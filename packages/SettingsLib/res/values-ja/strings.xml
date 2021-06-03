@@ -244,9 +244,9 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"ブートローダーによるロック解除を許可する"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM ロック解除の許可"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"警告: この設定をONにしている場合、このデバイスではデバイス保護機能を利用できません。"</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"仮の現在地情報アプリを選択"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"仮の現在地情報アプリが設定されていません"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"仮の現在地情報アプリ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"現在地情報の強制変更アプリを選択"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"現在地情報の強制変更アプリが設定されていません"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"現在地情報の強制変更アプリ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"ネットワーク"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"ワイヤレス ディスプレイ認証"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi-Fi 詳細ログの有効化"</string>

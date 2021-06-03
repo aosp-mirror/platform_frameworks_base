@@ -255,7 +255,7 @@
     <string name="mobile_data_always_on" msgid="8275958101875563572">"మొబైల్ డేటాని ఎల్లప్పుడూ యాక్టివ్‌గా ఉంచు"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"టెథెరింగ్ హార్డ్‌వేర్ వేగవృద్ధి"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"పేర్లు లేని బ్లూటూత్ పరికరాలు  చూపించు"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"సంపూర్ణ వాల్యూమ్‌‍ను నిలిపివేయి"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"సంపూర్ణ వాల్యూమ్‌‍ను డిజేబుల్ చేయి"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorscheను ఎనేబుల్ చేయి"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"బ్లూటూత్ AVRCP వెర్షన్"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"బ్లూటూత్ AVRCP సంస్కరణను ఎంచుకోండి"</string>
@@ -286,11 +286,11 @@
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ఈ మోడ్ ఎనేబుల్ అయ్యాక, MAC ర్యాండమైజేషన్‌ను ఎనేబుల్ చేసిన నెట్‌వర్క్‌తో కనెక్ట్ అయ్యే ప్రతిసారీ ఈ పరికరం MAC అడ్రస్ మారవచ్చు."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"గణించబడుతోంది"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"గణించబడటం లేదు"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"లాగర్ బఫర్ పరిమాణాలు"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"లాగర్ బఫర్ సైజ్‌లు"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"లాగ్ బఫర్‌కి లాగర్ పరిమా. ఎంచుకోండి"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"లాగర్ నిరంతర నిల్వలోని డేటాను తీసివేయాలా?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"మేము నిరంతర లాగర్‌తో ఇక పర్యవేక్షించనప్పుడు, మీ పరికరంలోని లాగర్ డేటాను మేము తొలగించాల్సి ఉంటుంది."</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"పరికరంలో లాగర్ డేటా నిరంతరం నిల్వ చేయి"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"పరికరంలో లాగర్ డేటా నిరంతరం స్టోర్ చేయి"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"పరికరంలో నిరంతరం నిల్వ చేయాల్సిన లాగ్ బఫర్‌లను ఎంచుకోండి"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"USB కాన్ఫిగరేషన్‌ని ఎంచుకోండి"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB కాన్ఫిగరేషన్‌ని ఎంచుకోండి"</string>
@@ -331,7 +331,7 @@
     <string name="debug_monitoring_category" msgid="1597387133765424994">"పర్యవేక్షణ"</string>
     <string name="strict_mode" msgid="889864762140862437">"ఖచ్చితమైన మోడ్ ప్రారంభించబడింది"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"యాప్‌లు ప్రధాన థ్రెడ్‌లో సుదీర్ఘ చర్యలు చేసేటప్పుడు స్క్రీన్‌ను ఫ్లాష్ చేయండి"</string>
-    <string name="pointer_location" msgid="7516929526199520173">"పాయింటర్ స్థానం"</string>
+    <string name="pointer_location" msgid="7516929526199520173">"పాయింటర్ లొకేషన్"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"ప్రస్తుత స్పర్శ డేటాను చూపుతోన్న స్క్రీన్"</string>
     <string name="show_touches" msgid="8437666942161289025">"నొక్కినవి చూపు"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"నొక్కినప్పుడు దృశ్యపరమైన ప్రతిస్పందన చూపు"</string>

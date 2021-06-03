@@ -196,7 +196,7 @@
     <string name="choose_profile" msgid="343803890897657450">"เลือกโปรไฟล์"</string>
     <string name="category_personal" msgid="6236798763159385225">"ส่วนตัว"</string>
     <string name="category_work" msgid="4014193632325996115">"ที่ทำงาน"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"ตัวเลือกสำหรับนักพัฒนาแอป"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"เปิดใช้ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ตั้งค่าตัวเลือกสำหรับการพัฒนาแอปพลิเคชัน"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์ไม่สามารถใช้ได้สำหรับผู้ใช้นี้"</string>
@@ -280,7 +280,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"ชื่อโฮสต์ของผู้ให้บริการ DNS ส่วนตัว"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"ป้อนชื่อโฮสต์ของผู้ให้บริการ DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"เชื่อมต่อไม่ได้"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"แสดงตัวเลือกสำหรับการรับรองการแสดงผลแบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ลดการเปลืองแบตเตอรี่และเพิ่มประสิทธิภาพเครือข่าย"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"เมื่อเปิดใช้โหมดนี้ ที่อยู่ MAC ของอุปกรณ์นี้อาจเปลี่ยนทุกครั้งที่เชื่อมต่อกับเครือข่ายที่มีการเปิดใช้การสุ่ม MAC"</string>

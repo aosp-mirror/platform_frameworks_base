@@ -298,7 +298,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Dozvoli lažne lokacije"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Omogući pregled atributa prikaza"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Prijenos podataka na mobilnoj mreži ostaje aktivan čak i kada je aktiviran WiFi (za brzo prebacivanje između mreža)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Korištenje hardverskog ubrzavanja za povezivanje putem mobitela ako je dostupno"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Korištenje hardverskog ubrzavanja za povezivanje putem mobitela, ako je dostupno"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Omogućiti otklanjanje grešaka putem USB-a?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Otklanjanje grešaka putem USB-a je namijenjeno samo u svrhe razvoja aplikacija. Koristite ga za kopiranje podataka između računara i uređaja, instaliranje aplikacija na uređaj bez obavještenja te čitanje podataka iz zapisnika."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Omogućiti bežično otklanjanje grešaka?"</string>
@@ -307,7 +307,7 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Dopustiti postavke za razvoj?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Ove postavke su namijenjene samo za svrhe razvoja. Mogu izazvati pogrešno ponašanje uređaja i aplikacija na njemu."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Potvrdi aplikacije putem USB-a"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Provjerava da li se u aplikacijama instaliranim putem ADB-a/ADT-a javlja zlonamjerno ponašanje."</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Provjerite da li se u aplikacijama instaliranim putem ADB-a/ADT-a javlja zlonamjerno ponašanje"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Prikazat će se Bluetooth uređaji bez naziva (samo MAC adrese)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Onemogućava funkciju apsolutne jačine zvuka za Bluetooth u slučaju problema s jačinom zvuka na udaljenim uređajima, kao što je neprihvatljivo glasan zvuk ili nedostatak kontrole."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Omogućava grupisanje funkcije Bluetooth Gabeldorsche."</string>

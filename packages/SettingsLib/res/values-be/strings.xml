@@ -349,7 +349,7 @@
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Адключыць аўдыямаршрутызацыю USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Выкл. аўтаперанакіраванне на USB-аўдыяпрылады"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Паказаць межы макета"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Паказаць межы кліпа, палі і г. д."</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Паказаць межы абрэзкі, палі і г. д."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Прымусовая раскладка справа налева"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Прымусовая раскладка экрана справа налева для ўсіх рэгіянальных налад"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Прымусовае выкананне 4x MSAA"</string>
@@ -372,8 +372,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Паведамляць аб тым, што праграма не адказвае"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Паказваць папярэджанні канала апавяшчэннаў"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Паказвае папярэджанне на экране, калі праграма публікуе апавяшчэнне без сапраўднага канала"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"Прымусова дазволіць праграмы на вонкавым сховішчы"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Робіць любую праграму даступнай для запісу на вонкавае сховішча, незалежна ад значэнняў маніфеста"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"Прымусова дазволіць праграмы ў знешнім сховішчы"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Робіць любую праграму даступнай для запісу ў знешняе сховішча, незалежна ад значэнняў маніфеста"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Зрабіць вокны дзеянняў даступнымі для змены памеру"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Зрабіць усе віды дзейнасці даступнымі для змены памеру ў рэжыме некалькіх вокнаў, незалежна ад значэнняў маніфеста."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Уключыць адвольную форму вокнаў"</string>

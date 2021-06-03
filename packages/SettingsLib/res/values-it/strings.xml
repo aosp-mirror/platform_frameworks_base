@@ -330,17 +330,17 @@
     <string name="media_category" msgid="8122076702526144053">"Contenuti multimediali"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Monitoraggio"</string>
     <string name="strict_mode" msgid="889864762140862437">"Attiva StrictMode"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Flash dello schermo in caso di lunghe operazioni sul thread principale"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Schermo lampeggia per operazioni lunghe su thread principale"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Posizione puntatore"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Overlay schermo che mostra i dati touch correnti"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostra tocchi"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Mostra feedback visivi per i tocchi"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Aggiornamenti superficie"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Flash delle superfici delle finestre all\'aggiornamento"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Superfici delle finestre lampeggiano se aggiornate"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Aggiornam. visualizzazione"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Flash visualizzazioni dentro finestre se disegnate"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Visualizz. lampeggiano dentro finestre se disegnate"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Aggiornam. livelli hardware"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Lampeggia in verde livelli hardware durante aggiornamento"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Livelli hardware lampeggiano in verde se aggiornati"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Debug overdraw GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Disabilita overlay HW"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Usa sempre GPU per la composizione dello schermo"</string>

@@ -281,9 +281,9 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Introdueix el nom d\'amfitrió del proveïdor de DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"No s\'ha pogut connectar"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra les opcions per a la certificació de pantalla sense fil"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Augmenta nivell de registre Wi‑Fi, mostra\'l per SSID RSSI al selector de Wi‑Fi"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Augmenta el nivell de registre de la connexió Wi‑Fi i es mostra per SSID RSSI al selector de Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Redueix el consum de bateria i millora el rendiment de la xarxa"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quan aquest mode està activat, és possible que l’adreça MAC d’aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quan aquest mode està activat, és possible que l’adreça MAC d’aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"D\'ús no mesurat"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Mides de la mem. intermèdia del registrador"</string>
@@ -359,7 +359,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Activa les capes de depuració de GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permet capes de depuració de GPU en apps de depuració"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Activa el registre detallat"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclou altres registres de proveïdor específics del dispositiu als informes d’errors; és possible que continguin informació privada, consumeixin més bateria o utilitzin més espai d\'emmagatzematge."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclou altres registres de proveïdor específics del dispositiu als informes d’errors; és possible que continguin informació privada, consumeixin més bateria o utilitzin més espai d\'emmagatzematge"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala d\'animació finestra"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala d\'animació transició"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de durada d\'animació"</string>
@@ -375,9 +375,9 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Força permetre aplicacions de manera externa"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Força l\'ajust de la mida de les activitats"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors definits."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors definits"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activa les finestres de forma lliure"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activa la compatibilitat amb finestres de forma lliure experimentals."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activa la compatibilitat amb finestres de forma lliure experimentals"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Contrasenya per a còpies d\'ordinador"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Les còpies de seguretat completes d\'ordinador no estan protegides"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Toca per canviar o suprimir la contrasenya per a les còpies de seguretat completes de l\'ordinador"</string>
@@ -515,7 +515,7 @@
     <string name="storage_category" msgid="2287342585424631813">"Emmagatzematge"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Dades compartides"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Mostra i modifica les dades compartides"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"No hi ha dades compartides per a aquest usuari."</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"No hi ha dades compartides per a aquest usuari"</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"S\'ha produït un error en recollir les dades compartides. Torna-ho a provar."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Identificador de dades compartides: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Caduquen el dia <xliff:g id="DATE">%s</xliff:g>"</string>

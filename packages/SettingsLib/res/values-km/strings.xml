@@ -203,8 +203,8 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"ការ​កំណត់ VPN មិន​អាច​ប្រើ​បាន​សម្រាប់​អ្នក​ប្រើ​នេះ"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"កំណត់​ការ​ភ្ជាប់​មិន​អាច​ប្រើ​បាន​សម្រាប់​អ្នក​ប្រើ​​នេះ"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ការ​កំណត់​ឈ្មោះ​ចូល​ដំណើរការ​មិន​អាច​ប្រើ​បាន​សម្រាប់​អ្នក​ប្រើ​​នេះ"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"ការ​កែ​កំហុស​តាម USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"មុខងារកែ​កំហុសពេល​ភ្ជាប់​ USB"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"ការ​ជួសជុលតាម USB"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"មុខងារជួសជុល នៅពេលភ្ជាប់ USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"ដក​សិទ្ធិ​កែ​កំហុសតាម USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ការជួសជុល​ដោយឥតខ្សែ"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"មុខងារ​ជួសជុល នៅពេល​ភ្ជាប់ Wi‑Fi"</string>
@@ -268,7 +268,7 @@
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"ការកំណត់ជា​ពណ៌ប្រផេះ​មានន័យថា​ទូរសព្ទ ឬ​កាស​មិនស្គាល់ទេ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"កម្រិត​ប៊ីត​ក្នុង​មួយ​គំរូ​នៃ​សំឡេង​ប៊្លូធូស"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ជំរុញ​ការជ្រើសរើស​កូឌិក​សំឡេង​\nប៊្លូធូស៖ កម្រិត​ប៊ីត​ក្នុង​មួយ​គំរូ"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"មុខ​ងារ​រលកសញ្ញា​សំឡេង​ប៊្លូធូស"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"មុខ​ងារ​ប៉ុស្តិ៍​សំឡេង​ប៊្លូធូស"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"ជំរុញ​ការជ្រើសរើស​កូឌិក​សំឡេង\nប៊្លូធូស៖ ប្រភេទ​សំឡេង"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"កូឌិកប្រភេទ LDAC នៃសំឡេង​ប៊្លូធូស៖ គុណភាព​ចាក់​សំឡេង"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ជំរុញ​ការជ្រើសរើស​កូឌិក​ប្រភេទ​ LDAC\nនៃសំឡេង​ប៊្លូធូស៖ គុណភាព​ចាក់​សំឡេង"</string>
@@ -286,11 +286,11 @@
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"នៅពេលបើក​មុខងារនេះ អាសយដ្ឋាន MAC របស់ឧបករណ៍នេះ​អាចផ្លាស់ប្ដូរ​ រាល់ពេល​ដែលវា​ភ្ជាប់ជាមួយ​បណ្ដាញ​ដែលបានបើក​ការប្រើ MAC ចៃដន្យ។"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"មានការកំណត់"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"មិនមានការកំណត់"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"ទំហំកន្លែងផ្ទុករបស់ logger"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"ទំហំឡុកជើបាហ្វើ"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"ជ្រើស​ទំហំ Logger per log buffer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"ជម្រះទំហំផ្ទុក logger ដែលប្រើបានយូរឬ?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"នៅពេលដែលយើងឈប់ធ្វើការត្រួតពិនិត្យតទៅទៀតដោយប្រើ logger ដែលប្រើបានយូរ យើងត្រូវបានតម្រូវឲ្យលុបទិន្នន័យ logger ដែលមាននៅលើឧបករណ៍របស់អ្នក"</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"ផ្ទុកទិន្នន័យ logger នៅលើឧបករណ៍ឲ្យបានយូរ"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"ផ្ទុកទិន្នន័យឡុកជើនៅលើឧបករណ៍ឲ្យជាប់"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"ជ្រើសអង្គចងចាំកំណត់ហេតុបណ្តោះអាសន្នដើម្បីផ្ទុកនៅលើឧបករណ៍ឲ្យបានយូរ"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"ជ្រើស​ការ​កំណត់​រចនាសម្ព័ន្ធ​យូអេសប៊ី"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"ជ្រើស​ការ​កំណត់​រចនាសម្ព័ន្ធ​យូអេសប៊ី"</string>
@@ -395,7 +395,7 @@
     <item msgid="4548987861791236754">"ពណ៌ធម្មជាតិដូចដែលបានឃើញដោយភ្នែក"</item>
     <item msgid="1282170165150762976">"ពណ៌ដែលបានសម្រួលសម្រាប់មាតិកាឌីជីថល"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="5372523625297212320">"កម្មវិធី​ផ្អាក​ដំណើរការ"</string>
+    <string name="inactive_apps_title" msgid="5372523625297212320">"កម្មវិធី​សម្ងំរង់ចាំ"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"សកម្ម។ ប៉ះដើម្បីបិទ/បើក។"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"សកម្ម។ ប៉ះដើម្បីបិទ/បើក។"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ស្ថាន​ភាព​មុខងារ​ផ្អាក​ដំណើរការ​កម្មវិធី៖<xliff:g id="BUCKET"> %s</xliff:g>"</string>

@@ -234,9 +234,9 @@
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡುವ ಮೂಲಕ ವೈ-ಫೈನಲ್ಲಿ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ಡೀಬಗ್, dev"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"ದೋಷ ವರದಿಯ ಶಾರ್ಟ್‌ಕಟ್‌‌"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"ಬಗ್ ವರದಿಯ ಶಾರ್ಟ್‌ಕಟ್‌‌"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ದೋಷ ವರದಿ ಮಾಡಲು ಪವರ್ ಮೆನುನಲ್ಲಿ ಬಟನ್ ತೋರಿಸು"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"ಎಚ್ಚರವಾಗಿರು"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"ಎಚ್ಚರವಾಗಿರುವಿಕೆ"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"ಚಾರ್ಜ್ ಮಾಡುವಾಗ ಪರದೆಯು ಎಂದಿಗೂ ನಿದ್ರಾವಸ್ಥೆಗೆ ಹೋಗುವುದಿಲ್ಲ"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ಬ್ಲೂಟೂತ್‌‌ HCI ಸ್ನೂಪ್‌ ಲಾಗ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ಬ್ಲೂಟೂತ್ ಪ್ಯಾಕೆಟ್‌ಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್‌ ಮಾಡಿ. (ಈ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬದಲಾಯಿಸಿದ ನಂತರ ಬ್ಲೂಟೂತ್ ಟಾಗಲ್ ಮಾಡಿ)"</string>
@@ -333,12 +333,12 @@
     <string name="strict_mode_summary" msgid="1838248687233554654">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮುಖ್ಯ ಥ್ರೆಡ್‌ನಲ್ಲಿ ದೀರ್ಘ ಕಾರ್ಯಾಚರಣೆ ನಿರ್ವಹಿಸಿದಾಗ ಪರದೆಯನ್ನು ಫ್ಲ್ಯಾಶ್ ಮಾಡು"</string>
     <string name="pointer_location" msgid="7516929526199520173">"ಪಾಯಿಂಟರ್ ಸ್ಥಳ"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"ಪ್ರಸ್ತುತ ಸ್ಪರ್ಶ ಡೇಟಾ ತೋರಿಸುವ ಪರದೆಯ ಓವರ್‌ಲೇ"</string>
-    <string name="show_touches" msgid="8437666942161289025">"ಟ್ಯಾಪ್‌ಗಳನ್ನು ತೋರಿಸು"</string>
+    <string name="show_touches" msgid="8437666942161289025">"ಟ್ಯಾಪ್‌ಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"ಟ್ಯಾಪ್‌ಗಳಿಗೆ ದೃಶ್ಯ ಪ್ರತಿಕ್ರಿಯೆ ತೋರಿಸು"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"ಸರ್ಫೇಸ್‌‌ ಅಪ್‌ಡೇಟ್ ತೋರಿಸಿ‌"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"ಅಪ್‌ಡೇಟ್‌ ಆಗುವಾಗ ವಿಂಡೋದ ಸರ್ಫೇಸ್‌ ಫ್ಲ್ಯಾಶ್ ಆಗುತ್ತದೆ"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"\'ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ\' ತೋರಿಸಿ"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"ಡ್ರಾ ಮಾಡಿದಾಗ ವಿಂಡೊದಲ್ಲಿ ವೀಕ್ಷಣೆ ಫ್ಲ್ಯಾಶ್‌"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"ಬರೆದಾಗ ವಿಂಡೊದೊಳಗೆ ವೀಕ್ಷಣೆ ಫ್ಲ್ಯಾಶ್‌ ಮಾಡುತ್ತದೆ"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"ಹಾರ್ಡ್‌ವೇರ್‌ ಲೇಯರ್‌‌ ಅಪ್‌ಡೇಟ್‌"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"ಅವುಗಳು ನವೀಕರಿಸಿದಾಗ ಹಾರ್ಡ್‌ವೇರ್‌‌ ಲೇಯರ್‌ಗಳು ಹಸಿರು ಫ್ಲ್ಯಾಶ್‌‌ ಆಗುತ್ತದೆ"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU ಓವರ್‌ಡ್ರಾ ಡೀಬಗ್"</string>
@@ -358,7 +358,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"ಪ್ರೊಫೈಲ್ HWUI ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ಡೀಬಗ್ ಲೇಯರ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ಡೀಬಗ್ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ GPU ಡೀಬಗ್ ಲೇಯರ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡುವುದನ್ನು ಅನುಮತಿಸಿ"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ವೆರ್‌ಬೋಸ್ ವೆಂಡರ್ ಲಾಗಿಂಗ್‌ ಆನ್"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ವರ್‌ಬೋಸ್ ವೆಂಡರ್ ಲಾಗಿಂಗ್‌ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ಬಗ್ ವರದಿಗಳಲ್ಲಿ ಹೆಚ್ಚುವರಿ ಸಾಧನ ನಿರ್ದಿಷ್ಟ ವೆಂಡರ್ ಲಾಗ್‌ಗಳು ಒಳಗೊಂಡಿದೆ, ಇದು ಖಾಸಗಿ ಮಾಹಿತಿ, ಹೆಚ್ಚಿನ ಬ್ಯಾಟರಿ ಬಳಕೆ ಮತ್ತು/ಅಥವಾ ಹೆಚ್ಚಿನ ಸಂಗ್ರಹಣೆಯ ಬಳಕೆಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Window ಅನಿಮೇಶನ್ ಸ್ಕೇಲ್‌"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ಪರಿವರ್ತನೆ ಅನಿಮೇಶನ್ ಸ್ಕೇಲ್‌"</string>

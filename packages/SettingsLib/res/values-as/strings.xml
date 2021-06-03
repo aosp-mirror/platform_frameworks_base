@@ -337,9 +337,9 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"টিপিলে দৃশ্যায়িত ফীডবেক দিয়ক"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"পৃষ্ঠভাগৰ আপডেইট দেখুৱাওক"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"আপডেইট হওতে গোটেই ৱিণ্ড পৃষ্ঠসমূহ ফ্লাশ্ব কৰক"</string>
-    <string name="show_hw_screen_updates" msgid="2021286231267747506">"আপডে’ট চাওক দেখুৱাওক"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"ভিউৰ আপডে’ট দেখুৱাওক"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"অঁকাৰ সময়ত ৱিণ্ড\'ৰ ভিতৰত ফ্লাশ্ব দৰ্শন"</string>
-    <string name="show_hw_layers_updates" msgid="5268370750002509767">"হাৰ্ডৱেৰৰ তৰপৰ আপডেইট দেখুৱাওক"</string>
+    <string name="show_hw_layers_updates" msgid="5268370750002509767">"হাৰ্ডৱেৰৰ স্তৰৰ আপডে\'ট দেখুৱাওক"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"হাৰ্ডৱেৰ লেয়াৰ আপডেইট হওতে সিঁহতক সেউজীয়া ৰঙেৰে ফ্লাশ্ব কৰক"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU অভাৰড্ৰ ডিবাগ কৰক"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW অ’ভাৰলে অক্ষম কৰক"</string>
