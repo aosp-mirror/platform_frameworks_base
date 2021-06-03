@@ -121,4 +121,12 @@ public class ActivityManagerUtils {
 
         return (((double) hash) / Integer.MAX_VALUE) <= rate;
     }
+
+    /**
+     * @param shortInstanceName {@link ServiceRecord#shortInstanceName}.
+     * @return hash of the ServiceRecord's shortInstanceName, combined with ANDROID_ID.
+     */
+    public static int hashComponentNameForAtom(String shortInstanceName) {
+        return getUnsignedHashUnCached(shortInstanceName) ^ getAndroidIdHash();
+    }
 }

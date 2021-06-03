@@ -114,12 +114,7 @@ public interface FalsingManager {
     /** From com.android.systemui.Dumpable. */
     void dump(FileDescriptor fd, PrintWriter pw, String[] args);
 
-    /**
-     *  Don't call this. It's meant for internal use to allow switching between implementations.
-     *
-     * Tests may also call it.
-     **/
-    void cleanupInternal();
+    void cleanup();
 
     /** Call to report a ProximityEvent to the FalsingManager. */
     void onProximityEvent(ProximityEvent proximityEvent);
@@ -141,9 +136,7 @@ public interface FalsingManager {
         void onFalse();
     }
 
-    /**
-     * Listener that is alerted when a double tap is required to confirm a single tap.
-     **/
+    /** Listener that is alerted when a double tap is required to confirm a single tap. */
     interface FalsingTapListener {
         void onDoubleTapRequired();
     }

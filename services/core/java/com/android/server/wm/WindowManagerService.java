@@ -2329,6 +2329,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 result |= RELAYOUT_RES_SURFACE_CHANGED;
                 if (!win.mWillReplaceWindow) {
+                    // When FLAG_SHOW_WALLPAPER flag is removed from a window, we usually set a flag
+                    // in DC#pendingLayoutChanges and update the wallpaper target later.
+                    // However it's possible that FLAG_SHOW_WALLPAPER flag is removed from a window
+                    // when the window is about to exit, so we update the wallpaper target
+                    // immediately here. Otherwise this window will be stuck in exiting and its
+                    // surface remains on the screen.
+                    // TODO(b/189856716): Allow destroying surface even if it belongs to the
+                    //  keyguard target.
+                    if (wallpaperMayMove) {
+                        displayContent.mWallpaperController.adjustWallpaperWindows();
+                    }
                     focusMayChange = tryStartExitingAnimation(win, winAnimator, focusMayChange);
                 }
             }
@@ -6957,32 +6968,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final int displayOwnerUid = display.getOwnerUid();
         if (callingUid != displayOwnerUid) {
             throw new SecurityException("The caller doesn't own the display.");
-        }
-    }
-
-    /** @see Session#reparentDisplayContent(IWindow, SurfaceControl, int)  */
-    void reparentDisplayContent(IWindow client, SurfaceControl sc, int displayId) {
-        checkCallerOwnsDisplay(displayId);
-
-        synchronized (mGlobalLock) {
-            int uid = Binder.getCallingUid();
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final WindowState win = windowForClientLocked(null, client, false);
-                if (win == null) {
-                    ProtoLog.w(WM_ERROR, "Bad requesting window %s", client);
-                    return;
-                }
-                getDisplayContentOrCreate(displayId, null).reparentDisplayContent(win, sc);
-                // Notifies AccessibilityController to re-compute the window observer of
-                // this embedded display
-                if (mAccessibilityController != null) {
-                    mAccessibilityController.handleWindowObserverOfEmbeddedDisplay(
-                            displayId, win, uid);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
         }
     }
 

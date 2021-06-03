@@ -341,6 +341,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
+import com.android.internal.content.F2fsUtils;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.content.om.OverlayConfig;
@@ -896,6 +897,20 @@ public class PackageManagerService extends IPackageManager.Stub
      * Only non-null during an OTA, and even then it is nulled again once systemReady().
      */
     private @Nullable ArraySet<String> mExistingPackages = null;
+
+    /**
+     * List of code paths that need to be released when the system becomes ready.
+     * <p>
+     * NOTE: We have to delay releasing cblocks for no other reason than we cannot
+     * retrieve the setting {@link Secure#RELEASE_COMPRESS_BLOCKS_ON_INSTALL}. When
+     * we no longer need to read that setting, cblock release can occur in the
+     * constructor.
+     *
+     * @see Secure#RELEASE_COMPRESS_BLOCKS_ON_INSTALL
+     * @see #systemReady()
+     */
+    private @Nullable List<File> mReleaseOnSystemReady;
+
     /**
      * Whether or not system app permissions should be promoted from install to runtime.
      */
@@ -1413,8 +1428,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mStaticLibsByDeclaringPackage = new WatchedArrayMap<>();
     private final SnapshotCache<WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>>
             mStaticLibsByDeclaringPackageSnapshot =
-            new SnapshotCache.Auto<>(mSharedLibraries, mSharedLibraries,
-                                     "PackageManagerService.mSharedLibraries");
+            new SnapshotCache.Auto<>(mStaticLibsByDeclaringPackage, mStaticLibsByDeclaringPackage,
+                                     "PackageManagerService.mStaticLibsByDeclaringPackage");
 
     // Mapping from instrumentation class names to info about them.
     @Watched
@@ -7907,6 +7922,21 @@ public class PackageManagerService extends IPackageManager.Stub
                 IoUtils.closeQuietly(handle);
             }
         }
+        if (ret == PackageManager.INSTALL_SUCCEEDED) {
+            // NOTE: During boot, we have to delay releasing cblocks for no other reason than
+            // we cannot retrieve the setting {@link Secure#RELEASE_COMPRESS_BLOCKS_ON_INSTALL}.
+            // When we no longer need to read that setting, cblock release can occur always
+            // occur here directly
+            if (!mSystemReady) {
+                if (mReleaseOnSystemReady == null) {
+                    mReleaseOnSystemReady = new ArrayList<>();
+                }
+                mReleaseOnSystemReady.add(dstCodePath);
+            } else {
+                final ContentResolver resolver = mContext.getContentResolver();
+                F2fsUtils.releaseCompressedBlocks(resolver, dstCodePath);
+            }
+        }
         if (ret != PackageManager.INSTALL_SUCCEEDED) {
             if (!dstCodePath.exists()) {
                 return null;
@@ -13224,9 +13254,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (!sharedLibraryInfo.isStatic()) {
                     continue;
                 }
-                final PackageSetting staticLibPkgSetting = getPackageSetting(
-                        toStaticSharedLibraryPackageName(sharedLibraryInfo.getName(),
-                                sharedLibraryInfo.getLongVersion()));
+                final PackageSetting staticLibPkgSetting =
+                        getPackageSetting(sharedLibraryInfo.getPackageName());
                 if (staticLibPkgSetting == null) {
                     Slog.wtf(TAG, "Shared lib without setting: " + sharedLibraryInfo);
                     continue;
@@ -17778,6 +17807,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if (mRet == PackageManager.INSTALL_SUCCEEDED) {
                 mRet = args.copyApk();
             }
+            if (mRet == PackageManager.INSTALL_SUCCEEDED) {
+                F2fsUtils.releaseCompressedBlocks(
+                        mContext.getContentResolver(), new File(args.getCodePath()));
+            }
             if (mParentInstallParams != null) {
                 mParentInstallParams.tryProcessInstallRequest(args, mRet);
             } else {
@@ -17785,7 +17818,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 processInstallRequestsAsync(
                         res.returnCode == PackageManager.INSTALL_SUCCEEDED,
                         Collections.singletonList(new InstallRequest(args, res)));
-
             }
         }
     }
@@ -22726,7 +22758,8 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     public int getPreferredActivitiesInternal(List<WatchedIntentFilter> outFilters,
             List<ComponentName> outActivities, String packageName) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
+        final int callingUid = Binder.getCallingUid();
+        if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
         int num = 0;
@@ -22738,9 +22771,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 final Iterator<PreferredActivity> it = pir.filterIterator();
                 while (it.hasNext()) {
                     final PreferredActivity pa = it.next();
+                    final String prefPackageName = pa.mPref.mComponent.getPackageName();
                     if (packageName == null
-                            || (pa.mPref.mComponent.getPackageName().equals(packageName)
-                                    && pa.mPref.mAlways)) {
+                            || (prefPackageName.equals(packageName) && pa.mPref.mAlways)) {
+                        if (shouldFilterApplicationLocked(
+                                mSettings.getPackageLPr(prefPackageName), callingUid, userId)) {
+                            continue;
+                        }
                         if (outFilters != null) {
                             outFilters.add(new WatchedIntentFilter(pa.getIntentFilter()));
                         }
@@ -24120,8 +24157,15 @@ public class PackageManagerService extends IPackageManager.Stub
     public void systemReady() {
         enforceSystemOrRoot("Only the system can claim the system is ready");
 
-        mSystemReady = true;
         final ContentResolver resolver = mContext.getContentResolver();
+        if (mReleaseOnSystemReady != null) {
+            for (int i = mReleaseOnSystemReady.size() - 1; i >= 0; --i) {
+                final File dstCodePath = mReleaseOnSystemReady.get(i);
+                F2fsUtils.releaseCompressedBlocks(resolver, dstCodePath);
+            }
+            mReleaseOnSystemReady = null;
+        }
+        mSystemReady = true;
         ContentObserver co = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -24184,7 +24228,13 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.onSystemReady();
 
         int[] grantPermissionsUserIds = EMPTY_INT_ARRAY;
-        for (int userId : UserManagerService.getInstance().getUserIds()) {
+        final List<UserInfo> livingUsers = mInjector.getUserManagerInternal().getUsers(
+                /* excludePartial= */ true,
+                /* excludeDying= */ true,
+                /* excludePreCreated= */ false);
+        final int livingUserCount = livingUsers.size();
+        for (int i = 0; i < livingUserCount; i++) {
+            final int userId = livingUsers.get(i).id;
             if (mPmInternal.isPermissionUpgradeNeeded(userId)) {
                 grantPermissionsUserIds = ArrayUtils.appendInt(
                         grantPermissionsUserIds, userId);
