@@ -341,7 +341,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
-import com.android.internal.content.F2fsUtils;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.content.om.OverlayConfig;
@@ -897,20 +896,6 @@ public class PackageManagerService extends IPackageManager.Stub
      * Only non-null during an OTA, and even then it is nulled again once systemReady().
      */
     private @Nullable ArraySet<String> mExistingPackages = null;
-
-    /**
-     * List of code paths that need to be released when the system becomes ready.
-     * <p>
-     * NOTE: We have to delay releasing cblocks for no other reason than we cannot
-     * retrieve the setting {@link Secure#RELEASE_COMPRESS_BLOCKS_ON_INSTALL}. When
-     * we no longer need to read that setting, cblock release can occur in the
-     * constructor.
-     *
-     * @see Secure#RELEASE_COMPRESS_BLOCKS_ON_INSTALL
-     * @see #systemReady()
-     */
-    private @Nullable List<File> mReleaseOnSystemReady;
-
     /**
      * Whether or not system app permissions should be promoted from install to runtime.
      */
@@ -7920,21 +7905,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
             } finally {
                 IoUtils.closeQuietly(handle);
-            }
-        }
-        if (ret == PackageManager.INSTALL_SUCCEEDED) {
-            // NOTE: During boot, we have to delay releasing cblocks for no other reason than
-            // we cannot retrieve the setting {@link Secure#RELEASE_COMPRESS_BLOCKS_ON_INSTALL}.
-            // When we no longer need to read that setting, cblock release can occur always
-            // occur here directly
-            if (!mSystemReady) {
-                if (mReleaseOnSystemReady == null) {
-                    mReleaseOnSystemReady = new ArrayList<>();
-                }
-                mReleaseOnSystemReady.add(dstCodePath);
-            } else {
-                final ContentResolver resolver = mContext.getContentResolver();
-                F2fsUtils.releaseCompressedBlocks(resolver, dstCodePath);
             }
         }
         if (ret != PackageManager.INSTALL_SUCCEEDED) {
@@ -17807,10 +17777,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (mRet == PackageManager.INSTALL_SUCCEEDED) {
                 mRet = args.copyApk();
             }
-            if (mRet == PackageManager.INSTALL_SUCCEEDED) {
-                F2fsUtils.releaseCompressedBlocks(
-                        mContext.getContentResolver(), new File(args.getCodePath()));
-            }
             if (mParentInstallParams != null) {
                 mParentInstallParams.tryProcessInstallRequest(args, mRet);
             } else {
@@ -17818,6 +17784,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 processInstallRequestsAsync(
                         res.returnCode == PackageManager.INSTALL_SUCCEEDED,
                         Collections.singletonList(new InstallRequest(args, res)));
+
             }
         }
     }
@@ -24157,15 +24124,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public void systemReady() {
         enforceSystemOrRoot("Only the system can claim the system is ready");
 
-        final ContentResolver resolver = mContext.getContentResolver();
-        if (mReleaseOnSystemReady != null) {
-            for (int i = mReleaseOnSystemReady.size() - 1; i >= 0; --i) {
-                final File dstCodePath = mReleaseOnSystemReady.get(i);
-                F2fsUtils.releaseCompressedBlocks(resolver, dstCodePath);
-            }
-            mReleaseOnSystemReady = null;
-        }
         mSystemReady = true;
+        final ContentResolver resolver = mContext.getContentResolver();
         ContentObserver co = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
