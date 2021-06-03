@@ -360,6 +360,13 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onUserSwitch_setsTheme() {
+        mBroadcastReceiver.getValue().onReceive(null,
+                new Intent(Intent.ACTION_USER_STARTED));
+        verify(mThemeOverlayApplier).applyCurrentUserOverlays(any(), any(), anyInt(), any());
+    }
+
+    @Test
     public void onProfileAdded_setsTheme() {
         mBroadcastReceiver.getValue().onReceive(null,
                 new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED));
