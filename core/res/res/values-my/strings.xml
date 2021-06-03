@@ -315,9 +315,9 @@
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"သင့်ဖုန်းရှိ ဓာတ်ပုံများ၊ မီဒီယာနှင့် ဖိုင်များအား ဝင်သုံးပါ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"မိုက်ခရိုဖုန်း"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"အသံဖမ်းခြင်း"</string>
-    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ကိုယ်လက်လှုပ်ရှားမှု"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"သင့်ကိုယ်လက်လှုပ်ရှားမှုကို ဝင်ကြည့်ရန်"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Camera"</string>
+    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ကိုယ်ခန္ဓာလှုပ်ရှားမှု"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"သင့်ကိုယ်ခန္ဓာလှုပ်ရှားမှုကို ဝင်ကြည့်ရန်"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"ကင်မရာ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ဓာတ်ပုံ ရိုက်ပြီးနောက် ဗွီဒီယို မှတ်တမ်းတင်ရန်"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"အနီးတစ်ဝိုက်ရှိ စက်များ"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"အနီးတစ်ဝိုက်ရှိ စက်များကို ရှာဖွေပြီးချိတ်ဆက်မည်"</string>
@@ -451,8 +451,8 @@
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ဤအက်ပ်သည် မိုက်ခရိုဖုန်းကို အသုံးပြု၍ အချိန်မရွေး အသံဖမ်းနိုင်သည်။"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM ထံသို့ ညွှန်ကြားချက်များကို ပို့ပါ"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"အက်ပ်အား ဆင်းမ်ကဒ်ဆီသို့ အမိန့်များ ပေးပို့ခွင့် ပြုခြင်း။ ဤခွင့်ပြုမှုမှာ အန္တရာယ်အလွန် ရှိပါသည်။"</string>
-    <string name="permlab_activityRecognition" msgid="1782303296053990884">"ကိုယ်လက်လှုပ်ရှားမှုကို မှတ်သားပါ"</string>
-    <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ဤအက်ပ်က သင်၏ကိုယ်လက်လှုပ်ရှားမှုကို မှတ်သားနိုင်ပါသည်။"</string>
+    <string name="permlab_activityRecognition" msgid="1782303296053990884">"ကိုယ်ခန္ဓာလှုပ်ရှားမှုကို မှတ်သားပါ"</string>
+    <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ဤအက်ပ်က သင်၏ကိုယ်ခန္ဓာလှုပ်ရှားမှု မှတ်သားနိုင်ပါသည်။"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ဓါတ်ပုံနှင့်ဗွီဒီယိုရိုက်ခြင်း"</string>
     <string name="permdesc_camera" msgid="5240801376168647151">"ဤအက်ပ်ကို အသုံးပြုနေစဉ် ၎င်းက ကင်မရာကို အသုံးပြု၍ ဓာတ်ပုံနှင့် ဗီဒီယိုများကို ရိုက်ကူးနိုင်သည်။"</string>
     <string name="permlab_backgroundCamera" msgid="7549917926079731681">"ဓာတ်ပုံနှင့် ဗီဒီယိုများကို နောက်ခံတွင် ရိုက်ကူးပါ"</string>
@@ -1866,7 +1866,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"‘ဘက်ထရီ အားထိန်း’ က ‘မှောင်သည့် အပြင်အဆင်’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။\n\n"<annotation id="url">"ပိုမိုလေ့လာရန်"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"‘ဘက်ထရီ အားထိန်း’ က ‘မှောင်သည့် အပြင်အဆင်’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာချွေတာမှုစနစ် ဖွင့်မလား။"</string>
@@ -2079,7 +2080,7 @@
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"စနစ်"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ဆက်တင်များ"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Camera"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"ကင်မရာ"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"မိုက်ခရိုဖုန်း"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"သင့်မျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များပေါ်တွင် ပြသခြင်း"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"အကြံပြုချက် ပေးရန်"</string>
