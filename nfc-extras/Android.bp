@@ -27,4 +27,5 @@ java_sdk_library {
     name: "com.android.nfc_extras",
     srcs: ["java/**/*.java"],
     api_packages: ["com.android.nfc_extras"],
+    dist_group: "android",
 }
