@@ -207,7 +207,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB कनेक्ट गरिएको बेलामा डिबग मोड"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB डिबग गर्ने अधिकार फिर्ता लिइयोस्"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"वायरलेस डिबगिङ"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi मा जोडिँदा डिबग मोड सक्षम पार्ने कि नपार्ने"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi मा कनेक्ट हुँदा डिबग मोड अन गरियोस्"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"त्रुटि"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"वायरलेस डिबगिङ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"उपलब्ध डिभाइस हेर्न र प्रयोग गर्न वायरलेस डिबगिङ अन गर्नुहोस्"</string>
@@ -283,7 +283,7 @@
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"जडान गर्न सकिएन"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"वायरलेस डिस्प्लेसम्बन्धी विकल्प देखाइयोस्"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi लगिङ लेभल बढाइयोस्, Wi-Fi पि‍करमा प्रति SSID RSSI देखाइयोस्"</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ब्याट्रीको खपत कम गरी नेटवर्कको कार्यसम्पादनमा सुधार गर्दछ"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"यसले ब्याट्रीको खपत कम गर्छ र नेटवर्कको कार्यसम्पादनमा सुधार गर्दछ"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"यो मोड अन गरिएका बेला यो डिभाइस MAC एड्रेस बदल्ने सुविधा अन गरिएको नेटवर्कमा जति पटक कनेक्ट हुन्छ त्यति नै पटक यस डिभाइसको MAC एड्रेस पनि परिवर्तन हुन सक्छ।"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"सशुल्क वाइफाइ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"मिटर नगरिएको"</string>
@@ -291,7 +291,7 @@
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"लग बफर प्रति लगर आकार चयन गर्नुहोस्"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"लगरको निरन्तर भण्डारणलाई खाली गर्ने हो?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"हामी अब निरन्तर लगर मार्फत अनुगमन गरिरहेका छैनौँ, त्यसैले हामीले तपाईँको डिभाइसमा रहेको लगर सम्बन्धी डेटा मेटाउन आवश्यक छ।"</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"लगरसम्बन्धी डेटा निरन्तर डिभाइसमा भण्डारण गर्नुहोस्"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"लगरसम्बन्धी डेटा निरन्तर डिभाइसमा भण्डारण गरियोस्"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"डिभाइसमा निरन्तर भण्डारण गरिने लग सम्बन्धी बफरहरूलाई चयन गर्नुहोस्"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"USB विन्यास चयन गर्नुहोस्"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB विन्यास चयन गर्नुहोस्"</string>
@@ -310,14 +310,14 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB मा एपको पुष्टि गरियोस्"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक व्यवहार पत्ता लगाउन ADB/ADT बाट इन्स्टल गरिएका एपको जाँच गरियोस्"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नामकरण नगरिएका ब्लुटुथ डिभाइस (MAC एड्रेस भएका मात्र) देखाइने छ"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट डिभाइसमा अस्वीकार्य भोल्युम बज्ने वा सो भोल्युम नियन्त्रण गर्न नसकिने आदि अवस्थामा ब्लुटुथ निरपेक्ष भोल्युम अफ गर्छ।"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"यसले रिमोट डिभाइसमा अत्याधिक ठूलो वा अनियन्त्रित भोल्युम बज्नेको जस्ता अवस्थामा ब्लुटुथको निरपेक्ष भोल्युम अफ गर्छ।"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लुटुथ Gabeldorsche सुविधाको स्ट्याक अन गरियोस्।"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"यसले परिष्कृत जडानको सुविधा सक्षम पार्छ।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानीय टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"स्थानीय सेल पहुँच प्रदान गर्ने टर्मिनल एप सक्षम गर्नुहोस्"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP जाँच"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP जाँच व्यवहार सेट गर्नुहोस्"</string>
-    <string name="debug_debugging_category" msgid="535341063709248842">"डिबग गरिँदै"</string>
+    <string name="debug_debugging_category" msgid="535341063709248842">"डिबग गरिँदै छ"</string>
     <string name="debug_app" msgid="8903350241392391766">"डिबग एप चयन गर्नुहोस्"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"कुनै पनि डिबग एप सेट गरिएको छैन"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"डिबग गर्ने एप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -327,35 +327,35 @@
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"डिबग भएको एप चल्नुअघि डिबगरलाई पर्खिन्छ"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"इनपुट"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"रेखाचित्र"</string>
-    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"हार्डवेयर एक्सेलेरेटड रेन्डरिङ फुर्तिलो बनाइयो"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"हार्डवेयरले बढाएको रेन्डरिङ"</string>
     <string name="media_category" msgid="8122076702526144053">"मिडिया"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"अनुगमन गर्दै"</string>
     <string name="strict_mode" msgid="889864762140862437">"स्ट्रिक्ट मोड अन गरियोस्"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"एपले मुख्य थ्रेडमा लामा गतिविधि गर्दा स्क्रिन फ्ल्यास गरियोस्"</string>
     <string name="pointer_location" msgid="7516929526199520173">"पोइन्टरको स्थान"</string>
-    <string name="pointer_location_summary" msgid="957120116989798464">"स्क्रिन ओवरले हालको टच डेटा देखाउँदै छ"</string>
+    <string name="pointer_location_summary" msgid="957120116989798464">"स्क्रिन ओभरलेले हालको टच डेटा देखाउँदै छ"</string>
     <string name="show_touches" msgid="8437666942161289025">"ट्याप देखाइयोस्"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"ट्यापका लागि भिजुअल प्रतिक्रिया देखाइयोस्"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"सर्फेस अपडेट देखाइयोस्"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"अपडेट हुँदा विन्डोका पूरै सतहमा देखाइयोस्"</string>
-    <string name="show_hw_screen_updates" msgid="2021286231267747506">"GPU भ्युको अपडेट देखाइयोस् देखाउनुहोस्"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"GPU भ्युको अपडेट देखाइयोस्"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"GPU ले बनाएको भ्यु विन्डोमा फ्ल्यास गरियोस्"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"हार्डवेयर लेयरको अपडेट देखाइयोस्"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"हार्डवेयर लेयर अपडेट हुँदा ती लेयर हरिया देखिऊन्"</string>
-    <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU overdraw डिबग गर्नुहोस्"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"HW ओवरले अफ गरियोस्"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU overdraw डिबग गरियोस्"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"HW ओभरले अफ गरियोस्"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"स्क्रिन कोम्पजिट गर्न लागि सधैँ GPU प्रयोग गरियोस्"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"कलर स्पेसको नक्कल गरियोस्"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ट्रेसहरू सक्षम गर्नुहोस्"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB अडियो राउटिङ अफ गरियोस्"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB अडियोमा स्वत: राउट नगरियोस्"</string>
     <string name="debug_layout" msgid="1659216803043339741">"लेआउटका सीमाहरू देखाइयोस्"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमा, मार्जिन, इत्यादि देखाउनुहोस्।"</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमा, मार्जिन, इत्यादि देखाइयोस्।"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL लेआउट बलपूर्वक प्रयोग गरियोस्"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"सबै लोकेलमा RTLमा स्क्रिन लेआउट बलपूर्वक प्रयोग गरियोस्"</string>
     <string name="force_msaa" msgid="4081288296137775550">"बलपूर्वक 4x MSAA प्रयोग गरियोस्"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES २.० एपमा ४x MSAA अन गरियोस्"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"गैर आयातकर क्लिप कार्यहरू डिबग गर्नुहोस्"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"गैर आयातकर क्लिप रहेका कार्यहरू डिबग गरियोस्"</string>
     <string name="track_frame_time" msgid="522674651937771106">"प्रोफाइलको HWUI रेन्डरिङ"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU का डिबग लेयर अन गरियोस्"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डिबग एपका लागि GPU का डिबग लेयर लोड गरियोस्"</string>
@@ -368,15 +368,15 @@
     <string name="debug_applications_category" msgid="5394089406638954196">"एपहरू"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"गतिविधि नराखियोस्"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"प्रयोगकर्ता कुनै गतिविधिबाट बाहिरिने बित्तिकै उक्त गतिविधि अन्त्य गरियोस्"</string>
-    <string name="app_process_limit_title" msgid="8361367869453043007">"ब्याकग्राउन्ड प्रक्रियाको सीमा सीमा"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"ब्याकग्राउन्ड प्रक्रियाको सीमा"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"ब्याकग्राउन्डमा ANR देखाइयोस्"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ब्याकग्राउन्डका एपको हकमा \'नचलिरहेका एप\' सन्देश देखाइयोस्"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना च्यानलसम्बन्धी चेतावनी देखाइयोस्"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"एपले मान्य च्यानलबिना सूचना पोस्ट गर्दा स्क्रिनमा चेतावनी देखाइयोस्"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"बहिरी मेमोरीमा पनि चल्न दिइयोस् प्राप्त एपहरू"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"तोकिएको नियमको ख्याल नगरी एपलाई बाह्य भण्डारणमा चल्ने बनाउँछ"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"एपलाई बहिरी मेमोरीमा पनि चल्ने दिइयोस्"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"तोकिएको नियमको ख्याल नगरी एपलाई बाह्य भण्डारणमा चल्ने बनाइयोस्"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"बलपूर्वक एपहरूको आकार मिलाउन मिल्ने बनाइयोस्"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"तोकिएको नियमको ख्याल नगरी एपलाई एकभन्दा बढी विन्डोमा रिसाइन गर्न सकिने बनाइयोस्।"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"तोकिएको नियमको ख्याल नगरी एपलाई एकभन्दा बढी विन्डोमा रिसाइज गर्न सकिने बनाइयोस्।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"फ्रिफर्म विन्डोहरू अन गरियोस्"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"प्रयोगात्मक फ्रिफर्म विन्डोहरू चल्ने बनाइयोस्"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"डेस्कटप ब्याकअप पासवर्ड"</string>

@@ -204,7 +204,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"ഈ ഉപയോക്താവിനായി ടെതറിംഗ് ക്രമീകരണങ്ങൾ ലഭ്യമല്ല"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ആക്‌സസ്സ് പോയിന്റ് നെയിം ക്രമീകരണങ്ങൾ ഈ ഉപയോക്താവിനായി ലഭ്യമല്ല"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB ഡീബഗ്ഗിംഗ്"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"USB കണ‌ക്റ്റുചെയ്‌തിരിക്കുമ്പോഴുള്ള ഡീബഗ് മോഡ്"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"USB കണ‌ക്റ്റ് ചെയ്‌തിരിക്കുമ്പോഴുള്ള ഡീബഗ് മോഡ്"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ഡീബഗ്ഗിംഗ് അംഗീകാരം പിൻവലിക്കുക"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"വയർലെസ് ഡീബഗ്ഗിംഗ്"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"വൈഫൈ കണക്റ്റ് ചെയ്‌തിരിക്കുമ്പോൾ ഡീബഗ് മോഡിലാക്കുക"</string>

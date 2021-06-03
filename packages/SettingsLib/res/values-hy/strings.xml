@@ -244,7 +244,7 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Թույլ տալ սկզբնաբեռնման բեռնիչի ապակողպումը"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Թույլատրե՞լ OEM ապակողպումը:"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ԶԳՈՒՇԱՑՈՒՄ. Այս կարգավորումը միացրած ժամանակ սարքի պաշտպանության գործառույթները չեն աջակցվի այս սարքի վրա:"</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Ընտրեք տեղադրությունը կեղծող հավելված"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Ընտրել կեղծ տեղադրության հավելված"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Տեղադրությունը կեղծող հավելված տեղակայված չէ"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Տեղադրությունը կեղծող հավելված՝ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Ցանց"</string>
@@ -258,8 +258,8 @@
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Անջատել ձայնի բացարձակ ուժգնությունը"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Միացնել Gabeldorsche-ը"</string>
     <string name="enhanced_connectivity" msgid="7201127377781666804">"Տվյալների լավացված փոխանակում"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP տարբերակը"</string>
-    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Ընտրել Bluetooth AVRCP տարբերակը"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP-ի տարբերակ"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Ընտրել Bluetooth AVRCP-ի տարբերակը"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP-ի տարբերակ"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Ընտրել Bluetooth MAP-ի տարբերակը"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth աուդիո կոդեկ"</string>
@@ -457,7 +457,7 @@
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Վերահսկվում է ադմինիստրատորի կողմից"</string>
     <string name="disabled" msgid="8017887509554714950">"Կասեցված է"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Թույլատրված է"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"Արգելված է"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"Արգելված"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Անհայտ հավելվածների տեղադրում"</string>
     <string name="home" msgid="973834627243661438">"Կարգավորումների գլխավոր էջ"</string>
   <string-array name="battery_labels">

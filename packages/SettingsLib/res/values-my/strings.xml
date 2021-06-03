@@ -207,7 +207,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB နှင့်ချိတ်ထားလျှင် အမှားရှာဖွေဖယ်ရှားမှုစနစ် စတင်ရန်"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB အမှားရှာပြင်ဆင်ခွင့်များ ပြန်ရုပ်သိမ်းခြင်း"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်း"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi ချိတ်ဆက်ထားစဉ် အမှားရှာပြင်ပုံစံ"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi ချိတ်ဆက်ထားစဉ် အမှားရှာပြင်မုဒ်"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"အမှား"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်း"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ရနိုင်သည့် စက်ပစ္စည်းများကို ကြည့်ပြီး အသုံးပြုနိုင်ရန် ကြိုးမဲ့ အမှားရှာပြင်ခြင်းကို ဖွင့်ပါ"</string>
@@ -297,7 +297,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB စီစဉ်ဖွဲ့စည်းမှု ရွေးရန်"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"ပုံစံတုတည်နေရာများကို ခွင့်ပြုရန်"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"ပုံစံတုတည်နေရာများကို ခွင့်ပြုရန်"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"အရည်အချင်းများ စူးစမ်းမှု မြင်ကွင်းကို ဖွင့်ရန်"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"ရည်ညွှန်းချက်စိစစ်ခြင်း မြင်ကွင်း"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Wi-Fi ဖွင့်ထားချိန်တွင်လည်း မိုဘိုင်းဒေတာ အမြဲတမ်းဖွင့်မည် (မြန်ဆန်သည့် ကွန်ရက် ပြောင်းခြင်းအတွက်)။"</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"အရှိန်မြှင့်တင်ရန် မိုဘိုင်းဖုန်းသုံး ချိတ်ဆက်မျှဝေခြင်း စက်ပစ္စည်းကို ရနိုင်လျှင် သုံးပါ"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ပြသနာရှာခြင်း ခွင့်ပြုပါမလား?"</string>
