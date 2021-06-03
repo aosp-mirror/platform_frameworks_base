@@ -205,7 +205,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Die Tethering-Einstellungen sind für diesen Nutzer nicht verfügbar."</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Die Einstellungen für den Zugangspunkt sind für diesen Nutzer nicht verfügbar."</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB-Debugging"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Debugmodus bei Anschluss über USB"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Debugging-Modus bei Anschluss über USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB-Debugging-Autorisierungen aufheben"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Debugging über WLAN"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Debugging-Modus, wenn eine WLAN-Verbindung besteht"</string>
@@ -237,7 +237,7 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, Debug, Dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Verknüpfung zu Fehlerbericht"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Im Ein-/Aus-Menü wird eine Option zum Erstellen eines Fehlerberichts angezeigt"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"Aktiv lassen"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"Bildschirm aktiv lassen"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Display wird beim Laden nie in den Ruhezustand versetzt"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI-Snoop-Protokoll aktivieren"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth-Pakete erfassen. Nach der Änderung muss Bluetooth aus- und wieder eingeschaltet werden"</string>
@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Zertifizierung für kabellose Übertragung"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Ausführliche WLAN-Protokollierung aktivieren"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Drosselung der WLAN-Suche"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Unbeständige MAC-Randomisierung für WLAN"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobile Datennutzung immer aktiviert"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardwarebeschleunigung für Tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth-Geräte ohne Namen anzeigen"</string>
@@ -263,12 +262,12 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Bluetooth AVRCP-Version auswählen"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP-Version"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Bluetooth MAP-Version auswählen"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth-Audio-Codec"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth-Audio: Codec"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Bluetooth-Audio-Codec auslösen\nAuswahl"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Bluetooth-Audio: Abtastrate"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Bluetooth-Audio-Codec auslösen\nAuswahl: Abtastrate"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Wenn etwas ausgegraut ist, wird es nicht vom Smartphone oder Headset unterstützt"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bluetooth-Audio/Bits pro Sample"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bluetooth-Audio: Bits pro Sample"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Bluetooth-Audio-Codec auslösen\nAuswahl: Bits pro Sample"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Bluetooth-Audio: Kanalmodus"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Bluetooth-Audio-Codec auslösen\nAuswahl: Kanalmodus"</string>
@@ -330,7 +329,7 @@
     <string name="debug_drawing_category" msgid="5066171112313666619">"Bildschirmdarstellung"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Hardwarebeschleunigtes Rendering"</string>
     <string name="media_category" msgid="8122076702526144053">"Medien"</string>
-    <string name="debug_monitoring_category" msgid="1597387133765424994">"Überwachung"</string>
+    <string name="debug_monitoring_category" msgid="1597387133765424994">"Monitoring"</string>
     <string name="strict_mode" msgid="889864762140862437">"Strikter Modus aktiviert"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"Bei langen App-Vorgängen im Hauptthread blinkt Bildschirm"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Zeigerposition"</string>
@@ -357,7 +356,7 @@
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA erzwingen"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"In OpenGL ES 2.0-Apps 4x MSAA aktivieren"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Nichtrechteckige Zuschnitte debuggen"</string>
-    <string name="track_frame_time" msgid="522674651937771106">"HWUI-Rendering für Profil"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"HWUI-Rendering-Profil"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU-Debug-Ebenen zulassen"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Debug-Apps das Laden von GPU-Debug-Ebenen erlauben"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ausführliche Protokollierung aktivieren"</string>
@@ -452,10 +451,9 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet wird eventuell bald ausgeschaltet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Gerät wird eventuell bald ausgeschaltet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"voll in <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Voll in <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – voll in <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_limited (7956120998372505295) -->
-    <skip />
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Aufladen vorübergehend eingeschränkt"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Unbekannt"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Wird aufgeladen"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Schnelles Aufladen"</string>
