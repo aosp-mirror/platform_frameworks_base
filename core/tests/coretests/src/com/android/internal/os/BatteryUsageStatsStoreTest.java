@@ -122,6 +122,16 @@ public class BatteryUsageStatsStoreTest {
                 .isAtMost(MAX_BATTERY_STATS_SNAPSHOT_STORAGE_BYTES);
     }
 
+    @Test
+    public void testSavingStatsdAtomPullTimestamp() {
+        mBatteryUsageStatsStore.setLastBatteryUsageStatsBeforeResetAtomPullTimestamp(1234);
+        assertThat(mBatteryUsageStatsStore.getLastBatteryUsageStatsBeforeResetAtomPullTimestamp())
+                .isEqualTo(1234);
+        mBatteryUsageStatsStore.setLastBatteryUsageStatsBeforeResetAtomPullTimestamp(5478);
+        assertThat(mBatteryUsageStatsStore.getLastBatteryUsageStatsBeforeResetAtomPullTimestamp())
+                .isEqualTo(5478);
+    }
+
     private void prepareBatteryStats() {
         mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
                 /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0,
