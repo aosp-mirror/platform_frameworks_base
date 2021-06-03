@@ -360,7 +360,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Ativar camadas de depuração de GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permitir carregamento de camadas de depuração de GPU p/ apps de depuração"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ativar registro detalhado de fornecedor"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluir mais registros de fornecedores específicos do dispositivo em relatórios de bugs, que podem conter informações particulares e usar mais bateria e/ou armazenamento."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluir mais registros de fornecedores específicos do dispositivo em relatórios de bugs. Isso pode aumentar o uso da bateria e/ou do armazenamento, e os relatórios podem conter informações particulares."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animação da janela"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala de animação de transição"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de duração do Animator"</string>
@@ -372,7 +372,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Mostrar ANRs em 2º plano"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Exibir a caixa de diálogo \"App não responde\" para apps em segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostrar avisos de notificações"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Exibir aviso na tela quando um app posta notificação sem canal válido"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Exibir aviso na tela quando um app posta uma notificação s/ um canal válido"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forçar permissão de apps em armazenamento externo"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Qualificar apps para gravação em armazenamento externo, independentemente de valores de manifestos"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forçar atividades a serem redimensionáveis"</string>

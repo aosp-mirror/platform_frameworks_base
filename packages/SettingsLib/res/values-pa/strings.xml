@@ -204,7 +204,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"ਇਸ ਵਰਤੋਂਕਾਰ ਲਈ ਟੈਦਰਿੰਗ ਸੈਟਿੰਗਾਂ ਉਪਲਬਧ ਨਹੀਂ ਹਨ"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ਐਕਸੈੱਸ ਪੁਆਇੰਟ ਨਾਮ ਸੈਟਿੰਗਾਂ ਇਸ ਵਰਤੋਂਕਾਰ ਲਈ ਉਪਲਬਧ ਨਹੀਂ ਹਨ"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB ਡੀਬੱਗਿੰਗ"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"ਡੀਬੱਗ ਮੋਡ ਜਦੋਂ USB ਕਨੈਕਟ ਕੀਤੀ ਜਾਏ"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"USB ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ \'ਤੇ ਡੀਬੱਗ ਮੋਡ"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ਡੀਬਗਿੰਗ ਇਖਤਿਆਰੀਕਰਨ ਰੱਦ ਕਰੋ"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ਵਾਇਰਲੈੱਸ ਡੀਬੱਗਿੰਗ"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ਵਾਈ-ਫਾਈ ਕਨੈਕਟ ਹੋਣ \'ਤੇ ਡੀਬੱਗ ਮੋਡ"</string>
@@ -250,7 +250,7 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"ਨੈੱਟਵਰਕਿੰਗ"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"ਵਾਈ-ਫਾਈ ਵਰਬੋਸ ਲੌਗਿੰਗ ਚਾਲੂ ਕਰੋ"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"ਸੀਮਤ ਵਾਈ‑ਫਾਈ ਸਕੈਨ"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"ਵਾਈ‑ਫਾਈ ਸਕੈਨ ਥਰੌਟਲਿੰਗ"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ਵਾਈ-ਫਾਈ ਵਿਸਤ੍ਰਿਤ MAC ਬੇਤਰਤੀਬੀਕਰਨ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ਮੋਬਾਈਲ ਡਾਟਾ ਹਮੇਸ਼ਾਂ ਕਿਰਿਆਸ਼ੀਲ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਸ਼ਨ"</string>
@@ -297,8 +297,8 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB ਕੌਂਫਿਗਰੇਸ਼ਨ ਚੁਣੋ"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"ਨਕਲੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"ਨਕਲੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"ਵਿਸ਼ੇਸ਼ਤਾ ਨਿਰੀਖਣ ਦੇਖੋ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"ਹਮੇਸ਼ਾਂ ਮੋਬਾਈਲ ਡਾਟਾ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਰੱਖੋ ਭਾਵੇਂ ਵਾਈ‑ਫਾਈ ਕਿਰਿਆਸ਼ੀਲ ਹੋਵੇ (ਤੇਜ਼ ਨੈੱਟਵਰਕ ਸਵਿੱਚਿੰਗ ਲਈ)।"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"\'ਵਿਸ਼ੇਸ਼ਤਾ ਨਿਰੀਖਣ ਦੇਖੋ\' ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"ਵਾਈ‑ਫਾਈ ਕਿਰਿਆਸ਼ੀਲ ਹੋਣ \'ਤੇ ਵੀ ਹਮੇਸ਼ਾਂ ਮੋਬਾਈਲ ਡਾਟਾ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਰੱਖੋ(ਤੇਜ਼ ਨੈੱਟਵਰਕ ਸਵਿੱਚਿੰਗ ਲਈ)।"</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"ਉਪਲਬਧ ਹੋਣ \'ਤੇ ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਸ਼ਨ ਵਰਤੋ"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"ਕੀ USB ਡੀਬਗਿੰਗ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB ਡੀਬਗਿੰਗ ਸਿਰਫ਼ ਵਿਕਾਸ ਮੰਤਵਾਂ ਲਈ ਹੁੰਦੀ ਹੈ। ਇਸਨੂੰ ਆਪਣੇ ਕੰਪਿਊਟਰ ਅਤੇ ਆਪਣੇ ਡੀਵਾਈਸ ਵਿਚਕਾਰ ਡਾਟਾ ਕਾਪੀ ਕਰਨ ਲਈ ਵਰਤੋ, ਸੂਚਨਾ ਦੇ ਬਿਨਾਂ ਆਪਣੇ ਡੀਵਾਈਸ ਤੇ ਐਪਾਂ ਸਥਾਪਤ ਕਰੋ ਅਤੇ ਲੌਗ ਡਾਟਾ ਪੜ੍ਹੋ।"</string>
@@ -333,7 +333,7 @@
     <string name="strict_mode" msgid="889864762140862437">"ਸਟ੍ਰਿਕਟ ਮੋਡ ਚਾਲੂ ਹੈ"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"ਐਪਾਂ ਵੱਲੋਂ ਮੁੱਖ ਥ੍ਰੈੱਡ \'ਤੇ ਲੰਬੀਆਂ ਕਾਰਵਾਈਆਂ ਕਰਨ \'ਤੇ ਸਕ੍ਰੀਨ ਫਲੈਸ਼ ਕਰੋ"</string>
     <string name="pointer_location" msgid="7516929526199520173">"ਪੁਆਇੰਟਰ ਟਿਕਾਣਾ"</string>
-    <string name="pointer_location_summary" msgid="957120116989798464">"ਸਕ੍ਰੀਨ ਓਵਰਲੇ ਮੌਜੂਦਾ ਸਪੱਰਸ਼ ਡਾਟਾ ਦਿਖਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="pointer_location_summary" msgid="957120116989798464">"ਸਕ੍ਰੀਨ ਓਵਰਲੇ ਮੌਜੂਦਾ ਸਪਰਸ਼ ਡਾਟਾ ਦਿਖਾ ਰਿਹਾ ਹੈ"</string>
     <string name="show_touches" msgid="8437666942161289025">"ਟੈਪਾਂ ਦਿਖਾਓ"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"ਟੈਪਾਂ ਲਈ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਤੀਕਰਮ ਦਿਖਾਓ"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"ਸਰਫ਼ੇਸ ਅੱਪਡੇਟ ਦਿਖਾਓ"</string>
@@ -345,10 +345,10 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU ਓਵਰਡ੍ਰਾ ਡੀਬੱਗ ਕਰੋ"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW ਓਵਰਲੇ ਨੂੰ ਬੰਦ ਕਰੋ"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"ਸਕ੍ਰੀਨ ਕੰਪੋਜ਼ਿਟਿੰਗ ਲਈ ਹਮੇਸ਼ਾਂ GPU ਵਰਤੋ"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"ਰੰਗ ਸਪੇਸ ਦੀ ਨਕਲ ਕਰੋ"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"ਰੰਗ ਸਪੇਸ ਨੂੰ ਸਿਮੂਲੇਟ ਕਰੋ"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ਟ੍ਰੇਸਿਜ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB ਆਡੀਓ ਰੂਟਿੰਗ ਨੂੰ ਬੰਦ ਕਰੋ"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ਆਡੀਓ ਪੈਰੀਫੈਰਲ ਲਈ ਸਵੈਚਲਿਤ ਰੂਟਿੰਗ ਬੰਦ ਕਰੋ"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ਆਡੀਓ ਪੈਰੀਫਰਲ ਲਈ ਸਵੈਚਲਿਤ ਰੂਟਿੰਗ ਬੰਦ ਕਰੋ"</string>
     <string name="debug_layout" msgid="1659216803043339741">"ਖਾਕਾ ਸੀਮਾਵਾਂ ਦਿਖਾਓ"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ਕਲਿੱਪ ਸੀਮਾਵਾਂ, ਹਾਸ਼ੀਏ ਆਦਿ ਦਿਖਾਓ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਖਾਕਾ ਲਾਗੂ ਕਰੋ"</string>
@@ -362,9 +362,9 @@
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ਵਰਬੋਸ ਵਿਕਰੇਤਾ ਲੌਗਿੰਗ ਚਾਲੂ ਕਰੋ"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ਬੱਗ ਰਿਪੋਰਟਾਂ ਵਿੱਚ ਵਧੀਕ ਡੀਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਵਿਕਰੇਤਾ ਲੌਗ ਸ਼ਾਮਲ ਕਰੋ, ਜਿਨ੍ਹਾਂ ਵਿੱਚ ਨਿੱਜੀ ਜਾਣਕਾਰੀ, ਬੈਟਰੀ ਦੀ ਵਧੇਰੇ ਵਰਤੋਂ, ਅਤੇ/ਜਾਂ ਵਧੇਰੀ ਸਟੋਰੇਜ ਸ਼ਾਮਲ ਹੋ ਸਕਦੀ ਹੈ।"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ਵਿੰਡੋ ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"ਟ੍ਰਾਂਜਿਸ਼ਨ ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"ਟ੍ਰਾਂਜ਼ਿਸ਼ਨ ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ਐਨੀਮੇਟਰ ਮਿਆਦ ਸਕੇਲ"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ ਦੀ ਨਕਲ ਕਰੋ"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ ਨੂੰ ਸਿਮੂਲੇਟ ਕਰੋ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ਐਪਾਂ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ਸਰਗਰਮੀਆਂ ਨਾ ਰੱਖੋ"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ਹਰੇਕ ਸਰਗਰਮੀ ਨਸ਼ਟ ਕਰੋ, ਜਿਵੇਂ ਹੀ ਵਰਤੋਂਕਾਰ ਇਸਨੂੰ ਛੱਡੇ"</string>
