@@ -956,7 +956,7 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Ereduaren bidez desblokeatzea."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Aurpegiaren bidez desblokeatzeko eginbidea."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN kodearen bidez desblokeatzea."</string>
-    <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM txartela desblokeatzeko PIN kodea."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIMa desblokeatzeko PINa."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM txartela desblokeatzeko PUK kodea."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"Pasahitzaren bidez desblokeatzea."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"Eredua marrazteko eremua."</string>
@@ -1726,7 +1726,7 @@
     <string name="user_switched" msgid="7249833311585228097">"Erabiltzailea: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"\"<xliff:g id="NAME">%1$s</xliff:g>\" erabiltzailera aldatzen…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailearen saioa amaitzen…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"Jabe"</string>
+    <string name="owner_name" msgid="8713560351570795743">"\"Jabea\""</string>
     <string name="error_message_title" msgid="4082495589294631966">"Errorea"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Administratzaileak ez du eman aldaketa egiteko baimena"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Ez da ekintza gauza dezakeen aplikaziorik aurkitu"</string>
@@ -1867,8 +1867,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Bateria-aurrezleak gai iluna aktibatzen du, eta murriztu edo desaktibatu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk.\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Bateria-aurrezleak gai iluna aktibatzen du, eta murriztu edo desaktibatu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
+    <string name="battery_saver_description" msgid="8518809702138617167">"Bateria-aurrezleak gai iluna aktibatzen du, eta atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk murrizten edo desaktibatzen ditu."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazio batek datuak atzitu ahal izango ditu, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurrezlea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>
@@ -2166,7 +2167,7 @@
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Erabili arakatzaile pertsonala"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Erabili laneko arakatzailea"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIMaren sarearen bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIMaren sareko azpimultzoaren bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIMaren sareko azpimultzoaren bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Enpresaren SIMaren bidez desblokeatzeko PIN kodea"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"SIMaren zerbitzu-hornitzailearen bidez desblokeatzeko PIN kodea"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"SIMaren bidez desblokeatzeko PIN kodea"</string>
@@ -2175,9 +2176,9 @@
     <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"Idatzi PUK kodea"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIMaren 1 motako sarearen bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIMaren 2 motako sarearen bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"HRPD sarearen bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIMaren 1 motako sarearen bidez desblokeatzeko PINa"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIMaren 2 motako sarearen bidez desblokeatzeko PINa"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"HRPD sarearen bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"Enpresaren RUIMaren bidez desblokeatzeko PIN kodea"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"RUIMaren zerbitzu-hornitzailearen bidez desblokeatzeko PIN kodea"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"RUIMaren bidez desblokeatzeko PIN kodea"</string>
@@ -2187,11 +2188,11 @@
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"Idatzi PUK kodea"</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"SPNaren bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"SPNaren bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"Zerbitzu-hornitzailearen PLMN sare nagusi baliokidearen bidez desblokeatzeko PIN kodea"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"ICCIDaren bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPIaren bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"Sareko azpimultzoaren zerbitzu-hornitzailearen bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPIaren bidez desblokeatzeko PINa"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"Sareko azpimultzoaren zerbitzu-hornitzailearen bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"SIMaren sarearen bidez desblokeatzeko eskatzen…"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"SIMaren sareko azpimultzoaren bidez desblokeatzeko eskatzen…"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"SIMaren zerbitzu-hornitzailearen bidez desblokeatzeko eskatzen…"</string>

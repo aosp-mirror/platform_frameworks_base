@@ -1867,7 +1867,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"យល់ព្រម"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"មុខងារ​សន្សំថ្មបើករចនាប័ទ្មងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។\n\n"<annotation id="url">"ស្វែងយល់បន្ថែម"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"មុខងារ​សន្សំថ្មបើករចនាប័ទ្មងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យ?"</string>
@@ -2006,7 +2007,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"ផលិត​ភាព"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"ភាពងាយស្រួល"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ទំហំផ្ទុកឧបករណ៍"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"ការ​កែកំហុសតាម USB"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"ការ​ជួសជុលតាម USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ម៉ោង"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"នាទី"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"កំណត់​ម៉ោង"</string>

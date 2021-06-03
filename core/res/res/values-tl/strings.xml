@@ -1867,7 +1867,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Na-delete ng iyong admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, ilang partikular na feature, at ilang koneksyon sa network.\n\n"<annotation id="url">"Matuto pa"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, ilang partikular na feature, at ilang koneksyon sa network."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, ilang partikular na feature, at ilang koneksyon sa network."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"I-on ang Data Saver?"</string>

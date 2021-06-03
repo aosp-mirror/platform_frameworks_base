@@ -1867,7 +1867,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizado polo teu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado polo teu administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Coa función Aforro de batería, actívase o tema escuro e restrínxense ou desactívanse a actividade en segundo plano, algúns efectos visuais e determinadas funcións e conexións de rede.\n\n"<annotation id="url">"Máis información"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"Coa función Aforro de batería, actívase o tema escuro e restrínxense ou desactívanse a actividade en segundo plano, algúns efectos visuais e determinadas funcións e conexións de rede."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para contribuír a reducir o uso de datos, o aforro de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, poida que as imaxes non se mostren ata que as toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Queres activar o aforro de datos?"</string>
