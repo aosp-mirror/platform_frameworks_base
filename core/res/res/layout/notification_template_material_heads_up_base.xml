@@ -23,7 +23,7 @@
     android:tag="headsUp"
     >
 
-    <com.android.internal.widget.RemeasuringLinearLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipChildren="false"
@@ -35,7 +35,7 @@
             android:id="@null"
             />
 
-        <com.android.internal.widget.RemeasuringLinearLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="-20dp"
@@ -60,6 +60,6 @@
                 />
 
             <include layout="@layout/notification_material_action_list" />
-        </com.android.internal.widget.RemeasuringLinearLayout>
-    </com.android.internal.widget.RemeasuringLinearLayout>
+        </LinearLayout>
+    </LinearLayout>
 </FrameLayout>
