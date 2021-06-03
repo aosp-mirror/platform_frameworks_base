@@ -10751,6 +10751,10 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    PowerProfile getPowerProfile() {
+        return mPowerProfile;
+    }
+
     /**
      * Starts tracking CPU time-in-state for threads of the system server process,
      * keeping a separate account of threads receiving incoming binder calls.
