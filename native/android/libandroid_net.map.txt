@@ -14,6 +14,8 @@ LIBANDROID_NET {
     android_res_nquery; # llndk
     android_res_nresult; # llndk
     android_res_nsend; # llndk
+    # These functions have been part of the NDK since API 31.
+    android_getprocnetwork; # llndk
   local:
     *;
 };

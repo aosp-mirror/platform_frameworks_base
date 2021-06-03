@@ -227,6 +227,7 @@ cc_library_shared {
             shared_libs: [
                 "android.hardware.memtrack-V1-ndk_platform",
                 "libandroidicu",
+                "libandroid_net",
                 "libbpf_android",
                 "libnetdbpf",
                 "libnetdutils",
