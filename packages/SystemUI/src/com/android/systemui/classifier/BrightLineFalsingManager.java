@@ -82,8 +82,6 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final List<FalsingBeliefListener> mFalsingBeliefListeners = new ArrayList<>();
     private List<FalsingTapListener> mFalsingTapListeners = new ArrayList<>();
 
-    private boolean mDestroyed;
-
     private final SessionListener mSessionListener = new SessionListener() {
         @Override
         public void onSessionEnded() {
@@ -198,8 +196,6 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
-        checkDestroyed();
-
         mPriorInteractionType = interactionType;
         if (skipFalsing(interactionType)) {
             mPriorResults = getPassedResult(1);
@@ -225,8 +221,6 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isSimpleTap() {
-        checkDestroyed();
-
         FalsingClassifier.Result result = mSingleTapClassifier.isTap(
                 mDataProvider.getRecentMotionEvents(), 0);
         mPriorResults = Collections.singleton(result);
@@ -234,16 +228,8 @@ public class BrightLineFalsingManager implements FalsingManager {
         return !result.isFalse();
     }
 
-    private void checkDestroyed() {
-        if (mDestroyed) {
-            Log.wtf(TAG, "Tried to use FalsingManager after being destroyed!");
-        }
-    }
-
     @Override
     public boolean isFalseTap(@Penalty int penalty) {
-        checkDestroyed();
-
         if (skipFalsing(GENERIC)) {
             mPriorResults = getPassedResult(1);
             logDebug("Skipped falsing");
@@ -306,8 +292,6 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseDoubleTap() {
-        checkDestroyed();
-
         if (skipFalsing(GENERIC)) {
             mPriorResults = getPassedResult(1);
             logDebug("Skipped falsing");
@@ -422,8 +406,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public void cleanupInternal() {
-        mDestroyed = true;
+    public void cleanup() {
         mDataProvider.removeSessionListener(mSessionListener);
         mDataProvider.removeGestureCompleteListener(mGestureFinalizedListener);
         mClassifiers.forEach(FalsingClassifier::cleanup);

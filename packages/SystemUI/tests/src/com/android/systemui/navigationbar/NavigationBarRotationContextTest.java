@@ -31,9 +31,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
-import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
-import com.android.systemui.navigationbar.RotationButton;
-import com.android.systemui.navigationbar.RotationButtonController;
 import com.android.systemui.statusbar.policy.RotationLockController;
 
 import org.junit.Before;
@@ -46,7 +43,6 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class NavigationBarRotationContextTest extends SysuiTestCase {
-    static final int RES_UNDEF = 0;
     static final int DEFAULT_ROTATE = 0;
 
     @Rule
@@ -66,7 +62,6 @@ public class NavigationBarRotationContextTest extends SysuiTestCase {
         mRotationButtonController.setRotationButton(mRotationButton, (visibility) -> {});
         // Due to a mockito issue, only spy the object after setting the initial state
         mRotationButtonController = spy(mRotationButtonController);
-        final KeyButtonDrawable kbd = mock(KeyButtonDrawable.class);
         doReturn(view).when(mRotationButton).getCurrentView();
         doReturn(true).when(mRotationButton).acceptRotationProposal();
     }

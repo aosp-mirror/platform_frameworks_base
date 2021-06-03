@@ -30,10 +30,8 @@ import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
@@ -249,7 +247,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class Task extends WindowContainer<WindowContainer> {
+/**
+ * {@link Task} is a TaskFragment that can contain a group of activities to perform a certain job.
+ * Activities of the same task affinities usually group in the same {@link Task}. A {@link Task}
+ * can also be an entity that showing in the Recents Screen for a job that user interacted with.
+ * A {@link Task} can also contain other {@link Task}s.
+ */
+class Task extends TaskFragment {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_ATM;
     static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
@@ -334,22 +338,6 @@ class Task extends WindowContainer<WindowContainer> {
     static final int REPARENT_KEEP_ROOT_TASK_AT_FRONT = 1;
     // Do not move the root task as a part of reparenting
     static final int REPARENT_LEAVE_ROOT_TASK_IN_PLACE = 2;
-
-    @IntDef(prefix = {"TASK_VISIBILITY"}, value = {
-            TASK_VISIBILITY_VISIBLE,
-            TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
-            TASK_VISIBILITY_INVISIBLE,
-    })
-    @interface TaskVisibility {}
-
-    /** Task is visible. No other tasks on top that fully or partially occlude it. */
-    static final int TASK_VISIBILITY_VISIBLE = 0;
-
-    /** Task is partially occluded by other translucent task(s) on top of it. */
-    static final int TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT = 1;
-
-    /** Task is completely invisible. */
-    static final int TASK_VISIBILITY_INVISIBLE = 2;
 
     enum ActivityState {
         INITIALIZING,
@@ -446,7 +434,6 @@ class Task extends WindowContainer<WindowContainer> {
 
     CharSequence lastDescription; // Last description captured for this item.
 
-    Task mAdjacentTask; // Task adjacent to this one.
     int mAffiliatedTaskId; // taskId of parent affiliation or self if no parent.
     Task mPrevAffiliate; // previous task in affiliated chain.
     int mPrevAffiliateTaskId = INVALID_TASK_ID; // previous id for persistence.
@@ -496,10 +483,6 @@ class Task extends WindowContainer<WindowContainer> {
 
     /** Used by fillTaskInfo */
     final TaskActivitiesReport mReuseActivitiesReport = new TaskActivitiesReport();
-
-    final ActivityTaskManagerService mAtmService;
-    final ActivityTaskSupervisor mTaskSupervisor;
-    final RootWindowContainer mRootWindowContainer;
 
     /* Unique identifier for this task. */
     final int mTaskId;
@@ -641,8 +624,6 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private static final ResetTargetTaskHelper sResetTargetTaskHelper = new ResetTargetTaskHelper();
-    private final EnsureActivitiesVisibleHelper mEnsureActivitiesVisibleHelper =
-            new EnsureActivitiesVisibleHelper(this);
     private final EnsureVisibleActivitiesConfigHelper mEnsureVisibleActivitiesConfigHelper =
             new EnsureVisibleActivitiesConfigHelper();
     private class EnsureVisibleActivitiesConfigHelper {
@@ -858,11 +839,8 @@ class Task extends WindowContainer<WindowContainer> {
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
             boolean _createdByOrganizer, IBinder _launchCookie, boolean _deferTaskAppear,
             boolean _removeWithTaskOrganizer) {
-        super(atmService.mWindowManager);
+        super(atmService);
 
-        mAtmService = atmService;
-        mTaskSupervisor = atmService.mTaskSupervisor;
-        mRootWindowContainer = mAtmService.mRootWindowContainer;
         mTaskId = _taskId;
         mUserId = _userId;
         mResizeMode = resizeMode;
@@ -1569,11 +1547,6 @@ class Task extends WindowContainer<WindowContainer> {
 
         mAtmService.mWindowManager.mTaskSnapshotController.notifyTaskRemovedFromRecents(
                 mTaskId, mUserId);
-    }
-
-    void setAdjacentTask(Task adjacent) {
-        mAdjacentTask = adjacent;
-        adjacent.mAdjacentTask = this;
     }
 
     void setTaskToAffiliateWith(Task taskToAffiliateWith) {
@@ -3585,45 +3558,6 @@ class Task extends WindowContainer<WindowContainer> {
         return getWindowConfiguration().tasksAreFloating() && !mPreserveNonFloatingState;
     }
 
-    /**
-     * Returns true if the root task is translucent and can have other contents visible behind it if
-     * needed. A root task is considered translucent if it don't contain a visible or
-     * starting (about to be visible) activity that is fullscreen (opaque).
-     * @param starting The currently starting activity or null if there is none.
-     */
-    @VisibleForTesting
-    boolean isTranslucent(ActivityRecord starting) {
-        if (!isAttached() || isForceHidden()) {
-            return true;
-        }
-        final PooledPredicate p = PooledLambda.obtainPredicate(Task::isOpaqueActivity,
-                PooledLambda.__(ActivityRecord.class), starting);
-        final ActivityRecord opaque = getActivity(p);
-        p.recycle();
-        return opaque == null;
-    }
-
-    private static boolean isOpaqueActivity(ActivityRecord r, ActivityRecord starting) {
-        if (r.finishing) {
-            // We don't factor in finishing activities when determining translucency since
-            // they will be gone soon.
-            return false;
-        }
-
-        if (!r.visibleIgnoringKeyguard && r != starting) {
-            // Also ignore invisible activities that are not the currently starting
-            // activity (about to be visible).
-            return false;
-        }
-
-        if (r.occludesParent()) {
-            // Root task isn't translucent if it has at least one fullscreen activity
-            // that is visible.
-            return true;
-        }
-        return false;
-    }
-
     /** Returns the top-most activity that occludes the given one, or {@code null} if none. */
     @Nullable
     ActivityRecord getOccludingActivityAbove(ActivityRecord activity) {
@@ -3717,19 +3651,6 @@ class Task extends WindowContainer<WindowContainer> {
         return activity != null ? activity.findMainWindow() : null;
     }
 
-    ActivityRecord topRunningActivity() {
-        return topRunningActivity(false /* focusableOnly */);
-    }
-
-    ActivityRecord topRunningActivity(boolean focusableOnly) {
-        // Split into 2 to avoid object creation due to variable capture.
-        if (focusableOnly) {
-            return getActivity((r) -> r.canBeTopRunning() && r.isFocusable());
-        } else {
-            return getActivity(ActivityRecord::canBeTopRunning);
-        }
-    }
-
     ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
         final PooledPredicate p = PooledLambda.obtainPredicate(Task::isTopRunningNonDelayed
                 , PooledLambda.__(ActivityRecord.class), notTop);
@@ -3782,12 +3703,6 @@ class Task extends WindowContainer<WindowContainer> {
             return r.mHandleExitSplashScreen
                     && r.mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_COPYING;
         });
-    }
-
-    boolean isTopActivityFocusable() {
-        final ActivityRecord r = topRunningActivity();
-        return r != null ? r.isFocusable()
-                : (isFocusable() && getWindowConfiguration().canReceiveKeys());
     }
 
     boolean isFocusableAndVisible() {
@@ -4210,176 +4125,7 @@ class Task extends WindowContainer<WindowContainer> {
      * @param starting The currently starting activity or null if there is none.
      */
     boolean shouldBeVisible(ActivityRecord starting) {
-        return getVisibility(starting) != TASK_VISIBILITY_INVISIBLE;
-    }
-
-    /**
-     * Returns true if the task should be visible.
-     *
-     * @param starting The currently starting activity or null if there is none.
-     */
-    @TaskVisibility
-    int getVisibility(ActivityRecord starting) {
-        if (!isAttached() || isForceHidden()) {
-            return TASK_VISIBILITY_INVISIBLE;
-        }
-
-        if (isTopActivityLaunchedBehind()) {
-            return TASK_VISIBILITY_VISIBLE;
-        }
-
-        boolean gotRootSplitScreenTask = false;
-        boolean gotOpaqueSplitScreenPrimary = false;
-        boolean gotOpaqueSplitScreenSecondary = false;
-        boolean gotTranslucentFullscreen = false;
-        boolean gotTranslucentSplitScreenPrimary = false;
-        boolean gotTranslucentSplitScreenSecondary = false;
-        boolean shouldBeVisible = true;
-
-        // This root task is only considered visible if all its parent root tasks are considered
-        // visible, so check the visibility of all ancestor root task first.
-        final WindowContainer parent = getParent();
-        if (parent.asTask() != null) {
-            final int parentVisibility = parent.asTask().getVisibility(starting);
-            if (parentVisibility == TASK_VISIBILITY_INVISIBLE) {
-                // Can't be visible if parent isn't visible
-                return TASK_VISIBILITY_INVISIBLE;
-            } else if (parentVisibility == TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT) {
-                // Parent is behind a translucent container so the highest visibility this container
-                // can get is that.
-                gotTranslucentFullscreen = true;
-            }
-        }
-
-        final List<Task> adjacentTasks = new ArrayList<>();
-        final int windowingMode = getWindowingMode();
-        final boolean isAssistantType = isActivityTypeAssistant();
-        for (int i = parent.getChildCount() - 1; i >= 0; --i) {
-            final WindowContainer wc = parent.getChildAt(i);
-            final Task other = wc.asTask();
-            if (other == null) continue;
-
-            final boolean hasRunningActivities = other.topRunningActivity() != null;
-            if (other == this) {
-                // Should be visible if there is no other stack occluding it, unless it doesn't
-                // have any running activities, not starting one and not home stack.
-                shouldBeVisible = hasRunningActivities || isInTask(starting) != null
-                        || isActivityTypeHome();
-                break;
-            }
-
-            if (!hasRunningActivities) {
-                continue;
-            }
-
-            final int otherWindowingMode = other.getWindowingMode();
-
-            if (otherWindowingMode == WINDOWING_MODE_FULLSCREEN) {
-                if (other.isTranslucent(starting)) {
-                    // Can be visible behind a translucent fullscreen stack.
-                    gotTranslucentFullscreen = true;
-                    continue;
-                }
-                return TASK_VISIBILITY_INVISIBLE;
-            } else if (otherWindowingMode == WINDOWING_MODE_MULTI_WINDOW
-                    && other.matchParentBounds()) {
-                if (other.isTranslucent(starting)) {
-                    // Can be visible behind a translucent task.
-                    gotTranslucentFullscreen = true;
-                    continue;
-                }
-                // Multi-window task that matches parent bounds would occlude other children.
-                return TASK_VISIBILITY_INVISIBLE;
-            } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                    && !gotOpaqueSplitScreenPrimary) {
-                gotRootSplitScreenTask = true;
-                gotTranslucentSplitScreenPrimary = other.isTranslucent(starting);
-                gotOpaqueSplitScreenPrimary = !gotTranslucentSplitScreenPrimary;
-                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                        && gotOpaqueSplitScreenPrimary) {
-                    // Can not be visible behind another opaque stack in split-screen-primary mode.
-                    return TASK_VISIBILITY_INVISIBLE;
-                }
-            } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                    && !gotOpaqueSplitScreenSecondary) {
-                gotRootSplitScreenTask = true;
-                gotTranslucentSplitScreenSecondary = other.isTranslucent(starting);
-                gotOpaqueSplitScreenSecondary = !gotTranslucentSplitScreenSecondary;
-                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                        && gotOpaqueSplitScreenSecondary) {
-                    // Can not be visible behind another opaque stack in split-screen-secondary mode.
-                    return TASK_VISIBILITY_INVISIBLE;
-                }
-            }
-            if (gotOpaqueSplitScreenPrimary && gotOpaqueSplitScreenSecondary) {
-                // Can not be visible if we are in split-screen windowing mode and both halves of
-                // the screen are opaque.
-                return TASK_VISIBILITY_INVISIBLE;
-            }
-            if (isAssistantType && gotRootSplitScreenTask) {
-                // Assistant stack can't be visible behind split-screen. In addition to this not
-                // making sense, it also works around an issue here we boost the z-order of the
-                // assistant window surfaces in window manager whenever it is visible.
-                return TASK_VISIBILITY_INVISIBLE;
-            }
-            if (other.mAdjacentTask != null) {
-                if (adjacentTasks.contains(other.mAdjacentTask)) {
-                    if (other.isTranslucent(starting)
-                            || other.mAdjacentTask.isTranslucent(starting)) {
-                        // Can be visible behind a translucent adjacent tasks.
-                        gotTranslucentFullscreen = true;
-                        continue;
-                    }
-                    // Can not be visible behind adjacent tasks.
-                    return TASK_VISIBILITY_INVISIBLE;
-                } else {
-                    adjacentTasks.add(other);
-                }
-            }
-        }
-
-        if (!shouldBeVisible) {
-            return TASK_VISIBILITY_INVISIBLE;
-        }
-
-        // Handle cases when there can be a translucent split-screen stack on top.
-        switch (windowingMode) {
-            case WINDOWING_MODE_FULLSCREEN:
-                if (gotTranslucentSplitScreenPrimary || gotTranslucentSplitScreenSecondary) {
-                    // At least one of the split-screen stacks that covers this one is translucent.
-                    // When in split mode, home task will be reparented to the secondary split while
-                    // leaving tasks not supporting split below. Due to
-                    // TaskDisplayArea#assignRootTaskOrdering always adjusts home surface layer to
-                    // the bottom, this makes sure tasks not in split roots won't occlude home task
-                    // unexpectedly.
-                    return TASK_VISIBILITY_INVISIBLE;
-                }
-                break;
-            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
-                if (gotTranslucentSplitScreenPrimary) {
-                    // Covered by translucent primary split-screen on top.
-                    return TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
-                }
-                break;
-            case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY:
-                if (gotTranslucentSplitScreenSecondary) {
-                    // Covered by translucent secondary split-screen on top.
-                    return TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
-                }
-                break;
-        }
-
-        // Lastly - check if there is a translucent fullscreen stack on top.
-        return gotTranslucentFullscreen ? TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT
-                : TASK_VISIBILITY_VISIBLE;
-    }
-
-    private boolean isTopActivityLaunchedBehind() {
-        final ActivityRecord top = topRunningActivity();
-        if (top != null && top.mLaunchTaskBehind) {
-            return true;
-        }
-        return false;
+        return getVisibility(starting) != TASK_FRAGMENT_VISIBILITY_INVISIBLE;
     }
 
     ActivityRecord isInTask(ActivityRecord r) {
@@ -5319,9 +5065,7 @@ class Task extends WindowContainer<WindowContainer> {
         return super.isAlwaysOnTop();
     }
 
-    /**
-     * Returns whether this task is currently forced to be hidden for any reason.
-     */
+    @Override
     protected boolean isForceHidden() {
         return mForceHiddenFlags != 0;
     }
@@ -5957,10 +5701,10 @@ class Task extends WindowContainer<WindowContainer> {
      *                 The activity is either starting or resuming.
      *                 Caller should ensure starting activity is visible.
      * @param preserveWindows Flag indicating whether windows should be preserved when updating
-     *                        configuration in {@link mEnsureActivitiesVisibleHelper}.
+     *                        configuration in {@link EnsureActivitiesVisibleHelper}.
      * @param configChanges Parts of the configuration that changed for this activity for evaluating
      *                      if the screen should be frozen as part of
-     *                      {@link mEnsureActivitiesVisibleHelper}.
+     *                      {@link EnsureActivitiesVisibleHelper}.
      *
      */
     void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
@@ -5976,21 +5720,26 @@ class Task extends WindowContainer<WindowContainer> {
      *                 The activity is either starting or resuming.
      *                 Caller should ensure starting activity is visible.
      * @param notifyClients Flag indicating whether the visibility updates should be sent to the
-     *                      clients in {@link mEnsureActivitiesVisibleHelper}.
+     *                      clients in {@link EnsureActivitiesVisibleHelper}.
      * @param preserveWindows Flag indicating whether windows should be preserved when updating
-     *                        configuration in {@link mEnsureActivitiesVisibleHelper}.
+     *                        configuration in {@link EnsureActivitiesVisibleHelper}.
      * @param configChanges Parts of the configuration that changed for this activity for evaluating
      *                      if the screen should be frozen as part of
-     *                      {@link mEnsureActivitiesVisibleHelper}.
+     *                      {@link EnsureActivitiesVisibleHelper}.
      */
     // TODO: Should be re-worked based on the fact that each task as a root task in most cases.
     void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients) {
         mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
-            forAllLeafTasks(task -> task.mEnsureActivitiesVisibleHelper.process(
-                    starting, configChanges, preserveWindows, notifyClients),
-                    true /* traverseTopToBottom */);
+            forAllTaskFragments(fragment -> {
+                if (!fragment.hasDirectChildActivities()) {
+                    return;
+                }
+
+                fragment.ensureFragmentActivitiesVisible(starting, configChanges, preserveWindows,
+                        notifyClients);
+            }, true /* traverseTopToBottom */);
 
             // Notify WM shell that task visibilities may have changed
             forAllTasks(task -> task.dispatchTaskInfoChangedIfNeeded(/* force */ false),
@@ -6124,7 +5873,8 @@ class Task extends WindowContainer<WindowContainer> {
                     if (!child.isTopActivityFocusable()) {
                         continue;
                     }
-                    if (child.getVisibility(null /* starting */) != TASK_VISIBILITY_VISIBLE) {
+                    if (child.getVisibility(null /* starting */)
+                            != TASK_FRAGMENT_VISIBILITY_VISIBLE) {
                         break;
                     }
 

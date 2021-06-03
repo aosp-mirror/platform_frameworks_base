@@ -18,6 +18,7 @@ package com.android.systemui.navigationbar;
 
 import android.os.IBinder;
 
+import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -34,5 +35,22 @@ public class TaskbarDelegate implements CommandQueue.Callbacks {
             boolean showImeSwitcher) {
         mOverviewProxyService.notifyImeWindowStatus(displayId, token, vis, backDisposition,
                 showImeSwitcher);
+    }
+
+    @Override
+    public void onRotationProposal(int rotation, boolean isValid) {
+        mOverviewProxyService.onRotationProposal(rotation, isValid);
+    }
+
+    @Override
+    public void disable(int displayId, int state1, int state2, boolean animate) {
+        mOverviewProxyService.disable(displayId, state1, state2, animate);
+    }
+
+    @Override
+    public void onSystemBarAttributesChanged(int displayId, int appearance,
+            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme, int behavior,
+            boolean isFullscreen) {
+        mOverviewProxyService.onSystemBarAttributesChanged(displayId, behavior);
     }
 }
