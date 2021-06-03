@@ -14,11 +14,12 @@
   ~ limitations under the License
   -->
 
-<com.android.internal.widget.NotificationMaxHeightFrameLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_weight="1"
     android:minHeight="@dimen/notification_headerless_min_height"
     android:tag="base"
     >
@@ -166,4 +167,4 @@
 
     </LinearLayout>
 
-</com.android.internal.widget.NotificationMaxHeightFrameLayout>
+</FrameLayout>
