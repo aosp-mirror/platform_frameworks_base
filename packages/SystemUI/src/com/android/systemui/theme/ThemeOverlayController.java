@@ -237,7 +237,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())
+            if (Intent.ACTION_USER_STARTED.equals(intent.getAction())
                     || Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction())) {
                 if (!mDeviceProvisionedController.isCurrentUserSetup()) {
                     Log.i(TAG, "User setup not finished when " + intent.getAction()
@@ -282,7 +282,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     public void start() {
         if (DEBUG) Log.d(TAG, "Start");
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        filter.addAction(Intent.ACTION_USER_STARTED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mMainExecutor,
