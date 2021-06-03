@@ -3961,7 +3961,7 @@ public final class ActiveServices {
             bumpServiceExecutingLocked(r, execInFg, "start");
             if (!oomAdjusted) {
                 oomAdjusted = true;
-                mAm.updateOomAdjLocked(r.app, true, OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
+                mAm.updateOomAdjLocked(r.app, OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
             }
             if (r.fgRequired && !r.fgWaiting) {
                 if (!r.isForeground) {
@@ -4232,7 +4232,7 @@ public final class ActiveServices {
             if (enqueueOomAdj) {
                 mAm.enqueueOomAdjTargetLocked(r.app);
             } else {
-                mAm.updateOomAdjLocked(r.app, true, OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+                mAm.updateOomAdjLocked(r.app, OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
             }
         }
         if (r.bindings.size() > 0) {
@@ -4327,8 +4327,7 @@ public final class ActiveServices {
                     if (enqueueOomAdj) {
                         mAm.enqueueOomAdjTargetLocked(s.app);
                     } else {
-                        mAm.updateOomAdjLocked(s.app, true,
-                                OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+                        mAm.updateOomAdjLocked(s.app, OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                     }
                     b.intent.hasBound = false;
                     // Assume the client doesn't want to know about a rebind;
@@ -4492,7 +4491,7 @@ public final class ActiveServices {
                 if (enqueueOomAdj) {
                     mAm.enqueueOomAdjTargetLocked(r.app);
                 } else {
-                    mAm.updateOomAdjLocked(r.app, true, OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+                    mAm.updateOomAdjLocked(r.app, OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                 }
             }
             r.executeFg = false;
