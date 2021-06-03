@@ -2587,7 +2587,7 @@ class Task extends TaskFragment {
      * @param outStableBounds where to place bounds with stable insets applied.
      * @param bounds the bounds to inset.
      */
-    private void calculateInsetFrames(Rect outNonDecorBounds, Rect outStableBounds, Rect bounds,
+    void calculateInsetFrames(Rect outNonDecorBounds, Rect outStableBounds, Rect bounds,
             DisplayInfo displayInfo) {
         outNonDecorBounds.set(bounds);
         outStableBounds.set(bounds);
