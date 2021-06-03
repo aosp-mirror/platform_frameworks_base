@@ -766,7 +766,7 @@
       <item quantity="other">%d ମିନିଟ୍‍</item>
       <item quantity="one">%d ମିନିଟ୍‍</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"ବ୍ୟାଟେରୀ ବ୍ୟବହାର"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"ବ୍ୟାଟେରୀର ବ୍ୟବହାର"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"ଚାର୍ଜ କରାଯିବାବେଳେ ବ୍ୟାଟେରୀ ସେଭର୍‍ ଉପଲବ୍ଧ ନଥାଏ"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"ବ୍ୟାଟେରୀ ସେଭର୍"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"କାର୍ଯ୍ୟଦକ୍ଷତା ଓ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଡାଟା କମ୍ କରେ"</string>

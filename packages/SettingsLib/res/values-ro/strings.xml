@@ -204,7 +204,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Setările pentru tethering nu sunt disponibile pentru acest utilizator"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Setările pentru „Nume puncte de acces” nu sunt disponibile pentru acest utilizator"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Remedierea erorilor prin USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Mod de depanare când este conectat USB"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Mod de remediere a erorilor când este conectat USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revoc autorizații remediere a erorilor prin USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Remedierea erorilor wireless"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modul de remediere a erorilor când rețeaua Wi-Fi este conectată"</string>

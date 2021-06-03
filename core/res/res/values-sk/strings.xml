@@ -415,7 +415,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Umožňuje aplikácii upravovať denník hovorov vo vašom tablete vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu vášho denníka hovorov."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Umožňuje aplikácii upravovať denník hovorov zariadenia Android TV vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu denníkov hovorov."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Umožňuje aplikácii upravovať zoznam hovorov vo vašom telefóne vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu vášho zoznamu hovorov."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"prístup k telesným senzorom (ako sú snímače tepu)"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"prístup k telovým senzorom (ako sú snímače tepu)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Umožňuje aplikácii získať prístup k údajom senzorov monitorujúcich vašu fyzickú kondíciu (napríklad pulz)."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čítanie udalostí kalendára a podrobností"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Táto aplikácia môže čítať všetky udalosti kalendára uložené vo vašom tablete a zdieľať alebo ukladať dáta kalendára."</string>
