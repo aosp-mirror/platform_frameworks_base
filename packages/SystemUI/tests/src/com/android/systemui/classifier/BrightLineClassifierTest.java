@@ -118,7 +118,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         verify(mFalsingDataProvider).addSessionListener(
                 any(FalsingDataProvider.SessionListener.class));
 
-        mBrightLineFalsingManager.cleanup();
+        mBrightLineFalsingManager.cleanupInternal();
         verify(mFalsingDataProvider).removeSessionListener(
                 any(FalsingDataProvider.SessionListener.class));
     }
