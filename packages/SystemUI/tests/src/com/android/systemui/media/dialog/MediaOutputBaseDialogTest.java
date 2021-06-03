@@ -50,7 +50,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
     private static final String TEST_PACKAGE = "test_package";
