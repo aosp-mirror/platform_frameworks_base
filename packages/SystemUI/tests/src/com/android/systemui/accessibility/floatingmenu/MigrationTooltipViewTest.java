@@ -40,10 +40,12 @@ import org.junit.runner.RunWith;
 public class MigrationTooltipViewTest extends SysuiTestCase {
 
     private TextView mTextView;
+    private final Position mPlaceholderPosition = new Position(0.0f, 0.0f);
 
     @Before
     public void setUp() {
-        final AccessibilityFloatingMenuView menuView = new AccessibilityFloatingMenuView(mContext);
+        final AccessibilityFloatingMenuView menuView = new AccessibilityFloatingMenuView(mContext,
+                mPlaceholderPosition);
         final MigrationTooltipView toolTipView = new MigrationTooltipView(mContext, menuView);
         mTextView = toolTipView.findViewById(R.id.text);
     }
