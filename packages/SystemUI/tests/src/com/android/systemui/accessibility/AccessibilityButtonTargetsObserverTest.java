@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 
@@ -60,8 +61,9 @@ public class AccessibilityButtonTargetsObserverTest extends SysuiTestCase {
     @Test
     public void onChange_haveListener_invokeCallback() {
         mAccessibilityButtonTargetsObserver.addListener(mListener);
-        Settings.Secure.putString(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, TEST_A11Y_BTN_TARGETS);
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, TEST_A11Y_BTN_TARGETS,
+                UserHandle.USER_CURRENT);
 
         mAccessibilityButtonTargetsObserver.mContentObserver.onChange(false);
 
@@ -72,8 +74,9 @@ public class AccessibilityButtonTargetsObserverTest extends SysuiTestCase {
     public void onChange_listenerRemoved_noInvokeCallback() {
         mAccessibilityButtonTargetsObserver.addListener(mListener);
         mAccessibilityButtonTargetsObserver.removeListener(mListener);
-        Settings.Secure.putString(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, TEST_A11Y_BTN_TARGETS);
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, TEST_A11Y_BTN_TARGETS,
+                UserHandle.USER_CURRENT);
 
         mAccessibilityButtonTargetsObserver.mContentObserver.onChange(false);
 
@@ -82,8 +85,9 @@ public class AccessibilityButtonTargetsObserverTest extends SysuiTestCase {
 
     @Test
     public void getCurrentAccessibilityButtonTargets_expectedValue() {
-        Settings.Secure.putString(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, TEST_A11Y_BTN_TARGETS);
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, TEST_A11Y_BTN_TARGETS,
+                UserHandle.USER_CURRENT);
 
         final String actualValue =
                 mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();
