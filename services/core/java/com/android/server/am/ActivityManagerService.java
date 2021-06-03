@@ -350,8 +350,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.NonaFunction;
-import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
@@ -16085,11 +16083,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void onForegroundServiceNotificationUpdate(Notification notification,
-                int id, String pkg, @UserIdInt int userId) {
+        public void onForegroundServiceNotificationUpdate(boolean shown,
+                Notification notification, int id, String pkg, @UserIdInt int userId) {
             synchronized (ActivityManagerService.this) {
-                mServices.onForegroundServiceNotificationUpdateLocked(notification,
-                        id, pkg, userId);
+                mServices.onForegroundServiceNotificationUpdateLocked(shown,
+                        notification, id, pkg, userId);
             }
         }
 
