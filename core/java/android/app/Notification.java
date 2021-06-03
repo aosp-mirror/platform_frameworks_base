@@ -12370,7 +12370,7 @@ public class Notification implements Parcelable
                 mRippleAlpha = 0x33;
             } else {
                 int[] attrs = {
-                        R.attr.colorBackground,
+                        R.attr.colorSurface,
                         R.attr.colorBackgroundFloating,
                         R.attr.textColorPrimary,
                         R.attr.textColorSecondary,
