@@ -245,6 +245,9 @@
     <!-- Slovakia: 4 digits (premium), plus EU: http://www.cmtelecom.com/premium-sms/slovakia -->
     <shortcode country="sk" premium="\\d{4}" free="116\\d{3}|8000" />
 
+    <!-- Taiwan -->
+    <shortcode country="tw" pattern="\\d{4}" free="1922" />
+
     <!-- Thailand: 4186001 used by AIS_TH_DCB -->
     <shortcode country="th" pattern="\\d{1,5}" premium="4\\d{6}" free="4186001" />
 
