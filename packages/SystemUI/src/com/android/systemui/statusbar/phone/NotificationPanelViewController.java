@@ -42,6 +42,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -55,7 +56,6 @@ import android.os.UserManager;
 import android.os.VibrationEffect;
 import android.util.Log;
 import android.util.MathUtils;
-import android.view.DisplayCutout;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -375,8 +375,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private float mOverStretchAmount;
     private float mDownX;
     private float mDownY;
-    private int mDisplayCutoutTopInset = 0; // in pixels
-    private int mDisplayCutoutLeftInset = 0; // in pixels
+    private int mDisplayTopInset = 0; // in pixels
+    private int mDisplayRightInset = 0; // in pixels
     private int mSplitShadeNotificationsTopPadding;
 
     private final KeyguardClockPositionAlgorithm
@@ -1268,7 +1268,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 hasVisibleNotifications, darkamount, mOverStretchAmount,
                 bypassEnabled, getUnlockedStackScrollerPadding(),
                 computeQsExpansionFraction(),
-                mDisplayCutoutTopInset,
+                mDisplayTopInset,
                 mShouldUseSplitNotificationShade);
         mClockPositionAlgorithm.run(mClockPositionResult);
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
@@ -2217,8 +2217,9 @@ public class NotificationPanelViewController extends PanelViewController {
                         : notificationTop);
             }
             bottom = getView().getBottom();
-            left = getView().getLeft() - mDisplayCutoutLeftInset;
-            right = getView().getRight() - mDisplayCutoutLeftInset;
+            // notification bounds should take full screen width regardless of insets
+            left = 0;
+            right = getView().getRight() + mDisplayRightInset;
         } else if (qsPanelBottomY > 0) { // so bounds are empty on lockscreen
             top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
             bottom = mNotificationStackScrollLayoutController.getHeight();
@@ -4486,9 +4487,11 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private class OnApplyWindowInsetsListener implements View.OnApplyWindowInsetsListener {
         public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-            final DisplayCutout displayCutout = v.getRootWindowInsets().getDisplayCutout();
-            mDisplayCutoutTopInset = displayCutout != null ? displayCutout.getSafeInsetTop() : 0;
-            mDisplayCutoutLeftInset = displayCutout != null ? displayCutout.getSafeInsetLeft() : 0;
+            // the same types of insets that are handled in NotificationShadeWindowView
+            int insetTypes = WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout();
+            Insets combinedInsets = insets.getInsetsIgnoringVisibility(insetTypes);
+            mDisplayTopInset = combinedInsets.top;
+            mDisplayRightInset = combinedInsets.right;
 
             mNavigationBarBottomHeight = insets.getStableInsetBottom();
             updateMaxHeadsUpTranslation();
