@@ -1866,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Yöneticiniz tarafından güncellendi"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Yöneticiniz tarafından silindi"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Tamam"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Pil Tasarrufu, Koyu temayı açıp arka plan etkinliğini, bazı görsel efektleri, belirli özellikleri ve bazı ağ bağlantılarını sınırlandırır veya kapatır.\n\n"<annotation id="url">"Daha fazla bilgi"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Pil Tasarrufu, Koyu temayı açıp arka plan etkinliğini, bazı görsel efektleri, belirli özellikleri ve bazı ağ bağlantılarını sınırlandırır veya kapatır."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Pil Tasarrufu, Koyu temayı açıp arka plan etkinliğini, bazı görsel efektleri, belirli özellikleri ve bazı ağ bağlantılarını sınırlandırır veya kapatır."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Veri kullanımını azaltmaya yardımcı olması için Veri Tasarrufu, bazı uygulamaların arka planda veri göndermesini veya almasını engeller. Kullanmakta olduğunuz bir uygulama veri bağlantısına erişebilir, ancak bunu daha seyrek yapabilir. Bu durumda örneğin, siz resimlere dokunmadan resimler görüntülenmez."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Veri Tasarrufu açılsın mı?"</string>
