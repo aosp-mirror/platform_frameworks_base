@@ -829,6 +829,7 @@ package android.content.pm {
 
   public final class SharedLibraryInfo implements android.os.Parcelable {
     method @NonNull public java.util.List<java.lang.String> getAllCodePaths();
+    method public boolean isNative();
   }
 
   public final class ShortcutInfo implements android.os.Parcelable {
