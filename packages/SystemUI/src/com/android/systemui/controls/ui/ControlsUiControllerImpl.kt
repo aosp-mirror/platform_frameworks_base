@@ -165,7 +165,7 @@ class ControlsUiControllerImpl @Inject constructor (
         controlActionCoordinator.activityContext = activityContext
 
         allStructures = controlsController.get().getFavorites()
-        selectedStructure = loadPreference(allStructures)
+        selectedStructure = getPreferredStructure(allStructures)
 
         if (controlsController.get().addSeedingFavoritesCallback(onSeedingComplete)) {
             listingCallback = createCallback(::showSeedingView)
@@ -448,7 +448,7 @@ class ControlsUiControllerImpl @Inject constructor (
         return maxColumns
     }
 
-    private fun loadPreference(structures: List<StructureInfo>): StructureInfo {
+    override fun getPreferredStructure(structures: List<StructureInfo>): StructureInfo {
         if (structures.isEmpty()) return EMPTY_STRUCTURE
 
         val component = sharedPreferences.getString(PREF_COMPONENT, null)?.let {
