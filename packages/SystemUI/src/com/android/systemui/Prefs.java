@@ -74,7 +74,8 @@ public final class Prefs {
             Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP,
             Key.HAS_SEEN_REVERSE_BOTTOM_SHEET,
             Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT,
-            Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP
+            Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP,
+            Key.ACCESSIBILITY_FLOATING_MENU_POSITION
     })
     // TODO: annotate these with their types so {@link PrefsCommandLine} can know how to set them
     public @interface Key {
@@ -125,6 +126,7 @@ public final class Prefs {
         String CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT = "ControlsStructureSwipeTooltipCount";
         String HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP =
                 "HasSeenAccessibilityFloatingMenuDockTooltip";
+        String ACCESSIBILITY_FLOATING_MENU_POSITION = "AccessibilityFloatingMenuPosition";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {
