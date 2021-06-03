@@ -986,7 +986,42 @@ public class OverviewProxyService extends CurrentUserTracker implements
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call notifyImeWindowStatus()", e);
         }
+    }
 
+    public void onRotationProposal(int rotation, boolean isValid) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onRotationProposal(rotation, isValid);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy for proposing rotation.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call onRotationProposal()", e);
+        }
+    }
+
+    public void disable(int displayId, int state1, int state2, boolean animate) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.disable(displayId, state1, state2, animate);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy for disable flags.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call disable()", e);
+        }
+    }
+
+    public void onSystemBarAttributesChanged(int displayId, int behavior) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onSystemBarAttributesChanged(displayId, behavior);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy for system bar attr change.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call onSystemBarAttributesChanged()", e);
+        }
     }
 
     private void updateEnabledState() {
@@ -1040,7 +1075,5 @@ public class OverviewProxyService extends CurrentUserTracker implements
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}
-        default void onImeWindowStatusChanged(int displayId, IBinder token, int vis,
-                int backDisposition, boolean showImeSwitcher) {}
     }
 }

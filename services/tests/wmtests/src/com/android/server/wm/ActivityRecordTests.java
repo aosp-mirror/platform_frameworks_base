@@ -74,9 +74,9 @@ import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STARTED;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
-import static com.android.server.wm.Task.TASK_VISIBILITY_INVISIBLE;
-import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
-import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_INVISIBLE;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_BEFORE_ANIM;
@@ -618,13 +618,14 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Task task = activity.getTask();
         activity.setState(Task.ActivityState.STOPPED, "Testing");
 
-        doReturn(TASK_VISIBILITY_VISIBLE).when(task).getVisibility(null);
+        doReturn(TASK_FRAGMENT_VISIBILITY_VISIBLE).when(task).getVisibility(null);
         assertEquals(true, activity.shouldResumeActivity(null /* activeActivity */));
 
-        doReturn(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT).when(task).getVisibility(null);
+        doReturn(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT)
+                .when(task).getVisibility(null);
         assertEquals(false, activity.shouldResumeActivity(null /* activeActivity */));
 
-        doReturn(TASK_VISIBILITY_INVISIBLE).when(task).getVisibility(null);
+        doReturn(TASK_FRAGMENT_VISIBILITY_INVISIBLE).when(task).getVisibility(null);
         assertEquals(false, activity.shouldResumeActivity(null /* activeActivity */));
     }
 
@@ -638,7 +639,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.addResultLocked(topActivity, "resultWho", 0, 0, new Intent());
         topActivity.finishing = true;
 
-        doReturn(TASK_VISIBILITY_VISIBLE).when(task).getVisibility(null);
+        doReturn(TASK_FRAGMENT_VISIBILITY_VISIBLE).when(task).getVisibility(null);
         assertEquals(true, activity.shouldResumeActivity(null /* activeActivity */));
         assertEquals(false, activity.shouldPauseActivity(null /*activeActivity */));
     }

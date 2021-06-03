@@ -47,6 +47,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
+import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.recents.utilities.ViewRippler;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -311,7 +313,7 @@ public class RotationButtonController {
 
         // Prepare to show the navbar icon by updating the icon style to change anim params
         mLastRotationSuggestion = rotation; // Remember rotation for click
-        final boolean rotationCCW = isRotationAnimationCCW(windowRotation, rotation);
+        final boolean rotationCCW = Utilities.isRotationAnimationCCW(windowRotation, rotation);
         if (windowRotation == Surface.ROTATION_0 || windowRotation == Surface.ROTATION_180) {
             mIconResId = rotationCCW
                     ? R.drawable.ic_sysbar_rotate_button_ccw_start_90
@@ -431,23 +433,6 @@ public class RotationButtonController {
         return rotation == NATURAL_ROTATION;
     }
 
-    private boolean isRotationAnimationCCW(int from, int to) {
-        // All 180deg WM rotation animations are CCW, match that
-        if (from == Surface.ROTATION_0 && to == Surface.ROTATION_90) return false;
-        if (from == Surface.ROTATION_0 && to == Surface.ROTATION_180) return true; //180d so CCW
-        if (from == Surface.ROTATION_0 && to == Surface.ROTATION_270) return true;
-        if (from == Surface.ROTATION_90 && to == Surface.ROTATION_0) return true;
-        if (from == Surface.ROTATION_90 && to == Surface.ROTATION_180) return false;
-        if (from == Surface.ROTATION_90 && to == Surface.ROTATION_270) return true; //180d so CCW
-        if (from == Surface.ROTATION_180 && to == Surface.ROTATION_0) return true; //180d so CCW
-        if (from == Surface.ROTATION_180 && to == Surface.ROTATION_90) return true;
-        if (from == Surface.ROTATION_180 && to == Surface.ROTATION_270) return false;
-        if (from == Surface.ROTATION_270 && to == Surface.ROTATION_0) return false;
-        if (from == Surface.ROTATION_270 && to == Surface.ROTATION_90) return true; //180d so CCW
-        if (from == Surface.ROTATION_270 && to == Surface.ROTATION_180) return true;
-        return false; // Default
-    }
-
     private void rescheduleRotationTimeout(final boolean reasonHover) {
         // May be called due to a new rotation proposal or a change in hover state
         if (reasonHover) {
@@ -518,38 +503,6 @@ public class RotationButtonController {
                         if (a.id == taskId) setRotateSuggestionButtonState(false /* visible */);
                     });
         }
-    }
-
-    private class ViewRippler {
-        private static final int RIPPLE_OFFSET_MS = 50;
-        private static final int RIPPLE_INTERVAL_MS = 2000;
-        private View mRoot;
-
-        public void start(View root) {
-            stop(); // Stop any pending ripple animations
-
-            mRoot = root;
-
-            // Schedule pending ripples, offset the 1st to avoid problems with visibility change
-            mRoot.postOnAnimationDelayed(mRipple, RIPPLE_OFFSET_MS);
-            mRoot.postOnAnimationDelayed(mRipple, RIPPLE_INTERVAL_MS);
-            mRoot.postOnAnimationDelayed(mRipple, 2 * RIPPLE_INTERVAL_MS);
-            mRoot.postOnAnimationDelayed(mRipple, 3 * RIPPLE_INTERVAL_MS);
-            mRoot.postOnAnimationDelayed(mRipple, 4 * RIPPLE_INTERVAL_MS);
-        }
-
-        public void stop() {
-            if (mRoot != null) mRoot.removeCallbacks(mRipple);
-        }
-
-        private final Runnable mRipple = new Runnable() {
-            @Override
-            public void run() { // Cause the ripple to fire via false presses
-                if (!mRoot.isAttachedToWindow()) return;
-                mRoot.setPressed(true /* pressed */);
-                mRoot.setPressed(false /* pressed */);
-            }
-        };
     }
 
     enum RotationButtonEvent implements UiEventLogger.UiEventEnum {
