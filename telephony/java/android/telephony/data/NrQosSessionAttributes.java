@@ -241,6 +241,30 @@ public final class NrQosSessionAttributes implements Parcelable, QosSessionAttri
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NrQosSessionAttributes nrQosAttr = (NrQosSessionAttributes) o;
+        return m5Qi == nrQosAttr.m5Qi
+                && mQfi == nrQosAttr.mQfi
+                && mMaxUplinkBitRate == nrQosAttr.mMaxUplinkBitRate
+                && mMaxDownlinkBitRate == nrQosAttr.mMaxDownlinkBitRate
+                && mGuaranteedUplinkBitRate == nrQosAttr.mGuaranteedUplinkBitRate
+                && mGuaranteedDownlinkBitRate == nrQosAttr.mGuaranteedDownlinkBitRate
+                && mAveragingWindow == nrQosAttr.mAveragingWindow
+                && mRemoteAddresses.size() == nrQosAttr.mRemoteAddresses.size()
+                && mRemoteAddresses.containsAll(nrQosAttr.mRemoteAddresses);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(m5Qi, mQfi, mMaxUplinkBitRate,
+                mMaxDownlinkBitRate, mGuaranteedUplinkBitRate,
+                mGuaranteedDownlinkBitRate, mAveragingWindow, mRemoteAddresses);
+    }
+
+
     @NonNull
     public static final Creator<NrQosSessionAttributes> CREATOR =
             new Creator<NrQosSessionAttributes>() {
