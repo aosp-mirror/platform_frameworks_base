@@ -58,6 +58,8 @@
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_gravity="center_vertical"
+            android:focusable="false"
+            android:clickable="false"
             android:track="@drawable/settingslib_track_selector"
             android:thumb="@drawable/settingslib_thumb_selector"
             android:theme="@style/MainSwitch.Settingslib"/>
