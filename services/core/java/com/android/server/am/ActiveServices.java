@@ -6117,8 +6117,10 @@ public final class ActiveServices {
                 && code != REASON_UID_VISIBLE;
     }
 
-    // TODO: remove this notification after feature development is done
     private void showFgsBgRestrictedNotificationLocked(ServiceRecord r) {
+        if (!mAm.mConstants.mFgsStartRestrictionNotificationEnabled /* default is false */) {
+            return;
+        }
         final Context context = mAm.mContext;
         final String title = "Foreground Service BG-Launch Restricted";
         final String content = "App restricted: " + r.mRecentCallingPackage;
