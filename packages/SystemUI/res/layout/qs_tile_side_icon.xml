@@ -23,7 +23,7 @@
     <ImageView
         android:id="@+id/customDrawable"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/qs_icon_size"
+        android:layout_height="@dimen/qs_side_view_size"
         android:layout_marginEnd="@dimen/qs_drawable_end_margin"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"

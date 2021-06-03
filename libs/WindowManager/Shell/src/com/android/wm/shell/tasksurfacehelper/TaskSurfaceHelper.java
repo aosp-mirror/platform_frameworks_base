@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.vibrator;
+package com.android.wm.shell.tasksurfacehelper;
 
-import android.os.VibrationEffect;
+/**
+ * Interface to communicate with a Task's SurfaceControl.
+ */
+public interface TaskSurfaceHelper {
 
-/** Function that applies a generic modifier to a {@link VibrationEffect}. */
-interface VibrationEffectModifier<T> {
-
-    /** Applies the modifier to given {@link VibrationEffect}. */
-    VibrationEffect apply(VibrationEffect effect, T modifier);
+    /** Sets the METADATA_GAME_MODE for the layer corresponding to the task **/
+    default void setGameModeForTask(int taskId, int gameMode) {}
 }

@@ -199,11 +199,11 @@
         <item name="android:textSize">@dimen/qs_tile_text_size</item>
         <item name="android:letterSpacing">0.01</item>
         <item name="android:lineHeight">20sp</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
     </style>
 
     <style name="TextAppearance.QS.TileLabel.Secondary">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
     <style name="TextAppearance.QS.UserSwitcher">
@@ -223,7 +223,7 @@
     </style>
 
     <style name="TextAppearance.QS.Status">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">14sp</item>
         <item name="android:letterSpacing">0.01</item>
@@ -231,20 +231,19 @@
     </style>
 
     <style name="TextAppearance.QS.SecurityFooter" parent="@style/TextAppearance.QS.Status">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.QS.Status.Carriers">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-    </style>
+    <style name="TextAppearance.QS.Status.Carriers" />
 
     <style name="TextAppearance.QS.Status.Carriers.NoCarrierText">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.QS.Status.Build">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
@@ -643,7 +642,7 @@
         <item name="android:tint">?android:attr/textColorPrimary</item>
         <item name="android:stateListAnimator">@anim/media_button_state_list_animator</item>
         <item name="android:padding">12dp</item>
-        <item name="android:scaleType">fitCenter</item>
+        <item name="android:scaleType">centerInside</item>
     </style>
 
     <style name="MediaPlayer.OutlineButton">
@@ -663,7 +662,8 @@
 
     <style name="MediaPlayer.AppIcon">
         <item name="android:background">@drawable/qs_media_icon_background</item>
-        <item name="android:backgroundTint">?android:attr/textColorPrimary</item>
+        <item name="android:backgroundTint">@color/media_player_solid_button_bg</item>
+        <item name="android:padding">4dp</item>
     </style>
 
     <style name="MediaPlayer.Album">

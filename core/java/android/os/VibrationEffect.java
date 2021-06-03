@@ -182,6 +182,11 @@ public abstract class VibrationEffect implements Parcelable {
      * @return The desired effect.
      */
     public static VibrationEffect createOneShot(long milliseconds, int amplitude) {
+        if (amplitude == 0) {
+            throw new IllegalArgumentException(
+                    "amplitude must either be DEFAULT_AMPLITUDE, "
+                            + "or between 1 and 255 inclusive (amplitude=" + amplitude + ")");
+        }
         return createWaveform(new long[]{milliseconds}, new int[]{amplitude}, -1 /* repeat */);
     }
 
@@ -581,20 +586,14 @@ public abstract class VibrationEffect implements Parcelable {
         public void validate() {
             int segmentCount = mSegments.size();
             boolean hasNonZeroDuration = false;
-            boolean hasNonZeroAmplitude = false;
             for (int i = 0; i < segmentCount; i++) {
                 VibrationEffectSegment segment = mSegments.get(i);
                 segment.validate();
                 // A segment with unknown duration = -1 still counts as a non-zero duration.
                 hasNonZeroDuration |= segment.getDuration() != 0;
-                hasNonZeroAmplitude |= segment.hasNonZeroAmplitude();
             }
             if (!hasNonZeroDuration) {
                 throw new IllegalArgumentException("at least one timing must be non-zero"
-                        + " (segments=" + mSegments + ")");
-            }
-            if (!hasNonZeroAmplitude) {
-                throw new IllegalArgumentException("at least one amplitude must be non-zero"
                         + " (segments=" + mSegments + ")");
             }
             if (mRepeatIndex != -1) {

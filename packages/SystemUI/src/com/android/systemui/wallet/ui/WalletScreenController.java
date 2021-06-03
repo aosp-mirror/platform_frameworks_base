@@ -260,6 +260,7 @@ public class WalletScreenController implements
         mIsDismissed = true;
         mSelectedCardId = null;
         mHandler.removeCallbacks(mSelectionRunnable);
+        mFalsingManager.cleanup();
         mWalletClient.notifyWalletDismissed();
         mWalletClient.removeWalletServiceEventListener(this);
         mWalletView.animateDismissal();

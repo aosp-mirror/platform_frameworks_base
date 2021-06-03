@@ -16,8 +16,7 @@
 
 package com.android.systemui.biometrics;
 
-import static com.android.systemui.biometrics.SidefpsController.SFPS_INDICATOR_HEIGHT;
-import static com.android.systemui.biometrics.SidefpsController.SFPS_INDICATOR_WIDTH;
+import static com.android.systemui.biometrics.SidefpsController.SFPS_AFFORDANCE_WIDTH;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -27,6 +26,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.util.AttributeSet;
+import android.view.Surface;
 import android.widget.FrameLayout;
 
 /**
@@ -34,18 +34,22 @@ import android.widget.FrameLayout;
  */
 public class SidefpsView extends FrameLayout {
     private static final String TAG = "SidefpsView";
+    private static final int POINTER_SIZE_PX = 50;
+    private static final int ROUND_RADIUS = 15;
+
     @NonNull private final RectF mSensorRect;
     @NonNull private final Paint mSensorRectPaint;
     @NonNull private final Paint mPointerText;
-    private static final int POINTER_SIZE_PX = 50;
+    @NonNull private final Context mContext;
 
     // Used to obtain the sensor location.
     @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
+    @Surface.Rotation private int mOrientation;
 
     public SidefpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
         super.setWillNotDraw(false);
-
+        mContext = context;
         mPointerText = new Paint(0 /* flags */);
         mPointerText.setAntiAlias(true);
         mPointerText.setColor(Color.WHITE);
@@ -54,7 +58,7 @@ public class SidefpsView extends FrameLayout {
         mSensorRect = new RectF();
         mSensorRectPaint = new Paint(0 /* flags */);
         mSensorRectPaint.setAntiAlias(true);
-        mSensorRectPaint.setColor(Color.BLUE);
+        mSensorRectPaint.setColor(Color.BLUE); // TODO: Fix Color
         mSensorRectPaint.setStyle(Paint.Style.FILL);
     }
 
@@ -65,11 +69,19 @@ public class SidefpsView extends FrameLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawRect(mSensorRect, mSensorRectPaint);
+        canvas.drawRoundRect(mSensorRect, ROUND_RADIUS, ROUND_RADIUS, mSensorRectPaint);
+        int x, y;
+        if (mOrientation == Surface.ROTATION_90 || mOrientation == Surface.ROTATION_270) {
+            x = mSensorProps.sensorRadius + 10;
+            y = SFPS_AFFORDANCE_WIDTH / 2 + 15;
+        } else {
+            x = SFPS_AFFORDANCE_WIDTH / 2 - 10;
+            y = mSensorProps.sensorRadius + 30;
+        }
         canvas.drawText(
                 ">",
-                SFPS_INDICATOR_WIDTH / 2 - 10, // TODO(b/188690214): retrieve from sensorProps
-                SFPS_INDICATOR_HEIGHT / 2 + 30, //TODO(b/188690214): retrieve from sensorProps
+                x,
+                y,
                 mPointerText
         );
     }
@@ -77,11 +89,19 @@ public class SidefpsView extends FrameLayout {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        mOrientation = mContext.getDisplay().getRotation();
+        if (mOrientation == Surface.ROTATION_90 || mOrientation == Surface.ROTATION_270) {
+            right = mSensorProps.sensorRadius * 2;
+            bottom = SFPS_AFFORDANCE_WIDTH;
+        } else {
+            right = SFPS_AFFORDANCE_WIDTH;
+            bottom = mSensorProps.sensorRadius * 2;
+        }
 
         mSensorRect.set(
                 0,
                 0,
-                SFPS_INDICATOR_WIDTH, //TODO(b/188690214): retrieve from sensorProps
-                SFPS_INDICATOR_HEIGHT); //TODO(b/188690214): retrieve from sensorProps
+                right,
+                bottom);
     }
 }
