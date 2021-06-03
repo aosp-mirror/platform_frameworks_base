@@ -1032,8 +1032,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Толук экранда ачуу"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Экрандын бир бөлүгүн чоңойтуу"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Которулуу"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Атайын мүмкүнчүлүктөр баскычы атайын мүмкүнчүлүктөр жаңсоосун алмаштырды\n\n"<annotation id="link">"Жөндөөлөрдү көрүү"</annotation></string>
-    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Убактылуу жашыруу үчүн баскычты четине жылдырыңыз"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Атайын мүмкүнчүлүктөр жаңсоосунун ордуна атайын мүмкүнчүлүктөр баскычы колдонулмакчы\n\n"<annotation id="link">"Жөндөөлөрдү көрүү"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Баскычты убактылуу жашыра туруу үчүн экрандын четине жылдырыңыз"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Жогорку сол жакка жылдыруу"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Жогорку оң жакка жылдырыңыз"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Төмөнкү сол жакка жылдыруу"</string>
