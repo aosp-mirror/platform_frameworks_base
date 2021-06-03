@@ -315,8 +315,7 @@ public class MediaControlPanel {
         appIconView.clearColorFilter();
         if (data.getAppIcon() != null && !data.getResumption()) {
             appIconView.setImageIcon(data.getAppIcon());
-            int color = Utils.getColorAttrDefaultColor(mContext,
-                    com.android.internal.R.attr.colorAccentTertiary);
+            int color = mContext.getColor(android.R.color.system_accent2_900);
             appIconView.setColorFilter(color);
         } else {
             appIconView.setColorFilter(getGrayscaleFilter());
