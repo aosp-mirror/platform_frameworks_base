@@ -1912,7 +1912,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atnaujino administratorius"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Ištrynė administratorius"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Gerai"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Akumuliatoriaus tausojimo priemonė įjungia tamsiąją temą ir apriboja arba išjungia veiklą fone, kai kuriuos vaizdinius efektus, tam tikras funkcijas bei kai kuriuos tinklo ryšius.\n\n"<annotation id="url">"Sužinokite daugiau"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Akumuliatoriaus tausojimo priemonė įjungia tamsiąją temą ir apriboja arba išjungia veiklą fone, kai kuriuos vaizdinius efektus, tam tikras funkcijas bei kai kuriuos tinklo ryšius."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Akumuliatoriaus tausojimo priemonė įjungia tamsiąją temą ir apriboja arba išjungia veiklą fone, kai kuriuos vaizdinius efektus, tam tikras funkcijas bei kai kuriuos tinklo ryšius."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Kad padėtų sumažinti duomenų naudojimą, Duomenų taupymo priemonė neleidžia kai kurioms programoms siųsti ar gauti duomenų fone. Šiuo metu naudojama programa gali pasiekti duomenis, bet tai bus daroma rečiau. Tai gali reikšti, kad, pvz., vaizdai nebus pateikiami, jei jų nepaliesite."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Įj. Duomenų taupymo priemonę?"</string>
