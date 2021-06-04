@@ -17,6 +17,7 @@
 package android.permission;
 
 import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED;
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.permission.PermissionControllerManager.COUNT_ONLY_WHEN_GRANTED;
 import static android.permission.PermissionControllerManager.COUNT_WHEN_SYSTEM;
 
@@ -510,7 +511,7 @@ public abstract class PermissionControllerService extends Service {
                     String callerPackageName, AdminPermissionControlParams params,
                     AndroidFuture callback) {
                 checkStringNotEmpty(callerPackageName);
-                if (params.getGrantState() == PERMISSION_GRANT_STATE_DENIED) {
+                if (params.getGrantState() == PERMISSION_GRANT_STATE_GRANTED) {
                     enforceSomePermissionsGrantedToCaller(
                             Manifest.permission.GRANT_RUNTIME_PERMISSIONS);
                 }
@@ -541,6 +542,9 @@ public abstract class PermissionControllerService extends Service {
             @Override
             public void updateUserSensitiveForApp(int uid, @NonNull AndroidFuture callback) {
                 Preconditions.checkNotNull(callback, "callback cannot be null");
+
+                enforceSomePermissionsGrantedToCaller(
+                        Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
 
                 try {
                     onUpdateUserSensitivePermissionFlags(uid, () -> callback.complete(null));
@@ -608,9 +612,7 @@ public abstract class PermissionControllerService extends Service {
                 try {
                     Objects.requireNonNull(permissionGroupName);
                     Objects.requireNonNull(callback);
-                    PermissionControllerService
-                            .this
-                            .onGetGroupOfPlatformPermission(
+                    PermissionControllerService.this.onGetGroupOfPlatformPermission(
                             permissionGroupName, callback::complete);
                 } catch (Throwable t) {
                     callback.completeExceptionally(t);

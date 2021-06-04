@@ -16,52 +16,31 @@
 
 package com.android.settingslib.enterprise;
 
-import static java.util.Objects.requireNonNull;
-
-import android.annotation.UserIdInt;
 import android.content.Context;
 
 import androidx.annotation.Nullable;
 
-import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-
 /**
  * An {@link ActionDisabledByAdminController} to be used with financed devices.
  */
-public class FinancedDeviceActionDisabledByAdminController
-        implements ActionDisabledByAdminController {
+final class FinancedDeviceActionDisabledByAdminController
+        extends BaseActionDisabledByAdminController {
 
-    private @UserIdInt int mEnforcementAdminUserId;
-    private EnforcedAdmin mEnforcedAdmin;
-    private final ActionDisabledLearnMoreButtonLauncher mHelper;
-    private final DeviceAdminStringProvider mDeviceAdminStringProvider;
-
-    FinancedDeviceActionDisabledByAdminController(
-            ActionDisabledLearnMoreButtonLauncher helper,
-            DeviceAdminStringProvider deviceAdminStringProvider) {
-        mHelper = requireNonNull(helper, "helper cannot be null");
-        mDeviceAdminStringProvider = requireNonNull(deviceAdminStringProvider,
-                "deviceAdminStringProvider cannot be null");
+    FinancedDeviceActionDisabledByAdminController(DeviceAdminStringProvider stringProvider) {
+        super(stringProvider);
     }
 
     @Override
-    public void updateEnforcedAdmin(EnforcedAdmin admin, int adminUserId) {
-        mEnforcementAdminUserId = adminUserId;
-        mEnforcedAdmin = requireNonNull(admin, "admin cannot be null");
-    }
+    public void setupLearnMoreButton(Context context) {
+        assertInitialized();
 
-    @Override
-    public void setupLearnMoreButton(Context context, Object alertDialogBuilder) {
-        mHelper.setupLearnMoreButtonToShowAdminPolicies(
-                context,
-                alertDialogBuilder,
-                mEnforcementAdminUserId,
+        mLauncher.setupLearnMoreButtonToShowAdminPolicies(context, mEnforcementAdminUserId,
                 mEnforcedAdmin);
     }
 
     @Override
     public String getAdminSupportTitle(@Nullable String restriction) {
-        return mDeviceAdminStringProvider.getDisabledByPolicyTitleForFinancedDevice();
+        return mStringProvider.getDisabledByPolicyTitleForFinancedDevice();
     }
 
     @Override

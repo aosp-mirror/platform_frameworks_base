@@ -16,8 +16,6 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
-import static android.view.View.GONE;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +41,7 @@ import java.util.List;
  */
 public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
     private int mIconWidthHeight;
+    private int mItemPadding;
     private final List<AccessibilityTarget> mTargets;
 
     @IntDef({
@@ -84,6 +83,7 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
         final AccessibilityTarget target = mTargets.get(position);
         holder.mIconView.setBackground(target.getIcon());
         holder.updateIconWidthHeight(mIconWidthHeight);
+        holder.updateItemPadding(mItemPadding, getItemCount());
         holder.itemView.setOnClickListener((v) -> target.onSelected());
         holder.itemView.setStateDescription(target.getStateDescription());
         holder.itemView.setContentDescription(target.getLabel());
@@ -120,14 +120,16 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
         mIconWidthHeight = iconWidthHeight;
     }
 
+    public void setItemPadding(int itemPadding) {
+        mItemPadding = itemPadding;
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         final View mIconView;
-        final View mDivider;
 
         ViewHolder(View itemView) {
             super(itemView);
             mIconView = itemView.findViewById(R.id.icon_view);
-            mDivider = itemView.findViewById(R.id.transparent_divider);
         }
 
         void updateIconWidthHeight(int newValue) {
@@ -139,21 +141,31 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
             layoutParams.height = newValue;
             mIconView.setLayoutParams(layoutParams);
         }
+
+        void updateItemPadding(int padding, int size) {
+            itemView.setPaddingRelative(padding, padding, padding, padding);
+        }
     }
 
     static class TopViewHolder extends ViewHolder {
         TopViewHolder(View itemView) {
             super(itemView);
-            final int padding = itemView.getPaddingStart();
-            itemView.setPaddingRelative(padding, padding, padding, 0);
+        }
+
+        @Override
+        void updateItemPadding(int padding, int size) {
+            final int paddingBottom = size <= 2 ? padding : 0;
+            itemView.setPaddingRelative(padding, padding, padding, paddingBottom);
         }
     }
 
     static class BottomViewHolder extends ViewHolder {
         BottomViewHolder(View itemView) {
             super(itemView);
-            mDivider.setVisibility(GONE);
-            final int padding = itemView.getPaddingStart();
+        }
+
+        @Override
+        void updateItemPadding(int padding, int size) {
             itemView.setPaddingRelative(padding, 0, padding, padding);
         }
     }

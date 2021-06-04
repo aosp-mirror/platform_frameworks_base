@@ -16,8 +16,8 @@
 
 package com.android.server.am;
 
+import android.os.Build;
 import android.os.Trace;
-import android.provider.DeviceConfig;
 
 import java.util.UUID;
 
@@ -26,15 +26,12 @@ import java.util.UUID;
  *
  * @hide
  */
-class TraceErrorLogger {
+public class TraceErrorLogger {
     private static final String COUNTER_PREFIX = "ErrorId:";
-    private static final String ADD_ERROR_ID = "add_error_id";
     private static final int PLACEHOLDER_VALUE = 1;
 
     public boolean isAddErrorIdEnabled() {
-        return DeviceConfig
-                .getBoolean(DeviceConfig.NAMESPACE_TRACE_ERROR_LOGGER, ADD_ERROR_ID,
-                        false);
+        return Build.IS_DEBUGGABLE;
     }
 
     /**

@@ -20,6 +20,7 @@ import static android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.pm.ApplicationInfo.AUTO_REVOKE_DISALLOWED;
 import static android.content.pm.ApplicationInfo.AUTO_REVOKE_DISCOURAGED;
@@ -65,6 +66,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.AppOpsManager.AttributionFlags;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -108,6 +110,7 @@ import android.os.storage.StorageManager;
 import android.permission.IOnPermissionsChangeListener;
 import android.permission.IPermissionChecker;
 import android.permission.IPermissionManager;
+import android.permission.PermissionCheckerManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
@@ -171,6 +174,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
 /**
@@ -3320,8 +3324,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public @NonNull AttributionSource registerAttributionSource(@NonNull AttributionSource source) {
-        return mAttributionSourceRegistry.registerAttributionSource(source);
+    public void registerAttributionSource(@NonNull AttributionSource source) {
+        mAttributionSourceRegistry.registerAttributionSource(source);
     }
 
     @Override
@@ -5295,8 +5299,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
          * @param permissionName the name of the permission to be checked
          * @param userId the user ID
          * @param superImpl the original implementation that can be delegated to
-         * @return {@link android.content.pm.PackageManager.PERMISSION_GRANTED} if the package has
-         * the permission, or {@link android.content.pm.PackageManager.PERMISSION_DENITED} otherwise
+         * @return {@link android.content.pm.PackageManager#PERMISSION_GRANTED} if the package has
+         * the permission, or {@link android.content.pm.PackageManager#PERMISSION_DENIED} otherwise
          *
          * @see android.content.pm.PackageManager#checkPermission(String, String)
          */
@@ -5310,8 +5314,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
          * @param uid the UID to be checked
          * @param permissionName the name of the permission to be checked
          * @param superImpl the original implementation that can be delegated to
-         * @return {@link android.content.pm.PackageManager.PERMISSION_GRANTED} if the package has
-         * the permission, or {@link android.content.pm.PackageManager.PERMISSION_DENITED} otherwise
+         * @return {@link android.content.pm.PackageManager#PERMISSION_GRANTED} if the package has
+         * the permission, or {@link android.content.pm.PackageManager#PERMISSION_DENIED} otherwise
          */
         int checkUidPermission(int uid, @NonNull String permissionName,
                 BiFunction<Integer, String, Integer> superImpl);
@@ -5395,8 +5399,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         private final WeakHashMap<IBinder, AttributionSource> mAttributions = new WeakHashMap<>();
 
-        public @NonNull AttributionSource registerAttributionSource(
-                @NonNull AttributionSource source) {
+        public void registerAttributionSource(@NonNull AttributionSource source) {
             //   Here we keep track of attribution sources that were created by an app
             // from an attribution chain that called into the app and the apps's
             // own attribution source. An app can register an attribution chain up
@@ -5443,10 +5446,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
 
             synchronized (mLock) {
-                final IBinder token = new Binder();
-                final AttributionSource result = source.withToken(token);
-                mAttributions.put(token, result);
-                return result;
+                mAttributions.put(source.getToken(), source);
             }
         }
 
@@ -5472,6 +5472,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         private static final ConcurrentHashMap<String, PermissionInfo> sPlatformPermissions
                 = new ConcurrentHashMap<>();
 
+        private static final AtomicInteger sAttributionChainIds = new AtomicInteger(0);
+
         private final @NonNull Context mContext;
         private final @NonNull AppOpsManager mAppOpsManager;
 
@@ -5481,53 +5483,108 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        @PermissionChecker.PermissionResult
+        @PermissionCheckerManager.PermissionResult
         public int checkPermission(@NonNull String permission,
                 @NonNull AttributionSourceState attributionSourceState, @Nullable String message,
-                boolean forDataDelivery, boolean startDataDelivery, boolean fromDatasource) {
+                boolean forDataDelivery, boolean startDataDelivery, boolean fromDatasource,
+                int attributedOp) {
             Objects.requireNonNull(permission);
             Objects.requireNonNull(attributionSourceState);
             final AttributionSource attributionSource = new AttributionSource(
                     attributionSourceState);
             final int result = checkPermission(mContext, permission, attributionSource, message,
-                    forDataDelivery, startDataDelivery, fromDatasource);
+                    forDataDelivery, startDataDelivery, fromDatasource, attributedOp);
             // Finish any started op if some step in the attribution chain failed.
             if (startDataDelivery && result != PermissionChecker.PERMISSION_GRANTED) {
-                finishDataDelivery(AppOpsManager.permissionToOp(permission),
-                        attributionSource.asState());
+                if (attributedOp == AppOpsManager.OP_NONE) {
+                    finishDataDelivery(AppOpsManager.permissionToOpCode(permission),
+                            attributionSource.asState(), fromDatasource);
+                } else {
+                    finishDataDelivery(attributedOp, attributionSource.asState(), fromDatasource);
+                }
             }
             return result;
         }
 
         @Override
-        public void finishDataDelivery(@NonNull String op,
-                @NonNull AttributionSourceState attributionSourceState) {
-            if (op == null || attributionSourceState.packageName == null) {
+        public void finishDataDelivery(int op,
+                @NonNull AttributionSourceState attributionSourceState, boolean fromDatasource) {
+            Objects.requireNonNull(attributionSourceState);
+
+            if (op == AppOpsManager.OP_NONE) {
                 return;
             }
-            mAppOpsManager.finishProxyOp(op, new AttributionSource(attributionSourceState));
-            if (attributionSourceState.next != null) {
-                finishDataDelivery(op, attributionSourceState.next[0]);
+
+            AttributionSource current = new AttributionSource(attributionSourceState);
+            AttributionSource next = null;
+
+            while (true) {
+                final boolean skipCurrentFinish = (fromDatasource || next != null);
+
+                next = current.getNext();
+
+                // If the call is from a datasource we need to vet only the chain before it. This
+                // way we can avoid the datasource creating an attribution context for every call.
+                if (!(fromDatasource && current.asState() == attributionSourceState)
+                        && next != null && !current.isTrusted(mContext)) {
+                    return;
+                }
+
+                // The access is for oneself if this is the single receiver of data
+                // after the data source or if this is the single attribution source
+                // in the chain if not from a datasource.
+                final boolean singleReceiverFromDatasource = (fromDatasource
+                        && current.asState() == attributionSourceState && next != null
+                        && next.getNext() == null);
+                final boolean selfAccess = singleReceiverFromDatasource || next == null;
+
+                final AttributionSource accessorSource = (!singleReceiverFromDatasource)
+                        ? current : next;
+
+                if (selfAccess) {
+                    final String resolvedPackageName = resolvePackageName(mContext, accessorSource);
+                    if (resolvedPackageName == null) {
+                        return;
+                    }
+                    mAppOpsManager.finishOp(accessorSource.getToken(), op,
+                            accessorSource.getUid(), resolvedPackageName,
+                            accessorSource.getAttributionTag());
+                } else {
+                    final AttributionSource resolvedAttributionSource =
+                            resolveAttributionSource(mContext, accessorSource);
+                    if (resolvedAttributionSource.getPackageName() == null) {
+                        return;
+                    }
+                    mAppOpsManager.finishProxyOp(AppOpsManager.opToPublicName(op),
+                            resolvedAttributionSource, skipCurrentFinish);
+                }
+
+                if (next == null || next.getNext() == null) {
+                    return;
+                }
+
+                current = next;
             }
         }
 
         @Override
-        @PermissionChecker.PermissionResult
+        @PermissionCheckerManager.PermissionResult
         public int checkOp(int op, AttributionSourceState attributionSource,
                 String message, boolean forDataDelivery, boolean startDataDelivery) {
             int result = checkOp(mContext, op, new AttributionSource(attributionSource), message,
                     forDataDelivery, startDataDelivery);
             if (result != PermissionChecker.PERMISSION_GRANTED && startDataDelivery) {
                 // Finish any started op if some step in the attribution chain failed.
-                finishDataDelivery(AppOpsManager.opToName(op), attributionSource);
+                finishDataDelivery(op, attributionSource, /*fromDatasource*/ false);
             }
             return  result;
         }
 
-        @PermissionChecker.PermissionResult
+        @PermissionCheckerManager.PermissionResult
         private static int checkPermission(@NonNull Context context, @NonNull String permission,
                 @NonNull AttributionSource attributionSource, @Nullable String message,
-                boolean forDataDelivery, boolean startDataDelivery, boolean fromDatasource) {
+                boolean forDataDelivery, boolean startDataDelivery, boolean fromDatasource,
+                int attributedOp) {
             PermissionInfo permissionInfo = sPlatformPermissions.get(permission);
 
             if (permissionInfo == null) {
@@ -5549,7 +5606,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
             if (permissionInfo.isRuntime()) {
                 return checkRuntimePermission(context, permission, attributionSource, message,
-                        forDataDelivery, startDataDelivery, fromDatasource);
+                        forDataDelivery, startDataDelivery, fromDatasource, attributedOp);
             }
 
             if (!fromDatasource && !checkPermission(context, permission, attributionSource.getUid(),
@@ -5558,15 +5615,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
 
             if (attributionSource.getNext() != null) {
-                return checkPermission(context, permission,
-                        attributionSource.getNext(), message, forDataDelivery,
-                        startDataDelivery, /*fromDatasource*/ false);
+                return checkPermission(context, permission, attributionSource.getNext(), message,
+                        forDataDelivery, startDataDelivery, /*fromDatasource*/ false, attributedOp);
             }
 
             return PermissionChecker.PERMISSION_GRANTED;
         }
 
-        @PermissionChecker.PermissionResult
+        @PermissionCheckerManager.PermissionResult
         private static int checkAppOpPermission(@NonNull Context context,
                 @NonNull String permission, @NonNull AttributionSource attributionSource,
                 @Nullable String message, boolean forDataDelivery, boolean fromDatasource) {
@@ -5586,7 +5642,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                 // If the call is from a datasource we need to vet only the chain before it. This
                 // way we can avoid the datasource creating an attribution context for every call.
-                if (!(fromDatasource && current == attributionSource)
+                if (!(fromDatasource && current.equals(attributionSource))
                         && next != null && !current.isTrusted(context)) {
                     return PermissionChecker.PERMISSION_HARD_DENIED;
                 }
@@ -5595,12 +5651,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // after the data source or if this is the single attribution source
                 // in the chain if not from a datasource.
                 final boolean singleReceiverFromDatasource = (fromDatasource
-                        && current == attributionSource && next != null && next.getNext() == null);
+                        && current.equals(attributionSource) && next != null
+                        && next.getNext() == null);
                 final boolean selfAccess = singleReceiverFromDatasource || next == null;
 
                 final int opMode = performOpTransaction(context, op, current, message,
                         forDataDelivery, /*startDataDelivery*/ false, skipCurrentChecks,
-                        selfAccess, singleReceiverFromDatasource);
+                        selfAccess, singleReceiverFromDatasource, AppOpsManager.OP_NONE,
+                        AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_FLAGS_NONE,
+                        AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
 
                 switch (opMode) {
                     case AppOpsManager.MODE_IGNORED:
@@ -5631,9 +5690,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         private static int checkRuntimePermission(@NonNull Context context,
                 @NonNull String permission, @NonNull AttributionSource attributionSource,
                 @Nullable String message, boolean forDataDelivery, boolean startDataDelivery,
-                boolean fromDatasource) {
+                boolean fromDatasource, int attributedOp) {
             // Now let's check the identity chain...
             final int op = AppOpsManager.permissionToOpCode(permission);
+            final int attributionChainId = (startDataDelivery)
+                    ? sAttributionChainIds.incrementAndGet()
+                    : AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
 
             AttributionSource current = attributionSource;
             AttributionSource next = null;
@@ -5644,7 +5706,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                 // If the call is from a datasource we need to vet only the chain before it. This
                 // way we can avoid the datasource creating an attribution context for every call.
-                if (!(fromDatasource && current == attributionSource)
+                if (!(fromDatasource && current.equals(attributionSource))
                         && next != null && !current.isTrusted(context)) {
                     return PermissionChecker.PERMISSION_HARD_DENIED;
                 }
@@ -5678,12 +5740,21 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // after the data source or if this is the single attribution source
                 // in the chain if not from a datasource.
                 final boolean singleReceiverFromDatasource = (fromDatasource
-                        && current == attributionSource && next != null && next.getNext() == null);
+                        && current.equals(attributionSource)
+                        && next != null && next.getNext() == null);
                 final boolean selfAccess = singleReceiverFromDatasource || next == null;
+
+                final int proxyAttributionFlags = (!skipCurrentChecks)
+                        ? resolveProxyAttributionFlags(attributionSource, current, fromDatasource,
+                                startDataDelivery, selfAccess)
+                        : AppOpsManager.ATTRIBUTION_FLAGS_NONE;
+                final int proxiedAttributionFlags = resolveProxiedAttributionFlags(
+                        attributionSource, next, fromDatasource, startDataDelivery, selfAccess);
 
                 final int opMode = performOpTransaction(context, op, current, message,
                         forDataDelivery, startDataDelivery, skipCurrentChecks, selfAccess,
-                        singleReceiverFromDatasource);
+                        singleReceiverFromDatasource, attributedOp, proxyAttributionFlags,
+                        proxiedAttributionFlags, attributionChainId);
 
                 switch (opMode) {
                     case AppOpsManager.MODE_ERRORED: {
@@ -5714,12 +5785,60 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return permissionGranted;
         }
 
+        private static @AttributionFlags int resolveProxyAttributionFlags(
+                @NonNull AttributionSource attributionChain,
+                @NonNull AttributionSource current, boolean fromDatasource,
+                boolean startDataDelivery, boolean selfAccess) {
+            return resolveAttributionFlags(attributionChain, current, fromDatasource,
+                    startDataDelivery, selfAccess, /*flagsForProxy*/ true);
+        }
+
+        private static @AttributionFlags int resolveProxiedAttributionFlags(
+                @NonNull AttributionSource attributionChain,
+                @NonNull AttributionSource current, boolean fromDatasource,
+                boolean startDataDelivery, boolean selfAccess) {
+            return resolveAttributionFlags(attributionChain, current, fromDatasource,
+                    startDataDelivery, selfAccess, /*flagsForProxy*/ false);
+        }
+
+        private static @AttributionFlags int resolveAttributionFlags(
+                @NonNull AttributionSource attributionChain,
+                @NonNull AttributionSource current, boolean fromDatasource,
+                boolean startDataDelivery, boolean selfAccess, boolean flagsForProxy) {
+            if (current == null || !startDataDelivery) {
+                return AppOpsManager.ATTRIBUTION_FLAGS_NONE;
+            }
+            if (flagsForProxy) {
+                if (selfAccess) {
+                    return AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
+                } else if (!fromDatasource && current.equals(attributionChain)) {
+                    return AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
+                }
+            } else {
+                if (selfAccess) {
+                    return AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
+                } else if (fromDatasource && current.equals(attributionChain.getNext())) {
+                    return AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
+                } else if (current.getNext() == null) {
+                    return AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
+                }
+            }
+            if (fromDatasource && current.equals(attributionChain)) {
+                return AppOpsManager.ATTRIBUTION_FLAGS_NONE;
+            }
+            return AppOpsManager.ATTRIBUTION_FLAG_INTERMEDIARY;
+        }
+
         private static int checkOp(@NonNull Context context, @NonNull int op,
                 @NonNull AttributionSource attributionSource, @Nullable String message,
                 boolean forDataDelivery, boolean startDataDelivery) {
             if (op < 0 || attributionSource.getPackageName() == null) {
                 return PermissionChecker.PERMISSION_HARD_DENIED;
             }
+
+            final int attributionChainId = (startDataDelivery)
+                    ? sAttributionChainIds.incrementAndGet()
+                    : AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
 
             AttributionSource current = attributionSource;
             AttributionSource next = null;
@@ -5737,9 +5856,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // The access is for oneself if this is the single attribution source in the chain.
                 final boolean selfAccess = (next == null);
 
+                final int proxyAttributionFlags = (!skipCurrentChecks)
+                        ? resolveProxyAttributionFlags(attributionSource, current,
+                                /*fromDatasource*/ false, startDataDelivery, selfAccess)
+                        : AppOpsManager.ATTRIBUTION_FLAGS_NONE;
+                final int proxiedAttributionFlags = resolveProxiedAttributionFlags(
+                        attributionSource, next, /*fromDatasource*/ false, startDataDelivery,
+                        selfAccess);
+
                 final int opMode = performOpTransaction(context, op, current, message,
                         forDataDelivery, startDataDelivery, skipCurrentChecks, selfAccess,
-                        /*fromDatasource*/ false);
+                        /*fromDatasource*/ false, AppOpsManager.OP_NONE, proxyAttributionFlags,
+                        proxiedAttributionFlags, attributionChainId);
 
                 switch (opMode) {
                     case AppOpsManager.MODE_ERRORED: {
@@ -5758,10 +5886,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
 
+        @SuppressWarnings("ConstantConditions")
         private static int performOpTransaction(@NonNull Context context, int op,
                 @NonNull AttributionSource attributionSource, @Nullable String message,
                 boolean forDataDelivery, boolean startDataDelivery, boolean skipProxyOperation,
-                boolean selfAccess, boolean singleReceiverFromDatasource) {
+                boolean selfAccess, boolean singleReceiverFromDatasource, int attributedOp,
+                @AttributionFlags int proxyAttributionFlags,
+                @AttributionFlags int proxiedAttributionFlags, int attributionChainId) {
             // We cannot perform app ops transactions without a package name. In all relevant
             // places we pass the package name but just in case there is a bug somewhere we
             // do a best effort to resolve the package from the UID (pick first without a loss
@@ -5793,36 +5924,75 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (resolvedAttributionSource.getPackageName() == null) {
                     return AppOpsManager.MODE_ERRORED;
                 }
+                // If the datasource is not in a trusted platform component then in would not
+                // have UPDATE_APP_OPS_STATS and the call below would fail. The problem is that
+                // an app is exposing runtime permission protected data but cannot blame others
+                // in a trusted way which would not properly show in permission usage UIs.
+                // As a fallback we note a proxy op that blames the app and the datasource.
+                int startedOp = op;
+                int checkedOpResult = MODE_ALLOWED;
+                int startedOpResult;
+
+                // If the datasource wants to attribute to another app op we need to
+                // make sure the op for the permission and the attributed ops allow
+                // the operation. We return the less permissive of the two and check
+                // the permission op while start the attributed op.
+                if (attributedOp != AppOpsManager.OP_NONE && attributedOp != op) {
+                    checkedOpResult = appOpsManager.checkOpNoThrow(op,
+                            resolvedAttributionSource.getUid(), resolvedAttributionSource
+                                    .getPackageName());
+                    if (checkedOpResult == MODE_ERRORED) {
+                        return checkedOpResult;
+                    }
+                    startedOp = attributedOp;
+                }
                 if (selfAccess) {
-                    // If the datasource is not in a trusted platform component then in would not
-                    // have UPDATE_APP_OPS_STATS and the call below would fail. The problem is that
-                    // an app is exposing runtime permission protected data but cannot blame others
-                    // in a trusted way which would not properly show in permission usage UIs.
-                    // As a fallback we note a proxy op that blames the app and the datasource.
                     try {
-                        return appOpsManager.startOpNoThrow(op, resolvedAttributionSource.getUid(),
+                        startedOpResult = appOpsManager.startOpNoThrow(
+                                resolvedAttributionSource.getToken(), startedOp,
+                                resolvedAttributionSource.getUid(),
                                 resolvedAttributionSource.getPackageName(),
                                 /*startIfModeDefault*/ false,
                                 resolvedAttributionSource.getAttributionTag(),
-                                message);
+                                message, proxyAttributionFlags, attributionChainId);
                     } catch (SecurityException e) {
                         Slog.w(LOG_TAG, "Datasource " + attributionSource + " protecting data with"
                                 + " platform defined runtime permission "
                                 + AppOpsManager.opToPermission(op) + " while not having "
                                 + Manifest.permission.UPDATE_APP_OPS_STATS);
-                        return appOpsManager.startProxyOpNoThrow(op, attributionSource, message,
-                                skipProxyOperation);
+                        startedOpResult = appOpsManager.startProxyOpNoThrow(attributedOp,
+                                attributionSource, message, skipProxyOperation,
+                                proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
                     }
                 } else {
-                    return appOpsManager.startProxyOpNoThrow(op, resolvedAttributionSource, message,
-                            skipProxyOperation);
+                    startedOpResult = appOpsManager.startProxyOpNoThrow(startedOp,
+                            resolvedAttributionSource, message, skipProxyOperation,
+                            proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
                 }
+                return Math.max(checkedOpResult, startedOpResult);
             } else {
                 final AttributionSource resolvedAttributionSource = resolveAttributionSource(
                         context, accessorSource);
                 if (resolvedAttributionSource.getPackageName() == null) {
                     return AppOpsManager.MODE_ERRORED;
                 }
+                int notedOp = op;
+                int checkedOpResult = MODE_ALLOWED;
+                int notedOpResult;
+
+                // If the datasource wants to attribute to another app op we need to
+                // make sure the op for the permission and the attributed ops allow
+                // the operation. We return the less permissive of the two and check
+                // the permission op while start the attributed op.
+                if (attributedOp != AppOpsManager.OP_NONE && attributedOp != op) {
+                    checkedOpResult = appOpsManager.checkOpNoThrow(op,
+                            resolvedAttributionSource.getUid(), resolvedAttributionSource
+                                    .getPackageName());
+                    if (checkedOpResult == MODE_ERRORED) {
+                        return checkedOpResult;
+                    }
+                    notedOp = attributedOp;
+                }
                 if (selfAccess) {
                     // If the datasource is not in a trusted platform component then in would not
                     // have UPDATE_APP_OPS_STATS and the call below would fail. The problem is that
@@ -5830,7 +6000,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     // in a trusted way which would not properly show in permission usage UIs.
                     // As a fallback we note a proxy op that blames the app and the datasource.
                     try {
-                        return appOpsManager.noteOpNoThrow(op, resolvedAttributionSource.getUid(),
+                        notedOpResult = appOpsManager.noteOpNoThrow(notedOp,
+                                resolvedAttributionSource.getUid(),
                                 resolvedAttributionSource.getPackageName(),
                                 resolvedAttributionSource.getAttributionTag(),
                                 message);
@@ -5839,13 +6010,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 + " platform defined runtime permission "
                                 + AppOpsManager.opToPermission(op) + " while not having "
                                 + Manifest.permission.UPDATE_APP_OPS_STATS);
-                        return appOpsManager.noteProxyOpNoThrow(op, attributionSource, message,
-                                skipProxyOperation);
+                        notedOpResult = appOpsManager.noteProxyOpNoThrow(notedOp, attributionSource,
+                                message, skipProxyOperation);
                     }
                 } else {
-                    return appOpsManager.noteProxyOpNoThrow(op, resolvedAttributionSource, message,
-                            skipProxyOperation);
+                    notedOpResult = appOpsManager.noteProxyOpNoThrow(notedOp,
+                            resolvedAttributionSource, message, skipProxyOperation);
                 }
+                return Math.max(checkedOpResult, notedOpResult);
             }
         }
 

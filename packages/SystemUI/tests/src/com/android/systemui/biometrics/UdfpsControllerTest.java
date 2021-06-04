@@ -275,6 +275,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
+        when(mUdfpsView.isIlluminationRequested()).thenReturn(true);
         // WHEN it is cancelled
         mUdfpsController.onCancelUdfps();
         // THEN the illumination is hidden
@@ -289,6 +290,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
+        when(mUdfpsView.isIlluminationRequested()).thenReturn(true);
         // WHEN it times out
         mFgExecutor.advanceClockToNext();
         mFgExecutor.runAllReady();

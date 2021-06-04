@@ -18,7 +18,6 @@ package android.media;
 
 import static android.Manifest.permission.BIND_IMS_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.media.permission.PermissionUtil.myIdentity;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -28,6 +27,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
+import android.content.AttributionSource.ScopedParcelState;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -35,7 +36,6 @@ import android.content.res.AssetFileDescriptor;
 import android.graphics.SurfaceTexture;
 import android.media.SubtitleController.Anchor;
 import android.media.SubtitleTrack.RenderingWidget;
-import android.media.permission.Identity;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -56,7 +56,6 @@ import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
@@ -685,14 +684,18 @@ public class MediaPlayer extends PlayerBase
         mTimeProvider = new TimeProvider(this);
         mOpenSubtitleSources = new Vector<InputStream>();
 
-        Identity identity = myIdentity(null);
+        AttributionSource attributionSource = AttributionSource.myAttributionSource();
         // set the package name to empty if it was null
-        identity.packageName = TextUtils.emptyIfNull(identity.packageName);
+        if (attributionSource.getPackageName() == null) {
+            attributionSource = attributionSource.withPackageName("");
+        }
 
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        native_setup(new WeakReference<MediaPlayer>(this), identity);
+        try (ScopedParcelState attributionSourceState = attributionSource.asScopedParcelState()) {
+            native_setup(new WeakReference<MediaPlayer>(this), attributionSourceState.getParcel());
+        }
 
         baseRegisterPlayer(sessionId);
     }
@@ -2475,7 +2478,8 @@ public class MediaPlayer extends PlayerBase
     private native final int native_setMetadataFilter(Parcel request);
 
     private static native final void native_init();
-    private native void native_setup(Object mediaplayerThis, @NonNull Identity identity);
+    private native void native_setup(Object mediaplayerThis,
+            @NonNull Parcel attributionSource);
     private native final void native_finalize();
 
     /**

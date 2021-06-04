@@ -35,17 +35,17 @@ public class SystemEmergencyHelper extends EmergencyHelper {
 
     private final Context mContext;
 
-    private TelephonyManager mTelephonyManager;
+    TelephonyManager mTelephonyManager;
 
-    private boolean mIsInEmergencyCall;
-    private long mEmergencyCallEndRealtimeMs = Long.MIN_VALUE;
+    boolean mIsInEmergencyCall;
+    long mEmergencyCallEndRealtimeMs = Long.MIN_VALUE;
 
     public SystemEmergencyHelper(Context context) {
         mContext = context;
     }
 
     /** Called when system is ready. */
-    public void onSystemReady() {
+    public synchronized void onSystemReady() {
         if (mTelephonyManager != null) {
             return;
         }
@@ -64,14 +64,20 @@ public class SystemEmergencyHelper extends EmergencyHelper {
                     return;
                 }
 
-                mIsInEmergencyCall = mTelephonyManager.isEmergencyNumber(
-                        intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
+                synchronized (SystemEmergencyHelper.this) {
+                    mIsInEmergencyCall = mTelephonyManager.isEmergencyNumber(
+                            intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
+                }
             }
         }, new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL));
     }
 
     @Override
-    public boolean isInEmergency(long extensionTimeMs) {
+    public synchronized boolean isInEmergency(long extensionTimeMs) {
+        if (mTelephonyManager == null) {
+            return false;
+        }
+
         boolean isInExtensionTime = mEmergencyCallEndRealtimeMs != Long.MIN_VALUE
                 && (SystemClock.elapsedRealtime() - mEmergencyCallEndRealtimeMs) < extensionTimeMs;
 
@@ -84,12 +90,16 @@ public class SystemEmergencyHelper extends EmergencyHelper {
     private class EmergencyCallTelephonyCallback extends TelephonyCallback implements
             TelephonyCallback.CallStateListener{
 
+        EmergencyCallTelephonyCallback() {}
+
         @Override
         public void onCallStateChanged(int state) {
             if (state == TelephonyManager.CALL_STATE_IDLE) {
-                if (mIsInEmergencyCall) {
-                    mEmergencyCallEndRealtimeMs = SystemClock.elapsedRealtime();
-                    mIsInEmergencyCall = false;
+                synchronized (SystemEmergencyHelper.this) {
+                    if (mIsInEmergencyCall) {
+                        mEmergencyCallEndRealtimeMs = SystemClock.elapsedRealtime();
+                        mIsInEmergencyCall = false;
+                    }
                 }
             }
         }

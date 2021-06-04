@@ -75,6 +75,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
@@ -334,6 +335,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     private boolean mAnimateNextPositionUpdate;
     private float mQuickQsOffsetHeight;
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+
     private int mTrackingPointer;
     private VelocityTracker mQsVelocityTracker;
     private boolean mQsTracking;
@@ -577,6 +580,11 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private ValueAnimator mQsClippingAnimation = null;
     private final Rect mKeyguardStatusAreaClipBounds = new Rect();
+
+    /**
+     * The alpha of the views which only show on the keyguard but not in shade / shade locked
+     */
+    private float mKeyguardOnlyContentAlpha = 1.0f;
     private int mOldLayoutDirection;
     private NotificationShelfController mNotificationShelfController;
     private int mScrimCornerRadius;
@@ -670,7 +678,8 @@ public class NotificationPanelViewController extends PanelViewController {
             FragmentService fragmentService,
             QuickAccessWalletController quickAccessWalletController,
             @Main Executor uiExecutor,
-            SecureSettings secureSettings) {
+            SecureSettings secureSettings,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 statusBarKeyguardViewManager, latencyTracker, flingAnimationUtilsBuilder.get(),
@@ -765,6 +774,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mConversationNotificationManager = conversationNotificationManager;
         mAuthController = authController;
         mLockIconViewController = lockIconViewController;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
 
         mView.setBackgroundColor(Color.TRANSPARENT);
         OnAttachStateChangeListener onAttachStateChangeListener = new OnAttachStateChangeListener();
@@ -897,8 +907,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 R.dimen.pulse_expansion_max_top_overshoot);
         mScrimCornerRadius = mResources.getDimensionPixelSize(
                 R.dimen.notification_scrim_corner_radius);
-        mScreenCornerRadius = mResources.getDimensionPixelSize(
-                com.android.internal.R.dimen.rounded_corner_radius);
+        mScreenCornerRadius = (int) ScreenDecorationsUtils.getWindowCornerRadius(mResources);
         mNotificationScrimPadding = mResources.getDimensionPixelSize(
                 R.dimen.notification_side_paddings);
         mLockscreenNotificationQSPadding = mResources.getDimensionPixelSize(
@@ -1247,10 +1256,11 @@ public class NotificationPanelViewController extends PanelViewController {
         int userIconHeight = mKeyguardQsUserSwitchController != null
                 ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
         float expandedFraction =
-                mKeyguardStatusViewController.isAnimatingScreenOffFromUnlocked() ? 1.0f
-                        : getExpandedFraction();
-        float darkamount = mKeyguardStatusViewController.isAnimatingScreenOffFromUnlocked() ? 1.0f
-                : mInterpolatedDarkAmount;
+                mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                        ? 1.0f : getExpandedFraction();
+        float darkamount =
+                mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                        ? 1.0f : mInterpolatedDarkAmount;
         mClockPositionAlgorithm.setup(mStatusBarHeaderHeightKeyguard,
                 totalHeight - bottomPadding,
                 mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
@@ -1419,12 +1429,13 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateClock() {
-        mKeyguardStatusViewController.setAlpha(mClockPositionResult.clockAlpha);
+        float alpha = mClockPositionResult.clockAlpha * mKeyguardOnlyContentAlpha;
+        mKeyguardStatusViewController.setAlpha(alpha);
         if (mKeyguardQsUserSwitchController != null) {
-            mKeyguardQsUserSwitchController.setAlpha(mClockPositionResult.clockAlpha);
+            mKeyguardQsUserSwitchController.setAlpha(alpha);
         }
         if (mKeyguardUserSwitcherController != null) {
-            mKeyguardUserSwitcherController.setAlpha(mClockPositionResult.clockAlpha);
+            mKeyguardUserSwitcherController.setAlpha(alpha);
         }
     }
 
@@ -2031,6 +2042,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void maybeAnimateBottomAreaAlpha() {
         mBottomAreaShadeAlphaAnimator.cancel();
         if (mBarState == StatusBarState.SHADE_LOCKED) {
+            mBottomAreaShadeAlphaAnimator.setFloatValues(mBottomAreaShadeAlpha, 0.0f);
             mBottomAreaShadeAlphaAnimator.start();
         } else {
             mBottomAreaShadeAlpha = 1f;
@@ -2444,6 +2456,20 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         mTransitionToFullShadeQSPosition = position;
         updateQsExpansion();
+    }
+
+    /**
+     * Set the alpha of the keyguard elements which only show on the lockscreen, but not in
+     * shade locked / shade. This is used when dragging down to the full shade.
+     */
+    public void setKeyguardOnlyContentAlpha(float keyguardAlpha) {
+        mKeyguardOnlyContentAlpha = Interpolators.ALPHA_IN.getInterpolation(keyguardAlpha);
+        if (mBarState == KEYGUARD) {
+            // If the animator is running, it's already fading out the content and this is a reset
+            mBottomAreaShadeAlpha = mKeyguardOnlyContentAlpha;
+            updateKeyguardBottomAreaAlpha();
+        }
+        updateClock();
     }
 
     private void trackMovement(MotionEvent event) {
@@ -2904,6 +2930,7 @@ public class NotificationPanelViewController extends PanelViewController {
         if (ambientIndicationContainer != null) {
             ambientIndicationContainer.setAlpha(alpha);
         }
+        mLockIconViewController.setAlpha(alpha);
     }
 
     /**
@@ -4216,7 +4243,9 @@ public class NotificationPanelViewController extends PanelViewController {
             int oldState = mBarState;
             boolean keyguardShowing = statusBarState == KEYGUARD;
 
-            if (mDozeParameters.shouldControlUnlockedScreenOff() && isDozing() && keyguardShowing) {
+            if (mUnlockedScreenOffAnimationController.shouldPlayScreenOffAnimation()
+                    && oldState == StatusBarState.SHADE
+                    && statusBarState == KEYGUARD) {
                 // This means we're doing the screen off animation - position the keyguard status
                 // view where it'll be on AOD, so we can animate it in.
                 mKeyguardStatusViewController.updatePosition(
@@ -4284,6 +4313,18 @@ public class NotificationPanelViewController extends PanelViewController {
             mKeyguardBottomArea.setDarkAmount(mInterpolatedDarkAmount);
             positionClockAndNotifications();
         }
+    }
+
+    /**
+     * Reconfigures the shade to show the AOD UI (clock, smartspace, etc). This is called by the
+     * screen off animation controller in order to animate in AOD without "actually" fully switching
+     * to the KEYGUARD state.
+     */
+    public void showAodUi() {
+        setDozing(true /* dozing */, false /* animate */, null);
+        mStatusBarStateListener.onStateChanged(KEYGUARD);
+        mStatusBarStateListener.onDozeAmountChanged(1f, 1f);
+        setExpandedFraction(1f);
     }
 
     /**

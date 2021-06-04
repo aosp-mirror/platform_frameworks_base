@@ -85,7 +85,8 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
     private CountDownLatch mConnectSignal;
 
     public ResolverRankerServiceResolverComparator(Context context, Intent intent,
-                String referrerPackage, AfterCompute afterCompute) {
+                String referrerPackage, AfterCompute afterCompute,
+                ChooserActivityLogger chooserActivityLogger) {
         super(context, intent);
         mCollator = Collator.getInstance(context.getResources().getConfiguration().locale);
         mReferrerPackage = referrerPackage;
@@ -97,6 +98,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
         mAction = intent.getAction();
         mRankerServiceName = new ComponentName(mContext, this.getClass());
         setCallBack(afterCompute);
+        setChooserActivityLogger(chooserActivityLogger);
     }
 
     @Override

@@ -139,6 +139,17 @@ public class RestrictedPreferenceHelper {
     }
 
     /**
+     * @return EnforcedAdmin if we have been passed the restriction in the xml.
+     */
+    public EnforcedAdmin checkRestrictionEnforced() {
+        if (mAttrUserRestriction == null) {
+            return null;
+        }
+        return RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
+                mAttrUserRestriction, UserHandle.myUserId());
+    }
+
+    /**
      * Disable this preference based on the enforce admin.
      *
      * @param admin details of the admin who enforced the restriction. If it is

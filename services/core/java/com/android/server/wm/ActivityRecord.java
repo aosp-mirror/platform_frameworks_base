@@ -299,6 +299,7 @@ import android.view.InputApplicationHandle;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
+import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type;
@@ -780,6 +781,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private final Configuration mTmpConfig = new Configuration();
     private final Rect mTmpBounds = new Rect();
+    private final Rect mTmpOutNonDecorBounds = new Rect();
 
     // Token for targeting this activity for assist purposes.
     final Binder assistToken = new Binder();
@@ -7030,7 +7032,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // TODO(b/181207944): Consider removing the if condition and always run
         // resolveFixedOrientationConfiguration() since this should be applied for all cases.
         if (isFixedOrientationLetterboxAllowed) {
-            resolveFixedOrientationConfiguration(newParentConfiguration);
+            resolveFixedOrientationConfiguration(newParentConfiguration, parentWindowingMode);
         }
 
         if (mCompatDisplayInsets != null) {
@@ -7173,20 +7175,75 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * Computes bounds (letterbox or pillarbox) when the parent doesn't handle the orientation
-     * change and the requested orientation is different from the parent.
+     * In some cases, applying insets to bounds changes the orientation. For example, if a
+     * close-to-square display rotates to portrait to respect a portrait orientation activity, after
+     * insets such as the status and nav bars are applied, the activity may actually have a
+     * landscape orientation. This method checks whether the orientations of the activity window
+     * with and without insets match or if the orientation with insets already matches the
+     * requested orientation. If not, it may be necessary to letterbox the window.
+     * @param parentBounds are the new parent bounds passed down to the activity and should be used
+     *                     to compute the stable bounds.
+     * @param outBounds will store the stable bounds, which are the bounds with insets applied.
+     *                  These should be used to compute letterboxed bounds if orientation is not
+     *                  respected when insets are applied.
+     */
+    private boolean orientationRespectedWithInsets(Rect parentBounds, Rect outBounds) {
+        if (mDisplayContent == null) {
+            return true;
+        }
+        // Only need to make changes if activity sets an orientation
+        final int requestedOrientation = getRequestedConfigurationOrientation();
+        if (requestedOrientation == ORIENTATION_UNDEFINED) {
+            return true;
+        }
+        // Compute parent orientation from bounds
+        final int orientation = parentBounds.height() >= parentBounds.width()
+                ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+        // Compute orientation from stable parent bounds (= parent bounds with insets applied)
+        final Task task = getTask();
+        task.calculateInsetFrames(mTmpOutNonDecorBounds /* outNonDecorBounds */,
+                outBounds /* outStableBounds */, parentBounds /* bounds */,
+                mDisplayContent.getDisplayInfo());
+        final int orientationWithInsets = outBounds.height() >= outBounds.width()
+                ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+        // If orientation does not match the orientation with insets applied, then a
+        // display rotation will not be enough to respect orientation. However, even if they do
+        // not match but the orientation with insets applied matches the requested orientation, then
+        // there is no need to modify the bounds because when insets are applied, the activity will
+        // have the desired orientation.
+        return orientation == orientationWithInsets
+                || orientationWithInsets == requestedOrientation;
+    }
+
+    /**
+     * Computes bounds (letterbox or pillarbox) when either:
+     * 1. The parent doesn't handle the orientation change and the requested orientation is
+     *    different from the parent (see {@link DisplayContent#setIgnoreOrientationRequest()}.
+     * 2. The parent handling the orientation is not enough. This occurs when the display rotation
+     *    may not be enough to respect orientation requests (see {@link
+     *    ActivityRecord#orientationRespectedWithInsets}).
      *
      * <p>If letterboxed due to fixed orientation then aspect ratio restrictions are also applied
-     * in this methiod.
+     * in this method.
      */
-    private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig) {
+    private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig,
+            int windowingMode) {
         mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
-        if (handlesOrientationChangeFromDescendant()) {
+        final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
+        final Rect containerBounds = new Rect(parentBounds);
+        boolean orientationRespectedWithInsets =
+                orientationRespectedWithInsets(parentBounds, containerBounds);
+        if (handlesOrientationChangeFromDescendant() && orientationRespectedWithInsets) {
             // No need to letterbox because of fixed orientation. Display will handle
-            // fixed-orientation requests.
+            // fixed-orientation requests and a display rotation is enough to respect requested
+            // orientation with insets applied.
             return;
         }
-        if (newParentConfig.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED) {
+        if (WindowConfiguration.inMultiWindowMode(windowingMode) && isResizeable()) {
+            // Ignore orientation request for resizable apps in multi window.
+            return;
+        }
+        if (windowingMode == WINDOWING_MODE_PINNED) {
             // PiP bounds have higher priority than the requested orientation. Otherwise the
             // activity may be squeezed into a small piece.
             return;
@@ -7199,7 +7256,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If the activity requires a different orientation (either by override or activityInfo),
         // make it fit the available bounds by scaling down its bounds.
         final int forcedOrientation = getRequestedConfigurationOrientation();
-        if (forcedOrientation == ORIENTATION_UNDEFINED || forcedOrientation == parentOrientation) {
+        if (forcedOrientation == ORIENTATION_UNDEFINED
+                || (forcedOrientation == parentOrientation && orientationRespectedWithInsets)) {
             return;
         }
 
@@ -7211,53 +7269,75 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
-        final int parentWidth = parentBounds.width();
-        final int parentHeight = parentBounds.height();
-        float aspect = Math.max(parentWidth, parentHeight)
-                / (float) Math.min(parentWidth, parentHeight);
+        // TODO(b/182268157) merge aspect ratio logic here and in
+        // {@link ActivityRecord#applyAspectRatio}
+        // if no aspect ratio constraints are provided, parent aspect ratio is used
+        float aspectRatio = computeAspectRatio(parentBounds);
 
         // Override from config_fixedOrientationLetterboxAspectRatio or via ADB with
         // set-fixed-orientation-letterbox-aspect-ratio.
         final float letterboxAspectRatioOverride =
                 mWmService.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
-        aspect = letterboxAspectRatioOverride > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO
-                ? letterboxAspectRatioOverride : aspect;
+        aspectRatio = letterboxAspectRatioOverride > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO
+                ? letterboxAspectRatioOverride : aspectRatio;
 
         // Adjust the fixed orientation letterbox bounds to fit the app request aspect ratio in
         // order to use the extra available space.
         final float maxAspectRatio = info.getMaxAspectRatio();
         final float minAspectRatio = info.getMinAspectRatio();
-        if (aspect > maxAspectRatio && maxAspectRatio != 0) {
-            aspect = maxAspectRatio;
-        } else if (aspect < minAspectRatio) {
-            aspect = minAspectRatio;
+        if (aspectRatio > maxAspectRatio && maxAspectRatio != 0) {
+            aspectRatio = maxAspectRatio;
+        } else if (aspectRatio < minAspectRatio) {
+            aspectRatio = minAspectRatio;
         }
 
         // Store the current bounds to be able to revert to size compat mode values below if needed.
-        Rect mTmpFullBounds = new Rect(resolvedBounds);
+        final Rect prevResolvedBounds = new Rect(resolvedBounds);
+
+        // Compute other dimension based on aspect ratio. Use bounds intersected with insets, stored
+        // in containerBounds after calling {@link ActivityRecord#orientationRespectedWithInsets()},
+        // to ensure that aspect ratio is respected after insets are applied.
+        int activityWidth;
+        int activityHeight;
         if (forcedOrientation == ORIENTATION_LANDSCAPE) {
-            final int height = (int) Math.rint(parentWidth / aspect);
-            final int top = parentBounds.centerY() - height / 2;
-            resolvedBounds.set(parentBounds.left, top, parentBounds.right, top + height);
+            activityWidth = parentBounds.width();
+            // Compute height from stable bounds width to ensure orientation respected after insets.
+            activityHeight = (int) Math.rint(containerBounds.width() / aspectRatio);
+            // Landscape is defined as width > height. To ensure activity is landscape when aspect
+            // ratio is close to 1, reduce the height by one pixel.
+            if (activityWidth == activityHeight) {
+                activityHeight -= 1;
+            }
+            // Center vertically within stable bounds in landscape to ensure insets do not trim
+            // height.
+            final int top = containerBounds.centerY() - activityHeight / 2;
+            resolvedBounds.set(parentBounds.left, top, parentBounds.right, top + activityHeight);
         } else {
-            final int width = (int) Math.rint(parentHeight / aspect);
+            activityHeight = parentBounds.height();
+            // Compute width from stable bounds height to ensure orientation respected after insets.
+            activityWidth = (int) Math.rint(containerBounds.height() / aspectRatio);
+            // Center horizontally in portrait. For now, align to left and allow
+            // {@link ActivityRecord#updateResolvedBoundsHorizontalPosition()} to center
+            // horizontally. Exclude left insets from parent to ensure cutout does not trim width.
             final Rect parentAppBounds = newParentConfig.windowConfiguration.getAppBounds();
-            final int left = width <= parentAppBounds.width()
-                    // Avoid overlapping with the horizontal decor area when possible.
-                    ? parentAppBounds.left : parentBounds.centerX() - width / 2;
-            resolvedBounds.set(left, parentBounds.top, left + width, parentBounds.bottom);
+            resolvedBounds.set(parentAppBounds.left, parentBounds.top,
+                    parentAppBounds.left + activityWidth, parentBounds.bottom);
         }
 
         if (mCompatDisplayInsets != null) {
             mCompatDisplayInsets.getBoundsByRotation(
                     mTmpBounds, newParentConfig.windowConfiguration.getRotation());
-            if (resolvedBounds.width() != mTmpBounds.width()
-                    || resolvedBounds.height() != mTmpBounds.height()) {
+            // Insets may differ between different rotations, for example in the case of a display
+            // cutout. To ensure consistent bounds across rotations, compare the activity dimensions
+            // minus insets from the rotation the compat bounds were computed in.
+            Task.intersectWithInsetsIfFits(mTmpBounds, parentBounds,
+                    mCompatDisplayInsets.mStableInsets[mCompatDisplayInsets.mOriginalRotation]);
+            if (activityWidth != mTmpBounds.width()
+                    || activityHeight != mTmpBounds.height()) {
                 // The app shouldn't be resized, we only do fixed orientation letterboxing if the
                 // compat bounds are also from the same fixed orientation letterbox. Otherwise,
                 // clear the fixed orientation bounds to show app in size compat mode.
-                resolvedBounds.set(mTmpFullBounds);
+                resolvedBounds.set(prevResolvedBounds);
                 return;
             }
         }
@@ -8502,6 +8582,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * compatibility mode activity compute the configuration without relying on its current display.
      */
     static class CompatDisplayInsets {
+        /** The original rotation the compat insets were computed in */
+        final @Rotation int mOriginalRotation;
         /** The container width on rotation 0. */
         private final int mWidth;
         /** The container height on rotation 0. */
@@ -8528,6 +8610,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         /** Constructs the environment to simulate the bounds behavior of the given container. */
         CompatDisplayInsets(DisplayContent display, ActivityRecord container,
                 @Nullable Rect fixedOrientationBounds) {
+            mOriginalRotation = display.getRotation();
             mIsFloating = container.getWindowConfiguration().tasksAreFloating();
             if (mIsFloating) {
                 final Rect containerBounds = container.getWindowConfiguration().getBounds();

@@ -272,6 +272,13 @@ class ProcessErrorStateRecord {
                 errorId = null;
             }
 
+            // This atom is only logged with the purpose of triggering Perfetto and the logging
+            // needs to happen as close as possible to the time when the ANR is detected.
+            // Also, it needs to be logged after adding the error id to the trace, to make sure
+            // the error id is present in the trace when the Perfetto trace is captured.
+            FrameworkStatsLog.write(FrameworkStatsLog.ANR_OCCURRED_PROCESSING_STARTED,
+                    mApp.processName);
+
             // Dump thread traces as quickly as we can, starting with "interesting" processes.
             firstPids.add(pid);
 

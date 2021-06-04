@@ -166,11 +166,13 @@ public interface QSTile {
         public boolean handlesLongClick = true;
         public boolean showRippleEffect = true;
         public Drawable sideViewCustomDrawable;
+        public String spec;
 
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();
             if (!other.getClass().equals(getClass())) throw new IllegalArgumentException();
-            final boolean changed = !Objects.equals(other.icon, icon)
+            final boolean changed = !Objects.equals(other.spec, spec)
+                    || !Objects.equals(other.icon, icon)
                     || !Objects.equals(other.iconSupplier, iconSupplier)
                     || !Objects.equals(other.label, label)
                     || !Objects.equals(other.secondaryLabel, secondaryLabel)
@@ -188,6 +190,7 @@ public interface QSTile {
                     || !Objects.equals(other.handlesLongClick, handlesLongClick)
                     || !Objects.equals(other.showRippleEffect, showRippleEffect)
                     || !Objects.equals(other.sideViewCustomDrawable, sideViewCustomDrawable);
+            other.spec = spec;
             other.icon = icon;
             other.iconSupplier = iconSupplier;
             other.label = label;
@@ -216,6 +219,7 @@ public interface QSTile {
         // This string may be used for CTS testing of tiles, so removing elements is discouraged.
         protected StringBuilder toStringBuilder() {
             final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
+            sb.append("spec=").append(spec);
             sb.append(",icon=").append(icon);
             sb.append(",iconSupplier=").append(iconSupplier);
             sb.append(",label=").append(label);

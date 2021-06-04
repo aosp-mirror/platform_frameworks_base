@@ -80,8 +80,22 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     public void setPageMargin(int marginPixels) {
-        if (marginPixels != getPageMargin()) {
-            super.setPageMargin(marginPixels);
+        // Using page margins creates some rounding issues that interfere with the correct position
+        // in the onPageChangedListener and therefore present bad positions to the PageIndicator.
+        // Instead, we use negative margins in the container and positive padding in the pages,
+        // matching the margin set from QSContainerImpl (note that new pages will always be inflated
+        // with the correct value.
+        // QSContainerImpl resources are set onAttachedView, so this view will always have the right
+        // values when attached.
+        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
+        lp.setMarginStart(-marginPixels);
+        lp.setMarginEnd(-marginPixels);
+        setLayoutParams(lp);
+
+        int nPages = mPages.size();
+        for (int i = 0; i < nPages; i++) {
+            View v = mPages.get(i);
+            v.setPadding(marginPixels, v.getPaddingTop(), marginPixels, v.getPaddingBottom());
         }
     }
 

@@ -35,6 +35,7 @@ import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
@@ -63,6 +64,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -268,10 +270,23 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         registerListeners();
     }
 
-    public void setAlternateAuthInterceptor(@Nullable AlternateAuthInterceptor authInterceptor) {
-        final boolean newlyNull = authInterceptor == null && mAlternateAuthInterceptor != null;
+    /**
+     * Sets the given alt auth interceptor to null if it's the current auth interceptor. Else,
+     * does nothing.
+     */
+    public void removeAlternateAuthInterceptor(@NonNull AlternateAuthInterceptor authInterceptor) {
+        if (Objects.equals(mAlternateAuthInterceptor, authInterceptor)) {
+            mAlternateAuthInterceptor = null;
+            resetAlternateAuth(true);
+        }
+    }
+
+    /**
+     * Sets a new alt auth interceptor.
+     */
+    public void setAlternateAuthInterceptor(@NonNull AlternateAuthInterceptor authInterceptor) {
         mAlternateAuthInterceptor = authInterceptor;
-        resetAlternateAuth(newlyNull);
+        resetAlternateAuth(false);
     }
 
     private void registerListeners() {

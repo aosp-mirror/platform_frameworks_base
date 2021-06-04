@@ -2773,6 +2773,7 @@ public final class Settings {
 
         private final ArraySet<String> mReadableFields;
         private final ArraySet<String> mAllFields;
+        private final ArrayMap<String, Integer> mReadableFieldsWithMaxTargetSdk;
 
         @GuardedBy("this")
         private GenerationTracker mGenerationTracker;
@@ -2794,7 +2795,9 @@ public final class Settings {
             mProviderHolder = providerHolder;
             mReadableFields = new ArraySet<>();
             mAllFields = new ArraySet<>();
-            getPublicSettingsForClass(callerClass, mAllFields, mReadableFields);
+            mReadableFieldsWithMaxTargetSdk = new ArrayMap<>();
+            getPublicSettingsForClass(callerClass, mAllFields, mReadableFields,
+                    mReadableFieldsWithMaxTargetSdk);
         }
 
         public boolean putStringForUser(ContentResolver cr, String name, String value,
@@ -2851,13 +2854,34 @@ public final class Settings {
             // Settings.Global and is not annotated as @Readable.
             // Notice that a key string that is not defined in any of the Settings.* classes will
             // still be regarded as readable.
-            if (!isCallerExemptFromReadableRestriction()
-                    && mAllFields.contains(name) && !mReadableFields.contains(name)) {
-                throw new SecurityException(
-                        "Settings key: <" + name + "> is not readable. From S+, settings keys "
-                                + "annotated with @hide are restricted to system_server and system "
-                                + "apps only, unless they are annotated with @Readable.");
+            if (!isCallerExemptFromReadableRestriction() && mAllFields.contains(name)) {
+                if (!mReadableFields.contains(name)) {
+                    throw new SecurityException(
+                            "Settings key: <" + name + "> is not readable. From S+, settings keys "
+                                    + "annotated with @hide are restricted to system_server and "
+                                    + "system apps only, unless they are annotated with @Readable."
+                    );
+                } else {
+                    // When the target settings key has @Readable annotation, if the caller app's
+                    // target sdk is higher than the maxTargetSdk of the annotation, reject access.
+                    if (mReadableFieldsWithMaxTargetSdk.containsKey(name)) {
+                        final int maxTargetSdk = mReadableFieldsWithMaxTargetSdk.get(name);
+                        final Application application = ActivityThread.currentApplication();
+                        final boolean targetSdkCheckOk = application != null
+                                && application.getApplicationInfo() != null
+                                && application.getApplicationInfo().targetSdkVersion
+                                <= maxTargetSdk;
+                        if (!targetSdkCheckOk) {
+                            throw new SecurityException(
+                                    "Settings key: <" + name + "> is only readable to apps with "
+                                            + "targetSdkVersion lower than or equal to: "
+                                            + maxTargetSdk
+                            );
+                        }
+                    }
+                }
             }
+
             final boolean isSelf = (userHandle == UserHandle.myUserId());
             int currentGeneration = -1;
             if (isSelf) {
@@ -3225,10 +3249,12 @@ public final class Settings {
     @Target({ ElementType.FIELD })
     @Retention(RetentionPolicy.RUNTIME)
     private @interface Readable {
+        int maxTargetSdk() default 0;
     }
 
     private static <T extends NameValueTable> void getPublicSettingsForClass(
-            Class<T> callerClass, Set<String> allKeys, Set<String> readableKeys) {
+            Class<T> callerClass, Set<String> allKeys, Set<String> readableKeys,
+            ArrayMap<String, Integer> keysWithMaxTargetSdk) {
         final Field[] allFields = callerClass.getDeclaredFields();
         try {
             for (int i = 0; i < allFields.length; i++) {
@@ -3241,8 +3267,15 @@ public final class Settings {
                     continue;
                 }
                 allKeys.add((String) value);
-                if (field.getAnnotation(Readable.class) != null) {
-                    readableKeys.add((String) value);
+                final Readable annotation = field.getAnnotation(Readable.class);
+
+                if (annotation != null) {
+                    final String key = (String) value;
+                    final int maxTargetSdk = annotation.maxTargetSdk();
+                    readableKeys.add(key);
+                    if (maxTargetSdk != 0) {
+                        keysWithMaxTargetSdk.put(key, maxTargetSdk);
+                    }
                 }
             }
         } catch (IllegalAccessException ignored) {
@@ -3404,8 +3437,10 @@ public final class Settings {
         }
 
         /** @hide */
-        public static void getPublicSettings(Set<String> allKeys, Set<String> readableKeys) {
-            getPublicSettingsForClass(System.class, allKeys, readableKeys);
+        public static void getPublicSettings(Set<String> allKeys, Set<String> readableKeys,
+                ArrayMap<String, Integer> readableKeysWithMaxTargetSdk) {
+            getPublicSettingsForClass(System.class, allKeys, readableKeys,
+                    readableKeysWithMaxTargetSdk);
         }
 
         /**
@@ -5734,8 +5769,10 @@ public final class Settings {
         }
 
         /** @hide */
-        public static void getPublicSettings(Set<String> allKeys, Set<String> readableKeys) {
-            getPublicSettingsForClass(Secure.class, allKeys, readableKeys);
+        public static void getPublicSettings(Set<String> allKeys, Set<String> readableKeys,
+                ArrayMap<String, Integer> readableKeysWithMaxTargetSdk) {
+            getPublicSettingsForClass(Secure.class, allKeys, readableKeys,
+                    readableKeysWithMaxTargetSdk);
         }
 
         /**
@@ -14965,8 +15002,10 @@ public final class Settings {
         }
 
         /** @hide */
-        public static void getPublicSettings(Set<String> allKeys, Set<String> readableKeys) {
-            getPublicSettingsForClass(Global.class, allKeys, readableKeys);
+        public static void getPublicSettings(Set<String> allKeys, Set<String> readableKeys,
+                ArrayMap<String, Integer> readableKeysWithMaxTargetSdk) {
+            getPublicSettingsForClass(Global.class, allKeys, readableKeys,
+                    readableKeysWithMaxTargetSdk);
         }
 
         /**

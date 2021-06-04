@@ -214,6 +214,8 @@ class BaseTooltipView extends FrameLayout {
 
         final GradientDrawable gradientDrawable = (GradientDrawable) mTextView.getBackground();
         gradientDrawable.setCornerRadius(mTextViewCornerRadius);
+        gradientDrawable.setColor(Utils.getColorAttrDefaultColor(getContext(),
+                com.android.internal.R.attr.colorAccentPrimary));
     }
 
     private void updateArrowWith(Rect anchorViewLocation) {

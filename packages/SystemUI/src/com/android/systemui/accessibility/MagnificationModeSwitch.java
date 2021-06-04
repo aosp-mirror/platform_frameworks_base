@@ -18,6 +18,7 @@ package com.android.systemui.accessibility;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import android.annotation.NonNull;
 import android.annotation.UiContext;
@@ -36,6 +37,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -73,6 +75,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     private int mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
     private final LayoutParams mParams;
+    private int mWindowHeight;
     @VisibleForTesting
     final Rect mDraggableWindowBounds = new Rect();
     private boolean mIsVisible = false;
@@ -92,6 +95,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mParams = createLayoutParams(context);
+        mWindowHeight = mWindowManager.getCurrentWindowMetrics().getBounds().height();
         mImageView = imageView;
         mImageView.setOnTouchListener(this::onTouch);
         mImageView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
@@ -106,15 +110,40 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
                         R.string.magnification_mode_switch_click_label));
                 info.addAction(clickAction);
                 info.setClickable(true);
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_up,
+                        mContext.getString(R.string.accessibility_control_move_up)));
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_down,
+                        mContext.getString(R.string.accessibility_control_move_down)));
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_left,
+                        mContext.getString(R.string.accessibility_control_move_left)));
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_right,
+                        mContext.getString(R.string.accessibility_control_move_right)));
             }
 
             @Override
             public boolean performAccessibilityAction(View host, int action, Bundle args) {
-                if (action == AccessibilityAction.ACTION_CLICK.getId()) {
-                    handleSingleTap();
+                if (performA11yAction(action)) {
                     return true;
                 }
                 return super.performAccessibilityAction(host, action, args);
+            }
+
+            private boolean performA11yAction(int action) {
+                final Rect windowBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+                if (action == AccessibilityAction.ACTION_CLICK.getId()) {
+                    handleSingleTap();
+                } else if (action == R.id.accessibility_action_move_up) {
+                    moveButton(0, -windowBounds.height());
+                } else if (action == R.id.accessibility_action_move_down) {
+                    moveButton(0, windowBounds.height());
+                } else if (action == R.id.accessibility_action_move_left) {
+                    moveButton(-windowBounds.width(), 0);
+                } else if (action == R.id.accessibility_action_move_right) {
+                    moveButton(windowBounds.width(), 0);
+                } else {
+                    return false;
+                }
+                return true;
             }
         });
         mWindowInsetChangeRunnable = this::onWindowInsetChanged;
@@ -283,6 +312,16 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     }
 
     void onConfigurationChanged(int configDiff) {
+        if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
+            mDraggableWindowBounds.set(getDraggableWindowBounds());
+            // Keep the Y position with the same height ratio before the window height is changed.
+            final int windowHeight = mWindowManager.getCurrentWindowMetrics().getBounds().height();
+            final float windowHeightFraction = (float) mParams.y / mWindowHeight;
+            mParams.y = (int) (windowHeight * windowHeightFraction);
+            mWindowHeight = windowHeight;
+            stickToScreenEdge(mToLeftScreenEdge);
+            return;
+        }
         if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
             applyResourcesValuesWithDensityChanged();
             return;
@@ -362,21 +401,21 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
                 PixelFormat.TRANSPARENT);
         params.gravity = Gravity.TOP | Gravity.LEFT;
         params.accessibilityTitle = getAccessibilityWindowTitle(context);
+        params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         return params;
     }
 
     private Rect getDraggableWindowBounds() {
         final int layoutMargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.magnification_switch_button_margin);
-        final Rect boundRect = new Rect(mWindowManager.getCurrentWindowMetrics().getBounds());
-        final Insets systemBars =
-                mWindowManager.getCurrentWindowMetrics().getWindowInsets()
-                        .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
-        final Rect insets = new Rect(layoutMargin,
-                systemBars.top + layoutMargin,
-                mParams.width + layoutMargin,
-                mParams.height + layoutMargin + systemBars.bottom);
-        boundRect.inset(insets);
+        final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
+        final Insets windowInsets = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(
+                WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+        final Rect boundRect = new Rect(windowMetrics.getBounds());
+        boundRect.offsetTo(0, 0);
+        boundRect.inset(0, 0, mParams.width, mParams.height);
+        boundRect.inset(windowInsets);
+        boundRect.inset(layoutMargin, layoutMargin);
         return boundRect;
     }
 

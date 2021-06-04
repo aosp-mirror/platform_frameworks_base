@@ -19,29 +19,30 @@ package com.android.settingslib.enterprise;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 
 import android.app.admin.DevicePolicyManager;
+import android.content.Context;
 
 /**
  * A factory that returns the relevant instance of {@link ActionDisabledByAdminController}.
  */
-public class ActionDisabledByAdminControllerFactory {
+public final class ActionDisabledByAdminControllerFactory {
 
     /**
      * Returns the relevant instance of {@link ActionDisabledByAdminController}.
      */
-    public static ActionDisabledByAdminController createInstance(
-            DevicePolicyManager dpm,
-            ActionDisabledLearnMoreButtonLauncher helper,
-            DeviceAdminStringProvider deviceAdminStringProvider) {
-        if (isFinancedDevice(dpm)) {
-            return new FinancedDeviceActionDisabledByAdminController(
-                    helper, deviceAdminStringProvider);
-        }
-        return new ManagedDeviceActionDisabledByAdminController(
-                helper, deviceAdminStringProvider);
+    public static ActionDisabledByAdminController createInstance(Context context,
+            DeviceAdminStringProvider stringProvider) {
+        return isFinancedDevice(context)
+                ? new FinancedDeviceActionDisabledByAdminController(stringProvider)
+                : new ManagedDeviceActionDisabledByAdminController(stringProvider);
     }
 
-    private static boolean isFinancedDevice(DevicePolicyManager dpm) {
+    private static boolean isFinancedDevice(Context context) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
         return dpm.isDeviceManaged() && dpm.getDeviceOwnerType(
                 dpm.getDeviceOwnerComponentOnAnyUser()) == DEVICE_OWNER_TYPE_FINANCED;
+    }
+
+    private ActionDisabledByAdminControllerFactory() {
+        throw new UnsupportedOperationException("provides only static methods");
     }
 }

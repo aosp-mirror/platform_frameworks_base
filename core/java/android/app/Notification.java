@@ -450,10 +450,12 @@ public class Notification implements Parcelable
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_text);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_inbox);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_messaging);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_messaging);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_conversation);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_media);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_media);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_call);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_call);
         STANDARD_LAYOUTS.add(R.layout.notification_template_header);
     }
 
@@ -5595,7 +5597,7 @@ public class Notification implements Parcelable
         private void bindSnoozeAction(RemoteViews big, StandardTemplateParams p) {
             boolean hideSnoozeButton = mN.isForegroundService() || mN.fullScreenIntent != null
                     || isBackgroundColorized(p)
-                    || p.mViewType == StandardTemplateParams.VIEW_TYPE_HEADS_UP;
+                    || p.mViewType != StandardTemplateParams.VIEW_TYPE_BIG;
             big.setBoolean(R.id.snooze_button, "setEnabled", !hideSnoozeButton);
             if (hideSnoozeButton) {
                 // Only hide; NotificationContentView will show it when it adds the click listener
@@ -5817,7 +5819,7 @@ public class Notification implements Parcelable
          *   @hide
          */
         public RemoteViews createContentView(boolean increasedHeight) {
-            if (mN.contentView != null && useExistingRemoteView()) {
+            if (useExistingRemoteView(mN.contentView)) {
                 return fullyCustomViewRequiresDecoration(false /* fromStyle */)
                         ? minimallyDecoratedContentView(mN.contentView) : mN.contentView;
             } else if (mStyle != null) {
@@ -5833,8 +5835,24 @@ public class Notification implements Parcelable
             return applyStandardTemplate(getBaseLayoutResource(), p, null /* result */);
         }
 
-        private boolean useExistingRemoteView() {
-            return mStyle == null || !mStyle.displayCustomViewInline();
+        private boolean useExistingRemoteView(RemoteViews customContent) {
+            if (customContent == null) {
+                return false;
+            }
+            if (styleDisplaysCustomViewInline()) {
+                // the provided custom view is intended to be wrapped by the style.
+                return false;
+            }
+            if (fullyCustomViewRequiresDecoration(false)
+                    && STANDARD_LAYOUTS.contains(customContent.getLayoutId())) {
+                // If the app's custom views are objects returned from Builder.create*ContentView()
+                // then the app is most likely attempting to spoof the user.  Even if they are not,
+                // the result would be broken (b/189189308) so we will ignore it.
+                Log.w(TAG, "For apps targeting S, a custom content view that is a modified "
+                        + "version of any standard layout is disallowed.");
+                return false;
+            }
+            return true;
         }
 
         /**
@@ -5842,7 +5860,7 @@ public class Notification implements Parcelable
          */
         public RemoteViews createBigContentView() {
             RemoteViews result = null;
-            if (mN.bigContentView != null && useExistingRemoteView()) {
+            if (useExistingRemoteView(mN.bigContentView)) {
                 return fullyCustomViewRequiresDecoration(false /* fromStyle */)
                         ? minimallyDecoratedBigContentView(mN.bigContentView) : mN.bigContentView;
             }
@@ -5947,7 +5965,7 @@ public class Notification implements Parcelable
          * @hide
          */
         public RemoteViews createHeadsUpContentView(boolean increasedHeight) {
-            if (mN.headsUpContentView != null && useExistingRemoteView()) {
+            if (useExistingRemoteView(mN.headsUpContentView)) {
                 return fullyCustomViewRequiresDecoration(false /* fromStyle */)
                         ? minimallyDecoratedHeadsUpContentView(mN.headsUpContentView)
                         : mN.headsUpContentView;
@@ -6396,7 +6414,7 @@ public class Notification implements Parcelable
             mN.reduceImageSizes(mContext);
 
             if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N
-                    && (useExistingRemoteView())) {
+                    && !styleDisplaysCustomViewInline()) {
                 if (mN.contentView == null) {
                     mN.contentView = createContentView();
                     mN.extras.putInt(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT,
@@ -6425,6 +6443,10 @@ public class Notification implements Parcelable
             mN.allPendingIntents = null;
 
             return mN;
+        }
+
+        private boolean styleDisplaysCustomViewInline() {
+            return mStyle != null && mStyle.displayCustomViewInline();
         }
 
         /**
@@ -6576,7 +6598,7 @@ public class Notification implements Parcelable
         public boolean usesTemplate() {
             return (mN.contentView == null && mN.headsUpContentView == null
                     && mN.bigContentView == null)
-                    || (mStyle != null && mStyle.displayCustomViewInline());
+                    || styleDisplaysCustomViewInline();
         }
     }
 
@@ -9782,10 +9804,6 @@ public class Notification implements Parcelable
          * <p>Apps sending bubbles may set this flag so that the bubble is posted <b>without</b>
          * the associated notification in the notification shade.</p>
          *
-         * <p>Apps sending bubbles can only apply this flag when the app is in the foreground,
-         * otherwise the flag is not respected. The app is considered foreground if it is visible
-         * and on the screen, note that a foreground service does not qualify.</p>
-         *
          * <p>Generally this flag should only be set by the app if the user has performed an
          * action to request or create a bubble, or if the user has seen the content in the
          * notification and the notification is no longer relevant. </p>
@@ -9935,10 +9953,6 @@ public class Notification implements Parcelable
          *
          * <p>Apps sending bubbles may set this flag so that the bubble is posted <b>without</b>
          * the associated notification in the notification shade.</p>
-         *
-         * <p>Apps sending bubbles can only apply this flag when the app is in the foreground,
-         * otherwise the flag is not respected. The app is considered foreground if it is visible
-         * and on the screen, note that a foreground service does not qualify.</p>
          *
          * <p>Generally the app should only set this flag if the user has performed an
          * action to request or create a bubble, or if the user has seen the content in the
@@ -10137,6 +10151,8 @@ public class Notification implements Parcelable
              * {@link Activity#isLaunchedFromBubble()} will return with {@code true}.
              * </p>
              *
+             * Note that the pending intent used here requires PendingIntent.FLAG_MUTABLE.
+             *
              * @throws NullPointerException if intent is null.
              * @throws NullPointerException if icon is null.
              */
@@ -10324,11 +10340,6 @@ public class Notification implements Parcelable
             /**
              * Sets whether the bubble will be posted <b>without</b> the associated notification in
              * the notification shade.
-             *
-             * <p>This flag has no effect if the app posting the bubble is not in the foreground.
-             * The app is considered foreground if it is visible and on the screen, note that
-             * a foreground service does not qualify.
-             * </p>
              *
              * <p>Generally, this flag should only be set if the user has performed an action to
              * request or create a bubble, or if the user has seen the content in the notification

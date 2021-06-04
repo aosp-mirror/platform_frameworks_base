@@ -56,13 +56,17 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
 
     public MediaSession2Record(Session2Token sessionToken, MediaSessionService service,
             Looper handlerLooper, int policies) {
-        mSessionToken = sessionToken;
-        mService = service;
-        mHandlerExecutor = new HandlerExecutor(new Handler(handlerLooper));
-        mController = new MediaController2.Builder(service.getContext(), sessionToken)
-                .setControllerCallback(mHandlerExecutor, new Controller2Callback())
-                .build();
-        mPolicies = policies;
+        // The lock is required to prevent `Controller2Callback` from using partially initialized
+        // `MediaSession2Record.this`.
+        synchronized (mLock) {
+            mSessionToken = sessionToken;
+            mService = service;
+            mHandlerExecutor = new HandlerExecutor(new Handler(handlerLooper));
+            mController = new MediaController2.Builder(service.getContext(), sessionToken)
+                    .setControllerCallback(mHandlerExecutor, new Controller2Callback())
+                    .build();
+            mPolicies = policies;
+        }
     }
 
     @Override
@@ -176,10 +180,12 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             if (DEBUG) {
                 Log.d(TAG, "connected to " + mSessionToken + ", allowed=" + allowedCommands);
             }
+            MediaSessionService service;
             synchronized (mLock) {
                 mIsConnected = true;
+                service = mService;
             }
-            mService.onSessionActiveStateChanged(MediaSession2Record.this);
+            service.onSessionActiveStateChanged(MediaSession2Record.this);
         }
 
         @Override
@@ -187,10 +193,12 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             if (DEBUG) {
                 Log.d(TAG, "disconnected from " + mSessionToken);
             }
+            MediaSessionService service;
             synchronized (mLock) {
                 mIsConnected = false;
+                service = mService;
             }
-            mService.onSessionDied(MediaSession2Record.this);
+            service.onSessionDied(MediaSession2Record.this);
         }
 
         @Override
@@ -199,7 +207,11 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
                 Log.d(TAG, "playback active changed, " + mSessionToken + ", active="
                         + playbackActive);
             }
-            mService.onSessionPlaybackStateChanged(MediaSession2Record.this, playbackActive);
+            MediaSessionService service;
+            synchronized (mLock) {
+                service = mService;
+            }
+            service.onSessionPlaybackStateChanged(MediaSession2Record.this, playbackActive);
         }
     }
 }

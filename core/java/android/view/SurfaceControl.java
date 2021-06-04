@@ -657,6 +657,12 @@ public final class SurfaceControl implements Parcelable {
     public static final int METADATA_OWNER_PID = 6;
 
     /**
+     * game mode for the layer - used for metrics
+     * @hide
+     */
+    public static final int METADATA_GAME_MODE = 8;
+
+    /**
      * A wrapper around HardwareBuffer that contains extra information about how to
      * interpret the screenshot HardwareBuffer.
      *

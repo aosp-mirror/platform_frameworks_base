@@ -1381,6 +1381,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 getActivityStartController().obtainStarter(intent, "dream")
                         .setCallingUid(callingUid)
                         .setCallingPid(callingPid)
+                        .setCallingPackage(intent.getPackage())
                         .setActivityInfo(a)
                         .setActivityOptions(options.toBundle())
                         // To start the dream from background, we need to start it from a persistent
@@ -2834,7 +2835,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         List<IBinder> topActivityToken = new ArrayList<>();
         topActivityToken.add(tokens.getActivityToken());
         requester.requestAssistData(topActivityToken, true /* fetchData */,
-                false /* fetchScreenshot */, true /* allowFetchData */,
+                false /* fetchScreenshot */, false /* fetchStructure */, true /* allowFetchData */,
                 false /* allowFetchScreenshot*/, true /* ignoreFocusCheck */,
                 Binder.getCallingUid(), callingPackageName);
 

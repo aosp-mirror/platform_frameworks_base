@@ -963,6 +963,9 @@ public class AppWidgetManager {
     /**
      * Set the component for a given appWidgetId.
      *
+     * If successful, the app widget provider will receive a {@link #ACTION_APPWIDGET_UPDATE}
+     * broadcast.
+     *
      * <p class="note">You need the BIND_APPWIDGET permission or the user must have enabled binding
      *         widgets always for your component. Should be used by apps that host widgets; if this
      *         method returns false, call {@link #ACTION_APPWIDGET_BIND} to request permission to
@@ -982,6 +985,9 @@ public class AppWidgetManager {
 
     /**
      * Set the component for a given appWidgetId.
+     *
+     * If successful, the app widget provider will receive a {@link #ACTION_APPWIDGET_UPDATE}
+     * broadcast.
      *
      * <p class="note">You need the BIND_APPWIDGET permission or the user must have enabled binding
      *         widgets always for your component. Should be used by apps that host widgets; if this
@@ -1006,6 +1012,10 @@ public class AppWidgetManager {
 
     /**
      * Set the provider for a given appWidgetId if the caller has a permission.
+     *
+     * If successful, the app widget provider will receive a {@link #ACTION_APPWIDGET_UPDATE}
+     * broadcast.
+     *
      * <p>
      * <strong>Note:</strong> You need the {@link android.Manifest.permission#BIND_APPWIDGET}
      * permission or the user must have enabled binding widgets always for your component.

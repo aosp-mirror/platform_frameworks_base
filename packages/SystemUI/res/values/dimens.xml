@@ -151,7 +151,7 @@
     <dimen name="notification_max_heads_up_height_before_s">162dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
-    <dimen name="notification_max_heads_up_height">143dp</dimen>
+    <dimen name="notification_max_heads_up_height">136dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
@@ -561,6 +561,7 @@
     <dimen name="qs_tile_icon_background_stroke_width">-1dp</dimen>
     <dimen name="qs_tile_background_size">56dp</dimen>
     <dimen name="qs_icon_size">20dp</dimen>
+    <dimen name="qs_side_view_size">28dp</dimen>
     <dimen name="qs_label_container_margin">10dp</dimen>
     <dimen name="qs_quick_tile_size">60dp</dimen>
     <dimen name="qs_tile_padding">12dp</dimen>
@@ -1466,16 +1467,17 @@
     <dimen name="medium_content_padding_above_name">4dp</dimen>
 
     <!-- Accessibility floating menu -->
-    <dimen name="accessibility_floating_menu_elevation">5dp</dimen>
+    <dimen name="accessibility_floating_menu_elevation">3dp</dimen>
     <dimen name="accessibility_floating_menu_stroke_width">1dp</dimen>
     <dimen name="accessibility_floating_menu_stroke_inset">-2dp</dimen>
     <dimen name="accessibility_floating_menu_margin">16dp</dimen>
-    <dimen name="accessibility_floating_menu_padding">6dp</dimen>
+    <dimen name="accessibility_floating_menu_small_padding">6dp</dimen>
     <dimen name="accessibility_floating_menu_small_width_height">36dp</dimen>
     <dimen name="accessibility_floating_menu_small_single_radius">25dp</dimen>
     <dimen name="accessibility_floating_menu_small_multiple_radius">20dp</dimen>
+    <dimen name="accessibility_floating_menu_large_padding">8dp</dimen>
     <dimen name="accessibility_floating_menu_large_width_height">56dp</dimen>
-    <dimen name="accessibility_floating_menu_large_single_radius">33dp</dimen>
+    <dimen name="accessibility_floating_menu_large_single_radius">35dp</dimen>
     <dimen name="accessibility_floating_menu_large_multiple_radius">35dp</dimen>
 
     <dimen name="accessibility_floating_tooltip_arrow_width">8dp</dimen>

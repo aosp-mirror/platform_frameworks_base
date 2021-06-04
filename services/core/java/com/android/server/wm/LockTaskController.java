@@ -355,6 +355,11 @@ public class LockTaskController {
             return false;
         }
 
+        // Allow the dream to start during lock task mode
+        if (wc.isActivityTypeDream()) {
+            return false;
+        }
+
         return !(isTaskAuthAllowlisted(taskAuth) || mLockTaskModeTasks.isEmpty());
     }
 

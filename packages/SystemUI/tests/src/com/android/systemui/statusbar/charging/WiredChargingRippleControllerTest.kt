@@ -20,6 +20,7 @@ import android.testing.AndroidTestingRunner
 import android.view.View
 import android.view.WindowManager
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -50,6 +51,7 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var rippleView: ChargingRippleView
     @Mock private lateinit var windowManager: WindowManager
+    @Mock private lateinit var uiEventLogger: UiEventLogger
     private val systemClock = FakeSystemClock()
 
     @Before
@@ -58,7 +60,7 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
         `when`(featureFlags.isChargingRippleEnabled).thenReturn(true)
         controller = WiredChargingRippleController(
                 commandRegistry, batteryController, configurationController,
-                featureFlags, context, windowManager, systemClock)
+                featureFlags, context, windowManager, systemClock, uiEventLogger)
         controller.rippleView = rippleView // Replace the real ripple view with a mock instance
     }
 
@@ -87,6 +89,10 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
         // Verify ripple removed
         runnableCaptor.value.run()
         verify(windowManager).removeView(rippleView)
+
+        // Verify event logged
+        verify(uiEventLogger).log(
+                WiredChargingRippleController.WiredChargingRippleEvent.CHARGING_RIPPLE_PLAYED)
     }
 
     @Test

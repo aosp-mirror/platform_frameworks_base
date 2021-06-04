@@ -45,8 +45,10 @@ import com.android.internal.util.FrameworkStatsLog;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Queue;
 
 /** Plays a {@link Vibration} in dedicated thread. */
 final class VibrationThread extends Thread implements IBinder.DeathRecipient {
@@ -93,7 +95,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     private final WorkSource mWorkSource = new WorkSource();
     private final PowerManager.WakeLock mWakeLock;
     private final IBatteryStats mBatteryStatsService;
-    private final VibrationEffectModifier<VibratorInfo> mDeviceEffectAdapter =
+    private final DeviceVibrationEffectAdapter mDeviceEffectAdapter =
             new DeviceVibrationEffectAdapter();
     private final Vibration mVibration;
     private final VibrationCallbacks mCallbacks;
@@ -171,7 +173,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 Slog.d(TAG, "Synced vibration complete reported by vibrator manager");
             }
             for (int i = 0; i < mVibrators.size(); i++) {
-                mStepQueue.consumeOnVibratorComplete(mVibrators.keyAt(i));
+                mStepQueue.notifyVibratorComplete(mVibrators.keyAt(i));
             }
             mLock.notify();
         }
@@ -183,7 +185,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             if (DEBUG) {
                 Slog.d(TAG, "Vibration complete reported by vibrator " + vibratorId);
             }
-            mStepQueue.consumeOnVibratorComplete(vibratorId);
+            mStepQueue.notifyVibratorComplete(vibratorId);
             mLock.notify();
         }
     }
@@ -192,25 +194,24 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "playVibration");
         try {
             CombinedVibration.Sequential effect = toSequential(mVibration.getEffect());
+            mStepQueue.offer(new StartVibrateStep(effect));
+
             int stepsPlayed = 0;
-
-            synchronized (mLock) {
-                mStepQueue.offer(new StartVibrateStep(effect));
-                Step topOfQueue;
-
-                while ((topOfQueue = mStepQueue.peek()) != null) {
-                    long waitTime = topOfQueue.calculateWaitTime();
-                    if (waitTime <= 0) {
-                        stepsPlayed += mStepQueue.consume();
-                    } else {
+            while (!mStepQueue.isEmpty()) {
+                long waitTime = mStepQueue.calculateWaitTime();
+                if (waitTime <= 0) {
+                    stepsPlayed += mStepQueue.consumeNext();
+                } else {
+                    synchronized (mLock) {
                         try {
                             mLock.wait(waitTime);
-                        } catch (InterruptedException e) { }
+                        } catch (InterruptedException e) {
+                        }
                     }
-                    if (mForceStop) {
-                        mStepQueue.cancel();
-                        return Vibration.Status.CANCELLED;
-                    }
+                }
+                if (mForceStop) {
+                    mStepQueue.cancel();
+                    return Vibration.Status.CANCELLED;
                 }
             }
 
@@ -295,54 +296,75 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     private final class StepQueue {
         @GuardedBy("mLock")
         private final PriorityQueue<Step> mNextSteps = new PriorityQueue<>();
-
         @GuardedBy("mLock")
+        private final Queue<Step> mPendingOnVibratorCompleteSteps = new LinkedList<>();
+
         public void offer(@NonNull Step step) {
-            mNextSteps.offer(step);
+            synchronized (mLock) {
+                mNextSteps.offer(step);
+            }
         }
 
-        @GuardedBy("mLock")
-        @Nullable
-        public Step peek() {
-            return mNextSteps.peek();
+        public boolean isEmpty() {
+            synchronized (mLock) {
+                return mPendingOnVibratorCompleteSteps.isEmpty() && mNextSteps.isEmpty();
+            }
+        }
+
+        /** Returns the time in millis to wait before calling {@link #consumeNext()}. */
+        public long calculateWaitTime() {
+            Step nextStep;
+            synchronized (mLock) {
+                if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
+                    // Steps anticipated by vibrator complete callback should be played right away.
+                    return 0;
+                }
+                nextStep = mNextSteps.peek();
+            }
+            return nextStep == null ? 0 : nextStep.calculateWaitTime();
         }
 
         /**
-         * Play and remove the step at the top of this queue, and also adds the next steps
-         * generated to be played next.
+         * Play and remove the step at the top of this queue, and also adds the next steps generated
+         * to be played next.
          *
          * @return the number of steps played
          */
-        @GuardedBy("mLock")
-        public int consume() {
-            Step nextStep = mNextSteps.poll();
+        public int consumeNext() {
+            Step nextStep = pollNext();
             if (nextStep != null) {
-                mNextSteps.addAll(nextStep.play());
+                // This might turn on the vibrator and have a HAL latency. Execute this outside any
+                // lock to avoid blocking other interactions with the thread.
+                List<Step> nextSteps = nextStep.play();
+                synchronized (mLock) {
+                    mNextSteps.addAll(nextSteps);
+                }
                 return 1;
             }
             return 0;
         }
 
         /**
-         * Play and remove the step in this queue that should be anticipated by the vibrator
-         * completion callback.
+         * Notify the step in this queue that should be anticipated by the vibrator completion
+         * callback and keep it separate to be consumed by {@link #consumeNext()}.
+         *
+         * <p>This is a lightweight method that do not trigger any operation from {@link
+         * VibratorController}, so it can be called directly from a native callback.
          *
          * <p>This assumes only one of the next steps is waiting on this given vibrator, so the
-         * first step found is played by this method, in no particular order.
+         * first step found will be anticipated by this method, in no particular order.
          */
         @GuardedBy("mLock")
-        public void consumeOnVibratorComplete(int vibratorId) {
+        public void notifyVibratorComplete(int vibratorId) {
             Iterator<Step> it = mNextSteps.iterator();
-            List<Step> nextSteps = EMPTY_STEP_LIST;
             while (it.hasNext()) {
                 Step step = it.next();
                 if (step.shouldPlayWhenVibratorComplete(vibratorId)) {
                     it.remove();
-                    nextSteps = step.play();
+                    mPendingOnVibratorCompleteSteps.offer(step);
                     break;
                 }
             }
-            mNextSteps.addAll(nextSteps);
         }
 
         /**
@@ -350,11 +372,23 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
          *
          * <p>This will remove and trigger {@link Step#cancel()} in all steps, in order.
          */
-        @GuardedBy("mLock")
         public void cancel() {
             Step step;
-            while ((step = mNextSteps.poll()) != null) {
+            while ((step = pollNext()) != null) {
+                // This might turn off the vibrator and have a HAL latency. Execute this outside
+                // any lock to avoid blocking other interactions with the thread.
                 step.cancel();
+            }
+        }
+
+        @Nullable
+        private Step pollNext() {
+            synchronized (mLock) {
+                // Prioritize the steps anticipated by a vibrator complete callback.
+                if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
+                    return mPendingOnVibratorCompleteSteps.poll();
+                }
+                return mNextSteps.poll();
             }
         }
     }

@@ -156,6 +156,7 @@ import android.app.ActivityThread;
 import android.app.AnrController;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AppOpsManager.AttributionFlags;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
@@ -346,6 +347,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.NonaFunction;
@@ -353,6 +355,7 @@ import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
+import com.android.internal.util.function.UndecFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.DisplayThread;
@@ -1833,7 +1836,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int[] cameraOp = {AppOpsManager.OP_CAMERA};
         mAppOpsService.startWatchingActive(cameraOp, new IAppOpsActiveCallback.Stub() {
             @Override
-            public void opActiveChanged(int op, int uid, String packageName, boolean active) {
+            public void opActiveChanged(int op, int uid, String packageName, String attributionTag,
+                    boolean active, @AttributionFlags int attributionFlags,
+                    int attributionChainId) {
                 cameraActiveChanged(uid, active);
             }
         });
@@ -6216,8 +6221,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // signature we just use the first package in the UID. For shared
                 // UIDs we may blame the wrong app but that is Okay as they are
                 // in the same security/privacy sandbox.
-                final AndroidPackage androidPackage = mPackageManagerInt
-                        .getPackage(Binder.getCallingUid());
+                final int uid = Binder.getCallingUid();
+                // Here we handle some of the special UIDs (mediaserver, systemserver, etc)
+                final String packageName = AppOpsManager.resolvePackageName(uid,
+                        /*packageName*/ null);
+                final AndroidPackage androidPackage;
+                if (packageName != null) {
+                    androidPackage = mPackageManagerInt.getPackage(packageName);
+                } else {
+                    androidPackage = mPackageManagerInt.getPackage(uid);
+                }
+                if (androidPackage == null) {
+                    Log.e(TAG, "Cannot find package for uid: " + uid);
+                    return null;
+                }
                 final AttributionSource attributionSource = new AttributionSource(
                         Binder.getCallingUid(), androidPackage.getPackageName(), null);
                 pfd = cph.provider.openFile(attributionSource, uri, "r", null);
@@ -16059,6 +16076,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public ServiceNotificationPolicy applyForegroundServiceNotification(
+                Notification notification, int id, String pkg, int userId) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.applyForegroundServiceNotificationLocked(notification,
+                        id, pkg, userId);
+            }
+        }
+
+        @Override
+        public void onForegroundServiceNotificationUpdate(Notification notification,
+                int id, String pkg, @UserIdInt int userId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.onForegroundServiceNotificationUpdateLocked(notification,
+                        id, pkg, userId);
+            }
+        }
+
+        @Override
         public void stopForegroundServicesForChannel(String pkg, int userId,
                 String channelId) {
             synchronized (ActivityManagerService.this) {
@@ -16848,7 +16883,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     return superImpl.apply(code, new AttributionSource(shellUid,
                             "com.android.shell", attributionSource.getAttributionTag(),
-                            attributionSource.getNext()),
+                            attributionSource.getToken(), attributionSource.getNext()),
                             shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                             skiProxyOperation);
                 } finally {
@@ -16864,8 +16899,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 @Nullable String packageName, @Nullable String attributionTag,
                 boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
-                @NonNull NonaFunction<IBinder, Integer, Integer, String, String, Boolean,
-                        Boolean, String, Boolean, SyncNotedAppOp> superImpl) {
+                @AttributionFlags int attributionFlags, int attributionChainId,
+                @NonNull UndecFunction<IBinder, Integer, Integer, String, String, Boolean,
+                        Boolean, String, Boolean, Integer, Integer, SyncNotedAppOp> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
                         Process.SHELL_UID);
@@ -16873,57 +16909,62 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     return superImpl.apply(token, code, shellUid, "com.android.shell",
                             attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                            shouldCollectMessage);
+                            shouldCollectMessage, attributionFlags, attributionChainId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
             return superImpl.apply(token, code, uid, packageName, attributionTag,
-                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                    attributionFlags, attributionChainId);
         }
 
         @Override
-        public SyncNotedAppOp startProxyOperation(IBinder token, int code,
+        public SyncNotedAppOp startProxyOperation(int code,
                 @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
                 boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-                boolean skipProsyOperation, @NonNull OctFunction<IBinder, Integer,
-                        AttributionSource, Boolean, Boolean, String, Boolean, Boolean,
-                        SyncNotedAppOp> superImpl) {
+                boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
+                @AttributionFlags int proxiedAttributionFlags, int attributionChainId,
+                @NonNull DecFunction<Integer, AttributionSource, Boolean, Boolean, String, Boolean,
+                        Boolean, Integer, Integer, Integer, SyncNotedAppOp> superImpl) {
             if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(
                         attributionSource.getUid()), Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(token, code, new AttributionSource(shellUid,
-                                    "com.android.shell", attributionSource.getAttributionTag(),
-                                    attributionSource.getNext()), startIfModeDefault,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            skipProsyOperation);
+                    return superImpl.apply(code, new AttributionSource(shellUid,
+                            "com.android.shell", attributionSource.getAttributionTag(),
+                            attributionSource.getToken(), attributionSource.getNext()),
+                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
+                            proxiedAttributionFlags, attributionChainId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(token, code, attributionSource, startIfModeDefault,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProsyOperation);
+            return superImpl.apply(code, attributionSource, startIfModeDefault,
+                    shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation,
+                    proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
         }
 
         @Override
-        public void finishProxyOperation(IBinder clientId, int code,
-                @NonNull AttributionSource attributionSource,
-                @NonNull TriFunction<IBinder, Integer, AttributionSource, Void> superImpl) {
+        public void finishProxyOperation(int code, @NonNull AttributionSource attributionSource,
+                boolean skipProxyOperation, @NonNull TriFunction<Integer, AttributionSource,
+                        Boolean, Void> superImpl) {
             if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(
                         attributionSource.getUid()), Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    superImpl.apply(clientId, code, new AttributionSource(shellUid,
+                    superImpl.apply(code, new AttributionSource(shellUid,
                             "com.android.shell", attributionSource.getAttributionTag(),
-                            attributionSource.getNext()));
+                            attributionSource.getToken(), attributionSource.getNext()),
+                            skipProxyOperation);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            superImpl.apply(clientId, code, attributionSource);
+            superImpl.apply(code, attributionSource, skipProxyOperation);
         }
 
         private boolean isTargetOp(int code) {
