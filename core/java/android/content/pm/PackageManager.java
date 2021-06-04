@@ -1278,6 +1278,13 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_STAGED = 0x00200000;
 
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that check whether given APEX can be
+     * updated should be disabled for this install.
+     * @hide
+     */
+    public static final int INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK = 0x00400000;
+
     /** @hide */
     @IntDef(flag = true, value = {
             DONT_KILL_APP,

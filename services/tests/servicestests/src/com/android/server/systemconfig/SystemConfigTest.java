@@ -222,6 +222,64 @@ public class SystemConfigTest {
     }
 
     /**
+     * Tests that readPermissions works correctly with {@link SystemConfig#ALLOW_APP_CONFIGS}
+     * permission flag for the tag: {@code allowed-partner-apex}.
+     */
+    @Test
+    public void readPermissions_allowAppConfigs_parsesPartnerApexAllowList()
+            throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <allowed-partner-apex package=\"com.android.apex1\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "partner-apex-allowlist.xml", contents);
+
+        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getAllowedPartnerApexes()).containsExactly("com.android.apex1");
+    }
+
+    /**
+     * Tests that readPermissions works correctly with {@link SystemConfig#ALLOW_APP_CONFIGS}
+     * permission flag for the tag: {@code allowed-partner-apex}.
+     */
+    @Test
+    public void readPermissions_allowAppConfigs_parsesPartnerApexAllowList_noPackage()
+            throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <allowed-partner-apex/>\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "partner-apex-allowlist.xml", contents);
+
+        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getAllowedPartnerApexes()).isEmpty();
+    }
+
+
+    /**
+     * Tests that readPermissions works correctly without {@link SystemConfig#ALLOW_APP_CONFIGS}
+     * permission flag for the tag: {@code allowed-partner-apex}.
+     */
+    @Test
+    public void readPermissions_notAllowAppConfigs_doesNotParsePartnerApexAllowList()
+            throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <allowed-partner-apex package=\"com.android.apex1\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "partner-apex-allowlist.xml", contents);
+
+        mSysConfig.readPermissions(folder, /* Grant all but ALLOW_APP_CONFIGS flag */ ~0x08);
+
+        assertThat(mSysConfig.getAllowedPartnerApexes()).isEmpty();
+    }
+
+    /**
      * Creates folderName/fileName in the mTemporaryFolder and fills it with the contents.
      *
      * @param folderName subdirectory of mTemporaryFolder to put the file, creating if needed
