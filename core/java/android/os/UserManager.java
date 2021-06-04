@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
 import android.annotation.SuppressAutoDoc;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -53,6 +54,7 @@ import android.location.LocationManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.AndroidException;
+import android.util.ArraySet;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
@@ -3197,6 +3199,33 @@ public class UserManager {
             intent.putExtra(EXTRA_USER_ACCOUNT_OPTIONS, accountOptions);
         }
         return intent;
+    }
+
+    /**
+     * Returns the list of the system packages that would be installed on this type of user upon
+     * its creation.
+     *
+     * Returns {@code null} if all system packages would be installed.
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("NullableCollection")
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
+    public @Nullable Set<String> getPreInstallableSystemPackages(@NonNull String userType) {
+        try {
+            final String[] installableSystemPackages
+                    = mService.getPreInstallableSystemPackages(userType);
+            if (installableSystemPackages == null) {
+                return null;
+            }
+            return new ArraySet<>(installableSystemPackages);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
