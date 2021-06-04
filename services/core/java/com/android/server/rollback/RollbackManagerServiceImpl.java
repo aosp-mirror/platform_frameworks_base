@@ -247,11 +247,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                                 PackageManagerInternal.class);
                         pm.setEnableRollbackCode(token, ret);
                     });
-
-                    // We're handling the ordered broadcast. Abort the
-                    // broadcast because there is no need for it to go to
-                    // anyone else.
-                    abortBroadcast();
                 }
             }
         }, enableRollbackFilter, null, getHandler());
