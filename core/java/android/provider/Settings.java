@@ -6661,20 +6661,6 @@ public final class Settings {
         public static final String COMPLETED_CATEGORY_PREFIX = "suggested.completed_category.";
 
         /**
-         * Whether or not compress blocks should be released on install.
-         * <p>The setting only determines if the platform will attempt to release
-         * compress blocks; it does not guarantee that the files will have their
-         * compress blocks released. Compression is currently only supported on
-         * some f2fs filesystems.
-         * <p>
-         * Type: int (0 for false, 1 for true)
-         *
-         * @hide
-         */
-        public static final String RELEASE_COMPRESS_BLOCKS_ON_INSTALL =
-                "release_compress_blocks_on_install";
-
-        /**
          * List of input methods that are currently enabled.  This is a string
          * containing the IDs of all enabled input methods, each ID separated
          * by ':'.

@@ -658,6 +658,8 @@ public class RecentsAnimationController implements DeathRecipient {
         if (!mNavigationBarAttachedToApp) {
             return;
         }
+        mNavigationBarAttachedToApp = false;
+
         if (mStatusBar != null) {
             mStatusBar.setNavigationBarLumaSamplingEnabled(mDisplayId, true);
         }

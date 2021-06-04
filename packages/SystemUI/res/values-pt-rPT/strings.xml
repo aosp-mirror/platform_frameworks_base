@@ -212,7 +212,7 @@
     <string name="accessibility_three_bars" msgid="819417766606501295">"Três barras."</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"Sinal completo."</string>
     <string name="accessibility_desc_on" msgid="2899626845061427845">"Ativado."</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"Desativado."</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"Desativado"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"Ligado."</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"A ligar..."</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>

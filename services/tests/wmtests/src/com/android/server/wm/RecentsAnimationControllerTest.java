@@ -519,12 +519,14 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 eq(mDefaultDisplay.mDisplayId), eq(false));
         verify(transaction).reparent(navToken.getSurfaceControl(), activity.getSurfaceControl());
         verify(transaction).setLayer(navToken.getSurfaceControl(), Integer.MAX_VALUE);
+        assertTrue(mController.isNavigationBarAttachedToApp());
 
         mController.cleanupAnimation(REORDER_MOVE_TO_TOP);
         verify(mController).restoreNavigationBarFromApp(eq(true));
         verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
                 eq(mDefaultDisplay.mDisplayId), eq(true));
         verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
+        assertFalse(mController.isNavigationBarAttachedToApp());
     }
 
     @Test
@@ -541,6 +543,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 eq(mDefaultDisplay.mDisplayId), eq(false));
         verify(transaction).reparent(navToken.getSurfaceControl(), activity.getSurfaceControl());
         verify(transaction).setLayer(navToken.getSurfaceControl(), Integer.MAX_VALUE);
+        assertTrue(mController.isNavigationBarAttachedToApp());
 
         final WindowContainer parent = navToken.getParent();
 
@@ -550,6 +553,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 eq(mDefaultDisplay.mDisplayId), eq(true));
         verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
         verify(transaction).reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
+        assertFalse(mController.isNavigationBarAttachedToApp());
     }
 
     @Test
@@ -566,6 +570,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 eq(mDefaultDisplay.mDisplayId), eq(false));
         verify(transaction).reparent(navToken.getSurfaceControl(), activity.getSurfaceControl());
         verify(transaction).setLayer(navToken.getSurfaceControl(), Integer.MAX_VALUE);
+        assertTrue(mController.isNavigationBarAttachedToApp());
 
         final WindowContainer parent = navToken.getParent();
 
@@ -575,6 +580,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
                 eq(mDefaultDisplay.mDisplayId), eq(true));
         verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
+        assertFalse(mController.isNavigationBarAttachedToApp());
     }
 
     @Test
@@ -607,6 +613,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 eq(mDefaultDisplay.mDisplayId), eq(false));
         verify(navWindow).setSurfaceTranslationY(-secondary.getBounds().top);
         verify(transaction).reparent(navToken.getSurfaceControl(), secondary.getSurfaceControl());
+        assertTrue(mController.isNavigationBarAttachedToApp());
         reset(navWindow);
 
         mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
@@ -616,6 +623,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         verify(navWindow).setSurfaceTranslationY(0);
         verify(transaction).reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
         verify(mController).restoreNavigationBarFromApp(eq(false));
+        assertFalse(mController.isNavigationBarAttachedToApp());
     }
 
     @Test

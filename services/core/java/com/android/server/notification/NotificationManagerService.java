@@ -6568,7 +6568,7 @@ public class NotificationManagerService extends SystemService {
 
             // limit the number of non-fgs outstanding notificationrecords an app can have
             if (!n.isForegroundService()) {
-                int count = getNotificationCountLocked(pkg, userId, id, tag);
+                int count = getNotificationCount(pkg, userId, id, tag);
                 if (count >= MAX_PACKAGE_NOTIFICATIONS) {
                     mUsageStats.registerOverCountQuota(pkg);
                     Slog.e(TAG, "Package has already posted or enqueued " + count
@@ -6647,28 +6647,29 @@ public class NotificationManagerService extends SystemService {
         return true;
     }
 
-    @GuardedBy("mNotificationLock")
-    protected int getNotificationCountLocked(String pkg, int userId, int excludedId,
+    protected int getNotificationCount(String pkg, int userId, int excludedId,
             String excludedTag) {
         int count = 0;
-        final int N = mNotificationList.size();
-        for (int i = 0; i < N; i++) {
-            final NotificationRecord existing = mNotificationList.get(i);
-            if (existing.getSbn().getPackageName().equals(pkg)
-                    && existing.getSbn().getUserId() == userId) {
-                if (existing.getSbn().getId() == excludedId
-                        && TextUtils.equals(existing.getSbn().getTag(), excludedTag)) {
-                    continue;
+        synchronized (mNotificationLock) {
+            final int N = mNotificationList.size();
+            for (int i = 0; i < N; i++) {
+                final NotificationRecord existing = mNotificationList.get(i);
+                if (existing.getSbn().getPackageName().equals(pkg)
+                        && existing.getSbn().getUserId() == userId) {
+                    if (existing.getSbn().getId() == excludedId
+                            && TextUtils.equals(existing.getSbn().getTag(), excludedTag)) {
+                        continue;
+                    }
+                    count++;
                 }
-                count++;
             }
-        }
-        final int M = mEnqueuedNotifications.size();
-        for (int i = 0; i < M; i++) {
-            final NotificationRecord existing = mEnqueuedNotifications.get(i);
-            if (existing.getSbn().getPackageName().equals(pkg)
-                    && existing.getSbn().getUserId() == userId) {
-                count++;
+            final int M = mEnqueuedNotifications.size();
+            for (int i = 0; i < M; i++) {
+                final NotificationRecord existing = mEnqueuedNotifications.get(i);
+                if (existing.getSbn().getPackageName().equals(pkg)
+                        && existing.getSbn().getUserId() == userId) {
+                    count++;
+                }
             }
         }
         return count;

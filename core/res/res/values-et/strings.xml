@@ -94,7 +94,7 @@
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS-sõnumid"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Kõnepostisõnumid"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"WiFi-kõned"</string>
-    <string name="notification_channel_sim" msgid="5098802350325677490">"SIM-kaardi olek"</string>
+    <string name="notification_channel_sim" msgid="5098802350325677490">"SIM-i olek"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"Kõrge prioriteediga SIM-i olek"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"Partner taotles TTY-režiimi TÄIELIK"</string>
     <string name="peerTtyModeHco" msgid="5626377160840915617">"Partner taotles TTY-režiimi HCO"</string>
@@ -1866,7 +1866,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administraator on seda värskendanud"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administraator on selle kustutanud"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Akusäästja lülitab sisse tumeda teema ja lülitab välja taustategevused, mõned visuaalsed efektid, teatud funktsioonid ja võrguühendused või piirab neid.\n\n"<annotation id="url">"Lisateave"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"Akusäästja lülitab sisse tumeda teema ja lülitab välja taustategevused, mõned visuaalsed efektid, teatud funktsioonid ja võrguühendused või piirab neid."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Andmekasutuse vähendamiseks keelab andmemahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks pildid kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Lülitada andmemahu säästja sisse?"</string>
@@ -1988,7 +1989,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"PIN-kood <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Vabasta"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Vabasta <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Rakenduste teave"</string>
+    <string name="app_info" msgid="6113278084877079851">"Rakenduse teave"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo käivitamine …"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Seadme lähtestamine …"</string>
