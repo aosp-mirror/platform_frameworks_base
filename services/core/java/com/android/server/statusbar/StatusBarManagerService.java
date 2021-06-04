@@ -18,7 +18,6 @@ package com.android.server.statusbar;
 
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
 import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
-import static android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.Manifest;
@@ -33,6 +32,8 @@ import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.biometrics.BiometricAuthenticator.Modality;
+import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
@@ -814,11 +815,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void onBiometricHelp(String message) {
+    public void onBiometricHelp(@Modality int modality, String message) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
-                mBar.onBiometricHelp(message);
+                mBar.onBiometricHelp(modality, message);
             } catch (RemoteException ex) {
             }
         }
