@@ -3705,7 +3705,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 final String[] uidPackages = mPackageManager.getPackagesForUid(callingUid);
                 if (!ArrayUtils.isEmpty(uidPackages)) {
                     return mPackageManager.isInstantApp(uidPackages[0],
-                            UserHandle.getCallingUserId());
+                            UserHandle.getUserId(callingUid));
                 }
             } catch (RemoteException e) {
                 /* ignore - same process */

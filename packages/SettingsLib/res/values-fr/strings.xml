@@ -237,7 +237,7 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, débogage, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Raccourci vers rapport de bug"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Afficher un bouton dans le menu de démarrage permettant de créer un rapport de bug"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"Écran toujours actif"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"Laisser activé"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"L\'écran ne se met jamais en veille lorsque l\'appareil est en charge"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Activer journaux HCI Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturer les paquets Bluetooth. (Activer/Désactiver le Bluetooth après avoir modifié ce paramètre)"</string>
@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certification affichage sans fil"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Autoriser l\'enregistrement d\'infos Wi-Fi détaillées"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limiter la recherche Wi‑Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Sélection aléatoire de l\'adresse MAC non persistante en Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Données mobiles toujours actives"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Accélération matérielle pour le partage de connexion"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Afficher les appareils Bluetooth sans nom"</string>
@@ -454,8 +453,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Chargée à 100 %% dans <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - chargée à 100 %% dans <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_limited (7956120998372505295) -->
-    <skip />
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Recharge momentanément limitée"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Batterie en charge"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Charge rapide"</string>
@@ -513,7 +511,7 @@
     <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Autorisez cette appli à définir des alarmes et à planifier d\'autres actions. Cette appli peut être utilisée lorsque vous n\'utilisez pas votre appareil, ce qui peut consommer davantage de batterie. Si cette autorisation est désactivée, l\'appli peut ne pas fonctionner correctement, et les alarmes définies ne se déclencheront pas comme prévu."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"définir, alarme, rappel, horloge"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activer"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode \"Ne pas déranger\""</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode Ne pas déranger"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Jamais"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Prioritaires uniquement"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

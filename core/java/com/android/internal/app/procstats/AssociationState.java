@@ -103,12 +103,8 @@ public final class AssociationState {
 
         @Nullable
         private SourceState getCommonSourceState(boolean createIfNeeded) {
-            if (mCommonSourceState == null) {
-                if (createIfNeeded) {
-                    mCommonSourceState = mTargetProcess.getOrCreateSourceState(mKey);
-                } else {
-                    Slog.wtf(TAG, "Unable to find common source state for " + mKey.mProcess);
-                }
+            if (mCommonSourceState == null && createIfNeeded) {
+                mCommonSourceState = mTargetProcess.getOrCreateSourceState(mKey);
             }
             return mCommonSourceState;
         }
@@ -225,7 +221,7 @@ public final class AssociationState {
                     }
                     mActiveProcState = mProcState;
                 }
-            } else {
+            } else if (mAssociationState != null) {
                 Slog.wtf(TAG, "startActive while not tracking: " + this);
             }
             if (mAssociationState != null) {

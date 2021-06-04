@@ -75,6 +75,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     private int mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
     private final LayoutParams mParams;
+    private int mWindowHeight;
     @VisibleForTesting
     final Rect mDraggableWindowBounds = new Rect();
     private boolean mIsVisible = false;
@@ -94,6 +95,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mParams = createLayoutParams(context);
+        mWindowHeight = mWindowManager.getCurrentWindowMetrics().getBounds().height();
         mImageView = imageView;
         mImageView.setOnTouchListener(this::onTouch);
         mImageView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
@@ -310,6 +312,16 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     }
 
     void onConfigurationChanged(int configDiff) {
+        if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
+            mDraggableWindowBounds.set(getDraggableWindowBounds());
+            // Keep the Y position with the same height ratio before the window height is changed.
+            final int windowHeight = mWindowManager.getCurrentWindowMetrics().getBounds().height();
+            final float windowHeightFraction = (float) mParams.y / mWindowHeight;
+            mParams.y = (int) (windowHeight * windowHeightFraction);
+            mWindowHeight = windowHeight;
+            stickToScreenEdge(mToLeftScreenEdge);
+            return;
+        }
         if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
             applyResourcesValuesWithDensityChanged();
             return;

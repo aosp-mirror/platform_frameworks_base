@@ -452,8 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Notifications moins urgentes affichées ci-dessous"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Touchez à nouveau pour ouvrir"</string>
-    <!-- no translation found for tap_again (1315420114387908655) -->
-    <skip />
+    <string name="tap_again" msgid="1315420114387908655">"Toucher de nouveau"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Balayez l\'écran vers le haut pour ouvrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Balayez l\'écran vers le haut pour réessayer"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Déverrouillez l\'écran pour utiliser la NFC"</string>
@@ -1125,19 +1124,19 @@
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"Ce sera bientôt l\'anniversaire de naissance de <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Anniversaire"</string>
     <string name="anniversary_status_content_description" msgid="8212171790843327442">"C\'est l\'anniversaire de <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="location_status" msgid="1294990572202541812">"Partage de position"</string>
+    <string name="location_status" msgid="1294990572202541812">"Partage sa position"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> partage sa position"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Nouvel article"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> a partagé une nouvelle histoire"</string>
-    <string name="video_status" msgid="4548544654316843225">"En train de regarder…"</string>
-    <string name="audio_status" msgid="4237055636967709208">"En train d\'écouter…"</string>
-    <string name="game_status" msgid="1340694320630973259">"En train de jouer…"</string>
+    <string name="video_status" msgid="4548544654316843225">"Regarde une vidéo"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Écoute"</string>
+    <string name="game_status" msgid="1340694320630973259">"Joue"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Amis"</string>
     <string name="empty_status" msgid="5938893404951307749">"Clavardons ce soir!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Le contenu sera bientôt affiché"</string>
     <string name="missed_call" msgid="4228016077700161689">"Appel manqué"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Afficher les messages récents, les appels manqués et les mises à jour d\'état"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Affichez les messages récents, les appels manqués et les mises à jour d\'état"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversation"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> a envoyé un message"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> a envoyé une image"</string>

@@ -5597,7 +5597,7 @@ public class Notification implements Parcelable
         private void bindSnoozeAction(RemoteViews big, StandardTemplateParams p) {
             boolean hideSnoozeButton = mN.isForegroundService() || mN.fullScreenIntent != null
                     || isBackgroundColorized(p)
-                    || p.mViewType == StandardTemplateParams.VIEW_TYPE_HEADS_UP;
+                    || p.mViewType != StandardTemplateParams.VIEW_TYPE_BIG;
             big.setBoolean(R.id.snooze_button, "setEnabled", !hideSnoozeButton);
             if (hideSnoozeButton) {
                 // Only hide; NotificationContentView will show it when it adds the click listener
@@ -12357,7 +12357,7 @@ public class Notification implements Parcelable
                 mRippleAlpha = 0x33;
             } else {
                 int[] attrs = {
-                        R.attr.colorBackground,
+                        R.attr.colorSurface,
                         R.attr.colorBackgroundFloating,
                         R.attr.textColorPrimary,
                         R.attr.textColorSecondary,
