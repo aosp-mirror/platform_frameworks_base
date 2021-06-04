@@ -379,6 +379,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
     }
 
+    public SurfaceControl getSurfaceControl() {
+        return mLeash;
+    }
+
     private void setBoundsStateForEntry(ComponentName componentName, PictureInPictureParams params,
             ActivityInfo activityInfo) {
         mPipBoundsState.setBoundsStateForEntry(componentName,
