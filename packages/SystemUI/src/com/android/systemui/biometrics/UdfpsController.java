@@ -658,8 +658,7 @@ public class UdfpsController implements DozeReceiver {
                     // during a11y.
                     if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
                             || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
-                        mView.setImportantForAccessibility(
-                                View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+                        mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
                     }
 
                     mWindowManager.addView(mView, computeLayoutParams(animation));
