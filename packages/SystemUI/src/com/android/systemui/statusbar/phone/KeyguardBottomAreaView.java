@@ -368,8 +368,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         updateLeftAffordanceIcon();
 
         lp = mWalletButton.getLayoutParams();
-        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_width);
-        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_height);
+        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_wallet_width);
+        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_wallet_width);
         mWalletButton.setLayoutParams(lp);
 
         mIndicationPadding = getResources().getDimensionPixelSize(
