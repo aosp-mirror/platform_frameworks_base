@@ -78,6 +78,24 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testSkipOccludedActivityCloseTransition() {
+        final ActivityRecord behind = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final ActivityRecord topOpening = createActivityRecord(behind.getTask());
+        topOpening.setOccludesParent(true);
+        topOpening.setVisible(true);
+
+        mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
+        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
+        mDisplayContent.mClosingApps.add(behind);
+
+        assertEquals(WindowManager.TRANSIT_OLD_UNSET,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        null, null, false));
+    }
+
+    @Test
     @FlakyTest(bugId = 131005232)
     public void testTranslucentOpen() {
         final ActivityRecord behind = createActivityRecord(mDisplayContent,

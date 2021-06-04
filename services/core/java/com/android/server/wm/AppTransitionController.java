@@ -412,7 +412,13 @@ public class AppTransitionController {
                 return TRANSIT_OLD_TASK_CLOSE;
             }
             if (isActivityClosing) {
-                return TRANSIT_OLD_ACTIVITY_CLOSE;
+                for (int i = closingApps.size() - 1; i >= 0; i--) {
+                    if (closingApps.valueAt(i).visibleIgnoringKeyguard) {
+                        return TRANSIT_OLD_ACTIVITY_CLOSE;
+                    }
+                }
+                // Skip close activity transition since no closing app can be visible
+                return WindowManager.TRANSIT_OLD_UNSET;
             }
         }
         if (appTransition.containsTransitRequest(TRANSIT_RELAUNCH)
