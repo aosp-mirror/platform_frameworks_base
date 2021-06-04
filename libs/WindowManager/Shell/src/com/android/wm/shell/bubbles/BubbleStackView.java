@@ -932,20 +932,16 @@ public class BubbleStackView extends FrameLayout
             }
         });
 
-        // If the stack itself is touched, it means none of its touchable views (bubbles, flyouts,
-        // ActivityViews, etc.) were touched. Collapse the stack if it's expanded.
-        setOnTouchListener((view, ev) -> {
-            if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-                if (mShowingManage) {
-                    showManageMenu(false /* show */);
-                } else if (mStackEduView != null && mStackEduView.getVisibility() == VISIBLE) {
-                    mStackEduView.hide(false);
-                } else if (mBubbleData.isExpanded()) {
-                    mBubbleData.setExpanded(false);
-                }
+        // If the stack itself is clicked, it means none of its touchable views (bubbles, flyouts,
+         // TaskView, etc.) were touched. Collapse the stack if it's expanded.
+        setOnClickListener(view -> {
+            if (mShowingManage) {
+                showManageMenu(false /* show */);
+            } else if (mStackEduView != null && mStackEduView.getVisibility() == VISIBLE) {
+                mStackEduView.hide(false);
+            } else if (mBubbleData.isExpanded()) {
+                mBubbleData.setExpanded(false);
             }
-
-            return true;
         });
 
         animate()
