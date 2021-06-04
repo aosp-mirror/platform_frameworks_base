@@ -42,7 +42,7 @@ public final class CrossWindowBlurListeners {
     // property for background blur support in surface flinger
     private static final String BLUR_PROPERTY = "ro.surface_flinger.supports_background_blur";
     public static final boolean CROSS_WINDOW_BLUR_SUPPORTED =
-            SystemProperties.get(BLUR_PROPERTY, "default").equals("1");
+            SystemProperties.getBoolean(BLUR_PROPERTY, false);
 
     private static volatile CrossWindowBlurListeners sInstance;
     private static final Object sLock = new Object();
