@@ -225,13 +225,21 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             if (isDatasourceAttributionTag(uid, packageName, attributionTag,
                     mLocationTags)) {
                 return resolvedCode;
+            } else if (packageName.equals("com.google.android.gms")) {
+                Log.i("AppOpsDebugRemapping", "NOT remapping " + packageName + " code "
+                        + code + " for tag " + attributionTag);
             }
         } else {
             resolvedCode = resolveArOp(code);
             if (resolvedCode != code) {
                 if (isDatasourceAttributionTag(uid, packageName, attributionTag,
                         mActivityRecognitionTags)) {
+                    Log.i("AppOpsDebugRemapping", "remapping " + packageName + " code "
+                            + code + " to " + resolvedCode + " for tag " + attributionTag);
                     return resolvedCode;
+                } else if (packageName.equals("com.google.android.gms")) {
+                    Log.i("AppOpsDebugRemapping", "NOT remapping " + packageName
+                            + " code " + code + " for tag " + attributionTag);
                 }
             }
         }
@@ -334,8 +342,22 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         if (appIdTags != null) {
             final ArraySet<String> packageTags = appIdTags.get(packageName);
             if (packageTags != null && packageTags.contains(attributionTag)) {
+                if (packageName.equals("com.google.android.gms")) {
+                    Log.i("AppOpsDebugRemapping", packageName + " tag "
+                            + attributionTag + " in " + packageTags);
+                }
                 return true;
             }
+            if (packageName.equals("com.google.android.gms")) {
+                Log.i("AppOpsDebugRemapping", packageName + " tag " + attributionTag
+                        + " NOT in " + packageTags);
+            }
+        } else {
+            if (packageName.equals("com.google.android.gms")) {
+                Log.i("AppOpsDebugRemapping", "no package tags for uid " + uid
+                        + " package " + packageName);
+            }
+
         }
         return false;
     }
