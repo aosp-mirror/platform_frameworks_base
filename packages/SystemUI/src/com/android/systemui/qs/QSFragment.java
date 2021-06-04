@@ -615,10 +615,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void notifyCustomizeChanged() {
         // The customize state changed, so our height changed.
         mContainer.updateExpansion();
-        mQSPanelScrollView.setVisibility(!mQSCustomizerController.isCustomizing() ? View.VISIBLE
-                : View.INVISIBLE);
-        mFooter.setVisibility(
-                !mQSCustomizerController.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
+        boolean customizing = isCustomizing();
+        mQSPanelScrollView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
+        mFooter.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
+        mHeader.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.
         mPanelView.onQsHeightChanged();
