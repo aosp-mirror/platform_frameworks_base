@@ -7821,13 +7821,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // Compute configuration based on max supported width and height.
-        // Also account for the left / top insets (e.g. from display cutouts), which will be clipped
-        // away later in {@link Task#computeConfigResourceOverrides()}. Otherwise, the app
-        // bounds would end up too small.
-        outBounds.set(containingBounds.left, containingBounds.top,
-                activityWidth + containingAppBounds.left,
-                activityHeight + containingAppBounds.top);
+        // Compute configuration based on max or min supported width and height.
+        // Also account for the insets (e.g. display cutouts, navigation bar), which will be
+        // clipped away later in {@link Task#computeConfigResourceOverrides()}, i.e., the out
+        // bounds are the app bounds restricted by aspect ratio + clippable insets. Otherwise,
+        // the app bounds would end up too small.
+        int right = activityWidth + containingAppBounds.left;
+        if (right >= containingAppBounds.right) {
+            right += containingBounds.right - containingAppBounds.right;
+        }
+        int bottom = activityHeight + containingAppBounds.top;
+        if (bottom >= containingAppBounds.bottom) {
+            bottom += containingBounds.bottom - containingAppBounds.bottom;
+        }
+        outBounds.set(containingBounds.left, containingBounds.top, right, bottom);
 
         return true;
     }
