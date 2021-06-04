@@ -2684,9 +2684,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 } else {
                     result.addAll(approvedInfos);
 
-                    // If the other profile has an app that's of equal or higher approval, add it
+                    // If the other profile has an app that's higher approval, add it
                     if (xpDomainInfo != null
-                            && xpDomainInfo.highestApprovalLevel >= highestApproval) {
+                            && xpDomainInfo.highestApprovalLevel > highestApproval) {
                         result.add(xpDomainInfo.resolveInfo);
                     }
                 }
