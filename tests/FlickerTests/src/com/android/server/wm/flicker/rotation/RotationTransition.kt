@@ -88,7 +88,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
             testSpec.config.startRotation, testSpec.config.endRotation)
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun statusBarWindowIsAlwaysVisible() {
         testSpec.statusBarWindowIsAlwaysVisible()
@@ -128,7 +128,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun noUncoveredRegions() {
         testSpec.noUncoveredRegions(testSpec.config.startRotation,
@@ -141,7 +141,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.focusDoesNotChange()
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun appLayerRotates_StartingPos() {
         testSpec.assertLayersStart {
@@ -149,7 +149,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun appLayerRotates_EndingPos() {
         testSpec.assertLayersEnd {
