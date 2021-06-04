@@ -39,6 +39,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.CloseGuard;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -338,6 +339,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
     private static final int MESSAGE_HEADSET_SERVICE_CONNECTED = 100;
     private static final int MESSAGE_HEADSET_SERVICE_DISCONNECTED = 101;
 
+    private final CloseGuard mCloseGuard = new CloseGuard();
+
     private Context mContext;
     private ServiceListener mServiceListener;
     private volatile IBluetoothHeadset mService;
@@ -385,6 +388,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
         }
 
         doBind();
+        mCloseGuard.open("close");
     }
 
     private boolean doBind() {
@@ -438,6 +442,14 @@ public final class BluetoothHeadset implements BluetoothProfile {
         }
         mServiceListener = null;
         doUnbind();
+        mCloseGuard.close();
+    }
+
+    /** {@hide} */
+    @Override
+    protected void finalize() throws Throwable {
+        mCloseGuard.warnIfOpen();
+        close();
     }
 
     /**
