@@ -105,6 +105,11 @@ public class LatencyTracker {
      */
     public static final int ACTION_ROTATE_SCREEN_CAMERA_CHECK = 10;
 
+    /**
+     * Time it takes to start unlock animation .
+     */
+    public static final int ACTION_LOCKSCREEN_UNLOCK = 11;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -116,7 +121,8 @@ public class LatencyTracker {
         ACTION_FACE_WAKE_AND_UNLOCK,
         ACTION_START_RECENTS_ANIMATION,
         ACTION_ROTATE_SCREEN_SENSOR,
-        ACTION_ROTATE_SCREEN_CAMERA_CHECK
+        ACTION_ROTATE_SCREEN_CAMERA_CHECK,
+        ACTION_LOCKSCREEN_UNLOCK
     };
 
     /** @hide */
@@ -131,7 +137,8 @@ public class LatencyTracker {
         ACTION_FACE_WAKE_AND_UNLOCK,
         ACTION_START_RECENTS_ANIMATION,
         ACTION_ROTATE_SCREEN_SENSOR,
-        ACTION_ROTATE_SCREEN_CAMERA_CHECK
+        ACTION_ROTATE_SCREEN_CAMERA_CHECK,
+        ACTION_LOCKSCREEN_UNLOCK
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -148,7 +155,8 @@ public class LatencyTracker {
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FACE_WAKE_AND_UNLOCK,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_START_RECENTS_ANIMATION,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR,
-            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -229,6 +237,8 @@ public class LatencyTracker {
                 return "ACTION_ROTATE_SCREEN_CAMERA_CHECK";
             case 11:
                 return "ACTION_ROTATE_SCREEN_SENSOR";
+            case 12:
+                return "ACTION_LOCKSCREEN_UNLOCK";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }
