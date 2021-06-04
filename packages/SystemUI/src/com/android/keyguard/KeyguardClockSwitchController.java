@@ -342,7 +342,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
     }
 
-    void refreshFormat(String timeFormat) {
+    void refreshFormat() {
         if (mClockViewController != null) {
             mClockViewController.refreshFormat();
             mLargeClockViewController.refreshFormat();
