@@ -15,8 +15,11 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     package="com.android.frameworks.servicestests.install_split"
-     android:isolatedSplits="true">
+    package="com.android.frameworks.servicestests.install_split"
+    android:isolatedSplits="true"
+    android:versionCode="9001"
+    android:versionName="1.0"
+    >
 
     <application android:label="ClassloaderSplitApp">
         <activity android:name=".BaseActivity"
