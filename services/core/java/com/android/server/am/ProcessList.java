@@ -5043,6 +5043,7 @@ public final class ProcessList {
         final UidRecord uidRec = app.getUidRecord();
         if (mService.mConstants.mKillForceAppStandByAndCachedIdle
                 && uidRec != null && uidRec.isIdle()
+                && !app.mState.shouldNotKillOnForcedAppStandbyAndIdle()
                 && app.isCached() && app.mState.isForcedAppStandby()) {
             app.killLocked("cached idle & forced-app-standby",
                     ApplicationExitInfo.REASON_OTHER,
