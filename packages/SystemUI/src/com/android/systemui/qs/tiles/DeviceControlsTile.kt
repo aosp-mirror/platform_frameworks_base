@@ -96,21 +96,32 @@ class DeviceControlsTile @Inject constructor(
     }
 
     override fun handleClick(view: View?) {
-        if (state.state == Tile.STATE_ACTIVE) {
-            mUiHandler.post {
-                val i = Intent().apply {
-                    component = ComponentName(mContext, ControlsActivity::class.java)
-                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                    putExtra(ControlsUiController.EXTRA_ANIMATE, true)
-                }
-                if (keyguardStateController.isUnlocked()) {
-                    val animationController = view?.let {
-                        ActivityLaunchAnimator.Controller.fromView(it)
-                    }
-                    mActivityStarter.startActivity(i, true /* dismissShade */, animationController)
-                } else {
+        if (state.state == Tile.STATE_UNAVAILABLE) {
+            return
+        }
+
+        val intent = Intent().apply {
+            component = ComponentName(mContext, ControlsActivity::class.java)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra(ControlsUiController.EXTRA_ANIMATE, true)
+        }
+        val animationController = view?.let {
+            ActivityLaunchAnimator.Controller.fromView(it)
+        }
+
+        mUiHandler.post {
+            if (keyguardStateController.isUnlocked) {
+                mActivityStarter.startActivity(
+                        intent, true /* dismissShade */, animationController)
+            } else {
+                if (state.state == Tile.STATE_ACTIVE) {
                     mHost.collapsePanels()
-                    mContext.startActivity(i)
+                    // With an active tile, don't use ActivityStarter so that the activity is
+                    // started without prompting keyguard unlock.
+                    mContext.startActivity(intent)
+                } else {
+                    mActivityStarter.postStartActivityDismissingKeyguard(
+                            intent, 0 /* delay */, animationController)
                 }
             }
         }
