@@ -2862,9 +2862,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private void updateImeWindowStatus() {
+    private void updateImeWindowStatus(boolean disableImeIcon) {
         synchronized (mMethodMap) {
-            updateSystemUiLocked();
+            if (disableImeIcon) {
+                updateSystemUiLocked(0, mBackDisposition);
+            } else {
+                updateSystemUiLocked();
+            }
         }
     }
 
@@ -4413,9 +4417,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return true;
             }
             case MSG_UPDATE_IME_WINDOW_STATUS: {
-                synchronized (mMethodMap) {
-                    updateSystemUiLocked();
-                }
+                updateImeWindowStatus(msg.arg1 == 1);
                 return true;
             }
             // ---------------------------------------------------------
@@ -5085,9 +5087,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void updateImeWindowStatus() {
+        public void updateImeWindowStatus(boolean disableImeIcon) {
             mService.mHandler.sendMessage(
-                    mService.mHandler.obtainMessage(MSG_UPDATE_IME_WINDOW_STATUS));
+                    mService.mHandler.obtainMessage(MSG_UPDATE_IME_WINDOW_STATUS,
+                            disableImeIcon ? 1 : 0, 0));
         }
     }
 
