@@ -628,9 +628,9 @@
         58.0001 29.2229,56.9551 26.8945,55.195
     </string>
 
-    <!-- The radius of the enrollment progress bar, in pixels -->
+    <!-- The radius of the enrollment progress bar, in dp -->
     <integer name="config_udfpsEnrollProgressBar" translatable="false">
-        360
+        280
     </integer>
 
     <!-- package name of a built-in camera app to use to restrict implicit intent resolution
