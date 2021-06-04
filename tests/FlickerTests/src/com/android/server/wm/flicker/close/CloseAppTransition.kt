@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.close
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -83,7 +82,7 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.navBarLayerIsAlwaysVisible(rotatesScreen = testSpec.isRotated)
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     open fun statusBarLayerIsAlwaysVisible() {
         testSpec.statusBarLayerIsAlwaysVisible(rotatesScreen = testSpec.isRotated)
@@ -95,7 +94,7 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     open fun statusBarLayerRotatesScales() {
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
@@ -117,25 +116,25 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
-    @FlakyTest(bugId = 185400889)
+    @Presubmit
     @Test
     open fun noUncoveredRegions() {
         testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
     }
 
-    @FlakyTest(bugId = 185400889)
+    @Presubmit
     @Test
     open fun launcherReplacesAppWindowAsTopWindow() {
         testSpec.launcherReplacesAppWindowAsTopWindow(testApp)
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     open fun launcherWindowBecomesVisible() {
         testSpec.launcherWindowBecomesVisible()
     }
 
-    @FlakyTest(bugId = 185400889)
+    @Presubmit
     @Test
     open fun launcherLayerReplacesApp() {
         testSpec.launcherLayerReplacesApp(testApp)
