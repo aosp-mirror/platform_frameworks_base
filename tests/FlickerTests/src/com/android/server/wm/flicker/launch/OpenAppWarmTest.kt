@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -68,32 +67,14 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
 
     @FlakyTest
     @Test
-    override fun focusChanges() {
-        super.focusChanges()
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
     }
 
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() {
         super.navBarLayerRotatesAndScales()
-    }
-
-    @FlakyTest
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
-
-    @Presubmit
-    @Test
-    override fun launcherWindowBecomesInvisible() {
-        super.launcherWindowBecomesInvisible()
-    }
-
-    @FlakyTest
-    @Test
-    override fun noUncoveredRegions() {
-        super.noUncoveredRegions()
     }
 
     companion object {

@@ -19,7 +19,6 @@ package com.android.server.wm.flicker.launch
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -76,13 +75,13 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         testSpec.navBarWindowIsAlwaysVisible()
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun navBarLayerIsAlwaysVisible() {
         testSpec.navBarLayerIsAlwaysVisible(rotatesScreen = testSpec.isRotated)
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun navBarLayerRotatesAndScales() {
         testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)
@@ -94,7 +93,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         testSpec.statusBarWindowIsAlwaysVisible()
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun statusBarLayerIsAlwaysVisible() {
         testSpec.statusBarLayerIsAlwaysVisible(rotatesScreen = testSpec.isRotated)
@@ -135,13 +134,13 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         testSpec.focusChanges("NexusLauncherActivity", testApp.`package`)
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun appLayerReplacesLauncher() {
         testSpec.appLayerReplacesLauncher(testApp.`package`)
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun appWindowReplacesLauncherAsTopWindow() {
         testSpec.appWindowReplacesLauncherAsTopWindow(testApp)
