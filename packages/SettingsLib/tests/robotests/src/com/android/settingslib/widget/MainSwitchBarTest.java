@@ -76,6 +76,14 @@ public class MainSwitchBarTest {
     }
 
     @Test
+    public void getSwitch_shouldNotFocusableAndClickable() {
+        final Switch switchObj = mBar.getSwitch();
+
+        assertThat(switchObj.isFocusable()).isFalse();
+        assertThat(switchObj.isClickable()).isFalse();
+    }
+
+    @Test
     public void show_shouldVisible() {
         mBar.show();
 

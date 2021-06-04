@@ -51,7 +51,7 @@ package android {
   }
 
   public static final class R.attr {
-    field public static final int requestForegroundServiceExemption;
+    field public static final int requestForegroundServiceExemption = 16844362; // 0x101064a
   }
 
   public static final class R.bool {
@@ -63,8 +63,8 @@ package android {
   public static final class R.string {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultDialer = 17039395; // 0x1040023
-    field public static final int config_systemAutomotiveCluster;
-    field public static final int config_systemAutomotiveProjection;
+    field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
+    field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
     field public static final int config_systemGallery = 17039399; // 0x1040027
   }
 
@@ -1408,6 +1408,7 @@ package android.media {
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
     method public static final int[] getPublicStreamTypes();
     method public int getStreamMinVolumeInt(int);
+    method @NonNull public java.util.Map<java.lang.Integer,java.lang.Boolean> getSurroundFormats();
     method public boolean hasRegisteredDynamicPolicy();
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE}) public boolean isFullVolumeDevice();
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int requestAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String, int, int);
@@ -2853,6 +2854,10 @@ package android.view.accessibility {
 
   public static final class AccessibilityNodeInfo.TouchDelegateInfo implements android.os.Parcelable {
     method public long getAccessibilityIdForRegion(@NonNull android.graphics.Region);
+  }
+
+  public class AccessibilityRecord {
+    method public void setDisplayId(int);
   }
 
   public final class AccessibilityWindowInfo implements android.os.Parcelable {

@@ -693,7 +693,6 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
         // UdfpsController is not BiometricPrompt-specific. It can be active for keyguard or
         // enrollment.
         if (mUdfpsController != null) {

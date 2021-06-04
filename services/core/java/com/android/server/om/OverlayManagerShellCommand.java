@@ -35,12 +35,9 @@ import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.util.TypedValue;
 
-import com.android.internal.util.ArrayUtils;
-
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,9 +100,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    Print debugging information about the overlay manager.");
         out.println("    With optional parameters PACKAGE and NAME, limit output to the specified");
         out.println("    overlay or target. With optional parameter FIELD, limit output to");
-        out.println("    the value of that SettingsItem field. Field names are");
-        out.println("    case insensitive and out.println the m prefix can be omitted,");
-        out.println("    so the following are equivalent: mState, mstate, State, state.");
+        out.println("    the corresponding SettingsItem field. Field names are all lower case");
+        out.println("    and omit the m prefix, i.e. 'userid' for SettingsItem.mUserId.");
         out.println("  list [--user USER_ID] [PACKAGE[:NAME]]");
         out.println("    Print information about target and overlay packages.");
         out.println("    Overlay packages are printed in priority order. With optional");
@@ -129,6 +125,11 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    Load a package and print the value of a given resource");
         out.println("    applying the current configuration and enabled overlays.");
         out.println("    For a more fine-grained alternative, use 'idmap2 lookup'.");
+        out.println("  fabricate [--user USER_ID] [--target-name OVERLAYABLE] --target PACKAGE");
+        out.println("            --name NAME PACKAGE:TYPE/NAME ENCODED-TYPE-ID ENCODED-VALUE");
+        out.println("    Create an overlay from a single resource. Caller must be root. Example:");
+        out.println("      fabricate --target android --name LighterGray \\");
+        out.println("                android:color/lighter_gray 0x1c 0xffeeeeee");
     }
 
     private int runList() throws RemoteException {

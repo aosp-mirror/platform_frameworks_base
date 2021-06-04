@@ -1298,6 +1298,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.readList(record.mText, null);
         record.mSourceWindowId = parcel.readInt();
         record.mSourceNodeId = parcel.readLong();
+        record.mSourceDisplayId = parcel.readInt();
         record.mSealed = (parcel.readInt() == 1);
     }
 
@@ -1364,6 +1365,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeList(record.mText);
         parcel.writeInt(record.mSourceWindowId);
         parcel.writeLong(record.mSourceNodeId);
+        parcel.writeInt(record.mSourceDisplayId);
         parcel.writeInt(record.mSealed ? 1 : 0);
     }
 
@@ -1402,6 +1404,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             if (DEBUG) {
                 builder.append("; SourceWindowId: 0x").append(Long.toHexString(mSourceWindowId));
                 builder.append("; SourceNodeId: 0x").append(Long.toHexString(mSourceNodeId));
+                builder.append("; SourceDisplayId: ").append(mSourceDisplayId);
             }
             for (int i = 0; i < getRecordCount(); i++) {
                 builder.append("  Record ").append(i).append(":");

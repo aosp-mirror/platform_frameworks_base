@@ -6227,8 +6227,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // signature we just use the first package in the UID. For shared
                 // UIDs we may blame the wrong app but that is Okay as they are
                 // in the same security/privacy sandbox.
-                final AndroidPackage androidPackage = mPackageManagerInt
-                        .getPackage(Binder.getCallingUid());
+                final int uid = Binder.getCallingUid();
+                // Here we handle some of the special UIDs (mediaserver, systemserver, etc)
+                final String packageName = AppOpsManager.resolvePackageName(uid,
+                        /*packageName*/ null);
+                final AndroidPackage androidPackage;
+                if (packageName != null) {
+                    androidPackage = mPackageManagerInt.getPackage(packageName);
+                } else {
+                    androidPackage = mPackageManagerInt.getPackage(uid);
+                }
+                if (androidPackage == null) {
+                    Log.e(TAG, "Cannot find package for uid: " + uid);
+                    return null;
+                }
                 final AttributionSource attributionSource = new AttributionSource(
                         Binder.getCallingUid(), androidPackage.getPackageName(), null);
                 pfd = cph.provider.openFile(attributionSource, uri, "r", null);

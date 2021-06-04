@@ -281,6 +281,9 @@
     <allow-in-power-save package="com.android.cellbroadcastreceiver" />
     <allow-in-power-save package="com.android.shell" />
 
+    <!-- Emergency app needs to run in the background to reliably provide safety features -->
+    <allow-in-power-save package="com.android.emergency" />
+
     <!-- Whitelist system providers -->
     <!-- Calendar provider needs alarms while in idle -->
     <allow-in-power-save package="com.android.providers.calendar" />

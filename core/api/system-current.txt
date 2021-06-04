@@ -317,10 +317,10 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
-    field public static final int hotwordDetectionService;
+    field public static final int hotwordDetectionService = 16844326; // 0x1010626
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
-    field public static final int playHomeTransitionSound;
+    field public static final int playHomeTransitionSound = 16844358; // 0x1010646
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
     field public static final int sdkVersion = 16844304; // 0x1010610
@@ -353,8 +353,8 @@ package android {
   }
 
   public static final class R.string {
-    field public static final int config_customMediaKeyDispatcher;
-    field public static final int config_customMediaSessionPolicyProvider;
+    field public static final int config_customMediaKeyDispatcher = 17039404; // 0x104002c
+    field public static final int config_customMediaSessionPolicyProvider = 17039405; // 0x104002d
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultBrowser = 17039394; // 0x1040022
     field public static final int config_defaultCallRedirection = 17039397; // 0x1040025
@@ -367,24 +367,24 @@ package android {
     field public static final int config_helpIntentNameKey = 17039390; // 0x104001e
     field public static final int config_helpPackageNameKey = 17039387; // 0x104001b
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
-    field public static final int config_systemActivityRecognizer;
-    field public static final int config_systemAmbientAudioIntelligence;
-    field public static final int config_systemAudioIntelligence;
-    field public static final int config_systemAutomotiveCluster;
-    field public static final int config_systemAutomotiveProjection;
-    field public static final int config_systemCompanionDeviceProvider;
-    field public static final int config_systemContacts;
+    field public static final int config_systemActivityRecognizer = 17039416; // 0x1040038
+    field public static final int config_systemAmbientAudioIntelligence = 17039411; // 0x1040033
+    field public static final int config_systemAudioIntelligence = 17039412; // 0x1040034
+    field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
+    field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
+    field public static final int config_systemCompanionDeviceProvider = 17039417; // 0x1040039
+    field public static final int config_systemContacts = 17039403; // 0x104002b
     field public static final int config_systemGallery = 17039399; // 0x1040027
-    field public static final int config_systemNotificationIntelligence;
-    field public static final int config_systemShell;
-    field public static final int config_systemSpeechRecognizer;
-    field public static final int config_systemTelevisionNotificationHandler;
-    field public static final int config_systemTextIntelligence;
-    field public static final int config_systemUi;
-    field public static final int config_systemUiIntelligence;
-    field public static final int config_systemVisualIntelligence;
-    field public static final int config_systemWellbeing;
-    field public static final int config_systemWifiCoexManager;
+    field public static final int config_systemNotificationIntelligence = 17039413; // 0x1040035
+    field public static final int config_systemShell = 17039402; // 0x104002a
+    field public static final int config_systemSpeechRecognizer = 17039406; // 0x104002e
+    field public static final int config_systemTelevisionNotificationHandler = 17039409; // 0x1040031
+    field public static final int config_systemTextIntelligence = 17039414; // 0x1040036
+    field public static final int config_systemUi = 17039418; // 0x104003a
+    field public static final int config_systemUiIntelligence = 17039410; // 0x1040032
+    field public static final int config_systemVisualIntelligence = 17039415; // 0x1040037
+    field public static final int config_systemWellbeing = 17039408; // 0x1040030
+    field public static final int config_systemWifiCoexManager = 17039407; // 0x104002f
   }
 
   public static final class R.style {

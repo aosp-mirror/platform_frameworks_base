@@ -24167,7 +24167,13 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.onSystemReady();
 
         int[] grantPermissionsUserIds = EMPTY_INT_ARRAY;
-        for (int userId : UserManagerService.getInstance().getUserIds()) {
+        final List<UserInfo> livingUsers = mInjector.getUserManagerInternal().getUsers(
+                /* excludePartial= */ true,
+                /* excludeDying= */ true,
+                /* excludePreCreated= */ false);
+        final int livingUserCount = livingUsers.size();
+        for (int i = 0; i < livingUserCount; i++) {
+            final int userId = livingUsers.get(i).id;
             if (mPmInternal.isPermissionUpgradeNeeded(userId)) {
                 grantPermissionsUserIds = ArrayUtils.appendInt(
                         grantPermissionsUserIds, userId);

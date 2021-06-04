@@ -20,8 +20,10 @@ import static com.android.internal.util.CollectionUtils.isEmpty;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcelable;
+import android.view.Display;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -104,6 +106,7 @@ public class AccessibilityRecord {
     @UnsupportedAppUsage
     long mSourceNodeId = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
     int mSourceWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+    int mSourceDisplayId = Display.INVALID_DISPLAY;
 
     CharSequence mClassName;
     CharSequence mContentDescription;
@@ -199,6 +202,27 @@ public class AccessibilityRecord {
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mSourceWindowId,
                 mSourceNodeId, false, GET_SOURCE_PREFETCH_FLAGS, null);
+    }
+
+    /**
+     * Sets the display id.
+     *
+     * @param displayId The displayId id.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setDisplayId(int displayId) {
+        mSourceDisplayId = displayId;
+    }
+
+    /**
+     * Gets the id of the display from which the event comes from.
+     *
+     * @return The display id.
+     */
+    public int getDisplayId() {
+        return mSourceDisplayId;
     }
 
     /**
@@ -886,6 +910,7 @@ public class AccessibilityRecord {
         mText.addAll(record.mText);
         mSourceWindowId = record.mSourceWindowId;
         mSourceNodeId = record.mSourceNodeId;
+        mSourceDisplayId = record.mSourceDisplayId;
         mConnectionId = record.mConnectionId;
     }
 
@@ -914,6 +939,7 @@ public class AccessibilityRecord {
         mText.clear();
         mSourceNodeId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
         mSourceWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+        mSourceDisplayId = Display.INVALID_DISPLAY;
         mConnectionId = UNDEFINED;
     }
 

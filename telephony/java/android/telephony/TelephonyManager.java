@@ -8512,13 +8512,13 @@ public class TelephonyManager {
 
     /**
      * Get the PLMN chosen for Manual Network Selection if active.
-     * Return null string if in automatic selection.
+     * Return empty string if in automatic selection.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
      * READ_PRECISE_PHONE_STATE} or that the calling app has carrier privileges
      * (see {@link #hasCarrierPrivileges})
      *
-     * @return manually selected network info on success or null string on failure
+     * @return manually selected network info on success or empty string on failure
      */
     @SuppressAutoDoc // No support carrier privileges (b/72967236).
     @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
@@ -8531,7 +8531,7 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getManualNetworkSelectionPlmn RemoteException", ex);
         }
-        return null;
+        return "";
     }
 
     /**

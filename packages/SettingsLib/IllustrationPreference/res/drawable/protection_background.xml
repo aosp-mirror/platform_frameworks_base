@@ -16,11 +16,7 @@
 -->
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:top="@dimen/settingslib_illustration_padding"
-        android:left="@dimen/settingslib_illustration_padding"
-        android:right="@dimen/settingslib_illustration_padding"
-        android:bottom="@dimen/settingslib_illustration_padding">
+    <item>
         <shape android:shape="rectangle">
             <solid android:color="@color/settingslib_protection_color"/>
             <corners android:radius="28dp"/>

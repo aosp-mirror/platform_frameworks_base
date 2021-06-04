@@ -54,8 +54,7 @@ public class FragmentHostManager {
     private final View mRootView;
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
-                | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS
-                | ActivityInfo.CONFIG_UI_MODE);
+                | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
     private final FragmentService mManager;
     private final ExtensionFragmentManager mPlugins = new ExtensionFragmentManager();
 
