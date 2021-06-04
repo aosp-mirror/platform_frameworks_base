@@ -20,11 +20,11 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
-import android.annotation.SuppressLint;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
-import android.annotation.SystemApi;
+import android.content.Attributable;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
@@ -339,14 +339,17 @@ public final class BluetoothHidDevice implements BluetoothProfile {
 
         private final Executor mExecutor;
         private final Callback mCallback;
+        private final AttributionSource mAttributionSource;
 
-        CallbackWrapper(Executor executor, Callback callback) {
+        CallbackWrapper(Executor executor, Callback callback, AttributionSource attributionSource) {
             mExecutor = executor;
             mCallback = callback;
+            mAttributionSource = attributionSource;
         }
 
         @Override
         public void onAppStatusChanged(BluetoothDevice pluggedDevice, boolean registered) {
+            Attributable.setAttributionSource(pluggedDevice, mAttributionSource);
             final long token = clearCallingIdentity();
             try {
                 mExecutor.execute(() -> mCallback.onAppStatusChanged(pluggedDevice, registered));
@@ -357,6 +360,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
 
         @Override
         public void onConnectionStateChanged(BluetoothDevice device, int state) {
+            Attributable.setAttributionSource(device, mAttributionSource);
             final long token = clearCallingIdentity();
             try {
                 mExecutor.execute(() -> mCallback.onConnectionStateChanged(device, state));
@@ -367,6 +371,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
 
         @Override
         public void onGetReport(BluetoothDevice device, byte type, byte id, int bufferSize) {
+            Attributable.setAttributionSource(device, mAttributionSource);
             final long token = clearCallingIdentity();
             try {
                 mExecutor.execute(() -> mCallback.onGetReport(device, type, id, bufferSize));
@@ -377,6 +382,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
 
         @Override
         public void onSetReport(BluetoothDevice device, byte type, byte id, byte[] data) {
+            Attributable.setAttributionSource(device, mAttributionSource);
             final long token = clearCallingIdentity();
             try {
                 mExecutor.execute(() -> mCallback.onSetReport(device, type, id, data));
@@ -387,6 +393,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
 
         @Override
         public void onSetProtocol(BluetoothDevice device, byte protocol) {
+            Attributable.setAttributionSource(device, mAttributionSource);
             final long token = clearCallingIdentity();
             try {
                 mExecutor.execute(() -> mCallback.onSetProtocol(device, protocol));
@@ -397,6 +404,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
 
         @Override
         public void onInterruptData(BluetoothDevice device, byte reportId, byte[] data) {
+            Attributable.setAttributionSource(device, mAttributionSource);
             final long token = clearCallingIdentity();
             try {
                 mExecutor.execute(() -> mCallback.onInterruptData(device, reportId, data));
@@ -407,6 +415,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
 
         @Override
         public void onVirtualCableUnplug(BluetoothDevice device) {
+            Attributable.setAttributionSource(device, mAttributionSource);
             final long token = clearCallingIdentity();
             try {
                 mExecutor.execute(() -> mCallback.onVirtualCableUnplug(device));
@@ -449,7 +458,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = getService();
         if (service != null) {
             try {
-                return BluetoothDevice.setAttributionSource(
+                return Attributable.setAttributionSource(
                         service.getConnectedDevices(mAttributionSource), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
@@ -469,7 +478,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = getService();
         if (service != null) {
             try {
-                return BluetoothDevice.setAttributionSource(
+                return Attributable.setAttributionSource(
                         service.getDevicesMatchingConnectionStates(states, mAttributionSource),
                         mAttributionSource);
             } catch (RemoteException e) {
@@ -549,7 +558,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = getService();
         if (service != null) {
             try {
-                CallbackWrapper cbw = new CallbackWrapper(executor, callback);
+                CallbackWrapper cbw = new CallbackWrapper(executor, callback, mAttributionSource);
                 result = service.registerApp(sdp, inQos, outQos, cbw, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
