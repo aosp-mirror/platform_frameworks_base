@@ -59,7 +59,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemProperties;
@@ -412,10 +411,6 @@ public class TelephonyManager {
             return mContext.getAttributionTag();
         }
         return null;
-    }
-
-    private boolean isSystemProcess() {
-        return Process.myUid() == Process.SYSTEM_UID;
     }
 
     /**
@@ -4196,19 +4191,12 @@ public class TelephonyManager {
         try {
             IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null) {
-                Rlog.e(TAG, "IMSI error: Subscriber Info is null");
-                if (!isSystemProcess()) {
-                    throw new RuntimeException("IMSI error: Subscriber Info is null");
-                }
-                return;
+                throw new RuntimeException("IMSI error: Subscriber Info is null");
             }
             int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
             info.resetCarrierKeysForImsiEncryption(subId, mContext.getOpPackageName());
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getCarrierInfoForImsiEncryption RemoteException" + ex);
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#getCarrierInfoForImsiEncryption RemoteException" + ex);
         }
     }
 
@@ -5247,17 +5235,11 @@ public class TelephonyManager {
         try {
             final ITelephony telephony = getITelephony();
             if (telephony == null) {
-                if (!isSystemProcess()) {
-                    throw new RuntimeException("Telephony service unavailable");
-                }
                 return;
             }
             telephony.sendDialerSpecialCode(mContext.getOpPackageName(), inputCode);
         } catch (RemoteException ex) {
-            // This could happen if binder process crashes.
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#sendDialerSpecialCode RemoteException" + ex);
         }
     }
 
@@ -9534,9 +9516,7 @@ public class TelephonyManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#getMobileProvisioningUrl RemoteException" + ex);
         }
         return null;
     }
@@ -13375,9 +13355,7 @@ public class TelephonyManager {
                 return service.isDataEnabledForApn(apnType, getSubId(), pkgForDebug);
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#isDataEnabledForApn RemoteException" + ex);
         }
         return false;
     }
@@ -13397,9 +13375,7 @@ public class TelephonyManager {
                 return service.isApnMetered(apnType, getSubId());
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#isApnMetered RemoteException" + ex);
         }
         return true;
     }
@@ -13459,9 +13435,7 @@ public class TelephonyManager {
                 service.setSystemSelectionChannels(specifiers, getSubId(), aidlConsumer);
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#setSystemSelectionChannels RemoteException" + ex);
         }
     }
 
@@ -13489,9 +13463,7 @@ public class TelephonyManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#getSystemSelectionChannels RemoteException" + ex);
         }
         return new ArrayList<>();
     }
@@ -13520,9 +13492,7 @@ public class TelephonyManager {
                 return service.isMvnoMatched(getSubId(), mvnoType, mvnoMatchData);
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#matchesCurrentSimOperator RemoteException" + ex);
         }
         return false;
     }
@@ -13926,10 +13896,7 @@ public class TelephonyManager {
                 service.setMobileDataPolicyEnabledStatus(getSubId(), policy, enabled);
             }
         } catch (RemoteException ex) {
-            // This could happen if binder process crashes.
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#setMobileDataPolicyEnabled RemoteException" + ex);
         }
     }
 
@@ -13950,10 +13917,7 @@ public class TelephonyManager {
                 return service.isMobileDataPolicyEnabled(getSubId(), policy);
             }
         } catch (RemoteException ex) {
-            // This could happen if binder process crashes.
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#isMobileDataPolicyEnabled RemoteException" + ex);
         }
         return false;
     }
@@ -14457,9 +14421,7 @@ public class TelephonyManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#getEquivalentHomePlmns RemoteException" + ex);
         }
 
         return Collections.emptyList();
@@ -14553,9 +14515,7 @@ public class TelephonyManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#isRadioInterfaceCapabilitySupported RemoteException" + ex);
         }
         return false;
     }
