@@ -452,8 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Weniger dringende Benachrichtigungen unten"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Erneut tippen, um Benachrichtigung zu öffnen"</string>
-    <!-- no translation found for tap_again (1315420114387908655) -->
-    <skip />
+    <string name="tap_again" msgid="1315420114387908655">"Noch einmal tippen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Zum Öffnen nach oben wischen"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Zum Wiederholen nach oben wischen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Zur Verwendung von NFC entsperren"</string>
