@@ -25,10 +25,17 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+import android.annotation.NonNull;
 import android.app.appsearch.PackageIdentifier;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
+import android.os.UserHandle;
+import android.util.ArrayMap;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -43,39 +50,47 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.Mockito;
 
 import java.util.Collections;
+import java.util.Map;
 
 public class VisibilityStoreTest {
-
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
-    private MockPackageManager mMockPackageManager = new MockPackageManager();
+    private final Map<UserHandle, PackageManager> mMockPackageManagers = new ArrayMap<>();
     private Context mContext;
-    private AppSearchImpl mAppSearchImpl;
     private VisibilityStore mVisibilityStore;
     private int mUid;
 
     @Before
     public void setUp() throws Exception {
         Context context = ApplicationProvider.getApplicationContext();
-        mContext =
-                new ContextWrapper(context) {
+        mContext = new ContextWrapper(context) {
+            @Override
+            public Context createContextAsUser(UserHandle user, int flags) {
+                return new ContextWrapper(super.createContextAsUser(user, flags)) {
                     @Override
                     public PackageManager getPackageManager() {
-                        return mMockPackageManager.getMockPackageManager();
+                        return getMockPackageManager(user);
                     }
                 };
+            }
+
+            @Override
+            public PackageManager getPackageManager() {
+                return createContextAsUser(getUser(), /*flags=*/ 0).getPackageManager();
+            }
+        };
 
         // Give ourselves global query permissions
-        mAppSearchImpl =
+        AppSearchImpl appSearchImpl =
                 AppSearchImpl.create(
                         mTemporaryFolder.newFolder(),
                         mContext,
-                        mContext.getUserId(),
                         /*logger=*/ null);
 
         mUid = mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
-        mVisibilityStore = mAppSearchImpl.getVisibilityStoreLocked();
+        mVisibilityStore = appSearchImpl.getVisibilityStoreLocked();
     }
 
     /**
@@ -103,8 +118,10 @@ public class VisibilityStoreTest {
     @Test
     public void testSetVisibility_platformSurfaceable() throws Exception {
         // Make sure we have global query privileges
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName(), PERMISSION_GRANTED);
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager
+                .checkPermission(READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName()))
+                .thenReturn(PERMISSION_GRANTED);
 
         mVisibilityStore.setVisibility(
                 "package",
@@ -210,10 +227,13 @@ public class VisibilityStoreTest {
         int uidNotFooOrBar = 3;
 
         // Make sure none of them have global query privileges
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo, PERMISSION_DENIED);
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, packageNameBar, PERMISSION_DENIED);
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager
+                .checkPermission(READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo))
+                .thenReturn(PERMISSION_DENIED);
+        when(mockPackageManager
+                .checkPermission(READ_GLOBAL_APP_SEARCH_DATA, packageNameBar))
+                .thenReturn(PERMISSION_DENIED);
 
         // By default, a schema isn't package accessible.
         assertThat(
@@ -237,32 +257,43 @@ public class VisibilityStoreTest {
                         ImmutableList.of(new PackageIdentifier(packageNameBar, sha256CertBar))));
 
         // Should fail if PackageManager doesn't see that it has the proper certificate
-        mMockPackageManager.mockGetPackageUidAsUser(packageNameFoo, mContext.getUserId(), uidFoo);
-        mMockPackageManager.mockRemoveSigningCertificate(packageNameFoo, sha256CertFoo);
+        when(mockPackageManager.getPackageUid(eq(packageNameFoo), /*flags=*/ anyInt()))
+                .thenReturn(uidFoo);
+        when(mockPackageManager.hasSigningCertificate(
+                packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
+                .thenReturn(false);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
                 .isFalse();
 
         // Should fail if PackageManager doesn't think the package belongs to the uid
-        mMockPackageManager.mockGetPackageUidAsUser(
-                packageNameFoo, mContext.getUserId(), uidNotFooOrBar);
-        mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
+        when(mockPackageManager.getPackageUid(eq(packageNameFoo), /*flags=*/ anyInt()))
+                .thenReturn(uidNotFooOrBar);
+        when(mockPackageManager.hasSigningCertificate(
+                packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
+                .thenReturn(true);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
                 .isFalse();
 
         // But if uid and certificate match, then we should have access
-        mMockPackageManager.mockGetPackageUidAsUser(packageNameFoo, mContext.getUserId(), uidFoo);
-        mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
+        when(mockPackageManager.getPackageUid(eq(packageNameFoo), /*flags=*/ anyInt()))
+                .thenReturn(uidFoo);
+        when(mockPackageManager.hasSigningCertificate(
+                packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
+                .thenReturn(true);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
                 .isTrue();
 
-        mMockPackageManager.mockGetPackageUidAsUser(packageNameBar, mContext.getUserId(), uidBar);
-        mMockPackageManager.mockAddSigningCertificate(packageNameBar, sha256CertBar);
+        when(mockPackageManager.getPackageUid(eq(packageNameBar), /*flags=*/ anyInt()))
+                .thenReturn(uidBar);
+        when(mockPackageManager.hasSigningCertificate(
+                packageNameBar, sha256CertBar, PackageManager.CERT_INPUT_SHA256))
+                .thenReturn(true);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package", "database", "prefix/schemaBar", packageNameBar, uidBar))
@@ -278,15 +309,21 @@ public class VisibilityStoreTest {
                         "prefix/schemaFoo",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))));
 
-        mMockPackageManager.mockGetPackageUidAsUser(packageNameFoo, mContext.getUserId(), uidFoo);
-        mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
+        when(mockPackageManager.getPackageUid(eq(packageNameFoo), /*flags=*/ anyInt()))
+                .thenReturn(uidFoo);
+        when(mockPackageManager.hasSigningCertificate(
+                packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
+                .thenReturn(true);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
                 .isTrue();
 
-        mMockPackageManager.mockGetPackageUidAsUser(packageNameBar, mContext.getUserId(), uidBar);
-        mMockPackageManager.mockAddSigningCertificate(packageNameBar, sha256CertBar);
+        when(mockPackageManager.getPackageUid(eq(packageNameBar), /*flags=*/ anyInt()))
+                .thenReturn(uidBar);
+        when(mockPackageManager.hasSigningCertificate(
+                packageNameBar, sha256CertBar, PackageManager.CERT_INPUT_SHA256))
+                .thenReturn(true);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package", "database", "prefix/schemaBar", packageNameBar, uidBar))
@@ -302,11 +339,13 @@ public class VisibilityStoreTest {
         int uidFoo = 1;
 
         // Pretend we can't find the Foo package.
-        mMockPackageManager.mockThrowsNameNotFoundException(packageNameFoo);
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager.getPackageUid(eq(packageNameFoo), /*flags=*/ anyInt()))
+                .thenThrow(new PackageManager.NameNotFoundException());
 
         // Make sure "foo" doesn't have global query privileges
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo, PERMISSION_DENIED);
+        when(mockPackageManager.checkPermission(READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo))
+                .thenReturn(PERMISSION_DENIED);
 
         // Grant package access
         mVisibilityStore.setVisibility(
@@ -332,10 +371,12 @@ public class VisibilityStoreTest {
         int uidFoo = 1;
 
         // Set it up such that the test package has global query privileges, but "foo" doesn't.
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName(), PERMISSION_GRANTED);
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo, PERMISSION_DENIED);
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager.checkPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName()))
+                .thenReturn(PERMISSION_GRANTED);
+        when(mockPackageManager.checkPermission(READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo))
+                .thenReturn(PERMISSION_DENIED);
 
         mVisibilityStore.setVisibility(
                 /*packageName=*/ "",
@@ -354,8 +395,11 @@ public class VisibilityStoreTest {
                                 mUid))
                 .isTrue();
 
-        mMockPackageManager.mockGetPackageUidAsUser(packageNameFoo, mContext.getUserId(), uidFoo);
-        mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
+        when(mockPackageManager.getPackageUid(eq(packageNameFoo), /*flags=*/ anyInt()))
+                .thenReturn(uidFoo);
+        when(mockPackageManager.hasSigningCertificate(
+                packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
+                .thenReturn(true);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 /*packageName=*/ "",
@@ -364,5 +408,15 @@ public class VisibilityStoreTest {
                                 packageNameFoo,
                                 uidFoo))
                 .isTrue();
+    }
+
+    @NonNull
+    private PackageManager getMockPackageManager(@NonNull UserHandle user) {
+        PackageManager pm = mMockPackageManagers.get(user);
+        if (pm == null) {
+            pm = Mockito.mock(PackageManager.class);
+            mMockPackageManagers.put(user, pm);
+        }
+        return pm;
     }
 }

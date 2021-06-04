@@ -86,7 +86,6 @@ public class AppSearchImplTest {
                 AppSearchImpl.create(
                         mTemporaryFolder.newFolder(),
                         context,
-                        VisibilityStore.NO_OP_USER_ID,
                         /*logger=*/ null);
     }
 
@@ -494,9 +493,7 @@ public class AppSearchImplTest {
         // Setup the index
         Context context = ApplicationProvider.getApplicationContext();
         File appsearchDir = mTemporaryFolder.newFolder();
-        AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(
-                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
+        AppSearchImpl appSearchImpl = AppSearchImpl.create(appsearchDir, context, /*logger=*/ null);
 
         // Insert schema
         List<AppSearchSchema> schemas =
@@ -557,9 +554,7 @@ public class AppSearchImplTest {
 
         // Initialize AppSearchImpl. This should cause a reset.
         appSearchImpl.close();
-        appSearchImpl =
-                AppSearchImpl.create(
-                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, testLogger);
+        appSearchImpl = AppSearchImpl.create(appsearchDir, context, testLogger);
 
         // Check recovery state
         InitializeStats initStats = testLogger.mInitializeStats;
@@ -1688,7 +1683,6 @@ public class AppSearchImplTest {
                 AppSearchImpl.create(
                         mTemporaryFolder.newFolder(),
                         context,
-                        VisibilityStore.NO_OP_USER_ID,
                         /*logger=*/ null);
 
         // Initial check that we could do something at first.
@@ -1836,9 +1830,7 @@ public class AppSearchImplTest {
         // Setup the index
         Context context = ApplicationProvider.getApplicationContext();
         File appsearchDir = mTemporaryFolder.newFolder();
-        AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(
-                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
+        AppSearchImpl appSearchImpl = AppSearchImpl.create(appsearchDir, context, /*logger=*/ null);
 
         List<AppSearchSchema> schemas =
                 Collections.singletonList(new AppSearchSchema.Builder("type").build());
@@ -1864,8 +1856,7 @@ public class AppSearchImplTest {
 
         // That document should be visible even from another instance.
         AppSearchImpl appSearchImpl2 =
-                AppSearchImpl.create(
-                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
+                AppSearchImpl.create(appsearchDir, context, /*logger=*/ null);
         getResult =
                 appSearchImpl2.getDocument(
                         "package", "database", "namespace1", "id1", Collections.emptyMap());
@@ -1877,9 +1868,7 @@ public class AppSearchImplTest {
         // Setup the index
         Context context = ApplicationProvider.getApplicationContext();
         File appsearchDir = mTemporaryFolder.newFolder();
-        AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(
-                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
+        AppSearchImpl appSearchImpl = AppSearchImpl.create(appsearchDir, context, /*logger=*/ null);
 
         List<AppSearchSchema> schemas =
                 Collections.singletonList(new AppSearchSchema.Builder("type").build());
@@ -1929,8 +1918,7 @@ public class AppSearchImplTest {
 
         // Only the second document should be retrievable from another instance.
         AppSearchImpl appSearchImpl2 =
-                AppSearchImpl.create(
-                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
+                AppSearchImpl.create(appsearchDir, context, /*logger=*/ null);
         expectThrows(
                 AppSearchException.class,
                 () ->
@@ -1951,9 +1939,7 @@ public class AppSearchImplTest {
         // Setup the index
         Context context = ApplicationProvider.getApplicationContext();
         File appsearchDir = mTemporaryFolder.newFolder();
-        AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(
-                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
+        AppSearchImpl appSearchImpl = AppSearchImpl.create(appsearchDir, context, /*logger=*/ null);
 
         List<AppSearchSchema> schemas =
                 Collections.singletonList(new AppSearchSchema.Builder("type").build());
@@ -2011,8 +1997,7 @@ public class AppSearchImplTest {
 
         // Only the second document should be retrievable from another instance.
         AppSearchImpl appSearchImpl2 =
-                AppSearchImpl.create(
-                        appsearchDir, context, VisibilityStore.NO_OP_USER_ID, /*logger=*/ null);
+                AppSearchImpl.create(appsearchDir, context, /*logger=*/ null);
         expectThrows(
                 AppSearchException.class,
                 () ->

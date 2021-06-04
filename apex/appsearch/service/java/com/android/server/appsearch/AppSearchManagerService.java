@@ -17,11 +17,10 @@ package com.android.server.appsearch;
 
 import static android.app.appsearch.AppSearchResult.throwableToFailedResult;
 import static android.os.Process.INVALID_UID;
-import static android.os.UserHandle.USER_NULL;
 
+import android.Manifest;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
-import android.app.ActivityManager;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchMigrationHelper;
 import android.app.appsearch.AppSearchResult;
@@ -63,6 +62,7 @@ import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.stats.LoggerInstanceManager;
 import com.android.server.appsearch.stats.PlatformLogger;
+import com.android.server.appsearch.util.PackageUtil;
 import com.android.server.usage.StorageStatsManagerLocal;
 import com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter;
 
@@ -124,8 +124,10 @@ public class AppSearchManagerService extends SystemService {
     }
 
     private void registerReceivers() {
-        mContext.registerReceiverAsUser(new UserActionReceiver(), UserHandle.ALL,
-                new IntentFilter(Intent.ACTION_USER_REMOVED), /*broadcastPermission=*/ null,
+        mContext.registerReceiverForAllUsers(
+                new UserActionReceiver(),
+                new IntentFilter(Intent.ACTION_USER_REMOVED),
+                /*broadcastPermission=*/ null,
                 /*scheduler=*/ null);
 
         //TODO(b/145759910) Add a direct callback when user clears the data instead of relying on
@@ -135,8 +137,10 @@ public class AppSearchManagerService extends SystemService {
         packageChangedFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
         packageChangedFilter.addDataScheme("package");
         packageChangedFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        mContext.registerReceiverAsUser(new PackageChangedReceiver(), UserHandle.ALL,
-                packageChangedFilter, /*broadcastPermission=*/ null,
+        mContext.registerReceiverForAllUsers(
+                new PackageChangedReceiver(),
+                packageChangedFilter,
+                /*broadcastPermission=*/ null,
                 /*scheduler=*/ null);
     }
 
@@ -148,12 +152,13 @@ public class AppSearchManagerService extends SystemService {
 
             switch (intent.getAction()) {
                 case Intent.ACTION_USER_REMOVED:
-                    int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
-                    if (userId == USER_NULL) {
-                        Log.e(TAG, "userId is missing in the intent: " + intent);
+                    UserHandle userHandle = intent.getParcelableExtra(Intent.EXTRA_USER);
+                    if (userHandle == null) {
+                        Log.e(TAG, "Extra "
+                                + Intent.EXTRA_USER + " is missing in the intent: " + intent);
                         return;
                     }
-                    handleUserRemoved(UserHandle.of(userId));
+                    handleUserRemoved(userHandle);
                     break;
                 default:
                     Log.e(TAG, "Received unknown intent: " + intent);
@@ -1183,13 +1188,9 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(actualCallingUser);
             Objects.requireNonNull(claimedCallingPackage);
 
-            int claimedCallingUid;
-            try {
-                Context claimedCallingContext =
-                        mContext.createContextAsUser(actualCallingUser, /*flags=*/ 0);
-                claimedCallingUid = claimedCallingContext.getPackageManager().getPackageUid(
-                        claimedCallingPackage, /*flags=*/ 0);
-            } catch (PackageManager.NameNotFoundException e) {
+            int claimedCallingUid = PackageUtil.getPackageUidAsUser(
+                    mContext, claimedCallingPackage, actualCallingUser);
+            if (claimedCallingUid == INVALID_UID) {
                 throw new SecurityException(
                         "Specified calling package [" + claimedCallingPackage + "] not found");
             }
@@ -1257,23 +1258,44 @@ public class AppSearchManagerService extends SystemService {
      *
      * <p>Takes care of checking permissions and converting USER_CURRENT to the actual current user.
      *
+     * @param requestedUser The user which the caller is requesting to execute as.
+     * @param callingUid The actual uid of the caller as determined by Binder.
      * @return the user handle that the call should run as. Will always be a concrete user.
      */
     // TODO(b/173553485) verifying that the caller has permission to access target user's data
     // TODO(b/173553485) Handle ACTION_USER_REMOVED broadcast
     // TODO(b/173553485) Implement SystemService.onUserStopping()
     @NonNull
-    private static UserHandle handleIncomingUser(@NonNull UserHandle userHandle, int callingUid) {
+    private UserHandle handleIncomingUser(@NonNull UserHandle requestedUser, int callingUid) {
         int callingPid = Binder.getCallingPid();
-        int finalUserId = ActivityManager.handleIncomingUser(
+        UserHandle callingUser = UserHandle.getUserHandleForUid(callingUid);
+        if (callingUser.equals(requestedUser)) {
+            return requestedUser;
+        }
+        // Duplicates UserController#ensureNotSpecialUser
+        if (requestedUser.getIdentifier() < 0) {
+            throw new IllegalArgumentException(
+                    "Call does not support special user " + requestedUser);
+        }
+        boolean canInteractAcrossUsers = mContext.checkPermission(
+                Manifest.permission.INTERACT_ACROSS_USERS,
                 callingPid,
-                callingUid,
-                userHandle.getIdentifier(),
-                /*allowAll=*/ false,
-                /*requireFull=*/ false,
-                /*name=*/ null,
-                /*callerPackage=*/ null);
-        return UserHandle.of(finalUserId);
+                callingUid) == PackageManager.PERMISSION_GRANTED;
+        if (!canInteractAcrossUsers) {
+            canInteractAcrossUsers = mContext.checkPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    callingPid,
+                    callingUid) == PackageManager.PERMISSION_GRANTED;
+        }
+        if (canInteractAcrossUsers) {
+            return requestedUser;
+        }
+        throw new SecurityException(
+                "Permission denied while calling from uid " + callingUid
+                        + " with " + requestedUser + "; Need to run as either the calling user ("
+                        + callingUser + "), or with one of the following permissions: "
+                        + Manifest.permission.INTERACT_ACROSS_USERS + " or "
+                        + Manifest.permission.INTERACT_ACROSS_USERS_FULL);
     }
 
     // TODO(b/179160886): Cache the previous storage stats.

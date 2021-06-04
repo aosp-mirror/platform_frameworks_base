@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -36,6 +35,7 @@ import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
+import com.android.server.appsearch.util.PackageUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -493,21 +493,13 @@ public final class PlatformLogger implements AppSearchLogger {
     @GuardedBy("mLock")
     private int getPackageUidAsUserLocked(@NonNull String packageName) {
         Integer packageUid = mPackageUidCacheLocked.get(packageName);
-        if (packageUid != null) {
-            return packageUid;
+        if (packageUid == null) {
+            packageUid = PackageUtil.getPackageUidAsUser(mContext, packageName, mUserHandle);
+            if (packageUid != Process.INVALID_UID) {
+                mPackageUidCacheLocked.put(packageName, packageUid);
+            }
         }
-
-        // TODO(b/173532925) since VisibilityStore has the same method, we can make this a
-        //  utility function
-        try {
-            packageUid = mContext.getPackageManager().getPackageUidAsUser(
-                    packageName, mUserHandle.getIdentifier());
-            mPackageUidCacheLocked.put(packageName, packageUid);
-            return packageUid;
-        } catch (PackageManager.NameNotFoundException e) {
-            // Package doesn't exist, continue
-        }
-        return Process.INVALID_UID;
+        return packageUid;
     }
 
     //

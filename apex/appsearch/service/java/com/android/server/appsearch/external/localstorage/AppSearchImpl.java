@@ -201,7 +201,6 @@ public final class AppSearchImpl implements Closeable {
     public static AppSearchImpl create(
             @NonNull File icingDir,
             @NonNull Context userContext,
-            int userId,
             @Nullable AppSearchLogger logger)
             throws AppSearchException {
         Objects.requireNonNull(icingDir);
@@ -213,8 +212,7 @@ public final class AppSearchImpl implements Closeable {
             initStatsBuilder = new InitializeStats.Builder();
         }
 
-        AppSearchImpl appSearchImpl =
-                new AppSearchImpl(icingDir, userContext, userId, initStatsBuilder);
+        AppSearchImpl appSearchImpl = new AppSearchImpl(icingDir, userContext, initStatsBuilder);
 
         long prepareVisibilityStoreLatencyStartMillis = SystemClock.elapsedRealtime();
         appSearchImpl.initializeVisibilityStore();
@@ -238,7 +236,6 @@ public final class AppSearchImpl implements Closeable {
     private AppSearchImpl(
             @NonNull File icingDir,
             @NonNull Context userContext,
-            int userId,
             @Nullable InitializeStats.Builder initStatsBuilder)
             throws AppSearchException {
         mReadWriteLock.writeLock().lock();
@@ -256,7 +253,7 @@ public final class AppSearchImpl implements Closeable {
                     "Constructing IcingSearchEngine, response",
                     Objects.hashCode(mIcingSearchEngineLocked));
 
-            mVisibilityStoreLocked = new VisibilityStore(this, userContext, userId);
+            mVisibilityStoreLocked = new VisibilityStore(this, userContext);
 
             // The core initialization procedure. If any part of this fails, we bail into
             // resetLocked(), deleting all data (but hopefully allowing AppSearchImpl to come up).

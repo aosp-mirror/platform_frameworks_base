@@ -18,7 +18,6 @@ package com.android.server.appsearch.visibilitystore;
 import static android.Manifest.permission.READ_GLOBAL_APP_SEARCH_DATA;
 
 import android.annotation.NonNull;
-import android.annotation.UserIdInt;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
@@ -27,7 +26,6 @@ import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -35,6 +33,7 @@ import android.util.ArraySet;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
+import com.android.server.appsearch.util.PackageUtil;
 
 import com.google.android.icing.proto.PersistType;
 
@@ -67,9 +66,6 @@ import java.util.Set;
  * @hide
  */
 public class VisibilityStore {
-
-    private static final String TAG = "AppSearchVisibilityStore";
-
     /** No-op user id that won't have any visibility settings. */
     public static final int NO_OP_USER_ID = -1;
 
@@ -95,9 +91,6 @@ public class VisibilityStore {
     // Context of the user that the call is being made as.
     private final Context mUserContext;
 
-    // User ID of the caller who we're checking visibility settings for.
-    private final int mUserId;
-
     /** Stores the schemas that are platform-hidden. All values are prefixed. */
     private final NotPlatformSurfaceableMap mNotPlatformSurfaceableMap =
             new NotPlatformSurfaceableMap();
@@ -112,13 +105,9 @@ public class VisibilityStore {
      * @param appSearchImpl AppSearchImpl instance
      * @param userContext Context of the user that the call is being made as
      */
-    public VisibilityStore(
-            @NonNull AppSearchImpl appSearchImpl,
-            @NonNull Context userContext,
-            @UserIdInt int userId) {
+    public VisibilityStore(@NonNull AppSearchImpl appSearchImpl, @NonNull Context userContext) {
         mAppSearchImpl = appSearchImpl;
-        mUserContext = userContext;
-        mUserId = userId;
+        mUserContext = Objects.requireNonNull(userContext);
     }
 
     /**
@@ -348,6 +337,9 @@ public class VisibilityStore {
         Set<PackageIdentifier> packageIdentifiers =
                 mPackageAccessibleMap.getAccessiblePackages(
                         packageName, databaseName, prefixedSchema);
+        if (packageIdentifiers.isEmpty()) {
+            return false;
+        }
         for (PackageIdentifier packageIdentifier : packageIdentifiers) {
             // TODO(b/169883602): Consider caching the UIDs of packages. Looking this up in the
             // package manager could be costly. We would also need to update the cache on
@@ -357,9 +349,10 @@ public class VisibilityStore {
             // the callerUid since clients can createContextAsUser with some other user, and then
             // make calls to us. So just check if the appId portion of the uid is the same. This is
             // essentially UserHandle.isSameApp, but that's not a system API for us to use.
-            int callerAppId = UserHandle.getAppId((callerUid));
-            int userAppId =
-                    UserHandle.getAppId(getPackageUidAsUser(packageIdentifier.getPackageName()));
+            int callerAppId = UserHandle.getAppId(callerUid);
+            int packageUid =
+                    PackageUtil.getPackageUid(mUserContext, packageIdentifier.getPackageName());
+            int userAppId = UserHandle.getAppId(packageUid);
             if (callerAppId != userAppId) {
                 continue;
             }
@@ -400,18 +393,5 @@ public class VisibilityStore {
     private static String getVisibilityDocumentId(
             @NonNull String packageName, @NonNull String databaseName) {
         return ID_PREFIX + PrefixUtil.createPrefix(packageName, databaseName);
-    }
-
-    /**
-     * Finds the UID of the {@code packageName}. Returns {@link Process#INVALID_UID} if unable to
-     * find the UID.
-     */
-    private int getPackageUidAsUser(@NonNull String packageName) {
-        try {
-            return mUserContext.getPackageManager().getPackageUidAsUser(packageName, mUserId);
-        } catch (PackageManager.NameNotFoundException e) {
-            // Package doesn't exist, continue
-        }
-        return Process.INVALID_UID;
     }
 }

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -29,46 +30,46 @@ import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.SparseIntArray;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.android.server.appsearch.external.localstorage.MockPackageManager;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 public class PlatformLoggerTest {
     private static final int TEST_MIN_TIME_INTERVAL_BETWEEN_SAMPLES_MILLIS = 100;
     private static final int TEST_DEFAULT_SAMPLING_INTERVAL = 10;
     private static final String TEST_PACKAGE_NAME = "packageName";
-    private MockPackageManager mMockPackageManager = new MockPackageManager();
+
+    private final Map<UserHandle, PackageManager> mMockPackageManagers = new ArrayMap<>();
     private Context mContext;
 
     @Before
     public void setUp() throws Exception {
         Context context = ApplicationProvider.getApplicationContext();
-        mContext =
-                new ContextWrapper(context) {
+        mContext = new ContextWrapper(context) {
+            @Override
+            public Context createContextAsUser(UserHandle user, int flags) {
+                return new ContextWrapper(super.createContextAsUser(user, flags)) {
                     @Override
                     public PackageManager getPackageManager() {
-                        return mMockPackageManager.getMockPackageManager();
+                        return getMockPackageManager(user);
                     }
                 };
-    }
-
-    static int calculateHashCodeMd5withBigInteger(@NonNull String str) throws
-            NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(str.getBytes(/*charsetName=*/ "UTF-8"));
-        byte[] digest = md.digest();
-        return new BigInteger(digest).intValue();
+            }
+        };
     }
 
     @Test
@@ -294,39 +295,51 @@ public class PlatformLoggerTest {
                         TEST_MIN_TIME_INTERVAL_BETWEEN_SAMPLES_MILLIS,
                         TEST_DEFAULT_SAMPLING_INTERVAL,
                         /*samplingIntervals=*/ new SparseIntArray()));
-        mMockPackageManager.mockGetPackageUidAsUser(testPackageName, mContext.getUserId(), testUid);
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager.getPackageUid(testPackageName, /*flags=*/0)).thenReturn(testUid);
 
-        //
         // First time, no cache
-        //
         PlatformLogger.ExtraStats extraStats = logger.createExtraStatsLocked(testPackageName,
                 CallStats.CALL_TYPE_PUT_DOCUMENT);
-
-        verify(mMockPackageManager.getMockPackageManager(), times(1)).getPackageUidAsUser(
-                eq(testPackageName), /*userId=*/ anyInt());
+        verify(mockPackageManager, times(1))
+                .getPackageUid(eq(testPackageName), /*flags=*/ anyInt());
         assertThat(extraStats.mPackageUid).isEqualTo(testUid);
 
-        //
         // Second time, we have cache
-        //
         extraStats = logger.createExtraStatsLocked(testPackageName,
                 CallStats.CALL_TYPE_PUT_DOCUMENT);
 
         // Count is still one since we will use the cache
-        verify(mMockPackageManager.getMockPackageManager(), times(1)).getPackageUidAsUser(
-                eq(testPackageName), /*userId=*/ anyInt());
+        verify(mockPackageManager, times(1))
+                .getPackageUid(eq(testPackageName), /*flags=*/ anyInt());
         assertThat(extraStats.mPackageUid).isEqualTo(testUid);
 
-        //
         // Remove the cache and try again
-        //
         assertThat(logger.removeCachedUidForPackage(testPackageName)).isEqualTo(testUid);
         extraStats = logger.createExtraStatsLocked(testPackageName,
                 CallStats.CALL_TYPE_PUT_DOCUMENT);
 
         // count increased by 1 since cache is cleared
-        verify(mMockPackageManager.getMockPackageManager(), times(2)).getPackageUidAsUser(
-                eq(testPackageName), /*userId=*/ anyInt());
+        verify(mockPackageManager, times(2))
+                .getPackageUid(eq(testPackageName), /*flags=*/ anyInt());
         assertThat(extraStats.mPackageUid).isEqualTo(testUid);
+    }
+
+    private static int calculateHashCodeMd5withBigInteger(@NonNull String str)
+            throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.update(str.getBytes(StandardCharsets.UTF_8));
+        byte[] digest = md.digest();
+        return new BigInteger(digest).intValue();
+    }
+
+    @NonNull
+    private PackageManager getMockPackageManager(@NonNull UserHandle user) {
+        PackageManager pm = mMockPackageManagers.get(user);
+        if (pm == null) {
+            pm = Mockito.mock(PackageManager.class);
+            mMockPackageManagers.put(user, pm);
+        }
+        return pm;
     }
 }

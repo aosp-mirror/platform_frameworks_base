@@ -172,11 +172,6 @@ public final class ImplInstanceManager {
             @Nullable AppSearchLogger logger)
             throws AppSearchException {
         File appSearchDir = getAppSearchDir(userHandle);
-        // TODO(b/181787682): Swap AppSearchImpl and VisibilityStore to accept a UserHandle too
-        return AppSearchImpl.create(
-                appSearchDir,
-                userContext,
-                userHandle.getIdentifier(),
-                /*logger=*/ null);
+        return AppSearchImpl.create(appSearchDir, userContext, /*logger=*/ null);
     }
 }
