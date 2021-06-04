@@ -1551,6 +1551,20 @@ public class ApnSetting implements Parcelable {
     }
 
     /**
+     * Converts the APN type bitmask to an array of all APN types
+     * @param apnTypeBitmask bitmask of APN types.
+     * @return int array of APN types
+     * @hide
+     */
+    @NonNull
+    public static int[] getApnTypesFromBitmask(int apnTypeBitmask) {
+        return APN_TYPE_INT_MAP.keySet().stream()
+                .filter(type -> ((apnTypeBitmask & type) == type))
+                .mapToInt(Integer::intValue)
+                .toArray();
+    }
+
+    /**
      * Converts the integer representation of APN type to its string representation.
      *
      * @param apnType APN type as an integer
