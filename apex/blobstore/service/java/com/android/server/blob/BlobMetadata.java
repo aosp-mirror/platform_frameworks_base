@@ -403,6 +403,19 @@ class BlobMetadata {
         return null;
     }
 
+    boolean shouldAttributeToUser(int userId) {
+        synchronized (mMetadataLock) {
+            for (int i = 0, size = mLeasees.size(); i < size; ++i) {
+                final Leasee leasee = mLeasees.valueAt(i);
+                // Don't attribute the blob to userId if there is a lease on it from another user.
+                if (userId != UserHandle.getUserId(leasee.uid)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     boolean shouldAttributeToLeasee(@NonNull String packageName, int userId,
             boolean callerHasStatsPermission) {
         if (!isALeaseeInUser(packageName, INVALID_UID, userId)) {

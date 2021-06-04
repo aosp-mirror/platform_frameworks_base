@@ -1333,9 +1333,10 @@ public class BlobStoreManagerService extends SystemService {
                 blobsDataSize.getAndAdd(session.getSize());
             }, userHandle.getIdentifier());
 
-            // TODO(http://b/187460239): Update this to only include blobs available to userId.
             forEachBlob(blobMetadata -> {
-                blobsDataSize.getAndAdd(blobMetadata.getSize());
+                if (blobMetadata.shouldAttributeToUser(userHandle.getIdentifier())) {
+                    blobsDataSize.getAndAdd(blobMetadata.getSize());
+                }
             });
 
             stats.dataSize += blobsDataSize.get();
