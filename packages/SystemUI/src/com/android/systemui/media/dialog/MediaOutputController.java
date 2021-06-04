@@ -24,7 +24,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.MediaRoute2Info;
-import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -77,7 +76,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     private final boolean mAboveStatusbar;
     private final NotificationEntryManager mNotificationEntryManager;
-    private final MediaRouter2Manager mRouterManager;
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
 
@@ -94,8 +92,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     public MediaOutputController(@NonNull Context context, String packageName,
             boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
             lbm, ShadeController shadeController, ActivityStarter starter,
-            NotificationEntryManager notificationEntryManager, UiEventLogger uiEventLogger,
-            MediaRouter2Manager routerManager) {
+            NotificationEntryManager notificationEntryManager, UiEventLogger uiEventLogger) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
@@ -107,7 +104,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mUiEventLogger = uiEventLogger;
-        mRouterManager = routerManager;
     }
 
     void start(@NonNull Callback cb) {
@@ -138,9 +134,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mLocalMediaManager.stopScan();
         mLocalMediaManager.registerCallback(this);
         mLocalMediaManager.startScan();
-        if (mRouterManager != null) {
-            mRouterManager.startScan();
-        }
     }
 
     void stop() {
@@ -150,9 +143,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         if (mLocalMediaManager != null) {
             mLocalMediaManager.unregisterCallback(this);
             mLocalMediaManager.stopScan();
-        }
-        if (mRouterManager != null) {
-            mRouterManager.stopScan();
         }
         mMediaDevices.clear();
     }

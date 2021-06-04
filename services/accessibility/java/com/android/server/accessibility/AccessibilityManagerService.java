@@ -719,6 +719,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     "event=" + event + ";userId=" + userId);
         }
         boolean dispatchEvent = false;
+        int resolvedUserId;
 
         synchronized (mLock) {
             if (event.getWindowId() ==
@@ -734,8 +735,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
             // performs the current profile parent resolution.
-            final int resolvedUserId = mSecurityPolicy
-                    .resolveCallingUserIdEnforcingPermissionsLocked(userId);
+            resolvedUserId = mSecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(userId);
 
             // Make sure the reported package is one the caller has access to.
             event.setPackageName(mSecurityPolicy.resolveValidReportedPackageLocked(
@@ -767,12 +767,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             int displayId = Display.INVALID_DISPLAY;
             synchronized (mLock) {
                 final int windowId = event.getWindowId();
-                if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-                        && windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
+                if (windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
                     displayId = mA11yWindowManager.getDisplayIdByUserIdAndWindowIdLocked(
-                            mCurrentUserId, windowId);
+                            resolvedUserId, windowId);
+                    event.setDisplayId(displayId);
                 }
-                if (displayId != Display.INVALID_DISPLAY
+
+                if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+                        && displayId != Display.INVALID_DISPLAY
                         && mA11yWindowManager.isTrackingWindowsLocked(displayId)) {
                     shouldComputeWindows = true;
                 }

@@ -27,7 +27,7 @@ namespace aapt {
 
 static ApiVersion sDevelopmentSdkLevel = 10000;
 static const auto sDevelopmentSdkCodeNames = std::unordered_set<StringPiece>({
-    "Q", "R", "S"
+    "Q", "R", "S", "T"
 });
 
 static const std::vector<std::pair<uint16_t, ApiVersion>> sAttrIdMap = {
@@ -58,7 +58,8 @@ static const std::vector<std::pair<uint16_t, ApiVersion>> sAttrIdMap = {
     {0x056d, SDK_O_MR1},
     {0x0586, SDK_P},
     {0x0606, SDK_Q},
-    {0x0617, SDK_R},
+    {0x0616, SDK_R},
+    {0x064b, SDK_S},
 };
 
 static bool less_entry_id(const std::pair<uint16_t, ApiVersion>& p, uint16_t entryId) {

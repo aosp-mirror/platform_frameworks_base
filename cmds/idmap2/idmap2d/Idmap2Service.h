@@ -24,7 +24,9 @@
 #include <idmap2/ResourceContainer.h>
 #include <idmap2/Result.h>
 
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace android::os {
 
@@ -59,6 +61,8 @@ class Idmap2Service : public BinderService<Idmap2Service>, public BnIdmap2 {
 
   binder::Status getFabricatedOverlayInfos(
       std::vector<os::FabricatedOverlayInfo>* _aidl_return) override;
+
+  binder::Status dumpIdmap(const std::string& overlay_path, std::string* _aidl_return) override;
 
  private:
   // idmap2d is killed after a period of inactivity, so any information stored on this class should

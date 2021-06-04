@@ -15,6 +15,7 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK;
 import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_DOCK;
@@ -31,6 +32,7 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -38,6 +40,7 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -84,12 +87,14 @@ public class InfoMediaManager extends MediaManager {
     public void startScan() {
         mMediaDevices.clear();
         mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
+        mRouterManager.startScan();
         refreshDevices();
     }
 
     @Override
     public void stopScan() {
         mRouterManager.unregisterCallback(mMediaRouterCallback);
+        mRouterManager.stopScan();
     }
 
     /**
@@ -389,6 +394,38 @@ public class InfoMediaManager extends MediaManager {
                     + shouldDisableMediaOutput);
         }
         return shouldDisableMediaOutput;
+    }
+
+    @TargetApi(Build.VERSION_CODES.R)
+    boolean shouldEnableVolumeSeekBar(RoutingSessionInfo sessionInfo) {
+        if (sessionInfo == null) {
+            Log.w(TAG, "shouldEnableVolumeSeekBar() package name is null or empty!");
+            return false;
+        }
+        final List<MediaRoute2Info> mediaRoute2Infos =
+                mRouterManager.getSelectedRoutes(sessionInfo);
+        // More than one selected route
+        if (mediaRoute2Infos.size() > 1) {
+            if (DEBUG) {
+                Log.d(TAG, "shouldEnableVolumeSeekBar() package name : "
+                        + sessionInfo.getClientPackageName()
+                        + ", mediaRoute2Infos.size() " + mediaRoute2Infos.size());
+            }
+            return false;
+        }
+        // Route contains group feature
+        for (MediaRoute2Info mediaRoute2Info : mediaRoute2Infos) {
+            final List<String> features = mediaRoute2Info.getFeatures();
+            if (features.contains(FEATURE_REMOTE_GROUP_PLAYBACK)) {
+                if (DEBUG) {
+                    Log.d(TAG, "shouldEnableVolumeSeekBar() package name : "
+                            + mediaRoute2Info.getClientPackageName()
+                            + "contain group playback ");
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
     private void refreshDevices() {
