@@ -90,6 +90,38 @@ int android_getprocnetwork(net_handle_t *network) {
     return 0;
 }
 
+int android_setprocdns(net_handle_t network) {
+    unsigned netid;
+    if (!getnetidfromhandle(network, &netid)) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    int rval = setNetworkForResolv(netid);
+    if (rval < 0) {
+        errno = -rval;
+        rval = -1;
+    }
+    return rval;
+}
+
+int android_getprocdns(net_handle_t *network) {
+    if (network == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    unsigned netid;
+    int rval = getNetworkForDns(&netid);
+    if (rval < 0) {
+        errno = -rval;
+        return -1;
+    }
+
+    *network = gethandlefromnetid(netid);
+    return 0;
+}
+
 int android_getaddrinfofornetwork(net_handle_t network,
         const char *node, const char *service,
         const struct addrinfo *hints, struct addrinfo **res) {
