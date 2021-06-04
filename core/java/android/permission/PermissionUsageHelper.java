@@ -19,6 +19,10 @@ package android.permission;
 import static android.Manifest.permission_group.CAMERA;
 import static android.Manifest.permission_group.LOCATION;
 import static android.Manifest.permission_group.MICROPHONE;
+import static android.app.AppOpsManager.ATTRIBUTION_FLAGS_NONE;
+import static android.app.AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
+import static android.app.AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
+import static android.app.AppOpsManager.AttributionFlags;
 import static android.app.AppOpsManager.OPSTR_CAMERA;
 import static android.app.AppOpsManager.OPSTR_COARSE_LOCATION;
 import static android.app.AppOpsManager.OPSTR_FINE_LOCATION;
@@ -30,6 +34,7 @@ import static android.media.AudioSystem.MODE_IN_COMMUNICATION;
 import static android.telephony.TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -56,7 +61,7 @@ import java.util.Objects;
  *
  * @hide
  */
-public class PermissionUsageHelper {
+public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedListener {
 
     /** Whether to show the mic and camera icons.  */
     private static final String PROPERTY_CAMERA_MIC_ICONS_ENABLED = "camera_mic_icons_enabled";
@@ -140,6 +145,7 @@ public class PermissionUsageHelper {
     private ArrayMap<UserHandle, Context> mUserContexts;
     private PackageManager mPkgManager;
     private AppOpsManager mAppOpsManager;
+    private ArrayMap<Integer, ArrayList<AccessChainLink>> mAttributionChains = new ArrayMap<>();
 
     /**
      * Constructor for PermissionUsageHelper
@@ -151,6 +157,10 @@ public class PermissionUsageHelper {
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
         mUserContexts = new ArrayMap<>();
         mUserContexts.put(Process.myUserHandle(), mContext);
+        // TODO ntmyren: make this listen for flag enable/disable changes
+        String[] ops = { OPSTR_CAMERA, OPSTR_RECORD_AUDIO };
+        mContext.getSystemService(AppOpsManager.class).startWatchingActive(ops,
+                context.getMainExecutor(), this);
     }
 
     private Context getUserContext(UserHandle user) {
@@ -158,6 +168,45 @@ public class PermissionUsageHelper {
             mUserContexts.put(user, mContext.createContextAsUser(user, 0));
         }
         return mUserContexts.get(user);
+    }
+
+    @Override
+    public void onOpActiveChanged(@NonNull String op, int uid, @NonNull String packageName,
+            boolean active) {
+        // not part of an attribution chain. Do nothing
+    }
+
+    @Override
+    public void onOpActiveChanged(@NonNull String op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag, boolean active, @AttributionFlags int attributionFlags,
+            int attributionChainId) {
+        if ((attributionFlags & ATTRIBUTION_FLAGS_NONE) != 0) {
+            return;
+        }
+
+        if (!active) {
+            // if any link in the chain is finished, remove the chain.
+            // TODO ntmyren: be smarter about this
+            mAttributionChains.remove(attributionChainId);
+            return;
+        }
+
+        ArrayList<AccessChainLink> currentChain = mAttributionChains.computeIfAbsent(
+                attributionChainId, k -> new ArrayList<>());
+        AccessChainLink link = new AccessChainLink(op, packageName, attributionTag, uid,
+                attributionFlags);
+
+        int currSize = currentChain.size();
+        if (currSize == 0 || link.isEnd() || !currentChain.get(currSize - 1).isEnd()) {
+            // if the list is empty, this link is the end, or the last link in the current chain
+            // isn't the end, add it to the end
+            currentChain.add(link);
+        } else if (link.isStart()) {
+            currentChain.add(0, link);
+        } else if (currentChain.get(currentChain.size() - 1).isEnd()) {
+            // we already have the end, and this is a mid node, so insert before the end
+            currentChain.add(currSize - 1, link);
+        }
     }
 
     /**
@@ -331,7 +380,7 @@ public class PermissionUsageHelper {
     private ArrayMap<OpUsage, CharSequence> getUniqueUsagesWithLabels(List<OpUsage> usages) {
         ArrayMap<OpUsage, CharSequence> usagesAndLabels = new ArrayMap<>();
 
-        if (usages == null) {
+        if (usages == null || usages.isEmpty()) {
             return usagesAndLabels;
         }
 
@@ -430,8 +479,51 @@ public class PermissionUsageHelper {
                 }
                 iterNum++;
             }
-            usagesAndLabels.put(start,
-                    proxyLabelList.isEmpty() ? null : formatLabelList(proxyLabelList));
+
+            // TODO ntmyren: remove this proxy logic once camera is converted to AttributionSource
+            // For now: don't add mic proxy usages
+            if (!start.op.equals(OPSTR_RECORD_AUDIO)) {
+                usagesAndLabels.put(start,
+                        proxyLabelList.isEmpty() ? null : formatLabelList(proxyLabelList));
+            }
+        }
+
+        for (int i = 0; i < mAttributionChains.size(); i++) {
+            List<AccessChainLink> usageList = mAttributionChains.valueAt(i);
+            int lastVisible = usageList.size() - 1;
+            // TODO ntmyren: remove this mic code once camera is converted to AttributionSource
+            // if the list is empty or incomplete, do not show it.
+            if (usageList.isEmpty() || !usageList.get(lastVisible).isEnd()
+                    || !usageList.get(0).isStart()
+                    || !usageList.get(lastVisible).usage.op.equals(OPSTR_RECORD_AUDIO)) {
+                continue;
+            }
+
+            //TODO ntmyren: remove once camera etc. etc.
+            for (AccessChainLink link: usageList) {
+                proxyPackages.add(link.usage.getPackageIdHash());
+            }
+
+            AccessChainLink start = usageList.get(0);
+            AccessChainLink lastVisibleLink = usageList.get(lastVisible);
+            while (lastVisible > 0 && !shouldShowPackage(lastVisibleLink.usage.packageName)) {
+                lastVisible--;
+                lastVisibleLink = usageList.get(lastVisible);
+            }
+            String proxyLabel = null;
+            if (!lastVisibleLink.usage.packageName.equals(start.usage.packageName)) {
+                try {
+                    PackageManager userPkgManager =
+                            getUserContext(lastVisibleLink.usage.getUser()).getPackageManager();
+                    ApplicationInfo appInfo = userPkgManager.getApplicationInfo(
+                            lastVisibleLink.usage.packageName, 0);
+                    proxyLabel = appInfo.loadLabel(userPkgManager).toString();
+                } catch (PackageManager.NameNotFoundException e) {
+                    // do nothing
+                }
+
+            }
+            usagesAndLabels.put(start.usage, proxyLabel);
         }
 
         for (int packageHash : mostRecentUsages.keySet()) {
@@ -493,6 +585,26 @@ public class PermissionUsageHelper {
             return Objects.equals(packageName, other.packageName) && Objects.equals(attributionTag,
                     other.attributionTag) && Objects.equals(op, other.op) && uid == other.uid
                     && lastAccessTime == other.lastAccessTime && isRunning == other.isRunning;
+        }
+    }
+
+    private static class AccessChainLink {
+        public final OpUsage usage;
+        public final @AttributionFlags int flags;
+
+        AccessChainLink(String op, String packageName, String attributionTag, int uid,
+                int flags) {
+            this.usage = new OpUsage(packageName, attributionTag, op, uid,
+                    System.currentTimeMillis(), true, null);
+            this.flags = flags;
+        }
+
+        public boolean isEnd() {
+            return (flags & ATTRIBUTION_FLAG_ACCESSOR) != 0;
+        }
+
+        public boolean isStart() {
+            return (flags & ATTRIBUTION_FLAG_RECEIVER) != 0;
         }
     }
 }

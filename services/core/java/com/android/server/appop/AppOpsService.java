@@ -84,8 +84,8 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.AppOpsManager.AttributionFlags;
 import android.app.AppOpsManager.AttributedOpEntry;
+import android.app.AppOpsManager.AttributionFlags;
 import android.app.AppOpsManager.HistoricalOps;
 import android.app.AppOpsManager.Mode;
 import android.app.AppOpsManager.OpEntry;
@@ -3255,13 +3255,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation);
     }
 
-    // TODO b/184963112: remove once full blaming is implemented
-    private boolean isRecognitionServiceTemp(int code, String packageName) {
-        return code == OP_RECORD_AUDIO
-                && (packageName.equals("com.google.android.googlequicksearchbox")
-                || packageName.equals("com.google.android.tts"));
-    }
-
     private SyncNotedAppOp noteProxyOperationImpl(int code, AttributionSource attributionSource,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation) {
@@ -3289,8 +3282,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
         final boolean isProxyTrusted = mContext.checkPermission(
                 Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
-                == PackageManager.PERMISSION_GRANTED || isSelfBlame
-                || isRecognitionServiceTemp(code, proxyPackageName);
+                == PackageManager.PERMISSION_GRANTED || isSelfBlame;
 
         if (!skipProxyOperation) {
             final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
