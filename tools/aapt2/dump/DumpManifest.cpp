@@ -88,10 +88,12 @@ enum {
   COMPILE_SDK_VERSION_CODENAME_ATTR = 0x01010573,
   VERSION_MAJOR_ATTR = 0x01010577,
   PACKAGE_TYPE_ATTR = 0x01010587,
+  USES_PERMISSION_FLAGS_ATTR = 0x01010644,
 };
 
 const std::string& kAndroidNamespace = "http://schemas.android.com/apk/res/android";
 constexpr int kCurrentDevelopmentVersion = 10000;
+constexpr int kNeverForLocation = 0x00010000;
 
 /** Retrieves the attribute of the element with the specified attribute resource id. */
 static xml::Attribute* FindAttribute(xml::Element *el, uint32_t resd_id) {
@@ -1070,6 +1072,7 @@ class UsesPermission : public ManifestExtractor::Element {
   std::vector<std::string> requiredNotFeatures;
   int32_t required = true;
   int32_t maxSdkVersion = -1;
+  int32_t usesPermissionFlags = 0;
 
   void Extract(xml::Element* element) override {
     name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
@@ -1086,6 +1089,8 @@ class UsesPermission : public ManifestExtractor::Element {
     required = GetAttributeIntegerDefault(FindAttribute(element, REQUIRED_ATTR), 1);
     maxSdkVersion = GetAttributeIntegerDefault(
         FindAttribute(element, MAX_SDK_VERSION_ATTR), -1);
+    usesPermissionFlags = GetAttributeIntegerDefault(
+        FindAttribute(element, USES_PERMISSION_FLAGS_ATTR), 0);
 
     if (!name.empty()) {
       CommonFeatureGroup* common = extractor()->GetCommonFeatureGroup();
@@ -1099,6 +1104,9 @@ class UsesPermission : public ManifestExtractor::Element {
       if (maxSdkVersion >= 0) {
         printer->Print(StringPrintf(" maxSdkVersion='%d'", maxSdkVersion));
       }
+      if ((usesPermissionFlags & kNeverForLocation) != 0) {
+        printer->Print(StringPrintf(" usesPermissionFlags='neverForLocation'"));
+      }
       printer->Print("\n");
       for (const std::string& requiredFeature : requiredFeatures) {
         printer->Print(StringPrintf("  required-feature='%s'\n", requiredFeature.data()));
@@ -1111,6 +1119,9 @@ class UsesPermission : public ManifestExtractor::Element {
         if (maxSdkVersion >= 0) {
           printer->Print(StringPrintf(" maxSdkVersion='%d'", maxSdkVersion));
         }
+        if ((usesPermissionFlags & kNeverForLocation) != 0) {
+          printer->Print(StringPrintf(" usesPermissionFlags='neverForLocation'"));
+        }
         printer->Print("\n");
       }
     }
@@ -1120,6 +1131,9 @@ class UsesPermission : public ManifestExtractor::Element {
     printer->Print(StringPrintf("uses-implied-permission: name='%s'", name.data()));
     if (maxSdkVersion >= 0) {
       printer->Print(StringPrintf(" maxSdkVersion='%d'", maxSdkVersion));
+    }
+    if ((usesPermissionFlags & kNeverForLocation) != 0) {
+      printer->Print(StringPrintf(" usesPermissionFlags='neverForLocation'"));
     }
     printer->Print(StringPrintf(" reason='%s'\n", reason.data()));
   }
