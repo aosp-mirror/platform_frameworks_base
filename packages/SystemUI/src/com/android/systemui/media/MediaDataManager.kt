@@ -39,6 +39,7 @@ import android.media.session.MediaSession
 import android.net.Uri
 import android.os.Parcelable
 import android.os.UserHandle
+import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
@@ -54,6 +55,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
+import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -114,7 +116,8 @@ class MediaDataManager(
     private val smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
     private var useMediaResumption: Boolean,
     private val useQsMediaPlayer: Boolean,
-    private val systemClock: SystemClock
+    private val systemClock: SystemClock,
+    private val tunerService: TunerService
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     companion object {
@@ -147,6 +150,7 @@ class MediaDataManager(
     // There should ONLY be at most one Smartspace media recommendation.
     private var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
     private var smartspaceSession: SmartspaceSession? = null
+    private var allowMediaRecommendations = Utils.allowMediaRecommendations(context)
 
     @Inject
     constructor(
@@ -164,12 +168,13 @@ class MediaDataManager(
         mediaDataFilter: MediaDataFilter,
         activityStarter: ActivityStarter,
         smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
-        clock: SystemClock
+        clock: SystemClock,
+        tunerService: TunerService
     ) : this(context, backgroundExecutor, foregroundExecutor, mediaControllerFactory,
             broadcastDispatcher, dumpManager, mediaTimeoutListener, mediaResumeListener,
             mediaSessionBasedFilter, mediaDeviceManager, mediaDataCombineLatest, mediaDataFilter,
             activityStarter, smartspaceMediaDataProvider, Utils.useMediaResumption(context),
-            Utils.useQsMediaPlayer(context), clock)
+            Utils.useQsMediaPlayer(context), clock, tunerService)
 
     private val appChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -243,6 +248,14 @@ class MediaDataManager(
                 })
         }
         smartspaceSession?.let { it.requestSmartspaceUpdate() }
+        tunerService.addTunable(object : TunerService.Tunable {
+            override fun onTuningChanged(key: String?, newValue: String?) {
+                allowMediaRecommendations = Utils.allowMediaRecommendations(context)
+                if (!allowMediaRecommendations) {
+                    dismissSmartspaceRecommendation(key = smartspaceMediaData.targetId, delay = 0L)
+                }
+            }
+        }, Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION)
     }
 
     fun destroy() {
@@ -695,8 +708,7 @@ class MediaDataManager(
     }
 
     override fun onSmartspaceTargetsUpdated(targets: List<Parcelable>) {
-        if (!Utils.allowMediaRecommendations(context)) {
-            Log.d(TAG, "Smartspace recommendation is disabled in Settings.")
+        if (!allowMediaRecommendations) {
             return
         }
 
