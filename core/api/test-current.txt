@@ -51,7 +51,7 @@ package android {
   }
 
   public static final class R.attr {
-    field public static final int requestForegroundServiceExemption;
+    field public static final int requestForegroundServiceExemption = 16844362; // 0x101064a
   }
 
   public static final class R.bool {
@@ -63,8 +63,8 @@ package android {
   public static final class R.string {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultDialer = 17039395; // 0x1040023
-    field public static final int config_systemAutomotiveCluster;
-    field public static final int config_systemAutomotiveProjection;
+    field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
+    field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
     field public static final int config_systemGallery = 17039399; // 0x1040027
   }
 
@@ -201,6 +201,11 @@ package android.app {
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void setHistoryParameters(int, long, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(int, int, String, int);
     method public static int strOpToOp(@NonNull String);
+    field public static final int ATTRIBUTION_CHAIN_ID_NONE = -1; // 0xffffffff
+    field public static final int ATTRIBUTION_FLAGS_NONE = 0; // 0x0
+    field public static final int ATTRIBUTION_FLAG_ACCESSOR = 1; // 0x1
+    field public static final int ATTRIBUTION_FLAG_INTERMEDIARY = 2; // 0x2
+    field public static final int ATTRIBUTION_FLAG_RECEIVER = 4; // 0x4
     field public static final int HISTORICAL_MODE_DISABLED = 0; // 0x0
     field public static final int HISTORICAL_MODE_ENABLED_ACTIVE = 1; // 0x1
     field public static final int HISTORICAL_MODE_ENABLED_PASSIVE = 2; // 0x2
@@ -228,6 +233,10 @@ package android.app {
     method public void increaseAccessDuration(int, int, @NonNull String, @Nullable String, int, int, long);
     method public void increaseRejectCount(int, int, @NonNull String, @Nullable String, int, int, long);
     method public void offsetBeginAndEndTime(long);
+  }
+
+  public static interface AppOpsManager.OnOpActiveChangedListener {
+    method public default void onOpActiveChanged(@NonNull String, int, @NonNull String, @Nullable String, boolean, int, int);
   }
 
   public class BroadcastOptions {
@@ -669,7 +678,7 @@ package android.content {
 
   public final class AttributionSource implements android.os.Parcelable {
     ctor public AttributionSource(int, @Nullable String, @Nullable String);
-    ctor public AttributionSource(int, @Nullable String, @Nullable String, @Nullable android.content.AttributionSource);
+    ctor public AttributionSource(int, @Nullable String, @Nullable String, @NonNull android.os.IBinder);
     ctor public AttributionSource(int, @Nullable String, @Nullable String, @Nullable java.util.Set<java.lang.String>, @Nullable android.content.AttributionSource);
   }
 
@@ -2041,7 +2050,7 @@ package android.permission {
   public final class PermissionManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData();
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData(boolean);
-    method @NonNull public android.content.AttributionSource registerAttributionSource(@NonNull android.content.AttributionSource);
+    method public void registerAttributionSource(@NonNull android.content.AttributionSource);
   }
 
 }

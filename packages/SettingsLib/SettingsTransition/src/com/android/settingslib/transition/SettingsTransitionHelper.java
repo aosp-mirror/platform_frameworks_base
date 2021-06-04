@@ -25,6 +25,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import androidx.core.os.BuildCompat;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.transition.platform.FadeThroughProvider;
 import com.google.android.material.transition.platform.MaterialSharedAxis;
@@ -92,7 +93,7 @@ public class SettingsTransitionHelper {
      * triggered when the page is launched/entering.
      */
     public static void applyForwardTransition(Activity activity) {
-        if (!BuildCompat.isAtLeastS()) {
+        if (!isSettingsTransitionEnabled()) {
             return;
         }
         if (activity == null) {
@@ -118,7 +119,7 @@ public class SettingsTransitionHelper {
      * previously-started Activity.
      */
     public static void applyBackwardTransition(Activity activity) {
-        if (!BuildCompat.isAtLeastS()) {
+        if (!isSettingsTransitionEnabled()) {
             return;
         }
         if (activity == null) {
@@ -133,5 +134,50 @@ public class SettingsTransitionHelper {
         final MaterialSharedAxis backward = createSettingsSharedAxis(activity, false);
         window.setReturnTransition(backward);
         window.setReenterTransition(backward);
+    }
+
+    /**
+     * Apply the forward transition to the {@link Fragment}, including Exit Transition and Enter
+     * Transition.
+     *
+     * The Exit Transition takes effect when leaving the page, while the Enter Transition is
+     * triggered when the page is launched/entering.
+     */
+    public static void applyForwardTransition(Fragment fragment) {
+        if (!isSettingsTransitionEnabled()) {
+            return;
+        }
+        if (fragment == null) {
+            Log.w(TAG, "applyForwardTransition: Invalid fragment!");
+            return;
+        }
+        final MaterialSharedAxis forward = createSettingsSharedAxis(fragment.getContext(), true);
+        fragment.setExitTransition(forward);
+        fragment.setEnterTransition(forward);
+    }
+
+    /**
+     * Apply the backward transition to the {@link Fragment}, including Return Transition and
+     * Reenter Transition.
+     *
+     * Return Transition will be used to move Views out of the scene when the Window is preparing
+     * to close. Reenter Transition will be used to move Views in to the scene when returning from a
+     * previously-started Fragment.
+     */
+    public static void applyBackwardTransition(Fragment fragment) {
+        if (!isSettingsTransitionEnabled()) {
+            return;
+        }
+        if (fragment == null) {
+            Log.w(TAG, "applyBackwardTransition: Invalid fragment!");
+            return;
+        }
+        final MaterialSharedAxis backward = createSettingsSharedAxis(fragment.getContext(), false);
+        fragment.setReturnTransition(backward);
+        fragment.setReenterTransition(backward);
+    }
+
+    private static boolean isSettingsTransitionEnabled() {
+        return BuildCompat.isAtLeastS();
     }
 }

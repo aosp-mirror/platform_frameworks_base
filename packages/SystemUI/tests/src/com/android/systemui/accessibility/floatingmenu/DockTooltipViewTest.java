@@ -51,6 +51,7 @@ public class DockTooltipViewTest extends SysuiTestCase {
 
     private AccessibilityFloatingMenuView mMenuView;
     private DockTooltipView mDockTooltipView;
+    private final Position mPlaceholderPosition = new Position(0.0f, 0.0f);
     private final MotionEventHelper mMotionEventHelper = new MotionEventHelper();
 
     @Before
@@ -62,7 +63,7 @@ public class DockTooltipViewTest extends SysuiTestCase {
                 mWindowManager).getMaximumWindowMetrics();
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
 
-        mMenuView = spy(new AccessibilityFloatingMenuView(mContext));
+        mMenuView = spy(new AccessibilityFloatingMenuView(mContext, mPlaceholderPosition));
         mDockTooltipView = new DockTooltipView(mContext, mMenuView);
     }
 

@@ -16,8 +16,6 @@
 
 package android.media;
 
-import static android.media.permission.PermissionUtil.myIdentity;
-
 import android.annotation.CallbackExecutor;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -27,14 +25,16 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
+import android.content.AttributionSource.ScopedParcelState;
 import android.content.Context;
 import android.hardware.Camera;
 import android.media.metrics.LogSessionId;
-import android.media.permission.Identity;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -163,8 +163,11 @@ public class MediaRecorder implements AudioRouting,
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        native_setup(new WeakReference<MediaRecorder>(this),
-                ActivityThread.currentPackageName(), myIdentity(context));
+        try (ScopedParcelState attributionSourceState = context.getAttributionSource()
+                .asScopedParcelState()) {
+            native_setup(new WeakReference<>(this), ActivityThread.currentPackageName(),
+                    attributionSourceState.getParcel());
+        }
     }
 
     /**
@@ -1894,14 +1897,15 @@ public class MediaRecorder implements AudioRouting,
             publicAlternatives = "{@link MediaRecorder}")
     private void native_setup(Object mediarecorderThis,
             String clientName, String opPackageName) throws IllegalStateException {
-        Identity identity = myIdentity(null);
-        identity.packageName = opPackageName;
-
-        native_setup(mediarecorderThis, clientName, identity);
+        AttributionSource attributionSource = AttributionSource.myAttributionSource()
+                .withPackageName(opPackageName);
+        try (ScopedParcelState attributionSourceState = attributionSource.asScopedParcelState()) {
+            native_setup(mediarecorderThis, clientName, attributionSourceState.getParcel());
+        }
     }
 
     private native void native_setup(Object mediarecorderThis,
-            String clientName, Identity identity)
+            String clientName, @NonNull Parcel attributionSource)
             throws IllegalStateException;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)

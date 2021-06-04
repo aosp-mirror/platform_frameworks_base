@@ -1792,6 +1792,9 @@
     <!-- Boolean indicating if placing the phone face down will result in a screen off. -->
     <bool name="config_flipToScreenOffEnabled">true</bool>
 
+    <!-- Integer to set a max latency the accelerometer will batch sensor requests with. -->
+    <integer name="config_flipToScreenOffMaxLatencyMicros">2000000</integer>
+
     <!-- Boolean indicating if current platform supports bluetooth SCO for off call
     use cases -->
     <bool name="config_bluetooth_sco_off_call">true</bool>
@@ -1968,6 +1971,9 @@
     <string name="config_systemActivityRecognizer" translatable="false"></string>
     <!-- The name of the package that will hold the system ui role -->
     <string name="config_systemUi" translatable="false">com.android.systemui</string>
+    <!-- The name of the package that will hold the television remote service role.
+        TODO(b/189347385) make this a @SystemAPI -->
+    <string name="config_systemTelevisionRemoteService" translatable="false">@string/config_tvRemoteServicePackage</string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>

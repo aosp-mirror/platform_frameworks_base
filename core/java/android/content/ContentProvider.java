@@ -49,6 +49,7 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.permission.PermissionCheckerManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -670,7 +671,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             }
         }
 
-        @PermissionChecker.PermissionResult
+        @PermissionCheckerManager.PermissionResult
         private void enforceFilePermission(@NonNull AttributionSource attributionSource,
                 Uri uri, String mode)
                 throws FileNotFoundException, SecurityException {
@@ -687,7 +688,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             }
         }
 
-        @PermissionChecker.PermissionResult
+        @PermissionCheckerManager.PermissionResult
         private int enforceReadPermission(@NonNull AttributionSource attributionSource, Uri uri)
                 throws SecurityException {
             final int result = enforceReadPermissionInner(uri, attributionSource);
@@ -705,7 +706,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             return PermissionChecker.PERMISSION_GRANTED;
         }
 
-        @PermissionChecker.PermissionResult
+        @PermissionCheckerManager.PermissionResult
         private int enforceWritePermission(@NonNull AttributionSource attributionSource, Uri uri)
                 throws SecurityException {
             final int result = enforceWritePermissionInner(uri, attributionSource);
@@ -738,7 +739,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * Verify that calling app holds both the given permission and any app-op
      * associated with that permission.
      */
-    @PermissionChecker.PermissionResult
+    @PermissionCheckerManager.PermissionResult
     private int checkPermission(String permission,
             @NonNull AttributionSource attributionSource) {
         if (Binder.getCallingPid() == Process.myPid()) {
@@ -753,7 +754,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /** {@hide} */
-    @PermissionChecker.PermissionResult
+    @PermissionCheckerManager.PermissionResult
     protected int enforceReadPermissionInner(Uri uri,
             @NonNull AttributionSource attributionSource) throws SecurityException {
         final Context context = getContext();
@@ -836,7 +837,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /** {@hide} */
-    @PermissionChecker.PermissionResult
+    @PermissionCheckerManager.PermissionResult
     protected int enforceWritePermissionInner(Uri uri,
             @NonNull AttributionSource attributionSource) throws SecurityException {
         final Context context = getContext();

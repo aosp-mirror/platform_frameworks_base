@@ -232,6 +232,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -261,6 +264,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -307,6 +313,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -355,6 +364,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -402,6 +414,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -464,6 +479,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -503,6 +521,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -548,6 +569,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -594,6 +618,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -656,6 +683,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -703,6 +733,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -748,6 +781,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -795,6 +831,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -841,6 +880,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -887,6 +929,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -933,6 +978,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -979,6 +1027,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1029,6 +1080,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -1076,6 +1130,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -1120,6 +1177,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -1318,6 +1378,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1348,6 +1411,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1393,6 +1459,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1439,6 +1508,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1487,6 +1559,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1534,6 +1609,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1598,6 +1676,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1636,6 +1717,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1684,6 +1768,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1733,6 +1820,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1781,6 +1871,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1811,6 +1904,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1842,6 +1938,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1892,6 +1991,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1940,6 +2042,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -1987,6 +2092,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -2033,6 +2141,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -2079,6 +2190,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -2123,6 +2237,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -2285,6 +2402,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
@@ -2330,6 +2450,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -2385,6 +2508,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
@@ -2433,6 +2559,9 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
         <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
         <item name="colorForeground">@color/foreground_device_default_light</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>

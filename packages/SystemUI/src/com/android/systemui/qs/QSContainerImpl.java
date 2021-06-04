@@ -295,7 +295,7 @@ public class QSContainerImpl extends FrameLayout {
                 qsPanelController.setContentMargins(mContentPadding, mContentPadding);
                 // Set it as double the side margin (to simulate end margin of current page +
                 // start margin of next page).
-                qsPanelController.setPageMargin(2 * mSideMargins);
+                qsPanelController.setPageMargin(mSideMargins);
             } else if (view == mHeader) {
                 // No content padding for the header.
             } else {

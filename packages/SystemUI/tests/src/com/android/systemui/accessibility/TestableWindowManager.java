@@ -19,6 +19,7 @@ package com.android.systemui.accessibility;
 import static android.view.WindowInsets.Type.systemGestures;
 
 import android.graphics.Insets;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.Display;
 import android.view.View;
@@ -31,6 +32,7 @@ public class TestableWindowManager implements WindowManager {
 
     private final WindowManager mWindowManager;
     private View mView;
+    private Rect mWindowBounds = null;
     private WindowInsets mWindowInsets = null;
 
     TestableWindowManager(WindowManager windowManager) {
@@ -82,7 +84,8 @@ public class TestableWindowManager implements WindowManager {
                 .setInsets(systemGestures(), systemGesturesInsets)
                 .build();
         final WindowMetrics windowMetrics = new WindowMetrics(
-                mWindowManager.getCurrentWindowMetrics().getBounds(),
+                mWindowBounds == null ? mWindowManager.getCurrentWindowMetrics().getBounds()
+                        : mWindowBounds,
                 mWindowInsets == null ? insets : mWindowInsets);
         return windowMetrics;
     }
@@ -101,6 +104,10 @@ public class TestableWindowManager implements WindowManager {
             return null;
         }
         return (WindowManager.LayoutParams) mView.getLayoutParams();
+    }
+
+    public void setWindowBounds(Rect bounds) {
+        mWindowBounds = bounds;
     }
 
     public void setWindowInsets(WindowInsets insets) {

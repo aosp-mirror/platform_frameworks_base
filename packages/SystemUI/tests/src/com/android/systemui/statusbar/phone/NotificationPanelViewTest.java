@@ -160,6 +160,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private DozeParameters mDozeParameters;
     @Mock
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock
     private NotificationPanelView mView;
     @Mock
     private LayoutInflater mLayoutInflater;
@@ -328,7 +330,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                         mock(HeadsUpManagerPhone.class),
                         new StatusBarStateControllerImpl(new UiEventLoggerFake()),
                         mKeyguardBypassController,
-                        mDozeParameters);
+                        mDozeParameters,
+                        mUnlockedScreenOffAnimationController);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,
                 coordinator,
@@ -386,7 +389,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mFragmentService,
                 mQuickAccessWalletController,
                 new FakeExecutor(new FakeSystemClock()),
-                mSecureSettings);
+                mSecureSettings,
+                mUnlockedScreenOffAnimationController);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mNotificationShelfController);

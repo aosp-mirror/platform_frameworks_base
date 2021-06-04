@@ -382,13 +382,15 @@ public class StackScrollAlgorithm {
 
         final boolean isHunGoingToShade = ambientState.isShadeExpanded()
                 && view == ambientState.getTrackedHeadsUpRow();
-        if (!isHunGoingToShade) {
-            if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
-                viewState.alpha = Interpolators.getNotificationScrimAlpha(
-                        ambientState.getExpansionFraction(), true /* notification */);
-            } else {
-                viewState.alpha = 1f - ambientState.getHideAmount();
-            }
+        if (isHunGoingToShade) {
+            // Keep 100% opacity for heads up notification going to shade.
+        } else if (ambientState.isOnKeyguard()) {
+            // Adjust alpha for wakeup to lockscreen.
+            viewState.alpha = 1f - ambientState.getHideAmount();
+        } else if (ambientState.isExpansionChanging()) {
+            // Adjust alpha for shade open & close.
+            viewState.alpha = Interpolators.getNotificationScrimAlpha(
+                    ambientState.getExpansionFraction(), true /* notification */);
         }
 
         if (view.mustStayOnScreen() && viewState.yTranslation >= 0) {

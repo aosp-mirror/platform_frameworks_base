@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
@@ -66,7 +67,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             ConfigurationController configurationController,
             DozeParameters dozeParameters,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            SmartspaceTransitionController smartspaceTransitionController) {
+            SmartspaceTransitionController smartspaceTransitionController,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
@@ -75,7 +77,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mDozeParameters = dozeParameters;
         mKeyguardStateController = keyguardStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
-                dozeParameters);
+                dozeParameters, unlockedScreenOffAnimationController);
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mSmartspaceTransitionController = smartspaceTransitionController;
 
@@ -87,7 +89,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 // element transition.
                 if (keyguardStateController.isShowing()) {
                     mView.setChildrenAlphaExcludingClockView(1f);
-                    mKeyguardClockSwitchController.setChildrenAlphaExcludingSmartspace(1f);
                 }
             }
         });
@@ -235,13 +236,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
         mKeyguardClockSwitchController.updatePosition(x, scale, CLOCK_ANIMATION_PROPERTIES,
                 animate);
-    }
-
-    /**
-     * @return {@code true} if we are currently animating the screen off from unlock
-     */
-    public boolean isAnimatingScreenOffFromUnlocked() {
-        return mKeyguardVisibilityHelper.isAnimatingScreenOffFromUnlocked();
     }
 
     /**

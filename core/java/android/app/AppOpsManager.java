@@ -708,6 +708,62 @@ public class AppOpsManager {
         }
     }
 
+    /**
+     * Attribution chain flag: specifies that this is the accessor. When
+     * an app A accesses the data that is then passed to app B that is then
+     * passed to C, we call app A accessor, app B intermediary, and app C
+     * receiver. If A accesses the data for itself, then it is the accessor
+     * and the receiver.
+     * @hide
+     */
+    @TestApi
+    public static final int ATTRIBUTION_FLAG_ACCESSOR = 0x1;
+
+    /**
+     * Attribution chain flag: specifies that this is the intermediary. When
+     * an app A accesses the data that is then passed to app B that is then
+     * passed to C, we call app A accessor, app B intermediary, and app C
+     * receiver. If A accesses the data for itself, then it is the accessor
+     * and the receiver.
+     * @hide
+     */
+    @TestApi
+    public static final int ATTRIBUTION_FLAG_INTERMEDIARY = 0x2;
+
+    /**
+     * Attribution chain flag: specifies that this is the receiver. When
+     * an app A accesses the data that is then passed to app B that is then
+     * passed to C, we call app A accessor, app B intermediary, and app C
+     * receiver. If A accesses the data for itself, then it is the accessor
+     * and the receiver.
+     * @hide
+     */
+    @TestApi
+    public static final int ATTRIBUTION_FLAG_RECEIVER = 0x4;
+
+    /**
+     * No attribution flags.
+     * @hide
+     */
+    @TestApi
+    public static final int ATTRIBUTION_FLAGS_NONE = 0x0;
+
+    /**
+     * No attribution chain id.
+     * @hide
+     */
+    @TestApi
+    public static final int ATTRIBUTION_CHAIN_ID_NONE = -1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            ATTRIBUTION_FLAG_ACCESSOR,
+            ATTRIBUTION_FLAG_INTERMEDIARY,
+            ATTRIBUTION_FLAG_RECEIVER
+    })
+    public @interface AttributionFlags {}
+
     // These constants are redefined here to work around a metalava limitation/bug where
     // @IntDef is not able to see @hide symbols when they are hidden via package hiding:
     // frameworks/base/core/java/com/android/internal/package.html
@@ -2782,16 +2838,6 @@ public class AppOpsManager {
      * @see #getNotedOpCollectionMode
      */
     private static final ThreadLocal<Integer> sBinderThreadCallingUid = new ThreadLocal<>();
-
-    /**
-     * Optimization: we need to propagate to IPCs whether the current thread is collecting
-     * app ops but using only the thread local above is too slow as it requires a map lookup
-     * on every IPC. We add this static var that is lockless and stores an OR-ed mask of the
-     * thread id's currently collecting ops, thus reducing the map lookup to a simple bit
-     * operation except the extremely unlikely case when threads with overlapping id bits
-     * execute op collecting ops.
-     */
-    private static volatile long sThreadsListeningForOpNotedInBinderTransaction = 0L;
 
     /**
      * If a thread is currently executing a two-way binder transaction, this stores the
@@ -7073,6 +7119,25 @@ public class AppOpsManager {
          */
         void onOpActiveChanged(@NonNull String op, int uid, @NonNull String packageName,
                 boolean active);
+
+        /**
+         * Called when the active state of an app-op changes.
+         *
+         * @param op The operation that changed.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param attributionTag The operation's attribution tag.
+         * @param active Whether the operation became active or inactive.
+         * @param attributionFlags the attribution flags for this operation.
+         * @param attributionChainId the unique id of the attribution chain this op is a part of.
+         * @hide
+         */
+        @TestApi
+        default void onOpActiveChanged(@NonNull String op, int uid, @NonNull String packageName,
+                @Nullable String attributionTag, boolean active, @AttributionFlags
+                int attributionFlags, int attributionChainId) {
+            onOpActiveChanged(op, uid, packageName, active);
+        }
     }
 
     /**
@@ -7694,14 +7759,17 @@ public class AppOpsManager {
             }
             cb = new IAppOpsActiveCallback.Stub() {
                 @Override
-                public void opActiveChanged(int op, int uid, String packageName, boolean active) {
+                public void opActiveChanged(int op, int uid, String packageName,
+                        String attributionTag, boolean active, @AttributionFlags
+                        int attributionFlags, int attributionChainId) {
                     executor.execute(() -> {
                         if (callback instanceof OnOpActiveChangedInternalListener) {
                             ((OnOpActiveChangedInternalListener) callback).onOpActiveChanged(op,
                                     uid, packageName, active);
                         }
                         if (sOpToString[op] != null) {
-                            callback.onOpActiveChanged(sOpToString[op], uid, packageName, active);
+                            callback.onOpActiveChanged(sOpToString[op], uid, packageName,
+                                    attributionTag, active, attributionFlags, attributionChainId);
                         }
                     });
                 }
@@ -8179,8 +8247,9 @@ public class AppOpsManager {
     public int noteProxyOp(int op, @Nullable String proxiedPackageName, int proxiedUid,
             @Nullable String proxiedAttributionTag, @Nullable String message) {
         return noteProxyOp(op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, proxiedPackageName, proxiedAttributionTag)),
-                message, /*skipProxyOperation*/ false);
+                new AttributionSource(proxiedUid, proxiedPackageName, proxiedAttributionTag,
+                        mContext.getAttributionSource().getToken())), message,
+                        /*skipProxyOperation*/ false);
     }
 
     /**
@@ -8265,8 +8334,8 @@ public class AppOpsManager {
             int proxiedUid, @Nullable String proxiedAttributionTag, @Nullable String message) {
         return noteProxyOpNoThrow(strOpToOp(op), new AttributionSource(
                 mContext.getAttributionSource(), new AttributionSource(proxiedUid,
-                        proxiedPackageName, proxiedAttributionTag)), message,
-                        /*skipProxyOperation*/ false);
+                        proxiedPackageName, proxiedAttributionTag, mContext.getAttributionSource()
+                        .getToken())), message,/*skipProxyOperation*/ false);
     }
 
     /**
@@ -8602,6 +8671,29 @@ public class AppOpsManager {
      */
     public int startOpNoThrow(int op, int uid, @NonNull String packageName,
             boolean startIfModeDefault, @Nullable String attributionTag, @Nullable String message) {
+        return startOpNoThrow(mContext.getAttributionSource().getToken(), op, uid, packageName,
+                startIfModeDefault, attributionTag, message);
+    }
+
+    /**
+     * @see #startOpNoThrow(String, int, String, String, String)
+     *
+     * @hide
+     */
+    public int startOpNoThrow(@NonNull IBinder token, int op, int uid, @NonNull String packageName,
+            boolean startIfModeDefault, @Nullable String attributionTag, @Nullable String message) {
+        return startOpNoThrow(token, op, uid, packageName, startIfModeDefault, attributionTag,
+                message, ATTRIBUTION_FLAGS_NONE, ATTRIBUTION_CHAIN_ID_NONE);
+    }
+
+    /**
+     * @see #startOpNoThrow(String, int, String, String, String)
+     *
+     * @hide
+     */
+    public int startOpNoThrow(@NonNull IBinder token, int op, int uid, @NonNull String packageName,
+            boolean startIfModeDefault, @Nullable String attributionTag, @Nullable String message,
+            @AttributionFlags int attributionFlags, int attributionChainId) {
         try {
             collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(uid, packageName, op);
@@ -8614,9 +8706,9 @@ public class AppOpsManager {
                 }
             }
 
-            SyncNotedAppOp syncOp = mService.startOperation(getClientId(), op, uid, packageName,
+            SyncNotedAppOp syncOp = mService.startOperation(token, op, uid, packageName,
                     attributionTag, startIfModeDefault, collectionMode == COLLECT_ASYNC, message,
-                    shouldCollectMessage);
+                    shouldCollectMessage, attributionFlags, attributionChainId);
 
             if (syncOp.getOpMode() == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
@@ -8653,8 +8745,9 @@ public class AppOpsManager {
     public int startProxyOp(@NonNull String op, int proxiedUid, @NonNull String proxiedPackageName,
             @Nullable String proxiedAttributionTag, @Nullable String message) {
         return startProxyOp(op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, proxiedPackageName, proxiedAttributionTag)),
-                message, /*skipProxyOperation*/ false);
+                new AttributionSource(proxiedUid, proxiedPackageName, proxiedAttributionTag,
+                        mContext.getAttributionSource().getToken())), message,
+                        /*skipProxyOperation*/ false);
     }
 
     /**
@@ -8700,8 +8793,9 @@ public class AppOpsManager {
             @Nullable String message) {
         return startProxyOpNoThrow(AppOpsManager.strOpToOp(op), new AttributionSource(
                 mContext.getAttributionSource(), new AttributionSource(proxiedUid,
-                        proxiedPackageName, proxiedAttributionTag)), message,
-                /*skipProxyOperation*/ false);
+                        proxiedPackageName, proxiedAttributionTag,
+                        mContext.getAttributionSource().getToken())), message,
+                        /*skipProxyOperation*/ false);
     }
 
     /**
@@ -8715,6 +8809,23 @@ public class AppOpsManager {
      */
     public int startProxyOpNoThrow(int op, @NonNull AttributionSource attributionSource,
             @Nullable String message, boolean skipProxyOperation) {
+        return startProxyOpNoThrow(op, attributionSource, message, skipProxyOperation,
+                ATTRIBUTION_FLAGS_NONE, ATTRIBUTION_FLAGS_NONE, ATTRIBUTION_CHAIN_ID_NONE);
+    }
+
+    /**
+     * Like {@link #startProxyOp(String, AttributionSource, String)} but instead
+     * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED} and
+     * the checks is for the attribution chain specified by the {@link AttributionSource}.
+     *
+     * @see #startProxyOp(String, AttributionSource, String)
+     *
+     * @hide
+     */
+    public int startProxyOpNoThrow(int op, @NonNull AttributionSource attributionSource,
+            @Nullable String message, boolean skipProxyOperation, @AttributionFlags
+            int proxyAttributionFlags, @AttributionFlags int proxiedAttributionFlags,
+            int attributionChainId) {
         try {
             collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(
@@ -8729,9 +8840,10 @@ public class AppOpsManager {
                 }
             }
 
-            SyncNotedAppOp syncOp = mService.startProxyOperation(getClientId(), op,
+            SyncNotedAppOp syncOp = mService.startProxyOperation(op,
                     attributionSource, false, collectionMode == COLLECT_ASYNC, message,
-                    shouldCollectMessage, skipProxyOperation);
+                    shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
+                    proxiedAttributionFlags, attributionChainId);
 
             if (syncOp.getOpMode() == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
@@ -8795,8 +8907,18 @@ public class AppOpsManager {
      */
     public void finishOp(int op, int uid, @NonNull String packageName,
             @Nullable String attributionTag) {
+        finishOp(mContext.getAttributionSource().getToken(), op, uid, packageName, attributionTag);
+    }
+
+    /**
+     * @see #finishOp(String, int, String, String)
+     *
+     * @hide
+     */
+    public void finishOp(IBinder token, int op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag) {
         try {
-            mService.finishOperation(getClientId(), op, uid, packageName, attributionTag);
+            mService.finishOperation(token, op, uid, packageName, attributionTag);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8817,23 +8939,26 @@ public class AppOpsManager {
     public void finishProxyOp(@NonNull String op, int proxiedUid,
             @NonNull String proxiedPackageName, @Nullable String proxiedAttributionTag) {
         finishProxyOp(op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, proxiedPackageName, proxiedAttributionTag)));
+                new AttributionSource(proxiedUid, proxiedPackageName,  proxiedAttributionTag,
+                        mContext.getAttributionSource().getToken())), /*skipProxyOperation*/ false);
     }
 
     /**
      * Report that an application is no longer performing an operation that had previously
-     * been started with {@link #startProxyOp(String, AttributionSource, String)}. There is no
-     * validation of input or result; the parameters supplied here must be the exact same ones
-     * previously passed in when starting the operation.
+     * been started with {@link #startProxyOp(String, AttributionSource, String, boolean)}. There
+     * is no validation of input or result; the parameters supplied here must be the exact same
+     * ones previously passed in when starting the operation.
      *
      * @param op The operation which was started
      * @param attributionSource The permission identity for which to finish
+     * @param skipProxyOperation Whether to skip the proxy finish.
      *
      * @hide
      */
-    public void finishProxyOp(@NonNull String op, @NonNull AttributionSource attributionSource) {
+    public void finishProxyOp(@NonNull String op, @NonNull AttributionSource attributionSource,
+            boolean skipProxyOperation) {
         try {
-            mService.finishProxyOperation(getClientId(), strOpToOp(op), attributionSource);
+            mService.finishProxyOperation(strOpToOp(op), attributionSource, skipProxyOperation);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8903,7 +9028,6 @@ public class AppOpsManager {
      * @hide
      */
     public static void startNotedAppOpsCollection(int callingUid) {
-        sThreadsListeningForOpNotedInBinderTransaction |= Thread.currentThread().getId();
         sBinderThreadCallingUid.set(callingUid);
     }
 
@@ -8918,7 +9042,6 @@ public class AppOpsManager {
      */
     public static void finishNotedAppOpsCollection() {
         sBinderThreadCallingUid.remove();
-        sThreadsListeningForOpNotedInBinderTransaction &= ~Thread.currentThread().getId();
         sAppOpsNotedInThisBinderTransaction.remove();
     }
 
@@ -9263,9 +9386,7 @@ public class AppOpsManager {
      * @return whether we are in a binder transaction and collecting appops.
      */
     private static boolean isListeningForOpNotedInBinderTransaction() {
-        return (sThreadsListeningForOpNotedInBinderTransaction
-                        & Thread.currentThread().getId()) != 0
-                && sBinderThreadCallingUid.get() != null;
+        return sBinderThreadCallingUid.get() != null;
     }
 
     /**

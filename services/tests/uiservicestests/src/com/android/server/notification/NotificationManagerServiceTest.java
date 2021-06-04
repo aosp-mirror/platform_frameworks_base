@@ -3394,16 +3394,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // anything that's currently enqueued or posted
         int userId = UserHandle.getUserId(mUid);
         assertEquals(40,
-                mService.getNotificationCountLocked(PKG, userId, 0, null));
+                mService.getNotificationCount(PKG, userId, 0, null));
         assertEquals(40,
-                mService.getNotificationCountLocked(PKG, userId, 0, "tag2"));
+                mService.getNotificationCount(PKG, userId, 0, "tag2"));
 
         // return all for package "a" - "banana" tag isn't used
         assertEquals(2,
-                mService.getNotificationCountLocked("a", userId, 0, "banana"));
+                mService.getNotificationCount("a", userId, 0, "banana"));
 
         // exclude a known notification - it's excluded from only the posted list, not enqueued
-        assertEquals(39, mService.getNotificationCountLocked(
+        assertEquals(39, mService.getNotificationCount(
                 PKG, userId, sampleIdToExclude, sampleTagToExclude));
     }
 
@@ -7223,6 +7223,47 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mNotificationRecordLogger.event(0));
     }
 
+    /**
+     * When something is bubble'd and the bubble is dismissed, but the notification is still
+     * visible, clicking on the notification shouldn't auto-cancel it because clicking on
+     * it will produce a bubble.
+     */
+    @Test
+    public void testNotificationBubbles_bubbleStays_whenClicked_afterBubbleDismissed()
+            throws Exception {
+        setUpPrefsForBubbles(PKG, mUid,
+                true /* global */,
+                BUBBLE_PREFERENCE_ALL /* app */,
+                true /* channel */);
+
+        // GIVEN a notification that has the auto cancels flag (cancel on click) and is a bubble
+        final NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
+        nr.getSbn().getNotification().flags |= FLAG_BUBBLE | FLAG_AUTO_CANCEL;
+        nr.setAllowBubble(true);
+        mService.addNotification(nr);
+
+        // And the bubble is dismissed
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(),
+                false /* isBubble */, 0 /* bubbleFlags */);
+        waitForIdle();
+        assertTrue(nr.isFlagBubbleRemoved());
+
+        // WHEN we click the notification
+        final NotificationVisibility nv = NotificationVisibility.obtain(nr.getKey(), 1, 2, true);
+        mService.mNotificationDelegate.onNotificationClick(mUid, Binder.getCallingPid(),
+                nr.getKey(), nv);
+        waitForIdle();
+
+        // THEN the bubble should still exist
+        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsAfter.length);
+
+        // Check we got the click log
+        assertEquals(1, mNotificationRecordLogger.numCalls());
+        assertEquals(NotificationRecordLogger.NotificationEvent.NOTIFICATION_CLICKED,
+                mNotificationRecordLogger.event(0));
+    }
+
     @Test
     public void testLoadDefaultApprovedServices_emptyResources() {
         TestableResources tr = mContext.getOrCreateTestableResources();
@@ -7770,8 +7811,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         inOrder.verify(child).recordDismissalSentiment(anyInt());
     }
 
-    // TODO (b/171418004): renable after app outreach
-    /*@Test
+    @Test
     public void testImmutableBubbleIntent() throws Exception {
         when(mAmi.getPendingIntentFlags(pi1))
                 .thenReturn(FLAG_IMMUTABLE | FLAG_ONE_SHOT);
@@ -7786,7 +7826,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         } catch (IllegalArgumentException e) {
             // good
         }
-    }*/
+    }
 
     @Test
     public void testMutableBubbleIntent() throws Exception {

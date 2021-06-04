@@ -22,7 +22,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
@@ -31,15 +30,16 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +50,9 @@ import java.util.List;
 @TestableLooper.RunWithLooper
 public class AccessibilityFloatingMenuTest extends SysuiTestCase {
 
+    @Rule
+    public MockitoRule mockito = MockitoJUnit.rule();
+
     @Mock
     private AccessibilityManager mAccessibilityManager;
 
@@ -58,18 +61,14 @@ public class AccessibilityFloatingMenuTest extends SysuiTestCase {
 
     @Before
     public void initMenu() {
-        MockitoAnnotations.initMocks(this);
-
-        final List<AccessibilityTarget> mTargets = new ArrayList<>();
-        mTargets.add(mock(AccessibilityTarget.class));
-
         final List<String> assignedTargets = new ArrayList<>();
         mContext.addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
         assignedTargets.add(MAGNIFICATION_CONTROLLER_NAME);
         doReturn(assignedTargets).when(mAccessibilityManager).getAccessibilityShortcutTargets(
                 anyInt());
 
-        mMenuView = new AccessibilityFloatingMenuView(mContext);
+        final Position position = new Position(0, 0);
+        mMenuView = new AccessibilityFloatingMenuView(mContext, position);
         mMenu = new AccessibilityFloatingMenu(mContext, mMenuView);
     }
 

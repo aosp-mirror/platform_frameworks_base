@@ -1156,13 +1156,12 @@ public final class PermissionManager {
      * @hide
      */
     @TestApi
-    public @NonNull AttributionSource registerAttributionSource(@NonNull AttributionSource source) {
+    public void registerAttributionSource(@NonNull AttributionSource source) {
         try {
-            return mPermissionManager.registerAttributionSource(source);
+            mPermissionManager.registerAttributionSource(source);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**

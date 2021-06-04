@@ -254,15 +254,15 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testOnDetachedStateReset() {
-        // GIVEN view is attached, alt auth is force being shown
+        // GIVEN view is attached
         mController.onViewAttached();
-        captureStatusBarStateListeners();
+        captureAltAuthInterceptor();
 
         // WHEN view is detached
         mController.onViewDetached();
 
-        // THEN set alternate auth interceptor to null
-        verify(mStatusBarKeyguardViewManager).setAlternateAuthInterceptor(null);
+        // THEN remove alternate auth interceptor
+        verify(mStatusBarKeyguardViewManager).removeAlternateAuthInterceptor(mAltAuthInterceptor);
     }
 
     private void sendStatusBarStateChanged(int statusBarState) {

@@ -315,7 +315,11 @@ class SystemStatusAnimationScheduler @Inject constructor(
     ) : AnimatorListenerAdapter() {
         override fun onAnimationEnd(p0: Animator?) {
             chipAnimationController.onChipAnimationEnd(animationState)
-            animationState = endState
+            animationState = if (endState == SHOWING_PERSISTENT_DOT && !hasPersistentDot) {
+                IDLE
+            } else {
+                endState
+            }
         }
 
         override fun onAnimationStart(p0: Animator?) {

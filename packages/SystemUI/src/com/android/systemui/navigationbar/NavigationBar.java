@@ -1585,6 +1585,13 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            // This receiver is unregistered when the view is detached, but on devices with multiple
+            // displays, it can sometimes still receive an ACTION_SCREEN_ON/ACTION_SCREEN_OFF on
+            // display switch, after it was detached, so this null check ensures no crash in that
+            // scenario.
+            if (mNavigationBarView == null) {
+                return;
+            }
             String action = intent.getAction();
             if (Intent.ACTION_SCREEN_OFF.equals(action)
                     || Intent.ACTION_SCREEN_ON.equals(action)) {

@@ -224,7 +224,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
     public void testLayoutParams_hasSecureWindowFlag() {
         final IBinder windowToken = mock(IBinder.class);
         final WindowManager.LayoutParams layoutParams =
-                AuthContainerView.getLayoutParams(windowToken);
+                AuthContainerView.getLayoutParams(windowToken, "");
         assertTrue((layoutParams.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0);
     }
 
@@ -232,7 +232,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
     public void testLayoutParams_excludesImeInsets() {
         final IBinder windowToken = mock(IBinder.class);
         final WindowManager.LayoutParams layoutParams =
-                AuthContainerView.getLayoutParams(windowToken);
+                AuthContainerView.getLayoutParams(windowToken, "");
         assertTrue((layoutParams.getFitInsetsTypes() & WindowInsets.Type.ime()) == 0);
     }
 

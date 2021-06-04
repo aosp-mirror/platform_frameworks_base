@@ -1857,6 +1857,57 @@ public class ChooserActivityTest {
     }
 
     @Test
+    public void testEmptyDirectRowLogging() throws InterruptedException {
+        Intent sendIntent = createSendTextIntent();
+        // We need app targets for direct targets to get displayed
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        // Start activity
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+
+        // Thread.sleep shouldn't be a thing in an integration test but it's
+        // necessary here because of the way the code is structured
+        Thread.sleep(3000);
+
+        assertThat("Chooser should have 2 app targets",
+                activity.getAdapter().getCount(), is(2));
+        assertThat("Chooser should have no direct targets",
+                activity.getAdapter().getSelectableServiceTargetCount(), is(0));
+
+        ChooserActivityLoggerFake logger =
+                (ChooserActivityLoggerFake) activity.getChooserActivityLogger();
+        assertThat(logger.numCalls(), is(6));
+        // first one should be SHARESHEET_TRIGGERED uievent
+        assertThat(logger.get(0).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
+        assertThat(logger.get(0).event.getId(),
+                is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_TRIGGERED.getId()));
+        // second one should be SHARESHEET_STARTED event
+        assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
+        assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
+        assertThat(logger.get(1).mimeType, is("text/plain"));
+        assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
+        assertThat(logger.get(1).appProvidedApp, is(0));
+        assertThat(logger.get(1).appProvidedDirect, is(0));
+        assertThat(logger.get(1).isWorkprofile, is(false));
+        assertThat(logger.get(1).previewType, is(3));
+        // third one should be SHARESHEET_APP_LOAD_COMPLETE uievent
+        assertThat(logger.get(2).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
+        assertThat(logger.get(2).event.getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_APP_LOAD_COMPLETE.getId()));
+        // fourth and fifth are just artifacts of test set-up
+        // sixth one should be ranking atom with SHARESHEET_EMPTY_DIRECT_SHARE_ROW event
+        assertThat(logger.get(5).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
+        assertThat(logger.get(5).event.getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_EMPTY_DIRECT_SHARE_ROW.getId()));
+    }
+
+    @Test
     public void testCopyTextToClipboardLogging() throws Exception {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);

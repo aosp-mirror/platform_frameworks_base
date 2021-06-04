@@ -23,6 +23,7 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.VisibleForTesting;
@@ -38,10 +39,14 @@ import com.airbnb.lottie.LottieAnimationView;
 public class IllustrationPreference extends Preference implements OnPreferenceClickListener {
 
     static final String TAG = "IllustrationPreference";
+
     private int mAnimationId;
     private boolean mIsAnimating;
+    private boolean mIsAutoScale;
     private ImageView mPlayButton;
     private LottieAnimationView mIllustrationView;
+    private View mMiddleGroundView;
+    private FrameLayout mMiddleGroundLayout;
 
     public IllustrationPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -66,13 +71,20 @@ public class IllustrationPreference extends Preference implements OnPreferenceCl
             Log.w(TAG, "Invalid illustration resource id.");
             return;
         }
+        mMiddleGroundLayout = (FrameLayout) holder.findViewById(R.id.middleground_layout);
         mPlayButton = (ImageView) holder.findViewById(R.id.video_play_button);
         mIllustrationView = (LottieAnimationView) holder.findViewById(R.id.lottie_view);
         mIllustrationView.setAnimation(mAnimationId);
         mIllustrationView.loop(true);
+        ColorUtils.applyDynamicColors(getContext(), mIllustrationView);
         mIllustrationView.playAnimation();
         updateAnimationStatus(mIsAnimating);
-        setOnPreferenceClickListener(this);
+        if (mIsAutoScale) {
+            enableAnimationAutoScale(mIsAutoScale);
+        }
+        if (mMiddleGroundView != null) {
+            enableMiddleGroundView();
+        }
     }
 
     @Override
@@ -102,16 +114,59 @@ public class IllustrationPreference extends Preference implements OnPreferenceCl
         return mIllustrationView.isAnimating();
     }
 
+    /**
+     * Set the middle ground view to preference. The user
+     * can overlay a view on top of the animation.
+     */
+    public void setMiddleGroundView(View view) {
+        mMiddleGroundView = view;
+        if (mMiddleGroundLayout == null) {
+            return;
+        }
+        enableMiddleGroundView();
+    }
+
+    /**
+     * Remove the middle ground view of preference.
+     */
+    public void removeMiddleGroundView() {
+        if (mMiddleGroundLayout == null) {
+            return;
+        }
+        mMiddleGroundLayout.removeAllViews();
+        mMiddleGroundLayout.setVisibility(View.GONE);
+    }
+
+    /**
+     * Enables the auto scale feature of animation view.
+     */
+    public void enableAnimationAutoScale(boolean enable) {
+        mIsAutoScale = enable;
+        if (mIllustrationView == null) {
+            return;
+        }
+        mIllustrationView.setScaleType(
+                mIsAutoScale ? ImageView.ScaleType.CENTER_CROP : ImageView.ScaleType.CENTER_INSIDE);
+    }
+
+    private void enableMiddleGroundView() {
+        mMiddleGroundLayout.removeAllViews();
+        mMiddleGroundLayout.addView(mMiddleGroundView);
+        mMiddleGroundLayout.setVisibility(View.VISIBLE);
+    }
+
     private void init(Context context, AttributeSet attrs) {
         setLayoutResource(R.layout.illustration_preference);
 
         mIsAnimating = true;
+        mIsAutoScale = false;
         if (attrs != null) {
             final TypedArray a = context.obtainStyledAttributes(attrs,
                     R.styleable.LottieAnimationView, 0 /*defStyleAttr*/, 0 /*defStyleRes*/);
             mAnimationId = a.getResourceId(R.styleable.LottieAnimationView_lottie_rawRes, 0);
             a.recycle();
         }
+        setOnPreferenceClickListener(this);
     }
 
     private void updateAnimationStatus(boolean playAnimation) {

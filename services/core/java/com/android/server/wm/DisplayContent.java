@@ -5015,28 +5015,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * Re-parent the DisplayContent's top surface, {@link #mSurfaceControl} to the specified
-     * SurfaceControl.
-     *
-     * @param win The window which owns the SurfaceControl. This indicates the z-order of the
-     *            windows of this display against the windows on the parent display.
-     * @param sc The new SurfaceControl, where the DisplayContent's surfaces will be re-parented to.
-     */
-    void reparentDisplayContent(WindowState win, SurfaceControl sc) {
-        if (mParentWindow != null) {
-            mParentWindow.removeEmbeddedDisplayContent(this);
-        }
-        mParentWindow = win;
-        mParentWindow.addEmbeddedDisplayContent(this);
-        mParentSurfaceControl = sc;
-        if (mPortalWindowHandle == null) {
-            mPortalWindowHandle = createPortalWindowHandle(sc.toString());
-        }
-        getPendingTransaction().setInputWindowInfo(sc, mPortalWindowHandle)
-                .reparent(mSurfaceControl, sc);
-    }
-
-    /**
      * Get the window which owns the surface that this DisplayContent is re-parented to.
      *
      * @return the parent window.
