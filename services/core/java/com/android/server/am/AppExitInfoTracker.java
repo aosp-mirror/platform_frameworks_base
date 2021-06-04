@@ -24,6 +24,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.Nullable;
 import android.app.ApplicationExitInfo;
 import android.app.ApplicationExitInfo.Reason;
@@ -287,8 +288,8 @@ public final class AppExitInfoTracker {
         if (!mAppExitInfoLoaded.get()) {
             return;
         }
-        mKillHandler.obtainMessage(KillHandler.MSG_PROC_DIED, obtainRawRecord(app))
-                .sendToTarget();
+        mKillHandler.obtainMessage(KillHandler.MSG_PROC_DIED,
+                obtainRawRecord(app, System.currentTimeMillis())).sendToTarget();
     }
 
     void scheduleNoteAppKill(final ProcessRecord app, final @Reason int reason,
@@ -300,7 +301,7 @@ public final class AppExitInfoTracker {
             return;
         }
 
-        ApplicationExitInfo raw = obtainRawRecord(app);
+        ApplicationExitInfo raw = obtainRawRecord(app, System.currentTimeMillis());
         raw.setReason(reason);
         raw.setSubReason(subReason);
         raw.setDescription(msg);
@@ -542,7 +543,8 @@ public final class AppExitInfoTracker {
                         return AppExitInfoTracker.FOREACH_ACTION_NONE;
                     });
 
-                    Collections.sort(list, (a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
+                    Collections.sort(list,
+                            (a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
                     int size = list.size();
                     if (maxNum > 0) {
                         size = Math.min(size, maxNum);
@@ -976,7 +978,7 @@ public final class AppExitInfoTracker {
     }
 
     @VisibleForTesting
-    ApplicationExitInfo obtainRawRecord(ProcessRecord app) {
+    ApplicationExitInfo obtainRawRecord(ProcessRecord app, @CurrentTimeMillisLong long timestamp) {
         ApplicationExitInfo info = mRawRecordsPool.acquire();
         if (info == null) {
             info = new ApplicationExitInfo();
@@ -998,7 +1000,7 @@ public final class AppExitInfoTracker {
             info.setImportance(procStateToImportance(app.mState.getSetProcState()));
             info.setPss(app.mProfile.getLastPss());
             info.setRss(app.mProfile.getLastRss());
-            info.setTimestamp(System.currentTimeMillis());
+            info.setTimestamp(timestamp);
         }
 
         return info;
@@ -1298,7 +1300,7 @@ public final class AppExitInfoTracker {
                         results.add(mInfos.valueAt(i));
                     }
                     Collections.sort(results,
-                            (a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
+                            (a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
                 } else {
                     if (maxNum == 1) {
                         // Most of the caller might be only interested with the most recent one
@@ -1318,7 +1320,7 @@ public final class AppExitInfoTracker {
                             list.add(mInfos.valueAt(i));
                         }
                         Collections.sort(list,
-                                (a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
+                                (a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
                         for (int i = 0; i < maxNum; i++) {
                             results.add(list.get(i));
                         }
@@ -1412,7 +1414,7 @@ public final class AppExitInfoTracker {
             for (int i = mInfos.size() - 1; i >= 0; i--) {
                 list.add(mInfos.valueAt(i));
             }
-            Collections.sort(list, (a, b) -> (int) (b.getTimestamp() - a.getTimestamp()));
+            Collections.sort(list, (a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
             int size = list.size();
             for (int i = 0; i < size; i++) {
                 list.get(i).dump(pw, prefix + "  ", "#" + i, sdf);
@@ -1629,7 +1631,8 @@ public final class AppExitInfoTracker {
         }
     }
 
-    private static boolean isFresh(long timestamp) {
+    @VisibleForTesting
+    boolean isFresh(long timestamp) {
         // A process could be dying but being stuck in some state, i.e.,
         // being TRACED by tombstoned, thus the zygote receives SIGCHILD
         // way after we already knew the kill (maybe because we did the kill :P),
