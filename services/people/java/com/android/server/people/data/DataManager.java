@@ -264,7 +264,7 @@ public class DataManager {
     @Nullable
     private ConversationChannel getConversationChannel(ShortcutInfo shortcutInfo,
             ConversationInfo conversationInfo) {
-        if (conversationInfo == null) {
+        if (conversationInfo == null || conversationInfo.isDemoted()) {
             return null;
         }
         if (shortcutInfo == null) {
