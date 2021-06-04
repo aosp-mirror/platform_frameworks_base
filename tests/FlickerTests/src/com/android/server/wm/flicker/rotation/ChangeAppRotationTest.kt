@@ -55,19 +55,13 @@ class ChangeAppRotationTest(
             }
         }
 
-    @FlakyTest(bugId = 151179149)
+    @FlakyTest(bugId = 190185577)
     @Test
     override fun focusDoesNotChange() {
         super.focusDoesNotChange()
     }
 
     @Postsubmit
-    @Test
-    override fun noUncoveredRegions() {
-        super.noUncoveredRegions()
-    }
-
-    @FlakyTest
     @Test
     fun screenshotLayerBecomesInvisible() {
         testSpec.assertLayers {
@@ -81,14 +75,8 @@ class ChangeAppRotationTest(
 
     @Postsubmit
     @Test
-    override fun appLayerRotates_EndingPos() {
-        super.appLayerRotates_EndingPos()
-    }
-
-    @Postsubmit
-    @Test
-    override fun appLayerRotates_StartingPos() {
-        super.appLayerRotates_StartingPos()
+    override fun statusBarLayerRotatesScales() {
+        super.statusBarLayerRotatesScales()
     }
 
     @Presubmit
@@ -97,16 +85,10 @@ class ChangeAppRotationTest(
         super.navBarWindowIsAlwaysVisible()
     }
 
-    @Postsubmit
+    @FlakyTest
     @Test
     override fun statusBarLayerIsAlwaysVisible() {
         super.statusBarLayerIsAlwaysVisible()
-    }
-
-    @Postsubmit
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() {
-        super.statusBarWindowIsAlwaysVisible()
     }
 
     companion object {
