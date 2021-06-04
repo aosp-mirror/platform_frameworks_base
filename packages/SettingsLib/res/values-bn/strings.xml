@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"ওয়াই-ফাই ভারবোস লগিং চালু করুন"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ওয়াই-ফাই স্ক্যান থ্রোটলিং"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"অল্প সময় ওয়াই-ফাই নেটওয়ার্কে যুক্ত হয় এমন MAC অ্যাড্রেস র‍্যান্ডমাইজেশনের সুবিধা"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখুন"</string>
@@ -354,7 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ক্লিপ বাউন্ড, মার্জিন ইত্যাদি দেখান"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL লেআউট দিকনির্দেশ জোর দিন"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"সমস্ত স্থানের জন্য RTL এ স্ক্রিন লেআউট দিকনির্দেশে জোর দেয়"</string>
-    <string name="force_msaa" msgid="4081288296137775550">"4x MSAA এ জোর দিন"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"4x MSAA-এ জোর দিন"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 অ্যাপের মধ্যে 4x MSAA চালু করুন"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"অ-আয়তক্ষেত্রাকার ক্লিপ অ্যাক্টিভিটি ডিবাগ করুন"</string>
     <string name="track_frame_time" msgid="522674651937771106">"প্রোফাইল HWUI রেন্ডারিং"</string>
@@ -454,8 +453,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>-এ ব্যাটারি পুরো চার্জ হয়ে যাবে"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>-এ ব্যাটারি পুরো চার্জ হয়ে যাবে"</string>
-    <!-- no translation found for power_charging_limited (7956120998372505295) -->
-    <skip />
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - চার্জ সাময়িকভাবে বন্ধ করা আছে"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"অজানা"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"চার্জ হচ্ছে"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"দ্রুত চার্জ হচ্ছে"</string>

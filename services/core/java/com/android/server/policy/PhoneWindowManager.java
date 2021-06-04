@@ -596,6 +596,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private KeyCombinationManager mKeyCombinationManager;
     private SingleKeyGestureDetector mSingleKeyGestureDetector;
+    private GestureLauncherService mGestureLauncherService;
 
     private boolean mLockNowPending = false;
 
@@ -917,6 +918,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void powerPress(long eventTime, int count, boolean beganFromNonInteractive) {
+        mCameraGestureTriggered = false;
         if (mDefaultDisplayPolicy.isScreenOnEarly() && !mDefaultDisplayPolicy.isScreenOnFully()) {
             Slog.i(TAG, "Suppressed redundant power key press while "
                     + "already in the process of turning the screen on.");
@@ -1066,12 +1068,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private int getMaxMultiPressPowerCount() {
+        // GestureLauncherService could handle power multi tap gesture.
+        if (mGestureLauncherService != null
+                && mGestureLauncherService.isEmergencyGestureEnabled()) {
+            return 5; // EMERGENCY_GESTURE_POWER_TAP_COUNT_THRESHOLD
+        }
+
         if (mTriplePressOnPowerBehavior != MULTI_PRESS_POWER_NOTHING) {
             return 3;
         }
         if (mDoublePressOnPowerBehavior != MULTI_PRESS_POWER_NOTHING) {
             return 2;
         }
+
+        if (mGestureLauncherService != null
+                && mGestureLauncherService.isCameraDoubleTapPowerEnabled()) {
+            return 2; // CAMERA_POWER_TAP_COUNT_THRESHOLD
+        }
+
         return 1;
     }
 
@@ -3825,15 +3839,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // The camera gesture will be detected by GestureLauncherService.
     private boolean handleCameraGesture(KeyEvent event, boolean interactive) {
         // camera gesture.
-        GestureLauncherService gestureService = LocalServices.getService(
-                GestureLauncherService.class);
-        if (gestureService == null) {
+        if (mGestureLauncherService == null) {
             return false;
         }
 
         final MutableBoolean outLaunched = new MutableBoolean(false);
-        final boolean gesturedServiceIntercepted = gestureService.interceptPowerKeyDown(event,
-                interactive, outLaunched);
+        final boolean gesturedServiceIntercepted = mGestureLauncherService.interceptPowerKeyDown(
+                event, interactive, outLaunched);
         if (outLaunched.value) {
             mCameraGestureTriggered = true;
         }
@@ -4689,6 +4701,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         mAutofillManagerInternal = LocalServices.getService(AutofillManagerInternal.class);
+        mGestureLauncherService = LocalServices.getService(GestureLauncherService.class);
     }
 
     /** {@inheritDoc} */

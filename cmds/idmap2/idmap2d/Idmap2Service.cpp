@@ -26,6 +26,8 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
@@ -33,6 +35,7 @@
 #include "idmap2/BinaryStreamVisitor.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
+#include "idmap2/PrettyPrintVisitor.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
 
@@ -45,6 +48,7 @@ using android::idmap2::FabricatedOverlayContainer;
 using android::idmap2::Idmap;
 using android::idmap2::IdmapHeader;
 using android::idmap2::OverlayResourceContainer;
+using android::idmap2::PrettyPrintVisitor;
 using android::idmap2::TargetResourceContainer;
 using android::idmap2::utils::kIdmapCacheDir;
 using android::idmap2::utils::kIdmapFilePermissionMask;
@@ -262,16 +266,16 @@ Status Idmap2Service::createFabricatedOverlay(
                                     path.c_str(), uid));
   }
 
+  const auto frro = builder.Build();
+  if (!frro) {
+    return error(StringPrintf("failed to serialize '%s:%s': %s", overlay.packageName.c_str(),
+                              overlay.overlayName.c_str(), frro.GetErrorMessage().c_str()));
+  }
   // Persist the fabricated overlay.
   umask(kIdmapFilePermissionMask);
   std::ofstream fout(path);
   if (fout.fail()) {
     return error("failed to open frro path " + path);
-  }
-  const auto frro = builder.Build();
-  if (!frro) {
-    return error(StringPrintf("failed to serialize '%s:%s': %s", overlay.packageName.c_str(),
-                              overlay.overlayName.c_str(), frro.GetErrorMessage().c_str()));
   }
   auto result = frro->ToBinaryStream(fout);
   if (!result) {
@@ -349,6 +353,26 @@ binder::Status Idmap2Service::deleteFabricatedOverlay(const std::string& overlay
   }
 
   *_aidl_return = true;
+  return ok();
+}
+
+binder::Status Idmap2Service::dumpIdmap(const std::string& overlay_path,
+                                        std::string* _aidl_return) {
+  assert(_aidl_return);
+
+  const auto idmap_path = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_path);
+  std::ifstream fin(idmap_path);
+  const auto idmap = Idmap::FromBinaryStream(fin);
+  fin.close();
+  if (!idmap) {
+    return error(idmap.GetErrorMessage());
+  }
+
+  std::stringstream stream;
+  PrettyPrintVisitor visitor(stream);
+  (*idmap)->accept(&visitor);
+  *_aidl_return = stream.str();
+
   return ok();
 }
 

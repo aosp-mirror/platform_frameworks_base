@@ -124,7 +124,8 @@ class DeviceControlsTile @Inject constructor(
         if (controlsComponent.isEnabled() && hasControlsApps.get()) {
             if (controlsComponent.getVisibility() == AVAILABLE) {
                 state.state = Tile.STATE_ACTIVE
-                state.secondaryLabel = ""
+                state.secondaryLabel = controlsComponent
+                        .getControlsController().get().getPreferredStructure().structure
             } else {
                 state.state = Tile.STATE_INACTIVE
                 state.secondaryLabel = mContext.getText(R.string.controls_tile_locked)

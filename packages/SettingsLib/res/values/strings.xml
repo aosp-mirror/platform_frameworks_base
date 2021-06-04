@@ -886,6 +886,9 @@
     <!-- UI debug setting: force right to left layout summary [CHAR LIMIT=100] -->
     <string name="force_rtl_layout_all_locales_summary">Force screen layout direction to RTL for all locales</string>
 
+    <!-- UI debug setting: enable or disable window blurs [CHAR LIMIT=25] -->
+    <string name="window_blurs">Allow window-level blurs</string>
+
     <!-- UI debug setting: force anti-aliasing to render apps [CHAR LIMIT=25] -->
     <string name="force_msaa">Force 4x MSAA</string>
     <!-- UI debug setting: force anti-aliasing summary [CHAR LIMIT=50] -->

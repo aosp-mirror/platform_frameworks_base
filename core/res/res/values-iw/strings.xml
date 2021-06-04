@@ -331,7 +331,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"קריאה וכתיבה של יומן השיחות של הטלפון"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"טלפון"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ביצוע וניהול של שיחות טלפון"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"חיישנים לבישים"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"חיישנים גופניים"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"גישה אל נתוני חיישנים של הסימנים החיוניים שלך"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"אחזור תוכן של חלון"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"בדיקת התוכן של חלון שאיתו מתבצעת אינטראקציה."</string>
@@ -1912,7 +1912,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"עודכנה על ידי מנהל המערכת"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"נמחקה על ידי מנהל המערכת"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"אישור"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"התכונה \'חיסכון בסוללה\' מפעילה עיצוב כהה ומגבילה או מכבה פעילות ברקע, חלק מהאפקטים החזותיים, תכונות מסוימות וחלק מהחיבורים לרשתות.\n\n"<annotation id="url">"מידע נוסף"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"התכונה \'חיסכון בסוללה\' מפעילה עיצוב כהה ומגבילה או מכבה פעילות ברקע, חלק מהאפקטים החזותיים, תכונות מסוימות וחלק מהחיבורים לרשתות."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות לשלוח או לקבל נתונים ברקע. אפליקציות שבהן נעשה שימוש כרגע יכולות לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"להפעיל את חוסך הנתונים?"</string>

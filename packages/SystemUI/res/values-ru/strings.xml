@@ -1136,19 +1136,19 @@
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"Скоро <xliff:g id="NAME">%1$s</xliff:g> празднует день рождения"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Годовщина"</string>
     <string name="anniversary_status_content_description" msgid="8212171790843327442">"<xliff:g id="NAME">%1$s</xliff:g> отмечает юбилей"</string>
-    <string name="location_status" msgid="1294990572202541812">"Доступ открыт"</string>
+    <string name="location_status" msgid="1294990572202541812">"Делится геоданными"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> показывает свое местоположение"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Новая история"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"Пользователь <xliff:g id="NAME">%1$s</xliff:g> поделился новой историей"</string>
-    <string name="video_status" msgid="4548544654316843225">"Просмотр"</string>
-    <string name="audio_status" msgid="4237055636967709208">"Прослушивание аудио"</string>
-    <string name="game_status" msgid="1340694320630973259">"Игра запущена"</string>
+    <string name="video_status" msgid="4548544654316843225">"Смотрит видео"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Слушает аудио"</string>
+    <string name="game_status" msgid="1340694320630973259">"Играет"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Друзья"</string>
     <string name="empty_status" msgid="5938893404951307749">"Давайте поболтаем!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Контент скоро появится."</string>
     <string name="missed_call" msgid="4228016077700161689">"Пропущенный вызов"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Просматривайте недавние сообщения, пропущенные звонки и обновления статуса."</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Будьте в курсе последних сообщений, пропущенных вызовов и обновлений статуса."</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Чат"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"Пользователь <xliff:g id="NAME">%1$s</xliff:g> отправил сообщение"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Пользователь <xliff:g id="NAME">%1$s</xliff:g> отправил изображение"</string>
