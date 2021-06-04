@@ -395,6 +395,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFitted();
 
         final Rect currentBounds = mActivity.getWindowConfiguration().getBounds();
+        final Rect currentAppBounds = mActivity.getWindowConfiguration().getAppBounds();
         final Rect originalBounds = new Rect(mActivity.getWindowConfiguration().getBounds());
 
         final int notchHeight = 100;
@@ -422,8 +423,8 @@ public class SizeCompatTests extends WindowTestsBase {
         // Because the display cannot rotate, the portrait activity will fit the short side of
         // display with keeping portrait bounds [200, 0 - 700, 1000] in center.
         assertEquals(newDisplayBounds.height(), currentBounds.height());
-        assertEquals(currentBounds.height() * newDisplayBounds.height() / newDisplayBounds.width(),
-                currentBounds.width());
+        assertEquals(currentAppBounds.height() * newDisplayBounds.height()
+                / newDisplayBounds.width(), currentAppBounds.width());
         assertFitted();
         // The appBounds should be [200, 100 - 700, 1000].
         final Rect appBounds = mActivity.getWindowConfiguration().getAppBounds();
