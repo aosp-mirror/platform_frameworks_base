@@ -20,9 +20,11 @@ import static com.android.systemui.qs.customize.QSCustomizer.EXTRA_QS_CUSTOMIZIN
 import static com.android.systemui.qs.customize.QSCustomizer.MENU_RESET;
 
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toolbar;
 import android.widget.Toolbar.OnMenuItemClickListener;
 
@@ -138,6 +140,20 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
             public void onInitializeAccessibilityNodeInfoForItem(RecyclerView.Recycler recycler,
                     RecyclerView.State state, View host, AccessibilityNodeInfoCompat info) {
                 // Do not read row and column every time it changes.
+            }
+
+            public void calculateItemDecorationsForChild(View child, Rect outRect) {
+                // There's only a single item decoration that cares about the itemOffsets, so
+                // we just call it manually so they are never cached. This way, it's updated as the
+                // tiles are moved around.
+                // It only sets the left and right margin and only cares about tiles (not TextView).
+                if (!(child instanceof TextView)) {
+                    outRect.setEmpty();
+                    mTileAdapter.getMarginItemDecoration().getItemOffsets(outRect, child,
+                            recyclerView, new RecyclerView.State());
+                    ((LayoutParams) child.getLayoutParams()).leftMargin = outRect.left;
+                    ((LayoutParams) child.getLayoutParams()).rightMargin = outRect.right;
+                }
             }
         };
         layout.setSpanSizeLookup(mTileAdapter.getSizeLookup());
