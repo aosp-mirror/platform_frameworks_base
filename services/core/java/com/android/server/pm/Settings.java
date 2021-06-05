@@ -3997,15 +3997,18 @@ public final class Settings implements Watchable, Snappable {
                 final int uninstallReason = (shouldMaybeInstall && !shouldReallyInstall) ?
                         UNINSTALL_REASON_USER_TYPE : UNINSTALL_REASON_UNKNOWN;
                 ps.setUninstallReason(uninstallReason, userHandle);
-                if (!shouldReallyInstall) {
+                if (shouldReallyInstall) {
+                    // Need to create a data directory for all apps installed for this user.
+                    // Accumulate all required args and call the installer after mPackages lock
+                    // has been released
+                    final String seInfo = AndroidPackageUtils.getSeInfo(ps.pkg, ps);
+                    batch.createAppData(ps.volumeUuid, ps.name, userHandle,
+                            StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE,
+                            ps.appId, seInfo, ps.pkg.getTargetSdkVersion());
+                } else {
+                    // Make sure the app is excluded from storage mapping for this user
                     writeKernelMappingLPr(ps);
                 }
-                // Need to create a data directory for all apps under this user. Accumulate all
-                // required args and call the installer after mPackages lock has been released
-                final String seInfo = AndroidPackageUtils.getSeInfo(ps.pkg, ps);
-                batch.createAppData(ps.volumeUuid, ps.name, userHandle,
-                        StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE, ps.appId,
-                        seInfo, ps.pkg.getTargetSdkVersion());
             }
         }
         t.traceBegin("createAppData");
