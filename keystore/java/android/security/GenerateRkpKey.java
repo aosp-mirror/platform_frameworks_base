@@ -22,6 +22,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * GenerateKey is a helper class to handle interactions between Keystore and the RemoteProvisioner
@@ -41,14 +45,25 @@ import android.os.RemoteException;
  * @hide
  */
 public class GenerateRkpKey {
+    private static final String TAG = "GenerateRkpKey";
+
+    private static final int NOTIFY_EMPTY = 0;
+    private static final int NOTIFY_KEY_GENERATED = 1;
+    private static final int TIMEOUT_MS = 1000;
 
     private IGenerateRkpKeyService mBinder;
     private Context mContext;
+    private CountDownLatch mCountDownLatch;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             mBinder = IGenerateRkpKeyService.Stub.asInterface(service);
+            mCountDownLatch.countDown();
+        }
+
+        @Override public void onBindingDied(ComponentName className) {
+            mCountDownLatch.countDown();
         }
 
         @Override
@@ -64,36 +79,51 @@ public class GenerateRkpKey {
         mContext = context;
     }
 
-    /**
-     * Fulfills the use case of (2) described in the class documentation. Blocks until the
-     * RemoteProvisioner application can get new attestation keys signed by the server.
-     */
-    public void notifyEmpty(int securityLevel) throws RemoteException {
+    private void bindAndSendCommand(int command, int securityLevel) throws RemoteException {
         Intent intent = new Intent(IGenerateRkpKeyService.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+        if (comp == null) {
+            throw new RemoteException("Could not resolve GenerateRkpKeyService.");
+        }
         intent.setComponent(comp);
-        if (comp == null || !mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)) {
-            throw new RemoteException("Failed to bind to GenerateKeyService");
+        mCountDownLatch = new CountDownLatch(1);
+        if (!mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)) {
+            throw new RemoteException("Failed to bind to GenerateRkpKeyService");
+        }
+        try {
+            mCountDownLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Interrupted: ", e);
         }
         if (mBinder != null) {
-            mBinder.generateKey(securityLevel);
+            switch (command) {
+                case NOTIFY_EMPTY:
+                    mBinder.generateKey(securityLevel);
+                    break;
+                case NOTIFY_KEY_GENERATED:
+                    mBinder.notifyKeyGenerated(securityLevel);
+                    break;
+                default:
+                    Log.e(TAG, "Invalid case for command");
+            }
+        } else {
+            Log.e(TAG, "Binder object is null; failed to bind to GenerateRkpKeyService.");
         }
         mContext.unbindService(mConnection);
     }
 
     /**
-     * FUlfills the use case of (1) described in the class documentation. Non blocking call.
+     * Fulfills the use case of (2) described in the class documentation. Blocks until the
+     * RemoteProvisioner application can get new attestation keys signed by the server.
+     */
+    public void notifyEmpty(int securityLevel) throws RemoteException {
+        bindAndSendCommand(NOTIFY_EMPTY, securityLevel);
+    }
+
+    /**
+     * Fulfills the use case of (1) described in the class documentation. Non blocking call.
      */
     public void notifyKeyGenerated(int securityLevel) throws RemoteException {
-        Intent intent = new Intent(IGenerateRkpKeyService.class.getName());
-        ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
-        intent.setComponent(comp);
-        if (comp == null || !mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)) {
-            throw new RemoteException("Failed to bind to GenerateKeyService");
-        }
-        if (mBinder != null) {
-            mBinder.notifyKeyGenerated(securityLevel);
-        }
-        mContext.unbindService(mConnection);
+        bindAndSendCommand(NOTIFY_KEY_GENERATED, securityLevel);
     }
 }
