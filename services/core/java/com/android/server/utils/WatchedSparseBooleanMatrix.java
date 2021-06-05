@@ -16,9 +16,12 @@
 
 package com.android.server.utils;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
+
 import android.annotation.Nullable;
 import android.annotation.Size;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -39,13 +42,14 @@ import java.util.Arrays;
 public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappable {
 
     /**
-     * The matrix is implemented through four arrays.  The matrix of booleans is stored in
-     * a one-dimensional {@code mValues} array.  {@code mValues} is always of size
-     * {@code mOrder * mOrder}.  Elements of {@code mValues} are addressed with
-     * arithmetic: the offset of the element {@code {row, col}} is at
-     * {@code row * mOrder + col}.  The term "storage index" applies to {@code mValues}.
-     * A storage index designates a row (column) in the underlying storage.  This is not
-     * the same as the row seen by client code.
+     * The matrix is implemented through four arrays.  First, the matrix of booleans is
+     * stored in a two-dimensional {@code mValues} array of bit-packed booleans.
+     * {@code mValues} is always of size {@code mOrder * mOrder / 8}.  The factor of 8 is
+     * present because there are 8 bits in a byte.  Elements of {@code mValues} are
+     * addressed with arithmetic: the element {@code {row, col}} is bit {@code col % 8} in
+     * byte * {@code (row * mOrder + col) / 8}.  The term "storage index" applies to
+     * {@code mValues}.  A storage index designates a row (column) in the underlying
+     * storage.  This is not the same as the row seen by client code.
      *
      * Client code addresses the matrix through indices.  These are integers that need not
      * be contiguous.  Client indices are mapped to storage indices through two linear
@@ -61,16 +65,32 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
      *
      * Some notes:
      * <ul>
-     * <li> The matrix never shrinks.
+     * <li> The matrix does not automatically shrink but there is a compress() method that
+     *      will recover unused space.
      * <li> Equality is a very, very expesive operation.
      * </ul>
      */
 
     /**
      * mOrder is always a multiple of this value.  A  minimal matrix therefore holds 2^12
-     * values and requires 1024 bytes.
+     * values and requires 1024 bytes.  The value is visible for testing.
      */
-    private static final int STEP = 64;
+    @VisibleForTesting(visibility = PRIVATE)
+    static final int STEP = 64;
+
+    /**
+     * There are 8 bits in a byte.  The constant is defined here only to make it easy to
+     * find in the code.
+     */
+    private static final int BYTE = 8;
+
+    /**
+     * Constants that index into the string array returned by matrixToString.  The primary
+     * consumer is test code.
+     */
+    static final int STRING_KEY_INDEX = 0;
+    static final int STRING_MAP_INDEX = 1;
+    static final int STRING_INUSE_INDEX = 2;
 
     /**
      * The order of the matrix storage, including any padding.  The matrix is always
@@ -103,7 +123,7 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     /**
      * The boolean array.  This array is always {@code mOrder x mOrder} in size.
      */
-    private boolean[] mValues;
+    private byte[] mValues;
 
     /**
      * A convenience function called when the elements are added to or removed from the storage.
@@ -140,7 +160,7 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
         mInUse = new boolean[mOrder];
         mKeys = ArrayUtils.newUnpaddedIntArray(mOrder);
         mMap = ArrayUtils.newUnpaddedIntArray(mOrder);
-        mValues = new boolean[mOrder * mOrder];
+        mValues = new byte[mOrder * mOrder / 8];
         mSize = 0;
     }
 
@@ -207,7 +227,7 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
         }
         if (r >= 0 && c >= 0) {
             setValueAt(r, c, value);
-            onChanged();
+            // setValueAt() will call onChanged().
         } else {
             throw new RuntimeException("matrix overflow");
         }
@@ -232,8 +252,12 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     public void removeAt(int index) {
         validateIndex(index);
         mInUse[mMap[index]] = false;
+        // Remove the specified index and ensure that unused words in mKeys and mMap are
+        // always zero, to simplify the equality function.
         System.arraycopy(mKeys, index + 1, mKeys, index, mSize - (index + 1));
+        mKeys[mSize - 1] = 0;
         System.arraycopy(mMap, index + 1, mMap, index, mSize - (index + 1));
+        mMap[mSize - 1] = 0;
         mSize--;
         onChanged();
     }
@@ -272,6 +296,17 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     }
 
     /**
+     * An internal method to fetch the boolean value given the mValues row and column
+     * indices.  These are not the indices used by the *At() methods.
+     */
+    private boolean valueAtInternal(int row, int col) {
+        int element = row * mOrder + col;
+        int offset = element / BYTE;
+        int mask = 1 << (element % BYTE);
+        return (mValues[offset] & mask) != 0;
+    }
+
+    /**
      * Given a row and column, each in the range <code>0...size()-1</code>, returns the
      * value from the <code>index</code>th key-value mapping that this WatchedSparseBooleanMatrix
      * stores.
@@ -280,8 +315,22 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
         validateIndex(rowIndex, colIndex);
         int r = mMap[rowIndex];
         int c = mMap[colIndex];
-        int element = r * mOrder + c;
-        return mValues[element];
+        return valueAtInternal(r, c);
+    }
+
+    /**
+     * An internal method to set the boolean value given the mValues row and column
+     * indices.  These are not the indices used by the *At() methods.
+     */
+    private void setValueAtInternal(int row, int col, boolean value) {
+        int element = row * mOrder + col;
+        int offset = element / BYTE;
+        byte mask = (byte) (1 << (element % BYTE));
+        if (value) {
+            mValues[offset] |= mask;
+        } else {
+            mValues[offset] &= ~mask;
+        }
     }
 
     /**
@@ -291,8 +340,7 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
         validateIndex(rowIndex, colIndex);
         int r = mMap[rowIndex];
         int c = mMap[colIndex];
-        int element = r * mOrder + c;
-        mValues[element] = value;
+        setValueAtInternal(r, c, value);
         onChanged();
     }
 
@@ -327,12 +375,17 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
             mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);
             mMap = GrowingArrayUtils.insert(mMap, mSize, i, newIndex);
             mSize++;
+
             // Initialize the row and column corresponding to the new index.
+            int valueRow = mOrder / BYTE;
+            int offset = newIndex / BYTE;
+            byte mask = (byte) (~(1 << (newIndex % BYTE)));
+            Arrays.fill(mValues, newIndex * valueRow, (newIndex + 1) * valueRow, (byte) 0);
             for (int n = 0; n < mSize; n++) {
-                mValues[n * mOrder + newIndex] = false;
-                mValues[newIndex * mOrder + n] = false;
+                mValues[n * valueRow + offset] &= mask;
             }
-            onChanged();
+            // Do not report onChanged() from this private method.  onChanged() is the
+            // responsibility of public methods that call this one.
         }
         return i;
     }
@@ -356,6 +409,33 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     }
 
     /**
+     * Expand the 2D array.  This also extends the free list.
+     */
+    private void growMatrix() {
+        resizeValues(mOrder + STEP);
+    }
+
+    /**
+     * Resize the values array to the new dimension.
+     */
+    private void resizeValues(int newOrder) {
+
+        boolean[] newInuse = Arrays.copyOf(mInUse, newOrder);
+        int minOrder = Math.min(mOrder, newOrder);
+
+        byte[] newValues = new byte[newOrder * newOrder / BYTE];
+        for (int i = 0; i < minOrder; i++) {
+            int row = mOrder * i / BYTE;
+            int newRow = newOrder * i / BYTE;
+            System.arraycopy(mValues, row, newValues, newRow, minOrder / BYTE);
+        }
+
+        mInUse = newInuse;
+        mValues = newValues;
+        mOrder = newOrder;
+    }
+
+    /**
      * Find an unused storage index, mark it in-use, and return it.
      */
     private int nextFree() {
@@ -369,27 +449,82 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     }
 
     /**
-     * Expand the 2D array.  This also extends the free list.
+     * Return the index of the key that uses the highest row index in use.  This returns
+     * -1 if the matrix is empty.  Note that the return is an index suitable for the *At()
+     * methods.  It is not the index in the mInUse array.
      */
-    private void growMatrix() {
-        int newOrder = mOrder + STEP;
-
-        boolean[] newInuse = Arrays.copyOf(mInUse, newOrder);
-
-        boolean[] newValues = new boolean[newOrder * newOrder];
-        for (int i = 0; i < mOrder; i++) {
-            int row = mOrder * i;
-            int newRow = newOrder * i;
-            for (int j = 0; j < mOrder; j++) {
-                int index = row + j;
-                int newIndex = newRow + j;
-                newValues[newIndex] = mValues[index];
+    private int lastInuse() {
+        for (int i = mOrder - 1; i >= 0; i--) {
+            if (mInUse[i]) {
+                for (int j = 0; j < mSize; j++) {
+                    if (mMap[j] == i) {
+                        return j;
+                    }
+                }
+                throw new IndexOutOfBoundsException();
             }
         }
+        return -1;
+    }
 
-        mInUse = newInuse;
-        mValues = newValues;
-        mOrder = newOrder;
+    /**
+     * Compress the matrix by packing keys into consecutive indices.  If the compression
+     * is sufficient, the mValues array can be shrunk.
+     */
+    private void pack() {
+        if (mSize == 0 || mSize == mOrder) {
+            return;
+        }
+        // dst and src are identify raw (row, col) in mValues.  srcIndex is the index (as
+        // in the result of keyAt()) of the key being relocated.
+        for (int dst = nextFree(); dst < mSize; dst = nextFree()) {
+            int srcIndex = lastInuse();
+            int src = mMap[srcIndex];
+            mInUse[src] = false;
+            mMap[srcIndex] = dst;
+            System.arraycopy(mValues, src * mOrder / BYTE,
+                             mValues, dst * mOrder / BYTE,
+                             mOrder / BYTE);
+            int srcOffset = (src / BYTE);
+            byte srcMask = (byte) (1 << (src % BYTE));
+            int dstOffset = (dst / BYTE);
+            byte dstMask = (byte) (1 << (dst % BYTE));
+            for (int i = 0; i < mOrder; i++) {
+                if ((mValues[srcOffset] & srcMask) == 0) {
+                    mValues[dstOffset] &= ~dstMask;
+                } else {
+                    mValues[dstOffset] |= dstMask;
+                }
+                srcOffset += mOrder / BYTE;
+                dstOffset += mOrder / BYTE;
+            }
+        }
+    }
+
+    /**
+     * Shrink the matrix, if possible.
+     */
+    public void compact() {
+        pack();
+        int unused = (mOrder - mSize) / STEP;
+        if (unused > 0) {
+            resizeValues(mOrder - (unused * STEP));
+        }
+    }
+
+    /**
+     * Return a copy of the keys that are in use by the matrix.
+     */
+    public int[] keys() {
+        return Arrays.copyOf(mKeys, mSize);
+    }
+
+    /**
+     * Return the size of the 2D matrix.  This is always greater than or equal to size().
+     * This does not reflect the sizes of the meta-information arrays (such as mKeys).
+     */
+    public int capacity() {
+        return mOrder;
     }
 
     /**
@@ -398,15 +533,12 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     @Override
     public int hashCode() {
         int hashCode = mSize;
+        hashCode = 31 * hashCode + Arrays.hashCode(mKeys);
+        hashCode = 31 * hashCode + Arrays.hashCode(mMap);
         for (int i = 0; i < mSize; i++) {
-            hashCode = 31 * hashCode + mKeys[i];
-            hashCode = 31 * hashCode + mMap[i];
-        }
-        for (int i = 0; i < mSize; i++) {
-            int row = mMap[i] * mOrder;
+            int row = mMap[i];
             for (int j = 0; j < mSize; j++) {
-                int element = mMap[j] + row;
-                hashCode = 31 * hashCode + (mValues[element] ? 1 : 0);
+                hashCode = 31 * hashCode + (valueAtInternal(row, mMap[j]) ? 1 : 0);
             }
         }
         return hashCode;
@@ -429,20 +561,16 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
         if (mSize != other.mSize) {
             return false;
         }
-
-        for (int i = 0; i < mSize; i++) {
-            if (mKeys[i] != other.mKeys[i]) {
-                return false;
-            }
-            if (mMap[i] != other.mMap[i]) {
-                return false;
-            }
+        if (!Arrays.equals(mKeys, other.mKeys)) {
+            // mKeys is zero padded at the end and is sorted, so the arrays can always be
+            // directly compared.
+            return false;
         }
         for (int i = 0; i < mSize; i++) {
-            int row = mMap[i] * mOrder;
+            int row = mMap[i];
             for (int j = 0; j < mSize; j++) {
-                int element = mMap[j] + row;
-                if (mValues[element] != other.mValues[element]) {
+                int col = mMap[j];
+                if (valueAtInternal(row, col) != other.valueAtInternal(row, col)) {
                     return false;
                 }
             }
@@ -451,9 +579,12 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     }
 
     /**
-     * Return the matrix meta information.  This is always three strings long.
+     * Return the matrix meta information.  This is always three strings long.  The
+     * strings are indexed by the constants STRING_KEY_INDEX, STRING_MAP_INDEX, and
+     * STRING_INUSE_INDEX.
      */
-    private @Size(3) String[] matrixToStringMeta() {
+    @VisibleForTesting(visibility = PRIVATE)
+    @Size(3) String[] matrixToStringMeta() {
         String[] result = new String[3];
 
         StringBuilder k = new StringBuilder();
@@ -463,7 +594,7 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
                 k.append(" ");
             }
         }
-        result[0] = k.substring(0);
+        result[STRING_KEY_INDEX] = k.substring(0);
 
         StringBuilder m = new StringBuilder();
         for (int i = 0; i < mSize; i++) {
@@ -472,42 +603,47 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
                 m.append(" ");
             }
         }
-        result[1] = m.substring(0);
+        result[STRING_MAP_INDEX] = m.substring(0);
 
         StringBuilder u = new StringBuilder();
         for (int i = 0; i < mOrder; i++) {
             u.append(mInUse[i] ? "1" : "0");
         }
-        result[2] = u.substring(0);
+        result[STRING_INUSE_INDEX] = u.substring(0);
         return result;
     }
 
     /**
      * Return the matrix as an array of strings.  There is one string per row.  Each
-     * string has a '1' or a '0' in the proper column.
+     * string has a '1' or a '0' in the proper column.  This is the raw data indexed by
+     * row/column disregarding the key map.
      */
-    private String[] matrixToStringRaw() {
+    @VisibleForTesting(visibility = PRIVATE)
+    String[] matrixToStringRaw() {
         String[] result = new String[mOrder];
         for (int i = 0; i < mOrder; i++) {
-            int row = i * mOrder;
             StringBuilder line = new StringBuilder(mOrder);
             for (int j = 0; j < mOrder; j++) {
-                int element = row + j;
-                line.append(mValues[element] ? "1" : "0");
+                line.append(valueAtInternal(i, j) ? "1" : "0");
             }
             result[i] = line.substring(0);
         }
         return result;
     }
 
-    private String[] matrixToStringCooked() {
+    /**
+     * Return the matrix as an array of strings.  There is one string per row.  Each
+     * string has a '1' or a '0' in the proper column.  This is the cooked data indexed by
+     * keys, in key order.
+     */
+    @VisibleForTesting(visibility = PRIVATE)
+    String[] matrixToStringCooked() {
         String[] result = new String[mSize];
         for (int i = 0; i < mSize; i++) {
-            int row = mMap[i] * mOrder;
+            int row = mMap[i];
             StringBuilder line = new StringBuilder(mSize);
             for (int j = 0; j < mSize; j++) {
-                int element = row + mMap[j];
-                line.append(mValues[element] ? "1" : "0");
+                line.append(valueAtInternal(row, mMap[j]) ? "1" : "0");
             }
             result[i] = line.substring(0);
         }

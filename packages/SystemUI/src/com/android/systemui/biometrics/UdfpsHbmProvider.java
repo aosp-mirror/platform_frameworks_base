@@ -31,8 +31,10 @@ public interface UdfpsHbmProvider {
     /**
      * UdfpsView will call this to enable the HBM when the fingerprint illumination is needed.
      *
-     * The call must be made from the UI thread. The callback, if provided, will also be invoked
-     * from the UI thread.
+     * This method is a no-op when some type of HBM is already enabled.
+     *
+     * This method must be called from the UI thread. The callback, if provided, will also be
+     * invoked from the UI thread.
      *
      * @param hbmType The type of HBM that should be enabled. See {@link UdfpsHbmTypes}.
      * @param surface The surface for which the HBM is requested, in case the HBM implementation
@@ -45,14 +47,14 @@ public interface UdfpsHbmProvider {
     /**
      * UdfpsView will call this to disable the HBM when the illumination is not longer needed.
      *
+     * This method is a no-op when HBM is already disabled. If HBM is enabled, this method will
+     * disable HBM for the {@code hbmType} and {@code surface} that were provided to the
+     * corresponding {@link #enableHbm(int, Surface, Runnable)}.
+     *
      * The call must be made from the UI thread. The callback, if provided, will also be invoked
      * from the UI thread.
      *
-     * @param hbmType The type of HBM that should be disabled. See {@link UdfpsHbmTypes}.
-     * @param surface The surface for which the HBM is requested, in case the HBM implementation
-     *                needs to unset special surface flags to disable the HBM. Can be null.
      * @param onHbmDisabled A runnable that will be executed once HBM is disabled.
      */
-    void disableHbm(@HbmType int hbmType, @Nullable Surface surface,
-            @Nullable Runnable onHbmDisabled);
+    void disableHbm(@Nullable Runnable onHbmDisabled);
 }

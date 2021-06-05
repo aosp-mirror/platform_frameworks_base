@@ -713,6 +713,34 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    public boolean removeClient(IAccessibilityManagerClient callback, int userId) {
+        // TODO(b/190216606): Add tracing for removeClient when implementation is the same in master
+
+        synchronized (mLock) {
+            final int resolvedUserId = mSecurityPolicy
+                    .resolveCallingUserIdEnforcingPermissionsLocked(userId);
+
+            AccessibilityUserState userState = getUserStateLocked(resolvedUserId);
+            if (mSecurityPolicy.isCallerInteractingAcrossUsers(userId)) {
+                boolean unregistered = mGlobalClients.unregister(callback);
+                if (DEBUG) {
+                    Slog.i(LOG_TAG,
+                            "Removed global client for pid:" + Binder.getCallingPid() + "state: "
+                                    + unregistered);
+                }
+                return unregistered;
+            } else {
+                boolean unregistered = userState.mUserClients.unregister(callback);
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "Removed user client for pid:" + Binder.getCallingPid()
+                            + " and userId:" + resolvedUserId + "state: " + unregistered);
+                }
+                return unregistered;
+            }
+        }
+    }
+
+    @Override
     public void sendAccessibilityEvent(AccessibilityEvent event, int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".sendAccessibilityEvent", FLAGS_ACCESSIBILITY_MANAGER,
@@ -3297,6 +3325,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 pw.println();
             }
             mA11yWindowManager.dump(fd, pw, args);
+            pw.println("Global client list info:{");
+            mGlobalClients.dump(pw, "    Client list ");
+            pw.println("    Registered clients:{");
+            for (int i = 0; i < mGlobalClients.getRegisteredCallbackCount(); i++) {
+                AccessibilityManagerService.Client client = (AccessibilityManagerService.Client)
+                        mGlobalClients.getRegisteredCallbackCookie(i);
+                pw.append(Arrays.toString(client.mPackageNames));
+            }
         }
     }
 
