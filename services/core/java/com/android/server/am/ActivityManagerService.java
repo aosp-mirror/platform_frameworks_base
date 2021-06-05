@@ -15349,6 +15349,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public int[] getStartedUserIds() {
+            return mUserController.getStartedUserArray();
+        }
+
+        @Override
         public void setPendingIntentAllowBgActivityStarts(IIntentSender target,
                 IBinder allowlistToken, int flags) {
             if (!(target instanceof PendingIntentRecord)) {
