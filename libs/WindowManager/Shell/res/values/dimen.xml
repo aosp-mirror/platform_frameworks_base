@@ -15,7 +15,8 @@
     limitations under the License.
 -->
 <resources>
-    <dimen name="dismiss_circle_size">52dp</dimen>
+    <dimen name="dismiss_circle_size">96dp</dimen>
+    <dimen name="dismiss_circle_small">60dp</dimen>
 
     <!-- The height of the gradient indicating the dismiss edge when moving a PIP. -->
     <dimen name="floating_dismiss_gradient_height">250dp</dimen>

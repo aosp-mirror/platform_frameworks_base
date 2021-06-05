@@ -75,6 +75,7 @@ public class PipTouchHandler {
     private final @NonNull PipBoundsState mPipBoundsState;
     private final PipUiEventLogger mPipUiEventLogger;
     private final PipDismissTargetHandler mPipDismissTargetHandler;
+    private final PipTaskOrganizer mPipTaskOrganizer;
     private final ShellExecutor mMainExecutor;
 
     private PipResizeGestureHandler mPipResizeGestureHandler;
@@ -173,6 +174,7 @@ public class PipTouchHandler {
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
+        mPipTaskOrganizer = pipTaskOrganizer;
         mMenuController = menuController;
         mPipUiEventLogger = pipUiEventLogger;
         mFloatingContentCoordinator = floatingContentCoordinator;
@@ -799,6 +801,7 @@ public class PipTouchHandler {
             mMovementWithinDismiss = touchState.getDownTouchPosition().y
                     >= mPipBoundsState.getMovementBounds().bottom;
             mMotionHelper.setSpringingToTouch(false);
+            mPipDismissTargetHandler.setTaskLeash(mPipTaskOrganizer.getSurfaceControl());
 
             // If the menu is still visible then just poke the menu
             // so that it will timeout after the user stops touching it
@@ -847,6 +850,7 @@ public class PipTouchHandler {
         @Override
         public boolean onUp(PipTouchState touchState) {
             mPipDismissTargetHandler.hideDismissTargetMaybe();
+            mPipDismissTargetHandler.setTaskLeash(null);
 
             if (!touchState.isUserInteracting()) {
                 return false;
