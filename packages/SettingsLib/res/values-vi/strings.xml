@@ -235,7 +235,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Hãy kết nối mạng Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, gỡ lỗi, nhà phát triển"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Phím tắt báo cáo lỗi"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Hiển thị một nút trong menu nguồn để báo cáo lỗi"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Hiện một nút trong trình đơn nguồn để báo cáo lỗi"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Không khóa màn hình"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Màn hình sẽ không bao giờ chuyển sang chế độ ngủ khi sạc"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bật nhật ký theo dõi HCI Bluetooth"</string>

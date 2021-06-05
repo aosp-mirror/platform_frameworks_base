@@ -698,7 +698,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"જરૂરી છે કે સંગ્રહિત ઍપ્લિકેશન એન્ક્રિપ્ટ થાય."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"કૅમેરા અક્ષમ કરો"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"તમામ ઉપકરણ કૅમેરાનો ઉપયોગ અટકાવો."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"અમુક સ્ક્રીનલૉક સુવિધા અક્ષમ કરો"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"અમુક સ્ક્રીનલૉક સુવિધા બંધ કરો"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"કેટલીક સ્ક્રીન લૉક સુવિધાઓના ઉપયોગને અટકાવો."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"ઘર"</item>

@@ -1596,7 +1596,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4 tadan 8 ta raqamgacha bo‘lgan PIN kodni kiriting."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK kod 8 ta raqam bo‘lishi shart."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"To‘g‘ri PUK kodni qayta kiriting. Qayta-qayta urinishlar SIM kartani butunlay o‘chirib qo‘yadi."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN-kod mos kelmadi"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN kod mos kelmadi"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Grafik kalit juda ko‘p marta chizildi"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"Qulfni ochish uchun Google hisobingiz bilan kiring."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Foydalanuvchi nomi (e-pochta)"</string>
