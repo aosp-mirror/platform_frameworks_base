@@ -325,7 +325,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"prístup k vašej fyzickej aktivite"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotenie a natáčanie videí"</string>
-    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Zariadenia nablízku"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Zariadenia v okolí"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"objavovať a pripájať zariadenia v okolí"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Zoznam hovorov"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"čítať a zapisovať do zoznamu hovorov"</string>
@@ -657,7 +657,7 @@
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"Odomknutie tvárou nie je v tomto zariadení podporované"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Senzor je dočasne vypnutý."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Tvár <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"Použiť odomknutie tvárou"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Používať odomknutie tvárou"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Použiť tvár alebo zámku obrazovky"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Pokračujte pomocou tváre"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Pokračujte použitím tváre alebo zámky obrazovky"</string>
@@ -1913,7 +1913,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizoval správca"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Odstránil správca"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Šetrič batérie zapne tmavý motív a obmedzí alebo vypne aktivitu na pozadí, niektoré vizuálne efekty, určité funkcie a niektoré pripojenia k sieti.\n\n"<annotation id="url">"Ďalšie informácie"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"Šetrič batérie zapne tmavý motív a obmedzí alebo vypne aktivitu na pozadí, niektoré vizuálne efekty, určité funkcie a niektoré pripojenia k sieti."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"S cieľom znížiť spotrebu dát bráni šetrič dát niektorým aplikáciám odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú práve používate, môže využívať dáta, ale možno to bude robiť menej často. Môže to napríklad znamenať, že sa obrázky zobrazia, až keď na ne klepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnúť šetrič dát?"</string>

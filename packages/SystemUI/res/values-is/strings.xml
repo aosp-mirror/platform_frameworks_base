@@ -1122,8 +1122,8 @@
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> á afmæli"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Afmæli á næstunni"</string>
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g> á bráðum afmæli"</string>
-    <string name="anniversary_status" msgid="1790034157507590838">"Brúðkaupsafmæli"</string>
-    <string name="anniversary_status_content_description" msgid="8212171790843327442">"<xliff:g id="NAME">%1$s</xliff:g> á brúðkaupsafmæli"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Afmæli"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"<xliff:g id="NAME">%1$s</xliff:g> á afmæli"</string>
     <string name="location_status" msgid="1294990572202541812">"Deilir staðsetningu"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> deilir staðsetningu sinni"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Ný frétt"</string>

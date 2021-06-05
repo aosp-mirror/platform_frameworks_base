@@ -435,7 +435,7 @@ public final class InputManager {
     /**
      * Enables an InputDevice.
      * <p>
-     * Requires {@link android.Manifest.permissions.DISABLE_INPUT_DEVICE}.
+     * Requires {@link android.Manifest.permission.DISABLE_INPUT_DEVICE}.
      * </p>
      *
      * @param id The input device Id.
@@ -454,7 +454,7 @@ public final class InputManager {
     /**
      * Disables an InputDevice.
      * <p>
-     * Requires {@link android.Manifest.permissions.DISABLE_INPUT_DEVICE}.
+     * Requires {@link android.Manifest.permission.DISABLE_INPUT_DEVICE}.
      * </p>
      *
      * @param id The input device Id.
@@ -831,7 +831,7 @@ public final class InputManager {
      * Sets the TouchCalibration to apply to the specified input device's coordinates.
      * <p>
      * This method may have the side-effect of causing the input device in question
-     * to be reconfigured. Requires {@link android.Manifest.permissions.SET_INPUT_CALIBRATION}.
+     * to be reconfigured. Requires {@link android.Manifest.permission.SET_INPUT_CALIBRATION}.
      * </p>
      *
      * @param inputDeviceDescriptor The input device descriptor.
@@ -874,7 +874,7 @@ public final class InputManager {
     /**
      * Sets the mouse pointer speed.
      * <p>
-     * Requires {@link android.Manifest.permissions.WRITE_SETTINGS}.
+     * Requires {@link android.Manifest.permission.WRITE_SETTINGS}.
      * </p>
      *
      * @param context The application context.
@@ -1285,7 +1285,7 @@ public final class InputManager {
      * @param inputPort The port of the input device.
      * @param displayPort The physical port of the associated display.
      * <p>
-     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1302,7 +1302,7 @@ public final class InputManager {
      * static association for the cleared input port will be restored.
      * @param inputPort The port of the input device to be cleared.
      * <p>
-     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1320,7 +1320,7 @@ public final class InputManager {
      * @param inputDeviceName The name of the input device.
      * @param displayUniqueId The unique id of the associated display.
      * <p>
-     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1337,7 +1337,7 @@ public final class InputManager {
      * Removes a runtime association between the input device and display.
      * @param inputDeviceName The name of the input device.
      * <p>
-     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */

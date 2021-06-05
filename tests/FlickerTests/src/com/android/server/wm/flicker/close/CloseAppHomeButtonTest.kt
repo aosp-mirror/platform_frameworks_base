@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.close
 
-import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -24,7 +23,6 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -47,30 +45,6 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
                 wmHelper.waitForHomeActivityVisible()
             }
         }
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsAlwaysVisible() {
-        super.statusBarLayerIsAlwaysVisible()
-    }
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerRotatesScales() {
-        super.statusBarLayerRotatesScales()
-    }
-
-    @Postsubmit
-    @Test
-    override fun launcherLayerReplacesApp() {
-        super.launcherLayerReplacesApp()
-    }
-
-    @Postsubmit
-    @Test
-    override fun noUncoveredRegions() {
-        super.noUncoveredRegions()
-    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

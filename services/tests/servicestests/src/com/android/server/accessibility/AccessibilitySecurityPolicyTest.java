@@ -617,7 +617,7 @@ public class AccessibilitySecurityPolicyTest {
 
         mA11ySecurityPolicy.checkAccessibilityAccess(mMockA11yServiceConnection);
         verify(mMockAppOpsManager).noteOpNoThrow(AppOpsManager.OPSTR_ACCESS_ACCESSIBILITY,
-                APP_UID, PACKAGE_NAME);
+                APP_UID, PACKAGE_NAME, null, null);
     }
 
     @Test

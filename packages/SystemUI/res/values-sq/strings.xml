@@ -1032,7 +1032,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Zmadho ekranin e plotë"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zmadho një pjesë të ekranit"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Ndërro"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Butoni i qasshmërisë është zëvendësuar me gjestin e qasshmërisë\n\n"<annotation id="link">"Shiko cilësimet"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Butoni i qasshmërisë zëvendësoi gjestin e qasshmërisë\n\n"<annotation id="link">"Shiko cilësimet"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Zhvendose butonin në skaj për ta fshehur përkohësisht"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Zhvendos lart majtas"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Zhvendos lart djathtas"</string>

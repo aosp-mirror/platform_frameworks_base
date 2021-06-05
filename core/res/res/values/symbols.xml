@@ -4401,4 +4401,6 @@
 
   <java-symbol type="dimen" name="starting_surface_icon_size" />
   <java-symbol type="dimen" name="starting_surface_default_icon_size" />
+
+  <java-symbol type="dimen" name="config_wallpaperDimAmount" />
 </resources>

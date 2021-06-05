@@ -252,8 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"無線螢幕分享認證"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"啟用 Wi‑Fi 詳細記錄設定"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi-Fi 掃描調節"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (882650208573834301) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi 非持續性隨機 MAC 位址"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"行動數據連線一律保持啟用狀態"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"網路共用硬體加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"顯示沒有名稱的藍牙裝置"</string>
@@ -454,8 +453,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>後充飽"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充飽"</string>
-    <!-- no translation found for power_charging_limited (7956120998372505295) -->
-    <skip />
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電功能暫時受到限制"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"不明"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"快速充電中"</string>

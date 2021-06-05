@@ -33,5 +33,20 @@
         <!-- Set up edge-to-edge configuration for top app bar -->
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="colorControlNormal">?android:attr/colorControlNormal</item>
+        <!-- For AndroidX AlertDialog -->
+        <item name="alertDialogTheme">@style/Theme.AlertDialog.SettingsLib</item>
+    </style>
+
+    <style name="Theme.AlertDialog.SettingsLib" parent="@style/Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="colorAccent">@*android:color/accent_device_default_light</item>
+        <item name="android:colorError">@color/settingslib_dialog_colorError</item>
+        <item name="android:colorBackground">@color/settingslib_dialog_background</item>
+
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="android:clipToPadding">true</item>
+        <item name="android:clipChildren">true</item>
+
+        <item name="dialogCornerRadius">@*android:dimen/config_dialogCornerRadius</item>
     </style>
 </resources>

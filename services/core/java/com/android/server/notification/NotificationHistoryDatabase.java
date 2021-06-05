@@ -354,6 +354,12 @@ public class NotificationHistoryDatabase {
         }
     }
 
+    public void unregisterFileCleanupReceiver() {
+        if(mContext != null) {
+            mContext.unregisterReceiver(mFileCleanupReceiver);
+        }
+    }
+
     private static long safeParseLong(String fileName) {
         // AtomicFile will create copies of the numeric files with ".new" and ".bak"
         // over the course of its processing. If these files still exist on boot we need to clean

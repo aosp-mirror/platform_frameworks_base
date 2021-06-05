@@ -1148,12 +1148,12 @@
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"يَحين يوم ميلاد <xliff:g id="NAME">%1$s</xliff:g> قريبًا."</string>
     <string name="anniversary_status" msgid="1790034157507590838">"الذكرى السنوية"</string>
     <string name="anniversary_status_content_description" msgid="8212171790843327442">"إنها الذكرى السنوية لـ <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="location_status" msgid="1294990572202541812">"تتم مشاركة الموقع الجغرافي"</string>
+    <string name="location_status" msgid="1294990572202541812">"جارٍ مشاركة الموقع الجغرافي"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"تتم الآن مشاركة موقع <xliff:g id="NAME">%1$s</xliff:g> الجغرافي."</string>
     <string name="new_story_status" msgid="9012195158584846525">"قصة جديدة"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"تمت مشاركة قصة جديدة من <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="video_status" msgid="4548544654316843225">"جارٍ المشاهدة"</string>
-    <string name="audio_status" msgid="4237055636967709208">"يتم الاستماع الآن"</string>
+    <string name="audio_status" msgid="4237055636967709208">"جارٍ الاستماع"</string>
     <string name="game_status" msgid="1340694320630973259">"جارٍ اللعب"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"الأصدقاء"</string>
     <string name="empty_status" msgid="5938893404951307749">"لنجرِ محادثة الليلة."</string>

@@ -157,7 +157,7 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Berretsita"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Amaitzeko, sakatu \"Berretsi\""</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentifikatuta"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Erabili PIN kodea"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Erabili PINa"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Erabili eredua"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Erabili pasahitza"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN kodea ez da zuzena"</string>
@@ -167,13 +167,13 @@
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Saiatu berriro. <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> saiakera."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Datuak ezabatuko dira"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Hurrengo saiakeran eredua oker marrazten baduzu, gailuko datuak ezabatuko dira."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Hurrengo saiakeran PIN kodea oker idazten baduzu, gailuko datuak ezabatuko dira."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"Hurrengo saiakeran PINa oker idazten baduzu, gailuko datuak ezabatuko dira."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"Hurrengo saiakeran pasahitza oker idazten baduzu, gailuko datuak ezabatuko dira."</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Hurrengo saiakeran eredua oker marrazten baduzu, erabiltzailea ezabatuko da."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Hurrengo saiakeran PIN kodea oker idazten baduzu, erabiltzailea ezabatuko da."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Hurrengo saiakeran PINa oker idazten baduzu, erabiltzailea ezabatuko da."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Hurrengo saiakeran pasahitza oker idazten baduzu, erabiltzailea ezabatuko da."</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Hurrengo saiakeran eredua oker marrazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Hurrengo saiakeran PIN kodea oker idazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Hurrengo saiakeran PINa oker idazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Hurrengo saiakeran pasahitza oker idazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Saiakera oker gehiegi egin dituzu. Gailuko datuak ezabatu egingo dira."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Saiakera oker gehiegi egin dituzu. Erabiltzailea ezabatu egingo da."</string>
@@ -1072,7 +1072,7 @@
     <string name="controls_pin_verify" msgid="3452778292918877662">"Egiaztatu <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN okerra"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Egiaztatzen…"</string>
-    <string name="controls_pin_instructions" msgid="6363309783822475238">"Idatzi PIN kodea"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"Idatzi PINa"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Saiatu beste PIN batekin"</string>
     <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Berresten…"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Berretsi <xliff:g id="DEVICE">%s</xliff:g> gailuaren aldaketa"</string>

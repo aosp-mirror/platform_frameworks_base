@@ -53,7 +53,7 @@ interface EconomyManagerInternal {
      * Return {@code true} if the app has a balance equal to or greater than the specified min
      * balance.
      */
-    boolean hasBalanceAtLeast(int userId, @NonNull String pkgName, double minBalance);
+    boolean hasBalanceAtLeast(int userId, @NonNull String pkgName, int minBalance);
 
     /**
      * Note that an instantaneous event has occurred. The event must be specified in one of the
