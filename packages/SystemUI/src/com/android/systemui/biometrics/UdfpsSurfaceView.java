@@ -124,8 +124,9 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
     @Override
     public void stopIllumination() {
         if (mHbmProvider != null) {
-            final Runnable onHbmDisabled = this::invalidate;
-            mHbmProvider.disableHbm(mHbmType, mHolder.getSurface(), onHbmDisabled);
+            final Runnable onHbmDisabled =
+                    (mHbmType == UdfpsHbmTypes.GLOBAL_HBM) ? this::invalidate : null;
+            mHbmProvider.disableHbm(onHbmDisabled);
         } else {
             Log.e(TAG, "stopIllumination | mHbmProvider is null");
         }
