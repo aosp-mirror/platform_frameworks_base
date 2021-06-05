@@ -680,6 +680,7 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* cont
         frameInfo->set(FrameInfoIndex::FrameCompleted) = std::max(gpuCompleteTime,
                 frameInfo->get(FrameInfoIndex::SwapBuffersCompleted));
         frameInfo->set(FrameInfoIndex::GpuCompleted) = gpuCompleteTime;
+        std::lock_guard(instance->mFrameMetricsReporterMutex);
         instance->mJankTracker.finishFrame(*frameInfo, instance->mFrameMetricsReporter);
     }
 }

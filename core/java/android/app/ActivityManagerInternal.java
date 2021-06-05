@@ -486,11 +486,11 @@ public abstract class ActivityManagerInternal {
 
     /**
      * Callback from the notification subsystem that the given FGS notification has
-     * been shown or updated.  This can happen after either Service.startForeground()
-     * or NotificationManager.notify().
+     * been evaluated, and either shown or explicitly overlooked.  This can happen
+     * after either Service.startForeground() or NotificationManager.notify().
      */
-    public abstract void onForegroundServiceNotificationUpdate(Notification notification,
-            int id, String pkg, @UserIdInt int userId);
+    public abstract void onForegroundServiceNotificationUpdate(boolean shown,
+            Notification notification, int id, String pkg, @UserIdInt int userId);
 
     /**
      * If the given app has any FGSs whose notifications are in the given channel,

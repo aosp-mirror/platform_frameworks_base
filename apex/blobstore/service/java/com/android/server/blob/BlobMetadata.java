@@ -50,6 +50,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ResourceId;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.RevocableFileDescriptor;
 import android.os.UserHandle;
@@ -308,7 +309,7 @@ class BlobMetadata {
                 if (callingUserId == committerUserId) {
                     continue;
                 }
-                if (!checkCallerCanAccessBlobsAcrossUsers(callingPackage, committerUserId)) {
+                if (!isPackageInstalledOnUser(callingPackage, committerUserId)) {
                     continue;
                 }
 
@@ -326,8 +327,25 @@ class BlobMetadata {
 
     private static boolean checkCallerCanAccessBlobsAcrossUsers(
             String callingPackage, int callingUserId) {
-        return PermissionManager.checkPackageNamePermission(ACCESS_BLOBS_ACROSS_USERS,
-                callingPackage, callingUserId) == PackageManager.PERMISSION_GRANTED;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return PermissionManager.checkPackageNamePermission(ACCESS_BLOBS_ACROSS_USERS,
+                    callingPackage, callingUserId) == PackageManager.PERMISSION_GRANTED;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private boolean isPackageInstalledOnUser(String packageName, int userId) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mContext.getPackageManager().getPackageInfoAsUser(packageName, 0, userId);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     boolean hasACommitterOrLeaseeInUser(int userId) {
@@ -401,6 +419,19 @@ class BlobMetadata {
             }
         }
         return null;
+    }
+
+    boolean shouldAttributeToUser(int userId) {
+        synchronized (mMetadataLock) {
+            for (int i = 0, size = mLeasees.size(); i < size; ++i) {
+                final Leasee leasee = mLeasees.valueAt(i);
+                // Don't attribute the blob to userId if there is a lease on it from another user.
+                if (userId != UserHandle.getUserId(leasee.uid)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     boolean shouldAttributeToLeasee(@NonNull String packageName, int userId,

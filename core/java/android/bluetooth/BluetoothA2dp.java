@@ -29,6 +29,7 @@ import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Attributable;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
@@ -389,8 +390,9 @@ public final class BluetoothA2dp implements BluetoothProfile {
         try {
             final IBluetoothA2dp service = getService();
             if (service != null && isEnabled()) {
-                return BluetoothDevice.setAttributionSource(
-                        service.getConnectedDevices(), mAttributionSource);
+                return Attributable.setAttributionSource(
+                        service.getConnectedDevicesWithAttribution(mAttributionSource),
+                        mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -411,8 +413,10 @@ public final class BluetoothA2dp implements BluetoothProfile {
         try {
             final IBluetoothA2dp service = getService();
             if (service != null && isEnabled()) {
-                return BluetoothDevice.setAttributionSource(
-                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
+                return Attributable.setAttributionSource(
+                        service.getDevicesMatchingConnectionStatesWithAttribution(states,
+                                mAttributionSource),
+                        mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -500,7 +504,8 @@ public final class BluetoothA2dp implements BluetoothProfile {
         try {
             final IBluetoothA2dp service = getService();
             if (service != null && isEnabled()) {
-                return service.getActiveDevice(mAttributionSource);
+                return Attributable.setAttributionSource(
+                        service.getActiveDevice(mAttributionSource), mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return null;

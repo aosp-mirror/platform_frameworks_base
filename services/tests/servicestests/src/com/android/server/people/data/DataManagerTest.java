@@ -682,6 +682,29 @@ public final class DataManagerTest {
     }
 
     @Test
+    public void testGetConversation_demoted() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isNull();
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        shortcut.setCached(ShortcutInfo.FLAG_PINNED);
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+        assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isNotNull();
+
+        mNotificationChannel.setDemoted(true);
+        NotificationListenerService listenerService =
+                mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
+        listenerService.onNotificationChannelModified(TEST_PKG_NAME, UserHandle.of(USER_ID_PRIMARY),
+                mNotificationChannel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+
+        assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isNull();
+    }
+
+    @Test
     public void testGetConversationGetsPersonsData() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
 
@@ -717,6 +740,27 @@ public final class DataManagerTest {
                 TEST_SHORTCUT_ID)).isTrue();
         assertThat(mDataManager.isConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
                 TEST_SHORTCUT_ID + "1")).isFalse();
+    }
+
+    @Test
+    public void testIsConversation_demoted() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        assertThat(mDataManager.isConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isFalse();
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        shortcut.setCached(ShortcutInfo.FLAG_PINNED);
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+
+        mNotificationChannel.setDemoted(true);
+        NotificationListenerService listenerService =
+                mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
+        listenerService.onNotificationChannelModified(TEST_PKG_NAME, UserHandle.of(USER_ID_PRIMARY),
+                mNotificationChannel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+
+        assertThat(mDataManager.isConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isFalse();
     }
 
     @Test
@@ -1371,13 +1415,20 @@ public final class DataManagerTest {
         NotificationListenerService listenerService =
                 mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
         listenerService.onNotificationPosted(mStatusBarNotification);
+        // posting updates the last interaction time, so delay before deletion
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        long approxDeletionTime = System.currentTimeMillis();
         listenerService.onNotificationRemoved(mStatusBarNotification, null,
                 NotificationListenerService.REASON_CANCEL);
 
         ConversationInfo conversationInfo = mDataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
                 .getConversationStore()
                 .getConversation(TEST_SHORTCUT_ID);
-        assertEquals(conversationInfo.getLastEventTimestamp(), System.currentTimeMillis());
+        assertTrue(conversationInfo.getLastEventTimestamp() - approxDeletionTime < 100);
     }
 
     @Test

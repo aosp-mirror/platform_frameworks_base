@@ -22,7 +22,6 @@ import android.graphics.FontListParser;
 import android.graphics.Typeface;
 import android.text.FontConfig;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -39,7 +38,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -61,36 +59,6 @@ public final class SystemFonts {
     private static @GuardedBy("sLock") Set<Font> sAvailableFonts;
 
     /**
-     * Helper wrapper class for skipping buffer equality check of Font#equals.
-     *
-     * Due to historical reasons, the Font#equals checks the byte-by-byte buffer equality which
-     * requires heavy IO work in getAvailableFonts. Since the fonts came from system are all regular
-     * file backed font instance and stored in the unique place, just comparing file path should be
-     * good enough for this case.
-     */
-    private static final class SystemFontHashWrapper {
-        private final Font mFont;
-        SystemFontHashWrapper(Font font) {
-            mFont = font;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            // All system fonts are regular-file backed font instance, so no need to
-            // compare buffers.
-            return mFont.paramEquals(((SystemFontHashWrapper) o).mFont);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(mFont);
-        }
-    }
-
-    /**
      * Returns all available font files in the system.
      *
      * @return a set of system fonts
@@ -98,25 +66,7 @@ public final class SystemFonts {
     public static @NonNull Set<Font> getAvailableFonts() {
         synchronized (LOCK) {
             if (sAvailableFonts == null) {
-                Set<SystemFontHashWrapper> set = new ArraySet<>();
-                for (Typeface tf : Typeface.getSystemFontMap().values()) {
-                    List<FontFamily> families = tf.getFallback();
-                    for (int i = 0; i < families.size(); ++i) {
-                        FontFamily family = families.get(i);
-                        for (int j = 0; j < family.getSize(); ++j) {
-                            set.add(new SystemFontHashWrapper(family.getFont(j)));
-                        }
-                    }
-                }
-
-                // Unwrapping font instance for Set<Font> interface. The ArraySet#add won't call
-                // Font#equals function if none of two objects has the same hash, so following
-                // unwrapping won't cause bad performance due to byte-by-byte equality check.
-                ArraySet<Font> result = new ArraySet(set.size());
-                for (SystemFontHashWrapper wrapper : set) {
-                    result.add(wrapper.mFont);
-                }
-                sAvailableFonts = Collections.unmodifiableSet(result);
+                sAvailableFonts = Font.getAvailableFonts();
             }
             return sAvailableFonts;
         }
