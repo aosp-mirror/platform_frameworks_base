@@ -4575,7 +4575,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 int motionPosition = findMotionRow(y);
                 if (isGlowActive()) {
                     // Pressed during edge effect, so this is considered the same as a fling catch.
-                    mTouchMode = TOUCH_MODE_FLING;
+                    touchMode = mTouchMode = TOUCH_MODE_FLING;
                 } else if (touchMode != TOUCH_MODE_FLING && motionPosition >= 0) {
                     // User clicked on an actual view (and was not stopping a fling).
                     // Remember where the motion event started

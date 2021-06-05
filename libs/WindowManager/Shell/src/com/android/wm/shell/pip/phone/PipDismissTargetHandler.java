@@ -26,8 +26,10 @@ import android.graphics.Rect;
 import android.graphics.drawable.TransitionDrawable;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -47,7 +49,7 @@ import kotlin.Unit;
 /**
  * Handler of all Magnetized Object related code for PiP.
  */
-public class PipDismissTargetHandler {
+public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListener {
 
     /* The multiplier to apply scale the target size by when applying the magnetic field radius */
     private static final float MAGNETIC_FIELD_RADIUS_MULTIPLIER = 1.25f;
@@ -91,6 +93,9 @@ public class PipDismissTargetHandler {
     private int mTargetSize;
     private int mDismissAreaHeight;
     private float mMagneticFieldRadiusPercent = 1f;
+
+    private SurfaceControl mTaskLeash;
+    private boolean mHasDismissTargetSurface;
 
     private final Context mContext;
     private final PipMotionHelper mMotionHelper;
@@ -167,6 +172,14 @@ public class PipDismissTargetHandler {
         mMagneticTargetAnimator = PhysicsAnimator.getInstance(mTargetView);
     }
 
+    @Override
+    public boolean onPreDraw() {
+        mTargetViewContainer.getViewTreeObserver().removeOnPreDrawListener(this);
+        mHasDismissTargetSurface = true;
+        updateDismissTargetLayer();
+        return true;
+    }
+
     /**
      * Potentially start consuming future motion events if PiP is currently near the magnetized
      * object.
@@ -207,12 +220,31 @@ public class PipDismissTargetHandler {
                         * MAGNETIC_FIELD_RADIUS_MULTIPLIER));
     }
 
+    public void setTaskLeash(SurfaceControl taskLeash) {
+        mTaskLeash = taskLeash;
+    }
+
+    private void updateDismissTargetLayer() {
+        if (!mHasDismissTargetSurface || mTaskLeash == null) {
+            // No dismiss target surface, can just return
+            return;
+        }
+
+        // Put the dismiss target behind the task
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        t.setRelativeLayer(mTargetViewContainer.getViewRootImpl().getSurfaceControl(),
+                mTaskLeash, -1);
+        t.apply();
+    }
+
     /** Adds the magnetic target view to the WindowManager so it's ready to be animated in. */
     public void createOrUpdateDismissTarget() {
         if (!mTargetViewContainer.isAttachedToWindow()) {
             mMagneticTargetAnimator.cancel();
 
             mTargetViewContainer.setVisibility(View.INVISIBLE);
+            mTargetViewContainer.getViewTreeObserver().removeOnPreDrawListener(this);
+            mHasDismissTargetSurface = false;
 
             try {
                 mWindowManager.addView(mTargetViewContainer, getDismissTargetLayoutParams());
@@ -259,9 +291,9 @@ public class PipDismissTargetHandler {
         createOrUpdateDismissTarget();
 
         if (mTargetViewContainer.getVisibility() != View.VISIBLE) {
-
             mTargetView.setTranslationY(mTargetViewContainer.getHeight());
             mTargetViewContainer.setVisibility(View.VISIBLE);
+            mTargetViewContainer.getViewTreeObserver().addOnPreDrawListener(this);
 
             // Cancel in case we were in the middle of animating it out.
             mMagneticTargetAnimator.cancel();

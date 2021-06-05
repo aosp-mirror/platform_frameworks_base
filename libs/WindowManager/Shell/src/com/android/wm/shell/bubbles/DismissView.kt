@@ -67,8 +67,6 @@ class DismissView(context: Context) : FrameLayout(context) {
     fun show() {
         if (isShowing) return
         isShowing = true
-        bringToFront()
-        setZ(Short.MAX_VALUE - 1f)
         setVisibility(View.VISIBLE)
         (getBackground() as TransitionDrawable).startTransition(DISMISS_SCRIM_FADE_MS)
         animator.cancel()

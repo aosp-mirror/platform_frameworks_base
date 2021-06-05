@@ -43,8 +43,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.NonaFunction;
-import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
@@ -321,6 +319,17 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             if (appIdTags == null) {
                 appIdTags = new ArrayMap<>();
             }
+
+            // Remove any invalid tags
+            boolean nullRemoved = packageTags.remove(null);
+            boolean nullStrRemoved = packageTags.remove("null");
+            boolean emptyRemoved = packageTags.remove("");
+            if (nullRemoved || nullStrRemoved || emptyRemoved) {
+                Log.e(LOG_TAG, "Attempted to add invalid source attribution tag, removed "
+                        + "null: " + nullRemoved + " removed \"null\": " + nullStrRemoved
+                        + " removed empty string: " + emptyRemoved);
+            }
+
             appIdTags.put(packageName, packageTags);
             datastore.put(appId, appIdTags);
         } else if (appIdTags != null) {

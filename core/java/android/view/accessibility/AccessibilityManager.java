@@ -523,6 +523,25 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Unregisters the IAccessibilityManagerClient from the backing service
+     * @hide
+     */
+    public boolean removeClient() {
+        synchronized (mLock) {
+            IAccessibilityManager service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+            try {
+                return service.removeClient(mClient, mUserId);
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
+            }
+        }
+        return false;
+    }
+
+    /**
      * @hide
      */
     @VisibleForTesting

@@ -34,10 +34,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Outline;
-import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -192,8 +189,7 @@ public class BubbleStackView extends FrameLayout
     private final BubbleController mBubbleController;
     private final BubbleData mBubbleData;
 
-    private final ValueAnimator mDesaturateAndDarkenAnimator;
-    private final Paint mDesaturateAndDarkenPaint = new Paint();
+    private final ValueAnimator mDismissBubbleAnimator;
 
     private PhysicsAnimationLayout mBubbleContainer;
     private StackAnimationController mStackAnimationController;
@@ -330,8 +326,8 @@ public class BubbleStackView extends FrameLayout
     private boolean mIsExpansionAnimating = false;
     private boolean mIsBubbleSwitchAnimating = false;
 
-    /** The view to desaturate/darken when magneted to the dismiss target. */
-    @Nullable private View mDesaturateAndDarkenTargetView;
+    /** The view to shrink and apply alpha to when magneted to the dismiss target. */
+    @Nullable private View mViewBeingDismissed;
 
     private Rect mTempRect = new Rect();
 
@@ -415,8 +411,7 @@ public class BubbleStackView extends FrameLayout
                     if (mExpandedAnimationController.getDraggedOutBubble() == null) {
                         return;
                     }
-
-                    animateDesaturateAndDarken(
+                    animateDismissBubble(
                             mExpandedAnimationController.getDraggedOutBubble(), true);
                 }
 
@@ -426,8 +421,7 @@ public class BubbleStackView extends FrameLayout
                     if (mExpandedAnimationController.getDraggedOutBubble() == null) {
                         return;
                     }
-
-                    animateDesaturateAndDarken(
+                    animateDismissBubble(
                             mExpandedAnimationController.getDraggedOutBubble(), false);
 
                     if (wasFlungOut) {
@@ -459,14 +453,13 @@ public class BubbleStackView extends FrameLayout
                 @Override
                 public void onStuckToTarget(
                         @NonNull MagnetizedObject.MagneticTarget target) {
-                    animateDesaturateAndDarken(mBubbleContainer, true);
+                    animateDismissBubble(mBubbleContainer, true);
                 }
 
                 @Override
                 public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
                         float velX, float velY, boolean wasFlungOut) {
-                    animateDesaturateAndDarken(mBubbleContainer, false);
-
+                    animateDismissBubble(mBubbleContainer, false);
                     if (wasFlungOut) {
                         mStackAnimationController.flingStackThenSpringToEdge(
                                 mStackAnimationController.getStackPosition().x, velX, velY);
@@ -481,11 +474,10 @@ public class BubbleStackView extends FrameLayout
                     mStackAnimationController.animateStackDismissal(
                             mDismissView.getHeight() /* translationYBy */,
                             () -> {
-                                resetDesaturationAndDarken();
+                                resetDismissAnimator();
                                 dismissMagnetizedObject();
                             }
                     );
-
                     mDismissView.hide();
                 }
             };
@@ -836,17 +828,7 @@ public class BubbleStackView extends FrameLayout
                 .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
         mFlyoutTransitionSpring.addEndListener(mAfterFlyoutTransitionSpring);
 
-        mDismissView = new DismissView(context);
-        addView(mDismissView);
-
-        final ContentResolver contentResolver = getContext().getContentResolver();
-        final int dismissRadius = Settings.Secure.getInt(
-                contentResolver, "bubble_dismiss_radius", mBubbleSize * 2 /* default */);
-
-        // Save the MagneticTarget instance for the newly set up view - we'll add this to the
-        // MagnetizedObjects.
-        mMagneticTarget = new MagnetizedObject.MagneticTarget(
-                mDismissView.getCircle(), dismissRadius);
+        setUpDismissView();
 
         setClipChildren(false);
         setFocusable(true);
@@ -891,6 +873,7 @@ public class BubbleStackView extends FrameLayout
                         mRelativeStackPositionBeforeRotation = null;
                     }
 
+                    setUpDismissView();
                     if (mIsExpanded) {
                         // Re-draw bubble row and pointer for new orientation.
                         beforeExpandedViewAnimation();
@@ -905,30 +888,23 @@ public class BubbleStackView extends FrameLayout
                     }
                     removeOnLayoutChangeListener(mOrientationChangedListener);
                 };
-
-        final ColorMatrix animatedMatrix = new ColorMatrix();
-        final ColorMatrix darkenMatrix = new ColorMatrix();
-
-        mDesaturateAndDarkenAnimator = ValueAnimator.ofFloat(1f, 0f);
-        mDesaturateAndDarkenAnimator.addUpdateListener(animation -> {
+        final float maxDismissSize = getResources().getDimensionPixelSize(
+                R.dimen.dismiss_circle_size);
+        final float minDismissSize = getResources().getDimensionPixelSize(
+                R.dimen.dismiss_circle_small);
+        final float sizePercent = minDismissSize / maxDismissSize;
+        mDismissBubbleAnimator = ValueAnimator.ofFloat(1f, 0f);
+        mDismissBubbleAnimator.addUpdateListener(animation -> {
             final float animatedValue = (float) animation.getAnimatedValue();
-            animatedMatrix.setSaturation(animatedValue);
-
-            final float animatedDarkenValue = (1f - animatedValue) * DARKEN_PERCENT;
-            darkenMatrix.setScale(
-                    1f - animatedDarkenValue /* red */,
-                    1f - animatedDarkenValue /* green */,
-                    1f - animatedDarkenValue /* blue */,
-                    1f /* alpha */);
-
-            // Concat the matrices so that the animatedMatrix both desaturates and darkens.
-            animatedMatrix.postConcat(darkenMatrix);
-
-            // Update the paint and apply it to the bubble container.
-            mDesaturateAndDarkenPaint.setColorFilter(new ColorMatrixColorFilter(animatedMatrix));
-
-            if (mDesaturateAndDarkenTargetView != null) {
-                mDesaturateAndDarkenTargetView.setLayerPaint(mDesaturateAndDarkenPaint);
+            if (mDismissView != null) {
+                mDismissView.setPivotX((mDismissView.getRight() - mDismissView.getLeft()) / 2f);
+                mDismissView.setPivotY((mDismissView.getBottom() - mDismissView.getTop()) / 2f);
+                final float scaleValue = Math.max(animatedValue, sizePercent);
+                mDismissView.getCircle().setScaleX(scaleValue);
+                mDismissView.getCircle().setScaleY(scaleValue);
+            }
+            if (mViewBeingDismissed != null) {
+                mViewBeingDismissed.setAlpha(Math.max(animatedValue, 0.7f));
             }
         });
 
@@ -1047,6 +1023,23 @@ public class BubbleStackView extends FrameLayout
             animate().translationX(0).start();
         }
     };
+
+    private void setUpDismissView() {
+        if (mDismissView != null) {
+            removeView(mDismissView);
+        }
+        mDismissView = new DismissView(getContext());
+        addView(mDismissView);
+
+        final ContentResolver contentResolver = getContext().getContentResolver();
+        final int dismissRadius = Settings.Secure.getInt(
+                contentResolver, "bubble_dismiss_radius", mBubbleSize * 2 /* default */);
+
+        // Save the MagneticTarget instance for the newly set up view - we'll add this to the
+        // MagnetizedObjects.
+        mMagneticTarget = new MagnetizedObject.MagneticTarget(
+                mDismissView.getCircle(), dismissRadius);
+    }
 
     // TODO: Create ManageMenuView and move setup / animations there
     private void setUpManageMenu() {
@@ -1217,6 +1210,7 @@ public class BubbleStackView extends FrameLayout
     public void onThemeChanged() {
         setUpFlyout();
         setUpManageMenu();
+        setUpDismissView();
         updateOverflow();
         updateUserEdu();
         updateExpandedViewTheme();
@@ -1256,6 +1250,7 @@ public class BubbleStackView extends FrameLayout
         updateOverflow();
         setUpManageMenu();
         setUpFlyout();
+        setUpDismissView();
         mBubbleSize = mPositioner.getBubbleSize();
         for (Bubble b : mBubbleData.getBubbles()) {
             if (b.getIconView() == null) {
@@ -2264,42 +2259,46 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
-    /** Prepares and starts the desaturate/darken animation on the bubble stack. */
-    private void animateDesaturateAndDarken(View targetView, boolean desaturateAndDarken) {
-        mDesaturateAndDarkenTargetView = targetView;
+    /** Prepares and starts the dismiss animation on the bubble stack. */
+    private void animateDismissBubble(View targetView, boolean applyAlpha) {
+        mViewBeingDismissed = targetView;
 
-        if (mDesaturateAndDarkenTargetView == null) {
+        if (mViewBeingDismissed == null) {
             return;
         }
-
-        if (desaturateAndDarken) {
-            // Use the animated paint for the bubbles.
-            mDesaturateAndDarkenTargetView.setLayerType(
-                    View.LAYER_TYPE_HARDWARE, mDesaturateAndDarkenPaint);
-            mDesaturateAndDarkenAnimator.removeAllListeners();
-            mDesaturateAndDarkenAnimator.start();
+        if (applyAlpha) {
+            mDismissBubbleAnimator.removeAllListeners();
+            mDismissBubbleAnimator.start();
         } else {
-            mDesaturateAndDarkenAnimator.removeAllListeners();
-            mDesaturateAndDarkenAnimator.addListener(new AnimatorListenerAdapter() {
+            mDismissBubbleAnimator.removeAllListeners();
+            mDismissBubbleAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    // Stop using the animated paint.
-                    resetDesaturationAndDarken();
+                    resetDismissAnimator();
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    super.onAnimationCancel(animation);
+                    resetDismissAnimator();
                 }
             });
-            mDesaturateAndDarkenAnimator.reverse();
+            mDismissBubbleAnimator.reverse();
         }
     }
 
-    private void resetDesaturationAndDarken() {
+    private void resetDismissAnimator() {
+        mDismissBubbleAnimator.removeAllListeners();
+        mDismissBubbleAnimator.cancel();
 
-        mDesaturateAndDarkenAnimator.removeAllListeners();
-        mDesaturateAndDarkenAnimator.cancel();
-
-        if (mDesaturateAndDarkenTargetView != null) {
-            mDesaturateAndDarkenTargetView.setLayerType(View.LAYER_TYPE_NONE, null);
-            mDesaturateAndDarkenTargetView = null;
+        if (mViewBeingDismissed != null) {
+            mViewBeingDismissed.setAlpha(1f);
+            mViewBeingDismissed = null;
+        }
+        if (mDismissView != null) {
+            mDismissView.getCircle().setScaleX(1f);
+            mDismissView.getCircle().setScaleY(1f);
         }
     }
 

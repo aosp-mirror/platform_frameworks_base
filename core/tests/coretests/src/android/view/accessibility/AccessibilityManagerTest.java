@@ -116,6 +116,13 @@ public class AccessibilityManagerTest {
     }
 
     @Test
+    public void testRemoveManager() throws Exception {
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
+        manager.removeClient();
+        verify(mMockService).removeClient(manager.getClient(), UserHandle.USER_CURRENT);
+    }
+
+    @Test
     public void testGetAccessibilityServiceList() throws Exception {
         // create a list of installed accessibility services the mock service returns
         List<AccessibilityServiceInfo> expectedServices = new ArrayList<>();
