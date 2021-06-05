@@ -187,8 +187,8 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Administrator radnog profila"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Od strane domene <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5891181538182009328">"Radni je profil izbrisan"</string>
-    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Administratorska aplikacija radnog profila nedostaje ili je oštećena. Zbog toga su radni profil i povezani podaci izbrisani. Za pomoć se obratite svom administratoru."</string>
-    <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Vaš radni profil više nije dostupan na ovom uređaju"</string>
+    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Administratorska aplikacija poslovnog profila nedostaje ili je oštećena. Zbog toga su poslovni profil i povezani podaci izbrisani. Za pomoć se obratite svom administratoru."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Vaš poslovni profil više nije dostupan na ovom uređaju"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Previše pokušaja unosa zaporke"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator je ustupio uređaj za osobnu upotrebu"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Uređaj je upravljan"</string>
@@ -295,7 +295,7 @@
     <string name="safeMode" msgid="8974401416068943888">"Siguran način rada"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Sustav Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Prijeđite na osobni profil"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"Radni profil"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"Poslovni profil"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"pristupati vašim kontaktima"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokacija"</string>
@@ -1570,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5581740063237175247">"Prihvatiti poziv?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Uvijek"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Samo jednom"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ne podržava radni profil"</string>
+    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ne podržava poslovni profil"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tabletno računalo"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Televizor"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>

@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Juhtmeta ekraaniühenduse sertifitseerimisvalikute kuvamine"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Suurenda WiFi logimistaset, kuva WiFi valijas SSID RSSI järgi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Aeglustab aku tühjenemist ja parandab võrgu toimivust"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kui see režiim on lubatud, võidakse selle seadme MAC-aadressi muuta iga kord, kui see ühendatakse võrguga, milles on juhusliku MAC-aadressi määramine lubatud."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kui see režiim on lubatud, võidakse selle seadme MAC-aadressi muuta iga kord, kui see ühendatakse võrguga, milles on juhuslikustatud MAC-aadressi määramine lubatud."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mahupõhine"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Mittemahupõhine"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logija puhvri suurused"</string>
@@ -327,7 +327,7 @@
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Silutud rakendus ootab toimimiseks siluri lisamist"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Sisend"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Graafika"</string>
-    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Tarkvarakiirendusega renderdamine"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Riistvarakiirendusega renderdamine"</string>
     <string name="media_category" msgid="8122076702526144053">"Meedia"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Jälgimine"</string>
     <string name="strict_mode" msgid="889864762140862437">"Range režiim on lubatud"</string>

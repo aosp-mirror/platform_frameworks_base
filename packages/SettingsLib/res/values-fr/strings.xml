@@ -236,7 +236,7 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, débogage, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Raccourci vers rapport de bug"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Afficher un bouton dans le menu de démarrage permettant de créer un rapport de bug"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"Écran toujours actif"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"Laisser activé"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"L\'écran ne se met jamais en veille lorsque l\'appareil est en charge"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Activer journaux HCI Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturer les paquets Bluetooth. (Activer/Désactiver le Bluetooth après avoir modifié ce paramètre)"</string>
@@ -496,7 +496,7 @@
     <string name="cancel" msgid="5665114069455378395">"Annuler"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activer"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode \"Ne pas déranger\""</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode Ne pas déranger"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Jamais"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Prioritaires uniquement"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

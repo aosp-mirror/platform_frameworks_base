@@ -693,10 +693,10 @@
     <string name="notification_channel_minimized" msgid="6892672757877552959">"Бул билдирмелер кичирейтилет"</string>
     <string name="notification_channel_silenced" msgid="1995937493874511359">"Бул билдирмелер үнсүз көрсөтүлөт"</string>
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Бул билдирмелер тууралуу кабарлап турабыз"</string>
-    <string name="inline_blocking_helper" msgid="2891486013649543452">"Адатта мындай билдирмелерди өткөрүп жибересиз. \nАлар көрсөтүлө берсинби?"</string>
+    <string name="inline_blocking_helper" msgid="2891486013649543452">"Адатта мындай билдирмелерди өткөрүп жибересиз. \nАлар көрүнө берсинби?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Бүттү"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Колдонуу"</string>
-    <string name="inline_keep_showing" msgid="8736001253507073497">"Бул билдирмелер көрсөтүлө берсинби?"</string>
+    <string name="inline_keep_showing" msgid="8736001253507073497">"Бул билдирмелер көрүнө берсинби?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"Эскертмелерди токтотуу"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"Үнсүз жеткирүү"</string>
     <string name="inline_block_button" msgid="479892866568378793">"Бөгөттөө"</string>
@@ -707,7 +707,7 @@
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Билдирүү"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Кабар бериле берсин"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Билдирмелерди өчүрүү"</string>
-    <string name="inline_keep_showing_app" msgid="4393429060390649757">"Бул колдонмонун билдирмелери көрсөтүлө берсинби?"</string>
+    <string name="inline_keep_showing_app" msgid="4393429060390649757">"Бул колдонмонун билдирмелери көрүнө берсинби?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Үнсүз"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Демейки"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Көбүк"</string>

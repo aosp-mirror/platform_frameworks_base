@@ -493,7 +493,7 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Көбүрөөк убакыт."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Азыраак убакыт."</string>
-    <string name="cancel" msgid="5665114069455378395">"Жокко чыгаруу"</string>
+    <string name="cancel" msgid="5665114069455378395">"Жок"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Күйгүзүү"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"Тынчымды алба\" режимин күйгүзүү"</string>

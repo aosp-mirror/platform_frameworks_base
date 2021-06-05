@@ -321,7 +321,7 @@
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Återuppta"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"Sökning efter GPS pågår"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Platsen har identifierats av GPS"</string>
-    <string name="accessibility_location_active" msgid="2845747916764660369">"Det finns aktiva platsbegäranden"</string>
+    <string name="accessibility_location_active" msgid="2845747916764660369">"Det finns aktiva platsförfrågningar"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Sensorer har inaktiverats"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Ta bort alla meddelanden."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> till"</string>
