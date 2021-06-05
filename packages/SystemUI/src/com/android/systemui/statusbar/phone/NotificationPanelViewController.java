@@ -2203,7 +2203,7 @@ public class NotificationPanelViewController extends PanelViewController {
         final int qsPanelBottomY = calculateQsBottomPosition(computeQsExpansionFraction());
         final boolean visible = (computeQsExpansionFraction() > 0 || qsPanelBottomY > 0)
                 && !mShouldUseSplitNotificationShade;
-        setQsExpansionEnabled(mAmbientState.getScrollY() == 0);
+        setQsExpansionEnabled(mAmbientState.getScrollY() == 0 && !mAmbientState.isShadeOpening());
 
         if (!mShouldUseSplitNotificationShade) {
             if (mTransitioningToFullShadeProgress > 0.0f) {
