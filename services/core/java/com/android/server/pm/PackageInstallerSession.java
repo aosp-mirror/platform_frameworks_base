@@ -2339,15 +2339,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private IntentSender getRemoteStatusReceiver() {
+        synchronized (mLock) {
+            return mRemoteStatusReceiver;
+        }
+    }
+
     private void verifyNonStaged()
             throws PackageManagerException {
         final PackageManagerService.VerificationParams verifyingSession =
                 prepareForVerification();
         if (isMultiPackage()) {
-            final List<PackageInstallerSession> childSessions;
-            synchronized (mLock) {
-                childSessions = getChildSessionsLocked();
-            }
+            final List<PackageInstallerSession> childSessions = getChildSessions();
             // Spot check to reject a non-staged multi package install of APEXes and APKs.
             if (!params.isStaged && containsApkSession()
                     && sessionContains(s -> s.isApexSession())) {
@@ -2371,11 +2374,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
             if (!success) {
-                final IntentSender statusReceiver;
-                synchronized (mLock) {
-                    statusReceiver = mRemoteStatusReceiver;
-                }
-                sendOnPackageInstalled(mContext, statusReceiver, sessionId,
+                sendOnPackageInstalled(mContext, getRemoteStatusReceiver(), sessionId,
                         isInstallerDeviceOwnerOrAffiliatedProfileOwner(), userId, null,
                         failure.error, failure.getLocalizedMessage(), null);
                 return;
@@ -2403,10 +2402,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Session should contain at least one apk session for installation");
         }
         if (isMultiPackage()) {
-            final List<PackageInstallerSession> childSessions;
-            synchronized (mLock) {
-                childSessions = getChildSessionsLocked();
-            }
+            final List<PackageInstallerSession> childSessions = getChildSessions();
             List<PackageManagerService.InstallParams> installingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
@@ -2425,11 +2421,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
             if (!success) {
-                final IntentSender statusReceiver;
-                synchronized (mLock) {
-                    statusReceiver = mRemoteStatusReceiver;
-                }
-                sendOnPackageInstalled(mContext, statusReceiver, sessionId,
+                sendOnPackageInstalled(mContext, getRemoteStatusReceiver(), sessionId,
                         isInstallerDeviceOwnerOrAffiliatedProfileOwner(), userId, null,
                         failure.error, failure.getLocalizedMessage(), null);
                 return;
@@ -2488,11 +2480,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         intent.setPackage(mPm.getPackageInstallerPackageName());
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
 
-        final IntentSender statusReceiver;
-        synchronized (mLock) {
-            statusReceiver = mRemoteStatusReceiver;
-        }
-        sendOnUserActionRequired(mContext, statusReceiver, sessionId, intent);
+        sendOnUserActionRequired(mContext, getRemoteStatusReceiver(), sessionId, intent);
 
         // Commit was keeping session marked as active until now; release
         // that extra refcount so session appears idle.
@@ -2502,76 +2490,77 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /**
      * Prepares staged directory with any inherited APKs and returns the parsed package.
      */
+    @GuardedBy("mLock")
     @Nullable
     private PackageLite parseApkLite() throws PackageManagerException {
 
 
-        if (!isMultiPackage()) {
-            Objects.requireNonNull(mPackageName);
-            Objects.requireNonNull(mSigningDetails);
-            Objects.requireNonNull(mResolvedBaseFile);
+        if (isMultiPackage()) {
+            return null;
+        }
+        Objects.requireNonNull(mPackageName);
+        Objects.requireNonNull(mSigningDetails);
+        Objects.requireNonNull(mResolvedBaseFile);
 
-            // Inherit any packages and native libraries from existing install that
-            // haven't been overridden.
-            if (!isApexSession() && params.mode == SessionParams.MODE_INHERIT_EXISTING) {
-                try {
-                    final List<File> fromFiles = mResolvedInheritedFiles;
-                    final File toDir = stageDir;
+        // Inherit any packages and native libraries from existing install that
+        // haven't been overridden.
+        if (!isApexSession() && params.mode == SessionParams.MODE_INHERIT_EXISTING) {
+            try {
+                final List<File> fromFiles = mResolvedInheritedFiles;
+                final File toDir = stageDir;
 
-                    if (LOGD) Slog.d(TAG, "Inherited files: " + mResolvedInheritedFiles);
-                    if (!mResolvedInheritedFiles.isEmpty() && mInheritedFilesBase == null) {
-                        throw new IllegalStateException("mInheritedFilesBase == null");
-                    }
-
-                    if (isLinkPossible(fromFiles, toDir)) {
-                        if (!mResolvedInstructionSets.isEmpty()) {
-                            final File oatDir = new File(toDir, "oat");
-                            createOatDirs(mResolvedInstructionSets, oatDir);
-                        }
-                        // pre-create lib dirs for linking if necessary
-                        if (!mResolvedNativeLibPaths.isEmpty()) {
-                            for (String libPath : mResolvedNativeLibPaths) {
-                                // "/lib/arm64" -> ["lib", "arm64"]
-                                final int splitIndex = libPath.lastIndexOf('/');
-                                if (splitIndex < 0 || splitIndex >= libPath.length() - 1) {
-                                    Slog.e(TAG,
-                                            "Skipping native library creation for linking due"
-                                                    + " to invalid path: " + libPath);
-                                    continue;
-                                }
-                                final String libDirPath = libPath.substring(1, splitIndex);
-                                final File libDir = new File(toDir, libDirPath);
-                                if (!libDir.exists()) {
-                                    NativeLibraryHelper.createNativeLibrarySubdir(libDir);
-                                }
-                                final String archDirPath = libPath.substring(splitIndex + 1);
-                                NativeLibraryHelper.createNativeLibrarySubdir(
-                                        new File(libDir, archDirPath));
-                            }
-                        }
-                        linkFiles(fromFiles, toDir, mInheritedFilesBase);
-                    } else {
-                        // TODO: this should delegate to DCS so the system process
-                        // avoids holding open FDs into containers.
-                        copyFiles(fromFiles, toDir);
-                    }
-                } catch (IOException e) {
-                    throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
-                            "Failed to inherit existing install", e);
+                if (LOGD) Slog.d(TAG, "Inherited files: " + mResolvedInheritedFiles);
+                if (!mResolvedInheritedFiles.isEmpty() && mInheritedFilesBase == null) {
+                    throw new IllegalStateException("mInheritedFilesBase == null");
                 }
-            }
 
-            if (!isApexSession()) {
-                // For mode inherit existing, it would link/copy existing files to stage dir in the
-                // above block. Therefore, we need to parse the complete package in stage dir here.
-                // Besides, PackageLite may be null for staged sessions that don't complete
-                // pre-reboot verification.
-                return getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
-            } else {
-                return getOrParsePackageLiteLocked(mResolvedBaseFile, /* flags */ 0);
+                if (isLinkPossible(fromFiles, toDir)) {
+                    if (!mResolvedInstructionSets.isEmpty()) {
+                        final File oatDir = new File(toDir, "oat");
+                        createOatDirs(mResolvedInstructionSets, oatDir);
+                    }
+                    // pre-create lib dirs for linking if necessary
+                    if (!mResolvedNativeLibPaths.isEmpty()) {
+                        for (String libPath : mResolvedNativeLibPaths) {
+                            // "/lib/arm64" -> ["lib", "arm64"]
+                            final int splitIndex = libPath.lastIndexOf('/');
+                            if (splitIndex < 0 || splitIndex >= libPath.length() - 1) {
+                                Slog.e(TAG,
+                                        "Skipping native library creation for linking due"
+                                                + " to invalid path: " + libPath);
+                                continue;
+                            }
+                            final String libDirPath = libPath.substring(1, splitIndex);
+                            final File libDir = new File(toDir, libDirPath);
+                            if (!libDir.exists()) {
+                                NativeLibraryHelper.createNativeLibrarySubdir(libDir);
+                            }
+                            final String archDirPath = libPath.substring(splitIndex + 1);
+                            NativeLibraryHelper.createNativeLibrarySubdir(
+                                    new File(libDir, archDirPath));
+                        }
+                    }
+                    linkFiles(fromFiles, toDir, mInheritedFilesBase);
+                } else {
+                    // TODO: this should delegate to DCS so the system process
+                    // avoids holding open FDs into containers.
+                    copyFiles(fromFiles, toDir);
+                }
+            } catch (IOException e) {
+                throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
+                        "Failed to inherit existing install", e);
             }
         }
-        return null;
+
+        if (!isApexSession()) {
+            // For mode inherit existing, it would link/copy existing files to stage dir in the
+            // above block. Therefore, we need to parse the complete package in stage dir here.
+            // Besides, PackageLite may be null for staged sessions that don't complete
+            // pre-reboot verification.
+            return getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
+        } else {
+            return getOrParsePackageLiteLocked(mResolvedBaseFile, /* flags */ 0);
+        }
     }
 
     @GuardedBy("mLock")
@@ -3906,11 +3895,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_UNAVAILABLE: {
                             // Don't fail or commit the session. Allow caller to commit again.
-                            final IntentSender statusReceiver;
-                            synchronized (mLock) {
-                                statusReceiver = mRemoteStatusReceiver;
-                            }
-                            sendPendingStreaming(mContext, statusReceiver, sessionId,
+                            sendPendingStreaming(mContext, getRemoteStatusReceiver(), sessionId,
                                     "DataLoader unavailable");
                             break;
                         }
@@ -3924,11 +3909,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 } catch (RemoteException e) {
                     // In case of streaming failure we don't want to fail or commit the session.
                     // Just return from this method and allow caller to commit again.
-                    final IntentSender statusReceiver;
-                    synchronized (mLock) {
-                        statusReceiver = mRemoteStatusReceiver;
-                    }
-                    sendPendingStreaming(mContext, statusReceiver, sessionId, e.getMessage());
+                    sendPendingStreaming(mContext, getRemoteStatusReceiver(), sessionId,
+                            e.getMessage());
                 }
             }
         };
@@ -4191,18 +4173,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void sendUpdateToRemoteStatusReceiver(int returnCode, String msg, Bundle extras) {
-        final IntentSender statusReceiver;
-        final String packageName;
-        synchronized (mLock) {
-            statusReceiver = mRemoteStatusReceiver;
-            packageName = mPackageName;
-        }
+        final IntentSender statusReceiver = getRemoteStatusReceiver();
         if (statusReceiver != null) {
             // Execute observer.onPackageInstalled on different thread as we don't want callers
             // inside the system server have to worry about catching the callbacks while they are
             // calling into the session
             final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = packageName;
+            args.arg1 = getPackageName();
             args.arg2 = msg;
             args.arg3 = extras;
             args.arg4 = statusReceiver;

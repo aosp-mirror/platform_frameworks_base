@@ -58,6 +58,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     private val displayMetrics: DisplayMetrics,
     private val mediaHierarchyManager: MediaHierarchyManager,
     private val scrimController: ScrimController,
+    private val depthController: NotificationShadeDepthController,
     private val featureFlags: FeatureFlags,
     private val context: Context,
     configurationController: ConfigurationController,
@@ -289,6 +290,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                     mediaHierarchyManager.setTransitionToFullShadeAmount(mediaAmount)
                     // Fade out all content only visible on the lockscreen
                     notificationPanelController.setKeyguardOnlyContentAlpha(1.0f - scrimProgress)
+                    depthController.transitionToFullShadeProgress = scrimProgress
                 }
             }
         }

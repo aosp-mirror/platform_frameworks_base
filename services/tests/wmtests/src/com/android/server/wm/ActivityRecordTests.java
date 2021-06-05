@@ -2700,6 +2700,40 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse("Starting window should not be present", activity.hasStartingWindow());
     }
 
+    @Test
+    public void testCloseToSquareFixedOrientationPortrait() {
+        // create a square display
+        final DisplayContent squareDisplay = new TestDisplayContent.Builder(mAtm, 2000, 2000)
+                .setSystemDecorations(true).build();
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(squareDisplay).build();
+
+        // create a fixed portrait activity
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task)
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT).build();
+
+        // check that both the configuration and app bounds are portrait
+        assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
+        assertTrue(activity.getConfiguration().windowConfiguration.getAppBounds().width()
+                <= activity.getConfiguration().windowConfiguration.getAppBounds().height());
+    }
+
+    @Test
+    public void testCloseToSquareFixedOrientationLandscape() {
+        // create a square display
+        final DisplayContent squareDisplay = new TestDisplayContent.Builder(mAtm, 2000, 2000)
+                .setSystemDecorations(true).build();
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(squareDisplay).build();
+
+        // create a fixed landscape activity
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task)
+                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE).build();
+
+        // check that both the configuration and app bounds are landscape
+        assertEquals(ORIENTATION_LANDSCAPE, activity.getConfiguration().orientation);
+        assertTrue(activity.getConfiguration().windowConfiguration.getAppBounds().width()
+                > activity.getConfiguration().windowConfiguration.getAppBounds().height());
+    }
+
     private void assertHasStartingWindow(ActivityRecord atoken) {
         assertNotNull(atoken.mStartingSurface);
         assertNotNull(atoken.mStartingData);

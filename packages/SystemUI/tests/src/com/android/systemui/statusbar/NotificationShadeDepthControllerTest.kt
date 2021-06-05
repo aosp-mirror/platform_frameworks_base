@@ -185,6 +185,13 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun setFullShadeTransition_appliesBlur() {
+        notificationShadeDepthController.transitionToFullShadeProgress = 1f
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
+    }
+
+    @Test
     fun updateGlobalDialogVisibility_animatesBlur() {
         notificationShadeDepthController.updateGlobalDialogVisibility(0.5f, root)
         verify(globalActionsSpring).animateTo(eq(maxBlur / 2), eq(root))

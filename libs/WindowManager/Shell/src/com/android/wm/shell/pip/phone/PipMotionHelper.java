@@ -40,6 +40,7 @@ import android.view.Choreographer;
 import androidx.dynamicanimation.animation.AnimationHandler;
 import androidx.dynamicanimation.animation.AnimationHandler.FrameCallbackScheduler;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -71,6 +72,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     /** Friction to use for PIP when it moves via physics fling animations. */
     private static final float DEFAULT_FRICTION = 1.9f;
+    /** How much of the dismiss circle size to use when scaling down PIP. **/
+    private static final float DISMISS_CIRCLE_PERCENT = 0.85f;
 
     private final Context mContext;
     private final PipTaskOrganizer mPipTaskOrganizer;
@@ -296,9 +299,17 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             boolean flung, Function0<Unit> after) {
         final PointF targetCenter = target.getCenterOnScreen();
 
-        final float desiredWidth = getBounds().width() / 2;
-        final float desiredHeight = getBounds().height() / 2;
+        // PIP should fit in the circle
+        final float dismissCircleSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.dismiss_circle_size);
 
+        final float width = getBounds().width();
+        final float height = getBounds().height();
+        final float ratio = width / height;
+
+        // Width should be a little smaller than the circle size.
+        final float desiredWidth = dismissCircleSize * DISMISS_CIRCLE_PERCENT;
+        final float desiredHeight = desiredWidth / ratio;
         final float destinationX = targetCenter.x - (desiredWidth / 2f);
         final float destinationY = targetCenter.y - (desiredHeight / 2f);
 

@@ -17,7 +17,6 @@
 package com.android.server.appsearch.external.localstorage;
 
 import static com.android.server.appsearch.external.localstorage.util.PrefixUtil.addPrefixToDocument;
-import static com.android.server.appsearch.external.localstorage.util.PrefixUtil.createPackagePrefix;
 import static com.android.server.appsearch.external.localstorage.util.PrefixUtil.createPrefix;
 import static com.android.server.appsearch.external.localstorage.util.PrefixUtil.getDatabaseName;
 import static com.android.server.appsearch.external.localstorage.util.PrefixUtil.getPackageName;
@@ -60,6 +59,7 @@ import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
+import com.android.server.appsearch.visibilitystore.VisibilityStore;
 
 import com.google.android.icing.IcingSearchEngine;
 import com.google.android.icing.proto.DeleteByQueryResultProto;
@@ -98,6 +98,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -199,14 +200,12 @@ public final class AppSearchImpl implements Closeable {
     @NonNull
     public static AppSearchImpl create(
             @NonNull File icingDir,
-            @NonNull Context context,
+            @NonNull Context userContext,
             int userId,
-            @NonNull String globalQuerierPackage,
             @Nullable AppSearchLogger logger)
             throws AppSearchException {
         Objects.requireNonNull(icingDir);
-        Objects.requireNonNull(context);
-        Objects.requireNonNull(globalQuerierPackage);
+        Objects.requireNonNull(userContext);
 
         long totalLatencyStartMillis = SystemClock.elapsedRealtime();
         InitializeStats.Builder initStatsBuilder = null;
@@ -215,8 +214,7 @@ public final class AppSearchImpl implements Closeable {
         }
 
         AppSearchImpl appSearchImpl =
-                new AppSearchImpl(
-                        icingDir, context, userId, globalQuerierPackage, initStatsBuilder);
+                new AppSearchImpl(icingDir, userContext, userId, initStatsBuilder);
 
         long prepareVisibilityStoreLatencyStartMillis = SystemClock.elapsedRealtime();
         appSearchImpl.initializeVisibilityStore();
@@ -239,9 +237,8 @@ public final class AppSearchImpl implements Closeable {
     /** @param initStatsBuilder collects stats for initialization if provided. */
     private AppSearchImpl(
             @NonNull File icingDir,
-            @NonNull Context context,
+            @NonNull Context userContext,
             int userId,
-            @NonNull String globalQuerierPackage,
             @Nullable InitializeStats.Builder initStatsBuilder)
             throws AppSearchException {
         mReadWriteLock.writeLock().lock();
@@ -259,8 +256,7 @@ public final class AppSearchImpl implements Closeable {
                     "Constructing IcingSearchEngine, response",
                     Objects.hashCode(mIcingSearchEngineLocked));
 
-            mVisibilityStoreLocked =
-                    new VisibilityStore(this, context, userId, globalQuerierPackage);
+            mVisibilityStoreLocked = new VisibilityStore(this, userContext, userId);
 
             // The core initialization procedure. If any part of this fails, we bail into
             // resetLocked(), deleting all data (but hopefully allowing AppSearchImpl to come up).
@@ -495,7 +491,8 @@ public final class AppSearchImpl implements Closeable {
             }
 
             mVisibilityStoreLocked.setVisibility(
-                    prefix,
+                    packageName,
+                    databaseName,
                     prefixedSchemasNotPlatformSurfaceable,
                     prefixedSchemasPackageAccessible);
 
@@ -844,17 +841,17 @@ public final class AppSearchImpl implements Closeable {
         try {
             throwIfClosedLocked();
 
+            // Convert package filters to prefix filters
             Set<String> packageFilters = new ArraySet<>(searchSpec.getFilterPackageNames());
             Set<String> prefixFilters = new ArraySet<>();
-            Set<String> allPrefixes = mNamespaceMapLocked.keySet();
             if (packageFilters.isEmpty()) {
                 // Client didn't restrict their search over packages. Try to query over all
                 // packages/prefixes
-                prefixFilters = allPrefixes;
+                prefixFilters = mNamespaceMapLocked.keySet();
             } else {
                 // Client did restrict their search over packages. Only include the prefixes that
                 // belong to the specified packages.
-                for (String prefix : allPrefixes) {
+                for (String prefix : mNamespaceMapLocked.keySet()) {
                     String packageName = getPackageName(prefix);
                     if (packageFilters.contains(packageName)) {
                         prefixFilters.add(prefix);
@@ -862,41 +859,50 @@ public final class AppSearchImpl implements Closeable {
                 }
             }
 
-            // Find which schemas the client is allowed to query over.
-            Set<String> allowedPrefixedSchemas = new ArraySet<>();
-            List<String> schemaFilters = searchSpec.getFilterSchemas();
+            // Convert schema filters to prefixed schema filters
+            ArraySet<String> prefixedSchemaFilters = new ArraySet<>();
             for (String prefix : prefixFilters) {
-                String packageName = getPackageName(prefix);
-
-                if (!schemaFilters.isEmpty()) {
-                    for (String schema : schemaFilters) {
-                        // Client specified some schemas to search over, check each one
-                        String prefixedSchema = prefix + schema;
-                        if (packageName.equals(callerPackageName)
-                                || mVisibilityStoreLocked.isSchemaSearchableByCaller(
-                                        prefix, prefixedSchema, callerUid)) {
-                            allowedPrefixedSchemas.add(prefixedSchema);
-                        }
-                    }
-                } else {
+                List<String> schemaFilters = searchSpec.getFilterSchemas();
+                if (schemaFilters.isEmpty()) {
                     // Client didn't specify certain schemas to search over, check all schemas
-                    Map<String, SchemaTypeConfigProto> prefixedSchemas =
-                            mSchemaMapLocked.get(prefix);
-                    if (prefixedSchemas != null) {
-                        for (String prefixedSchema : prefixedSchemas.keySet()) {
-                            if (packageName.equals(callerPackageName)
-                                    || mVisibilityStoreLocked.isSchemaSearchableByCaller(
-                                            prefix, prefixedSchema, callerUid)) {
-                                allowedPrefixedSchemas.add(prefixedSchema);
-                            }
-                        }
+                    prefixedSchemaFilters.addAll(mSchemaMapLocked.get(prefix).keySet());
+                } else {
+                    // Client specified some schemas to search over, check each one
+                    for (int i = 0; i < schemaFilters.size(); i++) {
+                        prefixedSchemaFilters.add(prefix + schemaFilters.get(i));
                     }
+                }
+            }
+
+            // Remove the schemas the client is not allowed to search over
+            Iterator<String> prefixedSchemaIt = prefixedSchemaFilters.iterator();
+            while (prefixedSchemaIt.hasNext()) {
+                String prefixedSchema = prefixedSchemaIt.next();
+                String packageName = getPackageName(prefixedSchema);
+
+                boolean allow;
+                if (packageName.equals(callerPackageName)) {
+                    // Callers can always retrieve their own data
+                    allow = true;
+                } else {
+                    String databaseName = getDatabaseName(prefixedSchema);
+                    allow =
+                            mVisibilityStoreLocked.isSchemaSearchableByCaller(
+                                    packageName,
+                                    databaseName,
+                                    prefixedSchema,
+                                    callerPackageName,
+                                    callerUid);
+                }
+
+                if (!allow) {
+                    prefixedSchemaIt.remove();
                 }
             }
 
             return doQueryLocked(
                     prefixFilters,
-                    allowedPrefixedSchemas,
+                    prefixedSchemaFilters,
                     queryExpression,
                     searchSpec,
                     sStatsBuilder);
@@ -1404,20 +1410,47 @@ public final class AppSearchImpl implements Closeable {
         mReadWriteLock.writeLock().lock();
         try {
             throwIfClosedLocked();
+            Set<String> existingPackages = getPackageToDatabases().keySet();
+            if (existingPackages.contains(packageName)) {
+                existingPackages.remove(packageName);
+                prunePackageData(existingPackages);
+            }
+        } finally {
+            mReadWriteLock.writeLock().unlock();
+        }
+    }
 
+    /**
+     * Remove all {@link AppSearchSchema}s and {@link GenericDocument}s that doesn't belong to any
+     * of the given installed packages
+     *
+     * @param installedPackages The name of all installed package.
+     * @throws AppSearchException if we cannot remove the data.
+     */
+    public void prunePackageData(@NonNull Set<String> installedPackages) throws AppSearchException {
+        mReadWriteLock.writeLock().lock();
+        try {
+            throwIfClosedLocked();
+            Map<String, Set<String>> packageToDatabases = getPackageToDatabases();
+            if (installedPackages.containsAll(packageToDatabases.keySet())) {
+                // No package got removed. We are good.
+                return;
+            }
+
+            // Prune schema proto
             SchemaProto existingSchema = getSchemaProtoLocked();
             SchemaProto.Builder newSchemaBuilder = SchemaProto.newBuilder();
-
-            String prefix = createPackagePrefix(packageName);
             for (int i = 0; i < existingSchema.getTypesCount(); i++) {
-                if (!existingSchema.getTypes(i).getSchemaType().startsWith(prefix)) {
+                String packageName = getPackageName(existingSchema.getTypes(i).getSchemaType());
+                if (installedPackages.contains(packageName)) {
                     newSchemaBuilder.addTypes(existingSchema.getTypes(i));
                 }
             }
+
             SchemaProto finalSchema = newSchemaBuilder.build();
 
-            // Apply schema, set force override to true to remove all schemas and documents under
-            // that package.
+            // Apply schema, set force override to true to remove all schemas and documents that
+            // doesn't belong to any of these installed packages.
             mLogUtil.piiTrace(
                     "clearPackageData.setSchema, request",
                     finalSchema.getTypesCount(),
@@ -1432,6 +1465,20 @@ public final class AppSearchImpl implements Closeable {
 
             // Determine whether it succeeded.
             checkSuccess(setSchemaResultProto.getStatus());
+
+            // Prune cached maps
+            for (Map.Entry<String, Set<String>> entry : packageToDatabases.entrySet()) {
+                String packageName = entry.getKey();
+                Set<String> databaseNames = entry.getValue();
+                if (!installedPackages.contains(packageName) && databaseNames != null) {
+                    for (String databaseName : databaseNames) {
+                        String removedPrefix = createPrefix(packageName, databaseName);
+                        mSchemaMapLocked.remove(removedPrefix);
+                        mNamespaceMapLocked.remove(removedPrefix);
+                    }
+                }
+            }
+            // TODO(b/145759910) clear visibility setting for package.
         } finally {
             mReadWriteLock.writeLock().unlock();
         }
@@ -1855,14 +1902,6 @@ public final class AppSearchImpl implements Closeable {
         // TODO(b/161935693) only allow GetSchemaResultProto NOT_FOUND on first run
         checkCodeOneOf(schemaProto.getStatus(), StatusProto.Code.OK, StatusProto.Code.NOT_FOUND);
         return schemaProto.getSchema();
-    }
-
-    /** Returns a set of all prefixes AppSearchImpl knows about. */
-    // TODO(b/180058203): Remove this method once platform has switched away from using this method.
-    @GuardedBy("mReadWriteLock")
-    @NonNull
-    Set<String> getPrefixesLocked() {
-        return mSchemaMapLocked.keySet();
     }
 
     private static void addToMap(

@@ -16,9 +16,10 @@
 
 package com.android.systemui.statusbar
 
+import android.view.CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED
+
 import android.app.ActivityManager
 import android.content.res.Resources
-import android.os.SystemProperties
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import android.view.SurfaceControl
@@ -40,10 +41,6 @@ open class BlurUtils @Inject constructor(
 ) : Dumpable {
     val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
     val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
-    private val blurSupportedSysProp = SystemProperties
-            .getBoolean("ro.surface_flinger.supports_background_blur", false)
-    private val blurDisabledSysProp = SystemProperties
-            .getBoolean("persist.sys.sf.disable_blurs", false)
 
     init {
         dumpManager.registerDumpable(javaClass.name, this)
@@ -100,7 +97,7 @@ open class BlurUtils @Inject constructor(
      * @return {@code true} when supported.
      */
     open fun supportsBlursOnWindows(): Boolean {
-        return blurSupportedSysProp && !blurDisabledSysProp && ActivityManager.isHighEndGfx()
+        return CROSS_WINDOW_BLUR_SUPPORTED && ActivityManager.isHighEndGfx()
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
@@ -109,8 +106,6 @@ open class BlurUtils @Inject constructor(
             it.increaseIndent()
             it.println("minBlurRadius: $minBlurRadius")
             it.println("maxBlurRadius: $maxBlurRadius")
-            it.println("blurSupportedSysProp: $blurSupportedSysProp")
-            it.println("blurDisabledSysProp: $blurDisabledSysProp")
             it.println("supportsBlursOnWindows: ${supportsBlursOnWindows()}")
         }
     }

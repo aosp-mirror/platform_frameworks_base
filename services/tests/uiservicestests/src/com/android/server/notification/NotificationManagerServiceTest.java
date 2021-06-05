@@ -3002,6 +3002,54 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSetNASMigrationDoneAndResetDefault_enableNAS() throws Exception {
+        int userId = 10;
+        when(mUm.getProfileIds(userId, false)).thenReturn(new int[]{userId});
+
+        mBinderService.setNASMigrationDoneAndResetDefault(userId, true);
+
+        assertTrue(mService.isNASMigrationDone(userId));
+        verify(mAssistants, times(1)).resetDefaultFromConfig();
+    }
+
+    @Test
+    public void testSetNASMigrationDoneAndResetDefault_disableNAS() throws Exception {
+        int userId = 10;
+        when(mUm.getProfileIds(userId, false)).thenReturn(new int[]{userId});
+
+        mBinderService.setNASMigrationDoneAndResetDefault(userId, false);
+
+        assertTrue(mService.isNASMigrationDone(userId));
+        verify(mAssistants, times(1)).clearDefaults();
+    }
+
+    @Test
+    public void testSetNASMigrationDoneAndResetDefault_multiProfile() throws Exception {
+        int userId1 = 11;
+        int userId2 = 12; //work profile
+        setUsers(new int[]{userId1, userId2});
+        when(mUm.isManagedProfile(userId2)).thenReturn(true);
+        when(mUm.getProfileIds(userId1, false)).thenReturn(new int[]{userId1, userId2});
+
+        mBinderService.setNASMigrationDoneAndResetDefault(userId1, true);
+        assertTrue(mService.isNASMigrationDone(userId1));
+        assertTrue(mService.isNASMigrationDone(userId2));
+    }
+
+    @Test
+    public void testSetNASMigrationDoneAndResetDefault_multiUser() throws Exception {
+        int userId1 = 11;
+        int userId2 = 12;
+        setUsers(new int[]{userId1, userId2});
+        when(mUm.getProfileIds(userId1, false)).thenReturn(new int[]{userId1});
+        when(mUm.getProfileIds(userId2, false)).thenReturn(new int[]{userId2});
+
+        mBinderService.setNASMigrationDoneAndResetDefault(userId1, true);
+        assertTrue(mService.isNASMigrationDone(userId1));
+        assertFalse(mService.isNASMigrationDone(userId2));
+    }
+
+    @Test
     public void testSetDndAccessForUser() throws Exception {
         UserHandle user = UserHandle.of(mContext.getUserId() + 10);
         ComponentName c = ComponentName.unflattenFromString("package/Component");

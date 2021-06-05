@@ -114,6 +114,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -165,6 +166,8 @@ public class AppStandbyControllerTests {
 
     /** Mock variable used in {@link MyInjector#isPackageInstalled(String, int, int)} */
     private static boolean isPackageInstalled = true;
+
+    private static final Random sRandom = new Random();
 
     private MyInjector mInjector;
     private AppStandbyController mController;
@@ -294,7 +297,7 @@ public class AppStandbyControllerTests {
 
         @Override
         File getDataSystemDirectory() {
-            return new File(getContext().getFilesDir(), Long.toString(Math.randomLongInternal()));
+            return new File(getContext().getFilesDir(), Long.toString(sRandom.nextLong()));
         }
 
         @Override

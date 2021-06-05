@@ -68,6 +68,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var notificationPanelController: NotificationPanelViewController
     @Mock lateinit var nsslController: NotificationStackScrollLayoutController
     @Mock lateinit var featureFlags: FeatureFlags
+    @Mock lateinit var depthController: NotificationShadeDepthController
     @Mock lateinit var stackscroller: NotificationStackScrollLayout
     @Mock lateinit var expandHelperCallback: ExpandHelper.Callback
     @Mock lateinit var statusbar: StatusBar
@@ -94,7 +95,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
             featureFlags = featureFlags,
             context = context,
             configurationController = configurationController,
-            falsingManager = falsingManager
+            falsingManager = falsingManager,
+            depthController = depthController
         )
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
@@ -221,5 +223,6 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verify(notificationPanelController).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
         verify(qS).setTransitionToFullShadeAmount(anyFloat(), anyBoolean())
+        verify(depthController).transitionToFullShadeProgress = anyFloat()
     }
 }

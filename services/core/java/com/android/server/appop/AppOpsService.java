@@ -3351,9 +3351,20 @@ public class AppOpsService extends IAppOpsService.Stub {
             boolean shouldCollectMessage) {
         RestrictionBypass bypass;
         try {
-            bypass = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
+            boolean isLocOrActivity = code == AppOpsManager.OP_FINE_LOCATION
+                    || code == AppOpsManager.OP_FINE_LOCATION_SOURCE
+                    || code == AppOpsManager.OP_ACTIVITY_RECOGNITION
+                    || code == AppOpsManager.OP_ACTIVITY_RECOGNITION_SOURCE;
+            bypass = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName,
+                    isLocOrActivity);
+            boolean wasNull = attributionTag == null;
             if (bypass != null && bypass.getIsAttributionTagNotFound()) {
                 attributionTag = null;
+            }
+            if (attributionTag == null && isLocOrActivity
+                    && packageName.equals("com.google.android.gms")) {
+                Slog.i("AppOpsDebug", "null tag on location or activity op " + code
+                        + " for " + packageName + ", was overridden: " + !wasNull, new Exception());
             }
         } catch (SecurityException e) {
             Slog.e(TAG, "noteOperation", e);
@@ -3861,9 +3872,19 @@ public class AppOpsService extends IAppOpsService.Stub {
             int attributionChainId, boolean dryRun) {
         RestrictionBypass bypass;
         try {
-            bypass = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
+            boolean isLocOrActivity = code == AppOpsManager.OP_FINE_LOCATION
+                    || code == AppOpsManager.OP_FINE_LOCATION_SOURCE
+                    || code == AppOpsManager.OP_ACTIVITY_RECOGNITION
+                    || code == AppOpsManager.OP_ACTIVITY_RECOGNITION_SOURCE;
+            bypass = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName,
+                    isLocOrActivity);
             if (bypass != null && bypass.getIsAttributionTagNotFound()) {
                 attributionTag = null;
+            }
+            if (attributionTag == null && isLocOrActivity
+                    && packageName.equals("com.google.android.gms")) {
+                Slog.i("AppOpsDebug", "null tag on location or activity op "
+                        + code + " for " + packageName, new Exception());
             }
         } catch (SecurityException e) {
             Slog.e(TAG, "startOperation", e);
@@ -4418,7 +4439,7 @@ public class AppOpsService extends IAppOpsService.Stub {
      */
     private @Nullable RestrictionBypass verifyAndGetBypass(int uid, String packageName,
             @Nullable String attributionTag) {
-        return verifyAndGetBypass(uid, packageName, attributionTag, null);
+        return verifyAndGetBypass(uid, packageName, attributionTag, null, false);
     }
 
     /**
@@ -4433,7 +4454,7 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @return {@code true} iff the package is privileged
      */
     private @Nullable RestrictionBypass verifyAndGetBypass(int uid, String packageName,
-            @Nullable String attributionTag, @Nullable String proxyPackageName) {
+            @Nullable String attributionTag, @Nullable String proxyPackageName, boolean extraLog) {
         if (uid == Process.ROOT_UID) {
             // For backwards compatibility, don't check package name for root UID.
             return null;
@@ -4475,6 +4496,15 @@ public class AppOpsService extends IAppOpsService.Stub {
             AndroidPackage pkg = pmInt.getPackage(packageName);
             if (pkg != null) {
                 isAttributionTagValid = isAttributionInPackage(pkg, attributionTag);
+                if (packageName.equals("com.google.android.gms") && extraLog) {
+                    if (isAttributionTagValid && attributionTag != null) {
+                        Slog.i("AppOpsDebug", "tag " + attributionTag + " found in "
+                                + packageName);
+                    } else {
+                        Slog.i("AppOpsDebug", "tag " + attributionTag + " missing from "
+                                + packageName);
+                    }
+                }
 
                 pkgUid = UserHandle.getUid(userId, UserHandle.getAppId(pkg.getUid()));
                 bypass = getBypassforPackage(pkg);

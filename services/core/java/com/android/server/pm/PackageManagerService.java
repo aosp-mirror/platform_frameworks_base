@@ -2684,9 +2684,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 } else {
                     result.addAll(approvedInfos);
 
-                    // If the other profile has an app that's of equal or higher approval, add it
+                    // If the other profile has an app that's higher approval, add it
                     if (xpDomainInfo != null
-                            && xpDomainInfo.highestApprovalLevel >= highestApproval) {
+                            && xpDomainInfo.highestApprovalLevel > highestApproval) {
                         result.add(xpDomainInfo.resolveInfo);
                     }
                 }
@@ -17120,7 +17120,7 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             // Should directory scanning logic be moved to ApexManager for better test coverage?
             final File dir = request.args.origin.resolvedFile;
-            final String[] apexes = dir.list();
+            final File[] apexes = dir.listFiles();
             if (apexes == null) {
                 throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                         dir.getAbsolutePath() + " is not a directory");
@@ -17130,7 +17130,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         "Expected exactly one .apex file under " + dir.getAbsolutePath()
                                 + " got: " + apexes.length);
             }
-            mApexManager.installPackage(dir.getAbsolutePath() + "/" + apexes[0]);
+            try (PackageParser2 packageParser = mInjector.getScanningPackageParser()) {
+                mApexManager.installPackage(apexes[0], packageParser);
+            }
         } catch (PackageManagerException e) {
             request.installResult.setError("APEX installation failed", e);
         }

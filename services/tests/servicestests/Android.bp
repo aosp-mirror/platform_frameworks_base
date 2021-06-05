@@ -118,6 +118,11 @@ android_test {
         ":PackageParserTestApp3",
         ":PackageParserTestApp4",
         ":apex.test",
+        ":test.rebootless_apex_v1",
+        ":test.rebootless_apex_v2",
+        ":com.android.apex.cts.shim.v1_prebuilt",
+        ":com.android.apex.cts.shim.v2_different_certificate_prebuilt",
+        ":com.android.apex.cts.shim.v2_unsigned_apk_container_prebuilt",
     ],
     resource_zips: [":FrameworksServicesTests_apks_as_resources"],
 }
