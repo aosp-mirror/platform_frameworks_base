@@ -372,6 +372,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
             return;
         }
 
+        final float smallCornerRadius =
+                getResources().getDimension(R.dimen.notification_corner_radius_small)
+                /  getResources().getDimension(R.dimen.notification_corner_radius);
         final float viewEnd = viewStart + anv.getActualHeight();
         final float cornerAnimationDistance = mCornerAnimationDistance
                 * mAmbientState.getExpansionFraction();
@@ -387,7 +390,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         } else if (viewEnd < cornerAnimationTop) {
             // Fast scroll skips frames and leaves corners with unfinished rounding.
             // Reset top and bottom corners outside of animation bounds.
-            anv.setBottomRoundness(anv.isLastInSection() ? 1f : 0f,
+            anv.setBottomRoundness(anv.isLastInSection() ? 1f : smallCornerRadius,
                     false /* animate */);
         }
 
@@ -401,7 +404,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         } else if (viewStart < cornerAnimationTop) {
             // Fast scroll skips frames and leaves corners with unfinished rounding.
             // Reset top and bottom corners outside of animation bounds.
-            anv.setTopRoundness(anv.isFirstInSection() ? 1f : 0f,
+            anv.setTopRoundness(anv.isFirstInSection() ? 1f : smallCornerRadius,
                     false /* animate */);
         }
     }
