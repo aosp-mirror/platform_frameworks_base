@@ -261,11 +261,11 @@ public class InputMethodMenuController {
             mSwitchingDialog.dismiss();
             mSwitchingDialog = null;
             mSwitchingDialogTitleView = null;
-        }
 
-        mService.updateSystemUiLocked();
-        mDialogBuilder = null;
-        mIms = null;
+            mService.updateSystemUiLocked();
+            mDialogBuilder = null;
+            mIms = null;
+        }
     }
 
     HardKeyboardListener getHardKeyboardListener() {

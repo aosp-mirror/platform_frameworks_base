@@ -27,6 +27,7 @@ import android.annotation.SystemApi;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Attributable;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
@@ -357,7 +358,7 @@ public final class BluetoothPan implements BluetoothProfile {
         final IBluetoothPan service = getService();
         if (service != null && isEnabled()) {
             try {
-                return BluetoothDevice.setAttributionSource(
+                return Attributable.setAttributionSource(
                         service.getConnectedDevices(mAttributionSource), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
@@ -384,7 +385,7 @@ public final class BluetoothPan implements BluetoothProfile {
         final IBluetoothPan service = getService();
         if (service != null && isEnabled()) {
             try {
-                return BluetoothDevice.setAttributionSource(
+                return Attributable.setAttributionSource(
                         service.getDevicesMatchingConnectionStates(states, mAttributionSource),
                         mAttributionSource);
             } catch (RemoteException e) {

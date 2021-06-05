@@ -258,16 +258,14 @@ public class StackScrollAlgorithm {
             }
         }
 
-        // Save (height of view before shelf, index of first view in shelf) from when shade is fully
+        // Save the index of first view in shelf from when shade is fully
         // expanded. Consider updating these states in updateContentView instead so that we don't
         // have to recalculate in every frame.
         float currentY = -scrollY;
         if (!ambientState.isOnKeyguard()) {
             currentY += mNotificationScrimPadding;
         }
-        float previousY = 0;
         state.firstViewInShelf = null;
-        state.viewHeightBeforeShelf = -1;
         for (int i = 0; i < state.visibleChildren.size(); i++) {
             final ExpandableView view = state.visibleChildren.get(i);
 
@@ -285,17 +283,8 @@ public class StackScrollAlgorithm {
                         && !(view instanceof FooterView)
                         && state.firstViewInShelf == null) {
                     state.firstViewInShelf = view;
-                    // There might be a section gap right before the shelf.
-                    // Limit the height of the view before the shelf so that it does not include
-                    // a gap and become taller than it normally is.
-                    state.viewHeightBeforeShelf = Math.min(getMaxAllowedChildHeight(view),
-                            ambientState.getStackEndHeight()
-                            - ambientState.getShelf().getIntrinsicHeight()
-                            - mPaddingBetweenElements
-                            - previousY);
                 }
             }
-            previousY = currentY;
             currentY = currentY
                     + getMaxAllowedChildHeight(view)
                     + mPaddingBetweenElements;
@@ -454,16 +443,7 @@ public class StackScrollAlgorithm {
             }
 
             // Clip height of view right before shelf.
-            float maxViewHeight = getMaxAllowedChildHeight(view);
-            if (ambientState.isExpansionChanging()
-                    && algorithmState.viewHeightBeforeShelf != -1) {
-                final int indexOfFirstViewInShelf = algorithmState.visibleChildren.indexOf(
-                        algorithmState.firstViewInShelf);
-                if (i == indexOfFirstViewInShelf - 1) {
-                    maxViewHeight = algorithmState.viewHeightBeforeShelf;
-                }
-            }
-            viewState.height = (int) (maxViewHeight * expansionFraction);
+            viewState.height = (int) (getMaxAllowedChildHeight(view) * expansionFraction);
         }
 
         algorithmState.mCurrentYPosition += viewState.height
@@ -735,11 +715,6 @@ public class StackScrollAlgorithm {
          * First view in shelf.
          */
         public ExpandableView firstViewInShelf;
-
-        /**
-         * Height of view right before the shelf.
-         */
-        public float viewHeightBeforeShelf;
 
         /**
          * The children from the host view which are not gone.

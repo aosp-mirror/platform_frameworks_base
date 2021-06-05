@@ -22,7 +22,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -87,9 +87,11 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
         }
     }
 
-    @BiometricAuthenticator.Modality private int mActiveSensorType = TYPE_FACE;
+    @Modality
+    private int mActiveSensorType = TYPE_FACE;
 
-    @Nullable UdfpsDialogMeasureAdapter mUdfpsMeasureAdapter;
+    @Nullable
+    private UdfpsDialogMeasureAdapter mUdfpsMeasureAdapter;
 
     public AuthBiometricFaceToFingerprintView(Context context) {
         super(context);
@@ -126,6 +128,16 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     }
 
     @Override
+    public void onAuthenticationFailed(
+            @Modality int modality, @Nullable String failureReason) {
+        if (modality == TYPE_FACE && mActiveSensorType == TYPE_FACE) {
+            // switching from face -> fingerprint mode, suppress soft error messages
+            failureReason = mContext.getString(R.string.fingerprint_dialog_use_fingerprint_instead);
+        }
+        super.onAuthenticationFailed(modality, failureReason);
+    }
+
+    @Override
     @BiometricState
     protected int getStateForAfterError() {
         if (mActiveSensorType == TYPE_FACE) {
@@ -155,7 +167,7 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     }
 
     @Override
-    public void updateState(int newState) {
+    public void updateState(@BiometricState int newState) {
         if (mState == STATE_HELP || mState == STATE_ERROR) {
             mActiveSensorType = TYPE_FINGERPRINT;
 

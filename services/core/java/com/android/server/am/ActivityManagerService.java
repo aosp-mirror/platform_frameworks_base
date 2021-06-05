@@ -350,8 +350,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.NonaFunction;
-import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
@@ -1807,8 +1805,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         0,
                         new HostingRecord("system"));
                 app.setPersistent(true);
-                app.mPid = MY_PID;
-                app.getWindowProcessController().setPid(MY_PID);
+                app.setPid(MY_PID);
                 app.mState.setMaxAdj(ProcessList.SYSTEM_ADJ);
                 app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
                 addPidLocked(app);
@@ -6908,7 +6905,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
                 if (changed) {
-                    updateOomAdjLocked(pr, true, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
+                    updateOomAdjLocked(pr, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
                 }
             }
         } finally {
@@ -12066,7 +12063,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mBackupTargets.put(targetUserId, r);
 
             // Try not to kill the process during backup
-            updateOomAdjLocked(proc, true, OomAdjuster.OOM_ADJ_REASON_NONE);
+            updateOomAdjLocked(proc, OomAdjuster.OOM_ADJ_REASON_NONE);
 
             // If the process is already attached, schedule the creation of the backup agent now.
             // If it is not yet live, this will be done when it attaches to the framework.
@@ -12183,7 +12180,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Not backing this app up any more; reset its OOM adjustment
                 final ProcessRecord proc = backupTarget.app;
-                updateOomAdjLocked(proc, true, OomAdjuster.OOM_ADJ_REASON_NONE);
+                updateOomAdjLocked(proc, OomAdjuster.OOM_ADJ_REASON_NONE);
                 proc.setInFullBackup(false);
 
                 oldBackupUid = backupTarget != null ? backupTarget.appInfo.uid : -1;
@@ -14444,20 +14441,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Update OomAdj for a specific process.
-     * @param app The process to update
-     * @param oomAdjAll If it's ok to call updateOomAdjLocked() for all running apps
-     *                  if necessary, or skip.
-     * @param oomAdjReason
-     * @return whether updateOomAdjLocked(app) was successful.
-     */
-    @GuardedBy("this")
-    final boolean updateOomAdjLocked(ProcessRecord app, boolean oomAdjAll,
-            String oomAdjReason) {
-        return mOomAdjuster.updateOomAdjLocked(app, oomAdjAll, oomAdjReason);
-    }
-
-    /**
      * Enqueue the given process into a todo list, and the caller should
      * call {@link #updateOomAdjPendingTargetsLocked} to kick off a pass of the oom adj update.
      */
@@ -14502,14 +14485,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         mOomAdjuster.updateOomAdjLocked(oomAdjReason);
     }
 
-    /*
+    /**
      * Update OomAdj for a specific process and its reachable processes.
+     *
      * @param app The process to update
      * @param oomAdjReason
+     * @return whether updateOomAdjLocked(app) was successful.
      */
     @GuardedBy("this")
-    final void updateOomAdjLocked(ProcessRecord app, String oomAdjReason) {
-        mOomAdjuster.updateOomAdjLocked(app, oomAdjReason);
+    final boolean updateOomAdjLocked(ProcessRecord app, String oomAdjReason) {
+        return mOomAdjuster.updateOomAdjLocked(app, oomAdjReason);
     }
 
     @Override
@@ -15415,7 +15400,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 pr.mState.setHasOverlayUi(hasOverlayUi);
                 //Slog.i(TAG, "Setting hasOverlayUi=" + pr.hasOverlayUi + " for pid=" + pid);
-                updateOomAdjLocked(pr, true, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
+                updateOomAdjLocked(pr, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
             }
         }
 
@@ -16085,11 +16070,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void onForegroundServiceNotificationUpdate(Notification notification,
-                int id, String pkg, @UserIdInt int userId) {
+        public void onForegroundServiceNotificationUpdate(boolean shown,
+                Notification notification, int id, String pkg, @UserIdInt int userId) {
             synchronized (ActivityManagerService.this) {
-                mServices.onForegroundServiceNotificationUpdateLocked(notification,
-                        id, pkg, userId);
+                mServices.onForegroundServiceNotificationUpdateLocked(shown,
+                        notification, id, pkg, userId);
             }
         }
 

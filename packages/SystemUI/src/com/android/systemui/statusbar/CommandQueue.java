@@ -18,7 +18,6 @@ package com.android.systemui.statusbar;
 
 import static android.app.StatusBarManager.DISABLE2_NONE;
 import static android.app.StatusBarManager.DISABLE_NONE;
-import static android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
 import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -35,6 +34,8 @@ import android.app.StatusBarManager.WindowType;
 import android.app.StatusBarManager.WindowVisibleState;
 import android.content.ComponentName;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator.Modality;
+import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
@@ -293,13 +294,16 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                 long operationId, @BiometricMultiSensorMode int multiSensorConfig) {
         }
 
+        /** @see IStatusBar#onBiometricAuthenticated() */
         default void onBiometricAuthenticated() {
         }
 
-        default void onBiometricHelp(String message) {
+        /** @see IStatusBar#onBiometricHelp(String) */
+        default void onBiometricHelp(@Modality int modality, String message) {
         }
 
-        default void onBiometricError(int modality, int error, int vendorCode) {
+        /** @see IStatusBar#onBiometricError(int, int, int) */
+        default void onBiometricError(@Modality int modality, int error, int vendorCode) {
         }
 
         default void hideAuthenticationDialog() {
@@ -891,9 +895,12 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
-    public void onBiometricHelp(String message) {
+    public void onBiometricHelp(@Modality int modality, String message) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_BIOMETRIC_HELP, message).sendToTarget();
+            SomeArgs args = SomeArgs.obtain();
+            args.argi1 = modality;
+            args.arg1 = message;
+            mHandler.obtainMessage(MSG_BIOMETRIC_HELP, args).sendToTarget();
         }
     }
 
@@ -1318,11 +1325,16 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     }
                     break;
                 }
-                case MSG_BIOMETRIC_HELP:
+                case MSG_BIOMETRIC_HELP: {
+                    SomeArgs someArgs = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onBiometricHelp((String) msg.obj);
+                        mCallbacks.get(i).onBiometricHelp(
+                                someArgs.argi1 /* modality */,
+                                (String) someArgs.arg1 /* message */);
                     }
+                    someArgs.recycle();
                     break;
+                }
                 case MSG_BIOMETRIC_ERROR: {
                     SomeArgs someArgs = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
