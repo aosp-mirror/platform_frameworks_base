@@ -62,6 +62,7 @@ import java.util.concurrent.TimeUnit;
 
 @SmallTest
 public class FrameTrackerTest {
+    private static final String CUJ_POSTFIX = "";
     private ViewAttachTestActivity mActivity;
 
     @Rule
@@ -100,15 +101,17 @@ public class FrameTrackerTest {
                 mListenerCapture.capture(), any());
         doNothing().when(mSurfaceControlWrapper).removeJankStatsListener(
                 mListenerCapture.capture());
+
         mChoreographer = mock(ChoreographerWrapper.class);
 
-        Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+        Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE, CUJ_POSTFIX);
         mTracker = Mockito.spy(
                 new FrameTracker(session, handler, mRenderer, mViewRootWrapper,
                         mSurfaceControlWrapper, mChoreographer, mWrapper,
                         /*traceThresholdMissedFrames=*/ 1, /*traceThresholdFrameTimeMillis=*/ -1,
                         null));
         doNothing().when(mTracker).triggerPerfetto();
+        doNothing().when(mTracker).postTraceStartMarker();
     }
 
     @Test

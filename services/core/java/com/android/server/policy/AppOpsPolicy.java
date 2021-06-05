@@ -43,8 +43,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.NonaFunction;
-import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
@@ -225,13 +223,21 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             if (isDatasourceAttributionTag(uid, packageName, attributionTag,
                     mLocationTags)) {
                 return resolvedCode;
+            } else if (packageName.equals("com.google.android.gms")) {
+                Log.i("AppOpsDebugRemapping", "NOT remapping " + packageName + " code "
+                        + code + " for tag " + attributionTag);
             }
         } else {
             resolvedCode = resolveArOp(code);
             if (resolvedCode != code) {
                 if (isDatasourceAttributionTag(uid, packageName, attributionTag,
                         mActivityRecognitionTags)) {
+                    Log.i("AppOpsDebugRemapping", "remapping " + packageName + " code "
+                            + code + " to " + resolvedCode + " for tag " + attributionTag);
                     return resolvedCode;
+                } else if (packageName.equals("com.google.android.gms")) {
+                    Log.i("AppOpsDebugRemapping", "NOT remapping " + packageName
+                            + " code " + code + " for tag " + attributionTag);
                 }
             }
         }
@@ -313,6 +319,17 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             if (appIdTags == null) {
                 appIdTags = new ArrayMap<>();
             }
+
+            // Remove any invalid tags
+            boolean nullRemoved = packageTags.remove(null);
+            boolean nullStrRemoved = packageTags.remove("null");
+            boolean emptyRemoved = packageTags.remove("");
+            if (nullRemoved || nullStrRemoved || emptyRemoved) {
+                Log.e(LOG_TAG, "Attempted to add invalid source attribution tag, removed "
+                        + "null: " + nullRemoved + " removed \"null\": " + nullStrRemoved
+                        + " removed empty string: " + emptyRemoved);
+            }
+
             appIdTags.put(packageName, packageTags);
             datastore.put(appId, appIdTags);
         } else if (appIdTags != null) {
@@ -334,8 +351,22 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         if (appIdTags != null) {
             final ArraySet<String> packageTags = appIdTags.get(packageName);
             if (packageTags != null && packageTags.contains(attributionTag)) {
+                if (packageName.equals("com.google.android.gms")) {
+                    Log.i("AppOpsDebugRemapping", packageName + " tag "
+                            + attributionTag + " in " + packageTags);
+                }
                 return true;
             }
+            if (packageName.equals("com.google.android.gms")) {
+                Log.i("AppOpsDebugRemapping", packageName + " tag " + attributionTag
+                        + " NOT in " + packageTags);
+            }
+        } else {
+            if (packageName.equals("com.google.android.gms")) {
+                Log.i("AppOpsDebugRemapping", "no package tags for uid " + uid
+                        + " package " + packageName);
+            }
+
         }
         return false;
     }

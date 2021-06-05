@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceSensorPropertiesInternal;
@@ -598,18 +599,18 @@ public class AuthContainerView extends LinearLayout
     }
 
     @Override
-    public void onAuthenticationFailed(String failureReason) {
-        mBiometricView.onAuthenticationFailed(failureReason);
+    public void onAuthenticationFailed(@Modality int modality, String failureReason) {
+        mBiometricView.onAuthenticationFailed(modality, failureReason);
     }
 
     @Override
-    public void onHelp(String help) {
-        mBiometricView.onHelp(help);
+    public void onHelp(@Modality int modality, String help) {
+        mBiometricView.onHelp(modality, help);
     }
 
     @Override
-    public void onError(String error) {
-        mBiometricView.onError(error);
+    public void onError(@Modality int modality, String error) {
+        mBiometricView.onError(modality, error);
     }
 
     @Override

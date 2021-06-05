@@ -15,9 +15,13 @@
  */
 
 // TODO(b/169883602): This is purposely a different package from the path so that it can access
-// AppSearchImpl and VisibilityStore methods without having to make methods public. This should be
-// moved into a proper package once AppSearchImpl-VisibilityStore's dependencies are refactored.
+// AppSearchImpl methods without having to make methods public. This should be moved into a proper
+// package once AppSearchImpl-VisibilityStore's dependencies are refactored.
 package com.android.server.appsearch.external.localstorage;
+
+import static android.Manifest.permission.READ_GLOBAL_APP_SEARCH_DATA;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -29,6 +33,7 @@ import android.content.pm.PackageManager;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
+import com.android.server.appsearch.visibilitystore.VisibilityStore;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -48,7 +53,7 @@ public class VisibilityStoreTest {
     private Context mContext;
     private AppSearchImpl mAppSearchImpl;
     private VisibilityStore mVisibilityStore;
-    private int mGlobalQuerierUid;
+    private int mUid;
 
     @Before
     public void setUp() throws Exception {
@@ -67,11 +72,9 @@ public class VisibilityStoreTest {
                         mTemporaryFolder.newFolder(),
                         mContext,
                         mContext.getUserId(),
-                        /*globalQuerierPackage=*/ mContext.getPackageName(),
                         /*logger=*/ null);
-        mGlobalQuerierUid =
-                mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
 
+        mUid = mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
         mVisibilityStore = mAppSearchImpl.getVisibilityStoreLocked();
     }
 
@@ -99,81 +102,96 @@ public class VisibilityStoreTest {
 
     @Test
     public void testSetVisibility_platformSurfaceable() throws Exception {
+        // Make sure we have global query privileges
+        mMockPackageManager.mockCheckPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName(), PERMISSION_GRANTED);
+
         mVisibilityStore.setVisibility(
-                "prefix",
+                "package",
+                "database",
                 /*schemasNotPlatformSurfaceable=*/ ImmutableSet.of(
                         "prefix/schema1", "prefix/schema2"),
                 /*schemasPackageAccessible=*/ Collections.emptyMap());
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schema1", mGlobalQuerierUid))
+                                "package",
+                                "database",
+                                "prefix/schema1",
+                                mContext.getPackageName(),
+                                mUid))
                 .isFalse();
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schema2", mGlobalQuerierUid))
+                                "package",
+                                "database",
+                                "prefix/schema2",
+                                mContext.getPackageName(),
+                                mUid))
                 .isFalse();
 
-        // New .setVisibility() call completely overrides previous visibility settings. So
-        // "schema2" isn't preserved.
+        // New .setVisibility() call completely overrides previous visibility settings.
+        // So "schema2" isn't preserved.
         mVisibilityStore.setVisibility(
-                "prefix",
+                "package",
+                "database",
                 /*schemasNotPlatformSurfaceable=*/ ImmutableSet.of(
                         "prefix/schema1", "prefix/schema3"),
                 /*schemasPackageAccessible=*/ Collections.emptyMap());
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schema1", mGlobalQuerierUid))
+                                "package",
+                                "database",
+                                "prefix/schema1",
+                                mContext.getPackageName(),
+                                mUid))
                 .isFalse();
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schema2", mGlobalQuerierUid))
+                                "package",
+                                "database",
+                                "prefix/schema2",
+                                mContext.getPackageName(),
+                                mUid))
                 .isTrue();
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schema3", mGlobalQuerierUid))
+                                "package",
+                                "database",
+                                "prefix/schema3",
+                                mContext.getPackageName(),
+                                mUid))
                 .isFalse();
 
         // Everything defaults to visible again.
         mVisibilityStore.setVisibility(
-                "prefix",
+                "package",
+                "database",
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptySet(),
                 /*schemasPackageAccessible=*/ Collections.emptyMap());
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schema1", mGlobalQuerierUid))
+                                "package",
+                                "database",
+                                "prefix/schema1",
+                                mContext.getPackageName(),
+                                mUid))
                 .isTrue();
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schema2", mGlobalQuerierUid))
+                                "package",
+                                "database",
+                                "prefix/schema2",
+                                mContext.getPackageName(),
+                                mUid))
                 .isTrue();
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schema3", mGlobalQuerierUid))
+                                "package",
+                                "database",
+                                "prefix/schema3",
+                                mContext.getPackageName(),
+                                mUid))
                 .isTrue();
-    }
-
-    @Test
-    public void testIsSchemaSearchableByCaller_platformQuerierHandlesNameNotFoundException()
-            throws Exception {
-        // Initialized the VisibilityStore with this context's package name as the global querier.
-        mMockPackageManager.mockThrowsNameNotFoundException(mContext.getPackageName());
-
-        // Create a new VisibilityStore instance since we look up the UID on initialization
-        AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(
-                        mTemporaryFolder.newFolder(),
-                        mContext,
-                        mContext.getUserId(),
-                        /*globalQuerierPackage=*/ mContext.getPackageName(),
-                        /*logger=*/ null);
-        VisibilityStore visibilityStore = appSearchImpl.getVisibilityStoreLocked();
-
-        // Use some arbitrary callerUid. If we can't find the global querier's uid though,
-        // nothing should be platform surfaceable.
-        assertThat(
-                        visibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schemaFoo", /*callerUid=*/ 0))
-                .isFalse();
     }
 
     @Test
@@ -191,19 +209,26 @@ public class VisibilityStoreTest {
         // Can't be the same value as uidFoo nor uidBar
         int uidNotFooOrBar = 3;
 
+        // Make sure none of them have global query privileges
+        mMockPackageManager.mockCheckPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo, PERMISSION_DENIED);
+        mMockPackageManager.mockCheckPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, packageNameBar, PERMISSION_DENIED);
+
         // By default, a schema isn't package accessible.
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schemaFoo", uidFoo))
+                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
                 .isFalse();
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schemaBar", uidBar))
+                                "package", "database", "prefix/schemaBar", packageNameBar, uidBar))
                 .isFalse();
 
         // Grant package access
         mVisibilityStore.setVisibility(
-                "prefix",
+                "package",
+                "database",
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptySet(),
                 /*schemasPackageAccessible=*/ ImmutableMap.of(
                         "prefix/schemaFoo",
@@ -216,7 +241,7 @@ public class VisibilityStoreTest {
         mMockPackageManager.mockRemoveSigningCertificate(packageNameFoo, sha256CertFoo);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schemaFoo", uidFoo))
+                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
                 .isFalse();
 
         // Should fail if PackageManager doesn't think the package belongs to the uid
@@ -225,7 +250,7 @@ public class VisibilityStoreTest {
         mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schemaFoo", uidFoo))
+                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
                 .isFalse();
 
         // But if uid and certificate match, then we should have access
@@ -233,20 +258,21 @@ public class VisibilityStoreTest {
         mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schemaFoo", uidFoo))
+                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
                 .isTrue();
 
         mMockPackageManager.mockGetPackageUidAsUser(packageNameBar, mContext.getUserId(), uidBar);
         mMockPackageManager.mockAddSigningCertificate(packageNameBar, sha256CertBar);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schemaBar", uidBar))
+                                "package", "database", "prefix/schemaBar", packageNameBar, uidBar))
                 .isTrue();
 
         // New .setVisibility() call completely overrides previous visibility settings. So
         // "schemaBar" settings aren't preserved.
         mVisibilityStore.setVisibility(
-                "prefix",
+                "package",
+                "database",
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptySet(),
                 /*schemasPackageAccessible=*/ ImmutableMap.of(
                         "prefix/schemaFoo",
@@ -256,14 +282,14 @@ public class VisibilityStoreTest {
         mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schemaFoo", uidFoo))
+                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
                 .isTrue();
 
         mMockPackageManager.mockGetPackageUidAsUser(packageNameBar, mContext.getUserId(), uidBar);
         mMockPackageManager.mockAddSigningCertificate(packageNameBar, sha256CertBar);
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schemaBar", uidBar))
+                                "package", "database", "prefix/schemaBar", packageNameBar, uidBar))
                 .isFalse();
     }
 
@@ -278,9 +304,14 @@ public class VisibilityStoreTest {
         // Pretend we can't find the Foo package.
         mMockPackageManager.mockThrowsNameNotFoundException(packageNameFoo);
 
+        // Make sure "foo" doesn't have global query privileges
+        mMockPackageManager.mockCheckPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo, PERMISSION_DENIED);
+
         // Grant package access
         mVisibilityStore.setVisibility(
-                "prefix",
+                "package",
+                "database",
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptySet(),
                 /*schemasPackageAccessible=*/ ImmutableMap.of(
                         "prefix/schemaFoo",
@@ -289,7 +320,7 @@ public class VisibilityStoreTest {
         // If we can't verify the Foo package that has access, assume it doesn't have access.
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                "prefix", "prefix/schemaFoo", uidFoo))
+                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
                 .isFalse();
     }
 
@@ -300,8 +331,15 @@ public class VisibilityStoreTest {
         byte[] sha256CertFoo = new byte[] {10};
         int uidFoo = 1;
 
+        // Set it up such that the test package has global query privileges, but "foo" doesn't.
+        mMockPackageManager.mockCheckPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName(), PERMISSION_GRANTED);
+        mMockPackageManager.mockCheckPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo, PERMISSION_DENIED);
+
         mVisibilityStore.setVisibility(
-                /*prefix=*/ "",
+                /*packageName=*/ "",
+                /*databaseName=*/ "",
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptySet(),
                 /*schemasPackageAccessible=*/ ImmutableMap.of(
                         "schema",
@@ -309,12 +347,22 @@ public class VisibilityStoreTest {
 
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
-                                /*prefix=*/ "", "schema", mGlobalQuerierUid))
+                                /*packageName=*/ "",
+                                /*databaseName=*/ "",
+                                "schema",
+                                mContext.getPackageName(),
+                                mUid))
                 .isTrue();
 
         mMockPackageManager.mockGetPackageUidAsUser(packageNameFoo, mContext.getUserId(), uidFoo);
         mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
-        assertThat(mVisibilityStore.isSchemaSearchableByCaller(/*prefix=*/ "", "schema", uidFoo))
+        assertThat(
+                        mVisibilityStore.isSchemaSearchableByCaller(
+                                /*packageName=*/ "",
+                                /*databaseName=*/ "",
+                                "schema",
+                                packageNameFoo,
+                                uidFoo))
                 .isTrue();
     }
 }

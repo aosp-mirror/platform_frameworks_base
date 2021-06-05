@@ -1108,7 +1108,8 @@ public class BiometricServiceTest {
     public void testAcquire_whenAuthenticating_sentToSystemUI() throws Exception {
         when(mContext.getResources().getString(anyInt())).thenReturn("test string");
 
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+        final int modality = BiometricAuthenticator.TYPE_FINGERPRINT;
+        setupAuthForOnly(modality, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
                 false /* requireConfirmation */, null /* authenticators */);
 
@@ -1121,7 +1122,7 @@ public class BiometricServiceTest {
         // Sends to SysUI and stays in authenticating state. We don't test that the correct
         // string is retrieved for now, but it's also very unlikely to break anyway.
         verify(mBiometricService.mStatusBarService)
-                .onBiometricHelp(anyString());
+                .onBiometricHelp(eq(modality), anyString());
         assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
     }
 

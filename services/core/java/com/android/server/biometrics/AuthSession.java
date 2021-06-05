@@ -21,7 +21,6 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT;
-import static android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 
 import static com.android.server.biometrics.BiometricServiceStateProto.MULTI_SENSOR_STATE_FACE_SCANNING;
 import static com.android.server.biometrics.BiometricServiceStateProto.MULTI_SENSOR_STATE_FP_SCANNING;
@@ -44,8 +43,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -498,7 +499,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         }
 
         try {
-            mStatusBarService.onBiometricHelp(message);
+            mStatusBarService.onBiometricHelp(sensorIdToModality(sensorId), message);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
@@ -873,7 +874,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         return modality;
     }
 
-    private @BiometricAuthenticator.Modality int sensorIdToModality(int sensorId) {
+    private @Modality int sensorIdToModality(int sensorId) {
         for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
             if (sensorId == sensor.id) {
                 return sensor.modality;
@@ -884,7 +885,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     private String getAcquiredMessageForSensor(int sensorId, int acquiredInfo, int vendorCode) {
-        final @BiometricAuthenticator.Modality int modality = sensorIdToModality(sensorId);
+        final @Modality int modality = sensorIdToModality(sensorId);
         switch (modality) {
             case BiometricAuthenticator.TYPE_FINGERPRINT:
                 return FingerprintManager.getAcquiredString(mContext, acquiredInfo, vendorCode);
