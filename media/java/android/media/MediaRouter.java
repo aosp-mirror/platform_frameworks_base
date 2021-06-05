@@ -185,6 +185,7 @@ public class MediaRouter {
 
             AudioRoutesInfo newAudioRoutes = null;
             try {
+                mIsBluetoothA2dpOn = mAudioService.isBluetoothA2dpOn();
                 newAudioRoutes = mAudioService.startWatchingRoutes(mAudioRoutesObserver);
             } catch (RemoteException e) {
             }

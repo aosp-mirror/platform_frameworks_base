@@ -20,11 +20,14 @@ import android.annotation.IntDef;
 import android.view.View;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.jank.InteractionJankMonitor.Configuration;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 public final class InteractionJankMonitorWrapper {
+    private static final String TAG = "JankMonitorWrapper";
+
     // Launcher journeys.
     public static final int CUJ_APP_LAUNCH_FROM_RECENTS =
             InteractionJankMonitor.CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS;
@@ -60,7 +63,11 @@ public final class InteractionJankMonitorWrapper {
     }
 
     public static boolean begin(View v, @CujType int cujType, long timeout) {
-        return InteractionJankMonitor.getInstance().begin(v, cujType, timeout);
+        Configuration.Builder builder =
+                new Configuration.Builder(cujType)
+                        .setView(v)
+                        .setTimeout(timeout);
+        return InteractionJankMonitor.getInstance().begin(builder);
     }
 
     public static boolean end(@CujType int cujType) {

@@ -580,8 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ਅੰਸ਼ਕ ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਪਤਾ ਲੱਗਿਆ"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ਫਿੰਗਰਪ੍ਰਿੰਟ \'ਤੇ ਪ੍ਰਕਿਰਿਆ ਨਹੀਂ ਹੋ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ਸੈਂਸਰ ਨੂੰ ਸਾਫ਼ ਕਰੋ"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6038375140739678098) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"ਸੈਂਸਰ \'ਤੇ ਉਂਗਲ ਨੂੰ ਥੋੜ੍ਹਾ ਜ਼ਿਆਦਾ ਦੇਰ ਲਈ ਰੱਖੋ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ਉਂਗਲ ਕਾਫ਼ੀ ਹੌਲੀ ਮੂਵ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ਕੋਈ ਹੋਰ ਫਿੰਗਰਪ੍ਰਿੰਟ ਵਰਤ ਕੇ ਦੇਖੋ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਚਮਕ"</string>
@@ -1867,7 +1866,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ਠੀਕ ਹੈ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"ਬੈਟਰੀ ਸੇਵਰ ਗੂੜ੍ਹੇ ਥੀਮ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਕੁਝ ਖਾਸ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਅਤੇ ਕੁਝ ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨਾਂ ਨੂੰ ਸੀਮਤ ਜਾਂ ਬੰਦ ਕਰਦਾ ਹੈ।\n\n"<annotation id="url">"ਹੋਰ ਜਾਣੋ"</annotation></string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
     <string name="battery_saver_description" msgid="8518809702138617167">"ਬੈਟਰੀ ਸੇਵਰ ਗੂੜ੍ਹੇ ਥੀਮ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਕੁਝ ਖਾਸ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਅਤੇ ਕੁਝ ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨਾਂ ਨੂੰ ਸੀਮਤ ਜਾਂ ਬੰਦ ਕਰਦਾ ਹੈ।"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ਡਾਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਲਈ, ਡਾਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡਾਟਾ \'ਤੇ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿੱਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕੀਤੇ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ਕੀ ਡਾਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>

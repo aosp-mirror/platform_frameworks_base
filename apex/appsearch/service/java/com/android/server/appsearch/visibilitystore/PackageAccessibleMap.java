@@ -28,23 +28,31 @@ import java.util.Set;
  * {@link android.app.appsearch.SetSchemaRequest.Builder#setSchemaTypeVisibilityForPackage} API.
  *
  * This object is not thread safe.
- * @hide
  */
-public class PackageAccessibleMap {
+class PackageAccessibleMap {
     /**
-     * Maps prefixes to prefixed schema types to PackageIdentifiers that have access to that schema.
+     * Maps packages to databases to prefixed schemas to PackageIdentifiers that have access to that
+     * schema.
      */
-    private final Map<String, Map<String, Set<PackageIdentifier>>> mMap = new ArrayMap<>();
+    private final Map<String, Map<String, Map<String, Set<PackageIdentifier>>>> mMap =
+            new ArrayMap<>();
 
     /**
-     * Sets the prefixed schemas that have package visibility in the given prefix.
+     * Sets the prefixed schemas that have package visibility in the given database.
      *
      * <p>Any existing mappings for this prefix are overwritten.
      */
     public void setPackageAccessible(
-            @NonNull String prefix,
+            @NonNull String packageName,
+            @NonNull String databaseName,
             @NonNull Map<String, Set<PackageIdentifier>> schemaToPackageIdentifier) {
-        mMap.put(prefix, schemaToPackageIdentifier);
+        Map<String, Map<String, Set<PackageIdentifier>>> databaseToSchemaTypeToVisibility =
+                mMap.get(packageName);
+        if (databaseToSchemaTypeToVisibility == null) {
+            databaseToSchemaTypeToVisibility = new ArrayMap<>();
+            mMap.put(packageName, databaseToSchemaTypeToVisibility);
+        }
+        databaseToSchemaTypeToVisibility.put(databaseName, schemaToPackageIdentifier);
     }
 
     /**
@@ -55,12 +63,20 @@ public class PackageAccessibleMap {
      */
     @NonNull
     public Set<PackageIdentifier> getAccessiblePackages(
-            @NonNull String prefix, @NonNull String schemaType) {
-        Map<String, Set<PackageIdentifier>> schemaTypeToVisibility = mMap.get(prefix);
+            @NonNull String packageName,
+            @NonNull String databaseName,
+            @NonNull String prefixedSchema) {
+        Map<String, Map<String, Set<PackageIdentifier>>> databaseToSchemaTypeToVisibility =
+                mMap.get(packageName);
+        if (databaseToSchemaTypeToVisibility == null) {
+            return Collections.emptySet();
+        }
+        Map<String, Set<PackageIdentifier>> schemaTypeToVisibility =
+                databaseToSchemaTypeToVisibility.get(databaseName);
         if (schemaTypeToVisibility == null) {
             return Collections.emptySet();
         }
-        Set<PackageIdentifier> accessiblePackages = schemaTypeToVisibility.get(schemaType);
+        Set<PackageIdentifier> accessiblePackages = schemaTypeToVisibility.get(prefixedSchema);
         if (accessiblePackages == null) {
             return Collections.emptySet();
         }

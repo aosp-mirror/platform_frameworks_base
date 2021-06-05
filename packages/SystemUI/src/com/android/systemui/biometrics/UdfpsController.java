@@ -111,7 +111,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final PowerManager mPowerManager;
     @NonNull private final AccessibilityManager mAccessibilityManager;
-    @Nullable private final UdfpsHbmCallback mHbmCallback;
+    @Nullable private final UdfpsHbmProvider mHbmProvider;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -494,7 +494,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull AccessibilityManager accessibilityManager,
             @NonNull ScreenLifecycle screenLifecycle,
             @Nullable Vibrator vibrator,
-            @NonNull Optional<UdfpsHbmCallback> hbmCallback) {
+            @NonNull Optional<UdfpsHbmProvider> hbmProvider) {
         mContext = context;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
         mMainHandler = new Handler(Looper.getMainLooper());
@@ -514,7 +514,7 @@ public class UdfpsController implements DozeReceiver {
         mFalsingManager = falsingManager;
         mPowerManager = powerManager;
         mAccessibilityManager = accessibilityManager;
-        mHbmCallback = hbmCallback.orElse(null);
+        mHbmProvider = hbmProvider.orElse(null);
         screenLifecycle.addObserver(mScreenObserver);
         mScreenOn = screenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
 
@@ -649,7 +649,7 @@ public class UdfpsController implements DozeReceiver {
                     Log.v(TAG, "showUdfpsOverlay | adding window reason=" + reason);
                     mView = (UdfpsView) mInflater.inflate(R.layout.udfps_view, null, false);
                     mView.setSensorProperties(mSensorProps);
-                    mView.setHbmCallback(mHbmCallback);
+                    mView.setHbmProvider(mHbmProvider);
                     UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
                     animation.init();
                     mView.setAnimationViewController(animation);

@@ -67,7 +67,8 @@ public interface BiometricAuthenticator {
             TYPE_NONE,
             TYPE_CREDENTIAL,
             TYPE_FINGERPRINT,
-            TYPE_IRIS
+            TYPE_IRIS,
+            TYPE_FACE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Modality {}

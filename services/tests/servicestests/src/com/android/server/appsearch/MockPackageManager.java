@@ -44,6 +44,12 @@ public class MockPackageManager {
         return mMockPackageManager;
     }
 
+    /** Mock a checkPermission call. */
+    public void mockCheckPermission(String permission, String packageName, int permissionResult) {
+        when(mMockPackageManager.checkPermission(permission, packageName))
+                .thenReturn(permissionResult);
+    }
+
     /** Mock a NameNotFoundException if the package name isn't installed. */
     public void mockThrowsNameNotFoundException(String packageName) {
         try {

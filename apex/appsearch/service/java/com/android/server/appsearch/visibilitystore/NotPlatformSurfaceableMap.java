@@ -26,36 +26,52 @@ import java.util.Set;
  * {@link android.app.appsearch.SetSchemaRequest.Builder#setSchemaTypeDisplayedBySystem} API.
  *
  * This object is not thread safe.
- * @hide
  */
-public class NotPlatformSurfaceableMap {
+class NotPlatformSurfaceableMap {
     /**
-     * Maps prefixes to the set of prefixed schemas that are platform-hidden within that prefix.
+     * Maps packages to databases to the set of prefixed schemas that are platform-hidden within
+     * that database.
      */
-    private final Map<String, Set<String>> mMap = new ArrayMap<>();
+    private final Map<String, Map<String, Set<String>>> mMap = new ArrayMap<>();
 
     /**
-     * Sets the prefixed schemas that are opted out of platform surfacing for the prefix.
+     * Sets the prefixed schemas that are opted out of platform surfacing for the database.
      *
      * <p>Any existing mappings for this prefix are overwritten.
      */
-    public void setNotPlatformSurfaceable(@NonNull String prefix, @NonNull Set<String> schemas) {
-        mMap.put(prefix, schemas);
+    public void setNotPlatformSurfaceable(
+            @NonNull String packageName,
+            @NonNull String databaseName,
+            @NonNull Set<String> prefixedSchemas) {
+        Map<String, Set<String>> databaseToSchemas = mMap.get(packageName);
+        if (databaseToSchemas == null) {
+            databaseToSchemas = new ArrayMap<>();
+            mMap.put(packageName, databaseToSchemas);
+        }
+        databaseToSchemas.put(databaseName, prefixedSchemas);
     }
 
     /**
      * Returns whether the given prefixed schema is platform surfaceable (has not opted out) in the
-     * given prefix.
+     * given database.
      */
-    public boolean isSchemaPlatformSurfaceable(@NonNull String prefix, @NonNull String schemaType) {
-        Set<String> schemaTypes = mMap.get(prefix);
+    public boolean isSchemaPlatformSurfaceable(
+            @NonNull String packageName,
+            @NonNull String databaseName,
+            @NonNull String prefixedSchema) {
+        Map<String, Set<String>> databaseToSchemaType = mMap.get(packageName);
+        if (databaseToSchemaType == null) {
+            // No opt-outs for this package
+            return true;
+        }
+        Set<String> schemaTypes = databaseToSchemaType.get(databaseName);
         if (schemaTypes == null) {
-            // No opt-outs for this prefix
+            // No opt-outs for this database
             return true;
         }
         // Some schemas were opted out of being platform-surfaced. As long as this schema
         // isn't one of those opt-outs, it's surfaceable.
-        return !schemaTypes.contains(schemaType);
+        return !schemaTypes.contains(prefixedSchema);
     }
 
     /** Discards all data in the map. */

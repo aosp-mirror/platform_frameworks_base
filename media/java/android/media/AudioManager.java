@@ -7055,6 +7055,8 @@ public class AudioManager {
      * @return a map where the key is a surround format and
      * the value indicates the surround format is enabled or not
      */
+    @TestApi
+    @NonNull
     public Map<Integer, Boolean> getSurroundFormats() {
         Map<Integer, Boolean> surroundFormats = new HashMap<>();
         int status = AudioSystem.getSurroundFormats(surroundFormats);
