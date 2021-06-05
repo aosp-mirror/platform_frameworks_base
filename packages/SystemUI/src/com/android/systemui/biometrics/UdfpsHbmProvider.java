@@ -26,22 +26,33 @@ import com.android.systemui.biometrics.UdfpsHbmTypes.HbmType;
  * enable the HBM while showing the fingerprint illumination, and to disable the HBM after the
  * illumination is no longer necessary.
  */
-public interface UdfpsHbmCallback {
+public interface UdfpsHbmProvider {
+
     /**
      * UdfpsView will call this to enable the HBM when the fingerprint illumination is needed.
+     *
+     * The call must be made from the UI thread. The callback, if provided, will also be invoked
+     * from the UI thread.
      *
      * @param hbmType The type of HBM that should be enabled. See {@link UdfpsHbmTypes}.
      * @param surface The surface for which the HBM is requested, in case the HBM implementation
      *                needs to set special surface flags to enable the HBM. Can be null.
+     * @param onHbmEnabled A runnable that will be executed once HBM is enabled.
      */
-    void enableHbm(@HbmType int hbmType, @Nullable Surface surface);
+    void enableHbm(@HbmType int hbmType, @Nullable Surface surface,
+            @Nullable Runnable onHbmEnabled);
 
     /**
      * UdfpsView will call this to disable the HBM when the illumination is not longer needed.
      *
+     * The call must be made from the UI thread. The callback, if provided, will also be invoked
+     * from the UI thread.
+     *
      * @param hbmType The type of HBM that should be disabled. See {@link UdfpsHbmTypes}.
      * @param surface The surface for which the HBM is requested, in case the HBM implementation
      *                needs to unset special surface flags to disable the HBM. Can be null.
+     * @param onHbmDisabled A runnable that will be executed once HBM is disabled.
      */
-    void disableHbm(@HbmType int hbmType, @Nullable Surface surface);
+    void disableHbm(@HbmType int hbmType, @Nullable Surface surface,
+            @Nullable Runnable onHbmDisabled);
 }

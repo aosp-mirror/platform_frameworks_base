@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.server.appsearch.visibilitystore;
 
-// TODO(b/169883602): This is purposely a different package from the path so that it can access
-// AppSearchImpl's methods without having to make them public. This should be moved into a proper
-// package once AppSearchImpl-VisibilityStore's dependencies are refactored.
-package com.android.server.appsearch.external.localstorage;
+import static android.Manifest.permission.READ_GLOBAL_APP_SEARCH_DATA;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -33,13 +31,10 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
-import com.android.server.appsearch.visibilitystore.NotPlatformSurfaceableMap;
-import com.android.server.appsearch.visibilitystore.PackageAccessibleDocument;
-import com.android.server.appsearch.visibilitystore.PackageAccessibleMap;
-import com.android.server.appsearch.visibilitystore.VisibilityDocument;
 
 import com.google.android.icing.proto.PersistType;
 
@@ -85,37 +80,23 @@ public class VisibilityStore {
      * These cannot have any of the special characters used by AppSearchImpl (e.g. {@code
      * AppSearchImpl#PACKAGE_DELIMITER} or {@code AppSearchImpl#DATABASE_DELIMITER}.
      */
-    static final String PACKAGE_NAME = "VS#Pkg";
+    @VisibleForTesting public static final String PACKAGE_NAME = "VS#Pkg";
 
-    static final String DATABASE_NAME = "VS#Db";
-
-    /**
-     * Prefix that AppSearchImpl creates for the VisibilityStore based on our package name and
-     * database name. Tracked here to tell when we're looking at our own prefix when looking through
-     * AppSearchImpl.
-     */
-    static final String VISIBILITY_STORE_PREFIX =
-            PrefixUtil.createPrefix(PACKAGE_NAME, DATABASE_NAME);
+    @VisibleForTesting public static final String DATABASE_NAME = "VS#Db";
 
     /** Namespace of documents that contain visibility settings */
     private static final String NAMESPACE = "";
 
-    /**
-     * Prefix to add to all visibility document ids. IcingSearchEngine doesn't allow empty ids.
-     */
+    /** Prefix to add to all visibility document ids. IcingSearchEngine doesn't allow empty ids. */
     private static final String ID_PREFIX = "uri:";
 
     private final AppSearchImpl mAppSearchImpl;
 
-    // Context of the system service.
-    private final Context mContext;
+    // Context of the user that the call is being made as.
+    private final Context mUserContext;
 
     // User ID of the caller who we're checking visibility settings for.
     private final int mUserId;
-
-    // UID of the package that has platform-query privileges, i.e. can query for all
-    // platform-surfaceable content.
-    private int mGlobalQuerierUid;
 
     /** Stores the schemas that are platform-hidden. All values are prefixed. */
     private final NotPlatformSurfaceableMap mNotPlatformSurfaceableMap =
@@ -129,16 +110,15 @@ public class VisibilityStore {
      * before using the object.
      *
      * @param appSearchImpl AppSearchImpl instance
+     * @param userContext Context of the user that the call is being made as
      */
     public VisibilityStore(
             @NonNull AppSearchImpl appSearchImpl,
-            @NonNull Context context,
-            @UserIdInt int userId,
-            @NonNull String globalQuerierPackage) {
+            @NonNull Context userContext,
+            @UserIdInt int userId) {
         mAppSearchImpl = appSearchImpl;
-        mContext = context;
+        mUserContext = userContext;
         mUserId = userId;
-        mGlobalQuerierUid = getGlobalQuerierUid(globalQuerierPackage);
     }
 
     /**
@@ -181,28 +161,44 @@ public class VisibilityStore {
 
         // Populate visibility settings set
         mNotPlatformSurfaceableMap.clear();
-        for (String prefix : mAppSearchImpl.getPrefixesLocked()) {
-            if (prefix.equals(VISIBILITY_STORE_PREFIX)) {
-                // Our own prefix. Skip
-                continue;
+        for (Map.Entry<String, Set<String>> entry :
+                mAppSearchImpl.getPackageToDatabases().entrySet()) {
+            String packageName = entry.getKey();
+            if (packageName.equals(PACKAGE_NAME)) {
+                continue; // Our own package. Skip.
             }
 
-            try {
-                // Note: We use the other clients' prefixed names as ids
-                VisibilityDocument visibilityDocument = new VisibilityDocument(
-                        mAppSearchImpl.getDocument(
-                                PACKAGE_NAME,
-                                DATABASE_NAME,
-                                NAMESPACE,
-                                /*id=*/ addIdPrefix(prefix),
-                                /*typePropertyPaths=*/ Collections.emptyMap()));
+            for (String databaseName : entry.getValue()) {
+                VisibilityDocument visibilityDocument;
+                try {
+                    // Note: We use the other clients' prefixed names as ids
+                    visibilityDocument =
+                            new VisibilityDocument(
+                                    mAppSearchImpl.getDocument(
+                                            PACKAGE_NAME,
+                                            DATABASE_NAME,
+                                            NAMESPACE,
+                                            /*id=*/ getVisibilityDocumentId(
+                                                    packageName, databaseName),
+                                            /*typePropertyPaths=*/ Collections.emptyMap()));
+                } catch (AppSearchException e) {
+                    if (e.getResultCode() == AppSearchResult.RESULT_NOT_FOUND) {
+                        // TODO(b/172068212): This indicates some desync error. We were expecting a
+                        //  document, but didn't find one. Should probably reset AppSearch instead
+                        //  of ignoring it.
+                        continue;
+                    }
+                    // Otherwise, this is some other error we should pass up.
+                    throw e;
+                }
 
                 // Update platform visibility settings
                 String[] notPlatformSurfaceableSchemas =
                         visibilityDocument.getNotPlatformSurfaceableSchemas();
                 if (notPlatformSurfaceableSchemas != null) {
                     mNotPlatformSurfaceableMap.setNotPlatformSurfaceable(
-                            prefix,
+                            packageName,
+                            databaseName,
                             new ArraySet<>(notPlatformSurfaceableSchemas));
                 }
 
@@ -226,25 +222,18 @@ public class VisibilityStore {
                         schemaToPackageIdentifierMap.put(prefixedSchema, packageIdentifiers);
                     }
                 }
-                mPackageAccessibleMap.setPackageAccessible(prefix, schemaToPackageIdentifierMap);
-            } catch (AppSearchException e) {
-                if (e.getResultCode() == AppSearchResult.RESULT_NOT_FOUND) {
-                    // TODO(b/172068212): This indicates some desync error. We were expecting a
-                    //  document, but didn't find one. Should probably reset AppSearch instead of
-                    //  ignoring it.
-                    continue;
-                }
-                // Otherwise, this is some other error we should pass up.
-                throw e;
+                mPackageAccessibleMap.setPackageAccessible(
+                        packageName, databaseName, schemaToPackageIdentifierMap);
             }
         }
     }
 
     /**
-     * Sets visibility settings for {@code prefix}. Any previous visibility settings will be
+     * Sets visibility settings for the given database. Any previous visibility settings will be
      * overwritten.
      *
-     * @param prefix Prefix that identifies who owns the {@code schemasNotPlatformSurfaceable}.
+     * @param packageName Package of app that owns the {@code schemasNotPlatformSurfaceable}.
+     * @param databaseName Database that owns the {@code schemasNotPlatformSurfaceable}.
      * @param schemasNotPlatformSurfaceable Set of prefixed schemas that should be hidden from the
      *     platform.
      * @param schemasPackageAccessible Map of prefixed schemas to a list of package identifiers that
@@ -252,17 +241,20 @@ public class VisibilityStore {
      * @throws AppSearchException on AppSearchImpl error.
      */
     public void setVisibility(
-            @NonNull String prefix,
+            @NonNull String packageName,
+            @NonNull String databaseName,
             @NonNull Set<String> schemasNotPlatformSurfaceable,
             @NonNull Map<String, List<PackageIdentifier>> schemasPackageAccessible)
             throws AppSearchException {
-        Objects.requireNonNull(prefix);
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(databaseName);
         Objects.requireNonNull(schemasNotPlatformSurfaceable);
         Objects.requireNonNull(schemasPackageAccessible);
 
         // Persist the document
         VisibilityDocument.Builder visibilityDocument =
-                new VisibilityDocument.Builder(NAMESPACE, /*id=*/ addIdPrefix(prefix));
+                new VisibilityDocument.Builder(
+                        NAMESPACE, /*id=*/ getVisibilityDocumentId(packageName, databaseName));
         if (!schemasNotPlatformSurfaceable.isEmpty()) {
             visibilityDocument.setSchemasNotPlatformSurfaceable(
                     schemasNotPlatformSurfaceable.toArray(new String[0]));
@@ -293,29 +285,50 @@ public class VisibilityStore {
         mAppSearchImpl.persistToDisk(PersistType.Code.LITE);
 
         // Update derived data structures.
-        mNotPlatformSurfaceableMap.setNotPlatformSurfaceable(prefix, schemasNotPlatformSurfaceable);
-        mPackageAccessibleMap.setPackageAccessible(prefix, schemaToPackageIdentifierMap);
+        mNotPlatformSurfaceableMap.setNotPlatformSurfaceable(
+                packageName, databaseName, schemasNotPlatformSurfaceable);
+        mPackageAccessibleMap.setPackageAccessible(
+                packageName, databaseName, schemaToPackageIdentifierMap);
     }
 
-    /** Checks whether {@code prefixedSchema} can be searched over by the {@code callerUid}. */
+    /**
+     * Checks whether {@code prefixedSchema} can be searched over by the {@code callerUid}.
+     *
+     * @param packageName Package that owns the schema.
+     * @param databaseName Database within the package that owns the schema.
+     * @param prefixedSchema Prefixed schema type the caller is trying to access.
+     * @param callerPackageName Package name of the caller.
+     * @param callerUid Uid of the caller.
+     */
     public boolean isSchemaSearchableByCaller(
-            @NonNull String prefix, @NonNull String prefixedSchema, int callerUid) {
-        Objects.requireNonNull(prefix);
+            @NonNull String packageName,
+            @NonNull String databaseName,
+            @NonNull String prefixedSchema,
+            @NonNull String callerPackageName,
+            int callerUid) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(databaseName);
         Objects.requireNonNull(prefixedSchema);
+        Objects.requireNonNull(callerPackageName);
 
-        if (prefix.equals(VISIBILITY_STORE_PREFIX)) {
+        if (packageName.equals(PACKAGE_NAME)) {
             return false; // VisibilityStore schemas are for internal bookkeeping.
         }
 
-        // We compare appIds here rather than direct uids because the package's uid may change based
-        // on the user that's running.
-        if (UserHandle.isSameApp(mGlobalQuerierUid, callerUid)
-                && mNotPlatformSurfaceableMap.isSchemaPlatformSurfaceable(prefix, prefixedSchema)) {
+        // TODO(b/180058203): If we can cache or pass in that a caller has the
+        //  READ_GLOBAL_SEARCH_DATA permission, then we can save this package manager lookup for
+        //  each schema we may check in the loop.
+        if (mNotPlatformSurfaceableMap.isSchemaPlatformSurfaceable(
+                        packageName, databaseName, prefixedSchema)
+                && mUserContext
+                                .getPackageManager()
+                                .checkPermission(READ_GLOBAL_APP_SEARCH_DATA, callerPackageName)
+                        == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
 
         // May not be platform surfaceable, but might still be accessible through 3p access.
-        return isSchemaPackageAccessible(prefix, prefixedSchema, callerUid);
+        return isSchemaPackageAccessible(packageName, databaseName, prefixedSchema, callerUid);
     }
 
     /**
@@ -328,20 +341,32 @@ public class VisibilityStore {
      * does not handle packages that have been signed by multiple certificates.
      */
     private boolean isSchemaPackageAccessible(
-            @NonNull String prefix, @NonNull String prefixedSchema, int callerUid) {
+            @NonNull String packageName,
+            @NonNull String databaseName,
+            @NonNull String prefixedSchema,
+            int callerUid) {
         Set<PackageIdentifier> packageIdentifiers =
-                mPackageAccessibleMap.getAccessiblePackages(prefix, prefixedSchema);
+                mPackageAccessibleMap.getAccessiblePackages(
+                        packageName, databaseName, prefixedSchema);
         for (PackageIdentifier packageIdentifier : packageIdentifiers) {
-            // Check that the caller uid matches this allowlisted PackageIdentifier.
             // TODO(b/169883602): Consider caching the UIDs of packages. Looking this up in the
             // package manager could be costly. We would also need to update the cache on
             // package-removals.
-            if (getPackageUidAsUser(packageIdentifier.getPackageName()) != callerUid) {
+
+            // 'callerUid' is the uid of the caller. The 'user' doesn't have to be the same one as
+            // the callerUid since clients can createContextAsUser with some other user, and then
+            // make calls to us. So just check if the appId portion of the uid is the same. This is
+            // essentially UserHandle.isSameApp, but that's not a system API for us to use.
+            int callerAppId = UserHandle.getAppId((callerUid));
+            int userAppId =
+                    UserHandle.getAppId(getPackageUidAsUser(packageIdentifier.getPackageName()));
+            if (callerAppId != userAppId) {
                 continue;
             }
 
             // Check that the package also has the matching certificate
-            if (mContext.getPackageManager()
+            if (mUserContext
+                    .getPackageManager()
                     .hasSigningCertificate(
                             packageIdentifier.getPackageName(),
                             packageIdentifier.getSha256Certificate(),
@@ -367,36 +392,14 @@ public class VisibilityStore {
     /**
      * Adds a prefix to create a visibility store document's id.
      *
-     * @param id Non-prefixed id
+     * @param packageName Package to which the visibility doc refers
+     * @param databaseName Database to which the visibility doc refers
      * @return Prefixed id
      */
-    private static String addIdPrefix(String id) {
-        return ID_PREFIX + id;
-    }
-
-    /**
-     * Finds the uid of the {@code globalQuerierPackage}. {@code globalQuerierPackage} must be a
-     * pre-installed, system app. Returns {@link Process#INVALID_UID} if unable to find the UID.
-     */
-    private int getGlobalQuerierUid(@NonNull String globalQuerierPackage) {
-        try {
-            int flags =
-                    PackageManager.MATCH_DISABLED_COMPONENTS
-                            | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
-                            | PackageManager.MATCH_SYSTEM_ONLY;
-            // It doesn't matter that we're using the caller's userId here. We'll eventually check
-            // that the two uids in question belong to the same appId.
-            return mContext.getPackageManager()
-                    .getPackageUidAsUser(globalQuerierPackage, flags, mUserId);
-        } catch (PackageManager.NameNotFoundException e) {
-            // Global querier doesn't exist.
-            Log.i(
-                    TAG,
-                    "AppSearch global querier package not found on device:  '"
-                            + globalQuerierPackage
-                            + "'");
-        }
-        return Process.INVALID_UID;
+    @NonNull
+    private static String getVisibilityDocumentId(
+            @NonNull String packageName, @NonNull String databaseName) {
+        return ID_PREFIX + PrefixUtil.createPrefix(packageName, databaseName);
     }
 
     /**
@@ -405,7 +408,7 @@ public class VisibilityStore {
      */
     private int getPackageUidAsUser(@NonNull String packageName) {
         try {
-            return mContext.getPackageManager().getPackageUidAsUser(packageName, mUserId);
+            return mUserContext.getPackageManager().getPackageUidAsUser(packageName, mUserId);
         } catch (PackageManager.NameNotFoundException e) {
             // Package doesn't exist, continue
         }

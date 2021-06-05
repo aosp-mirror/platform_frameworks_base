@@ -339,7 +339,7 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Може да допрете, повлечете, штипнете и да користите други движења."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Движења за отпечатоци"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може да сними движења што се направени на сензорот за отпечатоци на уредот."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Правење слика од екранот"</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Зачувување слика од екранот"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може да направи слика од екранот."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"оневозможи или измени статусна лента"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дозволува апликацијата да ја оневозможи статусната лента или да додава или отстранува системски икони."</string>
@@ -1866,8 +1866,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски.\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелнни ефекти, одредени функции и некои мрежни врски."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
+    <skip />
+    <string name="battery_saver_description" msgid="8518809702138617167">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>

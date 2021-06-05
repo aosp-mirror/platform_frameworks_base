@@ -983,7 +983,9 @@ public class SizeCompatTests extends WindowTestsBase {
     @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
             ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM})
     public void testOverrideMinAspectRatioLowerThanManifest() {
-        setUpDisplaySizeWithApp(1400, 1600);
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1400, 1800)
+                .setNotch(200).setSystemDecorations(true).build();
+        mTask = new TaskBuilder(mSupervisor).setDisplay(display).build();
 
         // Create a size compat activity on the same task.
         final ActivityRecord activity = new ActivityBuilder(mAtm)
@@ -997,8 +999,13 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // The per-package override should have no effect, because the manifest aspect ratio is
         // larger (2:1)
-        assertEquals(1600, activity.getBounds().height());
-        assertEquals(800, activity.getBounds().width());
+        final Rect appBounds = activity.getWindowConfiguration().getAppBounds();
+        assertEquals("App bounds must have min aspect ratio", 2f,
+                (float) appBounds.height() / appBounds.width(), 0.0001f /* delta */);
+        assertEquals("Long side must fit task",
+                mTask.getWindowConfiguration().getAppBounds().height(), appBounds.height());
+        assertEquals("Bounds can include insets", mTask.getBounds().height(),
+                activity.getBounds().height());
     }
 
     @Test

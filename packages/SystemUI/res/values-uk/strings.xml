@@ -1136,7 +1136,7 @@
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g> скоро святкуватиме День народження"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Річниця"</string>
     <string name="anniversary_status_content_description" msgid="8212171790843327442">"Сьогодні <xliff:g id="NAME">%1$s</xliff:g> відзначає річницю"</string>
-    <string name="location_status" msgid="1294990572202541812">"Ділюся геоданими"</string>
+    <string name="location_status" msgid="1294990572202541812">"Показую, де я"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> ділиться своїм місцезнаходженням"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Нова історія"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> ділиться новою історією"</string>
