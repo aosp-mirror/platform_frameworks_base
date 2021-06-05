@@ -480,8 +480,6 @@ public final class MediaFormat {
      * <li>The timestampUs shall be monotonically increasing.</li>
      * <li>The timestampUs shall fall within the time span of the video track.</li>
      * <li>The first timestampUs should match that of the first video sample.</li>
-     *
-     * @hide
      */
     public static final String KEY_SLOW_MOTION_MARKERS = "slow-motion-markers";
 
