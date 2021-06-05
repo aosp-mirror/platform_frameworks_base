@@ -54,7 +54,7 @@ droidstubs {
         },
         api_lint: {
             enabled: true,
-            new_since: ":android-non-updatable.api.public.latest",
+            new_since: ":android.api.public.latest",
         },
     },
     dists: [
@@ -109,7 +109,7 @@ droidstubs {
         },
         api_lint: {
             enabled: true,
-            new_since: ":android-non-updatable.api.system.latest",
+            new_since: ":android.api.system.latest",
             baseline_file: "core/api/system-lint-baseline.txt",
         },
     },
@@ -204,7 +204,7 @@ droidstubs {
         },
         api_lint: {
             enabled: true,
-            new_since: ":android-non-updatable.api.module-lib.latest",
+            new_since: ":android.api.module-lib.latest",
         },
     },
     dists: [
