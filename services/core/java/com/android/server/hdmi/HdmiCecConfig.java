@@ -317,6 +317,16 @@ public class HdmiCecConfig {
                 R.bool.config_cecHdmiCecVersion20_allowed,
                 R.bool.config_cecHdmiCecVersion20_default);
 
+        Setting routingControlControl = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL,
+                R.bool.config_cecRoutingControl_userConfigurable);
+        routingControlControl.registerValue(HdmiControlManager.ROUTING_CONTROL_ENABLED,
+                R.bool.config_cecRoutingControlEnabled_allowed,
+                R.bool.config_cecRoutingControlEnabled_default);
+        routingControlControl.registerValue(HdmiControlManager.ROUTING_CONTROL_DISABLED,
+                R.bool.config_cecRoutingControlDisabled_allowed,
+                R.bool.config_cecRoutingControlDisabled_default);
+
         Setting powerControlMode = registerSetting(
                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
                 R.bool.config_cecPowerControlMode_userConfigurable);
@@ -511,6 +521,8 @@ public class HdmiCecConfig {
                 return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
                 return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
+                return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
@@ -550,6 +562,8 @@ public class HdmiCecConfig {
                 return Global.HDMI_CONTROL_ENABLED;
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
                 return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
+                return Global.HDMI_CEC_SWITCH_ENABLED;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP;
             case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
