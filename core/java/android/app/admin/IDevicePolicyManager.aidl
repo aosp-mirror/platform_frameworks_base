@@ -390,7 +390,8 @@ interface IDevicePolicyManager {
 
     void setAffiliationIds(in ComponentName admin, in List<String> ids);
     List<String> getAffiliationIds(in ComponentName admin);
-    boolean isAffiliatedUser();
+    boolean isCallingUserAffiliated();
+    boolean isAffiliatedUser(int userId);
 
     void setSecurityLoggingEnabled(in ComponentName admin, String packageName, boolean enabled);
     boolean isSecurityLoggingEnabled(in ComponentName admin, String packageName);

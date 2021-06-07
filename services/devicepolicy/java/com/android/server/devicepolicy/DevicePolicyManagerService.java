@@ -14313,7 +14313,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isAffiliatedUser() {
+    public boolean isCallingUserAffiliated() {
         if (!mHasFeature) {
             return false;
         }
@@ -14321,6 +14321,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             return isUserAffiliatedWithDeviceLocked(mInjector.userHandleGetCallingUserId());
         }
+    }
+
+    @Override
+    public boolean isAffiliatedUser(@UserIdInt int userId) {
+        if (!mHasFeature) {
+            return false;
+        }
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
+
+        return isUserAffiliatedWithDeviceLocked(userId);
     }
 
     private boolean isUserAffiliatedWithDeviceLocked(@UserIdInt int userId) {
