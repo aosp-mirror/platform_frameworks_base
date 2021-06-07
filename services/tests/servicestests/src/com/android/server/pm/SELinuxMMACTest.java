@@ -91,6 +91,16 @@ public class SELinuxMMACTest {
     }
 
     @Test
+    public void getSeInfoTargetingCurDevelopment() {
+        AndroidPackage pkg = makePackage(Build.VERSION_CODES.CUR_DEVELOPMENT);
+        when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
+                argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
+                .thenReturn(true);
+        assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
+                is("default:targetSdkVersion=" + Build.VERSION_CODES.CUR_DEVELOPMENT));
+    }
+
+    @Test
     public void getSeInfoNoOptInButAlreadyR() {
         AndroidPackage pkg = makePackage(R_OPT_IN_VERSION);
         when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_R_CHANGES),
