@@ -37,7 +37,7 @@
     <string name="wifi_no_internet" msgid="1774198889176926299">"Aucun accès à Internet"</string>
     <string name="saved_network" msgid="7143698034077223645">"Enregistré lors de : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Connecté automatiquement via %1$s"</string>
-    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Connecté automatiquement via un fournisseur d\'évaluation de l\'état du réseau"</string>
+    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Connecté automatiquement via un fournisseur d\'évaluation du réseau"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Connecté via %1$s"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Connecté via <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"Disponible via %1$s"</string>
@@ -139,7 +139,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Signal Wi-Fi excellent"</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Réseau ouvert"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Réseau sécurisé"</string>
-    <string name="process_kernel_label" msgid="950292573930336765">"Plate-forme Android"</string>
+    <string name="process_kernel_label" msgid="950292573930336765">"OS Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Applications supprimées"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Applications et utilisateurs supprimés"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Mises à jour du système"</string>
