@@ -665,7 +665,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permite ao propietario vincularse á interface de nivel superior dun servizo de mensaxaría. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"vincular aos servizos do operador"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permite ao titular vincularse aos servizos do operador. As aplicacións normais non deberían necesitar este permiso."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"acceso ao modo Non molestar"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"acceso a Non molestar"</string>
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite á aplicación ler e escribir a configuración do modo Non molestar."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso de permiso de vista"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite ao propietario iniciar o uso de permisos dunha aplicación. As aplicacións normais non deberían precisalo nunca."</string>
