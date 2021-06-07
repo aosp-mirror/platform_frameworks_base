@@ -57,8 +57,7 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"येणारा कॉलर आयडी"</string>
-    <!-- no translation found for ClirMmi (6752346475055446417) -->
-    <skip />
+    <string name="ClirMmi" msgid="6752346475055446417">"आउटगोइंग कॉलर आयडी लपवा"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"कनेक्ट केलेला रेखा आयडी"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"कनेक्ट केलेला रेखा आयडी प्रतिबंध"</string>
     <string name="CfMmi" msgid="8390012691099787178">"कॉल फॉरवर्डिंग"</string>
@@ -149,12 +148,12 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"केवळ वाय-फाय"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <string name="crossSimFormat_spn_cross_sim_calling" msgid="779976494687695991">"<xliff:g id="SPN">%s</xliff:g> क्रॉस सिम कॉलिंग"</string>
-    <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"<xliff:g id="SPN">%s</xliff:g> बॅकअप कॉलिंग"</string>
+    <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकंदांनंतर <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
-    <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
-    <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
+    <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
+    <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
     <string name="fcComplete" msgid="1080909484660507044">"वैशिष्ट्य कोड पूर्ण."</string>
     <string name="fcError" msgid="5325116502080221346">"कनेक्शन समस्या किंवा अवैध फीचर कोड."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ठीक"</string>
@@ -204,8 +203,8 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"सेन्सर सूचना सेवा"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ट्वायलाइट सेवा"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"टाइम झोन डिटेक्टर (कनेक्टिव्हिटी नाही)"</string>
-    <!-- no translation found for gnss_time_update_service (9039489496037616095) -->
-    <skip />
+    <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS ची वेळ अपडेट करणारी सेवा"</string>
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"संगीत ओळख व्यवस्थापक सेवा"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"तुमचे डिव्हाइस मिटविले जाईल"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"प्रशासक अ‍ॅप वापरता येणार नाही. तुमचे डिव्हाइस आता साफ केले जाईल.\n\nतुम्हाला कुठलेही प्रश्न असल्यास, तुमच्या संस्थेच्या प्रशासकाशी संपर्क साधा."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> नी प्रिंट करणे बंद केले आहे."</string>
@@ -278,7 +277,7 @@
     <string name="notification_hidden_text" msgid="2835519769868187223">"नवीन सूचना"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"व्हर्च्युअल कीबोर्ड"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"वास्तविक कीबोर्ड"</string>
-    <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षितता"</string>
+    <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षा"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"कार मोड"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"खाते स्थिती"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"डेव्हलपर मेसेज"</string>
@@ -295,6 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"APP चालत आहे"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"बॅटरी लवकर संपवणारी अ‍ॅप्स"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"मॅग्निफिकेशन"</string>
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"अ‍ॅक्सेसिबिलिटी वापर"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> बॅटरी वापरत आहे"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> अ‍ॅप्स बॅटरी वापरत आहेत"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"बॅटरी आणि डेटा वापराच्‍या तपशीलांसाठी टॅप करा"</string>
@@ -319,6 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"शारीरिक अ‍ॅक्टिव्हिटी अ‍ॅक्सेस करा"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"कॅमेरा"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"चित्रे काढण्याची आणि व्हिडिओ रेकॉर्ड करण्याची"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"जवळपासची डिव्‍हाइस"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"जवळपास असलेली डिव्हाइस शोध आणि त्यांच्याशी कनेक्ट करा"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"कॉल लॉग"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"फोन कॉल लॉग वाचा आणि लिहा"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"फोन"</string>
@@ -345,6 +347,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"स्टेटस बार होण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"स्‍टेटस बार विस्तृत करा/संकुचित करा"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"स्टेटस बार विस्तृत करण्यासाठी किंवा संक्षिप्त करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"लॉक केलेल्या डिव्हाइसवर फुल स्क्रीन अ‍ॅक्टिव्हिटी म्हणून सूचना प्रदर्शित करणे"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"लॉक केलेल्या डिव्हाइसवर फुल स्क्रीन अ‍ॅक्टिव्हिटी म्हणून सूचना प्रदर्शित करण्यासाठी ॲपला अनुमती द्या"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"शॉर्टकट स्‍थापित करा"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"अनुप्रयोगाला वापरकर्ता हस्‍तक्षेपाशिवाय मुख्‍यस्‍क्रीन शॉर्टकट जोडण्‍याची अनुमती देते."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"शॉर्टकट विस्‍थापित करा"</string>
@@ -530,6 +534,14 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"टॅबलेटवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन इंस्टॉल करण्यासाठी आणि स्वीकारण्यासाठी, अ‍ॅप ला अनुमती देते."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TV डिव्हाइसवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन तयार करण्यासाठी आणि स्वीकारण्यासाठी, ॲपला अनुमती देते."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"फोनवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन इंस्टॉल करण्यासाठी आणि स्वीकारण्यासाठी, अ‍ॅप ला अनुमती देते."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"जवळपासची ब्लूटूथ डिव्‍हाइस शोधा आणि ती पेअर करा"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ॲपला जवळपासची ब्लूटूथ डिव्‍हाइस शोधण्यासाठी आणि ती पेअर करण्यासाठी अनुमती देते"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"पेअर केलेल्या ब्लूटूथ डिव्‍हाइसशी कनेक्ट करा"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"पेअर केलेल्या ब्लूटूथ डिव्‍हाइसशी कनेक्ट करण्यासाठी ॲपला अनुमती द्या"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"जवळपासच्या ब्लूटूथ डिव्‍हाइसवर जाहिरात करा"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"जवळपासच्या ब्लूटूथ डिव्‍हाइसवर जाहिरात करण्याची ॲपला परवानगी देते"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"जवळच्या अल्ट्रा-वाइडबँड डिव्हाइसदरम्यानचे संबंधित स्थान निर्धारित करा"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ॲपला जवळच्या अल्ट्रा-वाइडबँड डिव्हाइसदरम्यानचे संबंधित स्थान निर्धारित करण्याची अनुमती द्या"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"प्राधान्यकृत NFC पेमेंट सेवा माहिती"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"नोंदणीकृत एड्स आणि मार्ग गंतव्यस्थान सारखी प्राधान्यकृत एनएफसी पेमेंट सेवेची माहिती मिळवण्यासाठी अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"फील्ड जवळील कम्युनिकेशन नियंत्रित करा"</string>
@@ -552,25 +564,34 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"ॲपला तुमच्या फोटो संग्रहामध्ये सुधारणा करण्याची अनुमती देते."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"तुमच्या मीडिया संग्रहातून स्थाने वाचा"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"ॲपला तुमच्या मीडिया संग्रहामध्येील स्थाने वाचण्यासाठी अनुमती देते."</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"बायोमेट्रिक वापरा"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"बायोमेट्रिक किंवा स्क्रीन लॉक वापरा"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"हे तुम्हीच आहात याची पडताळणी करा"</string>
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"पुढे सुरू ठेवण्यासाठी तुमचे बायोमेट्रिक वापरा"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"पुढे सुरू ठेवण्यासाठी तुमचे बायोमेट्रिक किंवा स्क्रीन लॉक वापरा"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"बायोमेट्रिक हार्डवेअर उपलब्ध नाही"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ऑथेंटिकेशन रद्द केले"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"ओळखले नाही"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"ऑथेंटिकेशन रद्द केले"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"कोणताही पिन, पॅटर्न किंवा पासवर्ड सेट केलेला नाही"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"एरर ऑथेंटिकेट करत आहे"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"आंशिक फिंगरप्रिंट आढळली. कृपया पुन्हा प्रयत्न करा."</string>
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"स्क्रीन लॉक वापरा"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"पुढे सुरू ठेवण्यासाठी तुमचे स्क्रीन लॉक एंटर करा"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"आंशिक फिंगरप्रिंट डिटेक्ट केली"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फिंगरप्रिंटवर प्रक्रिया करणे शक्य झाले नाही. कृपया पुन्हा प्रयत्न करा."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"फिंगरप्रिंट सेन्सर खराब आहे. कृपया साफ करा आणि पुन्हा प्रयत्न करा."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"बोट खूप जलद हलविले. कृपया पुन्हा प्रयत्न करा."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"सेन्सर साफ करा"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"जरा जास्त वेळ धरून ठेवा"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"बोट खूप सावकाश हलविले. कृपया पुन्हा प्रयत्न करा."</string>
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"दुसरी फिंगरप्रिंट वापरून पाहा"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"खूप प्रखर"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"अ‍ॅडजस्ट करण्याचा प्रयत्न करा"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिंट ऑथेंटिकेट केली आहे"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म दाबा"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"फिंगरप्रिंट हार्डवेअर उपलब्‍ध नाही."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"फिंगरप्रिंट स्टोअर केले जाऊ शकत नाही. कृपया विद्यमान फिंगरप्रिंट काढा."</string>
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"फिंगरप्रिंट सेट करता आली नाही"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"फिंगरप्रिंट टाइमआउट झाले. पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"फिंगरप्रिंट ऑपरेशन रद्द झाले."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"वापरकर्त्याने फिंगरप्रिंट ऑपरेशन रद्द केले."</string>
@@ -581,16 +602,20 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"या डिव्हाइसमध्ये फिंगरप्रिंट सेन्सर नाही."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"सेन्सर तात्पुरता बंद केला आहे."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> बोट"</string>
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"फिंगरप्रिंट वापरा"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"फिंगरप्रिंट किंवा स्क्रीन लॉक वापरा"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"पुढे सुरू ठेवण्‍यासाठी तुमची फिंगरप्रिंट वापरा"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"पुढे सुरू ठेवण्यासाठी तुमचे फिंगरप्रिंट किंवा स्क्रीन लॉक वापरा"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फिंगरप्रिंट आयकन"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"फेस अनलॉक हार्डवेअर व्यवस्थापित करा"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"ॲपला वापरासाठी चेहरा टेम्पलेट जोडण्याच्या आणि हटवण्याच्या पद्धती जारी करू देते."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"फेस अनलॉक हार्डवेअर वापरा"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"अ‍ॅपला ऑथेंटिकेशनसाठी फेस अनलॉक हार्डवेअर वापरण्याची अनुमती देते"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"फेस अनलॉक"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"फेस अनलॉक"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"तुमच्या चेहऱ्याची पुन्हा नोंदणी करा"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ओळखण्यामध्ये सुधारणा करण्यासाठी, कृपया तुमच्या चेहऱ्याची पुन्हा नोंदणी करा"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"फेस अनलॉक सेट करा"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"तुमच्या फोनकडे पाहून तो अनलॉक करा"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"अनलॉक करण्याच्या आणखी पद्धती सेट करा"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"फिंगरप्रिंट जोडण्यासाठी टॅप करा"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"अचूक फेस डेटा कॅप्चर करता आला नाही. पुन्हा करा."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"खूप प्रखर. आणखी सौम्य प्रकाश वापरून पहा."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"खूप गडद. आणखी प्रखर प्रकाश वापरून पहा."</string>
@@ -607,24 +632,29 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"चेहरा ओळखू शकत नाही. पुन्हा प्रयत्न करा."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"एकाच प्रकारची पोझ देत आहात कृपया तुमची पोझ बदला."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"तुमचे डोके थोडे कमी फिरवा."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"तुमचे डोके थोडे कमी फिरवा."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"तुमचे डोके थोडे कमी तिरपे करा."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"तुमचे डोके थोडे कमी फिरवा."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"तुमचा चहेरा लपवणारे काहीही काढून टाका."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ब्लॅक बार सह तुमच्या स्क्रीनची वरची बाजू साफ करा"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"चेहरा पडताळू शकत नाही. हार्डवेअर उपलब्ध नाही."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"फेस अनलॉकचा पुन्हा प्रयत्न करा."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"फेस अनलॉक वापरण्याचा पुन्हा प्रयत्न करा"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"नवीन फेस डेटा स्टोअर करू शकत नाही. आधी जुना हटवा."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"चेहरा ऑपरेशन रद्द केले गेले."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"वापरकर्त्याने फेस अनलॉक रद्द केले आहे."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"वापरकर्त्याने फेस अनलॉक रद्द केले आहे"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"खूप जास्त प्रयत्न केले. नंतर पुन्हा प्रयत्न करा."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"बरेच प्रयत्न. फेस अनलॉक बंद केले आहे."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"बरेच प्रयत्न. फेस अनलॉक बंद केले आहे."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"बरेच प्रयत्न. त्याऐवजी स्क्रीन लॉक वापरा."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"चेहरा पडताळणी करू शकत नाही. पुन्हा प्रयत्न करा."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"तुम्ही फेस अनलॉक सेट केले नाही."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"या डिव्हाइसवर फेस अनलॉकला सपोर्ट नाही."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"तुम्ही फेस अनलॉक सेट केले नाही"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"फेस अनलॉक या डिव्हाइसवर सपोर्ट करत नाही"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"सेन्सर तात्पुरता बंद केला आहे."</string>
     <string name="face_name_template" msgid="3877037340223318119">"चेहरा <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"फेस अनलॉक वापरा"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"फेस किंवा स्क्रीन लॉक वापरा"</string>
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"पुढे सुरू ठेवण्यासाठी तुमचा चेहरा वापरा"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"पुढे सुरू ठेवण्यासाठी तुमचा चेहरा किंवा स्क्रीन लॉक वापरा"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"चेहरा आयकन"</string>
@@ -686,6 +716,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"व्यत्यय आणू नका कॉंफिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"व्ह्यू परवानगी वापर सुरू करा"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"धारकास अ‍ॅपसाठी परवानगी वापरणे सुरू करण्याची अनुमती देते. सामान्य अ‍ॅप्ससाठी कधीही आवश्यकता नसते."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"उच्च नमुना दराने सेन्सर डेटा अ‍ॅक्सेस करते"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"ॲपला २०० Hz पेक्षा जास्त दराने सेन्सर डेटाचा नमुना तयार करण्याची अनुमती देते"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियम सेट करा"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्क्रीन लॉक पासवर्ड आणि पिन मध्ये अनुमती दिलेले लांबी आणि वर्ण नियंत्रित करा."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"स्क्रीन अनलॉक प्रयत्नांचे परीक्षण करा"</string>
@@ -852,7 +884,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"पुन्हा प्रयत्न करा"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"पुन्हा प्रयत्न करा"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"सर्व वैशिष्‍ट्ये आणि डेटासाठी अनलॉक करा"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"कमाल चेहरा अनलॉक प्रयत्न ओलांडले"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"कमाल फेस अनलॉक प्रयत्न ओलांडले"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"सिम कार्ड नाही"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"टॅब्लेटमध्ये सिम कार्ड नाही."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"तुमच्या Android TV डिव्हाइसमध्ये सिम कार्ड नाही."</string>
@@ -922,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"अनलॉक क्षेत्र विस्तृत करा."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"स्‍लाइड अनलॉक."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"पॅटर्न अनलॉक."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"चेहरा अनलॉक."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"फेस अनलॉक."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"पिन अनलॉक."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"सिम पिन अनलॉक करा"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"सिम PUK अनलॉक करा"</string>
@@ -986,6 +1018,11 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"तुम्हाला हे पृष्ठ उघडण्याची परवानगी नाही."</string>
     <string name="text_copied" msgid="2531420577879738860">"मजकूर क्लिपबोर्डवर कॉपी केला."</string>
     <string name="copied" msgid="4675902854553014676">"कॉपी केले"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> वरून <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> पेस्ट केले"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ने तुमच्या क्लिपबोर्डवरून पेस्ट केले"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"तुम्ही कॉपी केलेला मजकूर <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ने पेस्ट केला"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"तुम्ही कॉपी केलेली इमेज <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ने पेस्ट केली"</string>
+    <string name="pasted_content" msgid="646276353060777131">"तुम्ही कॉपी केलेला आशय <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ने पेस्ट केला"</string>
     <string name="more_item_label" msgid="7419249600215749115">"अधिक"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"मेनू+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1219,6 +1256,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तयार करत आहे."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"अ‍ॅप्स सुरू करत आहे."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बूट समाप्त होत आहे."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"स्क्रीन बंद करायची आहे का?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"तुम्ही तुमची फिंगरप्रिंट सेट करत असताना पॉवर बटण दाबले.\n\nयामुळे सहसा तुमची स्क्रीन बंद होते."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"बंद करा"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"रद्द करा"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"रन होणारे <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"गेमवर परत जाण्यासाठी टॅप करा"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"गेम निवडा"</string>
@@ -1359,11 +1400,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"बंद करा"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> तपासत आहे…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"सध्याच्या आशयाचे पुनरावलोकन करत आहे"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"मीडिया स्टोरेजचे विश्लेषण करत आहे"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"नवीन <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> काम करत नाही"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"सेट करण्यासाठी टॅप करा"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"सेट अप करण्यासाठी निवडा"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"तुम्हाला डिव्हाइस पुन्हा फॉरमॅट करावे लागू शकते. बाहेर काढण्यासाठी टॅप करा."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"फोटो आणि मीडिया स्थानांतरित करण्‍यासाठी"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"मीडिया फाइल ब्राउझ करा"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> सह समस्या"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> काम करत नाही"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"दुरुस्त करण्‍यासाठी टॅप करा"</string>
@@ -1372,7 +1416,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> असमर्थित"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> काम करत नाही"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"हे डिव्हाइस <xliff:g id="NAME">%s</xliff:g> ला सपोर्ट करत नाही. सपोर्ट असलेल्या फॉरमॅटमध्ये सेट करण्यासाठी टॅप करा."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"हे डिव्हाइस <xliff:g id="NAME">%s</xliff:g> ला सपोर्ट करत नाही. सपोर्ट असलेल्या फॉरमॅटमध्ये सेट करण्यासाठी निवडा."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"सपोर्ट असलेल्या फॉरमॅटमध्ये <xliff:g id="NAME">%s</xliff:g> सेट करण्यासाठी निवडा."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"तुम्हाला डिव्हाइस पुन्हा फॉरमॅट करावे लागू शकते"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> अनपेक्षितरित्या काढले"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"आशय गमावणे टाळण्यासाठी काढून टाकण्यापूर्वी मीडिया इजेक्ट करा"</string>
@@ -1560,7 +1604,7 @@
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"सर्व पहा"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"ॲक्टिव्हिटी निवडा"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"यांच्यासह शेअर करा"</string>
-    <string name="sending" msgid="206925243621664438">"पाठवित आहे..."</string>
+    <string name="sending" msgid="206925243621664438">"पाठवत आहे..."</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ब्राउझर लाँच करायचा?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"कॉल स्वीकारायचा?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"नेहमी"</string>
@@ -1666,6 +1710,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट वापरा"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंगांची उलटापालट"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रंग सुधारणा"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"एकहाती मोड"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"आणखी डिम"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केले आहे."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद दाबा आणि धरून ठेवा"</string>
@@ -1729,6 +1775,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1765,6 +1822,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"अज्ञात पोट्रेट"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"अज्ञात लँडस्केप"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"रद्द केले"</string>
@@ -1808,8 +1866,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"आपल्या प्रशासकाने हटवले"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ओके"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर:\n\n•गडद थीम सुरू करते\n•बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि \"Ok Google\" यांसारखी वैशिष्ट्ये बंद किंवा मर्यादित करते.\n\n"<annotation id="url">"अधिक जाणून घ्या"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर:\n\n• गडद थीम सुरू करते\n• बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि “Ok Google” यांसारखी इतर वैशिष्ट्ये बंद किंवा मर्यादित करते"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"बॅटरी सेव्हर गडद थीम सुरू करते आणि बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट, ठरावीक वैशिष्ट्ये व काही नेटवर्क कनेक्शन मर्यादित किंवा बंद करते."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"बॅटरी सेव्हर गडद थीम सुरू करते आणि बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट, ठरावीक वैशिष्ट्ये व काही नेटवर्क कनेक्शन मर्यादित किंवा बंद करते."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"डेटाचा वापर कमी करण्यात मदत करण्यासाठी काही अ‍ॅप्सना बॅकग्राउंडमध्ये डेटा पाठवण्यास किंवा मिळवण्यास डेटा सर्व्हर प्रतिबंध करतो. तुम्ही सध्या वापरत असलेले अ‍ॅप डेटा अ‍ॅक्सेस करू शकते, पण तसे खूप कमी वेळा होते. याचाच अर्थ असा की, तुम्ही इमेजवर टॅप करेपर्यंत त्या डिस्प्ले होणार नाहीत असे होऊ शकते."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेव्हर सुरू करायचे?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"सुरू करा"</string>
@@ -1869,8 +1927,10 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS विनंती व्हिडिओ कॉलवर बदलली"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS विनंती USSD विनंतीवर बदलली"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"नवीन SS विनंतीवर बदलली"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"फिशिंगशी संबंधित सूचना"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"कार्य प्रोफाईल"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"सूचना दिल्या"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"पडताळणी केलेला"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"विस्तृत करा"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"संकुचित करा"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"टॉगल विस्तार"</string>
@@ -1882,6 +1942,13 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"मोठे करा"</string>
     <string name="close_button_text" msgid="10603510034455258">"बंद करा"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"उत्तर द्या"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"व्हिडिओ"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"नकार द्या"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"कॉल बंद करा"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"इनकमिंग कॉल"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"सुरू असलेला कॉल"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"इनकमिंग कॉल स्क्रीन करत आहे"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> निवडले</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> निवडला</item>
@@ -1903,8 +1970,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> आत्ता उपलब्ध नाही. हे <xliff:g id="APP_NAME_1">%2$s</xliff:g> कडून व्यवस्थापित केले जाते."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"अधिक जाणून घ्या"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"अ‍ॅप उघडा"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"कार्य प्रोफाइल सुरू ठेवायची?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"तुमची कार्य अ‍ॅप्स, सूचना, डेटा आणि अन्य कार्य प्रोफाइल वैशिष्ट्ये सुरू केली जातील"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"कार्य अ‍ॅप्स सुरू करायची का?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"तुमची कार्य ॲप्स आणि सूचना यांचा अ‍ॅक्सेस मिळवा"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"सुरू करा"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ॲप उपलब्ध नाही"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता उपलब्ध नाही."</string>
@@ -1936,6 +2003,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"बातम्‍या आणि मासिके"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"नकाशे आणि नेव्हिगेशन"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"उत्पादनक्षमता"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"अ‍ॅक्सेसिबिलिटी"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"डिव्हाइस स्टोरेज"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB डीबगिंग"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"तास"</string>
@@ -2019,6 +2087,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ही सूचना सायलंट करण्यात आली आहे. फीडबॅक देण्यासाठी टॅप करा."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"हा सूचनेला उच्च रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"या सूचनेला कमी रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"वर्धित सूचना"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"सुचवलेल्या कृती आणि उत्तरे आता वर्धित सूचनांद्वारे दिल्या जातात. Android अ‍ॅडॅप्टिव्ह सूचना यांना आता सपोर्ट नाही."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ओके"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"बंद करा"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"अधिक जाणून घ्या"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 मधील Android ॲडॅप्टिव्ह सूचना हे वैशिष्ट्य बदलून आता वर्धित सूचना झाले आहे. हे वैशिष्ट्य सुचवलेल्या कृती आणि उत्तरे दाखवते व तुमच्या सूचना व्यवस्थापित करते. \n\nवर्धित सूचना हे वैशिष्ट्य संपर्कांची नावे आणि मेसेज यांसारख्या वैयक्तिक माहितीसह सर्व सूचनांचा आशय ॲक्सेस करू शकते. हे वैशिष्ट्य फोन कॉलना उत्तर देणे आणि व्यत्यय आणू नका नियंत्रित करणे यांसारख्या कृती करून सूचना डिसमिस करू शकते किंवा त्यांना प्रतिसाद देऊ शकते."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनक्रम मोडची माहिती सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"चार्जिंगची सामान्य पातळी गाठेपर्यंत कदाचित बॅटरी संपू शकते"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर सुरू केला आहे"</string>
@@ -2065,6 +2139,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"ऑन-स्क्रीन ॲक्सेसिबिलिटी शॉर्टकट"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ऑन-स्क्रीन ॲक्सेसिबिलिटी शॉर्टकट निवडकर्ता"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"अ‍ॅक्सेसिबिलिटी शॉर्टकट"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"सूचना शेड डिसमिस करा"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> चा शीर्षक बार."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> हे प्रतिबंधित बादलीमध्ये ठेवण्यात आले आहे"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2076,20 +2151,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"कार्य"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"वैयक्तिक दृश्य"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"कार्य दृश्य"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"हे कार्य ॲप्ससोबत शेअर करू शकत नाही"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"तुमचा IT अ‍ॅडमिन तुम्हाला हा आशय तुमच्या ऑफिस प्रोफाइलमधील अ‍ॅप्ससोबत शेअर करू देत नाही"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"हे ऑफिस अ‍ॅप्ससोबत उघडू शकत नाही"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"तुमचा IT अ‍ॅडमिन तुम्हाला हा आशय तुमच्या कार्य प्रोफाइलमधील अ‍ॅप्सनी उघडू देत नाही"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"हे वैयक्तिक अ‍ॅप्ससोबत शेअर करू शकत नाही"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"तुमचा IT अ‍ॅडमिन तुम्हाला हा आशय तुमच्या वैयक्तिक प्रोफाइलमधील अ‍ॅप्ससोबत शेअर करू देत नाही"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"हे वैयक्तिक अ‍ॅप्ससोबत उघडू शकत नाही"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"तुमचा IT अ‍ॅडमिन तुम्हाला हा आशय तुमच्या वैयक्तिक प्रोफाइलमधील अ‍ॅप्ससोबत उघडू देत नाही"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"तुमच्या IT ॲडमिनने ब्लॉक केले"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"हा आशय कार्य ॲप्ससह शेअर केला जाऊ शकत नाही"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"हा आशय कार्य ॲप्स वापरून उघडला जाऊ शकत नाही"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"हा आशय वैयक्तिक ॲप्ससह शेअर केला जाऊ शकत नाही"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"हा आशय वैयक्तिक ॲप्स वापरून उघडला जाऊ शकत नाही"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"कार्य प्रोफाइल थांबवली आहे"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"सुरू करा"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"कार्य अ‍ॅप्स या आशयाला सपोर्ट करू शकत नाही"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"कार्य अ‍ॅप्स हा आशय उघडू शकत नाही"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"वैयक्तिक अ‍ॅप्स या आशयाला सपोर्ट करू शकत नाही"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"वैयक्तिक अ‍ॅप्स हा आशय उघडू शकत नाही"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"सुरू करण्यासाठी टॅप करा"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"कोणतीही कार्य ॲप्स सपोर्ट करत नाहीत"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"कोणतीही वैयक्तिक ॲप्स सपोर्ट करत नाहीत"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"<xliff:g id="APP">%s</xliff:g> च्या वैयक्तिक प्रोफाइलमध्ये उघडायचे आहे का?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"<xliff:g id="APP">%s</xliff:g> च्या कार्य प्रोफाइलमध्ये उघडायचे आहे का?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"वैयक्तिक ब्राउझर वापरा"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउझर वापरा"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"सिम नेटवर्क अनलॉक पिन"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM नेटवर्क सबसेट अनलॉक पिन"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM कॉर्पोरेट अनलॉक पिन"</string>
@@ -2202,16 +2276,19 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"नवीन: विंडो मॅग्निफायर"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"आता स्क्रीन अंशतः किंवा पूर्ण मॅग्निफाय करू शकता"</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"नवीन मॅग्निफिकेशन सेटिंग्ज"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"आता तुम्ही तुमच्या स्क्रीनचा एखादा भाग मॅग्निफाय करू शकता"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"सेटिंग्ज मध्ये सुरू करा"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"डिसमिस करा"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content (8063355861118105607) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content (4738005643315863736) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7921147002346108119) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_notification_channel_label (936036783155261349) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"डिव्हाइसचा मायक्रोफोन अनब्लॉक करा"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"डिव्हाइसचा कॅमेरा अनब्लॉक करा"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"सर्व &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; आणि सर्व ॲप्स व सेवांसाठी"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"अनब्लॉक करा"</string>
+    <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"सेन्सरशी संबंधित गोपनीयतेबाबत सूचना"</string>
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ॲप्लिकेशन आयकन"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"अ‍ॅप्लिकेशन ब्रॅंडिंग इमेज"</string>
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"अ‍ॅक्सेसशी संबंधित सेटिंग्ज तपासा"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> हे तुमची स्क्रीन पाहू शकते आणि नियंत्रित करू शकते. परीक्षण करण्यासाठी टॅप करा."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> चे भाषांतर केले."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"मेसेजचे <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> मधून <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> मध्ये भाषांतर केले."</string>
 </resources>
