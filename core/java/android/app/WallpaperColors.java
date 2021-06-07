@@ -293,7 +293,7 @@ public final class WallpaperColors implements Parcelable {
         ArrayList<Map.Entry<Integer, Integer>> mapEntries = new ArrayList(
                 populationByColor.entrySet());
         mapEntries.sort((a, b) ->
-                a.getValue().compareTo(b.getValue())
+                b.getValue().compareTo(a.getValue())
         );
         mMainColors = mapEntries.stream().map(entry -> Color.valueOf(entry.getKey())).collect(
                 Collectors.toList());
