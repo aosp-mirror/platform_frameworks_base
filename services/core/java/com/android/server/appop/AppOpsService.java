@@ -4483,8 +4483,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             // Special case for the shell which is a package but should be able
             // to bypass app attribution tag restrictions.
             if (pkgUid != UserHandle.getAppId(uid)) {
+                String otherUidMessage = DEBUG ? " but it is really " + pkgUid : " but it is not";
                 throw new SecurityException("Specified package " + packageName + " under uid "
-                        +  UserHandle.getAppId(uid) + " but it is really " + pkgUid);
+                        +  UserHandle.getAppId(uid) + otherUidMessage);
             }
             return RestrictionBypass.UNRESTRICTED;
         }
@@ -4544,8 +4545,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         if (pkgUid != uid) {
+            String otherUidMessage = DEBUG ? " but it is really " + pkgUid : " but it is not";
             throw new SecurityException("Specified package " + packageName + " under uid " + uid
-                    + " but it is really " + pkgUid);
+                    + otherUidMessage);
         }
 
         return bypass;
