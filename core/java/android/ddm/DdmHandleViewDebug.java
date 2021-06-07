@@ -39,12 +39,12 @@ import java.nio.ByteBuffer;
  * Handle various requests related to profiling / debugging of the view system.
  * Support for these features are advertised via {@link DdmHandleHello}.
  */
-public class DdmHandleViewDebug extends ChunkHandler {
+public class DdmHandleViewDebug extends DdmHandle {
     /** List {@link ViewRootImpl}'s of this process. */
-    private static final int CHUNK_VULW = type("VULW");
+    private static final int CHUNK_VULW = ChunkHandler.type("VULW");
 
     /** Operation on view root, first parameter in packet should be one of VURT_* constants */
-    private static final int CHUNK_VURT = type("VURT");
+    private static final int CHUNK_VURT = ChunkHandler.type("VURT");
 
     /** Dump view hierarchy. */
     private static final int VURT_DUMP_HIERARCHY = 1;
@@ -59,7 +59,7 @@ public class DdmHandleViewDebug extends ChunkHandler {
      * Generic View Operation, first parameter in the packet should be one of the
      * VUOP_* constants below.
      */
-    private static final int CHUNK_VUOP = type("VUOP");
+    private static final int CHUNK_VUOP = ChunkHandler.type("VUOP");
 
     /** Capture View. */
     private static final int VUOP_CAPTURE_VIEW = 1;
@@ -99,11 +99,11 @@ public class DdmHandleViewDebug extends ChunkHandler {
     }
 
     @Override
-    public void connected() {
+    public void onConnected() {
     }
 
     @Override
-    public void disconnected() {
+    public void onDisconnected() {
     }
 
     @Override
@@ -154,7 +154,7 @@ public class DdmHandleViewDebug extends ChunkHandler {
                     return createFailChunk(ERR_INVALID_OP, "Unknown view operation: " + op);
             }
         } else {
-            throw new RuntimeException("Unknown packet " + ChunkHandler.name(type));
+            throw new RuntimeException("Unknown packet " + name(type));
         }
     }
 

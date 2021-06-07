@@ -26,7 +26,6 @@ import static com.android.server.am.ProcessRecord.TAG;
 import android.annotation.ElapsedRealtimeLong;
 import android.app.ActivityManager;
 import android.content.ComponentName;
-import android.os.Binder;
 import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -302,9 +301,6 @@ final class ProcessStateRecord {
     @GuardedBy("mService")
     private int mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
 
-    @GuardedBy("mService")
-    private final ArraySet<Binder> mBackgroundFgsStartTokens = new ArraySet<>();
-
     /**
      * Whether or not this process has been in forced-app-standby state.
      */
@@ -366,6 +362,13 @@ final class ProcessStateRecord {
     @GuardedBy("mService")
     @ElapsedRealtimeLong
     private long mLastInvisibleTime;
+
+    /**
+     * Whether or not this process could be killed when it's in forced-app-standby mode
+     * and cached &amp; idle state.
+     */
+    @GuardedBy("mService")
+    private boolean mNoKillOnForcedAppStandbyAndIdle;
 
     // Below are the cached task info for OomAdjuster only
     private static final int VALUE_INVALID = -1;
@@ -711,7 +714,7 @@ final class ProcessStateRecord {
             Slog.i(TAG, "Setting runningRemoteAnimation=" + runningRemoteAnimation
                     + " for pid=" + mApp.getPid());
         }
-        mService.updateOomAdjLocked(mApp, true, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
+        mService.updateOomAdjLocked(mApp, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -1101,21 +1104,6 @@ final class ProcessStateRecord {
     }
 
     @GuardedBy("mService")
-    void addAllowBackgroundFgsStartsToken(Binder entity) {
-        mBackgroundFgsStartTokens.add(entity);
-    }
-
-    @GuardedBy("mService")
-    void removeAllowBackgroundFgsStartsToken(Binder entity) {
-        mBackgroundFgsStartTokens.remove(entity);
-    }
-
-    @GuardedBy("mService")
-    boolean areBackgroundFgsStartsAllowedByToken() {
-        return !mBackgroundFgsStartTokens.isEmpty();
-    }
-
-    @GuardedBy("mService")
     void resetAllowStartFgsState() {
         mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
     }
@@ -1160,6 +1148,16 @@ final class ProcessStateRecord {
     @ElapsedRealtimeLong
     long getLastInvisibleTime() {
         return mLastInvisibleTime;
+    }
+
+    @GuardedBy("mService")
+    void setNoKillOnForcedAppStandbyAndIdle(boolean shouldNotKill) {
+        mNoKillOnForcedAppStandbyAndIdle = shouldNotKill;
+    }
+
+    @GuardedBy("mService")
+    boolean shouldNotKillOnForcedAppStandbyAndIdle() {
+        return mNoKillOnForcedAppStandbyAndIdle;
     }
 
     @GuardedBy({"mService", "mProcLock"})

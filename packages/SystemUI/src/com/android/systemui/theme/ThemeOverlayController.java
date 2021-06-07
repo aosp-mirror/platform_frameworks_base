@@ -103,11 +103,11 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private final boolean mIsMonetEnabled;
     private UserTracker mUserTracker;
     private DeviceProvisionedController mDeviceProvisionedController;
-    private WallpaperColors mSystemColors;
+    private WallpaperColors mCurrentColors;
     private WallpaperManager mWallpaperManager;
     // If fabricated overlays were already created for the current theme.
     private boolean mNeedsOverlayCreation;
-    // Dominant olor extracted from wallpaper, NOT the color used on the overlay
+    // Dominant color extracted from wallpaper, NOT the color used on the overlay
     protected int mMainWallpaperColor = Color.TRANSPARENT;
     // Accent color extracted from wallpaper, NOT the color used on the overlay
     protected int mWallpaperAccentColor = Color.TRANSPARENT;
@@ -162,10 +162,17 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         handleWallpaperColors(wallpaperColors, which);
     };
 
+    private int getLatestWallpaperType() {
+        return mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_LOCK)
+                > mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_SYSTEM)
+                ? WallpaperManager.FLAG_LOCK : WallpaperManager.FLAG_SYSTEM;
+    }
+
     private void handleWallpaperColors(WallpaperColors wallpaperColors, int flags) {
-        final boolean hadWallpaperColors = mSystemColors != null;
-        if ((flags & WallpaperManager.FLAG_SYSTEM) != 0) {
-            mSystemColors = wallpaperColors;
+        final boolean hadWallpaperColors = mCurrentColors != null;
+        int latestWallpaperType = getLatestWallpaperType();
+        if ((flags & latestWallpaperType) != 0) {
+            mCurrentColors = wallpaperColors;
             if (DEBUG) Log.d(TAG, "got new colors: " + wallpaperColors + " where: " + flags);
         }
 
@@ -183,7 +190,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
             } else {
                 if (DEBUG) {
                     Log.i(TAG, "During user setup, but allowing first color event: had? "
-                            + hadWallpaperColors + " has? " + (mSystemColors != null));
+                            + hadWallpaperColors + " has? " + (mCurrentColors != null));
                 }
             }
         }
@@ -198,7 +205,8 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         if (!TextUtils.isEmpty(overlayPackageJson)) {
             try {
                 JSONObject jsonObject = new JSONObject(overlayPackageJson);
-                if (!COLOR_SOURCE_PRESET.equals(jsonObject.optString(OVERLAY_COLOR_SOURCE))) {
+                if (!COLOR_SOURCE_PRESET.equals(jsonObject.optString(OVERLAY_COLOR_SOURCE))
+                        && ((flags & latestWallpaperType) != 0)) {
                     mSkipSettingChange = true;
                     if (jsonObject.has(OVERLAY_CATEGORY_ACCENT_COLOR) || jsonObject.has(
                             OVERLAY_CATEGORY_SYSTEM_PALETTE)) {
@@ -229,7 +237,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())
+            if (Intent.ACTION_USER_STARTED.equals(intent.getAction())
                     || Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction())) {
                 if (!mDeviceProvisionedController.isCurrentUserSetup()) {
                     Log.i(TAG, "User setup not finished when " + intent.getAction()
@@ -274,7 +282,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     public void start() {
         if (DEBUG) Log.d(TAG, "Start");
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        filter.addAction(Intent.ACTION_USER_STARTED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mMainExecutor,
@@ -314,10 +322,10 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         // Upon boot, make sure we have the most up to date colors
         Runnable updateColors = () -> {
             WallpaperColors systemColor = mWallpaperManager.getWallpaperColors(
-                    WallpaperManager.FLAG_SYSTEM);
+                    getLatestWallpaperType());
             mMainExecutor.execute(() -> {
                 if (DEBUG) Log.d(TAG, "Boot colors: " + systemColor);
-                mSystemColors = systemColor;
+                mCurrentColors = systemColor;
                 reevaluateSystemTheme(false /* forceReload */);
             });
         };
@@ -348,7 +356,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     }
 
     private void reevaluateSystemTheme(boolean forceReload) {
-        final WallpaperColors currentColors = mSystemColors;
+        final WallpaperColors currentColors = mCurrentColors;
         final int mainColor;
         final int accentCandidate;
         if (currentColors == null) {
@@ -506,7 +514,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("mSystemColors=" + mSystemColors);
+        pw.println("mSystemColors=" + mCurrentColors);
         pw.println("mMainWallpaperColor=" + Integer.toHexString(mMainWallpaperColor));
         pw.println("mWallpaperAccentColor=" + Integer.toHexString(mWallpaperAccentColor));
         pw.println("mSecondaryOverlay=" + mSecondaryOverlay);

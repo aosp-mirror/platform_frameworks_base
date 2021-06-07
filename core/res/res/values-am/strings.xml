@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ከፊል የጣት አሻራ ተገኝቷል"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ጣት አሻራን መስራት አልተቻለም። እባክዎ እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ዳሳሹን ያጽዱ"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"ጣት በጣም በፍጥነት ተንቀሳቅሷል"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"ትንሽ ረዘም ላለ ጊዜ ይያዙ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ጣት ከልክ በላይ ተንቀራፎ ተንቀሳቅሷል። እባክዎ እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ሌላ የጣት አሻራ ይሞክሩ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"በጣም ብርሃናማ"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"የጣት አሻራ አዶ"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"በመልክ መክፈቻ ሃርድዌርን ማስተዳደር"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"መተግበሪያው ጥቅም ላይ እንዲውሉ የፊት ቅንብር ደንቦችን ለማከል እና ለመሰረዝ የሚያስችሉ ስልቶችን እንዲያስጀምር ያስችለዋል።"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"በመልክ መክፈት ሃርድዌርን መጠቀም"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"መተግበሪያው የመልክ መክፈቻ ሃርድዌርን ለማረጋገጥ እንዲጠቀም ያስችለዋል"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"በመልክ መክፈት"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"በመልክ መክፈት"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"የእርስዎን ፊት ዳግመኛ ያስመዝግቡ"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ማንነትን ለይቶ ማወቅን ለማሻሻል፣ እባክዎ የእርስዎን ፊት ዳግም ያስመዝግቡ"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"በመልክ መክፈቻን ያቀናብሩ"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"በመልክ መክፈትን ያዋቅሩ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ስልክዎን በመመልከት ያስከፍቱት"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"የሚከፍቱባቸው ተጨማሪ መንገዶችን ያቀናብሩ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"የጣት አሻራን ለማከል መታ ያድርጉ"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"መልክን ማረጋገጥ አይቻልም። ሃርድዌር የለም።"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"በመልክ መክፈትን እንደገና ይሞክሩ።"</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"በመልክ መክፈትን እንደገና ይሞክሩ"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"አዲስ የመልክ ውውሂብ ማስቀመጥ አልተቻለም። መጀመሪያ የድሮውን ይሰርዙት።"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"የፊት ሥርዓተ ክወና ተሰርዟል።"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"በመልክ መክፈት በተጠቃሚ ተሰርዟል።"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"በመልክ መክፈት በተጠቃሚ ተሰርዟል"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ከልክ በላይ ብዙ ሙከራዎች። በኋላ ላይ እንደገና ይሞክሩ።"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"በጣም ብዙ ሙከራዎች። በመልክ መክፈት ተሰናክሏል።"</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"በጣም ብዙ ሙከራዎች። በመልክ መክፈት ተሰናክሏል።"</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"በጣም ብዙ ሙከራዎች። በምትኩ የማያ ገጽ መቆለፊያን ያስገቡ።"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ፊትን ማረጋገጥ አይቻልም። እንደገና ይሞክሩ።"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"በመልክ መክፈትን አላቀናበሩም።"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"በመልክ መክፈት መስጫ በዚህ መሣሪያ ላይ አይደገፍም።"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"በመልክ መክፈትን አላዋቀሩም።"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"በመልክ መክፈት በዚህ መሣሪያ ላይ አይደገፍም"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ዳሳሽ ለጊዜው ተሰናክሏል።"</string>
     <string name="face_name_template" msgid="3877037340223318119">"ፊት <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"በመልክ መክፈትን ይጠቀሙ"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"በመልክ መክፈትን ይጠቀሙ"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"የመልክ ወይም የማያ ገጽ መቆለፊያን ይጠቀሙ"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ለመቀጠል መልክዎን ይጠቀሙ"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ለመቀጠል መልክዎን ወይም የማያ ገጽዎን መቆለፊያ ይጠቀሙ"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"የመክፈቻ አካባቢውን አስፋፋ።"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"በማንሸራተት ክፈት።"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"በስርዓተ-ጥለት መክፈት።"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"በመልክ መክፈት።"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"በመልክ መክፈት።"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"በፒን መክፈት።"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"የሲም ፒን ክፈት።"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"የሲም PUK ክፈት።"</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"በእርስዎ አስተዳዳሪ ተዘምኗል"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"በእርስዎ አስተዳዳሪ ተሰርዟል"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"እሺ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"የባትሪ ኃይል ቆጣቢ ጠቆር ያለ ገጽታን ያበራል እና የጀርባ እንቅስቃሴን፣ አንዳንድ ምስላዊ ተጽዕኖዎችን፣ የተወሰኑ ባህሪያትን እና አንዳንድ አውታረ መረብ ግንኙነቶችን ይገድባል ወይም ያጠፋል።\n\n"<annotation id="url">"የበለጠ ለመረዳት"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ባትሪ ቆጣቢ ጠቆር ያለ ገጽታን ያበራል እና የጀርባ እንቅስቃሴን፣ አንዳንድ ዕይታዊ ውጤቶችን፣ አንዳንድ ባህሪዎችን፣ እና አንዳንድ የአውታረ መረብ ግንኙነቶችን ይገድባል ወይም ያጠፋል።"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"ባትሪ ቆጣቢ ጠቆር ያለ ገጽታን ያበራል እና የጀርባ እንቅስቃሴን፣ አንዳንድ ዕይታዊ ውጤቶችን፣ አንዳንድ ባህሪዎችን፣ እና አንዳንድ የአውታረ መረብ ግንኙነቶችን ይገድባል ወይም ያጠፋል።"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"የውሂብ አጠቃቀም እንዲቀንስ ለማገዝ ውሂብ ቆጣቢ አንዳንድ መተግበሪያዎች ከበስተጀርባ ሆነው ውሂብ እንዳይልኩ ወይም እንዳይቀበሉ ይከለክላቸዋል። በአሁኑ ጊዜ እየተጠቀሙበት ያለ መተግበሪያ ውሂብ ሊደርስ ይችላል፣ ነገር ግን ባነሰ ተደጋጋሚነት ሊሆን ይችላል። ይሄ ማለት ለምሳሌ ምስሎችን መታ እስኪያደርጓቸው ድረስ ላይታዩ ይችላሉ ማለት ነው።"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ውሂብ ቆጣቢ ይጥፋ?"</string>

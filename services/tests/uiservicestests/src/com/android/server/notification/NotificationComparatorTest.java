@@ -37,6 +37,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.UserHandle;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
@@ -63,6 +64,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     @Mock TelecomManager mTm;
     @Mock RankingHandler handler;
     @Mock PackageManager mPm;
+    @Mock Vibrator mVibrator;
 
     private final String callPkg = "com.android.server.notification";
     private final int callUid = 10;
@@ -98,6 +100,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         when(mContext.getContentResolver()).thenReturn(getContext().getContentResolver());
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getSystemService(eq(Context.TELECOM_SERVICE))).thenReturn(mTm);
+        when(mContext.getSystemService(Vibrator.class)).thenReturn(mVibrator);
         when(mContext.getString(anyInt())).thenCallRealMethod();
         when(mContext.getColor(anyInt())).thenCallRealMethod();
         when(mTm.getDefaultDialerPackage()).thenReturn(callPkg);

@@ -17,14 +17,6 @@
   NOTE: You might also want to edit: packages/SystemUI/res/values-night/colors.xml
   -->
 <resources>
-    <!-- The primary text color if the text is on top of a dark background.
-    This is also affects colorized notifications with dark backgrounds. -->
-    <color name="notification_primary_text_color_dark">#ddffffff</color>
-
-    <!-- The secondary text color if the text is on top of a dark background. -->
-    <color name="notification_secondary_text_color_dark">#b2ffffff</color>
-
-    <color name="notification_default_color_dark">#ddffffff</color>
 
     <color name="notification_primary_text_color_current">@color/notification_primary_text_color_dark</color>
     <color name="notification_secondary_text_color_current">@color/notification_secondary_text_color_dark</color>

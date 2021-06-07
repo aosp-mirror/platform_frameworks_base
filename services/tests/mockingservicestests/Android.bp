@@ -31,7 +31,10 @@ android_test {
     name: "FrameworksMockingServicesTests",
     defaults: ["FrameworkMockingServicesTests-jni-defaults"],
 
-    srcs: ["src/**/*.java", "src/**/*.kt"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
 
     static_libs: [
         "services.core",
@@ -41,6 +44,7 @@ android_test {
         "service-jobscheduler",
         "service-permission.impl",
         "service-blobstore",
+        "service-appsearch",
         "androidx.test.runner",
         "androidx.test.ext.truth",
         "mockito-target-extended-minus-junit4",

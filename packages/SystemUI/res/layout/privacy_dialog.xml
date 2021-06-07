@@ -24,8 +24,6 @@
     android:layout_marginEnd="@dimen/ongoing_appops_dialog_side_margins"
     android:layout_marginTop="8dp"
     android:orientation="vertical"
-    android:paddingLeft="@dimen/ongoing_appops_dialog_side_padding"
-    android:paddingRight="@dimen/ongoing_appops_dialog_side_padding"
     android:paddingBottom="12dp"
     android:paddingTop="8dp"
     android:background="@drawable/qs_dialog_bg"

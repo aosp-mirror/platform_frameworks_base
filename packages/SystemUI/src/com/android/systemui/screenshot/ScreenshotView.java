@@ -861,11 +861,15 @@ public class ScreenshotView extends FrameLayout implements
 
     class SwipeDismissHandler implements OnTouchListener {
         // distance needed to register a dismissal
-        private static final float DISMISS_DISTANCE_THRESHOLD_DP = 30;
+        private static final float DISMISS_DISTANCE_THRESHOLD_DP = 20;
 
         private final GestureDetector mGestureDetector;
 
         private float mStartX;
+        // Keeps track of the most recent direction (between the last two move events).
+        // -1 for left; +1 for right.
+        private int mDirectionX;
+        private float mPreviousX;
 
         SwipeDismissHandler() {
             GestureDetector.OnGestureListener gestureListener = new SwipeDismissGestureListener();
@@ -878,6 +882,7 @@ public class ScreenshotView extends FrameLayout implements
             mCallbacks.onUserInteraction();
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 mStartX = event.getRawX();
+                mPreviousX = mStartX;
                 return true;
             } else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
                 if (isPastDismissThreshold()
@@ -906,16 +911,42 @@ public class ScreenshotView extends FrameLayout implements
             public boolean onScroll(
                     MotionEvent ev1, MotionEvent ev2, float distanceX, float distanceY) {
                 mScreenshotStatic.setTranslationX(ev2.getRawX() - mStartX);
+                mDirectionX = (ev2.getRawX() < mPreviousX) ? -1 : 1;
+                mPreviousX = ev2.getRawX();
                 return true;
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                    float velocityY) {
+                if (mScreenshotStatic.getTranslationX() * velocityX > 0
+                        && (mDismissAnimation == null || !mDismissAnimation.isRunning())) {
+                    animateDismissal(createSwipeDismissAnimation(velocityX / (float) 1000));
+                    return true;
+                }
+                return false;
             }
         }
 
         private boolean isPastDismissThreshold() {
-            float distance = Math.abs(mScreenshotStatic.getTranslationX());
-            return distance >= dpToPx(DISMISS_DISTANCE_THRESHOLD_DP);
+            float translationX = mScreenshotStatic.getTranslationX();
+            // Determines whether the absolute translation from the start is in the same direction
+            // as the current movement. For example, if the user moves most of the way to the right,
+            // but then starts dragging back left, we do not dismiss even though the absolute
+            // distance is greater than the threshold.
+            if (translationX * mDirectionX > 0) {
+                return Math.abs(translationX) >= dpToPx(DISMISS_DISTANCE_THRESHOLD_DP);
+            }
+            return false;
         }
 
         private ValueAnimator createSwipeDismissAnimation() {
+            return createSwipeDismissAnimation(1);
+        }
+
+        private ValueAnimator createSwipeDismissAnimation(float velocity) {
+            // velocity is measured in pixels per millisecond
+            velocity = Math.min(3, Math.max(1, velocity));
             ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
             float startX = mScreenshotStatic.getTranslationX();
             // make sure the UI gets all the way off the screen in the direction of movement
@@ -924,13 +955,14 @@ public class ScreenshotView extends FrameLayout implements
             float finalX = startX < 0
                     ? -1 * mActionsContainerBackground.getRight()
                     : mDisplayMetrics.widthPixels;
+            float distance = Math.abs(finalX - startX);
 
             anim.addUpdateListener(animation -> {
                 float translation = MathUtils.lerp(startX, finalX, animation.getAnimatedFraction());
                 mScreenshotStatic.setTranslationX(translation);
                 setAlpha(1 - animation.getAnimatedFraction());
             });
-            anim.setDuration(400);
+            anim.setDuration((long) (distance / Math.abs(velocity)));
             return anim;
         }
 

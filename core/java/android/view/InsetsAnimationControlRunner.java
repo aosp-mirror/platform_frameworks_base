@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsController.AnimationType;
 import android.view.InsetsState.InternalInsetsType;
@@ -43,6 +44,13 @@ public interface InsetsAnimationControlRunner {
      * Notifies {@link InsetsType types} of control are getting revoked.
      */
     void notifyControlRevoked(@InsetsType int types);
+
+    /**
+     * Updates the surface positions of the controls owned by this runner if there is any.
+     *
+     * @param controls An array of {@link InsetsSourceControl} that the caller newly receives.
+     */
+    void updateSurfacePosition(SparseArray<InsetsSourceControl> controls);
 
     /**
      * Cancels the animation.

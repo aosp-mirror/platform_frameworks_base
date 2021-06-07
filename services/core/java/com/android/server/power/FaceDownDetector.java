@@ -77,6 +77,8 @@ public class FaceDownDetector implements SensorEventListener {
 
     private boolean mIsEnabled;
 
+    private int mSensorMaxLatencyMicros;
+
     /**
      * DeviceConfig flag name, determines how long to disable sensor when user interacts while
      * device is flipped.
@@ -202,7 +204,11 @@ public class FaceDownDetector implements SensorEventListener {
         if (mActive != shouldBeActive) {
             if (shouldBeActive) {
                 mSensorManager.registerListener(
-                        this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+                        this,
+                        mAccelerometer,
+                        SensorManager.SENSOR_DELAY_NORMAL,
+                        mSensorMaxLatencyMicros
+                );
                 if (mPreviousResultType == SCREEN_OFF_RESULT) {
                     logScreenOff();
                 }
@@ -226,6 +232,7 @@ public class FaceDownDetector implements SensorEventListener {
         pw.println("  mFaceDown=" + mFaceDown);
         pw.println("  mActive=" + mActive);
         pw.println("  mLastFlipTime=" + mLastFlipTime);
+        pw.println("  mSensorMaxLatencyMicros=" + mSensorMaxLatencyMicros);
         pw.println("  mUserInteractionBackoffMillis=" + mUserInteractionBackoffMillis);
         pw.println("  mPreviousResultTime=" + mPreviousResultTime);
         pw.println("  mPreviousResultType=" + mPreviousResultType);
@@ -356,6 +363,11 @@ public class FaceDownDetector implements SensorEventListener {
                 3600_000);
     }
 
+    private int getSensorMaxLatencyMicros() {
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_flipToScreenOffMaxLatencyMicros);
+    }
+
     private float getFloatFlagValue(String key, float defaultValue, float min, float max) {
         final float value = DeviceConfig.getFloat(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 key,
@@ -416,6 +428,7 @@ public class FaceDownDetector implements SensorEventListener {
         mZAccelerationThreshold = getZAccelerationThreshold();
         mZAccelerationThresholdLenient = mZAccelerationThreshold + 1.0f;
         mTimeThreshold = getTimeThreshold();
+        mSensorMaxLatencyMicros = getSensorMaxLatencyMicros();
         mUserInteractionBackoffMillis = getUserInteractionBackoffMillis();
         final boolean oldEnabled = mIsEnabled;
         mIsEnabled = isEnabled();

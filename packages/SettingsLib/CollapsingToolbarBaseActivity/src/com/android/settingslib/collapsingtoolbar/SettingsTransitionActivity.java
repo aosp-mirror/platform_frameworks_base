@@ -16,6 +16,8 @@
 
 package com.android.settingslib.collapsingtoolbar;
 
+import static com.android.settingslib.transition.SettingsTransitionHelper.EXTRA_PAGE_TRANSITION_TYPE;
+
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,6 +30,7 @@ import androidx.core.os.BuildCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.settingslib.transition.SettingsTransitionHelper;
+import com.android.settingslib.transition.SettingsTransitionHelper.TransitionType;
 
 /**
  * A base Activity for Settings-specific page transition. Activities extending it will get
@@ -35,7 +38,6 @@ import com.android.settingslib.transition.SettingsTransitionHelper;
  */
 public abstract class SettingsTransitionActivity extends FragmentActivity {
     private static final String TAG = "SettingsTransitionActivity";
-    private static final int DEFAULT_REQUEST = -1;
 
     private Toolbar mToolbar;
 
@@ -58,45 +60,17 @@ public abstract class SettingsTransitionActivity extends FragmentActivity {
     }
 
     @Override
-    public void startActivity(Intent intent) {
-        if (!isSettingsTransitionEnabled()) {
-            super.startActivity(intent);
-            return;
-        }
-
-        super.startActivity(intent, createActivityOptionsBundleForTransition(null));
-    }
-
-    @Override
-    public void startActivity(Intent intent, @Nullable Bundle options) {
-        if (!isSettingsTransitionEnabled()) {
-            super.startActivity(intent, options);
-            return;
-        }
-
-        super.startActivity(intent, createActivityOptionsBundleForTransition(options));
-    }
-
-    @Override
-    public void startActivityForResult(Intent intent, int requestCode) {
-        if (!isSettingsTransitionEnabled() || requestCode == DEFAULT_REQUEST) {
-            super.startActivityForResult(intent, requestCode);
-            return;
-        }
-
-        super.startActivityForResult(intent, requestCode, createActivityOptionsBundleForTransition(
-                null));
-    }
-
-    @Override
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
-        if (!isSettingsTransitionEnabled() || requestCode == DEFAULT_REQUEST) {
+        final int transitionType = intent.getIntExtra(EXTRA_PAGE_TRANSITION_TYPE,
+                TransitionType.TRANSITION_SHARED_AXIS);
+        if (!isSettingsTransitionEnabled() ||
+                transitionType == TransitionType.TRANSITION_NONE) {
             super.startActivityForResult(intent, requestCode, options);
             return;
         }
 
-        super.startActivityForResult(intent, requestCode, createActivityOptionsBundleForTransition(
-                options));
+        super.startActivityForResult(intent, requestCode,
+                createActivityOptionsBundleForTransition(options));
     }
 
     protected boolean isSettingsTransitionEnabled() {

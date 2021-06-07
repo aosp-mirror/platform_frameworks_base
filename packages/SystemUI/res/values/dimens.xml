@@ -151,7 +151,7 @@
     <dimen name="notification_max_heads_up_height_before_s">162dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
-    <dimen name="notification_max_heads_up_height">143dp</dimen>
+    <dimen name="notification_max_heads_up_height">136dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
@@ -472,6 +472,8 @@
 
     <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
+    <dimen name="volume_dialog_ringer_rows_padding">7dp</dimen>
+
     <dimen name="volume_dialog_stream_padding">12dp</dimen>
 
     <dimen name="volume_dialog_panel_width">56dp</dimen>
@@ -559,6 +561,7 @@
     <dimen name="qs_tile_icon_background_stroke_width">-1dp</dimen>
     <dimen name="qs_tile_background_size">56dp</dimen>
     <dimen name="qs_icon_size">20dp</dimen>
+    <dimen name="qs_side_view_size">28dp</dimen>
     <dimen name="qs_label_container_margin">10dp</dimen>
     <dimen name="qs_quick_tile_size">60dp</dimen>
     <dimen name="qs_tile_padding">12dp</dimen>
@@ -1104,6 +1107,7 @@
     <dimen name="global_actions_button_padding">38dp</dimen>
     <dimen name="global_actions_corner_radius">28dp</dimen>
     <dimen name="global_actions_lite_padding">24dp</dimen>
+    <dimen name="global_actions_info_margin">32dp</dimen>
 
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->
@@ -1183,9 +1187,6 @@
     <dimen name="biometric_dialog_medium_to_large_translation_offset">100dp</dimen>
     <!-- Y translation for credential contents when animating in -->
     <dimen name="biometric_dialog_credential_translation_offset">60dp</dimen>
-
-    <!-- UDFPS enrollment progress bar thickness -->
-    <dimen name="udfps_enroll_progress_thickness">12dp</dimen>
 
     <!-- Wireless Charging Animation values -->
     <dimen name="wireless_charging_dots_radius_start">0dp</dimen>
@@ -1416,10 +1417,6 @@
     <dimen name="media_output_dialog_icon_corner_radius">16dp</dimen>
     <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
 
-    <!-- Delay after which the media will start transitioning to the full shade on
-         the lockscreen -->
-    <dimen name="lockscreen_shade_media_transition_start_delay">40dp</dimen>
-
     <!-- Distance that the full shade transition takes in order for qs to fully transition to the
          shade -->
     <dimen name="lockscreen_shade_qs_transition_distance">200dp</dimen>
@@ -1428,13 +1425,16 @@
          the shade (in alpha) -->
     <dimen name="lockscreen_shade_scrim_transition_distance">80dp</dimen>
 
-    <!-- Extra inset for the notifications when accounting for media during the lockscreen to
-         shade transition to compensate for the disappearing media -->
-    <dimen name="lockscreen_shade_transition_extra_media_inset">-48dp</dimen>
+    <!-- Distance that the full shade transition takes in order for media to fully transition to
+         the shade -->
+    <dimen name="lockscreen_shade_media_transition_distance">120dp</dimen>
 
     <!-- Maximum overshoot for the topPadding of notifications when transitioning to the full
          shade -->
-    <dimen name="lockscreen_shade_max_top_overshoot">32dp</dimen>
+    <dimen name="lockscreen_shade_notification_movement">24dp</dimen>
+
+    <!-- Maximum overshoot for the pulse expansion -->
+    <dimen name="pulse_expansion_max_top_overshoot">16dp</dimen>
 
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>
@@ -1465,16 +1465,17 @@
     <dimen name="medium_content_padding_above_name">4dp</dimen>
 
     <!-- Accessibility floating menu -->
-    <dimen name="accessibility_floating_menu_elevation">5dp</dimen>
+    <dimen name="accessibility_floating_menu_elevation">3dp</dimen>
     <dimen name="accessibility_floating_menu_stroke_width">1dp</dimen>
     <dimen name="accessibility_floating_menu_stroke_inset">-2dp</dimen>
     <dimen name="accessibility_floating_menu_margin">16dp</dimen>
-    <dimen name="accessibility_floating_menu_padding">6dp</dimen>
+    <dimen name="accessibility_floating_menu_small_padding">6dp</dimen>
     <dimen name="accessibility_floating_menu_small_width_height">36dp</dimen>
     <dimen name="accessibility_floating_menu_small_single_radius">25dp</dimen>
     <dimen name="accessibility_floating_menu_small_multiple_radius">20dp</dimen>
+    <dimen name="accessibility_floating_menu_large_padding">8dp</dimen>
     <dimen name="accessibility_floating_menu_large_width_height">56dp</dimen>
-    <dimen name="accessibility_floating_menu_large_single_radius">33dp</dimen>
+    <dimen name="accessibility_floating_menu_large_single_radius">35dp</dimen>
     <dimen name="accessibility_floating_menu_large_multiple_radius">35dp</dimen>
 
     <dimen name="accessibility_floating_tooltip_arrow_width">8dp</dimen>

@@ -200,6 +200,9 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     public void testMigration() throws Exception {
         triggerChildOpened();
 
+        mGatewayConnection
+                .getUnderlyingNetworkTrackerCallback()
+                .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
         getChildSessionCallback()
                 .onIpSecTransformsMigrated(makeDummyIpSecTransform(), makeDummyIpSecTransform());
         mTestLooper.dispatchAll();
@@ -207,7 +210,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         verify(mIpSecSvc, times(2))
                 .setNetworkForTunnelInterface(
                         eq(TEST_IPSEC_TUNNEL_RESOURCE_ID),
-                        eq(TEST_UNDERLYING_NETWORK_RECORD_1.network),
+                        eq(TEST_UNDERLYING_NETWORK_RECORD_2.network),
                         any());
 
         for (int direction : new int[] {DIRECTION_IN, DIRECTION_OUT}) {
@@ -226,8 +229,10 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                 MtuUtils.getMtu(
                         saProposals,
                         mConfig.getMaxMtu(),
-                        TEST_UNDERLYING_NETWORK_RECORD_1.linkProperties.getMtu());
-        verify(mNetworkAgent).sendLinkProperties(argThat(lp -> expectedMtu == lp.getMtu()));
+                        TEST_UNDERLYING_NETWORK_RECORD_2.linkProperties.getMtu());
+        verify(mNetworkAgent).sendLinkProperties(
+                argThat(lp -> expectedMtu == lp.getMtu()
+                        && TEST_TCP_BUFFER_SIZES_2.equals(lp.getTcpBufferSizes())));
     }
 
     private void triggerChildOpened() {
@@ -297,6 +302,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         final LinkProperties lp = lpCaptor.getValue();
         assertEquals(Collections.singletonList(TEST_INTERNAL_ADDR), lp.getLinkAddresses());
         assertEquals(Collections.singletonList(TEST_DNS_ADDR), lp.getDnsServers());
+        assertEquals(TEST_TCP_BUFFER_SIZES_1, lp.getTcpBufferSizes());
 
         final NetworkCapabilities nc = ncCaptor.getValue();
         assertTrue(nc.hasTransport(TRANSPORT_CELLULAR));

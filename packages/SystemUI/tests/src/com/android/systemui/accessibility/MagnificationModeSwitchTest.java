@@ -22,6 +22,7 @@ import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
+import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK;
 
@@ -58,6 +59,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.MathUtils;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
@@ -69,6 +71,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -88,8 +91,9 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 @SmallTest
+@FlakyTest(bugId = 188890599)
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MagnificationModeSwitchTest extends SysuiTestCase {
 
     private static final float FADE_IN_ALPHA = 1f;
@@ -223,13 +227,38 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     @Test
-    public void onApplyWindowInsetsWithWindowInsetsChange_buttonIsShowing_draggableBoundsChanged() {
+    public void onSystemBarsInsetsChanged_buttonIsShowing_draggableBoundsChanged() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         final Rect oldDraggableBounds = new Rect(mMagnificationModeSwitch.mDraggableWindowBounds);
 
         mWindowManager.setWindowInsets(new WindowInsets.Builder()
                 .setInsetsIgnoringVisibility(systemBars(), Insets.of(0, 20, 0, 20))
                 .build());
+        mSpyImageView.onApplyWindowInsets(WindowInsets.CONSUMED);
+
+        assertNotEquals(oldDraggableBounds, mMagnificationModeSwitch.mDraggableWindowBounds);
+    }
+
+    @Test
+    public void onDisplayCutoutInsetsChanged_buttonIsShowing_draggableBoundsChanged() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        final Rect oldDraggableBounds = new Rect(mMagnificationModeSwitch.mDraggableWindowBounds);
+
+        mWindowManager.setWindowInsets(new WindowInsets.Builder()
+                .setInsetsIgnoringVisibility(displayCutout(), Insets.of(20, 30, 20, 30))
+                .build());
+        mSpyImageView.onApplyWindowInsets(WindowInsets.CONSUMED);
+
+        assertNotEquals(oldDraggableBounds, mMagnificationModeSwitch.mDraggableWindowBounds);
+    }
+
+    @Test
+    public void onWindowBoundsChanged_buttonIsShowing_draggableBoundsChanged() {
+        mWindowManager.setWindowBounds(new Rect(0, 0, 800, 1000));
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        final Rect oldDraggableBounds = new Rect(mMagnificationModeSwitch.mDraggableWindowBounds);
+
+        mWindowManager.setWindowBounds(new Rect(0, 0, 1000, 800));
         mSpyImageView.onApplyWindowInsets(WindowInsets.CONSUMED);
 
         assertNotEquals(oldDraggableBounds, mMagnificationModeSwitch.mDraggableWindowBounds);
@@ -378,10 +407,26 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
                 hasItems(new AccessibilityNodeInfo.AccessibilityAction(
                         ACTION_CLICK.getId(), mContext.getResources().getString(
                         R.string.magnification_mode_switch_click_label))));
+        assertThat(nodeInfo.getActionList(),
+                hasItems(new AccessibilityNodeInfo.AccessibilityAction(
+                        R.id.accessibility_action_move_up, mContext.getResources().getString(
+                        R.string.accessibility_control_move_up))));
+        assertThat(nodeInfo.getActionList(),
+                hasItems(new AccessibilityNodeInfo.AccessibilityAction(
+                        R.id.accessibility_action_move_down, mContext.getResources().getString(
+                        R.string.accessibility_control_move_down))));
+        assertThat(nodeInfo.getActionList(),
+                hasItems(new AccessibilityNodeInfo.AccessibilityAction(
+                        R.id.accessibility_action_move_left, mContext.getResources().getString(
+                        R.string.accessibility_control_move_left))));
+        assertThat(nodeInfo.getActionList(),
+                hasItems(new AccessibilityNodeInfo.AccessibilityAction(
+                        R.id.accessibility_action_move_right, mContext.getResources().getString(
+                        R.string.accessibility_control_move_right))));
     }
 
     @Test
-    public void performA11yActions_showWindowModeButton_verifyTapAction() {
+    public void performClickA11yActions_showWindowModeButton_verifyTapAction() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
         resetAndStubMockImageViewAndAnimator();
 
@@ -389,6 +434,16 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
                 ACTION_CLICK.getId(), null);
 
         verifyTapAction(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+    }
+
+    @Test
+    public void performMoveLeftA11yAction_showButtonAtRightEdge_moveToLeftEdge() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        mSpyImageView.performAccessibilityAction(
+                R.id.accessibility_action_move_left, null);
+
+        assertLayoutPosition(/* toLeftScreenEdge= */true);
     }
 
     @Test
@@ -429,6 +484,28 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
                 mWindowManager.getLayoutParamsFromAttachedView();
         assertNotNull(layoutParams);
         assertEquals(newA11yWindowTitle, layoutParams.accessibilityTitle);
+    }
+
+    @Test
+    public void onRotationChanged_buttonIsShowing_expectedYPosition() {
+        final Rect windowBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+        final int oldWindowHeight = windowBounds.height();
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        final float windowHeightFraction =
+                (float) mWindowManager.getLayoutParamsFromAttachedView().y / oldWindowHeight;
+
+        // The window bounds are changed due to the rotation change.
+        final Rect newWindowBounds = new Rect(0, 0, windowBounds.height(), windowBounds.width());
+        mWindowManager.setWindowBounds(newWindowBounds);
+        mMagnificationModeSwitch.onConfigurationChanged(ActivityInfo.CONFIG_ORIENTATION);
+
+        int expectedY = (int) (newWindowBounds.height() * windowHeightFraction);
+        expectedY = MathUtils.constrain(expectedY,
+                mMagnificationModeSwitch.mDraggableWindowBounds.top,
+                mMagnificationModeSwitch.mDraggableWindowBounds.bottom);
+        assertEquals(
+                "The Y position does not keep the same height ratio after the rotation changed.",
+                expectedY, mWindowManager.getLayoutParamsFromAttachedView().y);
     }
 
     private void assertModeUnchanged(int expectedMode) {

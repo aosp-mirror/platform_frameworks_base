@@ -4727,9 +4727,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback;
 
         /**
-         * This lives here since it's only valid for interactive views.
+         * This lives here since it's only valid for interactive views. This list is null until the
+         * first use.
          */
-        private List<Rect> mSystemGestureExclusionRects;
+        private List<Rect> mSystemGestureExclusionRects = null;
 
         /**
          * Used to track {@link #mSystemGestureExclusionRects}
@@ -9828,30 +9829,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mContext.getContentCaptureOptions() == null) return;
 
         if (appeared) {
-            if (!isLaidOut() || getVisibility() != VISIBLE
-                    || (mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0) {
+            // The appeared event stops sending to AiAi.
+            // 1. The view is hidden.
+            // 2. The same event was sent.
+            // 3. The view is not laid out, and it will be laid out in the future.
+            //    Some recycled views cached its layout and a relayout is unnecessary. In this case,
+            // system still needs to notify content capture the view appeared. When a view is
+            // recycled, it will set the flag PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED.
+            final boolean isRecycledWithoutRelayout = getNotifiedContentCaptureDisappeared()
+                    && getVisibility() == VISIBLE
+                    && !isLayoutRequested();
+            if (getVisibility() != VISIBLE || getNotifiedContentCaptureAppeared()
+                    || !(isLaidOut() || isRecycledWithoutRelayout)) {
                 if (DEBUG_CONTENT_CAPTURE) {
                     Log.v(CONTENT_CAPTURE_LOG_TAG, "Ignoring 'appeared' on " + this + ": laid="
                             + isLaidOut() + ", visibleToUser=" + isVisibleToUser()
                             + ", visible=" + (getVisibility() == VISIBLE)
-                            + ": alreadyNotifiedAppeared=" + ((mPrivateFlags4
-                            & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0)
-                            + ", alreadyNotifiedDisappeared=" + ((mPrivateFlags4
-                            & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0));
+                            + ": alreadyNotifiedAppeared=" + getNotifiedContentCaptureAppeared()
+                            + ", alreadyNotifiedDisappeared="
+                            + getNotifiedContentCaptureDisappeared());
                 }
                 return;
             }
         } else {
-            if ((mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) == 0
-                    || (mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0) {
+            if (!getNotifiedContentCaptureAppeared() || getNotifiedContentCaptureDisappeared()) {
                 if (DEBUG_CONTENT_CAPTURE) {
                     Log.v(CONTENT_CAPTURE_LOG_TAG, "Ignoring 'disappeared' on " + this + ": laid="
                             + isLaidOut() + ", visibleToUser=" + isVisibleToUser()
                             + ", visible=" + (getVisibility() == VISIBLE)
-                            + ": alreadyNotifiedAppeared=" + ((mPrivateFlags4
-                            & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0)
-                            + ", alreadyNotifiedDisappeared=" + ((mPrivateFlags4
-                            & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0));
+                            + ": alreadyNotifiedAppeared=" + getNotifiedContentCaptureAppeared()
+                            + ", alreadyNotifiedDisappeared="
+                            + getNotifiedContentCaptureDisappeared());
                 }
                 return;
             }
@@ -9898,6 +9906,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return (mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0;
     }
 
+
+    private boolean getNotifiedContentCaptureDisappeared() {
+        return (mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0;
+    }
 
     /**
      * Sets the (optional) {@link ContentCaptureSession} associated with this view.
@@ -11592,8 +11604,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * a precision touch gesture in a small area in either the X or Y dimension, such as
      * an edge swipe or dragging a <code>SeekBar</code> thumb.</p>
      *
-     * <p>Do not modify the provided list after this method is called.</p>
-     *
      * <p>Note: the system will put a limit of <code>200dp</code> on the vertical extent of the
      * exclusions it takes into account. The limit does not apply while the navigation
      * bar is {@link #SYSTEM_UI_FLAG_IMMERSIVE_STICKY stickily} hidden, nor to the
@@ -11607,13 +11617,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (rects.isEmpty() && mListenerInfo == null) return;
 
         final ListenerInfo info = getListenerInfo();
+        if (info.mSystemGestureExclusionRects != null) {
+            info.mSystemGestureExclusionRects.clear();
+            info.mSystemGestureExclusionRects.addAll(rects);
+        } else {
+            info.mSystemGestureExclusionRects = new ArrayList<>(rects);
+        }
         if (rects.isEmpty()) {
-            info.mSystemGestureExclusionRects = null;
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
             }
         } else {
-            info.mSystemGestureExclusionRects = rects;
             if (info.mPositionUpdateListener == null) {
                 info.mPositionUpdateListener = new RenderNode.PositionUpdateListener() {
                     @Override

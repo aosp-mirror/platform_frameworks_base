@@ -64,4 +64,12 @@ public interface ViewTranslationCallback {
      * @hide
      */
     default void enableContentPadding() {}
+
+    /**
+     * Sets the duration for animations while transitioning the view between the original and
+     * translated contents.
+     *
+     * @hide
+     */
+    default void setAnimationDurationMillis(int durationMillis) {}
 }

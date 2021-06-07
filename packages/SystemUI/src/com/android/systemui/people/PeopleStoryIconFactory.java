@@ -29,6 +29,8 @@ import android.graphics.drawable.Drawable;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
@@ -58,7 +60,7 @@ class PeopleStoryIconFactory implements AutoCloseable {
         mIconDrawableFactory = iconDrawableFactory;
         mImportantConversationColor = context.getColor(R.color.important_conversation);
         mAccentColor = Utils.getColorAttr(context,
-                com.android.internal.R.attr.colorAccentPrimary).getDefaultColor();
+                com.android.internal.R.attr.colorAccentPrimaryVariant).getDefaultColor();
         mContext = context;
     }
 
@@ -83,7 +85,8 @@ class PeopleStoryIconFactory implements AutoCloseable {
      * Returns a {@link Drawable} for the entire conversation. The shortcut icon will be badged
      * with the launcher icon of the app specified by packageName.
      */
-    public Drawable getPeopleTileDrawable(Drawable headDrawable, String packageName, int userId,
+    public Drawable getPeopleTileDrawable(RoundedBitmapDrawable headDrawable, String packageName,
+            int userId,
             boolean important, boolean newStory) {
         return new PeopleStoryIconDrawable(headDrawable, getAppBadge(packageName, userId),
                 mIconBitmapSize, mImportantConversationColor, important, mIconSize, mDensity,
@@ -96,7 +99,7 @@ class PeopleStoryIconFactory implements AutoCloseable {
      */
     public static class PeopleStoryIconDrawable extends Drawable {
         private float mFullIconSize;
-        private Drawable mAvatar;
+        private RoundedBitmapDrawable mAvatar;
         private Drawable mBadgeIcon;
         private int mIconSize;
         private Paint mPriorityRingPaint;
@@ -105,12 +108,13 @@ class PeopleStoryIconFactory implements AutoCloseable {
         private Paint mStoryPaint;
         private float mDensity;
 
-        PeopleStoryIconDrawable(Drawable avatar,
+        PeopleStoryIconDrawable(RoundedBitmapDrawable avatar,
                 Drawable badgeIcon,
                 int iconSize,
                 @ColorInt int ringColor,
                 boolean showImportantRing, float fullIconSize, float density,
                 @ColorInt int accentColor, boolean showStoryRing) {
+            avatar.setCircular(true);
             mAvatar = avatar;
             mBadgeIcon = badgeIcon;
             mIconSize = iconSize;

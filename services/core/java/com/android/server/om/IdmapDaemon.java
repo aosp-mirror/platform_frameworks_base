@@ -170,6 +170,16 @@ class IdmapDaemon {
         }
     }
 
+    String dumpIdmap(@NonNull String overlayPath) {
+        try (Connection c = connect()) {
+            String dump = mService.dumpIdmap(overlayPath);
+            return TextUtils.nullIfEmpty(dump);
+        } catch (Exception e) {
+            Slog.wtf(TAG, "failed to dump idmap", e);
+            return null;
+        }
+    }
+
     private IBinder getIdmapService() throws TimeoutException, RemoteException {
         SystemService.start(IDMAP_DAEMON);
 
@@ -194,7 +204,13 @@ class IdmapDaemon {
     }
 
     private static void stopIdmapService() {
-        SystemService.stop(IDMAP_DAEMON);
+        try {
+            SystemService.stop(IDMAP_DAEMON);
+        } catch (RuntimeException e) {
+            // If the idmap daemon cannot be disabled for some reason, it is okay
+            // since we already finished invoking idmap.
+            Slog.w(TAG, "Failed to disable idmap2 daemon", e);
+        }
     }
 
     private Connection connect() throws TimeoutException, RemoteException {

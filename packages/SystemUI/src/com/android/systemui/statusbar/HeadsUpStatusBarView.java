@@ -35,7 +35,6 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry.OnSensitivityChangedListener;
 
-import java.util.List;
 
 /**
  * The view in the statusBar that contains part of the heads-up information
@@ -55,10 +54,8 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     private int[] mTmpPosition = new int[2];
     private boolean mFirstLayout = true;
     private int mMaxWidth;
-    private View mRootView;
     private int mSysWinInset;
     private int mCutOutInset;
-    private List<Rect> mCutOutBounds;
     private Rect mIconDrawingRect = new Rect();
     private Point mDisplaySize;
     private Runnable mOnDrawingRectChangedListener;
@@ -197,19 +194,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         int targetPadding = mAbsoluteStartPadding + mSysWinInset + mCutOutInset;
         boolean isRtl = isLayoutRtl();
         int start = isRtl ? (mDisplaySize.x - right) : left;
-
         if (start != targetPadding) {
-            if (mCutOutBounds != null) {
-                for (Rect cutOutRect : mCutOutBounds) {
-                    int cutOutStart = (isRtl)
-                            ? (mDisplaySize.x - cutOutRect.right) : cutOutRect.left;
-                    if (start > cutOutStart) {
-                        start -= cutOutRect.width();
-                        break;
-                    }
-                }
-            }
-
             int newPadding = targetPadding - start + getPaddingStart();
             setPaddingRelative(newPadding, 0, mEndMargin, 0);
         }
@@ -251,12 +236,6 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
                 : 0;
 
         getDisplaySize();
-
-        mCutOutBounds = null;
-        if (displayCutout != null && displayCutout.getSafeInsetRight() == 0
-                && displayCutout.getSafeInsetLeft() == 0) {
-            mCutOutBounds = displayCutout.getBoundingRects();
-        }
 
         // For Double Cut Out mode, the System window navigation bar is at the right
         // side of the left cut out. In this condition, mSysWinInset include the left cut

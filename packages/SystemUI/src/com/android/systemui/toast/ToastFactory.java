@@ -27,7 +27,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.ToastPlugin;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.FeatureFlags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -43,17 +42,14 @@ public class ToastFactory implements Dumpable {
     // only one ToastPlugin can be connected at a time.
     private ToastPlugin mPlugin;
     private final LayoutInflater mLayoutInflater;
-    private final boolean mToastStyleEnabled;
 
     @Inject
     public ToastFactory(
             LayoutInflater layoutInflater,
             PluginManager pluginManager,
-            DumpManager dumpManager,
-            FeatureFlags featureFlags) {
+            DumpManager dumpManager) {
         mLayoutInflater = layoutInflater;
         dumpManager.registerDumpable("ToastFactory", this);
-        mToastStyleEnabled = featureFlags.isToastStyleEnabled();
         pluginManager.addPluginListener(
                 new PluginListener<ToastPlugin>() {
                     @Override
@@ -77,10 +73,10 @@ public class ToastFactory implements Dumpable {
             int userId, int orientation) {
         if (isPluginAvailable()) {
             return new SystemUIToast(mLayoutInflater, context, text, mPlugin.createToast(text,
-                    packageName, userId), packageName, userId, mToastStyleEnabled, orientation);
+                    packageName, userId), packageName, userId, orientation);
         }
         return new SystemUIToast(mLayoutInflater, context, text, packageName, userId,
-                mToastStyleEnabled, orientation);
+                orientation);
     }
 
     private boolean isPluginAvailable() {
@@ -91,6 +87,5 @@ public class ToastFactory implements Dumpable {
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("ToastFactory:");
         pw.println("    mAttachedPlugin=" + mPlugin);
-        pw.println("    mToastStyleEnabled=" + mToastStyleEnabled);
     }
 }

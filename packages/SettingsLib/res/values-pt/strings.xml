@@ -252,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificação de Display sem fio"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Ativar registro detalhado de Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitar busca por Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"MAC aleatório melhorado por Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Ordem aleatória de MAC não persistente no Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dados móveis sempre ativos"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleração de hardware de tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostrar dispositivos Bluetooth sem nomes"</string>
@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostrar limites de corte, margens, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forçar layout da direita p/ esquerda"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forçar a direção do layout da direita para a esquerda para todas as localidades"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Forçar 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Ativar 4x MSAA em apps OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operações de corte não retangulares"</string>
@@ -360,7 +362,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Ativar camadas de depuração de GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permitir carregamento de camadas de depuração de GPU p/ apps de depuração"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ativar registro detalhado de fornecedor"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluir mais registros de fornecedores específicos do dispositivo em relatórios de bugs, que podem conter informações particulares e usar mais bateria e/ou armazenamento."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluir mais registros de fornecedores específicos do dispositivo em relatórios de bugs. Isso pode aumentar o uso da bateria e/ou do armazenamento, e os relatórios podem conter informações particulares."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animação da janela"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala de animação de transição"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de duração do Animator"</string>
@@ -372,7 +374,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Mostrar ANRs em 2º plano"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Exibir a caixa de diálogo \"App não responde\" para apps em segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostrar avisos de notificações"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Exibir aviso na tela quando um app posta notificação sem canal válido"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Exibir aviso na tela quando um app posta uma notificação s/ um canal válido"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forçar permissão de apps em armazenamento externo"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Qualificar apps para gravação em armazenamento externo, independentemente de valores de manifestos"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forçar atividades a serem redimensionáveis"</string>
@@ -453,7 +455,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> até a conclusão"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> até a conclusão"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g>: otimizando para integridade da bateria"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> (carregamento temporariamente limitado)"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconhecido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Carregando"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregando rápido"</string>
@@ -511,7 +513,7 @@
     <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Permitir que esse app defina alarmes e programe outras ações. Ele poderá ser usado quando você não estiver usando o dispositivo, o que consumirá mais bateria. Se essa permissão for desativada, o app e os alarmes dele poderão não funcionar como planejado."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programar, alarme, lembrete, relógio"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ativar"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ativar o \"Não perturbe\""</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ativar o Não perturbe"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nunca"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Somente prioridade"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

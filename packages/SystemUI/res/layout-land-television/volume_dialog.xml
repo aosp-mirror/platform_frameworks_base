@@ -32,7 +32,7 @@
         android:clipToPadding="false">
 
         <LinearLayout
-            android:id="@+id/main"
+            android:id="@+id/volume_dialog_rows_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"

@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC പ്രവർത്തനക്ഷമമാക്കി"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"സ്‌ക്രീൻ റെക്കോർഡ്"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ആരംഭിക്കുക"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"നിര്‍ത്തുക"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ഉപകരണ മൈക്രോഫോൺ അൺബ്ലോക്ക് ചെയ്യണോ?"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"ആവശ്യം കുറഞ്ഞ അറിയിപ്പുകൾ ചുവടെ നൽകിയിരിക്കുന്നു"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"തുറക്കുന്നതിന് വീണ്ടും ടാപ്പുചെയ്യുക"</string>
+    <string name="tap_again" msgid="1315420114387908655">"വീണ്ടും ടാപ്പ് ചെയ്യുക"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"തുറക്കാൻ മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"വീണ്ടും ശ്രമിക്കാൻ മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ഉപയോഗിക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
@@ -1032,7 +1032,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"സ്ക്രീൻ പൂർണ്ണമായും മാഗ്നിഫൈ ചെയ്യുക"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"സ്‌ക്രീനിന്റെ ഭാഗം മാഗ്നിഫൈ ചെയ്യുക"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"മാറുക"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ഉപയോഗസഹായി വിരൽചലനത്തെ മാറ്റി പകരം ഉപയോഗസഹായി ബട്ടൺ വന്നു\n\n"<annotation id="link">"ക്രമീകരണം കാണുക"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ഉപയോഗസഹായി ജെസ്ച്ചറിനെ മാറ്റി പകരം ഉപയോഗസഹായി ബട്ടൺ വന്നു\n\n"<annotation id="link">"ക്രമീകരണം കാണുക"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"തൽക്കാലം മറയ്‌ക്കുന്നതിന് ബട്ടൺ അരുകിലേക്ക് നീക്കുക"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"മുകളിൽ ഇടതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"മുകളിൽ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
@@ -1126,7 +1126,7 @@
     <string name="anniversary_status_content_description" msgid="8212171790843327442">"ഇന്ന് <xliff:g id="NAME">%1$s</xliff:g> എന്നയാളുടെ വാർഷികമാണ്"</string>
     <string name="location_status" msgid="1294990572202541812">"ലൊക്കേഷൻ പങ്കിടുന്നു"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g>, ലൊക്കേഷൻ പങ്കിടുന്നു"</string>
-    <string name="new_story_status" msgid="9012195158584846525">"പുതിയ വാർത്ത"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"പുതിയ സ്റ്റോറി"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g>, പുതിയൊരു സ്‌റ്റോറി പങ്കിട്ടു"</string>
     <string name="video_status" msgid="4548544654316843225">"കാണുന്നു"</string>
     <string name="audio_status" msgid="4237055636967709208">"കേൾക്കുന്നു"</string>

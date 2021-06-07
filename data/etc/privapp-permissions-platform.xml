@@ -153,7 +153,6 @@ applications that come with the platform
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
         <permission name="android.permission.MODIFY_AUDIO_ROUTING" />
-        <permission name="android.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
@@ -473,6 +472,7 @@ applications that come with the platform
         <permission name="android.permission.UPDATE_FONTS" />
         <!-- Permission required for hotword detection service CTS tests -->
         <permission name="android.permission.MANAGE_HOTWORD_DETECTION" />
+        <permission name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
         <permission name="android.permission.MANAGE_APP_HIBERNATION"/>
         <!-- Permission required for CTS test - ResourceObserverNativeTest -->
         <permission name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />

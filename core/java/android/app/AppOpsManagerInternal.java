@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.AppOpsManager.AttributionFlags;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.AttributionSource;
@@ -24,13 +25,13 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.NonaFunction;
-import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
+import com.android.internal.util.function.UndecFunction;
 
 /**
  * App ops service local interface.
@@ -52,8 +53,8 @@ public abstract class AppOpsManagerInternal {
          * @return The app op check result.
          */
         int checkOperation(int code, int uid, String packageName, @Nullable String attributionTag,
-                boolean raw,
-                QuintFunction<Integer, Integer, String, String, Boolean, Integer> superImpl);
+                boolean raw, QuintFunction<Integer, Integer, String, String, Boolean, Integer>
+                superImpl);
 
         /**
          * Allows overriding check audio operation behavior.
@@ -116,20 +117,22 @@ public abstract class AppOpsManagerInternal {
          * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
          * @param message The message in the async noted op
          * @param shouldCollectMessage whether to collect messages
+         * @param attributionFlags the attribution flags for this operation.
+         * @param attributionChainId the unique id of the attribution chain this op is a part of.
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
         SyncNotedAppOp startOperation(IBinder token, int code, int uid,
                 @Nullable String packageName, @Nullable String attributionTag,
                 boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message, boolean shouldCollectMessage, @NonNull NonaFunction<
-                        IBinder, Integer, Integer, String, String, Boolean, Boolean, String,
-                        Boolean, SyncNotedAppOp> superImpl);
+                @Nullable String message, boolean shouldCollectMessage,
+                @AttributionFlags int attributionFlags, int attributionChainId,
+                @NonNull UndecFunction<IBinder, Integer, Integer, String, String, Boolean,
+                        Boolean, String, Boolean, Integer, Integer, SyncNotedAppOp> superImpl);
 
         /**
          * Allows overriding start proxy operation behavior.
          *
-         * @param token The client state.
          * @param code The op code to start.
          * @param attributionSource The permission identity of the caller.
          * @param startIfModeDefault Whether to start the op of the mode is default.
@@ -137,26 +140,29 @@ public abstract class AppOpsManagerInternal {
          * @param message The message in the async noted op
          * @param shouldCollectMessage whether to collect messages
          * @param skipProxyOperation Whether to skip the proxy portion of the operation
+         * @param proxyAttributionFlags The attribution flags for the proxy.
+         * @param proxiedAttributionFlags The attribution flags for the proxied.
+         * @oaram attributionChainId The id of the attribution chain this operation is a part of.
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
-        SyncNotedAppOp startProxyOperation(IBinder token, int code,
-                @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
-                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-                boolean skipProxyOperation, @NonNull OctFunction<IBinder, Integer,
-                        AttributionSource, Boolean, Boolean, String, Boolean, Boolean,
+        SyncNotedAppOp startProxyOperation(int code, @NonNull AttributionSource attributionSource,
+                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
+                boolean shouldCollectMessage, boolean skipProxyOperation, @AttributionFlags
+                int proxyAttributionFlags, @AttributionFlags int proxiedAttributionFlags,
+                int attributionChainId, @NonNull DecFunction<Integer, AttributionSource, Boolean,
+                        Boolean, String, Boolean, Boolean, Integer, Integer, Integer,
                         SyncNotedAppOp> superImpl);
 
         /**
          * Allows overriding finish proxy op.
          *
-         * @param clientId Client state token.
          * @param code The op code to finish.
          * @param attributionSource The permission identity of the caller.
          */
-        void finishProxyOperation(IBinder clientId, int code,
-                @NonNull AttributionSource attributionSource,
-                @NonNull TriFunction<IBinder, Integer, AttributionSource, Void> superImpl);
+        void finishProxyOperation(int code, @NonNull AttributionSource attributionSource,
+                boolean skipProxyOperation,
+                @NonNull TriFunction<Integer, AttributionSource, Boolean, Void> superImpl);
     }
 
     /**

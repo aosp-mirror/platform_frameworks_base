@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Hindi buo ang natukoy na fingerprint"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Hindi maproseso ang fingerprint. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Linisin ang sensor"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Masyadong mabilis ang paggalaw ng daliri"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"I-hold nang mas matagal nang kaunti"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Sumubok ng ibang fingerprint"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Masyadong maliwanag"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icon ng fingerprint"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"pamahalaan ang hardware ng pag-unlock gamit ang mukha"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Pumapayag na mag-invoke ang app ng paraang magdagdag at mag-delete ng template ng mukha."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"gamitin ang hardware ng Pag-unlock Gamit ang Mukha"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Pinapayagan ang app na gamitin ang hardware ng Pag-unlock Gamit ang Mukha para sa pag-authenticate"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Pag-unlock Gamit ang Mukha"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Pag-unlock Gamit ang Mukha"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"I-enroll ulit ang iyong mukha"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para mapahusay ang pagkilala, paki-enroll ulit ang iyong mukha"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"I-set up ang pag-unlock gamit ang mukha"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"I-set up ang Pag-unlock Gamit ang Mukha"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"I-unlock ang iyong telepono sa pamamagitan ng pagtingin dito"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Mag-set up ng higit pang paraan para mag-unlock"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"I-tap para magdagdag ng fingerprint"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Di ma-verify ang mukha. Di available ang hardware."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Subukan ulit ang pag-unlock gamit ang mukha."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Subukan ulit ang Pag-unlock Gamit ang Mukha"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Hindi ma-store ang data ng mukha. Mag-delete muna ng iba."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Nakansela ang operation kaugnay ng mukha."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Kinansela ng user ang pag-unlock gamit ang mukha."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Kinansela ng user ang Pag-unlock Gamit ang Mukha"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Masyadong maraming pagsubok. Subukang muli mamaya."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Masyadong maraming pagsubok. Na-disable ang pag-unlock gamit ang mukha."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Masyado nang maraming beses sinubukan. Na-disable ang Pag-unlock Gamit ang Mukha."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Masyado nang maraming beses sinubukan. Ilagay na lang ang lock ng screen."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Hindi ma-verify ang mukha. Subukang muli."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Hindi mo pa nase-set up ang pag-unlock gamit ang mukha."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Hindi sinusuportahan ang pag-unlock gamit ang mukha sa device na ito."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Hindi mo pa nase-set up ang Pag-unlock Gamit ang Mukha"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Hindi sinusuportahan ang Pag-unlock Gamit ang Mukha sa device na ito"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Pansamantalang na-disable ang sensor."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Mukha <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Gumamit ng pag-unlock gamit ang mukha"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Gumamit ng Pag-unlock Gamit ang Mukha"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gumamit ng mukha o lock ng screen"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gamitin ang iyong mukha para magpatuloy"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gamitin ang iyong mukha o lock ng screen para magpatuloy"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Palakihin ang bahagi ng pag-unlock."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Pag-unlock ng slide."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Pag-unlock ng pattern."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Pag-unlock gamit ang mukha."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Pag-unlock Gamit ang Mukha."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pag-unlock ng pin."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Pag-unlock ng Pin ng Sim."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Pag-unlock ng Puk ng Sim."</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Na-delete ng iyong admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, ilang partikular na feature, at ilang koneksyon sa network.\n\n"<annotation id="url">"Matuto pa"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, ilang partikular na feature, at ilang koneksyon sa network."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, ilang partikular na feature, at ilang koneksyon sa network."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"I-on ang Data Saver?"</string>
@@ -2095,7 +2092,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"I-off"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Matuto pa"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pinalitan ng mga pinahusay na notification ang Mga Adaptive na Notification ng Android sa Android 12. Nagpapakita ng mga iminumungkahing pagkilos at sagot ang feature na ito, at isinasaayos nito ang iyong mga notification.\n\nMaa-access ng mga pinahusay na notification ang content ng notification, kabilang ang personal na impormasyon gaya ng mga pangalan ng contact at mensahe. Magagawa rin ng feature na ito na i-dismiss o tugunan ang mga notification, gaya ng pagsagot sa mga tawag sa telepono, at kontrolin ang Huwag Istorbohin."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pinalitan ng Mga pinahusay na notification ang Mga Adaptive na Notification ng Android sa Android 12. Nagpapakita ng mga iminumungkahing pagkilos at sagot ang feature na ito, at isinasaayos nito ang iyong mga notification.\n\nMaa-access ng Mga pinahusay na notification ang content ng notification, kabilang ang personal na impormasyon gaya ng mga pangalan ng contact at mensahe. Magagawa rin ng feature na ito na i-dismiss o tugunan ang mga notification, gaya ng pagsagot sa mga tawag sa telepono, at kontrolin ang Huwag Istorbohin."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification ng impormasyon ng Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Maaaring maubos ang baterya bago ang karaniwang pag-charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Na-activate ang Pantipid ng Baterya para patagalin ang buhay ng baterya"</string>

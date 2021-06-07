@@ -305,6 +305,7 @@ This section describes necessary and recommended steps when implementing a Quick
     * Inject a `Provider` for the tile created before.
     * Add a case to the `switch` with a unique String spec for the chosen tile.
 5. In [SystemUI/res/values/config.xml](/packages/SystemUI/res/values/config.xml), modify `quick_settings_tiles_stock` and add the spec defined in the previous step. If necessary, add it also to `quick_settings_tiles_default`. The first one contains a list of all the tiles that SystemUI knows how to create (to show to the user in the customization screen). The second one contains only the default tiles that the user will experience on a fresh boot or after they reset their tiles.
+6. In [SystemUI/res/values/tiles_states_strings.xml](/packages/SystemUI/res/values/tiles_states_strings.xml), add a new array for your tile. The name has to be `tile_states_<spec>`. Use a good description to help the translators.
 
 #### Abstract methods in QSTileImpl
 

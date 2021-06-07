@@ -372,7 +372,7 @@ class ScreenRotationAnimation {
                     mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
                             R.anim.screen_rotate_0_exit);
                     mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
-                            R.anim.screen_rotate_0_enter);
+                            R.anim.rotation_animation_enter);
                     break;
                 case Surface.ROTATION_90:
                     mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,

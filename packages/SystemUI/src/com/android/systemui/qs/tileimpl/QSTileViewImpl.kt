@@ -38,6 +38,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.FontSizeUtils
 import com.android.systemui.R
@@ -62,6 +63,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
         private const val SECONDARY_LABEL_NAME = "secondaryLabel"
         private const val CHEVRON_NAME = "chevron"
         const val UNAVAILABLE_ALPHA = 0.3f
+        @VisibleForTesting
+        internal const val TILE_STATE_RES_PREFIX = "tile_states_"
     }
 
     override var heightOverride: Int = HeightOverrideable.NO_OVERRIDE
@@ -484,16 +487,18 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     private fun getStateText(state: QSTile.State): String {
-        return if (state.disabledByPolicy) {
-            context.getString(R.string.tile_disabled)
-        } else if (state.state == Tile.STATE_UNAVAILABLE) {
-            context.getString(R.string.tile_unavailable)
-        } else if (state is BooleanState) {
-            if (state.state == Tile.STATE_INACTIVE) {
-                context.getString(R.string.switch_bar_off)
-            } else {
-                context.getString(R.string.switch_bar_on)
+        if (state.disabledByPolicy) {
+            return context.getString(R.string.tile_disabled)
+        }
+
+        return if (state.state == Tile.STATE_UNAVAILABLE || state is BooleanState) {
+            val resName = "$TILE_STATE_RES_PREFIX${state.spec}"
+            var arrayResId = resources.getIdentifier(resName, "array", context.packageName)
+            if (arrayResId == 0) {
+                arrayResId = R.array.tile_states_default
             }
+            val array = resources.getStringArray(arrayResId)
+            array[state.state]
         } else {
             ""
         }

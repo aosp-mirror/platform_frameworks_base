@@ -23,6 +23,10 @@
 #include <zlib.h>
 
 #include <fstream>
+#include <map>
+#include <memory>
+#include <string>
+#include <utility>
 
 namespace android::idmap2 {
 
@@ -89,7 +93,7 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
     auto package = entries.find(package_name);
     if (package == entries.end()) {
       package = entries
-                    .insert(std::make_pair<>(
+                    .insert(std::make_pair(
                         package_name, std::map<std::string, std::map<std::string, TargetValue>>()))
                     .first;
     }
@@ -98,13 +102,13 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
     if (type == package->second.end()) {
       type =
           package->second
-              .insert(std::make_pair<>(type_name.to_string(), std::map<std::string, TargetValue>()))
+              .insert(std::make_pair(type_name.to_string(), std::map<std::string, TargetValue>()))
               .first;
     }
 
     auto entry = type->second.find(entry_name.to_string());
     if (entry == type->second.end()) {
-      entry = type->second.insert(std::make_pair<>(entry_name.to_string(), TargetValue())).first;
+      entry = type->second.insert(std::make_pair(entry_name.to_string(), TargetValue())).first;
     }
 
     entry->second = TargetValue{res_entry.data_type, res_entry.data_value};

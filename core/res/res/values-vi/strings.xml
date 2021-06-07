@@ -267,7 +267,7 @@
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Âm thanh TẮT"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Âm thanh BẬT"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Chế độ trên máy bay"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Chế độ trên máy bay BẬT"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Chế độ trên máy bay đang bật"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"Chế độ trên máy bay TẮT"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"Cài đặt"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Hỗ trợ"</string>
@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Phát hiện thấy một phần vân tay"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Không thể xử lý vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Hãy vệ sinh cảm biến"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Di chuyển ngón tay quá nhanh"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Hãy giữ tay lâu hơn một chút"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Di chuyển ngón tay quá chậm. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Hãy thử một vân tay khác"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Quá sáng"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Biểu tượng vân tay"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"quản lý phần cứng của tính năng mở khóa bằng khuôn mặt"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Cho phép ứng dụng gọi ra các phương pháp để thêm và xóa mẫu khuôn mặt sử dụng."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"sử dụng phần cứng của tính năng mở khóa bằng khuôn mặt"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Cho phép ứng dụng dùng phần cứng mở khóa bằng khuôn mặt để tiến hành xác thực"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Mở khóa bằng khuôn mặt"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Mở khóa bằng khuôn mặt"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Đăng ký lại khuôn mặt của bạn"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Để cải thiện khả năng nhận dạng, hãy đăng ký lại khuôn mặt của bạn"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Thiết lập tính năng mở khóa bằng khuôn mặt"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Thiết lập tính năng Mở khóa bằng khuôn mặt"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Mở khóa điện thoại bằng cách nhìn vào điện thoại"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Thiết lập thêm những cách mở khóa khác"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Nhấn để thêm vân tay"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Không thể xác minh khuôn mặt. Phần cứng không có sẵn."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Thử lại thao tác mở khóa bằng khuôn mặt."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Hãy thử lại thao tác Mở khóa bằng khuôn mặt"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Không lưu được dữ liệu khuôn mặt mới. Hãy xóa dữ liệu cũ trước."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Đã hủy thao tác dùng khuôn mặt."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Người dùng đã hủy thao tác mở khóa bằng khuôn mặt."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Người dùng đã hủy thao tác Mở khóa bằng khuôn mặt"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Bạn đã thử quá nhiều lần. Hãy thử lại sau."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Quá nhiều lần thử. Đã tắt tính năng mở khóa bằng khuôn mặt."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Bạn đã thử quá nhiều lần. Thao tác Mở khóa bằng khuôn mặt đã bị vô hiệu hóa."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Bạn đã thử quá nhiều lần. Hãy nhập phương thức khóa màn hình."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Không thể xác minh khuôn mặt. Hãy thử lại."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Bạn chưa thiết lập tính năng mở khóa bằng khuôn mặt."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Thiết bị này không hỗ trợ tính năng mở khóa bằng khuôn mặt."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Bạn chưa thiết lập tính năng Mở khóa bằng khuôn mặt"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Thiết bị này không hỗ trợ tính năng Mở khóa bằng khuôn mặt"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Đã tạm thời tắt cảm biến."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Khuôn mặt <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Dùng tính năng mở khóa bằng khuôn mặt"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Dùng tính năng Mở khóa bằng khuôn mặt"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Dùng khuôn mặt hoặc phương thức khóa màn hình"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Hãy dùng khuôn mặt của bạn để tiếp tục"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Dùng khuôn mặt của bạn hoặc phương thức khóa màn hình để tiếp tục"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Mở rộng vùng khóa."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Mở khóa bằng cách trượt."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Mở khóa bằng hình."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Mở khóa bằng khuôn mặt."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Mở khóa bằng khuôn mặt."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Mở khóa bằng mã pin."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Mở khóa bằng mã PIN của SIM."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Mở khóa bằng mã PUK của SIM."</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Do quản trị viên của bạn xóa"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Trình tiết kiệm pin sẽ bật Giao diện tối, đồng thời hạn chế hoặc tắt hoạt động chạy trong nền, một số hiệu ứng hình ảnh, các tính năng nhất định và một số kết nối mạng.\n\n"<annotation id="url">"Tìm hiểu thêm"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Trình tiết kiệm pin sẽ bật Giao diện tối, đồng thời hạn chế hoặc tắt hoạt động chạy trong nền, một số hiệu ứng hình ảnh, các tính năng nhất định và một số đường kết nối mạng."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Trình tiết kiệm pin sẽ bật Giao diện tối, đồng thời hạn chế hoặc tắt hoạt động chạy trong nền, một số hiệu ứng hình ảnh, các tính năng nhất định, và một số kết nối mạng."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu sẽ chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể dùng dữ liệu nhưng tần suất sẽ giảm. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bật Trình tiết kiệm dữ liệu?"</string>

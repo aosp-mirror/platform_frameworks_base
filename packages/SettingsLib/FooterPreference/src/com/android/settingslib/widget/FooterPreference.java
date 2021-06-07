@@ -20,7 +20,7 @@ import android.content.Context;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.text.style.UnderlineSpan;
+import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
@@ -67,9 +67,9 @@ public class FooterPreference extends Preference {
         TextView learnMore = holder.itemView.findViewById(R.id.settingslib_learn_more);
         if (learnMore != null && mLearnMoreListener != null) {
             learnMore.setVisibility(View.VISIBLE);
-            learnMore.setOnClickListener(mLearnMoreListener);
             SpannableString learnMoreText = new SpannableString(learnMore.getText());
-            learnMoreText.setSpan(new UnderlineSpan(), 0, learnMoreText.length(), 0);
+            learnMoreText.setSpan(new FooterLearnMoreSpan(mLearnMoreListener), 0,
+                    learnMoreText.length(), 0);
             learnMore.setText(learnMoreText);
             if (!TextUtils.isEmpty(mLearnMoreContentDescription)) {
                 learnMore.setContentDescription(mLearnMoreContentDescription);
@@ -269,6 +269,28 @@ public class FooterPreference extends Preference {
                 footerPreference.setLearnMoreContentDescription(mLearnMoreContentDescription);
             }
             return footerPreference;
+        }
+    }
+
+    /**
+     * A {@link URLSpan} that opens a support page when clicked
+     */
+    static class FooterLearnMoreSpan extends URLSpan {
+
+        private final View.OnClickListener mClickListener;
+
+        FooterLearnMoreSpan(View.OnClickListener clickListener) {
+            // sets the url to empty string so we can prevent any other span processing from
+            // clearing things we need in this string.
+            super("");
+            mClickListener = clickListener;
+        }
+
+        @Override
+        public void onClick(View widget) {
+            if (mClickListener != null) {
+                mClickListener.onClick(widget);
+            }
         }
     }
 }

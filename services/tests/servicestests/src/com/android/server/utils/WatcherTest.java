@@ -34,9 +34,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
- * Test class for {@link Watcher}, {@link Watchable}, {@link WatchableImpl},
+ * Test class for various utility classes that support the Watchable or Snappable
+ * features.  This covers {@link Watcher}, {@link Watchable}, {@link WatchableImpl},
  * {@link WatchedArrayMap}, {@link WatchedSparseArray}, and
  * {@link WatchedSparseBooleanArray}.
  *
@@ -856,6 +858,197 @@ public class WatcherTest {
                 assertTrue(msg, array.get(i) == copy.get(i));
             }
         }
+    }
+
+    private static class IndexGenerator {
+        private final int mSeed;
+        private final Random mRandom;
+        public IndexGenerator(int seed) {
+            mSeed = seed;
+            mRandom = new Random(mSeed);
+        }
+        public int next() {
+            return mRandom.nextInt(50000);
+        }
+        public void reset() {
+            mRandom.setSeed(mSeed);
+        }
+        // This is an inefficient way to know if a value appears in an array.
+        private boolean contains(int[] s, int length, int k) {
+            for (int i = 0; i < length; i++) {
+                if (s[i] == k) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public int[] indexes(int size) {
+            reset();
+            int[] r = new int[size];
+            for (int i = 0; i < size; i++) {
+                int key = next();
+                // Ensure the list of indices are unique.
+                while (contains(r, i, key)) {
+                    key = next();
+                }
+                r[i] = key;
+            }
+            return r;
+        }
+    }
+
+    // Return a value based on the row and column.  The algorithm tries to avoid simple
+    // patterns like checkerboard.
+    private final boolean cellValue(int row, int col) {
+        return (((row * 4 + col) % 3)& 1) == 1;
+    }
+
+    // Fill a matrix
+    private void fill(WatchedSparseBooleanMatrix matrix, int size, int[] indexes) {
+        for (int i = 0; i < size; i++) {
+            int row = indexes[i];
+            for (int j = 0; j < size; j++) {
+                int col = indexes[j];
+                boolean want = cellValue(i, j);
+                matrix.put(row, col, want);
+            }
+        }
+    }
+
+    // Verify the content of a matrix.  This asserts on mismatch.  Selected indices may
+    // have been deleted.
+    private void verify(WatchedSparseBooleanMatrix matrix, int[] indexes, boolean[] absent) {
+        for (int i = 0; i < matrix.size(); i++) {
+            int row = indexes[i];
+            for (int j = 0; j < matrix.size(); j++) {
+                int col = indexes[j];
+                if (absent != null && (absent[i] || absent[j])) {
+                    boolean want = false;
+                    String msg = String.format("matrix(%d:%d, %d:%d) (deleted)", i, row, j, col);
+                    assertEquals(msg, matrix.get(row, col), false);
+                    assertEquals(msg, matrix.get(row, col, false), false);
+                    assertEquals(msg, matrix.get(row, col, true), true);
+                } else {
+                    boolean want = cellValue(i, j);
+                    String msg = String.format("matrix(%d:%d, %d:%d)", i, row, j, col);
+                    assertEquals(msg, matrix.get(row, col), want);
+                    assertEquals(msg, matrix.get(row, col, false), want);
+                    assertEquals(msg, matrix.get(row, col, true), want);
+                }
+            }
+        }
+    }
+
+    private void matrixGrow(WatchedSparseBooleanMatrix matrix, int size, IndexGenerator indexer) {
+        int[] indexes = indexer.indexes(size);
+
+        // Set values in the matrix, then read back and verify.
+        fill(matrix, size, indexes);
+        assertEquals(matrix.size(), size);
+        verify(matrix, indexes, null);
+
+        // Test the keyAt/indexOfKey methods
+        for (int i = 0; i < matrix.size(); i++) {
+            int key = indexes[i];
+            assertEquals(matrix.keyAt(matrix.indexOfKey(key)), key);
+        }
+    }
+
+    private void matrixDelete(WatchedSparseBooleanMatrix matrix, int size, IndexGenerator indexer) {
+        int[] indexes = indexer.indexes(size);
+        fill(matrix, size, indexes);
+
+        // Delete a bunch of rows.  Verify that reading back results in false and that
+        // contains() is false.  Recreate the rows and verify that all cells (other than
+        // the one just created) are false.
+        boolean[] absent = new boolean[size];
+        for (int i = 0; i < size; i += 13) {
+            matrix.deleteKey(indexes[i]);
+            absent[i] = true;
+        }
+        verify(matrix, indexes, absent);
+    }
+
+    private void matrixShrink(WatchedSparseBooleanMatrix matrix, int size, IndexGenerator indexer) {
+        int[] indexes = indexer.indexes(size);
+        fill(matrix, size, indexes);
+
+        int initialCapacity = matrix.capacity();
+
+        // Delete every other row, remembering which rows were deleted.  The goal is to
+        // make room for compaction.
+        boolean[] absent = new boolean[size];
+        for (int i = 0; i < size; i += 2) {
+            matrix.deleteKey(indexes[i]);
+            absent[i] = true;
+        }
+
+        matrix.compact();
+        int finalCapacity = matrix.capacity();
+        assertTrue("Matrix shrink", initialCapacity > finalCapacity);
+        assertTrue("Matrix shrink", finalCapacity - matrix.size() < matrix.STEP);
+    }
+
+    @Test
+    public void testWatchedSparseBooleanMatrix() {
+        final String name = "WatchedSparseBooleanMatrix";
+
+        // Test the core matrix functionality.  The three tess are meant to test various
+        // combinations of auto-grow.
+        IndexGenerator indexer = new IndexGenerator(3);
+        matrixGrow(new WatchedSparseBooleanMatrix(), 10, indexer);
+        matrixGrow(new WatchedSparseBooleanMatrix(1000), 500, indexer);
+        matrixGrow(new WatchedSparseBooleanMatrix(1000), 2000, indexer);
+        matrixDelete(new WatchedSparseBooleanMatrix(), 500, indexer);
+        matrixShrink(new WatchedSparseBooleanMatrix(), 500, indexer);
+
+        // Test Watchable behavior.
+        WatchedSparseBooleanMatrix matrix = new WatchedSparseBooleanMatrix();
+        WatchableTester tester = new WatchableTester(matrix, name);
+        tester.verify(0, "Initial array - no registration");
+        matrix.put(INDEX_A, INDEX_A, true);
+        tester.verify(0, "Updates with no registration");
+        tester.register();
+        tester.verify(0, "Updates with no registration");
+        matrix.put(INDEX_A, INDEX_B, true);
+        tester.verify(1, "Single cell assignment");
+        matrix.put(INDEX_A, INDEX_B, true);
+        tester.verify(2, "Single cell assignment - same value");
+        matrix.put(INDEX_C, INDEX_B, true);
+        tester.verify(3, "Single cell assignment");
+        matrix.deleteKey(INDEX_B);
+        tester.verify(4, "Delete key");
+        assertEquals(matrix.get(INDEX_B, INDEX_C), false);
+        assertEquals(matrix.get(INDEX_B, INDEX_C, false), false);
+        assertEquals(matrix.get(INDEX_B, INDEX_C, true), true);
+
+        matrix.clear();
+        tester.verify(5, "Clear");
+        assertEquals(matrix.size(), 0);
+        fill(matrix, 10, indexer.indexes(10));
+        int[] keys = matrix.keys();
+        assertEquals(keys.length, matrix.size());
+        for (int i = 0; i < matrix.size(); i++) {
+            assertEquals(matrix.keyAt(i), keys[i]);
+        }
+
+        WatchedSparseBooleanMatrix a = new WatchedSparseBooleanMatrix();
+        matrixGrow(a, 10, indexer);
+        assertEquals(a.size(), 10);
+        WatchedSparseBooleanMatrix b = new WatchedSparseBooleanMatrix();
+        matrixGrow(b, 10, indexer);
+        assertEquals(b.size(), 10);
+        assertEquals(a.equals(b), true);
+        int rowIndex = b.keyAt(3);
+        int colIndex = b.keyAt(4);
+        b.put(rowIndex, colIndex, !b.get(rowIndex, colIndex));
+        assertEquals(a.equals(b), false);
+
+        // Test Snappable behavior.
+        WatchedSparseBooleanMatrix s = a.snapshot();
+        assertEquals(a.equals(s), true);
+        a.put(rowIndex, colIndex, !a.get(rowIndex, colIndex));
+        assertEquals(a.equals(s), false);
     }
 
     @Test

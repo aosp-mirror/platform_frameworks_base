@@ -20,17 +20,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Enrollment progress bar -->
-    <com.android.systemui.biometrics.UdfpsProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:max="100"
-        android:padding="@dimen/udfps_enroll_progress_thickness"
-        android:progress="0"
-        android:layout_gravity="center"
-        android:visibility="gone"/>
-
     <!-- Fingerprint -->
     <ImageView
         android:id="@+id/udfps_enroll_animation_fp_view"

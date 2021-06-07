@@ -427,8 +427,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Tehnologija NFC je onemogočena"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Tehnologija NFC je omogočena"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Snemanje zaslona"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Začni"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ustavi"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Želite odblokirati mikrofon v napravi?"</string>
@@ -457,6 +456,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Manj nujna obvestila spodaj"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Znova se dotaknite, da odprete"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Znova se dotaknite možnosti"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Povlecite navzgor, da odprete"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Povlecite navzgor za vnovičen poskus"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Odklenite napravo, če želite uporabljati NFC."</string>

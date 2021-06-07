@@ -151,6 +151,16 @@ class Sensor {
         }
 
         @Override
+        public int getInterfaceVersion() {
+            return this.VERSION;
+        }
+
+        @Override
+        public String getInterfaceHash() {
+            return this.HASH;
+        }
+
+        @Override
         public void onChallengeGenerated(long challenge) {
             mHandler.post(() -> {
                 final BaseClientMonitor client = mScheduler.getCurrentClient();

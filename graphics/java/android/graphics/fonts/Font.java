@@ -46,7 +46,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A font class can be used for creating FontFamily.
@@ -859,6 +862,18 @@ public final class Font {
             + "}";
     }
 
+    /** @hide */
+    public static Set<Font> getAvailableFonts() {
+        // The font uniqueness is already calculated in the native code. So use IdentityHashMap
+        // for avoiding hash/equals calculation.
+        IdentityHashMap<Font, Font> map = new IdentityHashMap<>();
+        for (long nativePtr : nGetAvailableFontSet()) {
+            Font font = new Font(nativePtr);
+            map.put(font, font);
+        }
+        return Collections.unmodifiableSet(map.keySet());
+    }
+
     @CriticalNative
     private static native long nGetMinikinFontPtr(long font);
 
@@ -900,4 +915,7 @@ public final class Font {
 
     @CriticalNative
     private static native long nGetAxisInfo(long fontPtr, int i);
+
+    @FastNative
+    private static native long[] nGetAvailableFontSet();
 }

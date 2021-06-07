@@ -163,6 +163,7 @@ public class KeyguardPatternViewController
                 getKeyguardSecurityCallback().reportUnlockAttempt(userId, true, 0);
                 if (dismissKeyguard) {
                     mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
+                    mLatencyTracker.onActionStart(LatencyTracker.ACTION_LOCKSCREEN_UNLOCK);
                     getKeyguardSecurityCallback().dismiss(true, userId);
                 }
             } else {

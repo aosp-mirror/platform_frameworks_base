@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
@@ -159,7 +160,8 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
             KeyguardStateController keyguardStateController,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DozeParameters dozeParameters) {
+            DozeParameters dozeParameters,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         super(keyguardUserSwitcherView);
         if (DEBUG) Log.d(TAG, "New KeyguardUserSwitcherController");
         mContext = context;
@@ -171,7 +173,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         mAdapter = new KeyguardUserAdapter(mContext, resources, layoutInflater,
                 mUserSwitcherController, this);
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
-                keyguardStateController, dozeParameters);
+                keyguardStateController, dozeParameters, unlockedScreenOffAnimationController);
         mBackground = new KeyguardUserSwitcherScrim(context);
     }
 

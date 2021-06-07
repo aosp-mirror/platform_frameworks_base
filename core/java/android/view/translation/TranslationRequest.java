@@ -327,7 +327,9 @@ public final class TranslationRequest implements Parcelable {
             return this;
         }
 
-        /** @see #setTranslationRequestValues */
+        /** @see #setTranslationRequestValues
+         * @removed
+         */
         @DataClass.Generated.Member
         @Override
         @Deprecated
@@ -350,7 +352,9 @@ public final class TranslationRequest implements Parcelable {
             return this;
         }
 
-        /** @see #setViewTranslationRequests */
+        /** @see #setViewTranslationRequests
+         * @removed
+         */
         @DataClass.Generated.Member
         @Override
         @Deprecated

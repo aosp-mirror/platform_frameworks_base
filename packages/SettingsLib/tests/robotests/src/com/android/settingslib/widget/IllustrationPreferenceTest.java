@@ -22,6 +22,9 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.airbnb.lottie.LottieAnimationView;
 
@@ -41,14 +44,15 @@ public class IllustrationPreferenceTest {
     @Mock
     LottieAnimationView mAnimationView;
 
+    private Context mContext;
     private IllustrationPreference mPreference;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        final Context context = RuntimeEnvironment.application;
+        mContext = RuntimeEnvironment.application;
         final AttributeSet attributeSet = Robolectric.buildAttributeSet().build();
-        mPreference = new IllustrationPreference(context, attributeSet);
+        mPreference = new IllustrationPreference(mContext, attributeSet);
         ReflectionHelpers.setField(mPreference, "mIllustrationView", mAnimationView);
     }
 
@@ -64,5 +68,28 @@ public class IllustrationPreferenceTest {
         when(mAnimationView.isAnimating()).thenReturn(true);
 
         assertThat(mPreference.isAnimating()).isTrue();
+    }
+
+    @Test
+    public void setMiddleGroundView_middleGroundView_shouldVisible() {
+        final View view = new View(mContext);
+        final FrameLayout layout = new FrameLayout(mContext);
+        layout.setVisibility(View.GONE);
+        ReflectionHelpers.setField(mPreference, "mMiddleGroundView", view);
+        ReflectionHelpers.setField(mPreference, "mMiddleGroundLayout", layout);
+
+        mPreference.setMiddleGroundView(view);
+
+        assertThat(layout.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void enableAnimationAutoScale_shouldChangeScaleType() {
+        final LottieAnimationView animationView = new LottieAnimationView(mContext);
+        ReflectionHelpers.setField(mPreference, "mIllustrationView", animationView);
+
+        mPreference.enableAnimationAutoScale(true);
+
+        assertThat(animationView.getScaleType()).isEqualTo(ImageView.ScaleType.CENTER_CROP);
     }
 }

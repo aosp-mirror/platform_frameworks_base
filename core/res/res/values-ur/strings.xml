@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"جزوی فنگر پرنٹ کا پتہ چلا"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"فنگر پرنٹ پر کارروائی نہیں کی جا سکی۔ براہ کرم دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"سینسر صاف کریں"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"انگلی بہت تیزی سے ہٹائی گئی"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"تھوڑی دیر دبائے رکھیں"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"انگلی کو بہت آہستہ ہٹایا گیا۔ براہ کرم دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"دوسرا فنگر پرنٹ آزمائیں"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"کافی روشنی ہے"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"فنگر پرنٹ آئیکن"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"فیس اَنلاک والے ہارڈ ویئر کا نظم کریں"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"ایپ کو چہرے کی تمثیلات شامل اور حذف کرنے کے طریقوں کو کالعدم قرار دینے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"فیس اَنلاک والا ہارڈ ویئر استعمال کریں"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ایپ کو تصدیق کے لیے فیس اَنلاک کا ہارڈ ویئر استعمال کرنے کی اجازت دیتی ہے"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"فیس اَنلاک"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"فیس اَنلاک"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"اپنے چہرے کو دوبارہ مندرج کریں"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"شناخت کو بہتر بنانے کے لیے براہ کرم اپنے چہرے کو دوبارہ مندرج کریں"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"فیس اَنلاک سیٹ اپ کریں"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"فیس اَنلاک سیٹ اپ کریں"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"اپنے فون کی طرف دیکھ کر اسے غیر مقفل کریں"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"غیر مقفل کرنے کے مزید طریقے سیٹ اپ کریں"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"فنگر پرنٹ شامل کرنے کیلئے تھپتھپائیں"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"چہرے کی توثیق نہیں کی جا سکی۔ ہارڈ ویئر دستیاب نہیں ہے۔"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"فیس اَنلاک کو دوبارہ آزمائیں۔"</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"فیس اَنلاک کو دوبارہ آزمائیں"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"چہرے کا نیا ڈیٹا اسٹور نہیں کر سکتے۔ پہلے پرانا حذف کریں۔"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"چہرے پر ہونے والی کارروائی منسوخ ہو گئی۔"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"صارف نے فیس اَنلاک کو منسوخ کر دیا۔"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"صارف نے فیس اَنلاک کو منسوخ کر دیا"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"کافی زیادہ کوششیں کی گئیں۔ دوبارہ کوشش کریں۔"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"کافی زیادہ کوششیں۔ فیس اَنلاک غیر فعال کر دیا گیا۔"</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"کافی زیادہ کوششیں۔ فیس اَنلاک کو غیر فعال کر دیا گیا۔"</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"کافی زیادہ کوششیں۔ اس کے بجائے اسکرین لاک درج کریں۔"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"چہرے کی توثیق نہیں کی جا سکی۔ پھر آزمائيں۔"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"آپ نے فیس اَنلاک کو سیٹ نہیں کیا ہے۔"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"اس آلہ پر فیس اَنلاک تعاون یافتہ نہیں ہے۔"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"آپ نے فیس اَنلاک کو سیٹ نہیں کیا ہے"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"اس آلے پر فیس اَنلاک تعاون یافتہ نہیں ہے"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"سینسر عارضی طور غیر فعال ہے۔"</string>
     <string name="face_name_template" msgid="3877037340223318119">"چہرہ <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"فیس اَنلاک استعمال کریں"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"فیس اَنلاک کا استعمال کریں"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"فیس یا اسکرین لاک استعمال کریں"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"جاری رکھنے کے لیے اپنے چہرے کا استعمال کریں"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"جاری رکھنے کے لیے اپنے چہرے یا اسکرین لاک کا استعمال کریں"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"غیر مقفل کرنے والے علاقے کو پھیلائیں۔"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"سلائیڈ کے ذریعے غیر مقفل کریں۔"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"پیٹرن کے ذریعے غیر مقفل کریں۔"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"فیس اَنلاک۔"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"فیس اَنلاک۔"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"پن کے ذریعے غیر مقفل کریں۔"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"‏Sim پن غیر مقفل۔"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏Sim Puk غیر مقفل۔"</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"آپ کے منتظم کے ذریعے اپ ڈیٹ کیا گیا"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"آپ کے منتظم کے ذریعے حذف کیا گیا"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ٹھیک ہے"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"بیٹری سیور گہری تھیم کو آن کرتی ہے اور پس منظر کی سرگرمی، کچھ بصری اثرات، مخصوص خصوصیات اور کچھ نیٹ ورک کنکشنز کو محدود یا آف کرتی ہے۔\n\n"<annotation id="url">"مزید جانیں"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"بیٹری سیور گہری تھیم کو آن کرتی ہے اور پس منظر کی سرگرمی، کچھ بصری اثرات، مخصوص خصوصیات اور کچھ نیٹ ورک کنکشنز کو محدود یا آف کرتی ہے۔"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"بیٹری سیور گہری تھیم کو آن کرتی ہے اور پس منظر کی سرگرمی، کچھ بصری اثرات، مخصوص خصوصیات اور کچھ نیٹ ورک کنکشنز کو محدود یا آف کرتی ہے۔"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتی ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا تک رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا اکثر نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ڈیٹا سیور آن کریں؟"</string>

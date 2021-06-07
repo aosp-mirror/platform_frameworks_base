@@ -571,7 +571,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         // recreate this Surface, so only release it when we are fully
         // detached.
         if (mSurfacePackage != null) {
-            mTmpTransaction.reparent(mSurfacePackage.getSurfaceControl(), null).apply();
+            final SurfaceControl sc = mSurfacePackage.getSurfaceControl();
+            if (sc != null && sc.isValid()) {
+                mTmpTransaction.reparent(sc, null).apply();
+            }
             mSurfacePackage.release();
             mSurfacePackage = null;
         }
@@ -1826,7 +1829,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      */
     public void setChildSurfacePackage(@NonNull SurfaceControlViewHost.SurfacePackage p) {
         final SurfaceControl lastSc = mSurfacePackage != null ?
-            mSurfacePackage.getSurfaceControl() : null;
+                mSurfacePackage.getSurfaceControl() : null;
         if (mSurfaceControl != null && lastSc != null) {
             mTmpTransaction.reparent(lastSc, null).apply();
             mSurfacePackage.release();
@@ -1839,8 +1842,11 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void reparentSurfacePackage(SurfaceControl.Transaction t,
             SurfaceControlViewHost.SurfacePackage p) {
-        initEmbeddedHierarchyForAccessibility(p);
         final SurfaceControl sc = p.getSurfaceControl();
+        if (sc == null || !sc.isValid()) {
+            return;
+        }
+        initEmbeddedHierarchyForAccessibility(p);
         final SurfaceControl parent;
         if (mUseBlastAdapter) {
             parent = mBlastSurfaceControl;

@@ -50,6 +50,13 @@ public interface KeyguardStateController extends CallbackController<Callback> {
     boolean canDismissLockScreen();
 
     /**
+     * Whether we can currently perform the shared element SmartSpace transition. This is true if
+     * we're on the lockscreen, it can be dismissed with a swipe, and the Launcher is underneath the
+     * keyguard and displaying a SmartSpace that it has registered with System UI.
+     */
+    boolean canPerformSmartSpaceTransition();
+
+    /**
      * If the device has PIN/pattern/password or a lock screen at all.
      */
     boolean isMethodSecure();

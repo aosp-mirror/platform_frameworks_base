@@ -26,9 +26,8 @@ import androidx.annotation.Nullable;
  * Holds configuration about a package+cert that can access a schema.
  *
  * @see android.app.appsearch.SetSchemaRequest.Builder#setSchemaTypeVisibilityForPackage
- * @hide
  */
-public class PackageAccessibleDocument extends GenericDocument {
+class PackageAccessibleDocument extends GenericDocument {
     /** Schema type for nested documents that hold package accessible information. */
     public static final String SCHEMA_TYPE = "PackageAccessibleType";
 

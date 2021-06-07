@@ -28,6 +28,9 @@ import android.util.Slog;
 import android.view.Gravity;
 import android.view.WindowManager;
 
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
+
 /**
  * A WirelessChargingAnimation is a view containing view + animation for wireless charging.
  * @hide
@@ -54,9 +57,10 @@ public class WirelessChargingAnimation {
      * @hide
      */
     public WirelessChargingAnimation(@NonNull Context context, @Nullable Looper looper,
-            int transmittingBatteryLevel, int batteryLevel, Callback callback, boolean isDozing) {
+            int transmittingBatteryLevel, int batteryLevel, Callback callback, boolean isDozing,
+            UiEventLogger uiEventLogger) {
         mCurrentWirelessChargingView = new WirelessChargingView(context, looper,
-                transmittingBatteryLevel, batteryLevel, callback, isDozing);
+                transmittingBatteryLevel, batteryLevel, callback, isDozing, uiEventLogger);
     }
 
     /**
@@ -66,9 +70,9 @@ public class WirelessChargingAnimation {
      */
     public static WirelessChargingAnimation makeWirelessChargingAnimation(@NonNull Context context,
             @Nullable Looper looper, int transmittingBatteryLevel, int batteryLevel,
-            Callback callback, boolean isDozing) {
+            Callback callback, boolean isDozing, UiEventLogger uiEventLogger) {
         return new WirelessChargingAnimation(context, looper, transmittingBatteryLevel,
-                batteryLevel, callback, isDozing);
+                batteryLevel, callback, isDozing, uiEventLogger);
     }
 
     /**
@@ -95,6 +99,7 @@ public class WirelessChargingAnimation {
 
         private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
         private final Handler mHandler;
+        private final UiEventLogger mUiEventLogger;
 
         private int mGravity;
         private WirelessChargingLayout mView;
@@ -104,11 +109,12 @@ public class WirelessChargingAnimation {
 
         public WirelessChargingView(Context context, @Nullable Looper looper,
                 int transmittingBatteryLevel, int batteryLevel, Callback callback,
-                boolean isDozing) {
+                boolean isDozing, UiEventLogger uiEventLogger) {
             mCallback = callback;
             mNextView = new WirelessChargingLayout(context, transmittingBatteryLevel, batteryLevel,
                     isDozing);
             mGravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER;
+            mUiEventLogger = uiEventLogger;
 
             final WindowManager.LayoutParams params = mParams;
             params.height = WindowManager.LayoutParams.MATCH_PARENT;
@@ -195,6 +201,7 @@ public class WirelessChargingAnimation {
                         mCallback.onAnimationStarting();
                     }
                     mWM.addView(mView, mParams);
+                    mUiEventLogger.log(WirelessChargingRippleEvent.WIRELESS_RIPPLE_PLAYED);
                 } catch (WindowManager.BadTokenException e) {
                     Slog.d(TAG, "Unable to add wireless charging view. " + e);
                 }
@@ -213,6 +220,20 @@ public class WirelessChargingAnimation {
                 }
 
                 mView = null;
+            }
+        }
+
+        enum WirelessChargingRippleEvent implements UiEventLogger.UiEventEnum {
+            @UiEvent(doc = "Wireless charging ripple effect played")
+            WIRELESS_RIPPLE_PLAYED(830);
+
+            private final int mInt;
+            WirelessChargingRippleEvent(int id) {
+                mInt = id;
+            }
+
+            @Override public int getId() {
+                return mInt;
             }
         }
     }

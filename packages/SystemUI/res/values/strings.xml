@@ -1062,6 +1062,9 @@
     <!-- Shows to explain the double tap interaction with notifications: After tapping a notification on Keyguard, this will explain users to tap again to launch a notification. [CHAR LIMIT=60] -->
     <string name="notification_tap_again">Tap again to open</string>
 
+    <!-- Asks for a second tap as confirmation on an item that normally requires one tap. [CHAR LIMIT=60] -->
+    <string name="tap_again">Tap again</string>
+
     <!-- Message shown when lock screen is tapped or face authentication fails. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to open</string>
 
@@ -1650,6 +1653,8 @@
     <!-- Wallet strings -->
     <!-- Wallet empty state, title [CHAR LIMIT=32] -->
     <string name="wallet_title">Wallet</string>
+    <!-- Wallet empty state label. [CHAR LIMIT=NONE] -->
+    <string name="wallet_empty_state_label">Get set up to make faster, more secure purchases with your phone</string>
     <!-- Label of the button at the bottom prompting user enter wallet app. [CHAR LIMIT=NONE] -->
     <string name="wallet_app_button_label">Show all</string>
     <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->
@@ -2963,4 +2968,7 @@
 
     <!-- Content description for a chip in the status bar showing that the user is currently on a phone call. [CHAR LIMIT=NONE] -->
     <string name="ongoing_phone_call_content_description">Ongoing phone call</string>
+
+    <!-- URL for more information about changes in global actions -->
+    <string name="global_actions_change_url" translatable="false"></string>
 </resources>

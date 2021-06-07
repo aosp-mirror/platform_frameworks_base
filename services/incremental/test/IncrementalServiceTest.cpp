@@ -2260,6 +2260,11 @@ TEST_F(IncrementalServiceTest, testMetricsWithNoLastReadError) {
             result.getInt(String16(BnIncrementalService::METRICS_LAST_READ_ERROR_NUMBER().c_str()),
                           &lastReadErrorNumber));
     ASSERT_EQ(expectedLastReadErrorNumber, lastReadErrorNumber);
+    int expectedLastReadUid = -1, lastReadErrorUid = -1;
+    ASSERT_FALSE(
+            result.getInt(String16(BnIncrementalService::METRICS_LAST_READ_ERROR_UID().c_str()),
+                          &lastReadErrorUid));
+    ASSERT_EQ(expectedLastReadUid, lastReadErrorUid);
 }
 
 TEST_F(IncrementalServiceTest, testMetricsWithLastReadError) {
@@ -2272,7 +2277,8 @@ TEST_F(IncrementalServiceTest, testMetricsWithLastReadError) {
                                                         duration_cast<std::chrono::microseconds>(
                                                                 now.time_since_epoch())
                                                                 .count()),
-                                                .errorNo = static_cast<uint32_t>(-ETIME)}));
+                                                .errorNo = static_cast<uint32_t>(-ETIME),
+                                                .uid = 20000}));
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
@@ -2283,7 +2289,7 @@ TEST_F(IncrementalServiceTest, testMetricsWithLastReadError) {
     mClock->advanceMs(10);
     android::os::PersistableBundle result{};
     mIncrementalService->getMetrics(storageId, &result);
-    ASSERT_EQ(11, (int)result.size());
+    ASSERT_EQ(12, (int)result.size());
     int64_t expectedMillisSinceLastReadError = 10, millisSinceLastReadError = -1;
     ASSERT_TRUE(result.getLong(String16(BnIncrementalService::METRICS_MILLIS_SINCE_LAST_READ_ERROR()
                                                 .c_str()),
@@ -2294,6 +2300,10 @@ TEST_F(IncrementalServiceTest, testMetricsWithLastReadError) {
             result.getInt(String16(BnIncrementalService::METRICS_LAST_READ_ERROR_NUMBER().c_str()),
                           &lastReadErrorNumber));
     ASSERT_EQ(expectedLastReadErrorNumber, lastReadErrorNumber);
+    int expectedLastReadUid = 20000, lastReadErrorUid = -1;
+    ASSERT_TRUE(result.getInt(String16(BnIncrementalService::METRICS_LAST_READ_ERROR_UID().c_str()),
+                              &lastReadErrorUid));
+    ASSERT_EQ(expectedLastReadUid, lastReadErrorUid);
 }
 
 } // namespace android::os::incremental

@@ -154,7 +154,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             // must have the required permission and the users must be in the same profile group
             // in order to launch any of its own activities.
             if (callerUserId != userId) {
-                final int permissionFlag =  PermissionChecker.checkPermissionForPreflight(
+                final int permissionFlag = PermissionChecker.checkPermissionForPreflight(
                         mContext,
                         INTERACT_ACROSS_PROFILES,
                         callingPid,

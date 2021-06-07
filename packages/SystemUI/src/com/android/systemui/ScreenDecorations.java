@@ -236,7 +236,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             Log.i(TAG, "ScreenDecorations is disabled");
             return;
         }
-        mHandler = mThreadFactory.builderHandlerOnNewThread("ScreenDecorations");
+        mHandler = mThreadFactory.buildHandlerOnNewThread("ScreenDecorations");
         mExecutor = mThreadFactory.buildDelayableExecutorOnHandler(mHandler);
         mExecutor.execute(this::startOnScreenDecorationsThread);
         mDotViewController.setUiExecutor(mExecutor);

@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC er slått av"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC er slått på"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Skjermopptak"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Start"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stopp"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vil du oppheve blokkeringen av enhetsmikrofonen?"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Mindre presserende varsler nedenfor"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Trykk på nytt for å åpne"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Trykk igjen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Sveip opp for å åpne"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Sveip opp for å prøve igjen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås opp for å bruke NFC"</string>
@@ -750,7 +750,7 @@
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Disse varslene kan ikke endres."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Denne varselgruppen kan ikke konfigureres her"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Omdirigert varsel"</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Alle varsler fra <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g>: alle varsler"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Se mer"</string>
     <string name="appops_camera" msgid="5215967620896725715">"Denne appen bruker kameraet."</string>
     <string name="appops_microphone" msgid="8805468338613070149">"Denne appen bruker mikrofonen."</string>

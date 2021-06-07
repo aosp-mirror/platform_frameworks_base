@@ -1381,6 +1381,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 getActivityStartController().obtainStarter(intent, "dream")
                         .setCallingUid(callingUid)
                         .setCallingPid(callingPid)
+                        .setCallingPackage(intent.getPackage())
                         .setActivityInfo(a)
                         .setActivityOptions(options.toBundle())
                         // To start the dream from background, we need to start it from a persistent
@@ -2834,7 +2835,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         List<IBinder> topActivityToken = new ArrayList<>();
         topActivityToken.add(tokens.getActivityToken());
         requester.requestAssistData(topActivityToken, true /* fetchData */,
-                false /* fetchScreenshot */, true /* allowFetchData */,
+                false /* fetchScreenshot */, false /* fetchStructure */, true /* allowFetchData */,
                 false /* allowFetchScreenshot*/, true /* ignoreFocusCheck */,
                 Binder.getCallingUid(), callingPackageName);
 
@@ -6390,9 +6391,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public PackageConfigurationUpdater createPackageConfigurationUpdater() {
-            synchronized (mGlobalLock) {
-                return new PackageConfigurationUpdaterImpl(Binder.getCallingPid());
-            }
+            return new PackageConfigurationUpdaterImpl(Binder.getCallingPid());
         }
 
         @Override
@@ -6405,7 +6404,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     final class PackageConfigurationUpdaterImpl implements
             ActivityTaskManagerInternal.PackageConfigurationUpdater {
-        private int mPid;
+        private final int mPid;
         private int mNightMode;
 
         PackageConfigurationUpdaterImpl(int pid) {
@@ -6419,24 +6418,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void commit() throws RemoteException {
-            if (mPid == 0) {
-                throw new RemoteException("Invalid process");
-            }
+        public void commit() {
             synchronized (mGlobalLock) {
-                final WindowProcessController wpc = mProcessMap.getProcess(mPid);
-                if (wpc == null) {
-                    Slog.w(TAG, "Override application configuration: cannot find application");
-                    return;
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    final WindowProcessController wpc = mProcessMap.getProcess(mPid);
+                    if (wpc == null) {
+                        Slog.w(TAG, "Override application configuration: cannot find pid " + mPid);
+                        return;
+                    }
+                    if (wpc.getNightMode() == mNightMode) {
+                        return;
+                    }
+                    if (!wpc.setOverrideNightMode(mNightMode)) {
+                        return;
+                    }
+                    wpc.updateNightModeForAllActivities(mNightMode);
+                    mPackageConfigPersister.updateFromImpl(wpc.mName, wpc.mUserId, this);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
                 }
-                if (wpc.getNightMode() == mNightMode) {
-                    return;
-                }
-                if (!wpc.setOverrideNightMode(mNightMode)) {
-                    return;
-                }
-                wpc.updateNightModeForAllActivities(mNightMode);
-                mPackageConfigPersister.updateFromImpl(wpc.mName, wpc.mUserId, this);
             }
         }
 

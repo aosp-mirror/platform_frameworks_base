@@ -218,7 +218,7 @@
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Rändlus"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"WiFi"</string>
-    <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM-kaarti pole."</string>
+    <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM-i pole."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Mobiilne andmeside"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobiilne andmeside on sees"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Väljas"</string>
@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC on keelatud"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC on lubatud"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Ekraanisalvestus"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Alustage"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Peatage"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Kas tühistada seadme mikrofoni blokeerimine?"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Vähem kiireloomulised märguanded on allpool"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Avamiseks puudutage uuesti"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Puudutage uuesti"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Pühkige avamiseks üles"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Uuesti proovimiseks pühkige üles"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC kasutamiseks avage."</string>
@@ -967,7 +967,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"Rakendus <xliff:g id="APP">%1$s</xliff:g> töötab"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Rakendus avati installimata."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Rakendus avati installimata. Lisateabe saamiseks puudutage."</string>
-    <string name="app_info" msgid="5153758994129963243">"Rakenduste teave"</string>
+    <string name="app_info" msgid="5153758994129963243">"Rakenduse teave"</string>
     <string name="go_to_web" msgid="636673528981366511">"Ava brauser"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobiilne andmeside"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>

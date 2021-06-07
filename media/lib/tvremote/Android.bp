@@ -31,6 +31,7 @@ java_sdk_library {
         enabled: false,
     },
     static_libs: [
-        "android-support-annotations"
+        "android-support-annotations",
     ],
+    dist_group: "android",
 }

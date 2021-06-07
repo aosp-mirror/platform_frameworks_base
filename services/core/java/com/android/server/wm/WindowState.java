@@ -258,6 +258,7 @@ import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.wm.utils.CoordinateTransforms;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -444,6 +445,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     float mOverrideScale = 1;
     float mHScale=1, mVScale=1;
     float mLastHScale=1, mLastVScale=1;
+
+    // An offset in pixel of the surface contents from the window position. Used for Wallpaper
+    // to provide the effect of scrolling within a large surface. We just use these values as
+    // a cache.
+    int mXOffset = 0;
+    int mYOffset = 0;
+
+    // A scale factor for the surface contents, that will be applied from the center of the visible
+    // region.
+    float mWallpaperScale = 1f;
+
     final Matrix mTmpMatrix = new Matrix();
     final float[] mTmpMatrixArray = new float[9];
 
@@ -638,6 +650,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private PowerManager.WakeLock mDrawLock;
 
     private final Rect mTmpRect = new Rect();
+    private final Rect mTmpRect2 = new Rect();
     private final Point mTmpPoint = new Point();
 
     private final Transaction mTmpTransaction;
@@ -1160,13 +1173,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * @return {@code true} if the application runs in size compatibility mode or has an app level
-     * scaling override set.
+     * scaling override set. This method always returns {@code false} on child window because it
+     * should follow parent's scale.
      * @see CompatModePackages#getCompatScale
      * @see android.content.res.CompatibilityInfo#supportsScreen
      * @see ActivityRecord#hasSizeCompatBounds()
      */
     boolean hasCompatScale() {
-        return mOverrideScale != 1f || hasCompatScale(mAttrs, mActivityRecord);
+        return (mOverrideScale != 1f || hasCompatScale(mAttrs, mActivityRecord)) && !mIsChildWindow;
     }
 
     /**
@@ -1338,7 +1352,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
 
-            layoutDisplayFrame = new Rect(windowFrames.mDisplayFrame);
+            layoutDisplayFrame = mTmpRect2;
+            layoutDisplayFrame.set(windowFrames.mDisplayFrame);
             windowFrames.mDisplayFrame.set(windowFrames.mContainingFrame);
             layoutXDiff = mInsetFrame.left - windowFrames.mContainingFrame.left;
             layoutYDiff = mInsetFrame.top - windowFrames.mContainingFrame.top;
@@ -1500,7 +1515,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         boolean didFrameInsetsChange = setReportResizeHints();
-        boolean configChanged = !isLastConfigReportedToClient();
+        // The latest configuration will be returned by the out parameter of relayout, so it is
+        // unnecessary to report resize if this window is running relayout.
+        final boolean configChanged = !mInRelayout && !isLastConfigReportedToClient();
         if (DEBUG_CONFIGURATION && configChanged) {
             Slog.v(TAG_WM, "Win " + this + " config changed: " + getConfiguration());
         }
@@ -3838,8 +3855,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         fillClientWindowFramesAndConfiguration(mClientWindowFrames, mLastReportedConfiguration,
                 true /* useLatestConfig */, false /* relayoutVisible */);
-        final boolean reportDraw = drawPending || useBLASTSync() || !mRedrawForSyncReported;
-        final boolean forceRelayout = reportOrientation || isDragResizeChanged() || !mRedrawForSyncReported;
+        final boolean syncRedraw = shouldSendRedrawForSync();
+        final boolean reportDraw = syncRedraw || drawPending;
+        final boolean forceRelayout = syncRedraw || reportOrientation || isDragResizeChanged();
         final DisplayContent displayContent = getDisplayContent();
         final boolean alwaysConsumeSystemBars =
                 displayContent.getDisplayPolicy().areSystemBarsForcedShownLw(this);
@@ -3994,24 +4012,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord == null || (mActivityRecord.matchParentBounds() && !inMultiWindowMode());
     }
 
-    /** @return true when the window should be letterboxed. */
-    boolean isLetterboxedAppWindow() {
-        // Fullscreen mode but doesn't fill display area.
-        if (!inMultiWindowMode() && !matchesDisplayAreaBounds()) {
-            return true;
-        }
-        if (mActivityRecord != null) {
-            // Activity in size compat.
-            if (mActivityRecord.inSizeCompatMode()) {
-                return true;
-            }
-            // Letterbox for fixed orientation.
-            if (mActivityRecord.isLetterboxedForFixedOrientationAndAspectRatio()) {
-                return true;
-            }
-        }
-        // Letterboxed for display cutout.
-        return isLetterboxedForDisplayCutout();
+    /**
+     * @return true if activity bounds are letterboxed or letterboxed for diplay cutout.
+     *
+     * <p>Note that letterbox UI may not be shown even when this returns {@code true}. See {@link
+     * LetterboxUiController#shouldShowLetterboxUi} for more context.
+     */
+    boolean areAppWindowBoundsLetterboxed() {
+        return mActivityRecord != null
+                && (mActivityRecord.areBoundsLetterboxed() || isLetterboxedForDisplayCutout());
     }
 
     /** Returns {@code true} if the window is letterboxed for the display cutout. */
@@ -4446,6 +4455,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // required by {@link Gravity#apply} call.
             w = Math.min(w, pw);
             h = Math.min(h, ph);
+        }
+
+        if (mIsChildWindow) {
+            final WindowState parent = getTopParentWindow();
+            if (parent.hasCompatScale()) {
+                // Scale the containing and display frames because they are in screen coordinates.
+                // The position of frames are already relative to parent so only size is scaled.
+                mTmpRect.set(containingFrame);
+                containingFrame = mTmpRect;
+                CoordinateTransforms.scaleRectSize(containingFrame, parent.mInvGlobalScale);
+                if (fitToDisplay) {
+                    mTmpRect2.set(displayFrame);
+                    displayFrame = mTmpRect2;
+                    CoordinateTransforms.scaleRectSize(displayFrame, parent.mInvGlobalScale);
+                }
+            }
         }
 
         // Set mFrame
@@ -5429,10 +5454,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void updateScaleIfNeeded() {
-        if (mLastGlobalScale != mGlobalScale || mLastHScale != mHScale ||
-            mLastVScale != mVScale ) {
+        float newHScale = mHScale * mGlobalScale * mWallpaperScale;
+        float newVScale = mVScale * mGlobalScale * mWallpaperScale;
+        if (mLastHScale != newHScale ||
+            mLastVScale != newVScale ) {
             getPendingTransaction().setMatrix(getSurfaceControl(),
-                mGlobalScale*mHScale, 0, 0, mGlobalScale*mVScale);
+                newHScale, 0, 0, newVScale);
             mLastGlobalScale = mGlobalScale;
             mLastHScale = mHScale;
             mLastVScale = mVScale;
@@ -5470,6 +5497,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSurfacePlacementNeeded = false;
         transformFrameToSurfacePosition(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top,
                 mSurfacePosition);
+        mSurfacePosition.offset(mXOffset, mYOffset);
 
         // Freeze position while we're unrotated, so the surface remains at the position it was
         // prior to the rotation.
@@ -5824,7 +5852,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // the status bar). In that case we need to use the final frame.
         if (inFreeformWindowingMode()) {
             outFrame.set(getFrame());
-        } else if (isLetterboxedAppWindow() || mToken.isFixedRotationTransforming()) {
+        } else if (areAppWindowBoundsLetterboxed() || mToken.isFixedRotationTransforming()) {
             // 1. The letterbox surfaces should be animated with the owner activity, so use task
             //    bounds to include them.
             // 2. If the activity has fixed rotation transform, its windows are rotated in activity
@@ -5946,10 +5974,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * for Windows involved in these Syncs
      */
     private boolean shouldSendRedrawForSync() {
+        if (mRedrawForSyncReported) {
+            return false;
+        }
         final Task task = getTask();
-        if (task != null && task.getMainWindowSizeChangeTransaction() != null)
-            return !mRedrawForSyncReported;
-        return useBLASTSync() && !mRedrawForSyncReported;
+        if (task != null && task.getMainWindowSizeChangeTransaction() != null) {
+            return true;
+        }
+        return useBLASTSync();
     }
 
     void requestRedrawForSync() {
@@ -6077,5 +6109,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void markRedrawForSyncReported() {
        mRedrawForSyncReported = true;
+    }
+
+    boolean setWallpaperOffset(int dx, int dy, float scale) {
+        if (mXOffset == dx && mYOffset == dy && Float.compare(mWallpaperScale, scale) == 0) {
+            return false;
+        }
+        mXOffset = dx;
+        mYOffset = dy;
+        mWallpaperScale = scale;
+        scheduleAnimation();
+        return true;
     }
 }

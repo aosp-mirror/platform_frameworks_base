@@ -72,17 +72,6 @@ filegroup {
     visibility: ["//visibility:private"],
 }
 
-filegroup {
-    name: "services-all-sources",
-    srcs: [
-        ":services-non-updatable-sources",
-        ":service-media-s-sources",
-        ":service-permission-sources",
-        ":service-statsd-sources",
-    ],
-    visibility: ["//visibility:private"],
-}
-
 java_library {
     name: "Slogf",
     srcs: ["core/java/com/android/server/utils/Slogf.java"],

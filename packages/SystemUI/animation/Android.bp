@@ -36,6 +36,7 @@ android_library {
 
     static_libs: [
         "PluginCoreLib",
+        "WindowManager-Shell",
     ],
 
     manifest: "AndroidManifest.xml",

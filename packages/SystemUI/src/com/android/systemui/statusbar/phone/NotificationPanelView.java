@@ -24,6 +24,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
 
+import com.android.systemui.R;
+
 public class NotificationPanelView extends PanelView {
 
     private static final boolean DEBUG = false;
@@ -90,6 +92,10 @@ public class NotificationPanelView extends PanelView {
 
     void setRtlChangeListener(RtlChangeListener listener) {
         mRtlChangeListener = listener;
+    }
+
+    public TapAgainView getTapAgainView() {
+        return findViewById(R.id.shade_falsing_tap_again);
     }
 
     interface RtlChangeListener {

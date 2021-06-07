@@ -16,25 +16,28 @@
 
 package android.ddm;
 
+
+import android.os.Debug;
+import android.util.Log;
+
 import org.apache.harmony.dalvik.ddmc.Chunk;
 import org.apache.harmony.dalvik.ddmc.ChunkHandler;
 import org.apache.harmony.dalvik.ddmc.DdmServer;
-import android.os.Debug;
-import android.util.Log;
+
 import java.nio.ByteBuffer;
 
 /**
  * Handle profiling requests.
  */
-public class DdmHandleProfiling extends ChunkHandler {
+public class DdmHandleProfiling extends DdmHandle {
 
-    public static final int CHUNK_MPRS = type("MPRS");
-    public static final int CHUNK_MPRE = type("MPRE");
-    public static final int CHUNK_MPSS = type("MPSS");
-    public static final int CHUNK_MPSE = type("MPSE");
-    public static final int CHUNK_MPRQ = type("MPRQ");
-    public static final int CHUNK_SPSS = type("SPSS");
-    public static final int CHUNK_SPSE = type("SPSE");
+    public static final int CHUNK_MPRS = ChunkHandler.type("MPRS");
+    public static final int CHUNK_MPRE = ChunkHandler.type("MPRE");
+    public static final int CHUNK_MPSS = ChunkHandler.type("MPSS");
+    public static final int CHUNK_MPSE = ChunkHandler.type("MPSE");
+    public static final int CHUNK_MPRQ = ChunkHandler.type("MPRQ");
+    public static final int CHUNK_SPSS = ChunkHandler.type("SPSS");
+    public static final int CHUNK_SPSE = ChunkHandler.type("SPSE");
 
     private static final boolean DEBUG = false;
     private static DdmHandleProfiling mInstance = new DdmHandleProfiling();
@@ -60,13 +63,13 @@ public class DdmHandleProfiling extends ChunkHandler {
      * Called when the DDM server connects.  The handler is allowed to
      * send messages to the server.
      */
-    public void connected() {}
+    public void onConnected() {}
 
     /**
      * Called when the DDM server disconnects.  Can be used to disable
      * periodic transmissions or clean up saved state.
      */
-    public void disconnected() {}
+    public void onDisconnected() {}
 
     /**
      * Handle a chunk of data.
@@ -91,8 +94,7 @@ public class DdmHandleProfiling extends ChunkHandler {
         } else if (type == CHUNK_SPSE) {
             return handleMPSEOrSPSE(request, "Sample");
         } else {
-            throw new RuntimeException("Unknown packet "
-                + ChunkHandler.name(type));
+            throw new RuntimeException("Unknown packet " + name(type));
         }
     }
 

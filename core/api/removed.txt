@@ -1,12 +1,4 @@
 // Signature format: 2.0
-package android {
-
-  public static final class R.dimen {
-    field public static final int __removed_system_app_widget_internal_padding;
-  }
-
-}
-
 package android.app {
 
   public class Notification implements android.os.Parcelable {
@@ -558,6 +550,15 @@ package android.view.translation {
     method @Deprecated @Nullable public android.app.PendingIntent getTranslationSettingsActivityIntent();
     method @Deprecated public void removeOnDeviceTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
     method @Deprecated public void removeTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+  }
+
+  public static final class TranslationRequest.Builder {
+    method @Deprecated @NonNull public android.view.translation.TranslationRequest.Builder addTranslationRequestValue(@NonNull android.view.translation.TranslationRequestValue);
+    method @Deprecated @NonNull public android.view.translation.TranslationRequest.Builder addViewTranslationRequest(@NonNull android.view.translation.ViewTranslationRequest);
+  }
+
+  public static final class TranslationResponse.Builder {
+    method @Deprecated @NonNull public android.view.translation.TranslationResponse.Builder setTranslationStatus(int);
   }
 
   public final class TranslationSpec implements android.os.Parcelable {

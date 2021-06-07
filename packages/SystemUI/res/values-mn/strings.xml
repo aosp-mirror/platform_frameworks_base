@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC-г цуцалсан"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC-г идэвхжүүлсэн"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Дэлгэцийн үйлдэл бичих"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Эхлүүлэх"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Зогсоох"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Төхөөрөмжийн микрофоныг блокоос гаргах уу?"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Яаралтай биш мэдэгдлүүдийг доор"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Нээхийн тулд дахин товшино уу"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Дaхин товшино уу"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Нээхийн тулд дээш шударна уу"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Дахин оролдохын тулд дээш шударна уу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC-г ашиглахын тулд түгжээг тайлна уу"</string>
@@ -745,7 +745,7 @@
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Харилцан ярианы мэдэгдлийн дээд талд болон түгжигдсэн дэлгэц дээр профайл зураг байдлаар харуулах бөгөөд Бүү саад бол горимыг тасалдуулна"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Харилцан ярианы мэдэгдлийн дээд талд болон түгжигдсэн дэлгэц дээр профайл зураг байдлаар харуулах бөгөөд бөмбөлөг хэлбэрээр харагдана. Бүү саад бол горимыг тасалдуулна"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Тохиргоо"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Ач холбогдол"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Чухал"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> нь харилцан ярианы онцлогуудыг дэмждэггүй"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Эдгээр мэдэгдлийг өөрчлөх боломжгүй."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Энэ бүлэг мэдэгдлийг энд тохируулах боломжгүй байна"</string>

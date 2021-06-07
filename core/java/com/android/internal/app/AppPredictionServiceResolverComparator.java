@@ -61,17 +61,19 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
     private ResolverRankerServiceResolverComparator mResolverRankerService;
 
     AppPredictionServiceResolverComparator(
-                Context context,
-                Intent intent,
-                String referrerPackage,
-                AppPredictor appPredictor,
-                UserHandle user) {
+            Context context,
+            Intent intent,
+            String referrerPackage,
+            AppPredictor appPredictor,
+            UserHandle user,
+            ChooserActivityLogger chooserActivityLogger) {
         super(context, intent);
         mContext = context;
         mIntent = intent;
         mAppPredictor = appPredictor;
         mUser = user;
         mReferrerPackage = referrerPackage;
+        setChooserActivityLogger(chooserActivityLogger);
     }
 
     @Override
@@ -116,8 +118,9 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
                         // APS for chooser is disabled. Fallback to resolver.
                         mResolverRankerService =
                                 new ResolverRankerServiceResolverComparator(
-                                    mContext, mIntent, mReferrerPackage,
-                                        () -> mHandler.sendEmptyMessage(RANKER_SERVICE_RESULT));
+                                        mContext, mIntent, mReferrerPackage,
+                                        () -> mHandler.sendEmptyMessage(RANKER_SERVICE_RESULT),
+                                        getChooserActivityLogger());
                         mResolverRankerService.compute(targets);
                     } else {
                         Log.i(TAG, "AppPredictionService response received");

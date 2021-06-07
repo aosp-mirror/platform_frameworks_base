@@ -927,7 +927,7 @@ public final class CachedAppOptimizer {
                         + " received sync transactions while frozen, killing");
                 app.killLocked("Sync transaction while in frozen state",
                         ApplicationExitInfo.REASON_OTHER,
-                        ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+                        ApplicationExitInfo.SUBREASON_FREEZER_BINDER_TRANSACTION, true);
                 processKilled = true;
             }
 
@@ -940,7 +940,7 @@ public final class CachedAppOptimizer {
                     + app.processName + ". Killing it. Exception: " + e);
             app.killLocked("Unable to query binder frozen stats",
                     ApplicationExitInfo.REASON_OTHER,
-                    ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+                    ApplicationExitInfo.SUBREASON_FREEZER_BINDER_IOCTL, true);
             processKilled = true;
         }
 
@@ -957,7 +957,7 @@ public final class CachedAppOptimizer {
                     + ". Killing it");
             app.killLocked("Unable to unfreeze",
                     ApplicationExitInfo.REASON_OTHER,
-                    ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+                    ApplicationExitInfo.SUBREASON_FREEZER_BINDER_IOCTL, true);
             return;
         }
 
@@ -1342,7 +1342,7 @@ public final class CachedAppOptimizer {
                         synchronized (mAm) {
                             proc.killLocked("Unable to freeze binder interface",
                                     ApplicationExitInfo.REASON_OTHER,
-                                    ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+                                    ApplicationExitInfo.SUBREASON_FREEZER_BINDER_IOCTL, true);
                         }
                     });
                 }

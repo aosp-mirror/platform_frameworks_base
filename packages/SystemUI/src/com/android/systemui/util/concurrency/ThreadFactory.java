@@ -30,12 +30,20 @@ import java.util.concurrent.Executor;
  */
 public interface ThreadFactory {
     /**
+     * Returns a {@link Looper} running on a named thread.
+     *
+     * The thread is implicitly started and may be left running indefinitely, depending on the
+     * implementation. Assume this is the case and use responsibly.
+     */
+    Looper buildLooperOnNewThread(String threadName);
+
+    /**
      * Returns a {@link Handler} running on a named thread.
      *
      * The thread is implicitly started and may be left running indefinitely, depending on the
      * implementation. Assume this is the case and use responsibly.
      */
-    Handler builderHandlerOnNewThread(String threadName);
+    Handler buildHandlerOnNewThread(String threadName);
 
     /**
      * Return an {@link java.util.concurrent.Executor} running on a named thread.

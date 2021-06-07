@@ -220,7 +220,13 @@ public interface SplashScreen {
             }
         }
 
-        public void dispatchOnExitAnimation(IBinder token, SplashScreenView view) {
+        public void handOverSplashScreenView(@NonNull IBinder token,
+                @NonNull SplashScreenView splashScreenView) {
+            transferSurface(splashScreenView);
+            dispatchOnExitAnimation(token, splashScreenView);
+        }
+
+        private void dispatchOnExitAnimation(IBinder token, SplashScreenView view) {
             synchronized (mGlobalLock) {
                 final SplashScreenImpl impl = findImpl(token);
                 if (impl == null) {
@@ -239,6 +245,10 @@ public interface SplashScreen {
                 final SplashScreenImpl impl = findImpl(token);
                 return impl != null && impl.mExitAnimationListener != null;
             }
+        }
+
+        private void transferSurface(@NonNull SplashScreenView splashScreenView) {
+            splashScreenView.transferSurface();
         }
     }
 }

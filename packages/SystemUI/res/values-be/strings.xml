@@ -427,8 +427,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC адключаны"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC уключаны"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Запіс экрана"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Пачаць"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Спыніць"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Разблакіраваць мікрафон прылады?"</string>
@@ -457,6 +456,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Менш тэрміновыя апавяшчэнні ніжэй"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Дакраніцеся яшчэ раз, каб адкрыць"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Націсніце яшчэ раз"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Каб адкрыць, прагарніце ўверх"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Прагартайце ўверх, каб паўтарыць спробу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Разблакіруйце, каб выкарыстоўваць NFC"</string>
@@ -1158,7 +1158,7 @@
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Сканер адбіткаў пальцаў"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Сканер адбіткаў пальцаў выключаны"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"правесці аўтэнтыфікацыю"</string>
-    <string name="accessibility_enter_hint" msgid="2617864063504824834">"вызначыць прыладу"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"адкрыць галоўны экран прылады"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Каб адкрыць, скарыстайце адбітак пальца"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Патрабуецца аўтэнтыфікацыя. Дакраніцеся да сканера адбіткаў пальцаў."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Бягучы тэлефонны выклік"</string>

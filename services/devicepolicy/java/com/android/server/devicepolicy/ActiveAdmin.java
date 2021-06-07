@@ -1190,7 +1190,7 @@ class ActiveAdmin {
             pw.println(mEnrollmentSpecificId);
         }
 
-        pw.print("mAdminCanGrantSensorsPermissions");
+        pw.print("mAdminCanGrantSensorsPermissions=");
         pw.println(mAdminCanGrantSensorsPermissions);
 
         pw.print("mUsbDataSignaling=");

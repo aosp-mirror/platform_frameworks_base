@@ -2,12 +2,16 @@ package com.android.systemui.animation
 
 import android.app.ActivityManager
 import android.app.WindowConfiguration
+import android.content.ComponentName
+import android.content.pm.ActivityInfo
+import android.content.pm.ApplicationInfo
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.Looper
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.IRemoteAnimationFinishedCallback
+import android.view.IRemoteAnimationRunner
 import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
@@ -15,6 +19,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.mockito.any
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.assertNull
@@ -27,6 +32,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
@@ -36,14 +42,16 @@ import kotlin.concurrent.thread
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
 class ActivityLaunchAnimatorTest : SysuiTestCase() {
-    private val activityLaunchAnimator = ActivityLaunchAnimator(mContext)
     private val launchContainer = LinearLayout(mContext)
+    private val keyguardHandler = TestLaunchAnimatorKeyguardHandler(isOnKeyguard = false)
     @Spy private val controller = TestLaunchAnimatorController(launchContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
+    private val activityLaunchAnimator = ActivityLaunchAnimator(keyguardHandler, mContext)
 
     @get:Rule val rule = MockitoJUnit.rule()
 
     private fun startIntentWithAnimation(
+        animator: ActivityLaunchAnimator = this.activityLaunchAnimator,
         controller: ActivityLaunchAnimator.Controller? = this.controller,
         animate: Boolean = true,
         intentStarter: (RemoteAnimationAdapter?) -> Int
@@ -51,7 +59,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         // We start in a new thread so that we can ensure that the callbacks are called in the main
         // thread.
         thread {
-            activityLaunchAnimator.startIntentWithAnimation(
+            animator.startIntentWithAnimation(
                     controller = controller,
                     animate = animate,
                     intentStarter = intentStarter
@@ -101,6 +109,28 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun animatesIfActivityIsAlreadyOpenAndIsOnKeyguard() {
+        val keyguardHandler = spy(TestLaunchAnimatorKeyguardHandler(isOnKeyguard = true))
+        val animator = ActivityLaunchAnimator(keyguardHandler, context)
+
+        val willAnimateCaptor = ArgumentCaptor.forClass(Boolean::class.java)
+        var animationAdapter: RemoteAnimationAdapter? = null
+
+        startIntentWithAnimation(animator) { adapter ->
+            animationAdapter = adapter
+            ActivityManager.START_DELIVERED_TO_TOP
+        }
+
+        waitForIdleSync()
+        verify(controller).onIntentStarted(willAnimateCaptor.capture())
+        verify(keyguardHandler).disableKeyguardBlurs()
+        verify(keyguardHandler).hideKeyguardWithAnimation(any())
+
+        assertTrue(willAnimateCaptor.value)
+        assertNull(animationAdapter)
+    }
+
+    @Test
     fun doesNotAnimateIfAnimateIsFalse() {
         val willAnimateCaptor = ArgumentCaptor.forClass(Boolean::class.java)
         startIntentWithAnimation(animate = false) { ActivityManager.START_SUCCESS }
@@ -141,11 +171,31 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     private fun fakeWindow(): RemoteAnimationTarget {
         val bounds = Rect(10 /* left */, 20 /* top */, 30 /* right */, 40 /* bottom */)
+        val taskInfo = ActivityManager.RunningTaskInfo()
+        taskInfo.topActivity = ComponentName("com.android.systemui", "FakeActivity")
+        taskInfo.topActivityInfo = ActivityInfo().apply {
+            applicationInfo = ApplicationInfo()
+        }
+
         return RemoteAnimationTarget(
                 0, RemoteAnimationTarget.MODE_OPENING, SurfaceControl(), false, Rect(), Rect(), 0,
                 Point(), Rect(), bounds, WindowConfiguration(), false, SurfaceControl(), Rect(),
-                ActivityManager.RunningTaskInfo()
+                taskInfo
         )
+    }
+}
+
+private class TestLaunchAnimatorKeyguardHandler(
+    private val isOnKeyguard: Boolean
+) : ActivityLaunchAnimator.KeyguardHandler {
+    override fun isOnKeyguard(): Boolean = isOnKeyguard
+
+    override fun disableKeyguardBlurs() {
+        // Do nothing
+    }
+
+    override fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner) {
+        // Do nothing.
     }
 }
 

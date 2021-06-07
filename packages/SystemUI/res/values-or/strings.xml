@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ସକ୍ଷମ କରାଯାଇଛି"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ସ୍କ୍ରିନ୍ ରେକର୍ଡ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ଡିଭାଇସର ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ୍ କରିବେ?"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"ନିମ୍ନରେ କମ୍‍ ଜରୁରୀ ବିଜ୍ଞପ୍ତି"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"ଖୋଲିବା ପାଇଁ ପୁଣି ଟାପ୍‍ କରନ୍ତୁ"</string>
+    <string name="tap_again" msgid="1315420114387908655">"ପୁଣି ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ଖୋଲିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ପୁଣି ଚେଷ୍ଟା କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ବ୍ୟବହାର କରିବାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
@@ -798,7 +798,7 @@
       <item quantity="other">%d ମିନିଟ୍‍</item>
       <item quantity="one">%d ମିନିଟ୍‍</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"ବ୍ୟାଟେରୀ ବ୍ୟବହାର"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"ବ୍ୟାଟେରୀର ବ୍ୟବହାର"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"ଚାର୍ଜ କରାଯିବାବେଳେ ବ୍ୟାଟେରୀ ସେଭର୍‍ ଉପଲବ୍ଧ ନଥାଏ"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"ବ୍ୟାଟେରୀ ସେଭର୍"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"କାର୍ଯ୍ୟଦକ୍ଷତା ଓ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଡାଟା କମ୍ କରେ"</string>
@@ -1033,7 +1033,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ସ୍କ୍ରିନର ଅଂଶ ମାଗ୍ନିଫାଏ କରନ୍ତୁ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ସ୍ୱିଚ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ଆକ୍ସେସିବିଲିଟୀ ଜେଶ୍ଚରକୁ ଆକ୍ସେସିବିଲିଟୀ ବଟନରେ ପରିବର୍ତ୍ତନ କରାଯାଇଛି\n\n"<annotation id="link">"ସେଟିଂସ୍ ଦେଖନ୍ତୁ"</annotation></string>
-    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ବଟନକୁ ଅସ୍ଥାୟୀ ଭାବେ ଲୁଚାଇବା ପାଇଁ ଧାରକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ବଟନକୁ ଅସ୍ଥାୟୀ ଭାବେ ଲୁଚାଇବା ପାଇଁ ଏହାକୁ ଗୋଟିଏ ଧାରକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ଶୀର୍ଷ ବାମକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ଶୀର୍ଷ ଡାହାଣକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"ନିମ୍ନ ବାମକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
@@ -1113,16 +1113,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"ପ୍ରାଥମିକତା ଦିଆଯାଇଥିବା ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ବର୍ତ୍ତମାନର ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ"</string>
     <string name="okay" msgid="6490552955618608554">"ଠିକ୍ ଅଛି"</string>
-    <!-- no translation found for days_timestamp (5821854736213214331) -->
-    <skip />
-    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
-    <skip />
-    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
-    <skip />
-    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
-    <skip />
-    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
-    <skip />
+    <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> ଦିନ ପୂର୍ବେ"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"1 ସପ୍ତାହ ପୂର୍ବେ"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 ସପ୍ତାହ ପୂର୍ବେ"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"1 ସପ୍ତାହରୁ ଅଧିକ ଦିନ ଆଗରୁ"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"2 ସପ୍ତାହରୁ ଅଧିକ ଦିନ ଆଗରୁ"</string>
     <string name="birthday_status" msgid="2596961629465396761">"ଜନ୍ମଦିନ"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"ଆଜି <xliff:g id="NAME">%1$s</xliff:g>ଙ୍କର ଜନ୍ମଦିନ"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"ଜନ୍ମଦିନ ଶୀଘ୍ର ଆସୁଛି"</string>

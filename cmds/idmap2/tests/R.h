@@ -66,8 +66,8 @@ namespace R::overlay {
     constexpr ResourceId str1 = 0x7f02000b;
     constexpr ResourceId str3 = 0x7f02000c;
     constexpr ResourceId str4 = 0x7f02000d;
-  }
-}
+  }  // namespace string
+}  // namespace R::overlay
 // clang-format on
 
 }  // namespace android::idmap2

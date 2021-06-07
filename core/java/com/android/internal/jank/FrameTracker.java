@@ -208,7 +208,6 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
      */
     public synchronized void begin() {
         mBeginVsyncId = mChoreographer.getVsyncId() + 1;
-        mSession.setTimeStamp(System.nanoTime());
         if (mSurfaceControl != null) {
             postTraceStartMarker();
         }
@@ -224,7 +223,11 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         }
     }
 
-    private void postTraceStartMarker() {
+    /**
+     * Start trace section at appropriate time.
+     */
+    @VisibleForTesting
+    public void postTraceStartMarker() {
         mChoreographer.mChoreographer.postCallback(Choreographer.CALLBACK_INPUT, () -> {
             synchronized (FrameTracker.this) {
                 if (mCancelled || mEndVsyncId != INVALID_ID) {

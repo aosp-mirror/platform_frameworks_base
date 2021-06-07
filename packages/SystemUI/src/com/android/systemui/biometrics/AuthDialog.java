@@ -19,6 +19,7 @@ package com.android.systemui.biometrics;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.os.Bundle;
 import android.view.WindowManager;
 
@@ -112,21 +113,24 @@ public interface AuthDialog {
 
     /**
      * Authentication failed (reject, timeout). Dialog stays showing.
-     * @param failureReason
+     * @param modality sensor modality that triggered the error
+     * @param failureReason message
      */
-    void onAuthenticationFailed(String failureReason);
+    void onAuthenticationFailed(@Modality int modality, String failureReason);
 
     /**
      * Authentication rejected, or help message received.
-     * @param help
+     * @param modality sensor modality that triggered the help message
+     * @param help message
      */
-    void onHelp(String help);
+    void onHelp(@Modality int modality, String help);
 
     /**
      * Authentication failed. Dialog going away.
-     * @param error
+     * @param modality sensor modality that triggered the error
+     * @param error message
      */
-    void onError(String error);
+    void onError(@Modality int modality, String error);
 
     /**
      * Save the current state.

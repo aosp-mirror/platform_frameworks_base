@@ -829,7 +829,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
                 requestedStateStale = requestedVisibilityChanged || imeRequestedVisible;
             }
+        }
 
+        if (mTmpControlArray.size() > 0) {
+            // Update surface positions for animations.
+            for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
+                mRunningAnimations.get(i).runner.updateSurfacePosition(mTmpControlArray);
+            }
         }
         mTmpControlArray.clear();
 
@@ -1053,10 +1059,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         final InsetsAnimationControlRunner runner = useInsetsAnimationThread
                 ? new InsetsAnimationThreadControlRunner(controls,
                         frame, mState, listener, typesReady, this, durationMs, interpolator,
-                        animationType, mHost.getTranslator(), mHost.getHandler())
+                        animationType, layoutInsetsDuringAnimation, mHost.getTranslator(),
+                        mHost.getHandler())
                 : new InsetsAnimationControlImpl(controls,
                         frame, mState, listener, typesReady, this, durationMs, interpolator,
-                        animationType, mHost.getTranslator());
+                        animationType, layoutInsetsDuringAnimation, mHost.getTranslator());
         if ((typesReady & WindowInsets.Type.ime()) != 0) {
             ImeTracing.getInstance().triggerClientDump("InsetsAnimationControlImpl",
                     mHost.getInputMethodManager(), null /* icProto */);

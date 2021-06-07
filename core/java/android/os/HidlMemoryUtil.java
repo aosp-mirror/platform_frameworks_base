@@ -76,8 +76,7 @@ public final class HidlMemoryUtil {
             return new HidlMemory("ashmem", 0, null);
         }
 
-        try {
-            SharedMemory shmem = SharedMemory.create(name != null ? name : "", input.length);
+        try (SharedMemory shmem = SharedMemory.create(name != null ? name : "", input.length)) {
             ByteBuffer buffer = shmem.mapReadWrite();
             buffer.put(input);
             shmem.unmap(buffer);
@@ -119,8 +118,7 @@ public final class HidlMemoryUtil {
             return new HidlMemory("ashmem", 0, null);
         }
 
-        try {
-            SharedMemory shmem = SharedMemory.create(name != null ? name : "", input.size());
+        try (SharedMemory shmem = SharedMemory.create(name != null ? name : "", input.size())) {
             ByteBuffer buffer = shmem.mapReadWrite();
             for (Byte b : input) {
                 buffer.put(b);
@@ -214,8 +212,12 @@ public final class HidlMemoryUtil {
         if (fd == null) {
             return new HidlMemory("ashmem", 0, null);
         }
-        NativeHandle handle = new NativeHandle(fd, true);
-        return new HidlMemory("ashmem", size, handle);
+        try {
+            NativeHandle handle = new NativeHandle(Os.dup(fd), true);
+            return new HidlMemory("ashmem", size, handle);
+        } catch (ErrnoException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static ByteBuffer getBuffer(@NonNull HidlMemory mem) {

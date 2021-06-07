@@ -156,9 +156,9 @@ public class StackScrollAlgorithm {
 
     private void updateClipping(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-        float drawStart = !ambientState.isOnKeyguard()
-                ? ambientState.getStackY() - ambientState.getScrollY() : 0;
-        float clipStart = 0;
+        float drawStart = ambientState.isOnKeyguard() ? 0
+                : ambientState.getStackY() - ambientState.getScrollY();
+        float clipStart = ambientState.getNotificationScrimTop();
         int childCount = algorithmState.visibleChildren.size();
         boolean firstHeadsUp = true;
         for (int i = 0; i < childCount; i++) {
@@ -258,16 +258,14 @@ public class StackScrollAlgorithm {
             }
         }
 
-        // Save (height of view before shelf, index of first view in shelf) from when shade is fully
+        // Save the index of first view in shelf from when shade is fully
         // expanded. Consider updating these states in updateContentView instead so that we don't
         // have to recalculate in every frame.
         float currentY = -scrollY;
         if (!ambientState.isOnKeyguard()) {
             currentY += mNotificationScrimPadding;
         }
-        float previousY = 0;
         state.firstViewInShelf = null;
-        state.viewHeightBeforeShelf = -1;
         for (int i = 0; i < state.visibleChildren.size(); i++) {
             final ExpandableView view = state.visibleChildren.get(i);
 
@@ -285,17 +283,8 @@ public class StackScrollAlgorithm {
                         && !(view instanceof FooterView)
                         && state.firstViewInShelf == null) {
                     state.firstViewInShelf = view;
-                    // There might be a section gap right before the shelf.
-                    // Limit the height of the view before the shelf so that it does not include
-                    // a gap and become taller than it normally is.
-                    state.viewHeightBeforeShelf = Math.min(getMaxAllowedChildHeight(view),
-                            ambientState.getStackEndHeight()
-                            - ambientState.getShelf().getIntrinsicHeight()
-                            - mPaddingBetweenElements
-                            - previousY);
                 }
             }
-            previousY = currentY;
             currentY = currentY
                     + getMaxAllowedChildHeight(view)
                     + mPaddingBetweenElements;
@@ -380,11 +369,17 @@ public class StackScrollAlgorithm {
         ExpandableViewState viewState = view.getViewState();
         viewState.location = ExpandableViewState.LOCATION_UNKNOWN;
 
-        if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
+        final boolean isHunGoingToShade = ambientState.isShadeExpanded()
+                && view == ambientState.getTrackedHeadsUpRow();
+        if (isHunGoingToShade) {
+            // Keep 100% opacity for heads up notification going to shade.
+        } else if (ambientState.isOnKeyguard()) {
+            // Adjust alpha for wakeup to lockscreen.
+            viewState.alpha = 1f - ambientState.getHideAmount();
+        } else if (ambientState.isExpansionChanging()) {
+            // Adjust alpha for shade open & close.
             viewState.alpha = Interpolators.getNotificationScrimAlpha(
                     ambientState.getExpansionFraction(), true /* notification */);
-        } else {
-            viewState.alpha = 1f - ambientState.getHideAmount();
         }
 
         if (view.mustStayOnScreen() && viewState.yTranslation >= 0) {
@@ -414,13 +409,15 @@ public class StackScrollAlgorithm {
         }
 
         if (view instanceof FooterView) {
+            final boolean shadeClosed = !ambientState.isShadeExpanded();
             final boolean isShelfShowing = algorithmState.firstViewInShelf != null;
 
             final float footerEnd = algorithmState.mCurrentExpandedYPosition
                     + view.getIntrinsicHeight();
             final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
 
-            viewState.hidden = isShelfShowing || noSpaceForFooter;
+            viewState.hidden = shadeClosed || isShelfShowing || noSpaceForFooter;
+
         } else if (view != ambientState.getTrackedHeadsUpRow()) {
             if (ambientState.isExpansionChanging()) {
                 // Show all views. Views below the shelf will later be clipped (essentially hidden)
@@ -446,16 +443,7 @@ public class StackScrollAlgorithm {
             }
 
             // Clip height of view right before shelf.
-            float maxViewHeight = getMaxAllowedChildHeight(view);
-            if (ambientState.isExpansionChanging()
-                    && algorithmState.viewHeightBeforeShelf != -1) {
-                final int indexOfFirstViewInShelf = algorithmState.visibleChildren.indexOf(
-                        algorithmState.firstViewInShelf);
-                if (i == indexOfFirstViewInShelf - 1) {
-                    maxViewHeight = algorithmState.viewHeightBeforeShelf;
-                }
-            }
-            viewState.height = (int) (maxViewHeight * expansionFraction);
+            viewState.height = (int) (getMaxAllowedChildHeight(view) * expansionFraction);
         }
 
         algorithmState.mCurrentYPosition += viewState.height
@@ -550,7 +538,7 @@ public class StackScrollAlgorithm {
                 continue;
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            if (!row.isHeadsUp()) {
+            if (!(row.isHeadsUp() || row.isHeadsUpAnimatingAway())) {
                 continue;
             }
             ExpandableViewState childState = row.getViewState();
@@ -597,6 +585,7 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isHeadsUpAnimatingAway()) {
+                childState.yTranslation = Math.max(childState.yTranslation, mHeadsUpInset);
                 childState.hidden = false;
             }
         }
@@ -727,11 +716,6 @@ public class StackScrollAlgorithm {
          * First view in shelf.
          */
         public ExpandableView firstViewInShelf;
-
-        /**
-         * Height of view right before the shelf.
-         */
-        public float viewHeightBeforeShelf;
 
         /**
          * The children from the host view which are not gone.

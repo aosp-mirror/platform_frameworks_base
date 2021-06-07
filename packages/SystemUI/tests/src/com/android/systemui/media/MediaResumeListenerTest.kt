@@ -89,6 +89,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
     @Mock private lateinit var dumpManager: DumpManager
 
     @Captor lateinit var callbackCaptor: ArgumentCaptor<ResumeMediaBrowser.Callback>
+    @Captor lateinit var actionCaptor: ArgumentCaptor<Runnable>
 
     private lateinit var executor: FakeExecutor
     private lateinit var data: MediaData
@@ -224,9 +225,6 @@ class MediaResumeListenerTest : SysuiTestCase() {
         // But we do not tell it to add new controls
         verify(mediaDataManager, never())
                 .addResumptionControls(anyInt(), any(), any(), any(), any(), any(), any())
-
-        // Finally, make sure the resume browser disconnected
-        verify(resumeBrowser).disconnect()
     }
 
     @Test
@@ -266,5 +264,40 @@ class MediaResumeListenerTest : SysuiTestCase() {
         // Then since the mock service found media, the manager should be informed
         verify(mediaDataManager, times(3)).addResumptionControls(anyInt(),
                 any(), any(), any(), any(), any(), eq(PACKAGE_NAME))
+    }
+
+    @Test
+    fun testGetResumeAction_restarts() {
+        // Set up mocks to successfully find a MBS that returns valid media
+        val pm = mock(PackageManager::class.java)
+        whenever(mockContext.packageManager).thenReturn(pm)
+        val resolveInfo = ResolveInfo()
+        val serviceInfo = ServiceInfo()
+        serviceInfo.packageName = PACKAGE_NAME
+        resolveInfo.serviceInfo = serviceInfo
+        resolveInfo.serviceInfo.name = CLASS_NAME
+        val resumeInfo = listOf(resolveInfo)
+        whenever(pm.queryIntentServices(any(), anyInt())).thenReturn(resumeInfo)
+
+        val description = MediaDescription.Builder().setTitle(TITLE).build()
+        val component = ComponentName(PACKAGE_NAME, CLASS_NAME)
+        whenever(resumeBrowser.testConnection()).thenAnswer {
+            callbackCaptor.value.addTrack(description, component, resumeBrowser)
+        }
+
+        // When media data is loaded that has not been checked yet, and does have a MBS
+        val dataCopy = data.copy(resumeAction = null, hasCheckedForResume = false)
+        resumeListener.onMediaDataLoaded(KEY, null, dataCopy)
+
+        // Then we test whether the service is valid and set the resume action
+        executor.runAllReady()
+        verify(resumeBrowser).testConnection()
+        verify(mediaDataManager).setResumeAction(eq(KEY), capture(actionCaptor))
+
+        // When the resume action is run
+        actionCaptor.value.run()
+
+        // Then we call restart
+        verify(resumeBrowser).restart()
     }
 }

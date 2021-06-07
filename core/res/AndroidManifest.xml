@@ -1625,16 +1625,16 @@
     <eat-comment />
 
     <!-- Allows an application to modify and remove existing voicemails in the system.
-        <p>Protection level: signature|privileged
+        <p>Protection level: signature|privileged|role
     -->
     <permission android:name="com.android.voicemail.permission.WRITE_VOICEMAIL"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- Allows an application to read voicemails in the system.
-         <p>Protection level: signature|privileged
+         <p>Protection level: signature|privileged|role
     -->
     <permission android:name="com.android.voicemail.permission.READ_VOICEMAIL"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- ======================================= -->
     <!-- Permissions for accessing location info -->
@@ -2890,7 +2890,13 @@
     <permission android:name="android.permission.SET_DISPLAY_OFFSET"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows a companion app to run in the background.
+    <!-- Allows a companion app to run in the background. This permission implies
+         {@link android.Manifest.permission#REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND},
+         and allows to start a foreground service from the background.
+         If an app does not have to run in the background, but only needs to start a foreground
+         service from the background, consider using
+         {@link android.Manifest.permission#REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND},
+         which is less powerful.
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND"
@@ -2900,6 +2906,7 @@
 
     <!-- Allows a companion app to start a foreground service from the background.
          {@see android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND}
+         <p>Protection level: normal
          -->
     <permission android:name="android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND"
         android:protectionLevel="normal"/>

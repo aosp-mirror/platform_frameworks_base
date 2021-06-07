@@ -25,6 +25,7 @@ import android.annotation.SystemApi;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Attributable;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
@@ -243,7 +244,7 @@ public class BluetoothPbap implements BluetoothProfile {
             return new ArrayList<BluetoothDevice>();
         }
         try {
-            return BluetoothDevice.setAttributionSource(
+            return Attributable.setAttributionSource(
                     service.getConnectedDevices(mAttributionSource), mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, e.toString());
@@ -296,7 +297,7 @@ public class BluetoothPbap implements BluetoothProfile {
             return new ArrayList<BluetoothDevice>();
         }
         try {
-            return BluetoothDevice.setAttributionSource(
+            return Attributable.setAttributionSource(
                     service.getDevicesMatchingConnectionStates(states, mAttributionSource),
                     mAttributionSource);
         } catch (RemoteException e) {

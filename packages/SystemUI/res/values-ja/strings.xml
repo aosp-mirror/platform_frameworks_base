@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC は無効です"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC は有効です"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"スクリーン レコード"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"開始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"デバイスのマイクのブロックを解除しますか？"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"緊急度の低い通知を下に表示"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"開くにはもう一度タップしてください"</string>
+    <string name="tap_again" msgid="1315420114387908655">"もう一度タップしてください"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"開くには上にスワイプします"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"上にスワイプしてもう一度お試しください"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC を使用するには、ロックを解除してください"</string>
@@ -506,7 +506,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"パフォーマンスとバックグラウンドデータを制限します"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"バッテリー セーバーを OFF"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、画面上に表示される情報またはキャスト先に転送する情報すべてに、録画中またはキャスト中にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"次回から表示しない"</string>
@@ -1007,7 +1007,7 @@
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" 、 "</string>
     <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> が使用中"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> が最近使用"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"（仕事）"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"（業務用）"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"通話"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"（<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g> 経由）"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"カメラ"</string>
@@ -1033,7 +1033,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"画面の一部を拡大します"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"スイッチ"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ユーザー補助ジェスチャーに代わって、ユーザー補助機能ボタンが導入されました\n\n"<annotation id="link">"設定を表示"</annotation></string>
-    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ボタンを一時的に非表示にするには端に移動させてください"</string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ボタンを一時的に非表示にするには、端に移動させてください"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"左上に移動"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"右上に移動"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"左下に移動"</string>

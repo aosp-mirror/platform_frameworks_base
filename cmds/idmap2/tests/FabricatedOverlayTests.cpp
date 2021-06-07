@@ -19,6 +19,7 @@
 #include <idmap2/FabricatedOverlay.h>
 
 #include <fstream>
+#include <utility>
 
 namespace android::idmap2 {
 

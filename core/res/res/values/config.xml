@@ -955,7 +955,7 @@
             4 - Go to voice assist
             5 - Go to assistant (Settings.Secure.ASSISTANT)
     -->
-    <integer name="config_longPressOnPowerBehavior">1</integer>
+    <integer name="config_longPressOnPowerBehavior">5</integer>
 
     <!-- Whether the setting to change long press on power behaviour from default to assistant (5)
          is available in Settings.
@@ -973,7 +973,7 @@
             1 - Mute toggle
             2 - Global actions menu
     -->
-    <integer name="config_keyChordPowerVolumeUp">1</integer>
+    <integer name="config_keyChordPowerVolumeUp">2</integer>
 
     <!-- Control the behavior when the user long presses the back button.  Non-zero values are only
          valid for watches as part of CDD/CTS.
@@ -1792,6 +1792,9 @@
     <!-- Boolean indicating if placing the phone face down will result in a screen off. -->
     <bool name="config_flipToScreenOffEnabled">true</bool>
 
+    <!-- Integer to set a max latency the accelerometer will batch sensor requests with. -->
+    <integer name="config_flipToScreenOffMaxLatencyMicros">2000000</integer>
+
     <!-- Boolean indicating if current platform supports bluetooth SCO for off call
     use cases -->
     <bool name="config_bluetooth_sco_off_call">true</bool>
@@ -1968,6 +1971,9 @@
     <string name="config_systemActivityRecognizer" translatable="false"></string>
     <!-- The name of the package that will hold the system ui role -->
     <string name="config_systemUi" translatable="false">com.android.systemui</string>
+    <!-- The name of the package that will hold the television remote service role.
+        TODO(b/189347385) make this a @SystemAPI -->
+    <string name="config_systemTelevisionRemoteService" translatable="false">@string/config_tvRemoteServicePackage</string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>
@@ -3971,6 +3977,9 @@
     <!-- URI for in call notification sound -->
     <string translatable="false" name="config_inCallNotificationSound">/product/media/audio/ui/InCallNotification.ogg</string>
 
+    <!-- URI for default ringtone sound file to be used for silent ringer vibration -->
+    <string translatable="false" name="config_defaultRingtoneVibrationSound">/product/media/audio/ui/AttentionalHaptics.ogg</string>
+
     <!-- Default number of notifications from the same app before they are automatically grouped by the OS -->
     <integer translatable="false" name="config_autoGroupAtCount">4</integer>
 
@@ -4963,4 +4972,8 @@
 
     <!-- List containing the allowed install sources for accessibility service. -->
     <string-array name="config_accessibility_allowed_install_source" translatable="false"/>
+
+    <!-- The amount of dimming to apply to wallpapers with mid range luminance. 0 displays
+         the wallpaper at full brightness. 1 displays the wallpaper as fully black. -->
+    <item name="config_wallpaperDimAmount" format="float" type="dimen">0.05</item>
 </resources>

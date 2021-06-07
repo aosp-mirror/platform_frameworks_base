@@ -19,6 +19,7 @@ package com.android.systemui.accessibility;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 
@@ -55,8 +56,8 @@ public class SecureSettingsContentObserverTest extends SysuiTestCase {
 
     @Test
     public void checkValue() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, 1);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, 1, UserHandle.USER_CURRENT);
 
         assertThat(mTestObserver.getSettingsValue()).isEqualTo("1");
     }

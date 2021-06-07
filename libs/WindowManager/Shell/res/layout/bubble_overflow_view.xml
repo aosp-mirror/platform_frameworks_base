@@ -25,8 +25,8 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/bubble_view"
         android:layout_gravity="center"
-        android:layout_width="@dimen/individual_bubble_size"
-        android:layout_height="@dimen/individual_bubble_size"/>
+        android:layout_width="@dimen/bubble_size"
+        android:layout_height="@dimen/bubble_size"/>
 
     <TextView
         android:id="@+id/bubble_view_name"

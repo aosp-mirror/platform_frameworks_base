@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -71,13 +72,7 @@ class SeamlessAppRotationTest(
         super.statusBarLayerIsAlwaysVisible()
     }
 
-    @FlakyTest(bugId = 185400889)
-    @Test
-    override fun noUncoveredRegions() {
-        super.noUncoveredRegions()
-    }
-
-    @FlakyTest(bugId = 185400889)
+    @Presubmit
     @Test
     fun appLayerAlwaysVisible() {
         testSpec.assertLayers {
@@ -93,12 +88,6 @@ class SeamlessAppRotationTest(
                 .then()
                 .coversExactly(endingPos, testApp.`package`)
         }
-    }
-
-    @Postsubmit
-    @Test
-    override fun navBarWindowIsAlwaysVisible() {
-        super.navBarWindowIsAlwaysVisible()
     }
 
     @Postsubmit

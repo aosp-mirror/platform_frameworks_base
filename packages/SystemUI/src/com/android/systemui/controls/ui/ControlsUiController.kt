@@ -21,6 +21,7 @@ import android.content.Context
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import android.view.ViewGroup
+import com.android.systemui.controls.controller.StructureInfo
 
 interface ControlsUiController {
     companion object {
@@ -43,4 +44,11 @@ interface ControlsUiController {
         controlId: String,
         @ControlAction.ResponseResult response: Int
     )
+
+    /**
+     * Returns the structure that is currently preferred by the user.
+     *
+     * This structure will be the one that appears when the user first opens the controls activity.
+     */
+    fun getPreferredStructure(structures: List<StructureInfo>): StructureInfo
 }

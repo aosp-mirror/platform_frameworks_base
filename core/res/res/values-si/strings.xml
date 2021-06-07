@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"අර්ධ ඇඟිලි සලකුණක් අනාවරණය කරන ලදි"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ඇඟිලි සලකුණ පිරිසැකසීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"සංවේදකය පිරිසිදු කරන්න"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"ඇඟිල්ල වඩා වේගයෙන් ගෙන යන ලදි"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"තව ටිකක් වැඩිපුර අල්ලාගෙන සිටින්න"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ඇඟිල්ල වඩා සෙමෙන් ගෙන යන ලදි. කරුණාකර නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"තවත් ඇඟිලි සලකුණක් උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"දීප්තිය වැඩියි"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ඇඟිලි සලකුණු නිරූපකය"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"මුහුණෙන් අගුළු හැරීම දෘඪාංග කළමනා කරන්න"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"මුහුණු අච්චු එකතු කිරීමට සහ ඉවත් කිරීමට අදාළ ක්‍රම භාවිතය සඳහා මෙම යෙදුමට ඉඩ දෙයි."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"මුහුණෙන් අගුළු හැරීමේ දෘඪාංග භෘවිත කරන්න"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"සත්‍යාපනය සඳහා මුහුණෙන් අගුළු හැරීමේ දෘඪාංග භාවිත කිරීමට යෙදුමට ඉඩ දෙයි"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"මුහුණෙන් අගුළු හැරීම"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"මුහුණෙන් අගුළු ඇරීම"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ඔබේ මුහුණ යළි ලියාපදිංචි කරන්න"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"හඳුනා ගැනීම වැඩිදියුණු කිරීමට, ඔබේ මුහුණ යළි-ලියාපදිංචි කරන්න"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"මුහුණෙන් අගුළු හැරීම පිහිටුවන්න"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"මුහුණෙන් අගුළු ඇරීම පිහිටුවන්න"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ඔබගේ දුරකථනය දෙස බැලීමෙන් එහි අගුලු හරින්න"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"අගුලු හැරීමට තවත් ක්‍රම සකසන්න"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ඇඟිලි සලකුණක් එක් කිරීමට තට්ටු කරන්න"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"මුහුණ සත්‍යාපනය කළ නොහැක. දෘඩාංගය නොමැත."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"නැවතත් මුහුණෙන් අගුළු හැරීම උත්සාහ කරන්න."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"මුහුණෙන් අගුළු ඇරීම නැවත උත්සාහ කරන්න."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"නව මුහුණු දත්ත ගබඩා කළ නොහැක. පළමුව පැරණි එකක් මකන්න."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"මුහුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"පරිශීලකයා මුහුණෙන් අගුළු හැරීම අවලංගු කර ඇත."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"පරිශීලකයා විසින් මුහුණෙන් අගුළු ඇරීම අවලංගු කරන ලදි"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"උත්සාහයන් ඉතා වැඩි ගණනකි. පසුව නැවත උත්සාහ කරන්න."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"ප්‍රයත්න ගණන වැඩියි. මුහුණෙන් අගුළු හැරීම අබලයි."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"උත්සාහයන් ඉතා වැඩි ගණනකි. මුහුණෙන් අගුළු ඇරීම අබලයි."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"උත්සාහයන් ඉතා වැඩි ගණනකි. ඒ වෙනුවට තිර අගුල ඇතුළු කරන්න."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"මුහුණ සත්‍යාපන කළ නොහැක. නැවත උත්සාහ කරන්න."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"ඔබ මුහුණෙන් අගුළු හැරීම සකසා නැත"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"මෙම උපාංගයෙහි මුහුණෙන් අගුළු හැරීම සහය නොදැක්වේ"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"ඔබ මුහුණෙන් අගුළු ඇරීම පිහිටුවා නැත"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"මුහුණෙන් අගුළු ඇරීම මෙම උපාංගයේ සහාය නොදක්වයි."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"සංවේදකය තාවකාලිකව අබල කර ඇත."</string>
     <string name="face_name_template" msgid="3877037340223318119">"මුහුණු <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"මුහුණෙන් අගුළු හැරීම භාවිත කරන්න"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"මුහුණෙන් අගුළු ඇරීම භාවිත කර."</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"මුහුණෙන් අගුළු හැරීම හෝ තිර අගුල භාවිත කරන්න"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ඉදිරියට යාමට ඔබගේ මුහුණ භාවිත කරන්න"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ඉදිරියට යාමට ඔබගේ මුහුණු හෝ තිර අගුල භාවිත කරන්න"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"අගුළු නොදැමූ ප්‍රදේශය පුළුල් කරන්න."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"සර්පණ අගුළු ඇරීම."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"රටා අගුළු ඇරීම."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"මුහුණෙන් අගුළු හැරීම."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"මුහුණෙන් අගුළු ඇරීම."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN අගුළු ඇරීම."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sim Pin අගුලු දැමීම."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sim Puk අගුලු දැමීම."</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ඔබගේ පරිපාලක මඟින් යාවත්කාලීන කර ඇත"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ඔබගේ පරිපාලක මඟින් මකා දමා ඇත"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"හරි"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග, යම් විශේෂාංග සහ සමහර ජාල සම්බන්ධතා සීමා හෝ ක්‍රියාවිරහිත කරයි.\n\n"<annotation id="url">"තව දැන ගන්න"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග, යම් විශේෂාංග සහ සමහර ජාල සම්බන්ධතා සීමා හෝ ක්‍රියාවිරහිත කරයි."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග, යම් විශේෂාංග සහ සමහර ජාල සම්බන්ධතා සීමා හෝ ක්‍රියාවිරහිත කරයි."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>

@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.CloseGuard;
 import android.util.Log;
 
 /**
@@ -36,6 +37,7 @@ import android.util.Log;
  */
 @SuppressLint("AndroidFrameworkBluetoothPermission")
 public abstract class BluetoothProfileConnector<T> {
+    private final CloseGuard mCloseGuard = new CloseGuard();
     private final int mProfileId;
     private BluetoothProfile.ServiceListener mServiceListener;
     private final BluetoothProfile mProfileProxy;
@@ -82,11 +84,19 @@ public abstract class BluetoothProfileConnector<T> {
         mServiceName = serviceName;
     }
 
+    /** {@hide} */
+    @Override
+    public void finalize() {
+        mCloseGuard.warnIfOpen();
+        doUnbind();
+    }
+
     @SuppressLint("AndroidFrameworkRequiresPermission")
     private boolean doBind() {
         synchronized (mConnection) {
             if (mService == null) {
                 logDebug("Binding service...");
+                mCloseGuard.open("doUnbind");
                 try {
                     Intent intent = new Intent(mServiceName);
                     ComponentName comp = intent.resolveSystemService(
@@ -110,6 +120,7 @@ public abstract class BluetoothProfileConnector<T> {
         synchronized (mConnection) {
             if (mService != null) {
                 logDebug("Unbinding service...");
+                mCloseGuard.close();
                 try {
                     mContext.unbindService(mConnection);
                 } catch (IllegalArgumentException ie) {

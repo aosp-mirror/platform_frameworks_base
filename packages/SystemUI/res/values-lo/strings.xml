@@ -452,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"ການ​ແຈ້ງເຕືອນ​ທີ່​ສຳຄັນ​ໜ້ອຍ​ກວ່າ​ຢູ່​ດ້ານ​ລຸ່ມ"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"ແຕະ​ອີກ​ຄັ້ງ​ເພື່ອ​ເປີດ"</string>
+    <string name="tap_again" msgid="1315420114387908655">"ແຕະອີກເທື່ອໜຶ່ງ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ປັດຂຶ້ນເພື່ອເປີດ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ປັດຂຶ້ນເພື່ອລອງໃໝ່"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ປົດລັອກເພື່ອໃຊ້ NFC"</string>

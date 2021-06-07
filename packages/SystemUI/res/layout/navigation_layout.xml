@@ -23,6 +23,8 @@
     android:layout_marginEnd="@dimen/rounded_corner_content_padding"
     android:paddingStart="@dimen/nav_content_padding"
     android:paddingEnd="@dimen/nav_content_padding"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:id="@+id/horizontal">
 
     <com.android.systemui.navigationbar.buttons.NearestTouchFrame

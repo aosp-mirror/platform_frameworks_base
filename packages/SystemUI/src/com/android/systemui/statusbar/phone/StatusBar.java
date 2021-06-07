@@ -73,9 +73,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.graphics.RectF;
 import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
@@ -105,6 +105,7 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.view.Display;
+import android.view.IRemoteAnimationRunner;
 import android.view.IWindowManager;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
@@ -150,6 +151,7 @@ import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenu
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.charging.WirelessChargingAnimation;
@@ -163,6 +165,7 @@ import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.keyguard.KeyguardService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -266,7 +269,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         OnHeadsUpChangedListener, CommandQueue.Callbacks,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
         StatusBarStateController.StateListener,
-        LifecycleOwner, BatteryController.BatteryStateChangeCallback {
+        LifecycleOwner, BatteryController.BatteryStateChangeCallback,
+        ActivityLaunchAnimator.KeyguardHandler {
     public static final boolean MULTIUSER_DEBUG = false;
 
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -326,9 +330,15 @@ public class StatusBar extends SystemUI implements DemoMode,
     public static final int FADE_KEYGUARD_DURATION = 300;
     public static final int FADE_KEYGUARD_DURATION_PULSING = 96;
 
+    public static final long[] CAMERA_LAUNCH_GESTURE_VIBRATION_TIMINGS =
+            new long[]{20, 20, 20, 20, 100, 20};
+    public static final int[] CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES =
+            new int[]{39, 82, 139, 213, 0, 127};
 
-    /** If true, the system is in the half-boot-to-decryption-screen state.
-     * Prudently disable QS and notifications.  */
+    /**
+     * If true, the system is in the half-boot-to-decryption-screen state.
+     * Prudently disable QS and notifications.
+     */
     public static final boolean ONLY_CORE_APPS;
 
     /** If true, the lockscreen will show a distinct wallpaper */
@@ -380,6 +390,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationShadeWindowView mNotificationShadeWindowView;
     protected StatusBarWindowView mPhoneStatusBarWindow;
     protected PhoneStatusBarView mStatusBarView;
+    private AuthRippleController mAuthRippleController;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected NotificationShadeWindowController mNotificationShadeWindowController;
     protected StatusBarWindowController mStatusBarWindowController;
@@ -456,6 +467,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSlider.Factory mBrightnessSliderFactory;
     private final FeatureFlags mFeatureFlags;
+    private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private final List<ExpansionChangedListener> mExpansionChangedListeners;
 
@@ -600,7 +613,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private int mLastCameraLaunchSource;
     protected PowerManager.WakeLock mGestureWakeLock;
     private Vibrator mVibrator;
-    private long[] mCameraLaunchGestureVibePattern;
+    private VibrationEffect mCameraLaunchGestureVibrationEffect;
 
     private final int[] mTmpInt2 = new int[2];
 
@@ -794,7 +807,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarLocationPublisher locationPublisher,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             FeatureFlags featureFlags,
-            KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -877,6 +891,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAnimationScheduler = animationScheduler;
         mStatusBarLocationPublisher = locationPublisher;
         mFeatureFlags = featureFlags;
+        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         lockscreenShadeTransitionController.setStatusbar(this);
 
@@ -1230,6 +1247,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront, scrimForBubble);
 
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
+        mUnlockedScreenOffAnimationController.initialize(this, mLightRevealScrim);
         updateLightRevealScrimVisibility();
 
         mNotificationPanelViewController.initDependencies(
@@ -1311,12 +1329,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGestureWakeLock = mPowerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
                 "GestureWakeLock");
         mVibrator = mContext.getSystemService(Vibrator.class);
-        int[] pattern = mContext.getResources().getIntArray(
-                R.array.config_cameraLaunchGestureVibePattern);
-        mCameraLaunchGestureVibePattern = new long[pattern.length];
-        for (int i = 0; i < pattern.length; i++) {
-            mCameraLaunchGestureVibePattern[i] = pattern[i];
-        }
+        mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
+                mVibrator, context.getResources());
 
         // receive broadcasts
         registerBroadcastReceiver();
@@ -1365,7 +1379,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         // are already animating the keyguard dismiss (since we will need to either finish or cancel
         // the animation).
         if (trackingTouch
-                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe()) {
+                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe()
+                || mKeyguardUnlockAnimationController.isUnlockingWithSmartSpaceTransition()) {
             mKeyguardStateController.notifyKeyguardDismissAmountChanged(
                     1f - expansion, trackingTouch);
         }
@@ -1405,11 +1420,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void setUpPresenter() {
         // Set up the initial notification state.
-        mActivityLaunchAnimator = new ActivityLaunchAnimator(mContext);
+        mActivityLaunchAnimator = new ActivityLaunchAnimator(this, mContext);
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
                 mStackScrollerController.getNotificationListContainer(),
-                mNotificationShadeDepthControllerLazy.get(),
                 mHeadsUpManager
         );
 
@@ -1463,7 +1477,9 @@ public class StatusBar extends SystemUI implements DemoMode,
      * @param why the reason for the wake up
      */
     public void wakeUpIfDozing(long time, View where, String why) {
-        if (mDozing && !mKeyguardViewMediator.isAnimatingScreenOff()) {
+        if (mDozing && !(mKeyguardViewMediator.isAnimatingScreenOff()
+                || mUnlockedScreenOffAnimationController
+                    .isScreenOffLightRevealAnimationPlaying())) {
             mPowerManager.wakeUp(
                     time, PowerManager.WAKE_REASON_GESTURE, "com.android.systemui:" + why);
             mWakeUpComingFromTouch = true;
@@ -1556,7 +1572,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPhoneStatusBarWindow = mSuperStatusBarViewFactory.getStatusBarWindowView();
         mNotificationPanelViewController = statusBarComponent.getNotificationPanelViewController();
         statusBarComponent.getLockIconViewController().init();
-        statusBarComponent.getAuthRippleController().init();
+
+        mAuthRippleController = statusBarComponent.getAuthRippleController();
+        mAuthRippleController.init();
     }
 
     protected void startKeyguard() {
@@ -2062,10 +2080,50 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    /** Whether we should animate an activity launch. */
-    public boolean areLaunchAnimationsEnabled() {
-        // TODO(b/184121838): Support lock screen launch animations.
-        return mState == StatusBarState.SHADE && !isOccluded();
+    /**
+     * Whether we should animate an activity launch.
+     *
+     * Note: This method must be called *before* dismissing the keyguard.
+     */
+    public boolean shouldAnimateLaunch(boolean isActivityIntent) {
+        // TODO(b/184121838): Support launch animations when occluded.
+        if (isOccluded()) {
+            return false;
+        }
+
+        // Always animate if we are unlocked.
+        if (!mKeyguardStateController.isShowing()) {
+            return true;
+        }
+
+        // If we are locked, only animate if remote unlock animations are enabled and we can dismiss
+        // the lock screen without challenging the user. We also don't animate non-activity
+        // launches as they can break the animation.
+        // TODO(b/184121838): Support non activity launches on the lockscreen.
+        return isActivityIntent
+                && KeyguardService.sEnableRemoteKeyguardAnimation
+                && mKeyguardStateController.canDismissLockScreen();
+    }
+
+    @Override
+    public boolean isOnKeyguard() {
+        return mKeyguardStateController.isShowing();
+    }
+
+    @Override
+    public void hideKeyguardWithAnimation(IRemoteAnimationRunner runner) {
+        if (!mKeyguardStateController.canDismissLockScreen()) {
+            Log.wtf(TAG,
+                    "Unable to hide keyguard with animation as the keyguard can't be dismissed");
+            return;
+        }
+
+        mKeyguardViewMediator.hideWithAnimation(runner);
+    }
+
+    @Override
+    public void disableKeyguardBlurs() {
+        mMainThreadHandler.post(mKeyguardViewMediator::disableBlursUntilHidden);
     }
 
     public boolean isDeviceInVrMode() {
@@ -2533,7 +2591,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     public void onAnimationEnded() {
                         mNotificationShadeWindowController.setRequestTopUi(false, TAG);
                     }
-                }, false).show(animationDelay);
+                }, false, sUiEventLogger).show(animationDelay);
     }
 
     @Override
@@ -2786,8 +2844,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean afterKeyguardGone = mActivityIntentHelper.wouldLaunchResolverActivity(
                 intent, mLockscreenUserManager.getCurrentUserId());
 
-        ActivityLaunchAnimator.Controller animController = wrapAnimationController(
-                animationController, dismissShade);
+        ActivityLaunchAnimator.Controller animController =
+                shouldAnimateLaunch(true /* isActivityIntent */) ? wrapAnimationController(
+                    animationController, dismissShade) : null;
 
         // If we animate, we will dismiss the shade only once the animation is done. This is taken
         // care of by the StatusBarLaunchAnimationController.
@@ -2801,7 +2860,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             int[] result = new int[]{ActivityManager.START_CANCELED};
 
             mActivityLaunchAnimator.startIntentWithAnimation(animController,
-                    areLaunchAnimationsEnabled(), intent.getPackage(), (adapter) -> {
+                    true /* animate */, intent.getPackage(), (adapter) -> {
                         ActivityOptions options = new ActivityOptions(
                                 getActivityOptions(mDisplayId, adapter));
                         options.setDisallowEnterPictureInPictureWhileLaunching(
@@ -3367,8 +3426,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             updatePanelExpansionForKeyguard();
         }
         if (shouldBeKeyguard) {
-            if (isGoingToSleep()
-                    && mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_TURNING_OFF) {
+            if (mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                    || (isGoingToSleep()
+                    && mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_TURNING_OFF)) {
                 // Delay showing the keyguard until screen turned off.
             } else {
                 showKeyguardImpl();
@@ -3539,6 +3599,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanelViewController.cancelAnimation();
         mNotificationPanelViewController.setAlpha(1f);
         mNotificationPanelViewController.resetViewGroupFade();
+        updateDozingState();
         updateScrimController();
         Trace.endSection();
         return staying;
@@ -3609,10 +3670,16 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         boolean visibleNotOccluded = mStatusBarKeyguardViewManager.isShowing()
                 && !mStatusBarKeyguardViewManager.isOccluded();
+        // If we're dozing and we'll be animating the screen off, the keyguard isn't currently
+        // visible but will be shortly for the animation, so we should proceed as if it's visible.
+        boolean visibleNotOccludedOrWillBe =
+                visibleNotOccluded || (mDozing && mDozeParameters.shouldControlUnlockedScreenOff());
+
         boolean wakeAndUnlock = mBiometricUnlockController.getMode()
                 == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
         boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup() && !wakeAndUnlock)
-                || (mDozing && mDozeServiceHost.shouldAnimateScreenOff() && visibleNotOccluded);
+                || (mDozing && mDozeServiceHost.shouldAnimateScreenOff()
+                && visibleNotOccludedOrWillBe);
 
         mNotificationPanelViewController.setDozing(mDozing, animate, mWakeUpTouchLocation);
         updateQsExpansionEnabled();
@@ -3791,7 +3858,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onDozeAmountChanged(float linear, float eased) {
-        if (mFeatureFlags.useNewLockscreenAnimations()) {
+        if (mFeatureFlags.useNewLockscreenAnimations()
+                && !mCircleRevealAnimator.isRunning()) {
             mLightRevealScrim.setRevealAmount(1f - linear);
         }
     }
@@ -3828,6 +3896,23 @@ public class StatusBar extends SystemUI implements DemoMode,
         Trace.endSection();
     }
 
+    /**
+     * Update the parameters for the dozing circle reveal that animates when the user authenticates
+     * from AOD using the fingerprint sensor.
+     */
+    public void updateCircleReveal() {
+        final PointF fpLocation = mAuthRippleController.getFingerprintSensorLocation();
+        if (fpLocation != null) {
+            mCircleReveal =
+                    new CircleReveal(
+                            fpLocation.x,
+                            fpLocation.y,
+                            0,
+                            Math.max(Math.max(fpLocation.x, getDisplayWidth() - fpLocation.x),
+                                    Math.max(fpLocation.y, getDisplayHeight() - fpLocation.y)));
+        }
+    }
+
     private void startCircleReveal() {
         mLightRevealScrim.setRevealEffect(mCircleReveal);
         mCircleRevealAnimator.cancel();
@@ -3840,7 +3925,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private boolean shouldShowCircleReveal() {
         return mCircleReveal != null && !mCircleRevealAnimator.isRunning()
-                && mKeyguardUpdateMonitor.isUdfpsEnrolled()
                 && mBiometricUnlockController.getBiometricType() == FINGERPRINT;
     }
 
@@ -3978,6 +4062,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             mWakeUpCoordinator.setFullyAwake(false);
             mBypassHeadsUpNotifier.setFullyAwake(false);
             mKeyguardBypassController.onStartedGoingToSleep();
+
+            // The screen off animation uses our LightRevealScrim - we need to be expanded for it to
+            // be visible.
+            if (mUnlockedScreenOffAnimationController.shouldPlayScreenOffAnimation()) {
+                makeExpandedVisible(true);
+            }
+
             DejankUtils.stopDetectingBlockingIpcs(tag);
         }
 
@@ -3998,6 +4089,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             // once we fully woke up.
             updateNotificationPanelTouchState();
             mPulseExpansionHandler.onStartedWakingUp();
+
+            // If we are waking up during the screen off animation, we should undo making the
+            // expanded visible (we did that so the LightRevealScrim would be visible).
+            if (mUnlockedScreenOffAnimationController.isScreenOffLightRevealAnimationPlaying()) {
+                makeExpandedInvisible();
+            }
+
             DejankUtils.stopDetectingBlockingIpcs(tag);
         }
 
@@ -4062,12 +4160,37 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void vibrateForCameraGesture() {
         // Make sure to pass -1 for repeat so VibratorService doesn't stop us when going to sleep.
-        mVibrator.vibrate(mCameraLaunchGestureVibePattern, -1 /* repeat */);
+        mVibrator.vibrate(mCameraLaunchGestureVibrationEffect);
+    }
+
+    private static VibrationEffect getCameraGestureVibrationEffect(Vibrator vibrator,
+            Resources resources) {
+        if (vibrator.areAllPrimitivesSupported(
+                VibrationEffect.Composition.PRIMITIVE_QUICK_RISE,
+                VibrationEffect.Composition.PRIMITIVE_CLICK)) {
+            return VibrationEffect.startComposition()
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE)
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 50)
+                    .compose();
+        }
+        if (vibrator.hasAmplitudeControl()) {
+            return VibrationEffect.createWaveform(
+                    CAMERA_LAUNCH_GESTURE_VIBRATION_TIMINGS,
+                    CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES,
+                    /* repeat= */ -1);
+        }
+
+        int[] pattern = resources.getIntArray(R.array.config_cameraLaunchGestureVibePattern);
+        long[] timings = new long[pattern.length];
+        for (int i = 0; i < pattern.length; i++) {
+            timings[i] = pattern[i];
+        }
+        return VibrationEffect.createWaveform(timings, /* repeat= */ -1);
     }
 
     /**
      * @return true if the screen is currently fully off, i.e. has finished turning off and has
-     *         since not started turning on.
+     * since not started turning on.
      */
     public boolean isScreenFullyOff() {
         return mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_OFF;
@@ -4278,15 +4401,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateScrimController();
     }
 
-    /**
-     * Set the location of the sensor on UDFPS if existent.
-     */
-    public void setSensorRect(RectF rect) {
-        final float startRadius = (rect.right - rect.left) / 2f;
-        mCircleReveal = new CircleReveal(rect.centerX(), rect.centerY(),
-                startRadius, rect.centerY() - startRadius);
-    }
-
     @VisibleForTesting
     public void updateScrimController() {
         Trace.beginSection("StatusBar#updateScrimController");
@@ -4341,6 +4455,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
+        updateLightRevealScrimVisibility();
         Trace.endSection();
     }
 
@@ -4353,8 +4468,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean shouldIgnoreTouch() {
-        return mStatusBarStateController.isDozing()
-                && mDozeServiceHost.getIgnoreTouchWhilePulsing();
+        return (mStatusBarStateController.isDozing()
+                && mDozeServiceHost.getIgnoreTouchWhilePulsing())
+                || mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying();
     }
 
     // Begin Extra BaseStatusBar methods.
@@ -4556,6 +4672,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mLockscreenUserManager.getCurrentUserId());
 
         boolean collapse = animationController == null;
+        boolean animate = shouldAnimateLaunch(intent.isActivity());
         executeActionDismissingKeyguard(() -> {
             try {
                 // We wrap animationCallback with a StatusBarLaunchAnimatorController so that the
@@ -4565,7 +4682,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                                 animationController, this, intent.isActivity()) : null;
 
                 mActivityLaunchAnimator.startPendingIntentWithAnimation(
-                        controller, areLaunchAnimationsEnabled(), intent.getCreatorPackage(),
+                        controller, animate, intent.getCreatorPackage(),
                         (animationAdapter) -> intent.sendAndReturnResult(null, 0, null, null, null,
                                 null, getActivityOptions(mDisplayId, animationAdapter)));
             } catch (PendingIntent.CanceledException e) {
@@ -4770,6 +4887,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void updateLightRevealScrimVisibility() {
         if (mLightRevealScrim == null) {
             // status bar may not be inflated yet
+            return;
+        }
+
+        if (mDozeServiceHost.isPulsing()) {
+            mLightRevealScrim.setVisibility(View.GONE);
             return;
         }
 

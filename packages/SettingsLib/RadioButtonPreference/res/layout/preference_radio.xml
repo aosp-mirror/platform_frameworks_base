@@ -58,13 +58,14 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:paddingTop="16dp"
-        android:paddingBottom="16dp">
+        android:paddingBottom="16dp"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
         <TextView
             android:id="@android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:singleLine="true"
+            android:maxLines="2"
             android:textAppearance="?android:attr/textAppearanceListItem"/>
 
         <LinearLayout
@@ -109,12 +110,13 @@
             android:background="?android:attr/dividerVertical" />
         <ImageView
             android:id="@+id/radio_extra_widget"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
+            android:minWidth="@dimen/two_target_min_width"
             android:layout_height="fill_parent"
             android:src="@drawable/ic_settings_accent"
             android:contentDescription="@string/settings_label"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
             android:layout_gravity="center"
             android:background="?android:attr/selectableItemBackground" />
     </LinearLayout>

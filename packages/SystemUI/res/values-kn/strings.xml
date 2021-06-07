@@ -136,8 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ಕ್ಯಾಮರಾ"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ಫೋನ್"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ಧ್ವನಿ ಸಹಾಯಕ"</string>
-    <!-- no translation found for accessibility_wallet_button (1458258783460555507) -->
-    <skip />
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"ಅನ್‌ಲಾಕ್"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ಸಾಧನ ಲಾಕ್ ಆಗಿದೆ"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‍‍ಗಾಗಿ ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
@@ -352,8 +351,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ಸ್ಥಳ"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ಸ್ಥಳ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"ಕ್ಯಾಮರಾ ಪ್ರವೇಶದ ಅನುಮತಿ"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"ಮೈಕ್ ಪ್ರವೇಶದ ಅನುಮತಿ"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"ಕ್ಯಾಮರಾ ಆ್ಯಕ್ಸೆಸ್"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"ಮೈಕ್ ಆ್ಯಕ್ಸೆಸ್"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"ಲಭ್ಯವಿದೆ"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ಮಾಧ್ಯಮ ಸಾಧನ"</string>
@@ -424,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ಸಕ್ರಿಯಗೊಂಡಿದೆ"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡ್"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ನಿಲ್ಲಿಸಿ"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ಸಾಧನದ ಮೈಕ್ರೋಫೋನ್ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
@@ -454,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"ಕೆಳಗೆ ಕಡಿಮೆ ಅವಸರದ ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"ತೆರೆಯಲು ಮತ್ತೆ ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
+    <string name="tap_again" msgid="1315420114387908655">"ಪುನಃ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ತೆರೆಯಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ಬಳಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
@@ -1033,7 +1032,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಹಿಗ್ಗಿಸಿ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ಸ್ಕ್ರೀನ್‌ನ ಅರ್ಧಭಾಗವನ್ನು ಝೂಮ್ ಮಾಡಿ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ಸ್ವಿಚ್"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ಪ್ರವೇಶಿಸುವಿಕೆ ಬಟನ್ ಅಕ್ಸೆಸಿಬಿಲಿಟಿ ಗೆಸ್ಚರ್ ಅನ್ನು ಬದಲಾಯಿಸಿದೆ\n\n"<annotation id="link">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ಪ್ರವೇಶಿಸುವಿಕೆ ಬಟನ್, ಪ್ರವೇಶಿಸುವಿಕೆ ಗೆಸ್ಚರ್ ಅನ್ನು ಬದಲಾಯಿಸಿದೆ\n\n"<annotation id="link">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ಅದನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ಮರೆಮಾಡಲು ಅಂಚಿಗೆ ಬಟನ್ ಸರಿಸಿ"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ಎಡ ಮೇಲ್ಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ಬಲ ಮೇಲ್ಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
@@ -1114,16 +1113,11 @@
     <string name="priority_conversations" msgid="3967482288896653039">"ಆದ್ಯತೆಯ ಸಂಭಾಷಣೆಗಳು"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ಇತ್ತೀಚಿನ ಸಂಭಾಷಣೆಗಳು"</string>
     <string name="okay" msgid="6490552955618608554">"ಸರಿ"</string>
-    <!-- no translation found for days_timestamp (5821854736213214331) -->
-    <skip />
-    <!-- no translation found for one_week_timestamp (4925600765473875590) -->
-    <skip />
-    <!-- no translation found for two_weeks_timestamp (9111801081871962155) -->
-    <skip />
-    <!-- no translation found for over_one_week_timestamp (3770560704420807142) -->
-    <skip />
-    <!-- no translation found for over_two_weeks_timestamp (6300507859007874050) -->
-    <skip />
+    <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> ದಿನಗಳ ಹಿಂದೆ"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"1 ವಾರದ ಹಿಂದೆ"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 ವಾರಗಳ ಹಿಂದೆ"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"1 ವಾರಕ್ಕಿಂತ ಹಿಂದೆ"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"2 ವಾರಗಳಿಗಿಂತ ಹಿಂದೆ"</string>
     <string name="birthday_status" msgid="2596961629465396761">"ಜನ್ಮದಿನ"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರ ಜನ್ಮದಿನ"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"ಶೀಘ್ರದಲ್ಲಿ ಜನ್ಮದಿನವಿದೆ"</string>
@@ -1154,8 +1148,6 @@
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ದೃಢೀಕರಿಸಿ"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ಸಾಧನವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ತೆರೆಯುವುದಕ್ಕಾಗಿ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಬಳಸಿ"</string>
-    <!-- no translation found for accessibility_fingerprint_bouncer (7189102492498735519) -->
-    <skip />
-    <!-- no translation found for ongoing_phone_call_content_description (5332334388483099947) -->
-    <skip />
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ದೃಢೀಕರಣದ ಅವಶ್ಯಕತೆಯಿದೆ. ದೃಢೀಕರಿಸಲು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಫೋನ್ ಕರೆ"</string>
 </resources>

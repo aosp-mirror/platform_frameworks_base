@@ -427,8 +427,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC je vypnuto"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC je zapnuto"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Záznam obrazovky"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Spustit"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ukončit"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Odblokovat mikrofon zařízení?"</string>
@@ -457,6 +456,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Méně urgentní oznámení níže"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Oznámení otevřete opětovným klepnutím"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Znovu klepněte"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Otevřete přejetím prstem nahoru"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Přejetím nahoru to zkusíte znovu"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC vyžaduje odemknutou obrazovku"</string>
@@ -1140,8 +1140,8 @@
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> sdílí polohu"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Nový příběh"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> sdílí nový příběh"</string>
-    <string name="video_status" msgid="4548544654316843225">"Sledování"</string>
-    <string name="audio_status" msgid="4237055636967709208">"Poslouchám"</string>
+    <string name="video_status" msgid="4548544654316843225">"Sleduje"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Poslouchá"</string>
     <string name="game_status" msgid="1340694320630973259">"Hraje"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Přátelé"</string>
     <string name="empty_status" msgid="5938893404951307749">"Pojďme chatovat."</string>

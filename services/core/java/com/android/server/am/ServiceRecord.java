@@ -109,6 +109,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean fgWaiting;      // is a timeout for going foreground already scheduled?
     boolean isNotAppComponentUsage; // is service binding not considered component/package usage?
     boolean isForeground;   // is service currently in foreground mode?
+    boolean mLogEntering;    // need to report fgs transition once deferral policy is known
     int foregroundId;       // Notification ID of last foreground req.
     Notification foregroundNoti; // Notification record of foreground state.
     long fgDisplayTime;     // time at which the FGS notification should become visible
@@ -148,10 +149,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // null.
     @GuardedBy("ams")
     private List<IBinder> mBgActivityStartsByStartOriginatingTokens = new ArrayList<>();
-
-    // any current binding to this service has BIND_ALLOW_FOREGROUND_SERVICE_STARTS_FROM_BACKGROUND
-    // flag? if true, the process can start FGS from background.
-    boolean mIsAllowedBgFgsStartsByBinding;
 
     // allow while-in-use permissions in foreground service or not.
     // while-in-use permissions in FGS started from background might be restricted.
@@ -445,10 +442,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             pw.print(prefix); pw.print("mIsAllowedBgActivityStartsByStart=");
             pw.println(mIsAllowedBgActivityStartsByStart);
         }
-        if (mIsAllowedBgFgsStartsByBinding) {
-            pw.print(prefix); pw.print("mIsAllowedBgFgsStartsByBinding=");
-            pw.println(mIsAllowedBgFgsStartsByBinding);
-        }
         pw.print(prefix); pw.print("allowWhileInUsePermissionInFgs=");
                 pw.println(mAllowWhileInUsePermissionInFgs);
         pw.print(prefix); pw.print("recentCallingPackage=");
@@ -634,11 +627,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             } else {
                 proc.removeAllowBackgroundActivityStartsToken(this);
             }
-            if (mIsAllowedBgFgsStartsByBinding) {
-                proc.mState.addAllowBackgroundFgsStartsToken(this);
-            } else {
-                proc.mState.removeAllowBackgroundFgsStartsToken(this);
-            }
         }
         if (app != null && app != proc) {
             // If the old app is allowed to start bg activities because of a service start, leave it
@@ -726,32 +714,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         setAllowedBgActivityStartsByBinding(isAllowedByBinding);
     }
 
-    void updateIsAllowedBgFgsStartsByBinding() {
-        boolean isAllowedByBinding = false;
-        for (int conni = connections.size() - 1; conni >= 0; conni--) {
-            ArrayList<ConnectionRecord> cr = connections.valueAt(conni);
-            for (int i = 0; i < cr.size(); i++) {
-                if ((cr.get(i).flags
-                        & Context.BIND_ALLOW_FOREGROUND_SERVICE_STARTS_FROM_BACKGROUND) != 0) {
-                    isAllowedByBinding = true;
-                    break;
-                }
-            }
-            if (isAllowedByBinding) {
-                break;
-            }
-        }
-        setAllowedBgFgsStartsByBinding(isAllowedByBinding);
-    }
-
     void setAllowedBgActivityStartsByBinding(boolean newValue) {
         mIsAllowedBgActivityStartsByBinding = newValue;
         updateParentProcessBgActivityStartsToken();
-    }
-
-    void setAllowedBgFgsStartsByBinding(boolean newValue) {
-        mIsAllowedBgFgsStartsByBinding = newValue;
-        updateParentProcessBgFgsStartsToken();
     }
 
     /**
@@ -843,17 +808,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             app.addOrUpdateAllowBackgroundActivityStartsToken(this, getExclusiveOriginatingToken());
         } else {
             app.removeAllowBackgroundActivityStartsToken(this);
-        }
-    }
-
-    private void updateParentProcessBgFgsStartsToken() {
-        if (app == null) {
-            return;
-        }
-        if (mIsAllowedBgFgsStartsByBinding) {
-            app.mState.addAllowBackgroundFgsStartsToken(this);
-        } else {
-            app.mState.removeAllowBackgroundFgsStartsToken(this);
         }
     }
 

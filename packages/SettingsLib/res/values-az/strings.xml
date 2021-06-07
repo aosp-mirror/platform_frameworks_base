@@ -154,7 +154,7 @@
     <string name="unknown" msgid="3544487229740637809">"Naməlum"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"İstifadəçi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Bəzi susmaya görələr təyin edilib"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Susmaya görələr təyin edilməyib."</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Defolt ayarlanmayıb"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Mətndən-danışığa parametrləri"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Mətndən-nitqə daxiletmə"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Nitq diapazonu"</string>
@@ -207,11 +207,11 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB debaq prosesi"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB qoşulu olan zaman debaq rejimi"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB debaq avtorizasiyasını ləğv edin"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"WiFi sazlaması"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Wi-Fi vasitəsilə sazlama"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi qoşulduqda sazlama rejimi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Xəta"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"WiFi sazlaması"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Əlçatan cihazları görmək və onlardan istifadə etmək üçün WiFi sazlamasını yandırın"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Wi-Fi vasitəsilə sazlama"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Cihazları görmək və istifadə etmək üçün WiFi vasitəsilə sazlamanı işə salın"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR kodu ilə cihazı cütləşdirin"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR kod skanerindən istifadə etməklə yeni cihazları birləşdirin"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Qoşulma kodu ilə cihazı əlavə edin"</string>
@@ -223,10 +223,10 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Cihaz barmaq izi: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Bağlantı uğursuz oldu"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> cihazının düzgün şəbəkəyə qoşulduğundan əmin olun"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Cihaz ilə cütləşdirin"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Cihaza qoşulma"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi qoşulma kodu"</string>
-    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Cütləşdirmə uğursuz oldu"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Cihazın eyni şəbəkəyə qoşulduğundan əmin olun."</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Qoşula bilmir"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Eyni şəbəkəyə qoşulduğunu dəqiqləşdirin."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR kodu skanlamaqla cihazı Wi‑Fi vasitəsilə cütləşdirin"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Cihaz cütləşdirilir…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Cihazı cütləşdirmək alınmadı. Ya QR kodu yanlış idi, ya da cihaz eyni şəbəkəyə qoşulmayıb."</string>
@@ -252,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Simsiz displey sertifikatlaşması"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi Çoxsözlü Girişə icazə verin"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi skanlamasının tənzimlənməsi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi ilə qabaqcıl MAC randomizasiyası"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi müvəqqəti MAC randomizasiyası"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobil data həmişə aktiv"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Modem rejimində cihaz sürətləndiricisi"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth cihazlarını adsız göstərin"</string>
@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Klip sərhədləri, boşluqları və s. göstər"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL düzən istiqamətinə məcbur edin"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Ekran düzən istiqamətini RTL üzərinə bütün yerli variantlar üçün məcbur edin"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA məcbur edin"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 tətbiqlərində 4x MSAA aktiv et"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Qeyri-düzbucaqlı klip əməliyyatlarını debaq edin"</string>
@@ -453,7 +455,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Tam şarj edilənədək <xliff:g id="TIME">%1$s</xliff:g> qalıb"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - tam şarj edilənədək <xliff:g id="TIME">%2$s</xliff:g> qalıb"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Enerjiyə qənaət üçün optimallaşdırma"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Şarj müvəqqəti olaraq məhdudlaşdırılıb"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Naməlum"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Enerji doldurma"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Sürətlə doldurulur"</string>
@@ -506,9 +508,9 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Siqnallar və xatırladıcılar"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Siqnallar və xatırlatmaları ayarlamağa icazə verin"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Siqnallar və xatırlatmalar"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Bu tətbiqə siqnallar ayarlamağa və digər əməliyyatları planlaşdırmağa icazə verin. Bu tətbiq telefonunuzu istifadə etmədiyiniz zaman istifadə edilə bilər və daha çox enerji istifadə edə bilər. Bu icazə deaktivdirsə, bu tətbiq normal işləməyə bilər və onun siqnalları planlaşdırıldığı kimi işləməyəcəkdir."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Bu tətbiqə siqnallar ayarlamağa və digər əməliyyatları planlaşdırmağa icazə verin. Bu tətbiq planşetinizi istifadə etmədiyiniz zaman istifadə edilə bilər və daha çox enerji istifadə edə bilər. Bu icazə deaktivdirsə, bu tətbiq normal işləməyə bilər və onun siqnalları planlaşdırıldığı kimi işləməyəcəkdir."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Bu tətbiqə siqnallar ayarlamağa və digər əməliyyatları planlaşdırmağa icazə verin. Bu tətbiq cihazınızı istifadə etmədiyiniz zaman istifadə edilə bilər və daha çox enerji istifadə edə bilər. Bu icazə deaktivdirsə, bu tətbiq normal işləməyə bilər və onun siqnalları planlaşdırıldığı kimi işləməyəcəkdir."</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Bu tətbiqə zəngli saat və bildiriş hazırlamaq icazəsi verdiyiniz halda tətbiq cihaz istifadə edilmədiyi zaman da işləyəcək, enerji daha tez qurtaracaq. Bu ayar deaktiv ediləndən sonra tətbiqin işində kəsintilər ola, zəngli saatlar vaxtında işləməyə bilər."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Bu tətbiqə zəngli saat və bildiriş hazırlamaq icazəsi verdiyiniz halda tətbiq cihaz istifadə edilmədiyi zaman da işləyəcək, enerji daha tez qurtaracaq. Bu ayar deaktiv ediləndən sonra tətbiqin işində kəsintilər ola, zəngli saatlar vaxtında işləməyə bilər."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Bu tətbiqə zəngli saat və bildiriş hazırlamaq icazəsi verdiyiniz halda tətbiq cihaz istifadə edilmədiyi zaman da işləyəcək, enerji daha tez qurtaracaq. Bu ayar deaktiv ediləndən sonra tətbiqin işində kəsintilər ola, zəngli saatlar vaxtında işləməyə bilər."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"cədvəl, siqnal, xatırlatma, saat"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktiv edin"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"Narahat Etməyin\" rejimini aktiv edin"</string>

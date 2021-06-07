@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 
 /**
  * This class provides random static utility methods for {@link InputMethodManagerService} and its
@@ -946,8 +947,14 @@ final class InputMethodUtils {
         }
 
         ArrayList<InputMethodInfo> getEnabledInputMethodListLocked() {
+            return getEnabledInputMethodListWithFilterLocked(null /* matchingCondition */);
+        }
+
+        @NonNull
+        ArrayList<InputMethodInfo> getEnabledInputMethodListWithFilterLocked(
+                @Nullable Predicate<InputMethodInfo> matchingCondition) {
             return createEnabledInputMethodListLocked(
-                    getEnabledInputMethodsAndSubtypeListLocked());
+                    getEnabledInputMethodsAndSubtypeListLocked(), matchingCondition);
         }
 
         List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
@@ -1036,11 +1043,13 @@ final class InputMethodUtils {
         }
 
         private ArrayList<InputMethodInfo> createEnabledInputMethodListLocked(
-                List<Pair<String, ArrayList<String>>> imsList) {
+                List<Pair<String, ArrayList<String>>> imsList,
+                Predicate<InputMethodInfo> matchingCondition) {
             final ArrayList<InputMethodInfo> res = new ArrayList<>();
             for (Pair<String, ArrayList<String>> ims: imsList) {
                 InputMethodInfo info = mMethodMap.get(ims.first);
-                if (info != null && !info.isVrOnly()) {
+                if (info != null && !info.isVrOnly()
+                        && (matchingCondition == null || matchingCondition.test(info))) {
                     res.add(info);
                 }
             }

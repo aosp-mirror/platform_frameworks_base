@@ -68,18 +68,6 @@
             layout="@layout/keyguard_status_view"
             android:visibility="gone"/>
 
-        <com.android.systemui.scrim.ScrimView
-            android:id="@+id/scrim_notifications"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:importantForAccessibility="no"
-            systemui:ignoreRightInset="true"
-            systemui:layout_constraintStart_toStartOf="parent"
-            systemui:layout_constraintEnd_toEndOf="parent"
-            systemui:layout_constraintTop_toTopOf="parent"
-            systemui:layout_constraintBottom_toBottomOf="parent"
-            />
-
         <include layout="@layout/dock_info_overlay" />
 
         <FrameLayout
@@ -129,7 +117,22 @@
             android:layout_marginTop="@dimen/status_bar_header_height_keyguard"
             android:text="@string/report_rejected_touch"
             android:visibility="gone" />
-
+        <com.android.systemui.statusbar.phone.TapAgainView
+            android:id="@+id/shade_falsing_tap_again"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            systemui:layout_constraintLeft_toLeftOf="parent"
+            systemui:layout_constraintRight_toRightOf="parent"
+            systemui:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="20dp"
+            android:paddingHorizontal="16dp"
+            android:minHeight="44dp"
+            android:elevation="4dp"
+            android:background="@drawable/rounded_bg_full"
+            android:gravity="center"
+            android:text="@string/tap_again"
+            android:visibility="gone"
+        />
     </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
 
     <FrameLayout

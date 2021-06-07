@@ -73,8 +73,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
@@ -237,7 +237,6 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -338,6 +337,11 @@ public final class ActivityThread extends ClientTransactionHandler
      */
     @UnsupportedAppUsage
     final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
+    /**
+     * Maps from activity token to local record of the activities that are preparing to be launched.
+     */
+    final Map<IBinder, ActivityClientRecord> mLaunchingActivities =
+            Collections.synchronizedMap(new ArrayMap<IBinder, ActivityClientRecord>());
     /** The activities to be truly destroyed (not include relaunch). */
     final Map<IBinder, ClientTransactionItem> mActivitiesToBeDestroyed =
             Collections.synchronizedMap(new ArrayMap<IBinder, ClientTransactionItem>());
@@ -347,7 +351,6 @@ public final class ActivityThread extends ClientTransactionHandler
     // Number of activities that are currently visible on-screen.
     @UnsupportedAppUsage
     int mNumVisibleActivities = 0;
-    private final AtomicInteger mNumLaunchingActivities = new AtomicInteger();
     @GuardedBy("mAppThread")
     private int mLastProcessState = PROCESS_STATE_UNKNOWN;
     @GuardedBy("mAppThread")
@@ -1182,7 +1185,7 @@ public final class ActivityThread extends ClientTransactionHandler
             InetAddress.clearDnsCache();
             // Allow libcore to perform the necessary actions as it sees fit upon a network
             // configuration change.
-            NetworkEventDispatcher.getInstance().onNetworkConfigurationChanged();
+            NetworkEventDispatcher.getInstance().dispatchNetworkConfigurationChange();
         }
 
         public void updateHttpProxy() {
@@ -3256,6 +3259,21 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
+    public void addLaunchingActivity(IBinder token, ActivityClientRecord activity) {
+        mLaunchingActivities.put(token, activity);
+    }
+
+    @Override
+    public ActivityClientRecord getLaunchingActivity(IBinder token) {
+        return mLaunchingActivities.get(token);
+    }
+
+    @Override
+    public void removeLaunchingActivity(IBinder token) {
+        mLaunchingActivities.remove(token);
+    }
+
+    @Override
     public ActivityClientRecord getActivityClient(IBinder token) {
         return mActivities.get(token);
     }
@@ -3299,7 +3317,7 @@ public final class ActivityThread extends ClientTransactionHandler
             // Defer the top state for VM to avoid aggressive JIT compilation affecting activity
             // launch time.
             if (processState == ActivityManager.PROCESS_STATE_TOP
-                    && mNumLaunchingActivities.get() > 0) {
+                    && !mLaunchingActivities.isEmpty()) {
                 mPendingProcessState = processState;
                 mH.postDelayed(this::applyPendingProcessState, PENDING_TOP_PROCESS_STATE_TIMEOUT);
             } else {
@@ -3315,7 +3333,7 @@ public final class ActivityThread extends ClientTransactionHandler
         // Handle the pending configuration if the process state is changed from cached to
         // non-cached. Except the case where there is a launching activity because the
         // LaunchActivityItem will handle it.
-        if (wasCached && !isCachedProcessState() && mNumLaunchingActivities.get() == 0) {
+        if (wasCached && !isCachedProcessState() && mLaunchingActivities.isEmpty()) {
             final Configuration pendingConfig =
                     mConfigurationController.getPendingConfiguration(false /* clearPending */);
             if (pendingConfig == null) {
@@ -3351,11 +3369,6 @@ public final class ActivityThread extends ClientTransactionHandler
                 updateVmProcessState(pendingState);
             }
         }
-    }
-
-    @Override
-    public void countLaunchingActivities(int num) {
-        mNumLaunchingActivities.getAndAdd(num);
     }
 
     @UnsupportedAppUsage
@@ -3830,6 +3843,8 @@ public final class ActivityThread extends ClientTransactionHandler
         // - it does not call onProvideAssistData()
         // - it needs an IAutoFillCallback
         boolean forAutofill = cmd.requestType == ActivityManager.ASSIST_CONTEXT_AUTOFILL;
+        // When only the AssistContent is requested, omit the AsssistStructure
+        boolean requestedOnlyContent = cmd.requestType == ActivityManager.ASSIST_CONTEXT_CONTENT;
 
         // TODO: decide if lastSessionId logic applies to autofill sessions
         if (mLastSessionId != cmd.sessionId) {
@@ -3856,8 +3871,11 @@ public final class ActivityThread extends ClientTransactionHandler
                 r.activity.onProvideAssistData(data);
                 referrer = r.activity.onProvideReferrer();
             }
-            if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL || forAutofill) {
-                structure = new AssistStructure(r.activity, forAutofill, cmd.flags);
+            if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL || forAutofill
+                    || requestedOnlyContent) {
+                if (!requestedOnlyContent) {
+                    structure = new AssistStructure(r.activity, forAutofill, cmd.flags);
+                }
                 Intent activityIntent = r.activity.getIntent();
                 boolean notSecure = r.window == null ||
                         (r.window.getAttributes().flags
@@ -3879,18 +3897,21 @@ public final class ActivityThread extends ClientTransactionHandler
                     r.activity.onProvideAssistContent(content);
                 }
             }
-
-        }
-        if (structure == null) {
-            structure = new AssistStructure();
         }
 
-        // TODO: decide if lastSessionId logic applies to autofill sessions
+        if (!requestedOnlyContent) {
+            if (structure == null) {
+                structure = new AssistStructure();
+            }
 
-        structure.setAcquisitionStartTime(startTime);
-        structure.setAcquisitionEndTime(SystemClock.uptimeMillis());
+            // TODO: decide if lastSessionId logic applies to autofill sessions
 
-        mLastAssistStructures.add(new WeakReference<>(structure));
+            structure.setAcquisitionStartTime(startTime);
+            structure.setAcquisitionEndTime(SystemClock.uptimeMillis());
+
+            mLastAssistStructures.add(new WeakReference<>(structure));
+        }
+
         IActivityTaskManager mgr = ActivityTaskManager.getService();
         try {
             mgr.reportAssistContextExtras(cmd.requestToken, data, structure, content, referrer);
@@ -4108,7 +4129,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
         synchronized (this) {
             if (mSplashScreenGlobal != null) {
-                mSplashScreenGlobal.dispatchOnExitAnimation(r.token, v);
+                mSplashScreenGlobal.handOverSplashScreenView(r.token, v);
             }
         }
     }
@@ -6413,7 +6434,7 @@ public final class ActivityThread extends ClientTransactionHandler
             VMDebug.setAllocTrackerStackDepth(Integer.parseInt(property));
         }
         if (data.trackAllocation) {
-            DdmVmInternal.enableRecentAllocations(true);
+            DdmVmInternal.setRecentAllocationsTrackingEnabled(true);
         }
         // Note when this process has started.
         Process.setStartTimes(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());

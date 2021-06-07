@@ -252,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certification de l\'affichage sans fil"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Autoriser enreg. données Wi-Fi détaillées"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limiter la recherche de réseaux Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Sélect. aléatoire adr. MAC optim. par Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Réorganisation aléatoire MAC non persistante du Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Données cellulaires toujours actives"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Accélération matérielle pour le partage de connexion"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Afficher les appareils Bluetooth sans nom"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Afficher les options pour la certification d\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Détailler davantage les données Wi-Fi, afficher par SSID RSSI dans sélect. Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Réduit l\'utilisation de la pile et améliore les performances réseau"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Lorsque ce mode est activé, l\'adresse MAC de cet appareil pourrait changer chaque fois qu\'il se connecter à un réseau sur lequel la sélection aléatoire des adresses MAC est activée."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Lorsque ce mode est activé, l\'adresse MAC de cet appareil pourrait changer chaque fois qu\'il se connecte à un réseau sur lequel la sélection aléatoire des adresses MAC est activée."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Facturé à l\'usage"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non mesuré"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tailles des mémoires tampons d\'enregistreur"</string>
@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Afficher les limites, les marges de clip, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forcer droite à gauche"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forcer l\'orientation droite à gauche (toutes langues)"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Forcer MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activer MSAA 4x dans les applications OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Déboguer opérations de découpage non rectangulaire"</string>
@@ -376,7 +378,7 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forcer l\'autor. d\'applis sur stockage externe"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Rend possible l\'enregistrement de toute application sur un espace de stockage externe, indépendamment des valeurs du fichier manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forcer les activités à être redimensionnables"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet de redimensionner toutes les activités pour le mode multifenêtre, indépendamment des valeurs du fichier manifeste."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet de redimensionner toutes les activités pour le mode multi-fenêtre, indépendamment des valeurs du fichier manifeste."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activer les fenêtres de forme libre"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activer la compatibilité avec les fenêtres de forme libre expérimentales."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Mot de passe sauvegarde PC"</string>
@@ -453,7 +455,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> jusqu\'à la recharge complète"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> (<xliff:g id="TIME">%2$s</xliff:g> jusqu\'à la recharge complète)"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimisation pour préserver la pile"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> : recharge temporairement limitée"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Charge en cours…"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Recharge rapide"</string>

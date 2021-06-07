@@ -20,6 +20,7 @@
 #include <fstream>
 #include <memory>
 #include <ostream>
+#include <string>
 #include <vector>
 
 #include "androidfw/ResourceTypes.h"

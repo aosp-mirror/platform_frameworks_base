@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Partial fingerprint detected"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Couldn\'t process fingerprint. Please try again."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Clean the sensor"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Finger moved too fast"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Hold a little longer"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Finger moved too slow. Please try again."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Try another fingerprint"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Too bright"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Fingerprint icon"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"manage Face Unlock hardware"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Allows the app to invoke methods to add and delete facial templates for use."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"use Face Unlock hardware"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Allows the app to use Face Unlock hardware for authentication"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Re-enrol your face"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"To improve recognition, please re-enrol your face"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Set up Face Unlock"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Set up Face Unlock"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Unlock your phone by looking at it"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Set up more ways to unlock"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tap to add a fingerprint"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Can’t verify face. Hardware not available."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Try Face Unlock again."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Try Face Unlock again"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Can’t store new face data. Delete an old one first."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Face operation cancelled."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Face Unlock cancelled by user."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Face Unlock cancelled by user"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Too many attempts. Try again later."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Too many attempts. Face Unlock disabled."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Too many attempts. Face Unlock disabled."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Too many attempts. Enter screen lock instead."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Can’t verify face. Try again."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"You haven’t set up Face Unlock."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Face Unlock is not supported on this device."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"You haven’t set up Face Unlock"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Face Unlock isn’t supported on this device"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor temporarily disabled."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Face <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Use Face Unlock"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Use Face Unlock"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Use face or screen lock"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Use your face to continue"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Use your face or screen lock to continue"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Expand unlock area."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Slide unlock."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Pattern unlock."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Face Unlock."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Face Unlock."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin unlock."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM PIN unlock."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM PUK unlock."</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Updated by your admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Deleted by your admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Battery Saver turns on Dark theme and limits or turns off background activity, some visual effects, certain features and some network connections.\n\n"<annotation id="url">"Learn more"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Battery Saver turns on Dark theme and limits or turns off background activity, some visual effects, certain features and some network connections."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Battery Saver turns on Dark theme and limits or turns off background activity, some visual effects, certain features and some network connections."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app that you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Turn on Data Saver?"</string>

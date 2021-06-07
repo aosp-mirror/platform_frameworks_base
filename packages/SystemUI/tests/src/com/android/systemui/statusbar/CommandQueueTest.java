@@ -14,6 +14,7 @@
 
 package com.android.systemui.statusbar;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -444,10 +445,11 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testOnBiometricHelp() {
-        String helpMessage = "test_help_message";
-        mCommandQueue.onBiometricHelp(helpMessage);
+        final int modality = TYPE_FACE;
+        final String helpMessage = "test_help_message";
+        mCommandQueue.onBiometricHelp(modality, helpMessage);
         waitForIdleSync();
-        verify(mCallbacks).onBiometricHelp(eq(helpMessage));
+        verify(mCallbacks).onBiometricHelp(eq(modality), eq(helpMessage));
     }
 
     @Test

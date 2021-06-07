@@ -44,7 +44,7 @@
     <string name="mmiComplete" msgid="6341884570892520140">"MMIが完了しました。"</string>
     <string name="badPin" msgid="888372071306274355">"入力した古いPINは正しくありません。"</string>
     <string name="badPuk" msgid="4232069163733147376">"入力したPUKは正しくありません。"</string>
-    <string name="mismatchPin" msgid="2929611853228707473">"入力したPINが一致しません。"</string>
+    <string name="mismatchPin" msgid="2929611853228707473">"入力した PIN が一致しません。"</string>
     <string name="invalidPin" msgid="7542498253319440408">"4～8桁の数字のPINを入力してください。"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"PUKは8桁以上で入力してください。"</string>
     <string name="needPuk" msgid="7321876090152422918">"SIMカードはPUKでロックされています。ロックを解除するにはPUKコードを入力してください。"</string>
@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"指紋の一部しか検出できません"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"指紋を処理できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"センサーの汚れを取り除いてください"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"指を離すのが早すぎました"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"もう少し長く押してください"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"指の動きが遅すぎました。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"別の指紋をお試しください"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"明るすぎます"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"指紋アイコン"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"顔認証ハードウェアの管理"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"使用する顔テンプレートの追加や削除を行うメソッドの呼び出しをアプリに許可します。"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"顔認証ハードウェアの使用"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"顔認証ハードウェアを認証に使用することをアプリに許可します"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"顔認証"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"顔認証"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"顔の再登録"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"認識を改善するには、顔を再登録してください"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"顔認証の設定"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"顔認証の設定"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"スマートフォンに顔を向けるとロックが解除されます"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"その他のロック解除方法の設定"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"タップすると指紋が追加されます"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"顔を確認できません。ハードウェアを利用できません。"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"顔認証をもう一度お試しください。"</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"顔認証をもう一度お試しください"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"新しい顔データを保存できません。古いデータを削除してください。"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"顔の操作をキャンセルしました。"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"顔認証はユーザーによりキャンセルされました。"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"顔認証はユーザーによりキャンセルされました"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"試行回数の上限です。後でもう一度お試しください。"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"試行回数が上限を超えたため、顔認証を無効にしました。"</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"試行回数が上限を超えました。顔認証が無効になりました。"</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"試行回数が上限を超えました。代わりに画面ロック解除を入力してください。"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"顔を確認できません。もう一度お試しください。"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"顔認証を設定していません。"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"このデバイスでは、顔認証はご利用いただけません。"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"顔認証を設定していません"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"このデバイスは顔認証に対応していません"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"センサーが一時的に無効になっています。"</string>
     <string name="face_name_template" msgid="3877037340223318119">"顔 <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"顔認証の使用"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"顔認証の使用"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"顔認証または画面ロックの使用"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"続行するには顔認証を使用してください"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"続行するには、顔認証または画面ロックを使用してください"</string>
@@ -735,9 +732,9 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"画面のロック"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"画面をロックする方法とタイミングを制御します。"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"すべてのデータを消去"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"警告せずにデータの初期化を実行してタブレット内のデータを消去します。"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"警告せずにタブレットを初期化して内部のデータを消去します。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"警告せずに出荷時設定へのリセットを実行して Android TV デバイスのデータを消去します。"</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"警告せずにデータの初期化を実行してデバイス内のデータを消去します。"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"警告せずにデバイスを初期化して内部のデータを消去します。"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ユーザーデータの消去"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"このタブレットのこのユーザーのデータを警告なく消去します。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"この Android TV デバイスでこのユーザーのデータを警告なく消去します。"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"ロック解除エリアを拡大します。"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"スライドロックを解除します。"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"パターンロックを解除します。"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"顔認証を行います。"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"顔認証を行います。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PINロックを解除します。"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM PIN のロックを解除します。"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM PUK のロックを解除します。"</string>
@@ -1841,7 +1838,7 @@
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"新しいPIN"</string>
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"新しいPINの確認"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"制限を変更するためのPINを作成してください"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PINが一致しません。もう一度お試しください。"</string>
+    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN が一致しません。もう一度お試しください。"</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で作成してください。"</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒後にもう一度お試しください</item>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"バッテリー セーバーを有効にすると、ダークテーマが ON になり、バックグラウンド アクティビティ、一部の視覚効果、特定の機能、一部のネットワーク接続が制限されるか OFF になります。\n\n"<annotation id="url">"詳細"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"バッテリー セーバーを有効にすると、ダークテーマが ON になり、バックグラウンド アクティビティ、一部の視覚効果、特定の機能、一部のネットワーク接続が制限されるか OFF になります。"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"バッテリー セーバーを有効にすると、ダークテーマが ON になり、バックグラウンド アクティビティ、一部の視覚効果、特定の機能、一部のネットワーク接続が制限されるか OFF になります。"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータを送受信することはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
@@ -1974,7 +1971,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"詳細"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"アプリの一時停止を解除"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"仕事用アプリを ON にしますか？"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"仕事用のアプリや通知を利用する"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"仕事用のアプリを利用し、通知を受け取れるようになります"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ON にする"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"現在 <xliff:g id="APP_NAME">%1$s</xliff:g> はご利用になれません。"</string>

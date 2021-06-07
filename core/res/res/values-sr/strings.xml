@@ -583,7 +583,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Откривен је делимичан отисак прста"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Није успела обрада отиска прста. Пробајте поново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Обришите сензор"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Прст је померен пребрзо"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Задржите мало дуже"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Превише споро сте померили прст. Пробајте поново."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Пробајте са другим отиском прста"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Превише је светло"</string>
@@ -612,14 +612,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона отиска прста"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"управљање хардв. за откључавање лицем"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Дозвољава да апликација активира методе за додавање и брисање шаблона лица ради коришћења."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"коришћење хардвера за откључавање лицем"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Дозвољава да апликација користи хардвер за откључавање лицем ради потврде идентитета"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Откључавање лицем"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Откључавање лицем"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Поново региструјте лице"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Да бисте побољшали препознавање, поново региструјте лице"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Подесите откључавање лицем"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Подесите откључавање лицем"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Откључајте телефон тако што ћете га погледати"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Подесите још начина за откључавање"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Додирните да бисте додали отисак прста"</string>
@@ -646,18 +642,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Провера лица није успела. Хардвер није доступан."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Пробајте поново откључавање лицем."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Пробајте поново откључавање лицем"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Нови подаци о лицу нису сачувани. Прво избришете претходне."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Обрада лица је отказана."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Корисник је отказао откључавање лицем"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Корисник је отказао откључавање лицем"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Превише покушаја. Пробајте поново касније."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Превише покушаја. Откључавање лицем је онемогућено."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Превише покушаја. Откључавање лицем је онемогућено."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Превише покушаја. Користите закључавање екрана за то."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Провера лица није успела. Пробајте поново."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Нисте подесили откључавање лицем"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Откључавање лицем није подржано на овом уређају"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Нисте подесили откључавање лицем"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Откључавање лицем није подржано на овом уређају"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Сензор је привремено онемогућен."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Користите откључавање лицем"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Користите откључавање лицем"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Користите закључавање лицем или закључавање екрана"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Потврдите идентитет лицем да бисте наставили"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Користите лице или закључавање екрана да бисте наставили"</string>
@@ -960,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Прошири област откључавања."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Откључавање превлачењем."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Откључавање шаблоном."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Откључавање лицем."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Откључавање лицем."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Откључавање PIN-ом."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Откључава SIM картицу PIN-ом."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Откључава SIM картицу PUK-ом."</string>
@@ -1410,7 +1407,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ДЕЛИ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Избор метода уноса"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Задржи је на екрану док је физичка тастатура активна"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Задржава се на екрану док је физичка тастатура активна"</string>
     <string name="hardware" msgid="1800597768237606953">"Прикажи виртуелну тастатуру"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Конфигуришите физичку тастатуру"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Додирните да бисте изабрали језик и распоред"</string>
@@ -1892,7 +1889,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирао је администратор"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избрисао је администратор"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Потврди"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Уштеда батерије укључује Тамну тему и ограничава или искључује активности у позадини, неке визуелне ефекте, одређене функције и мрежне везе.\n\n"<annotation id="url">"Сазнајте више"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Уштеда батерије укључује тамну тему и ограничава или искључује активности у позадини, неке визуелне ефекте, одређене функције и неке мрежне везе."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Уштеда батерије укључује тамну тему и ограничава или искључује активности у позадини, неке визуелне ефекте, одређене функције и неке мрежне везе."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Да би се смањила потрошња података, Уштеда података спречава неке апликације да шаљу или примају податке у позадини. Апликација коју тренутно користите може да приступа подацима, али ће то чинити ређе. На пример, слике се неће приказивати док их не додирнете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Желите да укључите Уштеду података?"</string>
@@ -2005,7 +2002,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Апликација <xliff:g id="APP_NAME_0">%1$s</xliff:g> тренутно није доступна. <xliff:g id="APP_NAME_1">%2$s</xliff:g> управља доступношћу."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Сазнајте више"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Опозови паузирање апликације"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Укључити пословне апликације?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Укључујете пословне апликације?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Приступајте пословним апликацијама и обавештењима"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Укључи"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликација није доступна"</string>
@@ -2128,7 +2125,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Потврди"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Искључи"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Сазнајте више"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Побољшана обавештења су заменила Android прилагодљива обавештења у Android-у 12. Ова функција показује предложене радње и одговоре и организује обавештења.\n\nПобољшана обавештења могу да приступају садржају обавештења, укључујући личне податке попут имена контаката и порука. Ова функција може и да одбацује обавештења или да одговара на њих, на пример, да се јавља на телефонске позиве и контролише режим Не узнемиравај."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Побољшана обавештења су заменила Android прилагодљива обавештења у Android-у 12. Ова функција показује предложене радње и одговоре, и организује обавештења.\n\nПобољшана обавештења могу да приступају садржају обавештења, укључујући личне податке попут имена контаката и порука. Ова функција може и да одбацује обавештења или да одговара на њих, на пример, да се јавља на телефонске позиве и контролише режим Не узнемиравај."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Обавештење о информацијама Рутинског режима"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батерија ће се можда испразнити пре уобичајеног пуњења"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Уштеда батерије је активирана да би се продужило трајање батерије"</string>

@@ -3694,11 +3694,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && mImeLayeringTarget != null
                 && mImeLayeringTarget.mActivityRecord != null
                 && mImeLayeringTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                // An activity with override bounds should be letterboxed inside its parent bounds,
-                // so it doesn't fill the screen.
-                && mImeLayeringTarget.mActivityRecord.matchParentBounds()
-                // IME is attached to non-Letterboxed app windows, other than windows with
-                // LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER flag. (Refer to WS.isLetterboxedAppWindow())
+                // IME is attached to app windows that fill display area. This excludes
+                // letterboxed windows.
                 && mImeLayeringTarget.matchesDisplayAreaBounds();
     }
 
@@ -4013,6 +4010,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
         if (allowAttachToApp && shouldImeAttachedToApp()) {
+            if (mImeLayeringTarget.mActivityRecord != mImeInputTarget.mActivityRecord) {
+                // Do not change parent if the window hasn't requested IME.
+                return null;
+            }
             return mImeLayeringTarget.mActivityRecord.getSurfaceControl();
         }
 
@@ -5009,28 +5010,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && mDisplayId != mWmService.mVr2dDisplayId
                 // Do not show system decorations on untrusted virtual display.
                 && isTrusted();
-    }
-
-    /**
-     * Re-parent the DisplayContent's top surface, {@link #mSurfaceControl} to the specified
-     * SurfaceControl.
-     *
-     * @param win The window which owns the SurfaceControl. This indicates the z-order of the
-     *            windows of this display against the windows on the parent display.
-     * @param sc The new SurfaceControl, where the DisplayContent's surfaces will be re-parented to.
-     */
-    void reparentDisplayContent(WindowState win, SurfaceControl sc) {
-        if (mParentWindow != null) {
-            mParentWindow.removeEmbeddedDisplayContent(this);
-        }
-        mParentWindow = win;
-        mParentWindow.addEmbeddedDisplayContent(this);
-        mParentSurfaceControl = sc;
-        if (mPortalWindowHandle == null) {
-            mPortalWindowHandle = createPortalWindowHandle(sc.toString());
-        }
-        getPendingTransaction().setInputWindowInfo(sc, mPortalWindowHandle)
-                .reparent(mSurfaceControl, sc);
     }
 
     /**

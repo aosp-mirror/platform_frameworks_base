@@ -192,6 +192,7 @@ import android.view.autofill.AutofillManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.app.AssistUtils;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -435,6 +436,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mPowerKeyHandled;
     volatile boolean mBackKeyHandled;
     volatile boolean mEndCallKeyHandled;
+    volatile boolean mCameraGestureTriggered;
     volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
 
     /**
@@ -594,6 +596,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private KeyCombinationManager mKeyCombinationManager;
     private SingleKeyGestureDetector mSingleKeyGestureDetector;
+    private GestureLauncherService mGestureLauncherService;
 
     private boolean mLockNowPending = false;
 
@@ -650,7 +653,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case MSG_LAUNCH_ASSIST:
                     final int deviceId = msg.arg1;
                     final Long eventTime = (Long) msg.obj;
-                    launchAssistAction(null /* hint */, deviceId, eventTime);
+                    launchAssistAction(null /* hint */, deviceId, eventTime,
+                            AssistUtils.INVOCATION_TYPE_UNKNOWN);
                     break;
                 case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:
                     launchVoiceAssistWithWakeLock();
@@ -914,6 +918,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void powerPress(long eventTime, int count, boolean beganFromNonInteractive) {
+        mCameraGestureTriggered = false;
         if (mDefaultDisplayPolicy.isScreenOnEarly() && !mDefaultDisplayPolicy.isScreenOnFully()) {
             Slog.i(TAG, "Suppressed redundant power key press while "
                     + "already in the process of turning the screen on.");
@@ -1063,12 +1068,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private int getMaxMultiPressPowerCount() {
+        // GestureLauncherService could handle power multi tap gesture.
+        if (mGestureLauncherService != null
+                && mGestureLauncherService.isEmergencyGestureEnabled()) {
+            return 5; // EMERGENCY_GESTURE_POWER_TAP_COUNT_THRESHOLD
+        }
+
         if (mTriplePressOnPowerBehavior != MULTI_PRESS_POWER_NOTHING) {
             return 3;
         }
         if (mDoublePressOnPowerBehavior != MULTI_PRESS_POWER_NOTHING) {
             return 2;
         }
+
+        if (mGestureLauncherService != null
+                && mGestureLauncherService.isCameraDoubleTapPowerEnabled()) {
+            return 2; // CAMERA_POWER_TAP_COUNT_THRESHOLD
+        }
+
         return 1;
     }
 
@@ -1108,7 +1125,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 performHapticFeedback(HapticFeedbackConstants.ASSISTANT_BUTTON, false,
                         "Power - Long Press - Go To Assistant");
                 final int powerKeyDeviceId = Integer.MIN_VALUE;
-                launchAssistAction(null, powerKeyDeviceId, eventTime);
+                launchAssistAction(null, powerKeyDeviceId, eventTime,
+                        AssistUtils.INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS);
                 break;
         }
     }
@@ -1541,7 +1559,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     launchAllAppsAction();
                     break;
                 case LONG_PRESS_HOME_ASSIST:
-                    launchAssistAction(null, deviceId, eventTime);
+                    launchAssistAction(null, deviceId, eventTime,
+                            AssistUtils.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
                     break;
                 case LONG_PRESS_HOME_NOTIFICATION_PANEL:
                     toggleNotificationPanel();
@@ -2772,7 +2791,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     } else if (mPendingMetaAction) {
                         launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD,
                                 event.getDeviceId(),
-                                event.getEventTime());
+                                event.getEventTime(), AssistUtils.INVOCATION_TYPE_UNKNOWN);
                         mPendingMetaAction = false;
                     }
                 }
@@ -3036,7 +3055,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // various parts of the UI.
 
     /** Asks the status bar to startAssist(), usually a full "assistant" interface */
-    private void launchAssistAction(String hint, int deviceId, long eventTime) {
+    private void launchAssistAction(String hint, int deviceId, long eventTime,
+            int invocationType) {
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
         if (!isUserSetupComplete()) {
             // Disable opening assist window during setup
@@ -3053,6 +3073,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             args.putBoolean(hint, true);
         }
         args.putLong(Intent.EXTRA_TIME, eventTime);
+        args.putInt(AssistUtils.INVOCATION_TYPE_KEY, invocationType);
 
         ((SearchManager) mContext.createContextAsUser(UserHandle.of(mCurrentUserId), 0)
                 .getSystemService(Context.SEARCH_SERVICE)).launchAssist(args);
@@ -3818,15 +3839,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // The camera gesture will be detected by GestureLauncherService.
     private boolean handleCameraGesture(KeyEvent event, boolean interactive) {
         // camera gesture.
-        GestureLauncherService gestureService = LocalServices.getService(
-                GestureLauncherService.class);
-        if (gestureService == null) {
+        if (mGestureLauncherService == null) {
             return false;
         }
 
         final MutableBoolean outLaunched = new MutableBoolean(false);
-        final boolean gesturedServiceIntercepted = gestureService.interceptPowerKeyDown(event,
-                interactive, outLaunched);
+        final boolean gesturedServiceIntercepted = mGestureLauncherService.interceptPowerKeyDown(
+                event, interactive, outLaunched);
+        if (outLaunched.value) {
+            mCameraGestureTriggered = true;
+        }
         if (outLaunched.value && mRequestedOrSleepingDefaultDisplay) {
             mCameraGestureTriggeredDuringGoingToSleep = true;
         }
@@ -4203,13 +4225,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDefaultDisplayRotation.updateOrientationListener();
 
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onFinishedGoingToSleep(pmSleepReason,
-                    mCameraGestureTriggeredDuringGoingToSleep);
+            mKeyguardDelegate.onFinishedGoingToSleep(pmSleepReason, mCameraGestureTriggered);
         }
         if (mDisplayFoldController != null) {
             mDisplayFoldController.finishedGoingToSleep();
         }
         mCameraGestureTriggeredDuringGoingToSleep = false;
+        mCameraGestureTriggered = false;
     }
 
     // Called on the PowerManager's Notifier thread.
@@ -4236,8 +4258,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDefaultDisplayRotation.updateOrientationListener();
 
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onStartedWakingUp(pmWakeReason);
+            mKeyguardDelegate.onStartedWakingUp(pmWakeReason, mCameraGestureTriggered);
         }
+
+        mCameraGestureTriggered = false;
     }
 
     // Called on the PowerManager's Notifier thread.
@@ -4677,6 +4701,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         mAutofillManagerInternal = LocalServices.getService(AutofillManagerInternal.class);
+        mGestureLauncherService = LocalServices.getService(GestureLauncherService.class);
     }
 
     /** {@inheritDoc} */

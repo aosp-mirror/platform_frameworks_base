@@ -99,7 +99,7 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
-        internet,wifi,bt,dnd,flashlight,rotation,battery,cell,airplane,cast,screenrecord
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle
     </string>
 
     <!-- The minimum number of tiles to display in QuickSettings -->
@@ -107,7 +107,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        internet,wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,saver,dark,work,cast,night,screenrecord,reverse,reduce_brightness,cameratoggle,mictoggle,controls,alarm,wallet
+        internet,wifi,cell,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -352,7 +352,7 @@
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">left[.5W],back[1WC];home;recent[1WC],right[.5W]</string>
     <string name="config_navBarLayoutQuickstep" translatable="false">back[1.7WC];home;contextual[1.7WC]</string>
-    <string name="config_navBarLayoutHandle" translatable="false">back[40AC];home_handle;ime_switcher[40AC]</string>
+    <string name="config_navBarLayoutHandle" translatable="false">back[70AC];home_handle;ime_switcher[70AC]</string>
 
     <bool name="quick_settings_show_full_alarm">false</bool>
 
@@ -603,6 +603,8 @@
 
     <!-- Whether wallet view is shown in landscape / seascape orientations -->
     <bool name="global_actions_show_landscape_wallet_view">false</bool>
+    <!-- Whether global actions should show an informational message about changes in S -->
+    <bool name="global_actions_show_change_info">false</bool>
 
     <!-- Package name of the preferred system app to perform eSOS action -->
     <string name="config_preferredEmergencySosPackage" translatable="false"></string>
@@ -627,6 +629,11 @@
         M44.9713,54.6267C42.5513,56.7167 39.2879,58.0001 35.5846,58.0001C32.2296,
         58.0001 29.2229,56.9551 26.8945,55.195
     </string>
+
+    <!-- The radius of the enrollment progress bar, in dp -->
+    <integer name="config_udfpsEnrollProgressBar" translatable="false">
+        280
+    </integer>
 
     <!-- package name of a built-in camera app to use to restrict implicit intent resolution
          when the double-press power gesture is used. Ignored if empty. -->

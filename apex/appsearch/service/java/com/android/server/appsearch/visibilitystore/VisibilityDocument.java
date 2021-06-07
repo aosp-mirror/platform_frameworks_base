@@ -21,11 +21,8 @@ import android.app.appsearch.GenericDocument;
 
 import androidx.annotation.Nullable;
 
-/**
- * Holds the visibility settings that apply to a package's databases.
- * @hide
- */
-public class VisibilityDocument extends GenericDocument {
+/** Holds the visibility settings that apply to a package's databases. */
+class VisibilityDocument extends GenericDocument {
     /** Schema type for documents that hold AppSearch's metadata, e.g. visibility settings */
     public static final String SCHEMA_TYPE = "VisibilityType";
 

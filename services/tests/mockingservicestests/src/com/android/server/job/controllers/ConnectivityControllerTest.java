@@ -48,14 +48,18 @@ import static org.mockito.Mockito.verify;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicyManager;
+import android.os.BatteryManager;
+import android.os.BatteryManagerInternal;
 import android.os.Build;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -70,6 +74,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -82,6 +87,8 @@ public class ConnectivityControllerTest {
 
     @Mock
     private Context mContext;
+    @Mock
+    private BatteryManagerInternal mBatteryManagerInternal;
     @Mock
     private ConnectivityManager mConnManager;
     @Mock
@@ -107,6 +114,9 @@ public class ConnectivityControllerTest {
 
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
         LocalServices.addService(NetworkPolicyManagerInternal.class, mNetPolicyManagerInternal);
+
+        LocalServices.removeServiceForTest(BatteryManagerInternal.class);
+        LocalServices.addService(BatteryManagerInternal.class, mBatteryManagerInternal);
 
         when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
 
@@ -143,8 +153,18 @@ public class ConnectivityControllerTest {
                         DataUnit.MEBIBYTES.toBytes(1))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
 
+        final ArgumentCaptor<BroadcastReceiver> chargingCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        when(mBatteryManagerInternal.isPowered(eq(BatteryManager.BATTERY_PLUGGED_ANY)))
+                .thenReturn(false);
         final ConnectivityController controller = new ConnectivityController(mService);
+        verify(mContext).registerReceiver(chargingCaptor.capture(),
+                ArgumentMatchers.argThat(filter ->
+                        filter.hasAction(BatteryManager.ACTION_CHARGING)
+                                && filter.hasAction(BatteryManager.ACTION_DISCHARGING)));
         when(mService.getMaxJobExecutionTimeMs(any())).thenReturn(10 * 60_000L);
+        final BroadcastReceiver chargingReceiver = chargingCaptor.getValue();
+        chargingReceiver.onReceive(mContext, new Intent(BatteryManager.ACTION_DISCHARGING));
 
         // Slow network is too slow
         assertFalse(controller.isSatisfied(createJobStatus(job), net,
@@ -166,7 +186,18 @@ public class ConnectivityControllerTest {
         assertTrue(controller.isSatisfied(createJobStatus(job), net,
                 createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(130)
                         .setLinkDownstreamBandwidthKbps(130).build(), mConstants));
+        // Slow network is too slow, but device is charging and network is unmetered.
+        when(mBatteryManagerInternal.isPowered(eq(BatteryManager.BATTERY_PLUGGED_ANY)))
+                .thenReturn(true);
+        chargingReceiver.onReceive(mContext, new Intent(BatteryManager.ACTION_CHARGING));
+        assertTrue(controller.isSatisfied(createJobStatus(job), net,
+                createCapabilitiesBuilder().addCapability(NET_CAPABILITY_NOT_METERED)
+                        .setLinkUpstreamBandwidthKbps(1).setLinkDownstreamBandwidthKbps(1).build(),
+                mConstants));
 
+        when(mBatteryManagerInternal.isPowered(eq(BatteryManager.BATTERY_PLUGGED_ANY)))
+                .thenReturn(false);
+        chargingReceiver.onReceive(mContext, new Intent(BatteryManager.ACTION_DISCHARGING));
         when(mService.getMaxJobExecutionTimeMs(any())).thenReturn(60_000L);
 
         // Slow network is too slow
@@ -189,6 +220,14 @@ public class ConnectivityControllerTest {
         assertFalse(controller.isSatisfied(createJobStatus(job), net,
                 createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(130)
                         .setLinkDownstreamBandwidthKbps(130).build(), mConstants));
+        // Slow network is too slow, but device is charging and network is unmetered.
+        when(mBatteryManagerInternal.isPowered(eq(BatteryManager.BATTERY_PLUGGED_ANY)))
+                .thenReturn(true);
+        chargingReceiver.onReceive(mContext, new Intent(BatteryManager.ACTION_CHARGING));
+        assertTrue(controller.isSatisfied(createJobStatus(job), net,
+                createCapabilitiesBuilder().addCapability(NET_CAPABILITY_NOT_METERED)
+                        .setLinkUpstreamBandwidthKbps(1).setLinkDownstreamBandwidthKbps(1).build(),
+                mConstants));
     }
 
     @Test

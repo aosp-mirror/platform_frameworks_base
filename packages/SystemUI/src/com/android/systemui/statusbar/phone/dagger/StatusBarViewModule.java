@@ -23,6 +23,7 @@ import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthRippleView;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
+import com.android.systemui.statusbar.phone.TapAgainView;
 
 import dagger.Module;
 import dagger.Provides;
@@ -52,5 +53,12 @@ public abstract class StatusBarViewModule {
     public static AuthRippleView getAuthRippleView(
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.auth_ripple);
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    public static TapAgainView getTapAgainView(NotificationPanelView npv) {
+        return npv.getTapAgainView();
     }
 }

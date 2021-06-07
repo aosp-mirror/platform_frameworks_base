@@ -303,6 +303,13 @@ public class RecentsAnimationController implements DeathRecipient {
                                 inputMethodManagerInternal.hideCurrentInputMethod(
                                         SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
                             }
+                        } else {
+                            // Disable IME icon explicitly when IME attached to the app in case
+                            // IME icon might flickering while swiping to the next app task still
+                            // in animating before the next app window focused, or IME icon
+                            // persists on the bottom when swiping the task to recents.
+                            InputMethodManagerInternal.get().updateImeWindowStatus(
+                                    true /* disableImeIcon */);
                         }
                     }
                     mService.mWindowPlacerLocked.requestTraversal();
@@ -658,6 +665,8 @@ public class RecentsAnimationController implements DeathRecipient {
         if (!mNavigationBarAttachedToApp) {
             return;
         }
+        mNavigationBarAttachedToApp = false;
+
         if (mStatusBar != null) {
             mStatusBar.setNavigationBarLumaSamplingEnabled(mDisplayId, true);
         }
@@ -923,6 +932,12 @@ public class RecentsAnimationController implements DeathRecipient {
             mRecentScreenshotAnimator = null;
         }
 
+        // Restore IME icon only when moving the original app task to front from recents, in case
+        // IME icon may missing if the moving task has already been the current focused task.
+        if (reorderMode == REORDER_MOVE_TO_ORIGINAL_POSITION && !mIsAddingTaskToTargets) {
+            InputMethodManagerInternal.get().updateImeWindowStatus(false /* disableImeIcon */);
+        }
+
         // Update the input windows after the animation is complete
         final InputMonitor inputMonitor = mDisplayContent.getInputMonitor();
         inputMonitor.updateInputWindowsLw(true /*force*/);
@@ -1163,9 +1178,6 @@ public class RecentsAnimationController implements DeathRecipient {
                 // Apply the task's pending transaction in case it is detached and its transaction
                 // is not reachable.
                 mTask.getPendingTransaction().apply();
-
-                // Reset whether this task can affect the sysui flags
-                mTask.setCanAffectSystemUiFlags(true);
             }
         }
 

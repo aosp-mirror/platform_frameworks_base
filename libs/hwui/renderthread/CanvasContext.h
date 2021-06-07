@@ -170,6 +170,7 @@ public:
         if (mFrameMetricsReporter.get() != nullptr) {
             mFrameMetricsReporter->removeObserver(observer);
             if (!mFrameMetricsReporter->hasObservers()) {
+                std::lock_guard lock(mFrameMetricsReporterMutex);
                 mFrameMetricsReporter.reset(nullptr);
             }
         }
@@ -295,6 +296,7 @@ private:
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;
     std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter;
+    std::mutex mFrameMetricsReporterMutex;
 
     std::set<RenderNode*> mPrefetchedLayers;
 

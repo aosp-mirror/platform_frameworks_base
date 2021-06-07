@@ -245,7 +245,7 @@ public class ContentProviderHelper {
 
                     checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                     final int verifiedAdj = cpr.proc.mState.getVerifiedAdj();
-                    boolean success = mService.updateOomAdjLocked(cpr.proc, true,
+                    boolean success = mService.updateOomAdjLocked(cpr.proc,
                             OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
                     // XXX things have changed so updateOomAdjLocked doesn't actually tell us
                     // if the process has been successfully adjusted.  So to reduce races with
@@ -501,37 +501,38 @@ public class ContentProviderHelper {
 
             mService.grantImplicitAccess(userId, null, callingUid,
                     UserHandle.getAppId(cpi.applicationInfo.uid));
-        }
 
-        if (caller != null) {
-            // The client will be waiting, and we'll notify it when the provider is ready.
-            synchronized (cpr) {
-                if (cpr.provider == null) {
-                    if (cpr.launchingApp == null) {
-                        Slog.w(TAG, "Unable to launch app "
-                                + cpi.applicationInfo.packageName + "/"
-                                + cpi.applicationInfo.uid + " for provider "
-                                + name + ": launching app became null");
-                        EventLogTags.writeAmProviderLostProcess(
-                                UserHandle.getUserId(cpi.applicationInfo.uid),
-                                cpi.applicationInfo.packageName,
-                                cpi.applicationInfo.uid, name);
-                        return null;
-                    }
+            if (caller != null) {
+                // The client will be waiting, and we'll notify it when the provider is ready.
+                synchronized (cpr) {
+                    if (cpr.provider == null) {
+                        if (cpr.launchingApp == null) {
+                            Slog.w(TAG, "Unable to launch app "
+                                    + cpi.applicationInfo.packageName + "/"
+                                    + cpi.applicationInfo.uid + " for provider "
+                                    + name + ": launching app became null");
+                            EventLogTags.writeAmProviderLostProcess(
+                                    UserHandle.getUserId(cpi.applicationInfo.uid),
+                                    cpi.applicationInfo.packageName,
+                                    cpi.applicationInfo.uid, name);
+                            return null;
+                        }
 
-                    if (conn != null) {
-                        conn.waiting = true;
+                        if (conn != null) {
+                            conn.waiting = true;
+                        }
+                        Message msg = mService.mHandler.obtainMessage(
+                                ActivityManagerService.WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG);
+                        msg.obj = cpr;
+                        mService.mHandler.sendMessageDelayed(msg,
+                                ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS);
                     }
-                    Message msg = mService.mHandler.obtainMessage(
-                            ActivityManagerService.WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG);
-                    msg.obj = cpr;
-                    mService.mHandler.sendMessageDelayed(msg,
-                            ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS);
                 }
+                // Return a holder instance even if we are waiting for the publishing of the
+                // provider, client will check for the holder.provider to see if it needs to wait
+                // for it.
+                return cpr.newHolder(conn, false);
             }
-            // Return a holder instance even if we are waiting for the publishing of the provider,
-            // client will check for the holder.provider to see if it needs to wait for it.
-            return cpr.newHolder(conn, false);
         }
 
         // Because of the provider's external client (i.e., SHELL), we'll have to wait right here.
@@ -684,7 +685,7 @@ public class ContentProviderHelper {
 
             // update the app's oom adj value and each provider's usage stats
             if (providersPublished) {
-                mService.updateOomAdjLocked(r, true, OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
+                mService.updateOomAdjLocked(r, OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
                 for (int i = 0, size = providers.size(); i < size; i++) {
                     ContentProviderHolder src = providers.get(i);
                     if (src == null || src.info == null || src.provider == null) {

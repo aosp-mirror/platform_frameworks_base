@@ -334,6 +334,26 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     public static final int SUBREASON_CACHED_IDLE_FORCED_APP_STANDBY = 18;
 
+    /**
+     * The process was killed because it fails to freeze/unfreeze binder
+     * or query binder frozen info while being frozen.
+     * this would be set only when the reason is {@link #REASON_FREEZER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_FREEZER_BINDER_IOCTL = 19;
+
+    /**
+     * The process was killed because it receives sync binder transactions
+     * while being frozen.
+     * this would be set only when the reason is {@link #REASON_FREEZER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_FREEZER_BINDER_TRANSACTION = 20;
+
     // If there is any OEM code which involves additional app kill reasons, it should
     // be categorized in {@link #REASON_OTHER}, with subreason code starting from 1000.
 
@@ -491,6 +511,8 @@ public final class ApplicationExitInfo implements Parcelable {
         SUBREASON_IMPERCEPTIBLE,
         SUBREASON_REMOVE_LRU,
         SUBREASON_ISOLATED_NOT_NEEDED,
+        SUBREASON_FREEZER_BINDER_IOCTL,
+        SUBREASON_FREEZER_BINDER_TRANSACTION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SubReason {}
@@ -1032,6 +1054,8 @@ public final class ApplicationExitInfo implements Parcelable {
         pw.println(prefix + "  user=" + UserHandle.getUserId(mPackageUid));
         pw.println(prefix + "  process=" + mProcessName);
         pw.println(prefix + "  reason=" + mReason + " (" + reasonCodeToString(mReason) + ")");
+        pw.println(prefix + "  subreason=" + mSubReason + " (" + subreasonToString(mSubReason)
+                + ")");
         pw.println(prefix + "  status=" + mStatus);
         pw.println(prefix + "  importance=" + mImportance);
         pw.print(prefix + "  pss="); DebugUtils.printSizeValue(pw, mPss << 10); pw.println();
@@ -1055,6 +1079,8 @@ public final class ApplicationExitInfo implements Parcelable {
         sb.append(" process=").append(mProcessName);
         sb.append(" reason=").append(mReason).append(" (")
                 .append(reasonCodeToString(mReason)).append(")");
+        sb.append(" subreason=").append(mSubReason).append(" (")
+                .append(subreasonToString(mSubReason)).append(")");
         sb.append(" status=").append(mStatus);
         sb.append(" importance=").append(mImportance);
         sb.append(" pss="); DebugUtils.sizeValueToString(mPss << 10, sb);
@@ -1137,6 +1163,10 @@ public final class ApplicationExitInfo implements Parcelable {
                 return "REMOVE LRU";
             case SUBREASON_ISOLATED_NOT_NEEDED:
                 return "ISOLATED NOT NEEDED";
+            case SUBREASON_FREEZER_BINDER_IOCTL:
+                return "FREEZER BINDER IOCTL";
+            case SUBREASON_FREEZER_BINDER_TRANSACTION:
+                return "FREEZER BINDER TRANSACTION";
             default:
                 return "UNKNOWN";
         }

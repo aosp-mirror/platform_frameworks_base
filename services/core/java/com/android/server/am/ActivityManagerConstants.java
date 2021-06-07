@@ -453,7 +453,7 @@ final class ActivityManagerConstants extends ContentObserver {
     volatile long mFgsNotificationDeferralInterval = 10_000;
 
     // Rate limit: minimum time after an app's FGS notification is deferred
-    // before another FGS notifiction from that app can be deferred.
+    // before another FGS notification from that app can be deferred.
     volatile long mFgsNotificationDeferralExclusionTime = 2 * 60 * 1000L;
 
     /**

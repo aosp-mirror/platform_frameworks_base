@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC 已停用"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC 已啟用"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"螢幕錄影"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"開始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"要將裝置麥克風解除封鎖嗎？"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"還有 <xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g> 則通知"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"較不緊急的通知會顯示在下方"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"再次輕觸即可開啟"</string>
+    <string name="tap_again" msgid="1315420114387908655">"再輕觸一次"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑動即可開啟"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑動即可重試"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"如要使用 NFC，請先解鎖"</string>

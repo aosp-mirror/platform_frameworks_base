@@ -26,8 +26,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import androidx.annotation.NonNull;
@@ -41,17 +39,15 @@ import com.android.systemui.R;
 public class UdfpsEnrollDrawable extends UdfpsDrawable {
     private static final String TAG = "UdfpsAnimationEnroll";
 
-    static final float PROGRESS_BAR_RADIUS = 360.f;
-
     private static final long ANIM_DURATION = 800;
     // 1 + SCALE_MAX is the maximum that the moving target will animate to
     private static final float SCALE_MAX = 0.25f;
 
+    @NonNull private final UdfpsEnrollProgressBarDrawable mProgressDrawable;
     @NonNull private final Drawable mMovingTargetFpIcon;
     @NonNull private final Paint mSensorOutlinePaint;
     @NonNull private final Paint mBlueFill;
     @NonNull private final Paint mBlueStroke;
-    @NonNull private final Handler mHandler;
 
     @Nullable private RectF mSensorRect;
     @Nullable private UdfpsEnrollHelper mEnrollHelper;
@@ -64,11 +60,10 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
     // Moving target size
     float mCurrentScale = 1.f;
 
-
     UdfpsEnrollDrawable(@NonNull Context context) {
         super(context);
 
-        mHandler = new Handler(Looper.getMainLooper());
+        mProgressDrawable = new UdfpsEnrollProgressBarDrawable(context, this);
 
         mSensorOutlinePaint = new Paint(0 /* flags */);
         mSensorOutlinePaint.setAntiAlias(true);
@@ -112,47 +107,49 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
     }
 
     void onEnrollmentProgress(int remaining, int totalSteps) {
+        mProgressDrawable.setEnrollmentProgress(remaining, totalSteps);
+
         if (mEnrollHelper.isCenterEnrollmentComplete()) {
-            mHandler.post(() -> {
-                if (mAnimatorSet != null && mAnimatorSet.isRunning()) {
-                    mAnimatorSet.end();
-                }
+            if (mAnimatorSet != null && mAnimatorSet.isRunning()) {
+                mAnimatorSet.end();
+            }
 
-                final PointF point = mEnrollHelper.getNextGuidedEnrollmentPoint();
+            final PointF point = mEnrollHelper.getNextGuidedEnrollmentPoint();
 
-                final ValueAnimator x = ValueAnimator.ofFloat(mCurrentX, point.x);
-                x.addUpdateListener(animation -> {
-                    mCurrentX = (float) animation.getAnimatedValue();
-                    invalidateSelf();
-                });
-
-                final ValueAnimator y = ValueAnimator.ofFloat(mCurrentY, point.y);
-                y.addUpdateListener(animation -> {
-                    mCurrentY = (float) animation.getAnimatedValue();
-                    invalidateSelf();
-                });
-
-                final ValueAnimator scale = ValueAnimator.ofFloat(0, (float) Math.PI);
-                scale.setDuration(ANIM_DURATION);
-                scale.addUpdateListener(animation -> {
-                    // Grow then shrink
-                    mCurrentScale = 1 +
-                            SCALE_MAX * (float) Math.sin((float) animation.getAnimatedValue());
-                    invalidateSelf();
-                });
-
-                mAnimatorSet = new AnimatorSet();
-
-                mAnimatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
-                mAnimatorSet.setDuration(ANIM_DURATION);
-                mAnimatorSet.playTogether(x, y, scale);
-                mAnimatorSet.start();
+            final ValueAnimator x = ValueAnimator.ofFloat(mCurrentX, point.x);
+            x.addUpdateListener(animation -> {
+                mCurrentX = (float) animation.getAnimatedValue();
+                invalidateSelf();
             });
+
+            final ValueAnimator y = ValueAnimator.ofFloat(mCurrentY, point.y);
+            y.addUpdateListener(animation -> {
+                mCurrentY = (float) animation.getAnimatedValue();
+                invalidateSelf();
+            });
+
+            final ValueAnimator scale = ValueAnimator.ofFloat(0, (float) Math.PI);
+            scale.setDuration(ANIM_DURATION);
+            scale.addUpdateListener(animation -> {
+                // Grow then shrink
+                mCurrentScale = 1 +
+                        SCALE_MAX * (float) Math.sin((float) animation.getAnimatedValue());
+                invalidateSelf();
+            });
+
+            mAnimatorSet = new AnimatorSet();
+
+            mAnimatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+            mAnimatorSet.setDuration(ANIM_DURATION);
+            mAnimatorSet.playTogether(x, y, scale);
+            mAnimatorSet.start();
         }
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
+        mProgressDrawable.draw(canvas);
+
         if (isIlluminationShowing()) {
             return;
         }
@@ -179,6 +176,11 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             mFingerprintDrawable.setAlpha(mAlpha);
             mSensorOutlinePaint.setAlpha(mAlpha);
         }
+    }
+
+    @Override
+    public void onBoundsChange(@NonNull Rect rect) {
+        mProgressDrawable.setBounds(rect);
     }
 
     @Override

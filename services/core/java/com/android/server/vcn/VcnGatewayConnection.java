@@ -30,6 +30,7 @@ import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_INTERNAL_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
 
+import static com.android.server.VcnManagementService.LOCAL_LOG;
 import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
@@ -673,7 +674,6 @@ public class VcnGatewayConnection extends StateMachine {
                         mVcnContext,
                         subscriptionGroup,
                         mLastSnapshot,
-                        mConnectionConfig.getAllUnderlyingCapabilities(),
                         mUnderlyingNetworkTrackerCallback);
         mIpSecManager = mVcnContext.getContext().getSystemService(IpSecManager.class);
 
@@ -1645,7 +1645,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull IpSecTransform transform,
                 int direction) {
             if (direction != IpSecManager.DIRECTION_IN && direction != IpSecManager.DIRECTION_OUT) {
-                Slog.wtf(TAG, "Applying transform for unexpected direction: " + direction);
+                logWtf("Applying transform for unexpected direction: " + direction);
             }
 
             try {
@@ -1970,6 +1970,9 @@ public class VcnGatewayConnection extends StateMachine {
             }
             builder.setAdministratorUids(adminUids);
 
+            builder.setLinkUpstreamBandwidthKbps(underlyingCaps.getLinkUpstreamBandwidthKbps());
+            builder.setLinkDownstreamBandwidthKbps(underlyingCaps.getLinkDownstreamBandwidthKbps());
+
             // Set TransportInfo for SysUI use (never parcelled out of SystemServer).
             if (underlyingCaps.hasTransport(TRANSPORT_WIFI)
                     && underlyingCaps.getTransportInfo() instanceof WifiInfo) {
@@ -1986,6 +1989,11 @@ public class VcnGatewayConnection extends StateMachine {
                         "Unknown transport type or missing TransportInfo/NetworkSpecifier for"
                                 + " non-null underlying network");
             }
+        } else {
+            Slog.wtf(
+                    TAG,
+                    "No underlying network while building network capabilities",
+                    new IllegalStateException());
         }
 
         return builder.build();
@@ -2013,7 +2021,18 @@ public class VcnGatewayConnection extends StateMachine {
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null /*gateway*/,
                 null /*iface*/, RouteInfo.RTN_UNICAST));
 
-        final int underlyingMtu = (underlying == null) ? 0 : underlying.linkProperties.getMtu();
+        int underlyingMtu = 0;
+        if (underlying != null) {
+            final LinkProperties underlyingLp = underlying.linkProperties;
+
+            lp.setTcpBufferSizes(underlyingLp.getTcpBufferSizes());
+            underlyingMtu = underlyingLp.getMtu();
+        } else {
+            Slog.wtf(
+                    TAG,
+                    "No underlying network while building link properties",
+                    new IllegalStateException());
+        }
         lp.setMtu(
                 MtuUtils.getMtu(
                         ikeTunnelParams.getTunnelModeChildSessionParams().getSaProposals(),
@@ -2115,37 +2134,44 @@ public class VcnGatewayConnection extends StateMachine {
                 + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup)
                 + "-"
                 + mConnectionConfig.getGatewayConnectionName()
-                + "]: ";
+                + "] ";
     }
 
     private void logVdbg(String msg) {
         if (VDBG) {
             Slog.v(TAG, getLogPrefix() + msg);
+            LOCAL_LOG.log(getLogPrefix() + "VDBG: " + msg);
         }
     }
 
     private void logDbg(String msg) {
         Slog.d(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "DBG: " + msg);
     }
 
     private void logDbg(String msg, Throwable tr) {
         Slog.d(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "DBG: " + msg + tr);
     }
 
     private void logErr(String msg) {
         Slog.e(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "ERR: " + msg);
     }
 
     private void logErr(String msg, Throwable tr) {
         Slog.e(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "ERR: " + msg + tr);
     }
 
     private void logWtf(String msg) {
         Slog.wtf(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "WTF: " + msg);
     }
 
     private void logWtf(String msg, Throwable tr) {
         Slog.wtf(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "WTF: " + msg + tr);
     }
 
     /**
@@ -2169,15 +2195,9 @@ public class VcnGatewayConnection extends StateMachine {
         pw.println(
                 "mNetworkAgent.getNetwork(): "
                         + (mNetworkAgent == null ? null : mNetworkAgent.getNetwork()));
+        pw.println();
 
-        pw.println("mUnderlying:");
-        pw.increaseIndent();
-        if (mUnderlying != null) {
-            mUnderlying.dump(pw);
-        } else {
-            pw.println("null");
-        }
-        pw.decreaseIndent();
+        mUnderlyingNetworkTracker.dump(pw);
         pw.println();
 
         pw.decreaseIndent();
@@ -2274,13 +2294,11 @@ public class VcnGatewayConnection extends StateMachine {
                 VcnContext vcnContext,
                 ParcelUuid subscriptionGroup,
                 TelephonySubscriptionSnapshot snapshot,
-                Set<Integer> requiredUnderlyingNetworkCapabilities,
                 UnderlyingNetworkTrackerCallback callback) {
             return new UnderlyingNetworkTracker(
                     vcnContext,
                     subscriptionGroup,
                     snapshot,
-                    requiredUnderlyingNetworkCapabilities,
                     callback);
         }
 

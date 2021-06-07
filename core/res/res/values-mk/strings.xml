@@ -339,7 +339,7 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Може да допрете, повлечете, штипнете и да користите други движења."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Движења за отпечатоци"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може да сними движења што се направени на сензорот за отпечатоци на уредот."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Правење слика од екранот"</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Зачувување слика од екранот"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може да направи слика од екранот."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"оневозможи или измени статусна лента"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дозволува апликацијата да ја оневозможи статусната лента или да додава или отстранува системски икони."</string>
@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Откриен е делумен отпечаток"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Отпечатокот не може да се обработи. Обидете се повторно."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Исчистете го сензорот"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Прстот се движеше пребрзо"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Држете малку подолго"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Прстот се движеше премногу бавно. Обидете се повторно."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Пробајте со друг отпечаток"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Премногу светло"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона за отпечатоци"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"управува со хардвер за „Отклучување со лик“"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Дозволува апликац. да повика начини за додавање и бришење шаблони на лице за користење."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"користи хардвер за „Отклучување со лик“"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Дозволува апликацијата да користи хардвер за „Отклучување со лик“ за проверка"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Отклучување со лик"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Отклучување со лик"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Повторно регистрирајте го ликот"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"За да се подобри препознавањето, повторно регистрирајте го ликот"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Поставете „Отклучување со лик“"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Поставете „Отклучување со лик“"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отклучете го телефонот со гледање во него"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Поставете уште начини за отклучување"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Допрете за да додадете отпечаток"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ликот не може да се потврди. Хардвер - недостапен."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Пробајте „Отклучување со лик“ повторно."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Пробајте „Отклучување со лик“ повторно"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Не се зачуваа податоците за нов лик. Избришете го стариот."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Операцијата со лице се откажа."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"„Отклучувањето со лик“ е откажано од корисникот."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Корисникот го откажа „Отклучувањето со лик“"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Премногу обиди. Обидете се повторно подоцна."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Премногу обиди. „Отклучувањето со лик“ е оневозможено."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Премногу обиди. „Отклучувањето со лик“ е оневозможено."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Премногу обиди. Наместо тоа, користете го заклучувањето на екранот."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ликот не може да се потврди. Обидете се повторно."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Не сте поставиле „Отклучување со лик“."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"„Отклучувањето со лик“ не е поддржано на уредов."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Не сте поставиле „Отклучување со лик“"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"„Отклучувањето со лик“ не е поддржано на уредов"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Сензорот е привремено оневозможен."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Користи отклучување со лик"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Користи „Отклучување со лик“"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Користи лик или заклучување екран"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Користете го вашиот лик за да продолжите"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Користете отклучување со лик или заклучување екран за да продолжите"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Прошири отклучена област."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Отклучување со лизгање."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Отклучување со шема."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Отклучување со лик."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Отклучување со лик."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Отклучување со пин."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Отклучување со PIN на SIM."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Отклучување со PUK на SIM."</string>
@@ -1869,8 +1866,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски.\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелнни ефекти, одредени функции и некои мрежни врски."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>
@@ -2091,11 +2088,11 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Известувањево е рангирано повисоко. Допрете за да дадете повратни информации."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Известувањево е рангирано пониско. Допрете за да дадете повратни информации."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Подобрени известувања"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"„Подобрените известувања“ сега ги даваат предложените дејства и одговорите. „Приспособливите известувања на Android“ веќе не се достапни."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"„Подобрените известувања“ сега ги даваат предложените дејства и одговорите. „Адаптивните известувања на Android“ веќе не се достапни."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Во ред"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Исклучи"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Дознајте повеќе"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"„Подобрените известувања“ ги заменија „Приспособливите известувања на Android“ во Android 12. Оваа функција прикажува предложени дејства и одговори и ги организира вашите известувања.\n\n„Подобрените известувања“ може да пристапат до содржините од известувањата, вклучително и личните податоци, како што се имињата на контактите и пораките. Функцијава може и да отфрла или одговара на известувања, како на пример, одговарање телефонски повици и да ја контролира „Не вознемирувај“."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"„Подобрените известувања“ ги заменија „Адаптивните известувања на Android“ во Android 12. Оваа функција прикажува предложени дејства и одговори и ги организира вашите известувања. \n\n„Подобрените известувања“ може да пристапуваат до содржините од известувањата, вклучително и личните податоци, како што се имињата на контактите и пораките. Функцијава може и да ги отфрла или да одговара на известувањата, како на пример, да одговара на телефонски повици и да го контролира режимот „Не вознемирувај“."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известување за информации за режимот за рутини"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батеријата може да се потроши пред вообичаеното време за полнење"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Активиран е „Штедачот на батерија“ за да се продолжи траењето на батеријата"</string>

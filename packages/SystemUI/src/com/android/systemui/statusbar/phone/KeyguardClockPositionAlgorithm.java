@@ -325,7 +325,9 @@ public class KeyguardClockPositionAlgorithm {
      */
     private float getClockAlpha(int y) {
         float alphaKeyguard = Math.max(0, y / Math.max(1f, getClockY(1f, mDarkAmount)));
-        alphaKeyguard *= (1f - mQsExpansion);
+        float qsAlphaFactor = MathUtils.saturate(mQsExpansion / 0.3f);
+        qsAlphaFactor = 1f - qsAlphaFactor;
+        alphaKeyguard *= qsAlphaFactor;
         alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
         return MathUtils.lerp(alphaKeyguard, 1f, mDarkAmount);
     }

@@ -26,9 +26,11 @@ import android.graphics.PixelFormat;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -45,20 +47,19 @@ import javax.inject.Inject;
 @SysUISingleton
 public class SidefpsController {
     private static final String TAG = "SidefpsController";
-    // TODO (b/188690214): define and retrieve values from framework via SensorProps
-    static final int DISPLAY_HEIGHT = 1804;
-    static final int DISPLAY_WIDTH = 2208;
-    static final int SFPS_INDICATOR_HEIGHT = 225;
-    static final int SFPS_Y = 500;
-    static final int SFPS_INDICATOR_WIDTH = 50;
-
-    @Nullable private SidefpsView mView;
-    private final FingerprintManager mFingerprintManager;
-    private final Context mContext;
+    @NonNull private final Context mContext;
     @NonNull private final LayoutInflater mInflater;
+    private final FingerprintManager mFingerprintManager;
     private final WindowManager mWindowManager;
     private final DelayableExecutor mFgExecutor;
+    // TODO: update mDisplayHeight and mDisplayWidth for multi-display devices
+    private final int mDisplayHeight;
+    private final int mDisplayWidth;
+
     private boolean mIsVisible = false;
+    @Nullable private SidefpsView mView;
+
+    static final int SFPS_AFFORDANCE_WIDTH = 50; // in default portrait mode
 
     @NonNull
     private final ISidefpsController mSidefpsControllerImpl = new ISidefpsController.Stub() {
@@ -110,6 +111,11 @@ public class SidefpsController {
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mCoreLayoutParams.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        mDisplayHeight = displayMetrics.heightPixels;
+        mDisplayWidth = displayMetrics.widthPixels;
+
         mFingerprintManager.setSidefpsController(mSidefpsControllerImpl);
     }
 
@@ -122,7 +128,6 @@ public class SidefpsController {
 
     void hide() {
         if (mView != null) {
-            Log.v(TAG, "hideUdfpsOverlay | removing window");
             mWindowManager.removeView(mView);
             mView.setOnTouchListener(null);
             mView.setOnHoverListener(null);
@@ -132,13 +137,14 @@ public class SidefpsController {
         }
     }
 
+
     void onConfigurationChanged() {
-        // If overlay was hidden, it should remain hidden
-        if (!mIsVisible) {
+        // If mView is null or if view is hidden, then return.
+        if (mView == null || !mIsVisible) {
             return;
         }
-        // If the overlay needs to be shown, destroy the current overlay, and re-create and show
-        // the overlay with the updated LayoutParams.
+        // If the overlay needs to be displayed with a new configuration, destroy the current
+        // overlay, and re-create and show the overlay with the updated LayoutParams.
         hide();
         show();
     }
@@ -148,6 +154,25 @@ public class SidefpsController {
         for (FingerprintSensorPropertiesInternal props :
                 mFingerprintManager.getSensorPropertiesInternal()) {
             if (props.isAnySidefpsType()) {
+                // TODO(b/188690214): L155-L173 can be removed once sensorLocationX,
+                //  sensorLocationY, and sensorRadius are defined in sensorProps by the HAL
+                int sensorLocationX = 25;
+                int sensorLocationY = 610;
+                int sensorRadius = 112;
+
+                FingerprintSensorPropertiesInternal tempProps =
+                        new FingerprintSensorPropertiesInternal(
+                                props.sensorId,
+                                props.sensorStrength,
+                                props.maxEnrollmentsPerUser,
+                                props.componentInfo,
+                                props.sensorType,
+                                props.resetLockoutRequiresHardwareAuthToken,
+                                sensorLocationX,
+                                sensorLocationY,
+                                sensorRadius
+                        );
+                props = tempProps;
                 return props;
             }
         }
@@ -166,17 +191,30 @@ public class SidefpsController {
      */
     private WindowManager.LayoutParams computeLayoutParams() {
         mCoreLayoutParams.flags = getCoreLayoutParamFlags();
+        // Y value of top of affordance in portrait mode, X value of left of affordance in landscape
+        int sfpsLocationY = mSensorProps.sensorLocationY - mSensorProps.sensorRadius;
+        int sfpsAffordanceHeight = mSensorProps.sensorRadius * 2;
 
-        // Default dimensions assume portrait mode.
-        mCoreLayoutParams.x = DISPLAY_WIDTH - SFPS_INDICATOR_WIDTH;
-        mCoreLayoutParams.y = SFPS_Y;
-        mCoreLayoutParams.height = SFPS_INDICATOR_HEIGHT;
-        mCoreLayoutParams.width = SFPS_INDICATOR_WIDTH;
-
-        /*
-        TODO (b/188692405): recalculate coordinates for non-portrait configurations and folding
-         states
-        */
+        // Calculate coordinates of drawable area for the fps affordance, accounting for orientation
+        switch (mContext.getDisplay().getRotation()) {
+            case Surface.ROTATION_90:
+                mCoreLayoutParams.x = sfpsLocationY;
+                mCoreLayoutParams.y = 0;
+                mCoreLayoutParams.height = SFPS_AFFORDANCE_WIDTH;
+                mCoreLayoutParams.width = sfpsAffordanceHeight;
+                break;
+            case Surface.ROTATION_270:
+                mCoreLayoutParams.x = mDisplayHeight - sfpsLocationY - sfpsAffordanceHeight;
+                mCoreLayoutParams.y = mDisplayWidth - SFPS_AFFORDANCE_WIDTH;
+                mCoreLayoutParams.height = SFPS_AFFORDANCE_WIDTH;
+                mCoreLayoutParams.width = sfpsAffordanceHeight;
+                break;
+            default: // Portrait
+                mCoreLayoutParams.x = mDisplayWidth - SFPS_AFFORDANCE_WIDTH;
+                mCoreLayoutParams.y = sfpsLocationY;
+                mCoreLayoutParams.height = sfpsAffordanceHeight;
+                mCoreLayoutParams.width = SFPS_AFFORDANCE_WIDTH;
+        }
         return mCoreLayoutParams;
     }
 }

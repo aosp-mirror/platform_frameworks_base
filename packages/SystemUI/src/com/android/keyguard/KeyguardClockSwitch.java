@@ -192,7 +192,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
             if (indexOfChild(in) == -1) addView(in);
             direction = -1;
             smartspaceYTranslation = mSmartspaceView == null ? 0
-                    : mClockFrame.getY() - mSmartspaceView.getY();
+                    : mClockFrame.getTop() - mSmartspaceView.getTop();
         } else {
             in = mClockFrame;
             out = mLargeClockFrame;

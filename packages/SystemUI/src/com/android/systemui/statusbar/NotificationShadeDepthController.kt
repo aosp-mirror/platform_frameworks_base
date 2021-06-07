@@ -35,7 +35,6 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.DozeParameters
@@ -79,7 +78,6 @@ class NotificationShadeDepthController @Inject constructor(
     private var notificationAnimator: Animator? = null
     private var updateScheduled: Boolean = false
     private var shadeExpansion = 0f
-    private var ignoreShadeBlurUntilHidden: Boolean = false
     private var isClosed: Boolean = true
     private var isOpen: Boolean = false
     private var isBlurred: Boolean = false
@@ -106,21 +104,30 @@ class NotificationShadeDepthController @Inject constructor(
         }
 
     /**
+     * How much we're transitioning to the full shade
+     */
+    var transitionToFullShadeProgress = 0f
+        set(value) {
+            if (field == value) return
+            field = value
+            scheduleUpdate()
+        }
+
+    /**
      * When launching an app from the shade, the animations progress should affect how blurry the
      * shade is, overriding the expansion amount.
      */
-    var notificationLaunchAnimationParams: ExpandAnimationParameters? = null
+    var ignoreShadeBlurUntilHidden: Boolean = false
         set(value) {
-            field = value
-            if (value != null) {
-                scheduleUpdate()
+            if (field == value) {
                 return
             }
+            field = value
+            scheduleUpdate()
 
             if (shadeSpring.radius == 0 && shadeAnimation.radius == 0) {
                 return
             }
-            ignoreShadeBlurUntilHidden = true
             shadeSpring.animateTo(0)
             shadeSpring.finishIfRunning()
 
@@ -159,9 +166,8 @@ class NotificationShadeDepthController @Inject constructor(
         var combinedBlur = (shadeSpring.radius * INTERACTION_BLUR_FRACTION +
                 normalizedBlurRadius * ANIMATION_BLUR_FRACTION).toInt()
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(qsPanelExpansion))
+        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))
         var shadeRadius = max(combinedBlur, wakeAndUnlockBlurRadius).toFloat()
-        val launchProgress = notificationLaunchAnimationParams?.linearProgress ?: 0f
-        shadeRadius *= (1f - launchProgress) * (1f - launchProgress)
 
         if (ignoreShadeBlurUntilHidden) {
             if (shadeRadius == 0f) {
@@ -184,7 +190,8 @@ class NotificationShadeDepthController @Inject constructor(
             blur = 0
         }
 
-        blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur, scrimsVisible)
+        val opaque = scrimsVisible && !ignoreShadeBlurUntilHidden
+        blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur, opaque)
         val zoomOut = blurUtils.ratioOfBlurRadius(blur)
         try {
             if (root.isAttachedToWindow && root.windowToken != null) {
@@ -323,7 +330,7 @@ class NotificationShadeDepthController @Inject constructor(
         velocity: Float,
         direction: Int
     ) {
-        if (isOnKeyguardNotDismissing()) {
+        if (shouldApplyShadeBlur()) {
             if (expansion > 0f) {
                 // Blur view if user starts animating in the shade.
                 if (isClosed) {
@@ -370,7 +377,7 @@ class NotificationShadeDepthController @Inject constructor(
     private fun animateBlur(blur: Boolean, velocity: Float) {
         isBlurred = blur
 
-        val targetBlurNormalized = if (blur && isOnKeyguardNotDismissing()) {
+        val targetBlurNormalized = if (blur && shouldApplyShadeBlur()) {
             1f
         } else {
             0f
@@ -382,7 +389,7 @@ class NotificationShadeDepthController @Inject constructor(
 
     private fun updateShadeBlur() {
         var newBlur = 0
-        if (isOnKeyguardNotDismissing()) {
+        if (shouldApplyShadeBlur()) {
             newBlur = blurUtils.blurRadiusOfRatio(shadeExpansion)
         }
         shadeSpring.animateTo(newBlur)
@@ -397,7 +404,11 @@ class NotificationShadeDepthController @Inject constructor(
         choreographer.postFrameCallback(updateBlurCallback)
     }
 
-    private fun isOnKeyguardNotDismissing(): Boolean {
+    /**
+     * Should blur be applied to the shade currently. This is mainly used to make sure that
+     * on the lockscreen, the wallpaper isn't blurred.
+     */
+    private fun shouldApplyShadeBlur(): Boolean {
         val state = statusBarStateController.state
         return (state == StatusBarState.SHADE || state == StatusBarState.SHADE_LOCKED) &&
                 !keyguardStateController.isKeyguardFadingAway
@@ -415,8 +426,6 @@ class NotificationShadeDepthController @Inject constructor(
             it.println("shadeAnimation: ${shadeAnimation.radius}")
             it.println("globalActionsRadius: ${globalActionsSpring.radius}")
             it.println("wakeAndUnlockBlur: $wakeAndUnlockBlurRadius")
-            it.println("notificationLaunchAnimationProgress: " +
-                    "${notificationLaunchAnimationParams?.linearProgress}")
             it.println("ignoreShadeBlurUntilHidden: $ignoreShadeBlurUntilHidden")
         }
     }

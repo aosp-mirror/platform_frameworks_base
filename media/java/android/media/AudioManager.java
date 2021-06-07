@@ -7055,6 +7055,8 @@ public class AudioManager {
      * @return a map where the key is a surround format and
      * the value indicates the surround format is enabled or not
      */
+    @TestApi
+    @NonNull
     public Map<Integer, Boolean> getSurroundFormats() {
         Map<Integer, Boolean> surroundFormats = new HashMap<>();
         int status = AudioSystem.getSurroundFormats(surroundFormats);
@@ -7067,7 +7069,14 @@ public class AudioManager {
     }
 
     /**
-     * Set a certain surround format as enabled or not.
+     * Sets and persists a certain surround format as enabled or not.
+     * <p>
+     * This API is called by TvSettings surround sound menu when user enables or disables a
+     * surround sound format. This setting is persisted as global user setting.
+     * Applications should revert their changes to surround sound settings unless they intend to
+     * modify the global user settings across all apps. The framework does not auto-revert an
+     * application's settings after a lifecycle event. Audio focus is not required to apply these
+     * settings.
      *
      * @param enabled the required surround format state, true for enabled, false for disabled
      * @return true if successful, otherwise false

@@ -1549,7 +1549,8 @@
         <flag name="dataSync" value="0x01" />
         <!-- Music, video, news or other media play. -->
         <flag name="mediaPlayback" value="0x02" />
-        <!-- Ongoing phone call or video conference. -->
+        <!-- Ongoing operations related to phone calls, video conferencing,
+             or similar interactive communication. -->
         <flag name="phoneCall" value="0x04" />
         <!-- GPS, map, navigation location update. -->
         <flag name="location" value="0x08" />

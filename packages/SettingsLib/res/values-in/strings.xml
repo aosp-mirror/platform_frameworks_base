@@ -252,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Sertifikasi layar nirkabel"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktifkan Pencatatan Log Panjang Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pembatasan pemindaian Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Pengacakan MAC yang ditingkatkan Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Pengacakan MAC nonpersisten Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Data seluler selalu aktif"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Akselerasi hardware tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Tampilkan perangkat Bluetooth tanpa nama"</string>
@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Tampilkan batas klip, margin, dll."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Paksa arah tata letak RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Paksa arah tata letak layar RTL untuk semua lokal"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Paksa 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Aktifkan 4x MSAA dalam aplikasi OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Debug operasi klip non-kotak"</string>
@@ -368,9 +370,9 @@
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikasi"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Jangan simpan aktivitas"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Hancurkan tiap aktivitas setelah ditinggal pengguna"</string>
-    <string name="app_process_limit_title" msgid="8361367869453043007">"Batas proses background"</string>
-    <string name="show_all_anrs" msgid="9160563836616468726">"Tampilkan ANR background"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang berjalan di background"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"Batas proses latar blkng"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"Tampilkan ANR latar blkng"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang ada di latar belakang"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Tampilkan peringatan saluran notifikasi"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Menampilkan peringatan di layar saat aplikasi memposting notifikasi tanpa channel yang valid"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Paksa izinkan aplikasi di eksternal"</string>
@@ -453,7 +455,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi sampai penuh"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi sampai penuh"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Mengoptimalkan untuk kesehatan baterai"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengisian daya dibatasi untuk sementara"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tidak diketahui"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Mengisi daya"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mengisi daya cepat"</string>

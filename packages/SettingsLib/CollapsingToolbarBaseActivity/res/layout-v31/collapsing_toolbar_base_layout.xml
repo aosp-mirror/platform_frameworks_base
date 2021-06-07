@@ -21,7 +21,8 @@
     android:id="@+id/content_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:transitionGroup="true">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"

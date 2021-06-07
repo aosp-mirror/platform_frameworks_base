@@ -243,7 +243,7 @@ public final class MultiClientInputMethodManagerService {
                         }
 
                         @Override
-                        public void updateImeWindowStatus() {
+                        public void updateImeWindowStatus(boolean disableImeIcon) {
                         }
                     });
         }

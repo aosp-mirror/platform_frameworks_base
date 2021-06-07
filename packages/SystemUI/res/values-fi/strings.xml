@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC on poistettu käytöstä"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC on käytössä"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Näytön tallennus"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Aloita"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Lopeta"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Kumotaanko laitteen mikrofonin esto?"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Vähemmän kiireelliset ilmoitukset ovat alla"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Avaa napauttamalla uudelleen"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Napauta uudelleen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Avaa pyyhkäisemällä ylös"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Yritä uudelleen pyyhkäisemällä ylös"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Avaa lukitus, jotta voit käyttää NFC:tä"</string>
@@ -1126,9 +1126,9 @@
     <string name="anniversary_status_content_description" msgid="8212171790843327442">"<xliff:g id="NAME">%1$s</xliff:g> juhlii tänään vuosipäiväänsä"</string>
     <string name="location_status" msgid="1294990572202541812">"Sijaintia jaetaan"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> jakaa sijaintia"</string>
-    <string name="new_story_status" msgid="9012195158584846525">"Uusi juttu"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Uusi tarina"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> jakoi uuden tarinan"</string>
-    <string name="video_status" msgid="4548544654316843225">"Katsotaan"</string>
+    <string name="video_status" msgid="4548544654316843225">"Katsellaan"</string>
     <string name="audio_status" msgid="4237055636967709208">"Kuunnellaan"</string>
     <string name="game_status" msgid="1340694320630973259">"Toistetaan"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Kaverit"</string>

@@ -179,7 +179,7 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف هذا المستخدم."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف الملف الشخصي للعمل وبياناته."</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"إغلاق"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس زر استشعار بصمة الإصبع"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس مستشعر بصمة الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"رمز بصمة الإصبع"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"يتعذّر التعرّف على الوجه. استخدِم بصمة الإصبع بدلاً من ذلك."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"عليك استخدام بصمة الإصبع للمتابعة."</string>
@@ -431,8 +431,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"تم تفعيل الاتصال القريب المدى"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"تسجيل الشاشة"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"بدء"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"إيقاف"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"هل تريد إزالة حظر ميكروفون الجهاز؟"</string>
@@ -461,6 +460,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"الإشعارات الأقل إلحاحًا أدناه"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"انقر مرة أخرى للفتح"</string>
+    <string name="tap_again" msgid="1315420114387908655">"انقر مرة أخرى"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"يمكنك الفتح بالتمرير سريعًا لأعلى."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"مرِّر سريعًا للأعلى لإعادة المحاولة."</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏افتح قفل الشاشة لاستخدام تقنية NFC"</string>
@@ -1148,12 +1148,12 @@
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"يَحين يوم ميلاد <xliff:g id="NAME">%1$s</xliff:g> قريبًا."</string>
     <string name="anniversary_status" msgid="1790034157507590838">"الذكرى السنوية"</string>
     <string name="anniversary_status_content_description" msgid="8212171790843327442">"إنها الذكرى السنوية لـ <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="location_status" msgid="1294990572202541812">"تتم مشاركة الموقع الجغرافي"</string>
+    <string name="location_status" msgid="1294990572202541812">"جارٍ مشاركة الموقع الجغرافي"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"تتم الآن مشاركة موقع <xliff:g id="NAME">%1$s</xliff:g> الجغرافي."</string>
     <string name="new_story_status" msgid="9012195158584846525">"قصة جديدة"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"تمت مشاركة قصة جديدة من <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="video_status" msgid="4548544654316843225">"جارٍ المشاهدة"</string>
-    <string name="audio_status" msgid="4237055636967709208">"يتم الاستماع الآن"</string>
+    <string name="audio_status" msgid="4237055636967709208">"جارٍ الاستماع"</string>
     <string name="game_status" msgid="1340694320630973259">"جارٍ اللعب"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"الأصدقاء"</string>
     <string name="empty_status" msgid="5938893404951307749">"لنجرِ محادثة الليلة."</string>

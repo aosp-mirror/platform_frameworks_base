@@ -5,13 +5,18 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.ActivityManager
 import android.app.ActivityTaskManager
+import android.app.AppGlobals
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Matrix
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.RectF
+import android.graphics.drawable.GradientDrawable
 import android.os.Looper
 import android.os.RemoteException
+import android.os.UserHandle
 import android.util.Log
 import android.util.MathUtils
 import android.view.IRemoteAnimationFinishedCallback
@@ -26,20 +31,25 @@ import android.view.animation.AnimationUtils
 import android.view.animation.PathInterpolator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
+import com.android.wm.shell.startingsurface.SplashscreenContentDrawer
+import com.android.wm.shell.startingsurface.SplashscreenContentDrawer.SplashScreenWindowAttrs
 import kotlin.math.roundToInt
 
 /**
  * A class that allows activities to be started in a seamless way from a view that is transforming
  * nicely into the starting window.
  */
-class ActivityLaunchAnimator(context: Context) {
+class ActivityLaunchAnimator(
+    private val keyguardHandler: KeyguardHandler,
+    context: Context
+) {
     private val TAG = this::class.java.simpleName
 
     companion object {
         const val ANIMATION_DURATION = 500L
-        const val ANIMATION_DURATION_FADE_OUT_CONTENT = 183L
-        const val ANIMATION_DURATION_FADE_IN_WINDOW = 217L
-        const val ANIMATION_DELAY_FADE_IN_WINDOW = 167L
+        private const val ANIMATION_DURATION_FADE_OUT_CONTENT = 150L
+        private const val ANIMATION_DURATION_FADE_IN_WINDOW = 183L
+        private const val ANIMATION_DELAY_FADE_IN_WINDOW = ANIMATION_DURATION_FADE_OUT_CONTENT
         private const val ANIMATION_DURATION_NAV_FADE_IN = 266L
         private const val ANIMATION_DURATION_NAV_FADE_OUT = 133L
         private const val ANIMATION_DELAY_NAV_FADE_IN =
@@ -50,6 +60,8 @@ class ActivityLaunchAnimator(context: Context) {
         private val WINDOW_FADE_IN_INTERPOLATOR = PathInterpolator(0f, 0f, 0.6f, 1f)
         private val NAV_FADE_IN_INTERPOLATOR = PathInterpolator(0f, 0f, 0f, 1f)
         private val NAV_FADE_OUT_INTERPOLATOR = PathInterpolator(0.2f, 0f, 1f, 1f)
+
+        private val SRC_MODE = PorterDuffXfermode(PorterDuff.Mode.SRC)
 
         /**
          * Given the [linearProgress] of a launch animation, return the linear progress of the
@@ -65,6 +77,8 @@ class ActivityLaunchAnimator(context: Context) {
         }
     }
 
+    private val packageManager = AppGlobals.getPackageManager()
+
     /** The interpolator used for the width, height, Y position and corner radius. */
     private val animationInterpolator = AnimationUtils.loadInterpolator(context,
             R.interpolator.launch_animation_interpolator_y)
@@ -72,6 +86,8 @@ class ActivityLaunchAnimator(context: Context) {
     /** The interpolator used for the X position. */
     private val animationInterpolatorX = AnimationUtils.loadInterpolator(context,
             R.interpolator.launch_animation_interpolator_x)
+
+    private val cornerRadii = FloatArray(8)
 
     /**
      * Start an intent and animate the opening window. The intent will be started by running
@@ -104,15 +120,22 @@ class ActivityLaunchAnimator(context: Context) {
 
         Log.d(TAG, "Starting intent with a launch animation")
         val runner = Runner(controller)
-        val animationAdapter = RemoteAnimationAdapter(
-            runner,
-            ANIMATION_DURATION,
-            ANIMATION_DURATION - 150 /* statusBarTransitionDelay */
-        )
+        val isOnKeyguard = keyguardHandler.isOnKeyguard()
+
+        // Pass the RemoteAnimationAdapter to the intent starter only if we are not on the keyguard.
+        val animationAdapter = if (!isOnKeyguard) {
+            RemoteAnimationAdapter(
+                    runner,
+                    ANIMATION_DURATION,
+                    ANIMATION_DURATION - 150 /* statusBarTransitionDelay */
+            )
+        } else {
+            null
+        }
 
         // Register the remote animation for the given package to also animate trampoline
         // activity launches.
-        if (packageName != null) {
+        if (packageName != null && animationAdapter != null) {
             try {
                 ActivityTaskManager.getService().registerRemoteAnimationForNextActivityStart(
                     packageName, animationAdapter)
@@ -122,20 +145,31 @@ class ActivityLaunchAnimator(context: Context) {
         }
 
         val launchResult = intentStarter(animationAdapter)
-        val willAnimate = launchResult == ActivityManager.START_TASK_TO_FRONT ||
-            launchResult == ActivityManager.START_SUCCESS
 
-        Log.d(TAG, "launchResult=$launchResult willAnimate=$willAnimate")
+        // Only animate if the app is not already on top and will be opened, unless we are on the
+        // keyguard.
+        val willAnimate =
+                launchResult == ActivityManager.START_TASK_TO_FRONT ||
+                        launchResult == ActivityManager.START_SUCCESS ||
+                        (launchResult == ActivityManager.START_DELIVERED_TO_TOP && isOnKeyguard)
+
+        Log.d(TAG, "launchResult=$launchResult willAnimate=$willAnimate isOnKeyguard=$isOnKeyguard")
         controller.callOnIntentStartedOnMainThread(willAnimate)
 
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
         // never started.
         if (willAnimate) {
+            keyguardHandler.disableKeyguardBlurs()
             runner.postTimeout()
+
+            // Hide the keyguard using the launch animation instead of the default unlock animation.
+            if (isOnKeyguard) {
+                keyguardHandler.hideKeyguardWithAnimation(runner)
+            }
         }
     }
 
-    internal fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
+    private fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             this.launchContainer.context.mainExecutor.execute {
                 this.onIntentStarted(willAnimate)
@@ -177,6 +211,17 @@ class ActivityLaunchAnimator(context: Context) {
          */
         @Throws(PendingIntent.CanceledException::class)
         fun startPendingIntent(animationAdapter: RemoteAnimationAdapter?): Int
+    }
+
+    interface KeyguardHandler {
+        /** Whether we are currently on the keyguard or not. */
+        fun isOnKeyguard(): Boolean
+
+        /** Hide the keyguard and animate using [runner]. */
+        fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner)
+
+        /** Disable window blur so they don't overlap with the window launch animation **/
+        fun disableKeyguardBlurs()
     }
 
     /**
@@ -260,10 +305,7 @@ class ActivityLaunchAnimator(context: Context) {
         var right: Int,
 
         var topCornerRadius: Float = 0f,
-        var bottomCornerRadius: Float = 0f,
-
-        var contentAlpha: Float = 1f,
-        var backgroundAlpha: Float = 1f
+        var bottomCornerRadius: Float = 0f
     ) {
         private val startTop = top
         private val startBottom = bottom
@@ -303,6 +345,9 @@ class ActivityLaunchAnimator(context: Context) {
 
         val centerY: Float
             get() = top + height / 2f
+
+        /** Whether the expanded view should be visible or hidden. */
+        var visible: Boolean = true
     }
 
     @VisibleForTesting
@@ -337,17 +382,17 @@ class ActivityLaunchAnimator(context: Context) {
 
         override fun onAnimationStart(
             @WindowManager.TransitionOldType transit: Int,
-            remoteAnimationTargets: Array<out RemoteAnimationTarget>,
-            remoteAnimationWallpaperTargets: Array<out RemoteAnimationTarget>,
-            remoteAnimationNonAppTargets: Array<out RemoteAnimationTarget>,
-            iRemoteAnimationFinishedCallback: IRemoteAnimationFinishedCallback
+            apps: Array<out RemoteAnimationTarget>?,
+            wallpapers: Array<out RemoteAnimationTarget>?,
+            nonApps: Array<out RemoteAnimationTarget>?,
+            iCallback: IRemoteAnimationFinishedCallback?
         ) {
             removeTimeout()
 
             // The animation was started too late and we already notified the controller that it
             // timed out.
             if (timedOut) {
-                invokeCallback(iRemoteAnimationFinishedCallback)
+                iCallback?.invoke()
                 return
             }
 
@@ -358,30 +403,29 @@ class ActivityLaunchAnimator(context: Context) {
             }
 
             context.mainExecutor.execute {
-                startAnimation(remoteAnimationTargets, remoteAnimationNonAppTargets,
-                        iRemoteAnimationFinishedCallback)
+                startAnimation(apps, nonApps, iCallback)
             }
         }
 
         private fun startAnimation(
-            remoteAnimationTargets: Array<out RemoteAnimationTarget>,
-            remoteAnimationNonAppTargets: Array<out RemoteAnimationTarget>,
-            iCallback: IRemoteAnimationFinishedCallback
+            apps: Array<out RemoteAnimationTarget>?,
+            nonApps: Array<out RemoteAnimationTarget>?,
+            iCallback: IRemoteAnimationFinishedCallback?
         ) {
             Log.d(TAG, "Remote animation started")
-            val window = remoteAnimationTargets.firstOrNull {
+            val window = apps?.firstOrNull {
                 it.mode == RemoteAnimationTarget.MODE_OPENING
             }
 
             if (window == null) {
                 Log.d(TAG, "Aborting the animation as no window is opening")
                 removeTimeout()
-                invokeCallback(iCallback)
+                iCallback?.invoke()
                 controller.onLaunchAnimationCancelled()
                 return
             }
 
-            val navigationBar = remoteAnimationNonAppTargets.firstOrNull {
+            val navigationBar = nonApps?.firstOrNull {
                 it.windowType == WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
             }
 
@@ -425,22 +469,39 @@ class ActivityLaunchAnimator(context: Context) {
                 0f
             }
 
+            // We add an extra layer with the same color as the app splash screen background color,
+            // which is usually the same color of the app background. We first fade in this layer
+            // to hide the expanding view, then we fade it out with SRC mode to draw a hole in the
+            // launch container and reveal the opening window.
+            val windowBackgroundColor = extractSplashScreenBackgroundColor(window)
+            val windowBackgroundLayer = GradientDrawable().apply {
+                setColor(windowBackgroundColor)
+                alpha = 0
+            }
+
             // Update state.
             val animator = ValueAnimator.ofFloat(0f, 1f)
             this.animator = animator
             animator.duration = ANIMATION_DURATION
             animator.interpolator = Interpolators.LINEAR
 
+            val launchContainerOverlay = launchContainer.overlay
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
                     Log.d(TAG, "Animation started")
                     controller.onLaunchAnimationStart(isExpandingFullyAbove)
+
+                    // Add the drawable to the launch container overlay. Overlays always draw
+                    // drawables after views, so we know that it will be drawn above any view added
+                    // by the controller.
+                    launchContainerOverlay.add(windowBackgroundLayer)
                 }
 
                 override fun onAnimationEnd(animation: Animator?) {
                     Log.d(TAG, "Animation ended")
-                    invokeCallback(iCallback)
+                    iCallback?.invoke()
                     controller.onLaunchAnimationEnd(isExpandingFullyAbove)
+                    launchContainerOverlay.remove(windowBackgroundLayer)
                 }
             })
 
@@ -464,22 +525,59 @@ class ActivityLaunchAnimator(context: Context) {
                 state.bottomCornerRadius =
                     MathUtils.lerp(startBottomCornerRadius, endRadius, progress)
 
-                val contentAlphaProgress = getProgress(linearProgress, 0,
-                        ANIMATION_DURATION_FADE_OUT_CONTENT)
-                state.contentAlpha =
-                        1 - CONTENT_FADE_OUT_INTERPOLATOR.getInterpolation(contentAlphaProgress)
-
-                val backgroundAlphaProgress = getProgress(linearProgress,
-                        ANIMATION_DELAY_FADE_IN_WINDOW, ANIMATION_DURATION_FADE_IN_WINDOW)
-                state.backgroundAlpha =
-                        1 - WINDOW_FADE_IN_INTERPOLATOR.getInterpolation(backgroundAlphaProgress)
+                // The expanding view can/should be hidden once it is completely coverred by the
+                // windowBackgroundLayer.
+                state.visible =
+                        getProgress(linearProgress, 0, ANIMATION_DURATION_FADE_OUT_CONTENT) < 1
 
                 applyStateToWindow(window, state)
+                applyStateToWindowBackgroundLayer(windowBackgroundLayer, state, linearProgress)
                 navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }
+
+                // If we started expanding the view, we make it 1 pixel smaller on all sides to
+                // avoid artefacts on the corners caused by anti-aliasing of the view background and
+                // the window background layer.
+                if (state.top != startTop && state.left != startLeft &&
+                        state.bottom != startBottom && state.right != startRight) {
+                    state.top += 1
+                    state.left += 1
+                    state.right -= 1
+                    state.bottom -= 1
+                }
                 controller.onLaunchAnimationProgress(state, progress, linearProgress)
             }
 
             animator.start()
+        }
+
+        /** Extract the background color of the app splash screen. */
+        private fun extractSplashScreenBackgroundColor(window: RemoteAnimationTarget): Int {
+            val taskInfo = window.taskInfo
+            val windowPackage = taskInfo.topActivity.packageName
+            val userId = taskInfo.userId
+            val windowContext = context.createPackageContextAsUser(
+                    windowPackage, Context.CONTEXT_RESTRICTED, UserHandle.of(userId))
+            val activityInfo = taskInfo.topActivityInfo
+            val splashScreenThemeName = packageManager.getSplashScreenTheme(windowPackage, userId)
+            val splashScreenThemeId = if (splashScreenThemeName != null) {
+                windowContext.resources.getIdentifier(splashScreenThemeName, null, null)
+            } else {
+                0
+            }
+
+            val themeResId = when {
+                splashScreenThemeId != 0 -> splashScreenThemeId
+                activityInfo.themeResource != 0 -> activityInfo.themeResource
+                else -> com.android.internal.R.style.Theme_DeviceDefault_DayNight
+            }
+
+            if (themeResId != windowContext.themeResId) {
+                windowContext.setTheme(themeResId)
+            }
+
+            val windowAttrs = SplashScreenWindowAttrs()
+            SplashscreenContentDrawer.getWindowAttrs(windowContext, windowAttrs)
+            return SplashscreenContentDrawer.peekWindowBGColor(windowContext, windowAttrs)
         }
 
         private fun applyStateToWindow(window: RemoteAnimationTarget, state: State) {
@@ -519,8 +617,11 @@ class ActivityLaunchAnimator(context: Context) {
             )
 
             // The scale will also be applied to the corner radius, so we divide by the scale to
-            // keep the original radius.
-            val cornerRadius = minOf(state.topCornerRadius, state.bottomCornerRadius) / scale
+            // keep the original radius. We use the max of (topCornerRadius, bottomCornerRadius) to
+            // make sure that the window does not draw itself behind the expanding view. This is
+            // especially important for lock screen animations, where the window is not clipped by
+            // the shade.
+            val cornerRadius = maxOf(state.topCornerRadius, state.bottomCornerRadius) / scale
             val params = SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(window.leash)
                 .withAlpha(1f)
                 .withMatrix(matrix)
@@ -531,6 +632,41 @@ class ActivityLaunchAnimator(context: Context) {
                 .build()
 
             transactionApplier.scheduleApply(params)
+        }
+
+        private fun applyStateToWindowBackgroundLayer(
+            drawable: GradientDrawable,
+            state: State,
+            linearProgress: Float
+        ) {
+            // Update position.
+            drawable.setBounds(state.left, state.top, state.right, state.bottom)
+
+            // Update radius.
+            cornerRadii[0] = state.topCornerRadius
+            cornerRadii[1] = state.topCornerRadius
+            cornerRadii[2] = state.topCornerRadius
+            cornerRadii[3] = state.topCornerRadius
+            cornerRadii[4] = state.bottomCornerRadius
+            cornerRadii[5] = state.bottomCornerRadius
+            cornerRadii[6] = state.bottomCornerRadius
+            cornerRadii[7] = state.bottomCornerRadius
+            drawable.cornerRadii = cornerRadii
+
+            // We first fade in the background layer to hide the expanding view, then fade it out
+            // with SRC mode to draw a hole punch in the status bar and reveal the opening window.
+            val fadeInProgress = getProgress(linearProgress, 0, ANIMATION_DURATION_FADE_OUT_CONTENT)
+            if (fadeInProgress < 1) {
+                val alpha = CONTENT_FADE_OUT_INTERPOLATOR.getInterpolation(fadeInProgress)
+                drawable.alpha = (alpha * 0xFF).roundToInt()
+                drawable.setXfermode(null)
+            } else {
+                val fadeOutProgress = getProgress(linearProgress,
+                        ANIMATION_DELAY_FADE_IN_WINDOW, ANIMATION_DURATION_FADE_IN_WINDOW)
+                val alpha = 1 - WINDOW_FADE_IN_INTERPOLATOR.getInterpolation(fadeOutProgress)
+                drawable.alpha = (alpha * 0xFF).roundToInt()
+                drawable.setXfermode(SRC_MODE)
+            }
         }
 
         private fun applyStateToNavigationBar(
@@ -585,9 +721,9 @@ class ActivityLaunchAnimator(context: Context) {
             }
         }
 
-        private fun invokeCallback(iCallback: IRemoteAnimationFinishedCallback) {
+        private fun IRemoteAnimationFinishedCallback.invoke() {
             try {
-                iCallback.onAnimationFinished()
+                onAnimationFinished()
             } catch (e: RemoteException) {
                 e.printStackTrace()
             }

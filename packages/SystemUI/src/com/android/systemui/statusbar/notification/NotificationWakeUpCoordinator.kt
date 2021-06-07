@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.PanelExpansionListener
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import javax.inject.Inject
@@ -38,7 +39,8 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private val mHeadsUpManager: HeadsUpManager,
     private val statusBarStateController: StatusBarStateController,
     private val bypassController: KeyguardBypassController,
-    private val dozeParameters: DozeParameters
+    private val dozeParameters: DozeParameters,
+    private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController
 ) : OnHeadsUpChangedListener, StatusBarStateController.StateListener, PanelExpansionListener {
 
     private val mNotificationVisibility = object : FloatProperty<NotificationWakeUpCoordinator>(
@@ -264,7 +266,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onStateChanged(newState: Int) {
-        if (dozeParameters.shouldControlUnlockedScreenOff()) {
+        if (unlockedScreenOffAnimationController.shouldPlayScreenOffAnimation()) {
             if (animatingScreenOff &&
                     state == StatusBarState.KEYGUARD &&
                     newState == StatusBarState.SHADE) {
@@ -393,6 +395,11 @@ class NotificationWakeUpCoordinator @Inject constructor(
     override fun onDozingChanged(isDozing: Boolean) {
         if (isDozing) {
             setNotificationsVisible(visible = false, animate = false, increaseSpeed = false)
+        } else {
+            // We only unset the flag once we fully went asleep. If the user interrupts the
+            // animation in the middle, we have to abort the animation as well to make sure
+            // the notifications are visible again.
+            animatingScreenOff = false
         }
     }
 

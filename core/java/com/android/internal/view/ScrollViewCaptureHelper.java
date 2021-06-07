@@ -125,10 +125,19 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
                 view.getScrollX() - contentView.getLeft(),
                 view.getScrollY() - contentView.getTop());
 
+        Rect input = new Rect(requestedContentBounds);
+
+        // Expand input rect to get the requested rect to be in the center
+        int remainingHeight = view.getHeight() - view.getPaddingTop()
+                - view.getPaddingBottom() - input.height();
+        if (remainingHeight > 0) {
+            input.inset(0, -remainingHeight / 2);
+        }
+
         // requestRect is now local to contentView as requestedContentBounds
         // contentView (and each parent in turn if possible) will be scrolled
         // (if necessary) to make all of requestedContent visible, (if possible!)
-        contentView.requestRectangleOnScreen(new Rect(requestedContentBounds), true);
+        contentView.requestRectangleOnScreen(input, true);
 
         // update new offset between starting and current scroll position
         scrollDelta = view.getScrollY() - mStartScrollY;

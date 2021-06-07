@@ -22,13 +22,18 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -50,6 +55,14 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     ConfigurationController mConfigurationController;
     @Mock
     DozeParameters mDozeParameters;
+    @Mock
+    KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    @Mock
+    SmartspaceTransitionController mSmartSpaceTransitionController;
+    @Mock
+    UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Captor
+    private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
 
     private KeyguardStatusViewController mController;
 
@@ -64,7 +77,10 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mKeyguardUpdateMonitor,
                 mConfigurationController,
-                mDozeParameters);
+                mDozeParameters,
+                mKeyguardUnlockAnimationController,
+                mSmartSpaceTransitionController,
+                mUnlockedScreenOffAnimationController);
     }
 
     @Test
@@ -77,5 +93,27 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     public void dozeTimeTick_updatesClock() {
         mController.dozeTimeTick();
         verify(mKeyguardClockSwitchController).refresh();
+    }
+
+    @Test
+    public void timeFormatUpdateNotifiesClockSwitchController() {
+        mController.onViewAttached();
+
+        verify(mKeyguardUpdateMonitor).registerCallback(
+                mKeyguardUpdateMonitorCallbackCaptor.capture());
+
+        mKeyguardUpdateMonitorCallbackCaptor.getValue().onTimeFormatChanged("");
+        verify(mKeyguardClockSwitchController).refreshFormat();
+    }
+
+    @Test
+    public void userChangeNotifiesClockSwitchController() {
+        mController.onViewAttached();
+
+        verify(mKeyguardUpdateMonitor).registerCallback(
+                mKeyguardUpdateMonitorCallbackCaptor.capture());
+
+        mKeyguardUpdateMonitorCallbackCaptor.getValue().onUserSwitchComplete(0);
+        verify(mKeyguardClockSwitchController).refreshFormat();
     }
 }

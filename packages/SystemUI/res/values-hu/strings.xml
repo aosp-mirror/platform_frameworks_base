@@ -351,8 +351,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Beviteli módszer"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Tartózkodási hely"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Hely kikapcsolva"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Hozzáférés a kamerához"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Hozzáférés a mikrofonhoz"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Kameraelérés"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Mikrofonelérés"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Rendelkezésre áll"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Letiltva"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Médiaeszköz"</string>
@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Az NFC ki van kapcsolva"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Az NFC be van kapcsolva"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Képernyőrögzítés"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Indítás"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Leállítás"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Feloldja az eszközmikrofon letiltását?"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"A kevésbé sürgős értesítések lentebb vannak"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Koppintson ismét a megnyitáshoz"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Koppintson újra"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Csúsztasson felfelé a megnyitáshoz"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Az újrapróbálkozáshoz csúsztassa felfelé az ujját"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Az NFC használatához oldja fel a képernyőzárat"</string>
@@ -798,7 +798,7 @@
       <item quantity="other">%d perc</item>
       <item quantity="one">%d perc</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"Akkumulátorhasználat"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"Akkuhasználat"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Az Akkumulátorkímélő módot töltés közben nem lehet használni"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Akkumulátorkímélő mód"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Csökkenti a teljesítményt és a háttéradatok használatát"</string>

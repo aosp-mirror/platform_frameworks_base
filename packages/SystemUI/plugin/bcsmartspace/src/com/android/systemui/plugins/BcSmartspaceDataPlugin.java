@@ -114,6 +114,11 @@ public interface BcSmartspaceDataPlugin extends Plugin {
          * Set or clear next alarm information
          */
         void setNextAlarm(@Nullable Drawable image, @Nullable String description);
+
+        /**
+         * Set or clear device media playing
+         */
+        void setMediaTarget(@Nullable SmartspaceTarget target);
     }
 
     /** Interface for launching Intents, which can differ on the lockscreen */

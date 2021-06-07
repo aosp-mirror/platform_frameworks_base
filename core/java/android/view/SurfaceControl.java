@@ -34,7 +34,6 @@ import android.annotation.Size;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
-import android.graphics.BLASTBufferQueue;
 import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
@@ -645,6 +644,12 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final int METADATA_OWNER_PID = 6;
+
+    /**
+     * game mode for the layer - used for metrics
+     * @hide
+     */
+    public static final int METADATA_GAME_MODE = 8;
 
     /**
      * A wrapper around HardwareBuffer that contains extra information about how to

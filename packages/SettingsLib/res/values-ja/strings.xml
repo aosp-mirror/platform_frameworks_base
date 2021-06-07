@@ -245,14 +245,14 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"ブートローダーによるロック解除を許可する"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM ロック解除の許可"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"警告: この設定をONにしている場合、このデバイスではデバイス保護機能を利用できません。"</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"仮の現在地情報アプリを選択"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"仮の現在地情報アプリが設定されていません"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"仮の現在地情報アプリ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"現在地情報の強制変更アプリを選択"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"現在地情報の強制変更アプリが設定されていません"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"現在地情報の強制変更アプリ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"ネットワーク"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"ワイヤレス ディスプレイ認証"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi-Fi 詳細ログの有効化"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi スキャン スロットリング"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi-Fi-enhanced MAC ランダム化"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi-Fi 非永続的 MAC ランダム化"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"モバイルデータを常に ON にする"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"テザリング時のハードウェア アクセラレーション"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth デバイスを名前なしで表示"</string>
@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"クリップの境界線、マージンなどを表示"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTLレイアウト方向を使用"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"すべての言語/地域で画面レイアウト方向をRTLに設定"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA を適用"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 アプリで 4x MSAA を有効にする"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"非矩形クリップ操作をデバッグ"</string>
@@ -453,7 +455,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"完了まであと <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - 完了まであと <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 電池の状態を最適化"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電は一時的に制限されています"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"不明"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"急速充電中"</string>

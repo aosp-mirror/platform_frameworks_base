@@ -22,12 +22,14 @@
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
-#include "permission_utils.h"
 
 #include <utils/Log.h>
 #include <media/AudioRecord.h>
 #include <media/MicrophoneInfo.h>
 #include <vector>
+
+#include <android/content/AttributionSourceState.h>
+#include <android_os_Parcel.h>
 
 #include <nativehelper/ScopedUtfChars.h>
 
@@ -38,10 +40,8 @@
 #include "android_media_MicrophoneInfo.h"
 #include "android_media_AudioAttributes.h"
 
-// ----------------------------------------------------------------------------
 
-using android::media::permission::convertIdentity;
-using android::media::permission::Identity;
+// ----------------------------------------------------------------------------
 
 using namespace android;
 
@@ -189,7 +189,7 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
                                             jobject jaa, jintArray jSampleRate, jint channelMask,
                                             jint channelIndexMask, jint audioFormat,
                                             jint buffSizeInBytes, jintArray jSession,
-                                            jobject jIdentity, jlong nativeRecordInJavaObj,
+                                            jobject jAttributionSource, jlong nativeRecordInJavaObj,
                                             jint sharedAudioHistoryMs) {
     //ALOGV(">> Entering android_media_AudioRecord_setup");
     //ALOGV("sampleRate=%d, audioFormat=%d, channel mask=%x, buffSizeInBytes=%d "
@@ -260,14 +260,18 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
         size_t bytesPerSample = audio_bytes_per_sample(format);
 
         if (buffSizeInBytes == 0) {
-             ALOGE("Error creating AudioRecord: frameCount is 0.");
+            ALOGE("Error creating AudioRecord: frameCount is 0.");
             return (jint) AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT;
         }
         size_t frameSize = channelCount * bytesPerSample;
         size_t frameCount = buffSizeInBytes / frameSize;
 
         // create an uninitialized AudioRecord object
-        lpRecorder = new AudioRecord(convertIdentity(env, jIdentity));
+        Parcel* parcel = parcelForJavaObject(env, jAttributionSource);
+        android::content::AttributionSourceState attributionSource;
+        attributionSource.readFromParcel(parcel);
+
+        lpRecorder = new AudioRecord(attributionSource);
 
         // read the AudioAttributes values
         auto paa = JNIAudioAttributeHelper::makeUnique();
@@ -912,7 +916,7 @@ static const JNINativeMethod gMethods[] = {
         {"native_start", "(II)I", (void *)android_media_AudioRecord_start},
         {"native_stop", "()V", (void *)android_media_AudioRecord_stop},
         {"native_setup",
-         "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILandroid/media/permission/Identity;JI)I",
+         "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILandroid/os/Parcel;JI)I",
          (void *)android_media_AudioRecord_setup},
         {"native_finalize", "()V", (void *)android_media_AudioRecord_finalize},
         {"native_release", "()V", (void *)android_media_AudioRecord_release},

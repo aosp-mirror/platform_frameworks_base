@@ -18,9 +18,16 @@
 <!-- Contains the active ringer icon and a hidden drawer containing all three ringer options. -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/volume_ringer_and_drawer_container"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:gravity="center"
+    android:paddingLeft="@dimen/volume_dialog_ringer_rows_padding"
+    android:paddingTop="@dimen/volume_dialog_ringer_rows_padding"
+    android:paddingRight="@dimen/volume_dialog_ringer_rows_padding"
+    android:paddingBottom="@dimen/volume_dialog_ringer_rows_padding"
+    android:background="@drawable/volume_background_top"
+    android:layoutDirection="ltr"
     android:clipToPadding="false"
     android:clipChildren="false">
 

@@ -556,6 +556,10 @@ class ControlsControllerImpl @Inject constructor (
         )
     }
 
+    override fun getPreferredStructure(): StructureInfo {
+        return uiController.getPreferredStructure(getFavorites())
+    }
+
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("ControlsController state:")
         pw.println("  Changing users: $userChanging")

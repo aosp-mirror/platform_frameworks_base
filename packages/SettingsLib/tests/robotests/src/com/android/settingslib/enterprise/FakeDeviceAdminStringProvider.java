@@ -30,6 +30,8 @@ class FakeDeviceAdminStringProvider implements DeviceAdminStringProvider {
     static final String DEFAULT_DISABLED_BY_POLICY_CONTENT = "default_disabled_by_policy_content";
     static final String DEFAULT_DISABLED_BY_POLICY_TITLE_FINANCED_DEVICE =
             "default_disabled_by_policy_title_financed_device";
+    static final DeviceAdminStringProvider DEFAULT_DEVICE_ADMIN_STRING_PROVIDER =
+            new FakeDeviceAdminStringProvider(/* url = */ null);
 
     private final String mUrl;
 

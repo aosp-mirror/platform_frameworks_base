@@ -22,6 +22,7 @@
     android:layout_height="wrap_content"
     android:clipChildren="false"
     android:clipToPadding="false"
+    android:forceHasOverlappingRendering="false"
     android:theme="@style/MediaPlayer">
     <com.android.systemui.media.MediaScrollView
         android:id="@+id/media_carousel_scroller"

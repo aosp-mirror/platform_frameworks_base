@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -94,14 +95,22 @@ public final class AttributionSource implements Parcelable {
     @TestApi
     public AttributionSource(int uid, @Nullable String packageName,
             @Nullable String attributionTag) {
-        this(uid, packageName, attributionTag, /*next*/ null);
+        this(uid, packageName, attributionTag, new Binder());
     }
 
     /** @hide */
     @TestApi
     public AttributionSource(int uid, @Nullable String packageName,
-            @Nullable String attributionTag, @Nullable AttributionSource next) {
-        this(uid, packageName, attributionTag, /*renouncedPermissions*/ null, next);
+            @Nullable String attributionTag, @NonNull IBinder token) {
+        this(uid, packageName, attributionTag, token, /*renouncedPermissions*/ null,
+                /*next*/ null);
+    }
+
+    /** @hide */
+    public AttributionSource(int uid, @Nullable String packageName,
+            @Nullable String attributionTag, @NonNull IBinder token,
+            @Nullable AttributionSource next) {
+        this(uid, packageName, attributionTag, token, /*renouncedPermissions*/ null, next);
     }
 
     /** @hide */
@@ -109,28 +118,32 @@ public final class AttributionSource implements Parcelable {
     public AttributionSource(int uid, @Nullable String packageName,
             @Nullable String attributionTag, @Nullable Set<String> renouncedPermissions,
             @Nullable AttributionSource next) {
-        this(uid, packageName, attributionTag, /*token*/ null, (renouncedPermissions != null)
+        this(uid, packageName, attributionTag, (renouncedPermissions != null)
                 ? renouncedPermissions.toArray(new String[0]) : null, next);
     }
 
     /** @hide */
-    public AttributionSource(@NonNull AttributionSource current,
-            @Nullable AttributionSource next) {
+    public AttributionSource(@NonNull AttributionSource current, @Nullable AttributionSource next) {
         this(current.getUid(), current.getPackageName(), current.getAttributionTag(),
-                /*token*/ null, /*renouncedPermissions*/ null, next);
+                current.getToken(), current.mAttributionSourceState.renouncedPermissions, next);
     }
 
     AttributionSource(int uid, @Nullable String packageName, @Nullable String attributionTag,
-            @Nullable IBinder token, @Nullable String[] renouncedPermissions,
+            @Nullable String[] renouncedPermissions, @Nullable AttributionSource next) {
+        this(uid, packageName, attributionTag, new Binder(), renouncedPermissions, next);
+    }
+
+    AttributionSource(int uid, @Nullable String packageName, @Nullable String attributionTag,
+            @NonNull IBinder token, @Nullable String[] renouncedPermissions,
             @Nullable AttributionSource next) {
         mAttributionSourceState = new AttributionSourceState();
         mAttributionSourceState.uid = uid;
+        mAttributionSourceState.token = token;
         mAttributionSourceState.packageName = packageName;
         mAttributionSourceState.attributionTag = attributionTag;
-        mAttributionSourceState.token = token;
         mAttributionSourceState.renouncedPermissions = renouncedPermissions;
         mAttributionSourceState.next = (next != null) ? new AttributionSourceState[]
-                {next.mAttributionSourceState} : null;
+                {next.mAttributionSourceState} : new AttributionSourceState[0];
     }
 
     AttributionSource(@NonNull Parcel in) {
@@ -145,24 +158,57 @@ public final class AttributionSource implements Parcelable {
     /** @hide */
     public AttributionSource withNextAttributionSource(@Nullable AttributionSource next) {
         return new AttributionSource(getUid(), getPackageName(), getAttributionTag(),
-                getToken(), mAttributionSourceState.renouncedPermissions, next);
-    }
-
-    /** @hide */
-    public AttributionSource withToken(@Nullable IBinder token) {
-        return new AttributionSource(getUid(), getPackageName(), getAttributionTag(),
-                token, mAttributionSourceState.renouncedPermissions, getNext());
+                mAttributionSourceState.renouncedPermissions, next);
     }
 
     /** @hide */
     public AttributionSource withPackageName(@Nullable String packageName) {
-        return new AttributionSource(getUid(), packageName, getAttributionTag(), getToken(),
+        return new AttributionSource(getUid(), packageName, getAttributionTag(),
                 mAttributionSourceState.renouncedPermissions, getNext());
     }
 
     /** @hide */
     public @NonNull AttributionSourceState asState() {
         return mAttributionSourceState;
+    }
+
+    /** @hide */
+    public @NonNull ScopedParcelState asScopedParcelState() {
+        return new ScopedParcelState(this);
+    }
+
+    /** @hide */
+    public static AttributionSource myAttributionSource() {
+        return new AttributionSource(Process.myUid(), ActivityThread.currentOpPackageName(),
+                /*attributionTag*/ null, (String[]) /*renouncedPermissions*/ null, /*next*/ null);
+    }
+
+    /**
+     * This is a scoped object that exposes the content of an attribution source
+     * as a parcel. This is useful when passing one to native and avoid custom
+     * conversion logic from Java to native state that needs to be kept in sync
+     * as attribution source evolves. This way we use the same logic for passing
+     * to native as the ones for passing in an IPC - in both cases this is the
+     * same auto generated code.
+     *
+     * @hide
+     */
+    public static class ScopedParcelState implements AutoCloseable {
+        private final Parcel mParcel;
+
+        public @NonNull Parcel getParcel() {
+            return mParcel;
+        }
+
+        public ScopedParcelState(AttributionSource attributionSource) {
+            mParcel = Parcel.obtain();
+            attributionSource.writeToParcel(mParcel, 0);
+            mParcel.setDataPosition(0);
+        }
+
+        public void close() {
+            mParcel.recycle();
+        }
     }
 
     /**
@@ -209,7 +255,8 @@ public final class AttributionSource implements Parcelable {
                     "attributionTag = " + mAttributionSourceState.attributionTag + ", " +
                     "token = " + mAttributionSourceState.token + ", " +
                     "next = " + (mAttributionSourceState.next != null
-                            ? mAttributionSourceState.next[0]: null) +
+                                    && mAttributionSourceState.next.length > 0
+                            ? mAttributionSourceState.next[0] : null) +
                     " }";
         }
         return super.toString();
@@ -221,7 +268,8 @@ public final class AttributionSource implements Parcelable {
      * @hide
      */
     public int getNextUid() {
-        if (mAttributionSourceState.next != null) {
+        if (mAttributionSourceState.next != null
+                && mAttributionSourceState.next.length > 0) {
             return mAttributionSourceState.next[0].uid;
         }
         return Process.INVALID_UID;
@@ -233,21 +281,37 @@ public final class AttributionSource implements Parcelable {
      * @hide
      */
     public @Nullable String getNextPackageName() {
-        if (mAttributionSourceState.next != null) {
+        if (mAttributionSourceState.next != null
+                && mAttributionSourceState.next.length > 0) {
             return mAttributionSourceState.next[0].packageName;
         }
         return null;
     }
 
     /**
-     * @return The nexxt package's attribution tag that would receive
+     * @return The next package's attribution tag that would receive
      * the permission protected data.
      *
      * @hide
      */
     public @Nullable String getNextAttributionTag() {
-        if (mAttributionSourceState.next != null) {
+        if (mAttributionSourceState.next != null
+                && mAttributionSourceState.next.length > 0) {
             return mAttributionSourceState.next[0].attributionTag;
+        }
+        return null;
+    }
+
+    /**
+     * @return The next package's token that would receive
+     * the permission protected data.
+     *
+     * @hide
+     */
+    public @Nullable IBinder getNextToken() {
+        if (mAttributionSourceState.next != null
+                && mAttributionSourceState.next.length > 0) {
+            return mAttributionSourceState.next[0].token;
         }
         return null;
     }
@@ -311,7 +375,7 @@ public final class AttributionSource implements Parcelable {
      *
      * @hide
      */
-    public @Nullable IBinder getToken() {
+    public @NonNull IBinder getToken() {
         return mAttributionSourceState.token;
     }
 
@@ -319,7 +383,8 @@ public final class AttributionSource implements Parcelable {
      * The next app to receive the permission protected data.
      */
     public @Nullable AttributionSource getNext() {
-        if (mNextCached == null && mAttributionSourceState.next != null) {
+        if (mNextCached == null && mAttributionSourceState.next != null
+                && mAttributionSourceState.next.length > 0) {
             mNextCached = new AttributionSource(mAttributionSourceState.next[0]);
         }
         return mNextCached;
@@ -442,7 +507,7 @@ public final class AttributionSource implements Parcelable {
         @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
         public @NonNull Builder setRenouncedPermissions(@Nullable Set<String> value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x10;
+            mBuilderFieldsSet |= 0x8;
             mAttributionSourceState.renouncedPermissions = (value != null)
                     ? value.toArray(new String[0]) : null;
             return this;
@@ -453,9 +518,9 @@ public final class AttributionSource implements Parcelable {
          */
         public @NonNull Builder setNext(@Nullable AttributionSource value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x20;
+            mBuilderFieldsSet |= 0x10;
             mAttributionSourceState.next = (value != null) ? new AttributionSourceState[]
-                    {value.mAttributionSourceState} : null;
+                    {value.mAttributionSourceState} : mAttributionSourceState.next;
             return this;
         }
 
@@ -471,13 +536,15 @@ public final class AttributionSource implements Parcelable {
                 mAttributionSourceState.attributionTag = null;
             }
             if ((mBuilderFieldsSet & 0x8) == 0) {
-                mAttributionSourceState.token = null;
-            }
-            if ((mBuilderFieldsSet & 0x10) == 0) {
                 mAttributionSourceState.renouncedPermissions = null;
             }
-            if ((mBuilderFieldsSet & 0x20) == 0) {
+            if ((mBuilderFieldsSet & 0x10) == 0) {
                 mAttributionSourceState.next = null;
+            }
+            mAttributionSourceState.token = new Binder();
+            if (mAttributionSourceState.next == null) {
+                // The NDK aidl backend doesn't support null parcelable arrays.
+                mAttributionSourceState.next = new AttributionSourceState[0];
             }
             return new AttributionSource(mAttributionSourceState);
         }

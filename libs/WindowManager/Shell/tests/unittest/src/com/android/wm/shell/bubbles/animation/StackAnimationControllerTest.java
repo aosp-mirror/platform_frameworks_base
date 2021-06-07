@@ -69,7 +69,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
                     public int getAsInt() {
                         return mLayout.getChildCount();
                     }
-                }, mock(Runnable.class)));
+                }, mock(Runnable.class), mock(Runnable.class)));
         mLayout.setActiveController(mStackController);
         addOneMoreThanBubbleLimitBubbles();
         mStackOffset = mLayout.getResources().getDimensionPixelSize(R.dimen.bubble_stack_offset);
@@ -307,10 +307,12 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
         TestableStackController(
                 FloatingContentCoordinator floatingContentCoordinator,
                 IntSupplier bubbleCountSupplier,
-                Runnable onBubbleAnimatedOutAction) {
+                Runnable onBubbleAnimatedOutAction,
+                Runnable onStackAnimationFinished) {
             super(floatingContentCoordinator,
                     bubbleCountSupplier,
                     onBubbleAnimatedOutAction,
+                    onStackAnimationFinished,
                     new TestableBubblePositioner(mContext, mock(WindowManager.class)));
         }
 

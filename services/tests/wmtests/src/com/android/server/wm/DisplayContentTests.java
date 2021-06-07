@@ -358,6 +358,22 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(imeContainer).assignRelativeLayer(any(), eq(imeSurfaceParent), anyInt(), eq(true));
     }
 
+    @Test
+    public void testComputeImeTargetReturnsNull_windowDidntRequestIme() {
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION,
+                new ActivityBuilder(mAtm).setCreateTask(true).build(), "app");
+        final WindowState win2 = createWindow(null, TYPE_BASE_APPLICATION,
+                new ActivityBuilder(mAtm).setCreateTask(true).build(), "app2");
+
+        mDisplayContent.setImeInputTarget(win1);
+        mDisplayContent.setImeLayeringTarget(win2);
+
+        doReturn(true).when(mDisplayContent).shouldImeAttachedToApp();
+        // Compute IME parent returns nothing if current target and window receiving input
+        // are different i.e. if current window didn't request IME.
+        assertNull("computeImeParent() should be null", mDisplayContent.computeImeParent());
+    }
+
     /**
      * This tests root task movement between displays and proper root task's, task's and app token's
      * display container references updates.
@@ -574,12 +590,11 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState ws = createWindow(null, TYPE_APPLICATION, dc, "app window");
         dc.setImeLayeringTarget(ws);
 
-        // Adjust bounds so that matchesRootDisplayAreaBounds() returns false and
-        // hence isLetterboxedAppWindow() returns true.
+        // Adjust bounds so that matchesRootDisplayAreaBounds() returns false.
         ws.mActivityRecord.getConfiguration().windowConfiguration.setBounds(new Rect(1, 1, 1, 1));
         assertFalse("matchesRootDisplayAreaBounds() should return false",
                 ws.matchesDisplayAreaBounds());
-        assertTrue("isLetterboxedAppWindow() should return true", ws.isLetterboxedAppWindow());
+
         assertTrue("IME shouldn't be attached to app",
                 dc.computeImeParent() != dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
                         .mActivityRecord.getSurfaceControl());
@@ -1328,7 +1343,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         assertTrue(app.isFixedRotationTransforming());
         assertTrue(mAppWindow.matchesDisplayAreaBounds());
-        assertFalse(mAppWindow.isLetterboxedAppWindow());
+        assertFalse(mAppWindow.areAppWindowBoundsLetterboxed());
         assertTrue(mDisplayContent.getDisplayRotation().shouldRotateSeamlessly(
                 ROTATION_0 /* oldRotation */, ROTATION_90 /* newRotation */,
                 false /* forceUpdate */));
@@ -1371,11 +1386,11 @@ public class DisplayContentTests extends WindowTestsBase {
         performLayout(mDisplayContent);
 
         // Force the negative offset to verify it can be updated.
-        mWallpaperWindow.mWinAnimator.mXOffset = mWallpaperWindow.mWinAnimator.mYOffset = -1;
+        mWallpaperWindow.mXOffset = mWallpaperWindow.mYOffset = -1;
         assertTrue(mDisplayContent.mWallpaperController.updateWallpaperOffset(mWallpaperWindow,
                 false /* sync */));
-        assertThat(mWallpaperWindow.mWinAnimator.mXOffset).isGreaterThan(-1);
-        assertThat(mWallpaperWindow.mWinAnimator.mYOffset).isGreaterThan(-1);
+        assertThat(mWallpaperWindow.mXOffset).isGreaterThan(-1);
+        assertThat(mWallpaperWindow.mYOffset).isGreaterThan(-1);
 
         // The wallpaper need to animate with transformed position, so its surface position should
         // not be reset.

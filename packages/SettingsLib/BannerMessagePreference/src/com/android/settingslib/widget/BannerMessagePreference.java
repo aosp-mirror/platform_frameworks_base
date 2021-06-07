@@ -73,11 +73,11 @@ public class BannerMessagePreference extends Preference {
             throw new IllegalArgumentException();
         }
 
-        @ColorRes int getAccentColorResId() {
+        public @ColorRes int getAccentColorResId() {
             return mAccentColorResId;
         }
 
-        @ColorRes int getBackgroundColorResId() {
+        public @ColorRes int getBackgroundColorResId() {
             return mBackgroundColorResId;
         }
     }

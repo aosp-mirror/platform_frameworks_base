@@ -126,14 +126,12 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
 
 
         void cancelInternal() {
-            synchronized (mLock) {
-                if (mIsFulfilled) {
-                    return;
-                }
-                mIsFulfilled = true;
-            }
             Handler.getMain().post(() -> {
                 synchronized (mLock) {
+                    if (mIsFulfilled) {
+                        return;
+                    }
+                    mIsFulfilled = true;
                     try {
                         if (mCancellation != null) {
                             mCancellation.cancel();

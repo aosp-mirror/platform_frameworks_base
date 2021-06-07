@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"पूरा फ़िंगरप्रिंट पहचाना नहीं जा सका"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फ़िंगरप्रिंट प्रोसेस नहीं हो सका. कृपया दोबारा कोशिश करें."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"सेंसर को साफ़ करें"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"उंगली बहुत जल्दी हटा ली गई"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"उंगली को थोड़ी देर और सेंसर पर रखें"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"उंगली बहुत धीरे चलाई गई. कृपया फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"किसी दूसरे फ़िंगरप्रिंट से कोशिश करें"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"बहुत रोशनी है"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फ़िंगरप्रिंट आइकॉन"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"\'मालिक का चेहरा पहचानकर अनलॉक\' वाला हार्डवेयर प्रबंधित करें"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"ऐप्लिकेशन को चेहरे के टेम्पलेट इस्तेमाल के तरीके जोड़ने और मिटाने की मंज़ूरी मिलती है."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"फ़ेस अनलॉक हार्डवेयर इस्तेमाल करें"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"फ़ेस अनलॉक हार्डवेयर के इस्तेमाल की मंज़ूरी देता है"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"फ़ेस अनलॉक"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"फ़ेस अनलॉक"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"अपना चेहरा फिर से दर्ज करें"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"कृपया अपना चेहरा फिर से दर्ज करें ताकि आपको बेहतर तरीके से पहचाना जा सके"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"फ़ेस अनलॉक की सुविधा सेट अप करें"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"फे़स अनलॉक की सुविधा सेट अप करें"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"अपने फ़ोन की तरफ़ देखकर उसे अनलॉक करें"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"फ़ोन को अनलॉक करने के दूसरे तरीके सेट अप करें"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"फ़िंगरप्रिंट जोड़ने के लिए टैप करें"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"चेहरा नहीं पहचान पा रहे. हार्डवेयर उपलब्ध नहीं है."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"फ़ेस अनलॉक की सुविधा फिर से आज़माएं."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"फ़ेस अनलॉक की सुविधा फिर से आज़माएं"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"चेहरे का नया डेटा सेव नहीं हो सकता. कोई पुराना डेटा मिटाएं."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"चेहरा पहचानने की कार्रवाई रद्द की गई."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"उपयोगकर्ता ने \'मालिक का चेहरा पहचानकर अनलॉक\' रद्द की."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"उपयोगकर्ता ने फ़ेस अनलॉक को रद्द किया"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"कई बार कोशिश की गई. बाद में कोशिश करें."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"कई बार कोशिश की जा चुकी है. \'मालिक का चेहरा पहचानकर अनलॉक\' बंद है."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"कई बार कोशिश की जा चुकी है. फ़ेस अनलॉक को बंद कर दिया गया है."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"कई बार कोशिश की जा चुकी है. इसके बजाय, स्क्रीन लॉक का इस्तेमाल करें."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"चेहरा नहीं पहचान पा रहे. फिर से कोशिश करें."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"आपने \'मालिक का चेहरा पहचानकर अनलॉक\' सेट नहीं की है."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"इस डिवाइस पर फ़ेस अनलॉक की सुविधा काम नहीं करती है."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"आपने फ़ेस अनलॉक सेट अप नहीं किया है"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"फ़ेस अनलॉक की सुविधा इस डिवाइस पर उपलब्ध नहीं है"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"सेंसर कुछ समय के लिए बंद कर दिया गया है."</string>
     <string name="face_name_template" msgid="3877037340223318119">"चेहरा <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"\'फ़ेस अनलॉक\' इस्तेमाल करें"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"फ़ेस अनलॉक का इस्तेमाल करें"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"\'फ़ेस अनलॉक\' या स्क्रीन लॉक का क्रेडेंशियल इस्तेमाल करें"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"जारी रखने के लिए, अपने चेहरे की मदद से पुष्टि करें"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"जारी रखने के लिए, अपना चेहरा दिखाकर या स्क्रीन लॉक क्रेडेंशियल डालकर पुष्टि करें"</string>
@@ -731,13 +728,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"स्क्रीन को अनलॉक करते समय ध्यान रखें कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला गया है, तो अपने Android TV डिवाइस को तुरंत लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटाएं."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"स्‍क्रीनका लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार गलत पासवर्ड लिखा जाता है तो फ़ोन को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"स्‍क्रीन लॉक बदलना"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"स्‍क्रीन लॉक बदलना."</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"इससे स्‍क्रीन लॉक बदला जाता है."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"स्‍क्रीन लॉक करना"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"इससे नियंत्रित होगा कि स्‍क्रीन कैसे और कब लॉक हो."</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"इससे यह कंट्रोल होता है कि स्क्रीन कैसे और कब लॉक हो."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"सारा डेटा मिटाना"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना फ़ोन का डेटा मिटाना."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"फ़ैक्ट्री डेटा रीसेट करके अपने Android TV डिवाइस का डेटा बिना चेतावनी दिए मिटाएं."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना फ़ोन का डेटा मिटाना."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"इससे फ़ैक्‍टरी डेटा रीसेट करके, चेतावनी दिए बिना फ़ोन का डेटा मिट जाता है."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"उपयोगकर्ता डेटा मिटाएं"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"इस टैबलेट पर मौजूद इस उपयोगकर्ता का डेटा बिना चेतावनी के मिटा दें."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"बिना चेतावनी दिए, इस Android TV डिवाइस से उपयोगकर्ता का डेटा मिटाएं."</string>
@@ -751,7 +748,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"कैमरों को अक्षम करें"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"सभी डिवाइस कैमरों का उपयोग रोकें."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"स्‍क्रीन लॉक की कुछ सुविधाएं बंद करना"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"यह कुछ स्‍क्रीन लाॅक सुविधाओं का इस्तेमाल रोकती है."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"इससे कुछ स्‍क्रीन लॉक सुविधाओं का इस्तेमाल रोका जाता है."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"घर"</item>
     <item msgid="7740243458912727194">"मोबाइल"</item>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"अनलॉक क्षेत्र का विस्तार करें."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"स्लाइड अनलॉक."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"आकार अनलॉक."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"मालिक का चेहरा पहचानकर अनलॉक करें."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"फ़ेस अनलॉक."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"पिन अनलॉक."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"पिन के ज़रिए सिम अनलॉक करें."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"पीयूके के ज़रिए सिम अनलॉक करें."</string>
@@ -1869,9 +1866,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"आपके व्यवस्थापक ने अपडेट किया है"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"आपके व्यवस्थापक ने हटा दिया है"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ठीक है"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"बैटरी सेवर, गहरे रंग वाली थीम को चालू करता है. साथ ही, यह बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, कुछ खास सुविधाओं, और कुछ खास तरह के इंटरनेट कनेक्शन इस्तेमाल करने से डिवाइस को रोकता है या इन्हें बंद कर देता है.\n\n"<annotation id="url">"ज़्यादा जानें"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"बैटरी सेवर, गहरे रंग वाली थीम को चालू करता है. साथ ही, यह बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, कुछ खास सुविधाओं, और कुछ खास तरह के इंटरनेट कनेक्शन इस्तेमाल करने से डिवाइस को रोकता है या इन्हें बंद कर देता है."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"बैटरी सेवर, गहरे रंग वाली थीम को चालू करता है. साथ ही, यह बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, कुछ खास सुविधाओं, और कुछ खास तरह के इंटरनेट कनेक्शन इस्तेमाल करने से डिवाइस को रोकता है या इन्हें बंद कर देता है."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"डेटा खर्च को कम करने के लिए, डेटा बचाने की सेटिंग कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकती है. फ़िलहाल, आप जिस ऐप्लिकेशन का इस्तेमाल कर रहे हैं वह डेटा ऐक्सेस कर सकता है, लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी जब तक कि आप उन पर टैप नहीं करते."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"डेटा खर्च को कम करने के लिए, डेटा बचाने की सेटिंग कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकती है. फ़िलहाल, आप जिस ऐप्लिकेशन का इस्तेमाल कर रहे हैं वह डेटा ऐक्सेस कर सकता है, लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी, जब तक आप उन पर टैप नहीं करते."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा बचाने की सेटिंग चालू करें?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"चालू करें"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2095,7 +2092,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"चालू करें"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"बंद करें"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ज़्यादा जानें"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 में, ज़रूरत के हिसाब से सूचनाएं पाने की सुविधा की जगह अब \'बेहतर सूचनाएं\' सुविधा काम करेगी. यह सुविधा आपको कार्रवाइयों और जवाबों के सुझाव दिखाती है. साथ ही, आपके डिवाइस पर मिलने वाली सूचनाओं को व्यवस्थित करती है.\n\n\'बेहतर सूचनाएं\' सुविधा, डिवाइस पर मिलने वाली सभी सूचनाओं का कॉन्टेंट ऐक्सेस कर सकती है. इसमें आपकी निजी जानकारी, जैसे कि संपर्कों के नाम और मैसेज शामिल हैं. यह सुविधा, सूचनाओं को रद्द कर सकती है या उनका जवाब भी दे सकती है, जैसे कि फ़ोन कॉल का जवाब देना और \'परेशान न करें\' को कंट्रोल करना."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 में, ज़रूरत के हिसाब से सूचनाएं पाने की सुविधा की जगह अब \'बेहतर सूचनाएं\' सुविधा काम करेगी. यह सुविधा आपको कार्रवाइयों और जवाबों के सुझाव दिखाती है. साथ ही, आपके डिवाइस पर मिलने वाली सूचनाओं को व्यवस्थित करती है.\n\n\'बेहतर सूचनाएं\' सुविधा, डिवाइस पर मिलने वाली सभी सूचनाओं का कॉन्टेंट ऐक्सेस कर सकती है. इसमें आपकी निजी जानकारी, जैसे कि संपर्कों के नाम और मैसेज शामिल हैं. यह सुविधा, सूचनाओं को खारिज कर सकती है या उनका जवाब भी दे सकती है, जैसे कि फ़ोन कॉल का जवाब देना और \'परेशान न करें\' को कंट्रोल करना."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"रूटीन मोड जानकारी की सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"बैटरी आम तौर पर जितने समय चलती है, उससे पहले खत्म हो सकती है"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बैटरी लाइफ़ बढ़ाने के लिए \'बैटरी सेवर\' चालू हो गया है"</string>

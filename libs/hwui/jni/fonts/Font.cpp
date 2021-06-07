@@ -35,6 +35,7 @@
 #include <minikin/FontFamily.h>
 #include <minikin/FontFileParser.h>
 #include <minikin/LocaleList.h>
+#include <minikin/SystemFonts.h>
 #include <ui/FatVector.h>
 
 #include <memory>
@@ -282,6 +283,22 @@ static jint Font_getSourceId(CRITICAL_JNI_PARAMS_COMMA jlong fontPtr) {
     return font->font->typeface()->GetSourceId();
 }
 
+static jlongArray Font_getAvailableFontSet(JNIEnv* env, jobject) {
+    std::vector<jlong> refArray;
+    minikin::SystemFonts::getFontSet(
+            [&refArray](const std::vector<std::shared_ptr<minikin::Font>>& fontSet) {
+                refArray.reserve(fontSet.size());
+                for (const auto& font : fontSet) {
+                    std::shared_ptr<minikin::Font> fontRef = font;
+                    refArray.push_back(
+                            reinterpret_cast<jlong>(new FontWrapper(std::move(fontRef))));
+                }
+            });
+    jlongArray r = env->NewLongArray(refArray.size());
+    env->SetLongArrayRegion(r, 0, refArray.size(), refArray.data());
+    return r;
+}
+
 // Fast Native
 static jlong FontFileUtil_getFontRevision(JNIEnv* env, jobject, jobject buffer, jint index) {
     NPE_CHECK_RETURN_ZERO(env, buffer);
@@ -373,6 +390,9 @@ static const JNINativeMethod gFontMethods[] = {
         {"nGetAxisCount", "(J)I", (void*)Font_getAxisCount},
         {"nGetAxisInfo", "(JI)J", (void*)Font_getAxisInfo},
         {"nGetSourceId", "(J)I", (void*)Font_getSourceId},
+
+        // System font accessors
+        {"nGetAvailableFontSet", "()[J", (void*)Font_getAvailableFontSet},
 };
 
 static const JNINativeMethod gFontFileUtilMethods[] = {

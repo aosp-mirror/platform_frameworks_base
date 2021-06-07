@@ -99,7 +99,7 @@ class StackEducationView constructor(context: Context) : LinearLayout(context) {
         post {
             with(view) {
                 val bubbleSize = context.resources.getDimensionPixelSize(
-                    R.dimen.individual_bubble_size)
+                    R.dimen.bubble_size)
                 translationY = stackPosition.y + bubbleSize / 2 - getHeight() / 2
             }
             animate()

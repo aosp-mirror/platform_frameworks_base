@@ -400,10 +400,7 @@ public abstract class Context {
     public static final int BIND_BYPASS_POWER_NETWORK_RESTRICTIONS = 0x00020000;
 
     /**
-     * Flag for {@link #bindService}: allow background foreground service starts from the bound
-     * service's process.
-     * This flag is only respected if the caller is holding
-     * {@link android.Manifest.permission#START_FOREGROUND_SERVICES_FROM_BACKGROUND}.
+     * Do not use. This flag is no longer needed nor used.
      * @hide
      */
     @SystemApi
@@ -4837,6 +4834,14 @@ public abstract class Context {
      */
     @SystemApi
     public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
+
+    /**
+     * Official published name of the (internal) permission checker service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String PERMISSION_CHECKER_SERVICE = "permission_checker";
 
     /**
      * Use with {@link #getSystemService(String) to retrieve an

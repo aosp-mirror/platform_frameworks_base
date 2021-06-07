@@ -252,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Dayakan Pengelogan Berjela-jela Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pendikitan pengimbasan Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Perawakan MAC dipertingkat Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Perawakan MAC tidak berterusan Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Data mudah alih sentiasa aktif"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Pecutan perkakasan penambatan"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Tunjukkan peranti Bluetooth tanpa nama"</string>
@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Tunjukkan batas klip, margin dll."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Paksa arah reka letak RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Paksa arah reka letak skrin RTL bagi semua tempat peristiwa"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Paksa 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Dayakan 4x MSAA dalam apl OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Nyahpepijat operasi keratan bukan segi empat tepat"</string>
@@ -453,7 +455,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi hingga penuh"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi hingga penuh"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengoptimuman untuk kesihatan bateri"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengecasan terhad buat sementara waktu"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tidak diketahui"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Mengecas"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mengecas dgn cepat"</string>

@@ -1023,6 +1023,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mValidatedTransports.clear();
         if (mLastDefaultNetworkCapabilities != null) {
             for (int transportType : mLastDefaultNetworkCapabilities.getTransportTypes()) {
+                if (transportType != NetworkCapabilities.TRANSPORT_CELLULAR
+                        && transportType != NetworkCapabilities.TRANSPORT_WIFI
+                        && transportType != NetworkCapabilities.TRANSPORT_ETHERNET) {
+                    continue;
+                }
                 if (transportType == NetworkCapabilities.TRANSPORT_CELLULAR
                         && Utils.tryGetWifiInfoForVcn(mLastDefaultNetworkCapabilities) != null) {
                     mConnectedTransports.set(NetworkCapabilities.TRANSPORT_WIFI);
@@ -1045,11 +1050,15 @@ public class NetworkControllerImpl extends BroadcastReceiver
             Log.d(TAG, "updateConnectivity: mValidatedTransports=" + mValidatedTransports);
         }
 
-        mInetCondition = !mValidatedTransports.isEmpty();
+        mInetCondition = mValidatedTransports.get(NetworkCapabilities.TRANSPORT_CELLULAR)
+                || mValidatedTransports.get(NetworkCapabilities.TRANSPORT_WIFI)
+                || mValidatedTransports.get(NetworkCapabilities.TRANSPORT_ETHERNET);
 
         pushConnectivityToSignals();
         if (mProviderModel) {
-            mNoDefaultNetwork = mConnectedTransports.isEmpty();
+            mNoDefaultNetwork = !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_CELLULAR)
+                && !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_WIFI)
+                && !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_ETHERNET);
             mCallbackHandler.setConnectivityStatus(mNoDefaultNetwork, !mInetCondition,
                     mNoNetworksAvailable);
             for (int i = 0; i < mMobileSignalControllers.size(); i++) {

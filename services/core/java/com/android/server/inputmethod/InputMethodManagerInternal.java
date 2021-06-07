@@ -126,8 +126,10 @@ public abstract class InputMethodManagerInternal {
 
     /**
      * Updates the IME visibility, back disposition and show IME picker status for SystemUI.
+     * TODO(b/189923292): Making SystemUI to be true IME icon controller vs. presenter that
+     *     controlled by IMMS.
      */
-    public abstract void updateImeWindowStatus();
+    public abstract void updateImeWindowStatus(boolean disableImeIcon);
 
     /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
@@ -182,7 +184,7 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void updateImeWindowStatus() {
+                public void updateImeWindowStatus(boolean disableImeIcon) {
                 }
             };
 

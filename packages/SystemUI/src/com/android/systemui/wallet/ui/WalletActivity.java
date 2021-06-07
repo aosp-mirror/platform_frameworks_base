@@ -24,6 +24,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
+import android.service.quickaccesswallet.WalletServiceEvent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -50,9 +52,10 @@ import javax.inject.Inject;
 /**
  * Displays Wallet carousel screen inside an activity.
  */
-public class WalletActivity extends LifecycleActivity {
+public class WalletActivity extends LifecycleActivity implements
+        QuickAccessWalletClient.WalletServiceEventListener {
 
-    private final QuickAccessWalletClient mQuickAccessWalletClient;
+    private static final String TAG = "WalletActivity";
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
     private final ActivityStarter mActivityStarter;
@@ -62,10 +65,11 @@ public class WalletActivity extends LifecycleActivity {
     private final UserTracker mUserTracker;
     private final StatusBarKeyguardViewManager mKeyguardViewManager;
     private WalletScreenController mWalletScreenController;
+    private QuickAccessWalletClient mWalletClient;
+    private boolean mHasRegisteredListener;
 
     @Inject
     public WalletActivity(
-            QuickAccessWalletClient quickAccessWalletClient,
             KeyguardStateController keyguardStateController,
             KeyguardDismissUtil keyguardDismissUtil,
             ActivityStarter activityStarter,
@@ -74,7 +78,6 @@ public class WalletActivity extends LifecycleActivity {
             FalsingManager falsingManager,
             UserTracker userTracker,
             StatusBarKeyguardViewManager keyguardViewManager) {
-        mQuickAccessWalletClient = quickAccessWalletClient;
         mKeyguardStateController = keyguardStateController;
         mKeyguardDismissUtil = keyguardDismissUtil;
         mActivityStarter = activityStarter;
@@ -103,10 +106,11 @@ public class WalletActivity extends LifecycleActivity {
         getActionBar().setHomeActionContentDescription(R.string.accessibility_desc_close);
         WalletView walletView = requireViewById(R.id.wallet_view);
 
+        mWalletClient = QuickAccessWalletClient.create(this);
         mWalletScreenController = new WalletScreenController(
                 this,
                 walletView,
-                mQuickAccessWalletClient,
+                mWalletClient,
                 mActivityStarter,
                 mExecutor,
                 mHandler,
@@ -116,6 +120,10 @@ public class WalletActivity extends LifecycleActivity {
 
         walletView.getAppButton().setOnClickListener(
                 v -> {
+                    if (mWalletClient.createWalletIntent() == null) {
+                        Log.w(TAG, "Unable to create wallet app intent.");
+                        return;
+                    }
                     if (!mKeyguardStateController.isUnlocked()
                             && mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                         return;
@@ -123,12 +131,12 @@ public class WalletActivity extends LifecycleActivity {
 
                     if (mKeyguardStateController.isUnlocked()) {
                         mActivityStarter.startActivity(
-                                mQuickAccessWalletClient.createWalletIntent(), true);
+                                mWalletClient.createWalletIntent(), true);
                         finish();
                     } else {
                         mKeyguardDismissUtil.executeWhenUnlocked(() -> {
                             mActivityStarter.startActivity(
-                                    mQuickAccessWalletClient.createWalletIntent(), true);
+                                    mWalletClient.createWalletIntent(), true);
                             finish();
                             return false;
                         }, false, true);
@@ -150,6 +158,11 @@ public class WalletActivity extends LifecycleActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (!mHasRegisteredListener) {
+            // Listener is registered even when device is locked. Should only be registered once.
+            mWalletClient.addWalletServiceEventListener(this);
+            mHasRegisteredListener = true;
+        }
         mKeyguardStateController.addCallback(mWalletScreenController);
     }
 
@@ -174,6 +187,24 @@ public class WalletActivity extends LifecycleActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * Implements {@link QuickAccessWalletClient.WalletServiceEventListener}. Called when the wallet
+     * application propagates an event, such as an NFC tap, to the quick access wallet view.
+     */
+    @Override
+    public void onWalletServiceEvent(WalletServiceEvent event) {
+        switch (event.getEventType()) {
+            case WalletServiceEvent.TYPE_NFC_PAYMENT_STARTED:
+                finish();
+                break;
+            case WalletServiceEvent.TYPE_WALLET_CARDS_UPDATED:
+                mWalletScreenController.queryWalletCards();
+                break;
+            default:
+                Log.w(TAG, "onWalletServiceEvent: Unknown event type");
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
@@ -194,6 +225,8 @@ public class WalletActivity extends LifecycleActivity {
     protected void onDestroy() {
         mKeyguardStateController.removeCallback(mWalletScreenController);
         mWalletScreenController.onDismissed();
+        mWalletClient.removeWalletServiceEventListener(this);
+        mHasRegisteredListener = false;
         super.onDestroy();
     }
 

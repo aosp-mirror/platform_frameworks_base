@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC o‘chiq"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC yoniq"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Ekranni yozib olish"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Boshlash"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Toʻxtatish"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Qurilma mikrofoni blokdan chiqarilsinmi?"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Kam ahamiyatli bildirishnomalarni pastda ko‘rsatish"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Ochish uchun yana bosing"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Yana bosing"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Ochish uchun tepaga suring"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Qayta urinish uchun tepaga suring"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ishlatish uchun qurilma qulfini oching"</string>
@@ -593,7 +593,7 @@
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Kerak emas"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"Sozlash"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="5901885672973736563">"O‘chiring"</string>
+    <string name="volume_zen_end_now" msgid="5901885672973736563">"Faolsizlantirish"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Tovush sozlamalari"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Yoyish"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Yig‘ish"</string>

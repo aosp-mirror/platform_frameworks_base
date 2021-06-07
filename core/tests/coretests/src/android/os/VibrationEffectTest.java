@@ -102,7 +102,9 @@ public class VibrationEffectTest {
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.createOneShot(1, -2).validate());
         assertThrows(IllegalArgumentException.class,
-                () -> VibrationEffect.createOneShot(1, 256).validate());
+                () -> VibrationEffect.createOneShot(1, 0).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.createOneShot(-1, 255).validate());
     }
 
     @Test
@@ -117,6 +119,7 @@ public class VibrationEffectTest {
     @Test
     public void testValidateWaveform() {
         VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, -1).validate();
+        VibrationEffect.createWaveform(new long[]{10, 10}, new int[] {0, 0}, -1).validate();
         VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, 0).validate();
         VibrationEffect.startWaveform()
                 .addStep(/* amplitude= */ 1, /* duration= */ 10)

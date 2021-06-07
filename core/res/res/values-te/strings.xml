@@ -311,7 +311,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS సందేశాలను పంపడం మరియు వీక్షించడం"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"ఫైల్స్ మరియు మీడియా"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"ఫైల్స్, మీడియా"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"మైక్రోఫోన్"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ఆడియోను రికార్డ్ చేయడానికి"</string>
@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"పాక్షిక వేలిముద్ర గుర్తించబడింది"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"వేలిముద్రను ప్రాసెస్ చేయడం సాధ్యపడలేదు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"సెన్సార్‌ను శుభ్రం చేయండి"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"వేలు చాలా వేగంగా తరలించబడింది"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"కొంచెం ఎక్కువసేపు పట్టుకోండి"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"వేలిని చాలా నెమ్మదిగా కదిలించారు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"మరొక వేలిముద్రను ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"వెలుతురు అధికంగా ఉంది"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"వేలిముద్ర చిహ్నం"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"ఫేస్ అన్‌లాక్ చేయగల హార్డ్‌వేర్‌ను మేనేజ్‌ చేయడం"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"వినియోగం కోసం ముఖ టెంప్లేట్‌లను జోడించే మరియు తొలగించే పద్ధతులను అమలు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ఫేస్ అన్‌లాక్ హార్డ్‌వేర్‌ను ఉపయోగించడం"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ప్రామాణీకరణ కోసం ఫేస్‌తో అన్‌లాక్ చేయగల హార్డ్‌వేర్‌ ఉపయోగానికి యాప్‌ను అనుమతిస్తుంది"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ఫేస్ అన్‌లాక్"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ఫేస్ అన్‌లాక్"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"మీ ముఖాన్ని తిరిగి నమోదు చేయండి"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"గుర్తింపును మెరుగుపరచడానికి, దయచేసి మీ ముఖంను తిరిగి నమోదు చేసుకోండి"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"ఫేస్ అన్‌లాక్‌ను సెటప్ చేయండి"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"ఫేస్ అన్‌లాక్‌ను సెటప్ చేయండి"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"మీ ఫోన్‌ను చూడటం ద్వారా దాన్ని అన్‌లాక్ చేయండి"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"అన్‌లాక్ చేయడానికి మరిన్ని మార్గాలను సెటప్ చేయండి"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"వేలిముద్రను జోడించడానికి ట్యాప్ చేయండి"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ముఖం ధృవీకరించలేరు. హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"ఫేస్ అన్‌లాక్‌ను మళ్లీ ప్రయత్నించండి."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"ఫేస్ అన్‌లాక్‌ను మళ్లీ ట్రై చేయండి"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"కొత్త ముఖం డేటాను నిల్వ చేయడం కాదు. మొదట పాతది తొలిగించండి."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ముఖ కార్యకలాపం రద్దయింది."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ఫేస్ అన్‌లాక్‌ను యూజర్‌ రద్దు చేశారు."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"ఫేస్ అన్‌లాక్‌ను యూజర్ రద్దు చేశారు"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"చాలా ఎక్కువ ప్రయత్నాలు చేసారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"చాలా సార్లు ప్రయత్నించారు. ఫేస్ అన్‌లాక్ డిజేబుల్ చేయబడింది."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. ఫేస్ అన్‌లాక్ డిజేబుల్ చేయబడింది."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. బదులుగా స్క్రీన్ లాక్‌ను ఎంటర్ చేయండి."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ముఖం ధృవీకరించలేకపోయింది. మళ్లీ ప్రయత్నించండి."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"మీరు ఫేస్ అన్‌లాక్‌ను సెటప్ చేయలేదు."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ఈ పరికరంలో ఫేస్ అన్‌లాక్‌ను ఉపయోగించడానికి సపోర్ట్ లేదు."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"మీరు ఫేస్ అన్‌లాక్‌ను సెటప్ చేయలేదు"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"ఫేస్ అన్‌లాక్‌ను ఈ పరికరం సపోర్ట్ చేయదు"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
     <string name="face_name_template" msgid="3877037340223318119">"ముఖ <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"ఫేస్ అన్‌లాక్‌ను ఉపయోగించండి"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"ఫేస్ అన్‌లాక్‌ను ఉపయోగించండి"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ఫేస్ లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"కొనసాగించడానికి మీ ముఖాన్ని ఉపయోగించండి"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"కొనసాగించడానికి మీ ముఖం లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"అన్‌లాక్ ప్రాంతాన్ని విస్తరింపజేయండి."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"స్లయిడ్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ఆకృతి అన్‌లాక్."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ఫేస్ అన్‌లాక్."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ఫేస్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"పిన్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sim పిన్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sim Puk అన్‌లాక్."</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"సరే"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేసి, బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లు, నిర్దిష్ట ఫీచర్‌లు, ఇంకా కొన్ని నెట్‌వర్క్ కనెక్షన్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది.\n\n"<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేసి, బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లు, నిర్దిష్ట ఫీచర్‌లు, ఇంకా కొన్ని నెట్‌వర్క్ కనెక్షన్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేసి, బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లు, నిర్దిష్ట ఫీచర్‌లు, ఇంకా కొన్ని నెట్‌వర్క్ కనెక్షన్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు నొక్కే వరకు ఫోటోలు ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>

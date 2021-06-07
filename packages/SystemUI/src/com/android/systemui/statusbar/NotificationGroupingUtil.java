@@ -32,7 +32,6 @@ import com.android.internal.R;
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.ConversationLayout;
 import com.android.internal.widget.ImageFloatingTextView;
-import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentView;
 
@@ -79,11 +78,6 @@ public class NotificationGroupingUtil {
             CachingIconView icon = view.findViewById(com.android.internal.R.id.icon);
             if (icon != null) {
                 icon.setGrayedOut(apply);
-            }
-            NotificationExpandButton expand =
-                    view.findViewById(com.android.internal.R.id.expand_button);
-            if (expand != null) {
-                expand.setGrayedOut(apply);
             }
         }
     };

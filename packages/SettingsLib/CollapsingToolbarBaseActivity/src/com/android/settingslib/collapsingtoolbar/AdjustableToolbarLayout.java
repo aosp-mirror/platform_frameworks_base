@@ -26,12 +26,9 @@ import androidx.annotation.Nullable;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 /**
- * A customized version of CollapsingToolbarLayout that can apply different font size based on
- * the line count of its title.
+ * A customized version of CollapsingToolbarLayout that can apply different font size based on the
+ * line count of its title.
  */
 public class AdjustableToolbarLayout extends CollapsingToolbarLayout {
 
@@ -59,43 +56,25 @@ public class AdjustableToolbarLayout extends CollapsingToolbarLayout {
             public void onLayoutChange(View v, int left, int top, int right, int bottom,
                     int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 v.removeOnLayoutChangeListener(this);
-                final int count = getLineCountWithReflection();
+                final int count = getLineCount();
                 if (count > TOOLBAR_MAX_LINE_NUMBER) {
                     final ViewGroup.LayoutParams lp = getLayoutParams();
                     lp.height = getResources()
                             .getDimensionPixelSize(R.dimen.toolbar_three_lines_height);
+                    setScrimVisibleHeightTrigger(
+                            getResources().getDimensionPixelSize(
+                                    R.dimen.scrim_visible_height_trigger_three_lines));
                     setLayoutParams(lp);
                 } else if (count == TOOLBAR_MAX_LINE_NUMBER) {
                     final ViewGroup.LayoutParams lp = getLayoutParams();
                     lp.height = getResources()
                             .getDimensionPixelSize(R.dimen.toolbar_two_lines_height);
+                    setScrimVisibleHeightTrigger(
+                            getResources().getDimensionPixelSize(
+                                    R.dimen.scrim_visible_height_trigger_two_lines));
                     setLayoutParams(lp);
                 }
             }
         });
-    }
-
-    /**
-     * Returns a number of title line count for CollapsingToolbarLayout so that facilitates the
-     * determination to apply what kind of font size. Since the title of CollapsingToolbarLayout is
-     * drawn in a canvas and the text process is wrapped in a CollapsingTextHelper, the way we used
-     * here is to get the line count from the CollapsingTextHelper via Java Reflection.
-     */
-    private int getLineCountWithReflection() {
-        try {
-            final Field textHelperField =
-                    this.getClass().getSuperclass().getDeclaredField("collapsingTextHelper");
-            textHelperField.setAccessible(true);
-            final Object textHelperObj = textHelperField.get(this);
-
-            final Field layoutField = textHelperObj.getClass().getDeclaredField("textLayout");
-            layoutField.setAccessible(true);
-            final Object layoutObj = layoutField.get(textHelperObj);
-
-            final Method method = layoutObj.getClass().getDeclaredMethod("getLineCount");
-            return (int) method.invoke(layoutObj);
-        } catch (Exception e) {
-            return 0;
-        }
     }
 }

@@ -19,5 +19,5 @@ android_library {
     ],
 
     sdk_version: "system_current",
-    min_sdk_version: "21",
+    min_sdk_version: "28",
 }

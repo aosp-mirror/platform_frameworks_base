@@ -17,5 +17,5 @@
 
 <resources>
     <!-- Padding of illustration -->
-    <dimen name="settingslib_illustration_padding">16dp</dimen>
+    <dimen name="settingslib_illustration_padding">12dp</dimen>
 </resources>

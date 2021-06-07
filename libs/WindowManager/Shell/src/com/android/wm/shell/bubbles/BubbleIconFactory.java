@@ -48,9 +48,8 @@ public class BubbleIconFactory extends BaseIconFactory {
 
     public BubbleIconFactory(Context context) {
         super(context, context.getResources().getConfiguration().densityDpi,
-                context.getResources().getDimensionPixelSize(R.dimen.individual_bubble_size));
-        mBadgeSize = mContext.getResources().getDimensionPixelSize(
-                com.android.launcher3.icons.R.dimen.profile_badge_size);
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_size));
+        mBadgeSize = mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size);
     }
 
     /**

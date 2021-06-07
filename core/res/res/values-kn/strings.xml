@@ -325,7 +325,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ಪೋನ್‌ ಕರೆಯ ಲಾಗ್‌ ಅನ್ನು ಓದಿ ಮತ್ತು ಬರೆಯಿರಿ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ಫೋನ್"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ಫೋನ್ ಕರೆ ಮಾಡಲು ಹಾಗೂ ನಿರ್ವಹಿಸಲು"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ದೇಹದ ಸೆನ್ಸರ್‌"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ಬಾಡಿ ಸೆನ್ಸರ್‌"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ನಿಮ್ಮ ಮುಖ್ಯ ಲಕ್ಷಣಗಳ ಕುರಿತು ಸೆನ್ಸಾರ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆಯುತ್ತದೆ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ನೀವು ಬಳಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯ ಪರೀಕ್ಷಿಸುತ್ತದೆ."</string>
@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ಭಾಗಶಃ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪತ್ತೆಯಾಗಿದೆ"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ಸೆನ್ಸರ್ ಅನ್ನು ಸ್ವಚ್ಚಗೊಳಿಸಿ"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"ಬೆರಳನ್ನು ವೇಗವಾಗಿ ಸರಿಸಲಾಗಿದೆ"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"ಸ್ವಲ್ಪ ಹೆಚ್ಚು ಸಮಯ ಒತ್ತಿ ಹಿಡಿಯಿರಿ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ಬೆರಳನ್ನು ತುಂಬಾ ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ಮತ್ತೊಂದು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ತುಂಬಾ ಪ್ರಕಾಶಮಾನವಾಗಿದೆ"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಹಾರ್ಡ್‌ವೇರ್ ಅನ್ನು ನಿರ್ವಹಿಸಿ"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"ಬಳಕೆಗೆ ಮುಖದ ಟೆಂಪ್ಲೇಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಮತ್ತು ಅಳಿಸಲು ವಿಧಾನಗಳನ್ನು ಮನವಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಿ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ಫೇಸ್ ಅನ್‌ಲಾಕ್"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ಫೇಸ್ ಅನ್‌ಲಾಕ್"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರುನೋಂದಣಿ ಮಾಡಿ"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ಗುರುತಿಸುವಿಕೆಯನ್ನು ಹೆಚ್ಚಿಸಲು ನಿಮ್ಮ ಮುಖವನ್ನು ಮರುನೋಂದಣಿ ಮಾಡಿ"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಸೆಟಪ್ ಮಾಡಿ"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ಫೋನ್ ಅನ್ನು ನೋಡುವ ಮೂಲಕ ಅನ್‌ಲಾಕ್‌ ಮಾಡಿ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಹೆಚ್ಚಿನ ಮಾರ್ಗಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಸೇರಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ಮುಖ ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಹಾರ್ಡ್‌ವೇರ್ ಲಭ್ಯವಿಲ್ಲ."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"ಹೊಸ ಮುಖ ಡೇಟಾ ಸಂಗ್ರಹಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಮೊದಲು ಹಳೆಯದನ್ನು ಅಳಿಸಿ"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ಮುಖದ ಕಾರ್ಯಚರಣೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಬಳಕೆದಾರರು ರದ್ದುಗೊಳಿಸಿದ್ದಾರೆ."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಬಳಕೆದಾರರು ರದ್ದುಗೊಳಿಸಿದ್ದಾರೆ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಬದಲಾಗಿ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ನಮೂದಿಸಿ."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"ನೀವು ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಿಲ್ಲ."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"ಈ ಸಾಧನದಲ್ಲಿ ಫೇಸ್ ಅನ್‌ಲಾಕ್ ವೈಶಿಷ್ಟ್ಯವು ಬೆಂಬಲಿತವಾಗಿಲ್ಲ."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"ನೀವು ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಿಲ್ಲ"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"ಈ ಸಾಧನದಲ್ಲಿ ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ಸೆನ್ಸಾರ್ ಅನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="face_name_template" msgid="3877037340223318119">"ಮುಖದ <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಬಳಸಿ‌‌"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಬಳಸಿ‌‌"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ಫೇಸ್ ಅಥವಾ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಬಳಸಿ"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ಮುಂದುವರಿಸಲು ನಿಮ್ಮ ಮುಖವನ್ನು ಬಳಸಿ"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ಮುಂದುವರಿಸಲು ನಿಮ್ಮ ಮುಖ ಅಥವಾ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಬಳಸಿ"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"ಅನ್‌ಲಾಕ್ ಪ್ರದೇಶವನ್ನು ವಿಸ್ತರಿಸು."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ಸ್ಲೈಡ್ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ಪ್ಯಾಟರ್ನ್ ಅನ್‌ಲಾಕ್."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ಫೇಸ್ ಅನ್‌ಲಾಕ್."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ಫೇಸ್ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"ಪಿನ್ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"ಸಿಮ್‌ ಪಿನ್‌ ಅನ್‌ಲಾಕ್ ಮಾಡಿ."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"ಸಿಮ್‌ PUK ಅನ್‌ಲಾಕ್ ಮಾಡಿ."</string>
@@ -985,7 +982,7 @@
     <string name="double_tap_toast" msgid="7065519579174882778">"ಸಲಹೆ: ಝೂಮ್ ಇನ್ ಮತ್ತು ಝೂಮ್ ಔಟ್ ಮಾಡಲು ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"ಸ್ವಯಂತುಂಬುವಿಕೆ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"ಸ್ವಯಂತುಂಬುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ನೊಂದಿಗೆ ಸ್ವಯಂ-ಭರ್ತಿ"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ಸಹಾಯದಿಂದ ಸ್ವಯಂ-ಭರ್ತಿ"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಪ್‌ಡೇಟ್ ಮಾಡಲ್ಪಟ್ಟಿದೆ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಅಳಿಸಿದ್ದಾರೆ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ಸರಿ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"ಬ್ಯಾಟರಿ ಸೇವರ್ ಡಾರ್ಕ್ ಥೀಮ್ ಅನ್ನು ಆನ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಚಟುವಟಿಕೆ, ಕೆಲವು ವಿಷುವಲ್ ಎಫೆಕ್ಟ್‌ಗಳು, ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳು ಮತ್ತು ಇತರ ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕಗಳನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ ಅಥವಾ ಆಫ್ ಮಾಡುತ್ತದೆ.\n\n"<annotation id="url">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ಬ್ಯಾಟರಿ ಸೇವರ್, ಡಾರ್ಕ್ ಥೀಮ್ ಅನ್ನು ಆನ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಚಟುವಟಿಕೆ, ಕೆಲವು ವಿಷುವಲ್ ಎಫೆಕ್ಟ್‌ಗಳು, ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳು ಮತ್ತು ಇತರ ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕಗಳನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ ಅಥವಾ ಆಫ್ ಮಾಡುತ್ತದೆ."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"ಬ್ಯಾಟರಿ ಸೇವರ್ ಡಾರ್ಕ್ ಥೀಮ್ ಅನ್ನು ಆನ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಚಟುವಟಿಕೆ, ಕೆಲವು ವಿಷುವಲ್ ಎಫೆಕ್ಟ್‌ಗಳು, ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳು ಮತ್ತು ಇತರ ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕಗಳನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ ಅಥವಾ ಆಫ್ ಮಾಡುತ್ತದೆ."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ಡೇಟಾ ಬಳಕೆ ಕಡಿಮೆ ಮಾಡುವ ನಿಟ್ಟಿನಲ್ಲಿ, ಡೇಟಾ ಸೇವರ್ ಕೆಲವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಡೇಟಾ ಕಳುಹಿಸುವುದನ್ನು ಅಥವಾ ಸ್ವೀಕರಿಸುವುದನ್ನು ತಡೆಯುತ್ತದೆ. ನೀವು ಪ್ರಸ್ತುತ ಬಳಸುತ್ತಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು ಆದರೆ ಪದೇ ಪದೇ ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ. ಇದರರ್ಥ, ಉದಾಹರಣೆಗೆ, ನೀವು ಅವುಗಳನ್ನು ಟ್ಯಾಪ್ ಮಾಡುವವರೆಗೆ ಆ ಚಿತ್ರಗಳು ಕಾಣಿಸಿಕೊಳ್ಳುವುದಿಲ್ಲ."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ಡೇಟಾ ಸೇವರ್ ಆನ್ ಮಾಡಬೇಕೇ?"</string>
@@ -2095,8 +2092,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ಸರಿ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"ವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು Android 12 ರಲ್ಲಿ Android ಅಡಾಪ್ಟಿವ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಬದಲಾಯಿಸಿವೆ. ಈ ವೈಶಿಷ್ಟ್ಯವು ಸೂಚಿಸಿದ ಕ್ರಿಯೆಗಳು ಮತ್ತು ಪ್ರತ್ಯುತ್ತರಗಳನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಯೋಜಿಸುತ್ತದೆ.\n\nವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು ಸಂಪರ್ಕ ಹೆಸರುಗಳು ಮತ್ತು ಸಂದೇಶಗಳಂತಹ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಂತೆ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆ ವಿಷಯವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು. ಈ ವೈಶಿಷ್ಟ್ಯವು ಫೋನ್ ಕರೆಗಳಿಗೆ ಉತ್ತರಿಸುವುದು ಮತ್ತು \'ಅಡಚಣೆ ಮಾಡಬೇಡಿ\' ಅನ್ನು ನಿಯಂತ್ರಿಸುವಂತಹ ಅಧಿಸೂಚನೆಗಳನ್ನು ವಜಾಗೊಳಿಸಬಹುದು ಅಥವಾ ಪ್ರತಿಕ್ರಿಯಿಸಬಹುದು."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ದೈನಂದಿನ ಸ್ಥಿತಿಯ ಮಾಹಿತಿಯ ಅಧಿಸೂಚನೆ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ಚಾರ್ಜ್‌ಗೆ ಮೊದಲೆ ಬ್ಯಾಟರಿ ಮುಗಿದು ಬಿಡಬಹುದು"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ಬ್ಯಾಟರಿ ಅವಧಿ ಹೆಚ್ಚಿಸಲು ಬ್ಯಾಟರಿ ಸೇವರ್ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>

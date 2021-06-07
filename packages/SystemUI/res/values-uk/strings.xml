@@ -427,8 +427,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC вимкнено"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ввімкнено"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Запис відео з екрана"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Почати"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Зупинити"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Надати доступ до мікрофона?"</string>
@@ -457,6 +456,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Менше термінових сповіщень нижче"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Торкніться знову, щоб відкрити"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Натисніть знову"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Проведіть пальцем угору, щоб відкрити"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Проведіть пальцем угору, щоб повторити спробу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Розблокуйте екран, щоб скористатись NFC"</string>
@@ -1136,7 +1136,7 @@
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g> скоро святкуватиме День народження"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Річниця"</string>
     <string name="anniversary_status_content_description" msgid="8212171790843327442">"Сьогодні <xliff:g id="NAME">%1$s</xliff:g> відзначає річницю"</string>
-    <string name="location_status" msgid="1294990572202541812">"Ділюся геоданими"</string>
+    <string name="location_status" msgid="1294990572202541812">"Показую, де я"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> ділиться своїм місцезнаходженням"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Нова історія"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> ділиться новою історією"</string>

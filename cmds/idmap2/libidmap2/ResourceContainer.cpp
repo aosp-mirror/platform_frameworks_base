@@ -16,6 +16,11 @@
 
 #include "idmap2/ResourceContainer.h"
 
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "androidfw/ApkAssets.h"
 #include "androidfw/AssetManager.h"
 #include "androidfw/Util.h"
@@ -323,7 +328,7 @@ ApkResourceContainer::ApkResourceContainer(std::unique_ptr<ZipAssetsProvider> zi
 
 Result<std::unique_ptr<ApkResourceContainer>> ApkResourceContainer::FromPath(
     const std::string& path) {
-  auto zip_assets = ZipAssetsProvider::Create(path);
+  auto zip_assets = ZipAssetsProvider::Create(path, 0 /* flags */);
   if (zip_assets == nullptr) {
     return Error("failed to load zip assets");
   }

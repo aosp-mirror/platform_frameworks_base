@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"আংশিক আঙ্গুলের ছাপ শনাক্ত করা হয়েছে"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"আঙ্গুলের ছাপ প্রক্রিয়া করা যায়নি৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"সেন্সর পরিষ্কার করুন"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"আঙ্গুল খুব দ্রুত সরিয়ে নেওয়া হয়েছে"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"একটু বেশি সময় ধরে সেন্সরে আঙ্গুল রাখুন"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"আঙ্গুল খুব ধীরে সরানো হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"অন্য আঙ্গুলের ছাপ দিয়ে চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"অত্যন্ত উজ্জ্বল"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"আঙ্গুলের ছাপ আইকন"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"ফেস আনলক হার্ডওয়্যার ম্যানেজ করা"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"ব্যবহার করার জন্য ফেস টেম্পলেট যোগ করা এবং মোছার পদ্ধতি গ্রহণ করতে অ্যাপটিকে অনুমতি দেয়৷"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ফেস আনলক হার্ডওয়্যার ব্যবহার করা"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"অ্যাপকে যাচাইকরণের জন্য ফেস আনলক হার্ডওয়্যার ব্যবহার করতে দেয়"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ফেস আনলক"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"\'ফেস আনলক\'"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"আপনার ফেস আবার এনরোল করুন"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"শনাক্তকরণের উন্নতি করতে আপনার ফেস আবার এনরোল করুন"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"ফেস আনলক ফিচার সেট-আপ করুন"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"\'ফেস আনলক\' সেট আপ করুন"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"আপনার ফোনের দিকে তাকিয়ে এটিকে আনলক করুন"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক করার জন্য বিভিন্ন উপায়ে সেট আপ করুন"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"একটি আঙ্গুলের ছাপ যোগ করতে ট্যাপ করুন"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ফেস যাচাই করা যায়নি। হার্ডওয়্যার উপলভ্য নেই।"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"আবার ফেস আনলকের মাধ্যমে চেষ্টা করুন।"</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"\'ফেস আনলক\' আবার ব্যবহার করার চেষ্টা করুন"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"নতুন ফেস ডেটা স্টোর করা যায়নি। প্রথমে পুরনোটি মুছে ফেলুন।"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ফেস অপারেশন বাতিল করা হয়েছে৷"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ব্যবহারকারী ফেস আনলক বাতিল করে দিয়েছেন।"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"ব্যবহারকারী \'ফেস আনলক\' বাতিল করে দিয়েছেন"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"অনেকবার চেষ্টা করা হয়েছে। পরে আবার চেষ্টা করুন।"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"অনেকবার চেষ্টা করেছেন। ফেস আনলক বন্ধ করা হয়েছে।"</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"অনেকবার চেষ্টা করেছেন। \'ফেস আনলক\' বন্ধ করা হয়েছে।"</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"অনেকবার চেষ্টা করেছেন। এর পরিবর্তে স্ক্রিন লক ব্যবহার করুন।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"আপনার মুখ যাচাই করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"এখনও ফেস আনলক সেট-আপ করেননি।"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"এই ডিভাইসে ফেস আনলক সুবিধাটি কাজ করে না।"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"এখনও \'ফেস আনলক\' সেট আপ করেননি"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"এই ডিভাইসে \'ফেস আনলক\' কাজ করবে না"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"সেন্সর অস্থায়ীভাবে বন্ধ করা আছে।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> ফেস"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"ফেস আনলক ব্যবহার করুন"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"\'ফেস আনলক\' ব্যবহার করুন"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ফেস অথবা স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"চালিয়ে যেতে আপনার মুখ ব্যবহার করুন"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"চালিয়ে যেতে আপনার ফেস বা স্ক্রিন লক ব্যবহার করুন"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"আনলক এলাকা প্রসারিত করুন৷"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"স্লাইড দিয়ে আনলক৷"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"প্যাটার্ন দিয়ে আনলক৷"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"ফেস আনলক৷"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"\'ফেস আনলক\'।"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"পিন দিয়ে আনলক৷"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"সিম পিন আনলক।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"সিম পিইউকে আনলক।"</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"আপনার প্রশাসক আপডেট করেছেন"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ঠিক আছে"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"ব্যাটারি সেভার ডার্ক থিম চালু করে এবং ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, নির্দিষ্ট ফিচার ও কয়েকটি নেটওয়ার্ক কানেকশনের ব্যবহার সীমিত করে বা বন্ধ করে দেয়।\n\n"<annotation id="url">"আরও জানুন"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ব্যাটারি সেভার ডার্ক থিম চালু করে এবং ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, নির্দিষ্ট ফিচার ও কয়েকটি নেটওয়ার্ক কানেকশনের ব্যবহার সীমিত করে বা বন্ধ করে দেয়।"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"ব্যাটারি সেভার ডার্ক থিম চালু করে এবং ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, নির্দিষ্ট ফিচার ও কয়েকটি নেটওয়ার্ক কানেকশনের ব্যবহার সীমিত করে বা বন্ধ করে দেয়।"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার ব্যাকগ্রাউন্ডে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবির উপর ট্যাপ না করা পর্যন্ত সেগুলি দেখানো হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ডেটা সেভার চালু করবেন?"</string>
@@ -2095,8 +2092,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ঠিক আছে"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"বন্ধ করুন"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"আরও জানুন"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (3735480566983530650) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 ভার্সনে Android অ্যাডাপ্টিভ বিজ্ঞপ্তির পরিবর্তে এনহ্যান্সড বিজ্ঞপ্তি এসেছে। এই ফিচারটি সাজেস্ট করা অ্যাকশন ও উত্তর দেখায় এবং আপনার বিজ্ঞপ্তিগুলি সাজিয়ে রাখে। \n\nএনহ্যান্সড বিজ্ঞপ্তি পরিচিতির নাম এবং মেসেজের মতো ব্যক্তিগত তথ্য সমেত বিজ্ঞপ্তির কন্টেন্টে অ্যাক্সেস করতে পারে। এছাড়া, এই ফিচার বিজ্ঞপ্তি খারিজ করতে বা তার উত্তর দিতে পারে, যেমন ফোন কলের উত্তর দেওয়া এবং \'বিরক্ত করবে না\' মোড নিয়ন্ত্রণ করা।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"রুটিন মোডের তথ্য সংক্রান্ত বিজ্ঞপ্তি"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"সাধারণত যখন চার্জ দেন, তার আগে চার্জ শেষ হয়ে যেতে পারে"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ডিভাইস বেশিক্ষণ চালু রাখতে ব্যাটারি সেভার চালু করা হয়েছে"</string>

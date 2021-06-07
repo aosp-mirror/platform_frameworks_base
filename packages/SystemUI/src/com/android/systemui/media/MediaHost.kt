@@ -1,6 +1,5 @@
 package com.android.systemui.media
 
-import android.app.smartspace.SmartspaceTarget
 import android.graphics.Rect
 import android.util.ArraySet
 import android.view.View
@@ -57,13 +56,20 @@ class MediaHost constructor(
         }
 
     private val listener = object : MediaDataManager.Listener {
-        override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
-            updateViewVisibility()
+        override fun onMediaDataLoaded(
+            key: String,
+            oldKey: String?,
+            data: MediaData,
+            immediately: Boolean
+        ) {
+            if (immediately) {
+                updateViewVisibility()
+            }
         }
 
         override fun onSmartspaceMediaDataLoaded(
             key: String,
-            data: SmartspaceTarget,
+            data: SmartspaceMediaData,
             shouldPrioritize: Boolean
         ) {
             updateViewVisibility()
@@ -73,8 +79,10 @@ class MediaHost constructor(
             updateViewVisibility()
         }
 
-        override fun onSmartspaceMediaDataRemoved(key: String) {
-            updateViewVisibility()
+        override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
+            if (immediately) {
+                updateViewVisibility()
+            }
         }
     }
 

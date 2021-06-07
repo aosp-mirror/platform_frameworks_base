@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ამოცნობილია ნაწილობრივი თითის ანაბეჭდი"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"თითის ანაბეჭდის დამუშავება ვერ მოხერხდა. გთხოვთ, ცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"გაწმინდეთ სენსორი"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"თითი ზედმეტად სწრაფად მოძრაობდა"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"ცოტა მეტ ხანს გეჭიროთ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"თითის აღება მეტისმეტად ნელა მოხდა. გთხოვთ, სცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ცადეთ სხვა თითის ანაბეჭდი"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ზედმეტად ნათელია"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"თითის ანაბეჭდის ხატულა"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"სახით განბლოკვის აპარატურის მართვა"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"საშუალებას აძლევს აპს, დაამატოს და წაშალოს სახეების შაბლონები."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"სახით განბლოკვის აპარატურის გამოყენება"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"საშუალებას აძლევს აპს, ამოცნობისთვის გამოიყენოს სახით განბლოკვის აპარატურა"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"სახით განბლოკვა"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"განბლოკვა სახით"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"დაარეგისტრირეთ თქვენი სახე ხელახლა"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ამოცნობის გასაუმჯობესებლად, გთხოვთ, ხელახლა დაარეგისტრიროთ თქვენი სახე"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"სახით განბლოკვის დაყენება"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"სახით განბლოკვის პარამეტრების დაყენება"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"განბლოკეთ თქვენი ტელეფონი შეხედვით"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"დააყენეთ განბლოკვის სხვა ხერხები"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"შეეხეთ თითის ანაბეჭდის დასამატებლად"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"სახე ვერ დასტურდება. აპარატი მიუწვდომელია."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"ცადეთ ხელახლა სახით განბლოკვა."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"ხელახლა ცადეთ სახით განბლოკვა"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"სახის ახალი მონაცემები ვერ ინახება. ჯერ ძველი წაშალეთ."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"სახის ამოცნობა გაუქმდა."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"სახით განბლოკვა გაუქმდა მომხმარებლის მიერ."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"სახით განბლოკვა გაუქმდა მომხმარებლის მიერ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"დაფიქსირდა ბევრი მცდელობა. ცადეთ მოგვიანებით."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"მეტისმეტად ბევრი მცდელობა იყო. სახით განბლოკვა გათიშულია."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"მეტისმეტად ბევრი მცდელობა იყო. სახით განბლოკვა გათიშულია."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"მეტისმეტად ბევრი მცდელობა იყო. შეიყვანეთ ეკრანის დაბლოკვის პარამეტრები."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"სახის დადასტურება ვერ ხერხდება. ცადეთ ხელახლა."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"თქვენ არ დაგიყენებიათ სახით განბლოკვა."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"სახით განბლოკვა ამ მოწყობილობაზე მხარდაჭერილი არ არის."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"თქვენ არ დაგიყენებიათ სახით განბლოკვა."</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"სახით განბლოკვა ამ მოწყობილობაზე მხარდაჭერილი არ არის"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"სენსორი დროებით გათიშულია."</string>
     <string name="face_name_template" msgid="3877037340223318119">"სახე <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"გამოიყენეთ სახით განბლოკვა"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"გამოიყენეთ სახით განბლოკვა"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"გამოიყენეთ სახით ან ეკრანის დაბლოკვა"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"გასაგრძელებლად გამოიყენეთ თქვენი სახე"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"გასაგრძელებლად გამოიყენეთ თქვენი სახე ან ეკრანის განბლოკვის ნიმუში"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"განბლოკვის სივრცის გაშლა."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"გასრიალებით განბლოკვა"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"განბლოკვა ნიმუშით."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"სახით განბლოკვა"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"სახით განბლოკვა."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"განბლოკვა Pin-ით."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM-ის PIN-კოდით განბლოკვა."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM-ის PUK-კოდით განბლოკვა."</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"წაიშალა თქვენი ადმინისტრატორის მიერ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"კარგი"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"ბატარეის დამზოგი ჩართავს მუქ თემას და შეზღუდავს ან გამორთავს ფონურ აქტივობას, ზოგიერთ ვიზუალურ ეფექტს, გარკვეულ ფუნქციებსა და ზოგიერთ ქსელთან კავშირს.\n\n"<annotation id="url">"შეიტყვეთ მეტი"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ბატარეის დამზოგი ჩართავს მუქ თემას და შეზღუდავს ან გამორთავს ფონურ აქტივობას, ზოგიერთ ვიზუალურ ეფექტს, გარკვეულ ფუნქციებსა და ზოგიერთ ქსელთან კავშირს."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"ბატარეის დამზოგი ჩართავს მუქ თემას და შეზღუდავს ან გამორთავს ფონურ აქტივობას, ზოგიერთ ვიზუალურ ეფექტს, გარკვეულ ფუნქციებსა და ზოგიერთ ქსელთან კავშირს."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
@@ -1917,7 +1914,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ავარიული პაუზა"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"სამუშაო კვირის ღამე"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"შაბათ-კვირა"</string>
-    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"მოვლენისას"</string>
+    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"მოვლენა"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ძილისას"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ზოგიერთ ხმას ადუმებს"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ფიქსირდება თქვენი მ ოწყობილობის შიდა პრობლემა და შეიძლება არასტაბილური იყოს, სანამ ქარხნულ მონაცემების არ განაახლებთ."</string>

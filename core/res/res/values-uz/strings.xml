@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Barmoq izi qismi aniqlandi"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Barmoq izi aniqlanmadi. Qaytadan urining."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Sensorni tozalang"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Barmoq juda tez olindi"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Biroz koʻproq bosib turing"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Barmoq juda sekin harakatlandi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Boshqa barmoq izi bilan urining"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Juda yorqin"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Barmoq izi belgisi"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"yuz bilan ochish qurilmasini boshqarish"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Ilova foydalanish uchun yuz namunalarini qo‘shish va o‘chirish usullarini tatbiq qilishi mumkin."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"yuz bilan ochish qurilmasidan foydalanish"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Haqiqiylikni tekshirish uchun yuz bilan ochishdan foydalanish imkonini beradi"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Yuz bilan ochish"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Yuz bilan ochish"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Yuzingizni yana qayd qiling"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Yuzingiz yanada yaxshiroq aniqlanishi uchun uni yana bir marta qayd qiling"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Yuz bilan ochishni sozlash"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Yuz bilan ochishni sozlash"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefoningizni yuz tekshiruvi yordamida qulfdan chiqaring"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Qulfdan chiqarishning boshqa usullarini sozlang"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Barmoq izi kiritish uchun bosing"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Yuzingiz tasdiqlanmadi. Qurilma ishlamayapti."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Yana yuz bilan ochishga urining."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Yana yuz bilan ochishga urining"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Yuzga oid axborot saqlanmadi. Avval eskilari tozalansin."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Yuzni aniqlash bekor qilindi."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Yuz bilan ochishni foydalanuvchi bekor qildi."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Yuz bilan ochishni foydalanuvchi bekor qildi"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Juda ko‘p urinildi. Keyinroq qaytadan urining."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Juda koʻp urinildi. Yuz bilan ochish faolsizlantirildi."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Juda koʻp urinildi. Yuz bilan ochish faolsizlantirildi."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Juda koʻp urinildi. Ekran qulfi bilan oching."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Yuzingiz tasdiqlanmadi. Qaytadan urining."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Hali yuz bilan ochishni sozlamagansiz"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Yuz bilan ochish bu qurilmada ishlamaydi"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Hali yuz bilan ochishni sozlamagansiz"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Bu qurilmada yuz bilan ochish funksiyasi ishlamaydi"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor vaqtincha faol emas."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Yuz <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Yuz bilan ochish"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Yuz bilan ochish"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Yuz bilan ochish yoki ekran qulfi"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Yuz tekshiruvi bilan davom eting"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Davom etish uchun yuz tekshiruvi yoki ekran qulfidan foydalaning"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Qulfni ochish maydonini kengaytirish."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Qulfni silab ochish"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Grafik kalit bilan ochish."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Yuz bilan ochish."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Yuz bilan ochish."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin qulfini ochish."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM kartani PIN kod bilan ochish."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM kartani PUK kod bilan ochish."</string>
@@ -1659,7 +1656,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4 tadan 8 ta raqamgacha bo‘lgan PIN kodni kiriting."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK kod 8 ta raqam bo‘lishi shart."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"To‘g‘ri PUK kodni qayta kiriting. Qayta-qayta urinishlar SIM kartani butunlay o‘chirib qo‘yadi."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN-kod mos kelmadi"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN kod mos kelmadi"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Grafik kalit juda ko‘p marta chizildi"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"Qulfni ochish uchun Google hisobingiz bilan kiring."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Foydalanuvchi nomi (e-pochta)"</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administrator tomonidan yangilangan"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administrator tomonidan o‘chirilgan"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Quvvat tejash funksiyasi Tungi mavzuni va cheklovlarni yoqadi hamda fondagi harakatlar, vizual effektlar, ayrim funksiyalar va tarmoq aloqalari kabi boshqa funksiyalarni faolsizlantiradi yoki cheklaydi.\n\n"<annotation id="url">"Batafsil"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Quvvat tejash funksiyasi Tungi mavzuni va cheklovlarni yoqadi hamda fondagi harakatlar, vizual effektlar, ayrim funksiyalar va tarmoq aloqalari kabi boshqa funksiyalarni faolsizlantiradi yoki cheklaydi."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Quvvat tejash funksiyasi Tungi mavzuni va cheklovlarni yoqadi hamda fondagi harakatlar, vizual effektlar, ayrim funksiyalar va tarmoq aloqalari kabi boshqa funksiyalarni faolsizlantiradi yoki cheklaydi."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash yoqilsinmi?"</string>
@@ -2154,7 +2151,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Ish"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Shaxsiy rejim"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Ishchi rejim"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"AT administratori tomonidan bloklangan"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Administratoringiz tomonidan bloklangan"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Bu kontent ishga oid ilovalar bilan ulashilmaydi"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Bu kontent ishga oid ilovalar bilan ochilmaydi"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Bu kontent shaxsiy ilovalar bilan ulashilmaydi"</string>

@@ -62,7 +62,7 @@ public class NetworkCycleDataForUidLoaderTest {
         when(mContext.getSystemService(Context.NETWORK_POLICY_SERVICE))
                 .thenReturn(mNetworkPolicyManager);
         when(mNetworkPolicyManager.getNetworkPolicies()).thenReturn(new NetworkPolicy[0]);
-        mNetworkTemplate = NetworkTemplate.buildTemplateMobileAll(SUB_ID);
+        mNetworkTemplate = NetworkTemplate.buildTemplateCarrierMetered(SUB_ID);
     }
 
     @Test

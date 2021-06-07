@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Установен е частичен отпечатък"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Отпечатъкът не бе обработен. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Почистете сензора"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Пръстът бе преместен твърде бързо"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Задръжте пръста си малко по-дълго"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Преместихте пръста си твърде бавно. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Опитайте с друг отпечатък"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Твърде светло е"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона за отпечатък"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"управление на хардуера за отключване с лице"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Разрешава на прил. да извиква методи за добавяне и изтриване на лицеви шаблони за ползване"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"използване на хардуера за отключване с лице"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Разрешава на приложението да използва хардуера за отключване с лице с цел удостоверяване"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Отключване с лице"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Отключване с лице"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Регистрирайте отново лицето си"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"С цел подобряване на разпознаването регистрирайте отново лицето си"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Настройване на отключването с лице"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Настройване на отключването с лице"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отключвайте телефона си, като го погледнете"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Настройване на още начини за отключване на телефона"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Докоснете, за да добавите отпечатък"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Лицето не може да се потвърди. Хардуерът не е налице."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Опитайте отново да отключите с лице."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Опитайте отново да отключите с лице"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Не може да се запази ново лице. Първо изтрийте старо."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Операцията с лице е анулирана."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Отключването с лице е анулирано от потребителя."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Отключването с лице е анулирано от потребителя"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Твърде много опити. Опитайте отново по-късно."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Твърде много опити. Отключването с лице е деактивирано."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Твърде много опити. Отключването с лице е деактивирано."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Твърде много опити. Използвайте опцията за заключване на екрана."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Лицето не може да се потвърди. Опитайте отново."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Не сте настроили отключването с лице."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Отключването с лице не се поддържа на това устройство."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Не сте настроили отключването с лице"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Отключването с лице не се поддържа на това устройство"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Сензорът е временно деактивиран."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Използване на отключв. с лице"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Отключване с лице"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Използване на отключването с лице или опцията за заключване на екрана"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Използвайте лицето си, за да продължите"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Използвайте лицето си или опцията за заключване на екрана, за да продължите"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Разгъване на областта за отключване."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Отключване с плъзгане."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Отключване с фигура."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Отключване с лице."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Отключване с лице."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Отключване с ПИН код."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Отключване на SIM картата с ПИН код."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Отключване на SIM картата с PUK код."</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Актуализирано от администратора ви"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Изтрито от администратора ви"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Режимът за запазване на батерията включва тъмната тема и ограничава или изключва активността на заден план, някои визуални ефекти, определени функции и някои връзки с мрежата.\n\n"<annotation id="url">"Научете повече"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Режимът за запазване на батерията включва тъмната тема и ограничава или изключва активността на заден план, някои визуални ефекти, определени функции и някои връзки с мрежата."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Режимът за запазване на батерията включва тъмната тема и ограничава или изключва активността на заден план, някои визуални ефекти, определени функции и някои връзки с мрежата."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да използва данни, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Включване на „Икономия на данни“?"</string>

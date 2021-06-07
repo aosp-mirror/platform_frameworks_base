@@ -39,6 +39,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PIN_DISAPPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_TO_AOD;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_UNLOCK_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH;
@@ -62,6 +63,7 @@ import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
@@ -91,6 +93,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class InteractionJankMonitor {
     private static final String TAG = InteractionJankMonitor.class.getSimpleName();
+    private static final boolean DEBUG = false;
     private static final String ACTION_PREFIX = InteractionJankMonitor.class.getCanonicalName();
 
     private static final String DEFAULT_WORKER_NAME = TAG + "-Worker";
@@ -148,6 +151,7 @@ public class InteractionJankMonitor {
     public static final int CUJ_LAUNCHER_ALL_APPS_SCROLL = 26;
     public static final int CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET = 27;
     public static final int CUJ_SETTINGS_PAGE_SCROLL = 28;
+    public static final int CUJ_LOCKSCREEN_UNLOCK_ANIMATION = 29;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -185,6 +189,7 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_WIDGET,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_UNLOCK_ANIMATION,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -233,6 +238,7 @@ public class InteractionJankMonitor {
             CUJ_LAUNCHER_ALL_APPS_SCROLL,
             CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET,
             CUJ_SETTINGS_PAGE_SCROLL,
+            CUJ_LOCKSCREEN_UNLOCK_ANIMATION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -289,14 +295,17 @@ public class InteractionJankMonitor {
      * @return instance of the FrameTracker
      */
     @VisibleForTesting
-    public FrameTracker createFrameTracker(View v, Session session) {
+    public FrameTracker createFrameTracker(Configuration conf, Session session) {
+        final View v = conf.mView;
         final Context c = v.getContext().getApplicationContext();
+        final ThreadedRendererWrapper r = new ThreadedRendererWrapper(v.getThreadedRenderer());
+        final ViewRootWrapper vr = new ViewRootWrapper(v.getViewRootImpl());
+        final SurfaceControlWrapper sc = new SurfaceControlWrapper();
+        final ChoreographerWrapper cg = new ChoreographerWrapper(Choreographer.getInstance());
+
         synchronized (this) {
             FrameTrackerListener eventsListener = (s, act) -> handleCujEvents(c, act, s);
-            return new FrameTracker(session, mWorker.getThreadHandler(),
-                    new ThreadedRendererWrapper(v.getThreadedRenderer()),
-                    new ViewRootWrapper(v.getViewRootImpl()), new SurfaceControlWrapper(),
-                    new ChoreographerWrapper(Choreographer.getInstance()), mMetrics,
+            return new FrameTracker(session, mWorker.getThreadHandler(), r, vr, sc, cg, mMetrics,
                     mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis, eventsListener);
         }
     }
@@ -348,30 +357,47 @@ public class InteractionJankMonitor {
     /**
      * Begin a trace session.
      *
+     * @param v an attached view.
      * @param cujType the specific {@link InteractionJankMonitor.CujType}.
      * @return boolean true if the tracker is started successfully, false otherwise.
      */
     public boolean begin(View v, @CujType int cujType) {
-        synchronized (this) {
-            return begin(v, cujType, DEFAULT_TIMEOUT_MS);
+        try {
+            return beginInternal(
+                    new Configuration.Builder(cujType)
+                            .setView(v)
+                            .build());
+        } catch (IllegalArgumentException ex) {
+            Log.d(TAG, "Build configuration failed!", ex);
+            return false;
         }
     }
 
     /**
      * Begin a trace session.
      *
-     * @param cujType the specific {@link InteractionJankMonitor.CujType}.
-     * @param timeout the elapsed time in ms until firing the timeout action.
+     * @param builder the builder of the configurations for instrumenting the CUJ.
      * @return boolean true if the tracker is started successfully, false otherwise.
      */
-    public boolean begin(View v, @CujType int cujType, long timeout) {
+    public boolean begin(@NonNull Configuration.Builder builder) {
+        try {
+            return beginInternal(builder.build());
+        } catch (IllegalArgumentException ex) {
+            Log.d(TAG, "Build configuration failed!", ex);
+            return false;
+        }
+    }
+
+    private boolean beginInternal(@NonNull Configuration conf) {
         synchronized (this) {
-            if (!v.isAttachedToWindow()) {
-                Log.d(TAG, "View not attached!", new Throwable());
-                return false;
-            }
+            int cujType = conf.mCujType;
             boolean shouldSample = ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
             if (!mEnabled || !shouldSample) {
+                if (DEBUG) {
+                    Log.d(TAG, "Skip monitoring cuj: " + getNameOfCuj(cujType)
+                            + ", enable=" + mEnabled + ", debuggable=" + DEFAULT_ENABLED
+                            + ", sample=" + shouldSample + ", interval=" + mSamplingInterval);
+                }
                 return false;
             }
             FrameTracker tracker = getTracker(cujType);
@@ -379,14 +405,14 @@ public class InteractionJankMonitor {
             if (tracker != null) return false;
 
             // begin a new trace session.
-            tracker = createFrameTracker(v, new Session(cujType));
+            tracker = createFrameTracker(conf, new Session(cujType, conf.mTag));
             mRunningTrackers.put(cujType, tracker);
             tracker.begin();
 
             // Cancel the trace if we don't get an end() call in specified duration.
             Runnable timeoutAction = () -> cancel(cujType);
             mTimeoutActions.put(cujType, timeoutAction);
-            mWorker.getThreadHandler().postDelayed(timeoutAction, timeout);
+            mWorker.getThreadHandler().postDelayed(timeoutAction, conf.mTimeout);
             return true;
         }
     }
@@ -526,31 +552,129 @@ public class InteractionJankMonitor {
             case CUJ_NOTIFICATION_APP_START:
                 return "NOTIFICATION_APP_START";
             case CUJ_LOCKSCREEN_PASSWORD_APPEAR:
-                return "CUJ_LOCKSCREEN_PASSWORD_APPEAR";
+                return "LOCKSCREEN_PASSWORD_APPEAR";
             case CUJ_LOCKSCREEN_PATTERN_APPEAR:
-                return "CUJ_LOCKSCREEN_PATTERN_APPEAR";
+                return "LOCKSCREEN_PATTERN_APPEAR";
             case CUJ_LOCKSCREEN_PIN_APPEAR:
-                return "CUJ_LOCKSCREEN_PIN_APPEAR";
+                return "LOCKSCREEN_PIN_APPEAR";
             case CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR:
-                return "CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR";
+                return "LOCKSCREEN_PASSWORD_DISAPPEAR";
             case CUJ_LOCKSCREEN_PATTERN_DISAPPEAR:
-                return "CUJ_LOCKSCREEN_PATTERN_DISAPPEAR";
+                return "LOCKSCREEN_PATTERN_DISAPPEAR";
             case CUJ_LOCKSCREEN_PIN_DISAPPEAR:
-                return "CUJ_LOCKSCREEN_PIN_DISAPPEAR";
+                return "LOCKSCREEN_PIN_DISAPPEAR";
             case CUJ_LOCKSCREEN_TRANSITION_FROM_AOD:
-                return "CUJ_LOCKSCREEN_TRANSITION_FROM_AOD";
+                return "LOCKSCREEN_TRANSITION_FROM_AOD";
             case CUJ_LOCKSCREEN_TRANSITION_TO_AOD:
-                return "CUJ_LOCKSCREEN_TRANSITION_TO_AOD";
+                return "LOCKSCREEN_TRANSITION_TO_AOD";
             case CUJ_LAUNCHER_OPEN_ALL_APPS :
-                return "CUJ_LAUNCHER_OPEN_ALL_APPS";
+                return "LAUNCHER_OPEN_ALL_APPS";
             case CUJ_LAUNCHER_ALL_APPS_SCROLL:
-                return "CUJ_LAUNCHER_ALL_APPS_SCROLL";
+                return "LAUNCHER_ALL_APPS_SCROLL";
             case CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET:
                 return "LAUNCHER_APP_LAUNCH_FROM_WIDGET";
             case CUJ_SETTINGS_PAGE_SCROLL:
                 return "SETTINGS_PAGE_SCROLL";
+            case CUJ_LOCKSCREEN_UNLOCK_ANIMATION:
+                return "LOCKSCREEN_UNLOCK_ANIMATION";
         }
         return "UNKNOWN";
+    }
+
+    /**
+     * Configurations used while instrumenting the CUJ. <br/>
+     * <b>It may refer to an attached view, don't use static reference for any purpose.</b>
+     */
+    public static class Configuration {
+        private final View mView;
+        private final long mTimeout;
+        private final String mTag;
+        private final @CujType int mCujType;
+
+        /**
+         * A builder for building Configuration. <br/>
+         * <b>It may refer to an attached view, don't use static reference for any purpose.</b>
+         */
+        public static class Builder {
+            private View mAttrView = null;
+            private long mAttrTimeout = DEFAULT_TIMEOUT_MS;
+            private String mAttrTag = "";
+            private @CujType int mAttrCujType;
+
+            /**
+             * @param cuj The enum defined in {@link InteractionJankMonitor.CujType}.
+             */
+            public Builder(@CujType int cuj) {
+                mAttrCujType = cuj;
+            }
+
+            /**
+             * @param view an attached view
+             * @return builder
+             */
+            public Builder setView(@NonNull View view) {
+                mAttrView = view;
+                return this;
+            }
+
+            /**
+             * @param timeout duration to cancel the instrumentation in ms
+             * @return builder
+             */
+            public Builder setTimeout(long timeout) {
+                mAttrTimeout = timeout;
+                return this;
+            }
+
+            /**
+             * @param tag The postfix of the CUJ in the output trace.
+             *           It provides a brief description for the CUJ like the concrete class
+             *           who is dealing with the CUJ or the important state with the CUJ, etc.
+             * @return builder
+             */
+            public Builder setTag(@NonNull String tag) {
+                mAttrTag = tag;
+                return this;
+            }
+
+            /**
+             * Build the {@link Configuration} instance
+             * @return the instance of {@link Configuration}
+             * @throws IllegalArgumentException if any invalid attribute is set
+             */
+            public Configuration build() throws IllegalArgumentException {
+                return new Configuration(mAttrCujType, mAttrView, mAttrTag, mAttrTimeout);
+            }
+        }
+
+        private Configuration(@CujType int cuj, View view, String tag, long timeout) {
+            mCujType = cuj;
+            mTag = tag;
+            mTimeout = timeout;
+            mView = view;
+            validate();
+        }
+
+        private void validate() {
+            boolean shouldThrow = false;
+            final StringBuilder msg = new StringBuilder();
+
+            if (mTag == null) {
+                shouldThrow = true;
+                msg.append("Invalid tag; ");
+            }
+            if (mTimeout < 0) {
+                shouldThrow = true;
+                msg.append("Invalid timeout value; ");
+            }
+            if (mView == null || !mView.isAttachedToWindow()) {
+                shouldThrow = true;
+                msg.append("Null view or view is not attached yet; ");
+            }
+            if (shouldThrow) {
+                throw new IllegalArgumentException(msg.toString());
+            }
+        }
     }
 
     /**
@@ -558,15 +682,20 @@ public class InteractionJankMonitor {
      */
     public static class Session {
         @CujType
-        private int mCujType;
-        private long mTimeStamp;
+        private final int mCujType;
+        private final long mTimeStamp;
         @FrameTracker.Reasons
         private int mReason = FrameTracker.REASON_END_UNKNOWN;
-        private boolean mShouldNotify;
+        private final boolean mShouldNotify;
+        private final String mName;
 
-        public Session(@CujType int cujType) {
+        public Session(@CujType int cujType, @NonNull String postfix) {
             mCujType = cujType;
+            mTimeStamp = System.nanoTime();
             mShouldNotify = SystemProperties.getBoolean(PROP_NOTIFY_CUJ_EVENT, false);
+            mName = TextUtils.isEmpty(postfix)
+                    ? String.format("J<%s>", getNameOfCuj(mCujType))
+                    : String.format("J<%s::%s>", getNameOfCuj(mCujType), postfix);
         }
 
         @CujType
@@ -588,11 +717,7 @@ public class InteractionJankMonitor {
         }
 
         public String getName() {
-            return "J<" + getNameOfCuj(mCujType) + ">";
-        }
-
-        public void setTimeStamp(long timeStamp) {
-            mTimeStamp = timeStamp;
+            return mName;
         }
 
         public long getTimeStamp() {

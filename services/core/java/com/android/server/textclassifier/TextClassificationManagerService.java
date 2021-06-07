@@ -25,6 +25,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
@@ -59,6 +61,7 @@ import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.FunctionalUtils.ThrowingConsumer;
@@ -110,6 +113,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             try {
                 publishBinderService(Context.TEXT_CLASSIFICATION_SERVICE, mManagerService);
                 mManagerService.startListenSettings();
+                mManagerService.startTrackingPackageChanges();
             } catch (Throwable t) {
                 // Starting this service is not critical to the running of this device and should
                 // therefore not crash the device. If it fails, log the error and continue.
@@ -119,11 +123,14 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
         @Override
         public void onUserStarting(@NonNull TargetUser user) {
+            updatePackageStateForUser(user.getUserIdentifier());
             processAnyPendingWork(user.getUserIdentifier());
         }
 
         @Override
         public void onUserUnlocking(@NonNull TargetUser user) {
+            // refresh if we failed earlier due to locked encrypted user
+            updatePackageStateForUser(user.getUserIdentifier());
             // Rebind if we failed earlier due to locked encrypted user
             processAnyPendingWork(user.getUserIdentifier());
         }
@@ -131,6 +138,14 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         private void processAnyPendingWork(int userId) {
             synchronized (mManagerService.mLock) {
                 mManagerService.getUserStateLocked(userId).bindIfHasPendingRequestsLocked();
+            }
+        }
+
+        private void updatePackageStateForUser(int userId) {
+            synchronized (mManagerService.mLock) {
+                // Update the cached disable status, the TextClassfier may not be direct boot aware,
+                // we should update the disable status after user unlock
+                mManagerService.getUserStateLocked(userId).updatePackageStateLocked();
             }
         }
 
@@ -160,6 +175,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     private final String mDefaultTextClassifierPackage;
     @Nullable
     private final String mSystemTextClassifierPackage;
+    // TODO: consider using device config to control it.
+    private boolean DEBUG = false;
 
     private TextClassificationManagerService(Context context) {
         mContext = Objects.requireNonNull(context);
@@ -174,6 +191,46 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
     private void startListenSettings() {
         mSettingsListener.registerObserver();
+    }
+
+    void startTrackingPackageChanges() {
+        final PackageMonitor monitor = new PackageMonitor() {
+
+            @Override
+            public void onPackageAdded(String packageName, int uid) {
+                notifyPackageInstallStatusChange(packageName, /* installed*/ true);
+            }
+
+            @Override
+            public void onPackageRemoved(String packageName, int uid) {
+                notifyPackageInstallStatusChange(packageName, /* installed= */ false);
+            }
+
+            @Override
+            public void onPackageModified(String packageName) {
+                final int userId = getChangingUserId();
+                synchronized (mLock) {
+                    final UserState userState = getUserStateLocked(userId);
+                    final ServiceState serviceState = userState.getServiceStateLocked(packageName);
+                    if (serviceState != null) {
+                        serviceState.onPackageModifiedLocked();
+                    }
+                }
+            }
+
+            private void notifyPackageInstallStatusChange(String packageName, boolean installed) {
+                final int userId = getChangingUserId();
+                synchronized (mLock) {
+                    final UserState userState = getUserStateLocked(userId);
+                    final ServiceState serviceState = userState.getServiceStateLocked(packageName);
+                    if (serviceState != null) {
+                        serviceState.onPackageInstallStatusChangeLocked(installed);
+                    }
+                }
+            }
+        };
+
+        monitor.register(mContext, null,  UserHandle.ALL, true);
     }
 
     @Override
@@ -451,6 +508,14 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                     userState.getServiceStateLocked(useDefaultTextClassifier);
             if (serviceState == null) {
                 Slog.d(LOG_TAG, "No configured system TextClassifierService");
+                callback.onFailure();
+            } else if (!serviceState.isInstalledLocked() || !serviceState.isEnabledLocked()) {
+                if (DEBUG) {
+                    Slog.d(LOG_TAG,
+                            serviceState.mPackageName + " is not available in user " + userId
+                                    + ". Installed: " + serviceState.isInstalledLocked()
+                                    + ", enabled:" + serviceState.isEnabledLocked());
+                }
                 callback.onFailure();
             } else if (attemptToBind && !serviceState.bindLocked()) {
                 Slog.d(LOG_TAG, "Unable to bind TextClassifierService at " + methodName);
@@ -761,6 +826,24 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             return serviceStates;
         }
 
+        @GuardedBy("mLock")
+        @Nullable
+        private ServiceState getServiceStateLocked(String packageName) {
+            for (ServiceState serviceState : getAllServiceStatesLocked()) {
+                if (serviceState.mPackageName.equals(packageName)) {
+                    return serviceState;
+                }
+            }
+            return null;
+        }
+
+        @GuardedBy("mLock")
+        private void updatePackageStateLocked() {
+            for (ServiceState serviceState : getAllServiceStatesLocked()) {
+                serviceState.updatePackageStateLocked();
+            }
+        }
+
         void dump(IndentingPrintWriter pw) {
             synchronized (mLock) {
                 pw.increaseIndent();
@@ -814,6 +897,10 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         ComponentName mBoundComponentName = null;
         @GuardedBy("mLock")
         int mBoundServiceUid = Process.INVALID_UID;
+        @GuardedBy("mLock")
+        boolean mInstalled;
+        @GuardedBy("mLock")
+        boolean mEnabled;
 
         private ServiceState(
                 @UserIdInt int userId, @NonNull String packageName, boolean isTrusted) {
@@ -822,6 +909,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             mConnection = new TextClassifierServiceConnection(mUserId);
             mIsTrusted = isTrusted;
             mBindServiceFlags = createBindServiceFlags(packageName);
+            mInstalled = isPackageInstalledForUser();
+            mEnabled = isServiceEnabledForUser();
         }
 
         @Context.BindServiceFlags
@@ -831,6 +920,54 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 flags |= Context.BIND_RESTRICT_ASSOCIATIONS;
             }
             return flags;
+        }
+
+        private boolean isPackageInstalledForUser() {
+            try {
+                PackageManager packageManager = mContext.getPackageManager();
+                return packageManager.getPackageInfoAsUser(mPackageName, 0, mUserId) != null;
+            } catch (PackageManager.NameNotFoundException e) {
+                return false;
+            }
+        }
+
+        private boolean isServiceEnabledForUser() {
+            PackageManager packageManager = mContext.getPackageManager();
+            Intent intent = new Intent(TextClassifierService.SERVICE_INTERFACE);
+            intent.setPackage(mPackageName);
+            ResolveInfo resolveInfo = packageManager.resolveServiceAsUser(intent,
+                    PackageManager.GET_SERVICES, mUserId);
+            ServiceInfo serviceInfo = resolveInfo == null ? null : resolveInfo.serviceInfo;
+            return serviceInfo != null;
+        }
+
+        @GuardedBy("mLock")
+        @NonNull
+        private void onPackageInstallStatusChangeLocked(boolean installed) {
+            mInstalled = installed;
+        }
+
+        @GuardedBy("mLock")
+        @NonNull
+        private void onPackageModifiedLocked() {
+            mEnabled = isServiceEnabledForUser();
+        }
+
+        @GuardedBy("mLock")
+        @NonNull
+        private void updatePackageStateLocked() {
+            mInstalled = isPackageInstalledForUser();
+            mEnabled = isServiceEnabledForUser();
+        }
+
+        @GuardedBy("mLock")
+        boolean isInstalledLocked() {
+            return mInstalled;
+        }
+
+        @GuardedBy("mLock")
+        boolean isEnabledLocked() {
+            return mEnabled;
         }
 
         @GuardedBy("mLock")
@@ -923,6 +1060,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             pw.printPair("userId", mUserId);
             synchronized (mLock) {
                 pw.printPair("packageName", mPackageName);
+                pw.printPair("installed", mInstalled);
+                pw.printPair("enabled", mEnabled);
                 pw.printPair("boundComponentName", mBoundComponentName);
                 pw.printPair("isTrusted", mIsTrusted);
                 pw.printPair("bindServiceFlags", mBindServiceFlags);

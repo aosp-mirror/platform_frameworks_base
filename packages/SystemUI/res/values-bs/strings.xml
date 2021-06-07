@@ -425,7 +425,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC je onemogućen"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC je omogućen"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Snimanje zaslona"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Snimanje ekrana"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Započnite"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavite"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Deblokirati mikrofon uređaja?"</string>
@@ -454,6 +454,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Prikaži manje važna obavještenja ispod"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite ponovo da otvorite"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Ponovo dodirnite"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Prevucite da otvorite"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Prevucite prema gore da pokušate ponovo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Otključajte da koristite NFC"</string>
@@ -769,7 +770,7 @@
     <string name="feedback_demoted" msgid="951884763467110604">"Ovo obavještenje je automatski &lt;b&gt;rangirano niže&lt;/b&gt; u pozadini."</string>
     <string name="feedback_prompt" msgid="3656728972307896379">"Pošaljite programeru svoje povratne informacije. Je li ovo bilo tačno?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Hvala na povratnim informacijama!"</string>
-    <string name="feedback_ok" msgid="6481426753298857144">"UREDU"</string>
+    <string name="feedback_ok" msgid="6481426753298857144">"Uredu"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Otvorene su kontrole obavještenja za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"Zatvorene su kontrole obavještenja za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Dozvoli obavještenja s ovog kanala"</string>
@@ -1133,9 +1134,9 @@
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> dijeli lokaciju"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Nova priča"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> je podijelio/la novu priču"</string>
-    <string name="video_status" msgid="4548544654316843225">"Gleda"</string>
+    <string name="video_status" msgid="4548544654316843225">"Gledanje"</string>
     <string name="audio_status" msgid="4237055636967709208">"Slušanje"</string>
-    <string name="game_status" msgid="1340694320630973259">"Reproduciranje"</string>
+    <string name="game_status" msgid="1340694320630973259">"Igranje"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Prijatelji"</string>
     <string name="empty_status" msgid="5938893404951307749">"Chatajmo večeras!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Sadržaj će se uskoro prikazati"</string>

@@ -212,7 +212,7 @@
     <string name="accessibility_three_bars" msgid="819417766606501295">"Três barras."</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"Sinal completo."</string>
     <string name="accessibility_desc_on" msgid="2899626845061427845">"Ativado."</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"Desativado."</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"Desativado"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"Ligado."</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"A ligar..."</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
@@ -452,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Notificações menos urgentes abaixo"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Toque novamente para abrir"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Toque novamente"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Deslize rapidamente para cima para abrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Deslize rapidamente para cima para tentar novamente."</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquear para utilizar o NFC"</string>

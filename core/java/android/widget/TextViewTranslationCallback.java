@@ -16,10 +16,15 @@
 
 package android.widget;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.text.TextUtils;
+import android.text.method.TransformationMethod;
 import android.text.method.TranslationTransformationMethod;
 import android.util.Log;
 import android.view.View;
@@ -47,6 +52,7 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
     private boolean mIsShowingTranslation = false;
     private boolean mIsTextPaddingEnabled = false;
     private CharSequence mPaddedText;
+    private int mAnimationDurationMillis = 250; // default value
 
     private CharSequence mContentDescription;
 
@@ -82,14 +88,19 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
      */
     @Override
     public boolean onShowTranslation(@NonNull View view) {
-        mIsShowingTranslation = true;
         if (view.getViewTranslationResponse() == null) {
             Log.wtf(TAG, "onShowTranslation() shouldn't be called before "
                     + "onViewTranslationResponse().");
             return false;
         }
         if (mTranslationTransformation != null) {
-            ((TextView) view).setTransformationMethod(mTranslationTransformation);
+            final TransformationMethod transformation = mTranslationTransformation;
+            runWithAnimation(
+                    (TextView) view,
+                    () -> {
+                        mIsShowingTranslation = true;
+                        ((TextView) view).setTransformationMethod(transformation);
+                    });
             ViewTranslationResponse response = view.getViewTranslationResponse();
             if (response.getKeys().contains(ViewTranslationRequest.ID_CONTENT_DESCRIPTION)) {
                 CharSequence translatedContentDescription =
@@ -114,7 +125,6 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
      */
     @Override
     public boolean onHideTranslation(@NonNull View view) {
-        mIsShowingTranslation = false;
         if (view.getViewTranslationResponse() == null) {
             Log.wtf(TAG, "onHideTranslation() shouldn't be called before "
                     + "onViewTranslationResponse().");
@@ -122,8 +132,14 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
         }
         // Restore to original text content.
         if (mTranslationTransformation != null) {
-            ((TextView) view).setTransformationMethod(
-                    mTranslationTransformation.getOriginalTransformationMethod());
+            final TransformationMethod transformation =
+                    mTranslationTransformation.getOriginalTransformationMethod();
+            runWithAnimation(
+                    (TextView) view,
+                    () -> {
+                        mIsShowingTranslation = false;
+                        ((TextView) view).setTransformationMethod(transformation);
+                    });
             if (!TextUtils.isEmpty(mContentDescription)) {
                 view.setContentDescription(mContentDescription);
             }
@@ -212,4 +228,64 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
     }
 
     private static final char COMPAT_PAD_CHARACTER = '\u2002';
+
+    @Override
+    public void setAnimationDurationMillis(int durationMillis) {
+        mAnimationDurationMillis = durationMillis;
+    }
+
+    /**
+     * Applies a simple text alpha animation when toggling between original and translated text. The
+     * text is fully faded out, then swapped to the new text, then the fading is reversed.
+     *
+     * @param runnable the operation to run on the view after the text is faded out, to change to
+     * displaying the original or translated text.
+     */
+    private void runWithAnimation(TextView view, Runnable runnable) {
+        if (mAnimator != null) {
+            mAnimator.end();
+            // Note: mAnimator is now null; do not use again here.
+        }
+        int fadedOutColor = colorWithAlpha(view.getCurrentTextColor(), 0);
+        mAnimator = ValueAnimator.ofArgb(view.getCurrentTextColor(), fadedOutColor);
+        mAnimator.addUpdateListener(
+                // Note that if the text has a ColorStateList, this replaces it with a single color
+                // for all states. The original ColorStateList is restored when the animation ends
+                // (see below).
+                (valueAnimator) -> view.setTextColor((Integer) valueAnimator.getAnimatedValue()));
+        mAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        mAnimator.setRepeatCount(1);
+        mAnimator.setDuration(mAnimationDurationMillis);
+        final ColorStateList originalColors = view.getTextColors();
+        mAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                view.setTextColor(originalColors);
+                mAnimator = null;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+                runnable.run();
+            }
+        });
+        mAnimator.start();
+    }
+
+    private ValueAnimator mAnimator;
+
+    /**
+     * Returns {@code color} with alpha changed to {@code newAlpha}
+     */
+    private static int colorWithAlpha(int color, int newAlpha) {
+        return Color.argb(newAlpha, Color.red(color), Color.green(color), Color.blue(color));
+    }
 }

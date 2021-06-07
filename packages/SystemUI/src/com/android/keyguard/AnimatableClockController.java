@@ -107,6 +107,21 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         }
     };
 
+    private final StatusBarStateController.StateListener mStatusBarStatePersistentListener =
+            new StatusBarStateController.StateListener() {
+                @Override
+                public void onDozeAmountChanged(float linear, float eased) {
+                    boolean noAnimation = (mDozeAmount == 0f && linear == 1f)
+                            || (mDozeAmount == 1f && linear == 0f);
+                    boolean isDozing = linear > mDozeAmount;
+                    mDozeAmount = linear;
+                    if (mIsDozing != isDozing) {
+                        mIsDozing = isDozing;
+                        mView.animateDoze(mIsDozing, !noAnimation);
+                    }
+                }
+            };
+
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
         @Override
@@ -133,13 +148,14 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         updateLocale();
         mBroadcastDispatcher.registerReceiver(mLocaleBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
-        mStatusBarStateController.addCallback(mStatusBarStateListener);
-
         mIsDozing = mStatusBarStateController.isDozing();
         mDozeAmount = mStatusBarStateController.getDozeAmount();
         mBatteryController.addCallback(mBatteryCallback);
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mKeyguardShowing = true;
+
+        mStatusBarStateController.removeCallback(mStatusBarStatePersistentListener);
+        mStatusBarStateController.addCallback(mStatusBarStatePersistentListener);
 
         refreshTime();
         initColors();
@@ -149,9 +165,11 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     @Override
     protected void onViewDetached() {
         mBroadcastDispatcher.unregisterReceiver(mLocaleBroadcastReceiver);
-        mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mBatteryController.removeCallback(mBatteryCallback);
+        if (!mView.isAttachedToWindow()) {
+            mStatusBarStateController.removeCallback(mStatusBarStatePersistentListener);
+        }
     }
 
     /** Animate the clock appearance */
@@ -199,19 +217,4 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mView.setColors(mDozingColor, mLockScreenColor);
         mView.animateDoze(mIsDozing, false);
     }
-
-    private final StatusBarStateController.StateListener mStatusBarStateListener =
-            new StatusBarStateController.StateListener() {
-                @Override
-                public void onDozeAmountChanged(float linear, float eased) {
-                    boolean noAnimation = (mDozeAmount == 0f && linear == 1f)
-                            || (mDozeAmount == 1f && linear == 0f);
-                    boolean isDozing = linear > mDozeAmount;
-                    mDozeAmount = linear;
-                    if (mIsDozing != isDozing) {
-                        mIsDozing = isDozing;
-                        mView.animateDoze(mIsDozing, !noAnimation);
-                    }
-                }
-            };
 }

@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Slökkt á NFC"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Kveikt á NFC"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Skjáupptaka"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Hefja"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stöðva"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Opna fyrir hljóðnema tækisins?"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Minna áríðandi tilkynningar fyrir neðan"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Ýttu aftur til að opna"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Ýttu aftur"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Strjúktu upp til að opna"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Strjúktu upp til að reyna aftur"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Taktu úr lás til að nota NFC"</string>
@@ -1122,8 +1122,8 @@
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> á afmæli"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Afmæli á næstunni"</string>
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g> á bráðum afmæli"</string>
-    <string name="anniversary_status" msgid="1790034157507590838">"Brúðkaupsafmæli"</string>
-    <string name="anniversary_status_content_description" msgid="8212171790843327442">"<xliff:g id="NAME">%1$s</xliff:g> á brúðkaupsafmæli"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Afmæli"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"<xliff:g id="NAME">%1$s</xliff:g> á afmæli"</string>
     <string name="location_status" msgid="1294990572202541812">"Deilir staðsetningu"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> deilir staðsetningu sinni"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Ný frétt"</string>

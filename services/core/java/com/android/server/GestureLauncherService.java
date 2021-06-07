@@ -520,6 +520,14 @@ public class GestureLauncherService extends SystemService {
         return intercept && isUserSetupComplete();
     }
 
+    public boolean isCameraDoubleTapPowerEnabled() {
+        return mCameraDoubleTapPowerEnabled;
+    }
+
+    public boolean isEmergencyGestureEnabled() {
+        return mEmergencyGestureEnabled;
+    }
+
     /**
      * @return true if camera was launched, false otherwise.
      */

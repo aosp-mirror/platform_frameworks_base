@@ -161,7 +161,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 199;
+    static final int VERSION = 200;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -15541,6 +15541,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
         }
+
+        mBinderThreadCpuTimesUs =
+                LongSamplingCounterArray.readSummaryFromParcelLocked(in, mOnBatteryTimeBase);
     }
 
     /**
@@ -16065,6 +16068,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
         }
+
+        LongSamplingCounterArray.writeSummaryToParcelLocked(out, mBinderThreadCpuTimesUs);
     }
 
     public void readFromParcel(Parcel in) {

@@ -423,8 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"បាន​បិទ NFC"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"បាន​បើក NFC"</string>
-    <!-- no translation found for quick_settings_screen_record_label (8650355346742003694) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ការថត​វីដេអូ​អេក្រង់"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ចាប់ផ្ដើម"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ឈប់"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ឈប់ទប់ស្កាត់​មីក្រូហ្វូន​របស់ឧបករណ៍ឬ?"</string>
@@ -437,7 +436,7 @@
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"អូស​ឡើង​លើ​ដើម្បី​ប្តូរ​កម្មវិធី"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"អូសទៅស្ដាំដើម្បីប្ដូរកម្មវិធីបានរហ័ស"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"បិទ/បើក​ទិដ្ឋភាពរួម"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"បាន​បញ្ចូល​ថ្ម​​"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"បាន​សាក​ថ្មពេញ"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"កំពុងសាក​ថ្ម"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> រហូត​ដល់ពេញ"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"មិន​កំពុង​បញ្ចូល​ថ្ម"</string>
@@ -453,6 +452,7 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"ការ​ជូន​ដំណឹង​​មិន​សូវ​បន្ទាន់​ខាង​ក្រោម"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"ប៉ះ​ម្ដង​ទៀត ដើម្បី​បើក"</string>
+    <string name="tap_again" msgid="1315420114387908655">"ចុច​ម្ដងទៀត"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"អូសឡើងលើ​ដើម្បីបើក"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"អូសឡើងលើ ដើម្បី​ព្យាយាម​ម្ដងទៀត"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ដោះសោ ដើម្បីប្រើ NFC"</string>

@@ -1207,8 +1207,16 @@ public class LauncherAppsService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 String packageName = component.getPackageName();
+                int uId = -1;
+                try {
+                    uId = mContext.getPackageManager().getApplicationInfo(
+                            packageName, PackageManager.MATCH_ANY_USER).uid;
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.d(TAG, "package not found: " + e);
+                }
                 intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                         Uri.fromParts("package", packageName, null));
+                intent.putExtra("uId", uId);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.setSourceBounds(sourceBounds);
             } finally {

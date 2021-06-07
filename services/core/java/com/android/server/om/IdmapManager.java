@@ -22,7 +22,6 @@ import static com.android.server.om.OverlayManagerService.TAG;
 import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayableInfo;
-import android.content.pm.PackageParser;
 import android.os.Build.VERSION_CODES;
 import android.os.FabricatedOverlayInfo;
 import android.os.FabricatedOverlayInternal;
@@ -139,6 +138,14 @@ final class IdmapManager {
      */
     boolean deleteFabricatedOverlay(@NonNull String path) {
         return mIdmapDaemon.deleteFabricatedOverlay(path);
+    }
+
+    /**
+     * Gets the idmap data associated with an overlay, in dump format.
+     * Only indented for debugging.
+     */
+    String dumpIdmap(@NonNull String overlayPath) {
+        return mIdmapDaemon.dumpIdmap(overlayPath);
     }
 
     /**

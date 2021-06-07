@@ -28,6 +28,8 @@ import static android.view.InsetsAnimationControlImplProto.TMP_MATRIX;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
+import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
+import static android.view.InsetsController.LayoutInsetsDuringAnimation;
 import static android.view.InsetsState.ISIDE_BOTTOM;
 import static android.view.InsetsState.ISIDE_FLOATING;
 import static android.view.InsetsState.ISIDE_LEFT;
@@ -42,6 +44,7 @@ import android.annotation.Nullable;
 import android.content.res.CompatibilityInfo;
 import android.graphics.Insets;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.ArraySet;
 import android.util.Log;
@@ -85,6 +88,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private final Matrix mTmpMatrix = new Matrix();
     private final InsetsState mInitialInsetsState;
     private final @AnimationType int mAnimationType;
+    private final @LayoutInsetsDuringAnimation int mLayoutInsetsDuringAnimation;
     private final @InsetsType int mTypes;
     private @InsetsType int mControllingTypes;
     private final InsetsAnimationControlCallbacks mController;
@@ -107,9 +111,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     @VisibleForTesting
     public InsetsAnimationControlImpl(SparseArray<InsetsSourceControl> controls,
             @Nullable Rect frame, InsetsState state, WindowInsetsAnimationControlListener listener,
-            @InsetsType int types,
-            InsetsAnimationControlCallbacks controller, long durationMs, Interpolator interpolator,
-            @AnimationType int animationType, CompatibilityInfo.Translator translator) {
+            @InsetsType int types, InsetsAnimationControlCallbacks controller, long durationMs,
+            Interpolator interpolator, @AnimationType int animationType,
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
+            CompatibilityInfo.Translator translator) {
         mControls = controls;
         mListener = listener;
         mTypes = types;
@@ -145,6 +150,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
                 durationMs);
         mAnimation.setAlpha(getCurrentAlpha());
         mAnimationType = animationType;
+        mLayoutInsetsDuringAnimation = layoutInsetsDuringAnimation;
         mTranslator = translator;
         mController.startAnimation(this, listener, types, mAnimation,
                 new Bounds(mHiddenInsets, mShownInsets));
@@ -196,6 +202,19 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     @Override
     public void notifyControlRevoked(@InsetsType int types) {
         mControllingTypes &= ~types;
+    }
+
+    @Override
+    public void updateSurfacePosition(SparseArray<InsetsSourceControl> controls) {
+        for (int i = controls.size() - 1; i >= 0; i--) {
+            final InsetsSourceControl control = controls.valueAt(i);
+            final InsetsSourceControl c = mControls.get(control.getType());
+            if (c == null) {
+                continue;
+            }
+            final Point position = control.getSurfacePosition();
+            c.setSurfacePosition(position.x, position.y);
+        }
     }
 
     @Override
@@ -299,6 +318,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         if (mFinished) {
             return;
         }
+        mPendingInsets = mLayoutInsetsDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN
+                ? mShownInsets : mHiddenInsets;
+        mPendingAlpha = 1f;
+        applyChangeInsets(null);
         mCancelled = true;
         mListener.onCancelled(mReadyDispatched ? this : null);
         if (DEBUG) Log.d(TAG, "notify Control request cancelled for types: " + mTypes);

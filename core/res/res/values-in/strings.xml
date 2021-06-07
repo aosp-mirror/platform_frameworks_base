@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Sebagian sidik jari terdeteksi"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Tidak dapat memproses sidik jari. Coba lagi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Bersihkan sensor"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Jari bergerak terlalu cepat"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Tahan sedikit lebih lama"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Jari digerakkan terlalu lambat. Coba lagi."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Coba sidik jari lain"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Terlalu terang"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon sidik jari"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"kelola hardware face unlock"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Mengizinkan apl memicu metode untuk menambah &amp; menghapus template wajah untuk digunakan."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"gunakan hardware face unlock"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Mengizinkan aplikasi untuk menggunakan hardware face unlock untuk autentikasi"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face unlock"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Daftarkan kembali wajah Anda"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Untuk menyempurnakan pengenalan wajah, daftarkan kembali wajah Anda"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Siapkan face unlock"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Siapkan Face Unlock"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci ponsel dengan melihat ke ponsel"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Siapkan lebih banyak cara untuk membuka kunci"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketuk untuk menambahkan sidik jari"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tidak dapat memverifikasi wajah. Hardware tidak tersedia."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Coba face unlock lagi."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Coba Face Unlock lagi"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Tidak dapat menyimpan data wajah. Hapus dahulu data lama."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Pemrosesan wajah dibatalkan."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Face unlock dibatalkan oleh pengguna."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Face Unlock dibatalkan oleh pengguna"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Terlalu banyak percobaan. Coba lagi nanti."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Terlalu banyak gagal. Face unlock dinonaktifkan."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Terlalu banyak upaya gagal. Face Unlock dinonaktifkan."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Terlalu banyak upaya gagal. Masukkan kunci layar."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Tidak dapat memverifikasi wajah. Coba lagi."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Anda belum menyiapkan face unlock."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Face unlock tidak didukung di perangkat ini."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Anda belum menyiapkan Face Unlock"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Face Unlock tidak didukung di perangkat ini"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor dinonaktifkan untuk sementara."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> wajah"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Gunakan face unlock"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Gunakan Face Unlock"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gunakan face lock atau kunci layar"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gunakan wajah untuk melanjutkan"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gunakan face lock atau kunci layar untuk melanjutkan"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Luaskan area buka kunci."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Buka kunci dengan menggeser."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Buka kunci dengan pola."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Buka kunci dengan face unlock."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Face Unlock."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Buka kunci dengan PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"PIN SIM terbuka."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"PUK SIM terbuka."</string>
@@ -1869,7 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Diupdate oleh admin Anda"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Dihapus oleh admin Anda"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Oke"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"Penghemat Baterai akan mengaktifkan Tema gelap dan membatasi atau menonaktifkan aktivitas latar belakang, beberapa efek visual, fitur tertentu, dan beberapa koneksi jaringan.\n\n"<annotation id="url">"Pelajari lebih lanjut"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Penghemat Baterai akan mengaktifkan Tema gelap dan membatasi atau menonaktifkan aktivitas latar belakang, beberapa efek visual, fitur tertentu, dan beberapa koneksi jaringan."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Penghemat Baterai akan mengaktifkan Tema gelap dan membatasi atau menonaktifkan aktivitas latar belakang, beberapa efek visual, fitur tertentu, dan beberapa koneksi jaringan."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu mengurangi penggunaan data, Penghemat Data mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah diketuk."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Aktifkan Penghemat Data?"</string>
@@ -2283,10 +2280,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Sekarang Anda dapat memperbesar sebagian layar"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Aktifkan di Setelan"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Tutup"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Batalkan pemblokiran mikrofon perangkat"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Batalkan pemblokiran kamera perangkat"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Berhenti memblokir mikrofon perangkat"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Berhenti memblokir kamera perangkat"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Untuk &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; serta semua aplikasi dan layanan"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Batalkan pemblokiran"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Berhenti memblokir"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privasi Sensor"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikon aplikasi"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Brand image aplikasi"</string>

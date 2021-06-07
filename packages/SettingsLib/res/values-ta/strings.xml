@@ -252,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"வயர்லெஸ் காட்சிக்கான சான்றிதழ்"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"வைஃபை அதிவிவர நுழைவை இயக்கு"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"வைஃபை ஸ்கேனிங்கை வரம்பிடுதல்"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"வைஃபை மேம்பாட்டுடன் MAC ரேண்டம் ஆக்குதல்"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"வைஃபையில், மாறுபடும் MAC முகவரியைக் காண்பித்தல்"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"மொபைல் டேட்டாவை எப்போதும் இயக்கத்திலேயே வை"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"வன்பொருள் விரைவுப்படுத்துதல் இணைப்பு முறை"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"பெயர்கள் இல்லாத புளூடூத் சாதனங்களைக் காட்டு"</string>
@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"கிளிப் எல்லைகள், ஓரங்கள், மேலும் பலவற்றைக் காட்டு"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL தளவமைப்பின் திசையை வலியுறுத்து"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"எல்லா மொழிகளுக்கும் திரையின் தளவமைப்பு திசையை RTL க்கு மாற்று"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ஐ வலியுறுத்து"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 பயன்பாடுகளில் 4x MSAA ஐ இயக்கு"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"செவ்வகம் அல்லாத கிளிப் செயல்பாடுகளைப் பிழைத்திருத்து"</string>
@@ -453,7 +455,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"முழுவதும் சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g> ஆகும்"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழுவதும் சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - பேட்டரியின் ஆயுளை மேம்படுத்துகிறது"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - சார்ஜாவது தற்காலிகமாக வரம்பிடப்பட்டுள்ளது"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"சார்ஜ் ஆகிறது"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"வேகமாக சார்ஜாகிறது"</string>

@@ -321,7 +321,7 @@
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ถ่ายภาพและบันทึกวิดีโอ"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"อุปกรณ์ที่อยู่ใกล้เคียง"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"ค้นหาและเชื่อมต่อกับอุปกรณ์ที่อยู่ใกล้เคียง"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"ประวัติการโทร"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"บันทึกการโทร"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"อ่านและเขียนบันทึกการโทรของโทรศัพท์"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"โทรศัพท์"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"โทรและจัดการการโทร"</string>
@@ -580,7 +580,7 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ตรวจพบลายนิ้วมือบางส่วน"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ประมวลผลลายนิ้วมือไม่ได้ โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ทำความสะอาดเซ็นเซอร์"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"ขยับนิ้วเร็วเกินไป"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"วางนิ้วให้นานขึ้นอีกนิด"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"นิ้วเคลื่อนที่ช้าเกินไป โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ลองลายนิ้วมืออื่น"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"สว่างเกินไป"</string>
@@ -609,14 +609,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ไอคอนลายนิ้วมือ"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"จัดการฮาร์ดแวร์การปลดล็อกด้วยใบหน้า"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"อนุญาตให้แอปเรียกใช้วิธีเพิ่มและลบเทมเพลตใบหน้าสำหรับการใช้งาน"</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ใช้ฮาร์ดแวร์การปลดล็อกด้วยใบหน้า"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"อนุญาตให้แอปใช้ฮาร์ดแวร์การปลดล็อกด้วยใบหน้าเพื่อตรวจสอบสิทธิ์"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ปลดล็อกด้วยใบหน้า"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"การปลดล็อกด้วยใบหน้า"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ลงทะเบียนใบหน้าอีกครั้ง"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"โปรดลงทะเบียนใบหน้าอีกครั้งเพื่อปรับปรุงการจดจำ"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"ตั้งค่าการปลดล็อกด้วยใบหน้า"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"ตั้งค่าการปลดล็อกด้วยใบหน้า"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ปลดล็อกโทรศัพท์โดยมองไปที่โทรศัพท์"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ตั้งค่าการปลดล็อกด้วยวิธีอื่น"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"แตะเพื่อเพิ่มลายนิ้วมือ"</string>
@@ -643,18 +639,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ยืนยันใบหน้าไม่ได้ ฮาร์ดแวร์ไม่พร้อมใช้งาน"</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"ลองใช้การปลดล็อกด้วยใบหน้าอีกครั้ง"</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"ลองใช้การปลดล็อกด้วยใบหน้าอีกครั้ง"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"จัดเก็บข้อมูลใบหน้าใหม่ไม่ได้ ลบข้อมูลเก่าออกไปก่อน"</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ยกเลิกการดำเนินการกับใบหน้าแล้ว"</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"ผู้ใช้ยกเลิกการใช้การปลดล็อกด้วยใบหน้า"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"ผู้ใช้ยกเลิกการใช้การปลดล็อกด้วยใบหน้า"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ดำเนินการหลายครั้งเกินไป ลองอีกครั้งในภายหลัง"</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"ลองหลายครั้งเกินไป ปิดใช้การปลดล็อกด้วยใบหน้าแล้ว"</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ลองหลายครั้งเกินไป ปิดใช้การปลดล็อกด้วยใบหน้าแล้ว"</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ลองหลายครั้งเกินไป ใช้การล็อกหน้าจอแทน"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ยืนยันใบหน้าไม่ได้ ลองอีกครั้ง"</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"คุณยังไม่ได้ตั้งค่าการปลดล็อกด้วยใบหน้า"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"อุปกรณ์นี้ไม่รองรับการปลดล็อกด้วยใบหน้า"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"คุณยังไม่ได้ตั้งค่าการปลดล็อกด้วยใบหน้า"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"อุปกรณ์นี้ยังไม่รองรับการปลดล็อกด้วยใบหน้า"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ปิดใช้เซ็นเซอร์ชั่วคราวแล้ว"</string>
     <string name="face_name_template" msgid="3877037340223318119">"ใบหน้า <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"ใช้การปลดล็อกด้วยใบหน้า"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"ใช้การปลดล็อกด้วยใบหน้า"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ใช้การล็อกด้วยใบหน้าหรือการล็อกหน้าจอ"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ใช้ใบหน้าของคุณเพื่อดำเนินการต่อ"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ใช้ใบหน้าหรือการล็อกหน้าจอเพื่อดำเนินการต่อ"</string>
@@ -957,7 +954,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"ขยายพื้นที่ปลดล็อก"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"การปลดล็อกด้วยการเลื่อน"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"การปลดล็อกด้วยรูปแบบ"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"การปลดล็อกด้วยใบหน้า"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"การปลดล็อกด้วยใบหน้า"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"การปลดล็อกด้วย PIN"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"การปลดล็อก PIN ของซิม"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"การปลดล็อก PUK ของซิม"</string>
@@ -1862,14 +1859,14 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g>ที่ทำงาน"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 3"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ขอ PIN ก่อนเลิกตรึง"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ขอ PIN ก่อนเลิกปักหมุด"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ขอรูปแบบการปลดล็อกก่อนเลิกปักหมุด"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ขอรหัสผ่านก่อนเลิกตรึง"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ขอรหัสผ่านก่อนเลิกปักหมุด"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"ติดตั้งโดยผู้ดูแลระบบ"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ลบโดยผู้ดูแลระบบ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ตกลง"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4877297130366222145">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืดและจำกัดหรือปิดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง ฟีเจอร์บางส่วน และการเชื่อมต่อบางเครือข่าย\n\n"<annotation id="url">"ดูข้อมูลเพิ่มเติม"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืดและจำกัดหรือปิดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง ฟีเจอร์บางส่วน และการเชื่อมต่อบางเครือข่าย"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืดและจำกัดหรือปิดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง ฟีเจอร์บางส่วน และการเชื่อมต่อบางเครือข่าย"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลโดยการใช้อินเทอร์เน็ตอยู่เบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงอินเทอร์เน็ตได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>
