@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Показувати межі роликів, поля тощо"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Макет письма справа наліво"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Застосовувати макет письма справа наліво для всіх мов"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Примус. запустити 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Увімкнути 4x MSAA в програмах OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Налагодити непрямокутну обрізку"</string>

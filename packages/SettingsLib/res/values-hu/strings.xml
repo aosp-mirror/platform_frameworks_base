@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Kliphatárok, margók stb. megjelenítése."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Elrendezés jobbról balra"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Elrendezés jobbról balra minden nyelvnél"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA kényszerítése"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"A 4x MSAA engedélyezése az OpenGL ES 2.0-nál"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Nem négyzetes kivágási műveletek hibakeresése"</string>

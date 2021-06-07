@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ಕ್ಲಿಪ್‌ನ ಗಡಿಗಳು, ಅಂಚುಗಳು, ಇತ್ಯಾದಿ ತೋರಿಸು."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL ಲೇಔಟ್‌ ಡೈರೆಕ್ಷನ್ ಫೋರ್ಸ್ ಮಾಡುವಿಕೆ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ಎಲ್ಲ ಭಾಷೆಗಳಿಗಾಗಿ, RTL ಗೆ ಸ್ಕ್ರೀನ್‌ ಲೇಔಟ್‌ ಡೈರೆಕ್ಷನ್ ಅನ್ನು ಫೋರ್ಸ್ ಮಾಡಿ"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ಫೋರ್ಸ್ ಮಾಡಿ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ಅಪ್ಲಿಕೇಶನ್‌ಗಳಲ್ಲಿ 4x MSAA ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"ಆಯತಾಕಾರವಲ್ಲದ ಕ್ಲಿಪ್ ಕಾರ್ಯಾಚರಣೆ ಡೀಬಗ್"</string>
