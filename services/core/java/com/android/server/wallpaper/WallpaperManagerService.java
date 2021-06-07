@@ -628,7 +628,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
 
             // scale if the crop height winds up not matching the recommended metrics
-            needScale = cropHint.height() > wpData.mHeight
+            needScale = wpData.mHeight != cropHint.height()
                     || cropHint.height() > GLHelper.getMaxTextureSize()
                     || cropHint.width() > GLHelper.getMaxTextureSize();
 
