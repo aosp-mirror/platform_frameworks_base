@@ -27,27 +27,37 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 
-/** Multiplier that makes things free when the device is charging. */
-class ChargingMultiplier extends Multiplier {
-    private static final String TAG = "TARE-" + ChargingMultiplier.class.getSimpleName();
+/** Modifier that makes things free when the device is charging. */
+class ChargingModifier extends Modifier {
+    private static final String TAG = "TARE-" + ChargingModifier.class.getSimpleName();
     private static final boolean DEBUG = InternalResourceService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
     private final InternalResourceService mIrs;
     private final ChargingTracker mChargingTracker;
 
-    ChargingMultiplier(@NonNull InternalResourceService irs) {
-        super(true, true);
+    ChargingModifier(@NonNull InternalResourceService irs) {
+        super();
         mIrs = irs;
         mChargingTracker = new ChargingTracker();
         mChargingTracker.startTracking(irs.getContext());
     }
 
-    double getCurrentMultiplier() {
+    @Override
+    long getModifiedCostToProduce(long ctp) {
+        return modifyValue(ctp);
+    }
+
+    @Override
+    long getModifiedPrice(long price) {
+        return modifyValue(price);
+    }
+
+    private long modifyValue(long val) {
         if (mChargingTracker.mCharging) {
             return 0;
         }
-        return 1;
+        return val;
     }
 
     @Override
