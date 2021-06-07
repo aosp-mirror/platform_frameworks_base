@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ringtone_default" msgid="798836092118824500">"Suoneria predefinita"</string>
     <string name="notification_sound_default" msgid="8133121186242636840">"Suono di notifica predefinito"</string>
-    <string name="alarm_sound_default" msgid="4787646764557462649">"Suono sveglia predefinito"</string>
+    <string name="alarm_sound_default" msgid="4787646764557462649">"Suoneria sveglia predefinita"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"Aggiungi suoneria"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"Aggiungi sveglia"</string>
     <string name="add_notification_text" msgid="4431129543300614788">"Aggiungi notifica"</string>
