@@ -771,6 +771,9 @@
     <!-- Move distance for the unlock hint animation on the lockscreen -->
     <dimen name="hint_move_distance">75dp</dimen>
 
+    <!-- The overshoot amount when the panel flings open -->
+    <dimen name="panel_overshoot_amount">16dp</dimen>
+
     <!-- The width of the region on the left/right edge of the screen for performing the camera/
          phone hints. -->
     <dimen name="edge_tap_area_width">48dp</dimen>

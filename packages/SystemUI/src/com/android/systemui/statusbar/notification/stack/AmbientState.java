@@ -83,7 +83,7 @@ public class AmbientState {
     private ExpandableNotificationRow mTrackedHeadsUpRow;
     private float mAppearFraction;
     private boolean mIsShadeOpening;
-    private float mSectionPadding;
+    private float mOverExpansion;
 
     /** Distance of top of notifications panel from top of screen. */
     private float mStackY = 0;
@@ -182,12 +182,12 @@ public class AmbientState {
         return mIsShadeOpening;
     }
 
-    void setSectionPadding(float padding) {
-        mSectionPadding = padding;
+    void setOverExpansion(float overExpansion) {
+        mOverExpansion = overExpansion;
     }
 
-    float getSectionPadding() {
-        return mSectionPadding;
+    float getOverExpansion() {
+        return mOverExpansion;
     }
 
     private static int getZDistanceBetweenElements(Context context) {
