@@ -83,3 +83,15 @@ filegroup {
         "//packages/modules/Connectivity/Tethering"
     ],
 }
+
+filegroup {
+    name: "services-connectivity-shared-srcs",
+    srcs: [
+        // TODO: move to networkstack-client
+        "java/android/net/IpMemoryStore.java",
+        "java/android/net/NetworkMonitorManager.java",
+        // TODO: move to libs/net
+        "java/android/net/util/KeepalivePacketDataUtil.java",
+        "java/android/net/util/NetworkConstants.java",
+    ],
+}
