@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Sýna skurðlínur, spássíur o.s.frv."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Þvinga umbrot frá hægri til vinstri"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Þvinga umbrot skjás frá hægri til vinstri fyrir alla tungumálskóða"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Þvinga 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Virkja 4x MSAA í OpenGL ES 2.0 forritum"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Villuleita klippt svæði sem ekki eru rétthyrnd"</string>
