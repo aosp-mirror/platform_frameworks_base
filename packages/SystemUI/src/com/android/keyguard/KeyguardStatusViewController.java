@@ -287,6 +287,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         @Override
+        public void onTimeFormatChanged(String timeFormat) {
+            mKeyguardClockSwitchController.refreshFormat();
+        }
+
+        @Override
         public void onTimeZoneChanged(TimeZone timeZone) {
             mKeyguardClockSwitchController.updateTimeZone(timeZone);
         }
@@ -313,6 +318,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
         @Override
         public void onUserSwitchComplete(int userId) {
+            mKeyguardClockSwitchController.refreshFormat();
             mView.updateOwnerInfo();
             mView.updateLogoutView(shouldShowLogout());
         }
