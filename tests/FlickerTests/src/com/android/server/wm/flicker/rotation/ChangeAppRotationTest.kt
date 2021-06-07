@@ -25,7 +25,12 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
+import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -73,10 +78,23 @@ class ChangeAppRotationTest(
         }
     }
 
+    @Presubmit
+    @Test
+    fun statusBarWindowIsAlwaysVisible() {
+        testSpec.statusBarWindowIsAlwaysVisible()
+    }
+
+    @FlakyTest
+    @Test
+    fun statusBarLayerIsAlwaysVisible() {
+        testSpec.statusBarLayerIsAlwaysVisible(rotatesScreen = true)
+    }
+
     @Postsubmit
     @Test
-    override fun statusBarLayerRotatesScales() {
-        super.statusBarLayerRotatesScales()
+    fun statusBarLayerRotatesScales() {
+        testSpec.statusBarLayerRotatesScales(
+            testSpec.config.startRotation, testSpec.config.endRotation)
     }
 
     @Presubmit
@@ -87,8 +105,20 @@ class ChangeAppRotationTest(
 
     @FlakyTest
     @Test
-    override fun statusBarLayerIsAlwaysVisible() {
-        super.statusBarLayerIsAlwaysVisible()
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
+    }
+
+    @FlakyTest
+    @Test
+    override fun navBarLayerRotatesAndScales() {
+        super.navBarLayerRotatesAndScales()
+    }
+
+    @FlakyTest
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
     companion object {
