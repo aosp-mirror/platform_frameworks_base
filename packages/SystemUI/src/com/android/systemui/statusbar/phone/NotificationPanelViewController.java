@@ -2226,6 +2226,8 @@ public class NotificationPanelViewController extends PanelViewController {
             left = mNotificationStackScrollLayoutController.getLeft();
             right = mNotificationStackScrollLayoutController.getRight();
         }
+        // top should never be lower than bottom, otherwise it will be invisible.
+        top = Math.min(top, bottom);
         applyQSClippingBounds(left, top, right, bottom, visible);
     }
 
