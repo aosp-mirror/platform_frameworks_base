@@ -1971,7 +1971,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Més informació"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Reactiva l\'aplicació"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"Activar aplicacions de treball?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Accedeix a les teves aplicacions de treball i a les notificacions"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Accedeix a les teves aplicacions i notificacions de treball"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activa"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'aplicació no està disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Ara mateix, <xliff:g id="APP_NAME">%1$s</xliff:g> no està disponible."</string>
