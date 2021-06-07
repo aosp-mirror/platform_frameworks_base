@@ -1717,7 +1717,6 @@ public class DomainVerificationService extends SystemService
 
     @Override
     public int approvalLevelForDomain(@NonNull PackageSetting pkgSetting, @NonNull Intent intent,
-            @NonNull List<ResolveInfo> candidates,
             @PackageManager.ResolveInfoFlags int resolveInfoFlags, @UserIdInt int userId) {
         String packageName = pkgSetting.getName();
         if (!DomainVerificationUtils.isDomainVerificationIntent(intent, resolveInfoFlags)) {
@@ -1783,9 +1782,26 @@ public class DomainVerificationService extends SystemService
             return APPROVAL_LEVEL_NONE;
         }
 
-        if (!pkgUserState.installed || !pkgUserState.isPackageEnabled(pkg)) {
+        if (!pkgUserState.installed) {
             if (DEBUG_APPROVAL) {
-                debugApproval(packageName, debugObject, userId, false, "package not enabled");
+                debugApproval(packageName, debugObject, userId, false,
+                        "package not installed for user");
+            }
+            return APPROVAL_LEVEL_NONE;
+        }
+
+        if (!pkgUserState.isPackageEnabled(pkg)) {
+            if (DEBUG_APPROVAL) {
+                debugApproval(packageName, debugObject, userId, false,
+                        "package not enabled for user");
+            }
+            return APPROVAL_LEVEL_NONE;
+        }
+
+        if (pkgUserState.suspended) {
+            if (DEBUG_APPROVAL) {
+                debugApproval(packageName, debugObject, userId, false,
+                        "package suspended for user");
             }
             return APPROVAL_LEVEL_NONE;
         }
