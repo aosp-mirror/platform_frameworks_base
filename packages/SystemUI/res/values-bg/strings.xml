@@ -89,10 +89,13 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Правенето на екранни снимки не е разрешено от приложението или организацията ви"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Редактиране"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Редактиране на екранната снимка"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Превъртане"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Екранна снимка с превъртане"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Заснемане на още"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Отхвърляне на екранната снимка"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Визуализация на екранната снимка"</string>
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Горна граница: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Долна граница: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Лява граница: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Дясна граница: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Запис на екрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Записът на екрана се обработва"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущо известие за сесия за записване на екрана"</string>
@@ -114,7 +117,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Отказ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Споделяне"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Записването на екрана е анулирано"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Записът на екрана е запазен. Докоснете, за да го видите"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Записът на екрана е запазен"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Докоснете за преглед"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"При изтриването на записа на екрана възникна грешка"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Извличането на разрешенията не бе успешно."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"При стартирането на записа на екрана възникна грешка"</string>
@@ -132,7 +136,9 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Камера"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Гласова помощ"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Портфейл"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Отключване"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"Устройството е заключено"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Изчаква се отпечатък"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Отключете, без да използвате отпечатъка си"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Извършва се сканиране на лице"</string>
@@ -175,6 +181,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Отхвърляне"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Докоснете сензора за отпечатъци"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Икона за отпечатък"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Лицето не е разпознато. Използвайте отпечатък."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Използвайте отпечатъка си, за да продължите"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Отпечатъкът не може да бъде разпознат. Вместо това използвайте опция за заключване на екрана."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Търсим ви…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Икона на лице"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Бутон за промяна на мащаба с цел съвместимост."</string>
@@ -281,9 +290,7 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Мобилната точка за достъп се изключи."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Мобилната точка за достъп се включи."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Предаването на съдържанието от екрана спря."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Работният режим е изключен."</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Работният режим е включен."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Работният режим е изключен."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Работният режим е на пауза."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Работният режим е включен."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Функцията „Икономия на данни“ е изключена."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Функцията „Икономия на данни“ е включена."</string>
@@ -344,8 +351,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Метод на въвеждане"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Местоположение"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Местоположението е изключено"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Блокиране на камерата"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Спиране на микрофона"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Достъп до камерата"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Достъп до микрофона"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Налице"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Блокирано"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Мултимедийно устройство"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"Индикатор за силата на получения сигнал (RSSI)"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Само спешни обаждания"</string>
@@ -356,7 +365,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Нов потребител"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Интернет"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Безопасно в самолети"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Налице са мрежи"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Няма достъпни мрежи"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Няма връзка"</string>
@@ -376,7 +384,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Инвертиране на цветовете"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Режим на коригиране на цветовете"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Още настройки"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Потребителски настройки"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Затваряне"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Установена е връзка"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Свързано, батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Установява се връзка..."</string>
@@ -398,7 +408,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Използвано: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ограничение от <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Предупреждение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Служебен потребителски профил"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Служебни приложения"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нощно осветление"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ще се вкл. по залез"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До изгрев"</string>
@@ -413,13 +423,15 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"КБП е деактивирана"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"КБП е активирана"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Записване на екрана"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Запис на екрана"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Старт"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Стоп"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Да се отблокира ли микрофонът на устройството?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Да се отблокира ли камерата на устройството?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Да се отблокират ли камерата и микрофонът на устройството?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Това действие отблокира достъпа за всички приложения и услуги, които имат разрешение да използват микрофона ви."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Това действие отблокира достъпа за всички приложения и услуги, които имат разрешение да използват камерата ви."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Това действие отблокира достъпа за всички приложения и услуги, които имат разрешение да използват камерата или микрофона ви."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Устройство"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Прекарайте пръст нагоре, за да превключите между приложенията"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Плъзнете надясно за бързо превключване между приложенията"</string>
@@ -440,12 +452,13 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Ппоказване на по-малко спешните известия по-долу"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Докоснете отново, за да отворите"</string>
+    <string name="tap_again" msgid="1315420114387908655">"Докоснете отново"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Прекарайте пръст нагоре, за да отключите"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Плъзнете бързо нагоре, за да опитате отново"</string>
-    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
-    <skip />
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Отключете, за да използвате NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Това устройство принадлежи на организацията ви"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Това устройство принадлежи на <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Това устройство е предоставено от <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Плъзнете с пръст от иконата, за да използвате телефона"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Прекарайте пръст от иконата, за да получите гласова помощ"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Плъзнете с пръст от иконата, за да включите камерата"</string>
@@ -456,19 +469,19 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Пълна\nтишина"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Само\nс приоритет"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Само\nбудилници"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="7343602278805644915">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се безжично (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане)"</string>
-    <string name="keyguard_indication_charging_time" msgid="4927557805886436909">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се бързо (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се бавно (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане)"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се безжично • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се бързо • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се бавно • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Превключване между потребителите"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Превключване на потребителя – текущият е <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Текущ потребител – <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Показване на потребителския профил"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Добавяне на потребител"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Нов потребител"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Да се прекрати ли сесията като гост?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Да се премахне ли гостът?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Всички приложения и данни в тази сесия ще бъдат изтрити."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Прекратяване на сесията"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Премахване"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добре дошли отново в сесията като гост!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Искате ли да продължите сесията си?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Започване отначало"</string>
@@ -479,7 +492,7 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Излизане на потребителя"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Излезте от профила на текущия потребител"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ИЗЛИЗАНЕ НА ПОТРЕБИТЕЛЯ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Да се добави ли нов потреб.?"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Да се добави ли нов потребител?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Когато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Достигнахте огранич. за потребители"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -514,6 +527,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Това устройство се управлява от родителя ви"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Организацията ви притежава това устройство и може да наблюдава трафика в мрежата"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> притежава това устройство и може да наблюдава трафика в мрежата"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Това устройство е предоставено от <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Това устройство принадлежи на организацията ви и е свързано с(ъс) <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Това устройство принадлежи на <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> и е свързано с(ъс) <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Това устройство принадлежи на организацията ви"</string>
@@ -522,11 +536,13 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Това устройство принадлежи на <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> и е свързано с виртуални частни мрежи (VPN)"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Организацията ви може да наблюдава трафика в мрежата в служебния ви потребителски профил"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> може да наблюдава трафика в мрежата в служебния ви потребителски профил"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Мрежовата активност в служебния потребителски профил е видима за системния ви администратор"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Мрежата може да се наблюдава"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Това устройство е свързано с виртуални частни мрежи (VPN)"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Служебният ви потребителски профил е свързан с(ъс) <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Личният ви потребителски профил е свързан с(ъс) <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Това устройство е свързано с(ъс) <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Това устройство е предоставено от <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Управление на устройствата"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Наблюдаване на потр. профил"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Наблюдение на мрежата"</string>
@@ -538,11 +554,13 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Преглед на правилата"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Преглед на контролите"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Това устройство принадлежи на <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nСистемният ви администратор може да наблюдава и управлява настройките, корпоративния достъп, приложенията, свързаните с устройството данни и информацията за местоположението му.\n\nЗа повече информация се обърнете към него."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> може да има достъп до свързаните с това устройство данни, да управлява приложенията и да променя настройките му.\n\nОбърнете се към <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>, ако имате въпроси."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Това устройство принадлежи на организацията ви.\n\nСистемният ви администратор може да наблюдава и управлява настройките, корпоративния достъп, приложенията, свързаните с устройството данни и информацията за местоположението му.\n\nЗа повече информация се обърнете към него."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Организацията ви е инсталирала сертифициращ орган на това устройство. Трафикът в защитената ви мрежа може да бъде наблюдаван или променян."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Организацията ви е инсталирала сертифициращ орган в служебния ви потребителски профил. Трафикът в защитената ви мрежа може да бъде наблюдаван или променян."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На това устройство е инсталиран сертифициращ орган. Трафикът в защитената ви мрежа може да бъде наблюдаван или променян."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Администраторът ви е включил функцията за регистриране на мрежовата активност, която следи трафика на устройството ви."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Администраторът ви е включил функцията за регистриране на мрежовата активност, която следи трафика в служебния ви потребителски профил, но не и в личния."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Установена е връзка с приложението <xliff:g id="VPN_APP">%1$s</xliff:g>, което може да наблюдава активността ви в мрежата, включително имейли, приложения и уебсайтове."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Установена е връзка с приложенията <xliff:g id="VPN_APP_0">%1$s</xliff:g> и <xliff:g id="VPN_APP_1">%2$s</xliff:g>, които могат да наблюдават активността ви в мрежата, включително имейли, приложения и уебсайтове."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Служебният ви потребителски профил е свързан с приложението <xliff:g id="VPN_APP">%1$s</xliff:g>, което може да наблюдава активността ви в мрежата, включително имейли, приложения и уебсайтове."</string>
@@ -623,6 +641,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Докоснете, за да заглушите звука. Възможно е звукът на услугите за достъпност да бъде заглушен."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Докоснете, за да зададете вибриране."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Докоснете, за да заглушите звука."</string>
+    <string name="volume_ringer_change" msgid="3574969197796055532">"Докоснете, за да промените режима на звънене"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"спиране"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"пускане"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"вибриране"</string>
@@ -646,6 +665,13 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Показване на демонстрационния режим"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Будилник"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Портфейл"</string>
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"Показване на всички"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Отключване с цел плащане"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Не е настроено"</string>
+    <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Отключване с цел използване"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"При извличането на картите ви възникна проблем. Моля, опитайте отново по-късно"</string>
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Настройки за заключения екран"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Потребителски профил в Work"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Самолетен режим"</string>
     <string name="add_tile" msgid="6239678623873086686">"Добавяне на плочка"</string>
@@ -714,7 +740,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Състояние:&lt;/b&gt; Понижено до беззвучно"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Състояние:&lt;/b&gt; Класирано по-високо"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Състояние:&lt;/b&gt; Класирано по-ниско"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Показва се като плаващо балонче в горната част на секцията с разговори, показва снимката на потр. профил на заключения екран"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран, изглежда като балонче"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран, прекъсва режима „Не безпокойте“"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран, изглежда като балонче, прекъсва режима „Не безпокойте“"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддържа функциите за разговор"</string>
@@ -736,7 +765,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"Това известие автоматично бе &lt;b&gt;понижено до беззвучно&lt;/b&gt; от системата."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"Това известие автоматично бе &lt;b&gt;класирано по-високо&lt;/b&gt; в панела ви."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"Това известие автоматично бе &lt;b&gt;класирано по-ниско&lt;/b&gt; в панела ви."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"Правилно ли е това?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Изпратете отзивите си на програмиста. Правилно ли е това?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Благодарим ви за отзивите!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ОК"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Контролите за известията за <xliff:g id="APP_NAME">%1$s</xliff:g> са оттворени"</string>
@@ -759,7 +788,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"опции за отлагане на известията"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Напомняне"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"Настройки"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"ОТМЯНА"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"Отмяна"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Отложено за <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d часа</item>
@@ -799,6 +828,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Цифрова клавиатура – <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Премахване на прикачения файл"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Системни настройки"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Начало"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Скорошни"</string>
@@ -831,6 +861,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Вкл."</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Изкл."</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Не е налице"</string>
+    <string name="tile_disabled" msgid="373212051546573069">"Деактивирано"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Лента за навигация"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Оформление"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Тип на допълнителния ляв бутон"</string>
@@ -883,6 +914,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Преместване към позиция <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Добавяне към позиция <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Позиция <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Панелът е добавен"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Панелът е премахнат"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Редактор за бързи настройки."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Известие от <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Отваряне на настройките."</string>
@@ -890,11 +923,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Затваряне на бързите настройки."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Будилникът е навит."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Влезли сте като <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"изберете потребител"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Няма връзка с интернет"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Отвaряне на страницата с подробности."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Няма достъп, защото <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Отваряне на настройките за <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Редактиране на подредбата на настройките."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Меню за включване/изключване"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Страница <xliff:g id="ID_1">%1$d</xliff:g> от <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заключен екран"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Тел. се изкл. поради загряване"</string>
@@ -970,25 +1005,21 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Някои приложения използват <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" и "</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Използва се от <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Наскоро използвано от <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(служебно)"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Телефонно обаждане"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(чрез <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"камерата"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"местополож."</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"микрофона"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Сензорите са изключени"</string>
     <string name="device_services" msgid="1549944177856658705">"Услуги за устройството"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Няма заглавие"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"Докоснете, за да рестартирате това приложение в режим на цял екран."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Преместване"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Режимът за навигиране в системата е актуализиран. За да извършите промени, отворете настройките."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Отворете настройките, за да актуализирате режима за навигиране в системата"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Режим на готовност"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Разговорът е зададен като приоритетен"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетните разговори ще:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"се показват върху секцията с разговори;"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"показват снимката на потребителския профил на заключения екран."</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Показва се като плаващо балонче върху приложенията"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Прекъсване на режима „Не безпокойте“"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Разбрах"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Настройки"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за ниво на мащаба"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли за прозореца за ниво на мащаба"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Увеличаване на мащаба"</string>
@@ -998,13 +1029,19 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Преместване наляво"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Преместване надясно"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Превключване на увеличението"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Увеличаване на целия екран"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Увеличаване на целия екран"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Увеличаване на част от екрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Превключване"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Контроли за устройството"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Добавяне на контроли за свързаните ви устройства"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Настройване на контролите за устройството"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Задръжте бутона за захранване, за да осъществите достъп до контролите"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Жестът за достъпност бе заменен от бутон\n\n"<annotation id="link">"Преглед на настройките"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Преместете бутона до края, за да го скриете временно"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Преместване горе вляво"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Преместване горе вдясно"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Преместване долу вляво"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Преместване долу вдясно"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Преместване в края и скриване"</string>
+    <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Преместване в края и показване"</string>
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"превключване"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"Контроли за дома"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Изберете приложение, за да добавите контроли"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">Добавени са <xliff:g id="NUMBER_1">%s</xliff:g> контроли.</item>
@@ -1018,7 +1055,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"за премахване на означаването като любимо"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Преместете на позиция <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроли"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Избиране на контроли, които да са достъпни в менюто за захранване"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Изберете контролите, до които да осъществявате достъп от бързите настройки"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задръжте и плъзнете, за да пренаредите контролите"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Всички контроли са премахнати"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промените не са запазени"</string>
@@ -1030,6 +1067,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Добавяне"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Предложено от <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Контролите са актуализирани"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"У-вото е заключено"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ПИН кодът съдържа букви или символи"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Потвърждаване на <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Грешен ПИН код"</string>
@@ -1041,11 +1079,12 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Прекарайте пръст, за да видите повече"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Препоръките се зареждат"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Мултимедия"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"Скриване на текущата сесия."</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"Текущата сесия не може да бъде скрита."</string>
+    <string name="controls_media_close_session" msgid="1193000643003066508">"Да се скрие ли тази сесия за мултимедия?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"Текущата сесия за мултимедия не бе скрита."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Отхвърляне"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Възобновяване"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Настройки"</string>
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Google Play"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно, проверете прилож."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Грешка. Извършва се нов опит…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не е намерено"</string>
@@ -1055,7 +1094,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Състоян. не може да се зареди"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Грешка. Опитайте отново"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"В ход"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"Задръжте бутона за захранване, за да видите новите контроли"</string>
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"Отворете бързите настройки, за да видите новите контроли"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Добавяне на контроли"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Редактиране на контролите"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Добавяне на изходящи устройства"</string>
@@ -1067,6 +1106,48 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Сдвояване на ново устройство"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер на компилацията"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номерът на компилацията е копиран в буферната памет."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Отворен разговор"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Приспособления за разговор"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Докоснете разговор, за да го добавите към началния си екран"</string>
+    <string name="no_conversations_text" msgid="7362374212649891057">"Проверете отново тук, когато получите съобщения"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"Разговори с приоритет"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Скорошни разговори"</string>
+    <string name="okay" msgid="6490552955618608554">"OK"</string>
+    <string name="days_timestamp" msgid="5821854736213214331">"Преди <xliff:g id="DURATION">%1$s</xliff:g> дни"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"Преди 1 седмица"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"Преди 2 седмици"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"Преди повече от 1 седмица"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"Преди повече от 2 седмици"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Рожден ден"</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"Днес е рожденият ден на <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Предстоящ рожден ден"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"Скоро е рожденият ден на <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Годишнина"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"Днес е годишнината на <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="location_status" msgid="1294990572202541812">"Местопол. се споделя"</string>
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> споделя местоположението си"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Нова история"</string>
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> сподели нова история"</string>
+    <string name="video_status" msgid="4548544654316843225">"Гледате"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Слушате"</string>
+    <string name="game_status" msgid="1340694320630973259">"Играете"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Приятели"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Да поговорим!"</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"Съдържанието ще се покаже скоро"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Пропуснато обаждане"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Над <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Преглеждайте скорошни съобщения, пропуснати обаждания и информация за състоянието"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Разговор"</string>
+    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> изпрати съобщение"</string>
+    <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> изпрати изображение"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Възникна проблем при четенето на данните за нивото на батерията"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Докоснете за още информация"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Няма зададен будилник"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Сензор за отпечатъци"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Сензорът за отпечатъци е деактивиран"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"удостоверяване"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"вход в устройството"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Използвайте отпечатък за отваряне"</string>
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Изисква се удостоверяване на самоличността. За целта докоснете сензора за отпечатъци."</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Текущо телефонно обаждане"</string>
 </resources>

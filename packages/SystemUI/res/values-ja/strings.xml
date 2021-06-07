@@ -89,10 +89,13 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"スクリーンショットの作成はアプリまたは組織で許可されていません"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"編集"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"スクリーンショットを編集します"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"スクロール"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"スクリーンショットをスクロールします"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"キャプチャ範囲を拡大"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"スクリーンショットを閉じます"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"スクリーンショットのプレビュー"</string>
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"上部の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"下部の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"左の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"右の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"スクリーン レコーダー"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"画面の録画を処理しています"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
@@ -114,7 +117,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"キャンセル"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"共有"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"画面の録画をキャンセルしました"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"画面の録画を保存しました。タップで表示できます"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"画面の録画を保存しました"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"タップすると表示されます"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"画面の録画の削除中にエラーが発生しました"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"権限を取得できませんでした"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"画面の録画中にエラーが発生しました"</string>
@@ -132,7 +136,9 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"カメラ"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"電話"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"音声アシスト"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"ウォレット"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"ロック解除"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"デバイスはロックされています"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"指紋を待っています"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"指紋認証を使用せずにロック解除"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"顔のスキャン"</string>
@@ -173,8 +179,11 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"間違えた回数が上限を超えました。このユーザーが削除されます。"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"間違えた回数が上限を超えました。この仕事用プロファイルと関連データが削除されます。"</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"閉じる"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"指紋認証センサーをタップ"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"指紋認証センサーをタッチ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"指紋アイコン"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"顔を認識できません。指紋認証を使用してください。"</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"続行するには指紋認証を使用してください"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"指紋を認識できません。代わりに画面ロックを使用してください。"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"顔を認証しています…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"顔アイコン"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"互換ズームボタン。"</string>
@@ -281,9 +290,7 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"モバイルアクセスポイントをOFFにしました。"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"モバイルアクセスポイントをONにしました。"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"画面のキャストが停止しました。"</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"Work モードがオフです。"</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Work モードがオンです。"</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Work モードをオフにしました。"</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"Workモードを一時停止しました。"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Work モードをオンにしました。"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"データセーバーが OFF になりました。"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"データセーバーが ON になりました。"</string>
@@ -344,8 +351,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"入力方法"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"位置情報"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"現在地OFF"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"カメラをブロック"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"マイクをミュート"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"カメラへのアクセス"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"マイクへのアクセス"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"使用可能"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ブロック中"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"メディアデバイス"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"緊急通報のみ"</string>
@@ -356,7 +365,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"新しいユーザー"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"インターネット"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"機内モードで利用可能"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"ネットワークが利用できます"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ネットワークは利用できません"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"接続されていません"</string>
@@ -376,7 +384,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"色を反転"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"色補正モード"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"詳細設定"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ユーザー設定"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"完了"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"閉じる"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"接続済み"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"接続済み、電池 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"接続しています..."</string>
@@ -398,7 +408,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g>使用中"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"上限: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"警告: 上限は<xliff:g id="DATA_LIMIT">%s</xliff:g>です"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"仕事用プロファイル"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"仕事用アプリ"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"夜間モード"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"日の入りに ON"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"日の出まで"</string>
@@ -413,13 +423,15 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC は無効です"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC は有効です"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"スクリーン レコード"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"スクリーン レコード"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"開始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"デバイスのマイクのブロックを解除しますか？"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"デバイスのカメラのブロックを解除しますか？"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"デバイスのカメラとマイクのブロックを解除しますか？"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"マイクの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"カメラの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"カメラやマイクの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"デバイス"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"アプリを切り替えるには上にスワイプ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"右にドラッグするとアプリを素早く切り替えることができます"</string>
@@ -440,12 +452,13 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"緊急度の低い通知を下に表示"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"開くにはもう一度タップしてください"</string>
+    <string name="tap_again" msgid="1315420114387908655">"もう一度タップしてください"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"開くには上にスワイプします"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"上にスワイプしてもう一度お試しください"</string>
-    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
-    <skip />
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC を使用するには、ロックを解除してください"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"これは組織が所有するデバイスです"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"これは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> が所有するデバイスです"</string>
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"このデバイスは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> から提供されています"</string>
     <string name="phone_hint" msgid="6682125338461375925">"右にスワイプして通話"</string>
     <string name="voice_hint" msgid="7476017460191291417">"アイコンからスワイプして音声アシストを起動"</string>
     <string name="camera_hint" msgid="4519495795000658637">"左にスワイプしてカメラを起動"</string>
@@ -456,19 +469,19 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"サイレント\n"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"重要な\n通知のみ"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"アラーム\nのみ"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="7343602278805644915">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ワイヤレス充電中（完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>）"</string>
-    <string name="keyguard_indication_charging_time" msgid="4927557805886436909">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中（完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>）"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 急速充電中（完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>）"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 低速充電中（完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>）"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ワイヤレス充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 急速充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 低速充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ユーザーを切り替える"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"ユーザーを切り替える、現在のユーザーは<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"現在のユーザー: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"プロファイルを表示"</string>
     <string name="user_add_user" msgid="4336657383006913022">"ユーザーを追加"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新しいユーザー"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"ゲスト セッションを終了しますか？"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ゲストを削除しますか？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"このセッションでのアプリとデータはすべて削除されます。"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"セッションを終了"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"削除"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"おかえりなさい、ゲストさん"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"セッションを続行しますか？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"最初から開始"</string>
@@ -493,7 +506,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"パフォーマンスとバックグラウンドデータを制限します"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"バッテリー セーバーを OFF"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、画面上に表示される情報またはキャスト先に転送する情報すべてに、録画中またはキャスト中にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"次回から表示しない"</string>
@@ -514,6 +527,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"このデバイスは保護者によって管理されています"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"これは組織が所有するデバイスで、ネットワーク トラフィックが監視されることもあります"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスで、ネットワーク トラフィックが監視されることもあります"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"このデバイスは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> から提供されています"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"これは組織が所有するデバイスで、<xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスで、<xliff:g id="VPN_APP">%2$s</xliff:g> に接続しています"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"これは組織が所有するデバイスです"</string>
@@ -522,11 +536,13 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスで、VPN に接続しています"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"組織は仕事用プロファイルのネットワーク トラフィックを監視することがあります"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> によってこの仕事用プロファイルのネットワーク トラフィックが監視されることもあります"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"仕事用プロファイルのネットワーク アクティビティは IT 管理者に公開されます"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ネットワークが監視されることもあります"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"このデバイスは VPN に接続しています"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"この仕事用プロファイルは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"この個人用プロファイルは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"このデバイスは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"このデバイスは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> から提供されています"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"デバイス管理"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"プロファイルの監視"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"ネットワーク監視"</string>
@@ -538,11 +554,13 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ポリシーを見る"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"使用制限を表示"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスです。\n\nIT 管理者が、このデバイスに関連付けられている設定、コーポレート アクセス、アプリ、データのほか、デバイスの位置情報を監視、管理できます。\n\n詳しくは、IT 管理者にお問い合わせください。"</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> がこのデバイスに関連するデータにアクセスし、アプリを管理し、デバイスの設定を変更できる可能性があります。\n\nご不明な点がある場合は、<xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> にお問い合わせください。"</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"これは組織が所有するデバイスです。\n\nIT 管理者が、このデバイスに関連付けられている設定、コーポレート アクセス、アプリ、データのほか、デバイスの位置情報を監視、管理できます。\n\n詳しくは、IT 管理者にお問い合わせください。"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"組織によってこのデバイスに認証局がインストールされました。保護されたネットワーク トラフィックが監視、変更される場合があります。"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"組織によって、あなたの仕事用プロファイルに認証局がインストールされました。保護されたネットワーク トラフィックが監視、変更される場合があります。"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"このデバイスには認証局がインストールされています。保護されたネットワーク トラフィックが監視、変更される可能性があります。"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"管理者がネットワーク ログを有効にしているため、このデバイスのトラフィックが監視されています。"</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"管理者がネットワーク ログを有効にしているため、仕事用プロファイルのトラフィックは監視されています（個人用プロファイルは対象外）。"</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"<xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています。このアプリはあなたのネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> と <xliff:g id="VPN_APP_1">%2$s</xliff:g> に接続しています。これらのアプリは、あなたのネットワーク アクティビティ（メール、アプリ、ウェブサイト）を監視できます。"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"この仕事用プロファイルは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています。このアプリはあなたのネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
@@ -591,15 +609,15 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"固定を解除するまで常に表示されます。上にスワイプして長押しすると固定が解除されます。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"固定を解除するまで画面が常に表示されるようになります。[最近] を押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"固定を解除するまで画面が常に表示されるようになります。[ホーム] を押し続けると固定が解除されます。"</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人データ（連絡先やメールの内容など）にアクセスできる可能性があります。"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人データ（連絡先やメールの内容など）にアクセスされる可能性があります。"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"固定したアプリが他のアプリを開く可能性があります。"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"このアプリの固定を解除するには [戻る] ボタンと [最近] ボタンを長押しします"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"このアプリの固定を解除するには [戻る] ボタンと [ホーム] ボタンを長押しします"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"このアプリの固定を解除するには、上にスワイプして長押しします"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"いいえ"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"固定したアプリ"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"固定を解除したアプリ"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"アプリを固定しました"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"アプリの固定を解除しました"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>を非表示にしますか？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"次回、設定でONにすると再表示されます。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"非表示"</string>
@@ -623,6 +641,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s。タップしてミュートします。ユーザー補助機能サービスがミュートされる場合があります。"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s。タップしてバイブレーションに設定します。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s。タップしてミュートします。"</string>
+    <string name="volume_ringer_change" msgid="3574969197796055532">"タップすると、着信音のモードを変更できます"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ミュート"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ミュートを解除"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"バイブレーション"</string>
@@ -646,6 +665,13 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"デモモードを表示"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"イーサネット"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"アラーム"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"ウォレット"</string>
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"すべて表示"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ロックを解除して支払う"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"未設定"</string>
+    <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ロックを解除して使用"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"カードの取得中に問題が発生しました。しばらくしてからもう一度お試しください"</string>
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ロック画面の設定"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"仕事用プロファイル"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"機内モード"</string>
     <string name="add_tile" msgid="6239678623873086686">"タイルを追加"</string>
@@ -714,10 +740,13 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ステータス:&lt;/b&gt; ランクがサイレントに下がりました"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ステータス:&lt;/b&gt; ランクが上がりました"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ステータス:&lt;/b&gt; ランクが下がりました"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"会話セクションの一番上にバブルとして表示され、プロフィール写真がロック画面に表示されます"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"会話通知の一番上に表示されると同時に、ロック画面にプロフィール写真として表示されます"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"会話通知の一番上に表示されると同時に、ロック画面にプロフィール写真として表示されるほか、バブルとして表示されます"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"会話通知の一番上に表示されると同時に、ロック画面にプロフィール写真として表示され、サイレント モードが中断されます"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"会話通知の一番上に表示されると同時に、ロック画面にプロフィール写真として表示されるほか、バブルとして表示され、サイレント モードが中断されます"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> は会話機能に対応していません"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>は会話機能に対応していません"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"このグループの通知はここでは設定できません"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>
@@ -736,7 +765,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"この通知は、システムによって自動的に&lt;b&gt;ランクがサイレントに下がり&lt;/b&gt;ました。"</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"この通知は、自動的にシェード内の&lt;b&gt;ランクが上がり&lt;/b&gt;ました。"</string>
     <string name="feedback_demoted" msgid="951884763467110604">"この通知は、自動的にシェード内の&lt;b&gt;ランクが下がり&lt;/b&gt;ました。"</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"間違いありませんか？"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"皆様のご意見がデベロッパーに届きます。これで間違いありませんか？"</string>
     <string name="feedback_response" msgid="4671729244976641339">"フィードバックをお寄せいただきありがとうございます。"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> の通知管理は開いています"</string>
@@ -759,7 +788,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"通知スヌーズ設定"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"リマインダーの設定"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"設定"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"元に戻す"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"元に戻す"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"スヌーズ: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d時間</item>
@@ -799,6 +828,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"NumLock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"テンキーの <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"添付ファイルを削除"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"システム"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ホーム"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"最近"</string>
@@ -831,6 +861,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ON"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"OFF"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"使用不可"</string>
+    <string name="tile_disabled" msgid="373212051546573069">"無効"</string>
     <string name="nav_bar" msgid="4642708685386136807">"ナビゲーション バー"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"レイアウト"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"その他の左ボタンタイプ"</string>
@@ -883,6 +914,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> に移動"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"ポジション <xliff:g id="POSITION">%1$d</xliff:g> に追加"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"位置: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"タイルを追加しました"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"タイルを削除しました"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"クイック設定エディタ"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> の通知: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"設定を開きます。"</string>
@@ -890,11 +923,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"クイック設定を閉じます。"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"アラームを設定しました。"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> としてログインします"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ユーザーを選択"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"インターネットに接続されていません"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"詳細情報を開きます。"</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"利用できない理由: <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> の設定を開きます。"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"設定の順序を編集します。"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"電源ボタン メニュー"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ページ <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ロック画面"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"高熱で電源が OFF になりました"</string>
@@ -970,25 +1005,21 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"アプリは<xliff:g id="TYPES_LIST">%s</xliff:g>を使用しています。"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"、 "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" 、 "</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> が使用中"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> が最近使用"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"（業務用）"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"通話"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"（<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g> 経由）"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"カメラ"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"現在地情報"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"マイク"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"センサー OFF"</string>
     <string name="device_services" msgid="1549944177856658705">"デバイス サービス"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"タイトルなし"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"タップしてこのアプリを再起動すると、全画面表示になります。"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"移動"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"システム ナビゲーションを更新しました。変更するには [設定] に移動してください。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"システム ナビゲーションを更新するには [設定] に移動してください"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"スタンバイ"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"優先度を高く設定された会話"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"優先度の高い会話は、次のように表示されます。"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"会話セクションの一番上にバブルで表示"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ロック画面にプロフィール写真を表示"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"他のアプリに重ねてフローティング バブルとして表示"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"サイレント モードが ON でも表示"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"設定"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"拡大ウィンドウ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"拡大ウィンドウ コントロール"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"拡大"</string>
@@ -998,13 +1029,19 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"左に移動"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"右に移動"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"拡大スイッチ"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"画面全体を拡大します"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"画面全体を拡大します"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"画面の一部を拡大します"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"スイッチ"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"デバイス コントロール"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"接続済みデバイスのコントロールを追加します"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"デバイス コントロールの設定"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"コントロールにアクセスするには、電源ボタンを長押しします"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ユーザー補助ジェスチャーに代わって、ユーザー補助機能ボタンが導入されました\n\n"<annotation id="link">"設定を表示"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ボタンを一時的に非表示にするには、端に移動させてください"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"左上に移動"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"右上に移動"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"左下に移動"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"右下に移動"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"端に移動して非表示"</string>
+    <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"端から移動して表示"</string>
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"切り替え"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"ホーム コントロール"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"コントロールを追加するアプリの選択"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> 件のコントロールを追加しました。</item>
@@ -1018,7 +1055,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"お気に入りから削除"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ポジション <xliff:g id="NUMBER">%d</xliff:g> に移動"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源ボタン メニューからアクセスするコントロールを選択する"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"クイック設定からアクセスするコントロールを選択してください"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"変更が保存されていません"</string>
@@ -1030,6 +1067,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"追加"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> によるおすすめ"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"コントロールを更新しました"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"デバイス: ロック状態"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN に英字や記号を含める"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g>の確認"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN が間違っています"</string>
@@ -1041,11 +1079,12 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"スワイプすると他の構造が表示されます"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"候補を読み込んでいます"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"メディア"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"現在のセッションを非表示にします。"</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"現在のセッションは非表示にできません。"</string>
+    <string name="controls_media_close_session" msgid="1193000643003066508">"このメディア セッションを非表示にしますか？"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"現在のメディア セッションは非表示にできません。"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"閉じる"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"再開"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"再生"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"無効: アプリをご確認ください"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"エラー。再試行しています…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"見つかりませんでした"</string>
@@ -1055,7 +1094,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"ステータスを読み込めません"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"エラー: もう一度お試しください"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"処理中"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"電源ボタンを長押しすると、新しいコントロールが表示されます"</string>
+    <string name="controls_added_tooltip" msgid="5866098408470111984">"新しいコントロールを表示するにはクイック設定を開いてください"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"コントロールを追加"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"コントロールを編集"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"出力の追加"</string>
@@ -1067,6 +1106,48 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"新しいデバイスとのペア設定"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ビルド番号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ビルド番号をクリップボードにコピーしました。"</string>
+    <string name="basic_status" msgid="2315371112182658176">"空の会話"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"会話ウィジェット"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"会話をタップするとホーム画面に追加されます"</string>
+    <string name="no_conversations_text" msgid="7362374212649891057">"メッセージを受信すると、ここに表示されます"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"優先度の高い会話"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"最近の会話"</string>
+    <string name="okay" msgid="6490552955618608554">"OK"</string>
+    <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> 日前"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"1 週間前"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 週間前"</string>
+    <string name="over_one_week_timestamp" msgid="3770560704420807142">"1 週間以上前"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"2 週間以上前"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"誕生日"</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"今日は <xliff:g id="NAME">%1$s</xliff:g> さんのお誕生日です"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"もうすぐ誕生日"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"まもなく <xliff:g id="NAME">%1$s</xliff:g> さんのお誕生日です"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"記念日"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"今日は <xliff:g id="NAME">%1$s</xliff:g> さんの記念日です"</string>
+    <string name="location_status" msgid="1294990572202541812">"現在地を共有中"</string>
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> さんが位置情報を共有しています"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"新しいストーリー"</string>
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> さんが新しいストーリーを共有しました"</string>
+    <string name="video_status" msgid="4548544654316843225">"視聴中"</string>
+    <string name="audio_status" msgid="4237055636967709208">"再生中"</string>
+    <string name="game_status" msgid="1340694320630973259">"プレイ中"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"友だち"</string>
+    <string name="empty_status" msgid="5938893404951307749">"今夜、チャットしよう"</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"まもなく会話の内容が表示されます"</string>
+    <string name="missed_call" msgid="4228016077700161689">"不在着信"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g> 件以上"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"最近のメッセージ、不在着信、最新のステータスが表示されます"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"会話"</string>
+    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> さんからメッセージが届きました"</string>
+    <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> さんが画像を送信しました"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"電池残量の読み込み中に問題が発生しました"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"タップすると詳細が表示されます"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"アラーム未設定"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"指紋認証センサー"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"指紋認証センサーは無効です"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"認証"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"デバイスを入力"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"指紋を使って開いてください"</string>
+    <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"認証が必要です。指紋認証センサーをタッチして認証してください。"</string>
+    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"通話中"</string>
 </resources>
