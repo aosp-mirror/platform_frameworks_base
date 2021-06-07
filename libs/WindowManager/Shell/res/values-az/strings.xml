@@ -45,10 +45,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Yuxarı 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Yuxarı 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Aşağı tam ekran"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Bir əlli rejimdən istifadə edilir"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Birəlli rejim istifadəsi"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Çıxmaq üçün ekranın aşağısından yuxarıya doğru sürüşdürün və ya tətbiqin yuxarısında istənilən yerə toxunun"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Bir əlli rejimi başladın"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Bir əlli rejimdən çıxın"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Birəlli rejim başlasın"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Birəlli rejimdən çıxın"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> yumrucuqları üçün ayarlar"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Kənara çıxma"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Yenidən dəstəyə əlavə edin"</string>
