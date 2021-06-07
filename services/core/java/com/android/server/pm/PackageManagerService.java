@@ -9497,21 +9497,19 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public boolean isProtectedBroadcast(String actionName) {
-        // allow instant applications
-        synchronized (mProtectedBroadcasts) {
-            if (mProtectedBroadcasts.contains(actionName)) {
+        if (actionName != null) {
+            // TODO: remove these terrible hacks
+            if (actionName.startsWith("android.net.netmon.lingerExpired")
+                    || actionName.startsWith("com.android.server.sip.SipWakeupTimer")
+                    || actionName.startsWith("com.android.internal.telephony.data-reconnect")
+                    || actionName.startsWith("android.net.netmon.launchCaptivePortalApp")) {
                 return true;
-            } else if (actionName != null) {
-                // TODO: remove these terrible hacks
-                if (actionName.startsWith("android.net.netmon.lingerExpired")
-                        || actionName.startsWith("com.android.server.sip.SipWakeupTimer")
-                        || actionName.startsWith("com.android.internal.telephony.data-reconnect")
-                        || actionName.startsWith("android.net.netmon.launchCaptivePortalApp")) {
-                    return true;
-                }
             }
         }
-        return false;
+         // allow instant applications
+        synchronized (mProtectedBroadcasts) {
+            return mProtectedBroadcasts.contains(actionName);
+        }
     }
 
     @Override
@@ -15143,9 +15141,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Instrumentation: " + r);
             }
 
-            if (!pkg.getProtectedBroadcasts().isEmpty()) {
+            final List<String> protectedBroadcasts = pkg.getProtectedBroadcasts();
+            if (!protectedBroadcasts.isEmpty()) {
                 synchronized (mProtectedBroadcasts) {
-                    mProtectedBroadcasts.addAll(pkg.getProtectedBroadcasts());
+                    mProtectedBroadcasts.addAll(protectedBroadcasts);
                 }
             }
 
