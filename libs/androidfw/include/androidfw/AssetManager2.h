@@ -508,6 +508,11 @@ class Theme {
   // data failed.
   base::expected<std::monostate, NullOrIOError> ApplyStyle(uint32_t resid, bool force = false);
 
+  // Clears the existing theme, sets the new asset manager to use for this theme, and applies the
+  // styles in `style_ids` through repeated invocations of `ApplyStyle`.
+  void Rebase(AssetManager2* am, const uint32_t* style_ids, const uint8_t* force,
+              size_t style_count);
+
   // Sets this Theme to be a copy of `source` if `source` has the same AssetManager as this Theme.
   //
   // If `source` does not have the same AssetManager as this theme, only attributes from ApkAssets

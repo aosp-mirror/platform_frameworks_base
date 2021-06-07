@@ -1417,6 +1417,18 @@ base::expected<std::monostate, NullOrIOError> Theme::ApplyStyle(uint32_t resid, 
   return {};
 }
 
+void Theme::Rebase(AssetManager2* am, const uint32_t* style_ids, const uint8_t* force,
+                   size_t style_count) {
+  ATRACE_NAME("Theme::Rebase");
+  // Reset the entries without changing the vector capacity to prevent reallocations during
+  // ApplyStyle.
+  entries_.clear();
+  asset_manager_ = am;
+  for (size_t i = 0; i < style_count; i++) {
+    ApplyStyle(style_ids[i], force[i]);
+  }
+}
+
 std::optional<AssetManager2::SelectedValue> Theme::GetAttribute(uint32_t resid) const {
 
   constexpr const uint32_t kMaxIterations = 20;
