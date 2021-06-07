@@ -766,7 +766,7 @@
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"Sérsniðið"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"Afmæli"</string>
-    <string name="eventTypeAnniversary" msgid="4684702412407916888">"Brúðkaupsafmæli"</string>
+    <string name="eventTypeAnniversary" msgid="4684702412407916888">"Afmæli"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"Annað"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"Sérsniðið"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"Heima"</string>
