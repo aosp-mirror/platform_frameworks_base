@@ -110,6 +110,7 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -240,6 +241,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final Executor mUiBgExecutor;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthController;
 
     private boolean mSystemReady;
     private boolean mBootCompleted;
@@ -810,13 +812,15 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationControllerLazy,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            Lazy<NotificationShadeDepthController> notificationShadeDepthController) {
         super(context);
         mFalsingCollector = falsingCollector;
         mLockPatternUtils = lockPatternUtils;
         mBroadcastDispatcher = broadcastDispatcher;
         mKeyguardViewControllerLazy = statusBarKeyguardViewManagerLazy;
         mDismissCallbackRegistry = dismissCallbackRegistry;
+        mNotificationShadeDepthController = notificationShadeDepthController;
         mUiBgExecutor = uiBgExecutor;
         mUpdateMonitor = keyguardUpdateMonitor;
         mPM = powerManager;
@@ -1655,6 +1659,14 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
         mKeyguardExitAnimationRunner = runner;
         hideLocked();
+    }
+
+    /**
+     * Disable notification shade background blurs until the keyguard is dismissed.
+     * (Used during app launch animations)
+     */
+    public void disableBlursUntilHidden() {
+        mNotificationShadeDepthController.get().setIgnoreShadeBlurUntilHidden(true);
     }
 
     public boolean isSecure() {
