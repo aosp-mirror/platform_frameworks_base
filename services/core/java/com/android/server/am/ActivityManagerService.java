@@ -17099,6 +17099,19 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
+     * Suppress or reenable the rate limit on foreground service notification deferral.
+     * @param enable false to suppress rate-limit policy; true to reenable it.
+     */
+    @Override
+    public boolean enableFgsNotificationRateLimit(boolean enable) {
+        enforceCallingPermission(permission.WRITE_DEVICE_CONFIG,
+                "enableFgsNotificationRateLimit");
+        synchronized (this) {
+            return mServices.enableFgsNotificationRateLimitLocked(enable);
+        }
+    }
+
+    /**
      * Holds the AM lock for the specified amount of milliseconds.
      * Intended for use by the tests that need to imitate lock contention.
      * The token should be obtained by
