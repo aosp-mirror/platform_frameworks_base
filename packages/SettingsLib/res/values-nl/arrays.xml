@@ -55,13 +55,13 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"HDCP-controle nooit gebruiken"</item>
-    <item msgid="8254225038262324761">"HDCP-controle alleen voor DRM-content gebruiken"</item>
+    <item msgid="8254225038262324761">"Gebruik HDCP-controle alleen voor DRM-content"</item>
     <item msgid="6421717003037072581">"HDCP-controle altijd gebruiken"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="695678520785580527">"Uitgeschakeld"</item>
-    <item msgid="6336372935919715515">"Gefilterd ingeschakeld"</item>
-    <item msgid="2779123106632690576">"Ingeschakeld"</item>
+    <item msgid="695678520785580527">"Uitgezet"</item>
+    <item msgid="6336372935919715515">"Gefilterd staat aan"</item>
+    <item msgid="2779123106632690576">"Aangezet"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (standaard)"</item>
@@ -94,7 +94,7 @@
     <item msgid="3825367753087348007">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="8868109554557331312">"Systeemselectie gebruiken (standaard)"</item>
+    <item msgid="8868109554557331312">"Gebruik systeemselectie (standaard)"</item>
     <item msgid="9024885861221697796">"SBC"</item>
     <item msgid="4688890470703790013">"AAC"</item>
     <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> audio"</item>
@@ -109,7 +109,7 @@
     <item msgid="8887519571067543785">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="2284090879080331090">"Systeemselectie gebruiken (standaard)"</item>
+    <item msgid="2284090879080331090">"Gebruik systeemselectie (standaard)"</item>
     <item msgid="1872276250541651186">"44,1 kHz"</item>
     <item msgid="8736780630001704004">"48,0 kHz"</item>
     <item msgid="7698585706868856888">"88,2 kHz"</item>
@@ -122,7 +122,7 @@
     <item msgid="1212577207279552119">"32 bits per sample"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="9196208128729063711">"Systeemselectie gebruiken (standaard)"</item>
+    <item msgid="9196208128729063711">"Gebruik systeemselectie (standaard)"</item>
     <item msgid="1084497364516370912">"16 bits per sample"</item>
     <item msgid="2077889391457961734">"24 bits per sample"</item>
     <item msgid="3836844909491316925">"32 bits per sample"</item>
@@ -133,7 +133,7 @@
     <item msgid="927546067692441494">"Stereo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="1997302811102880485">"Systeemselectie gebruiken (standaard)"</item>
+    <item msgid="1997302811102880485">"Gebruik systeemselectie (standaard)"</item>
     <item msgid="8005696114958453588">"Mono"</item>
     <item msgid="1333279807604675720">"Stereo"</item>
   </string-array>
@@ -248,8 +248,8 @@
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="1968128556747588800">"Uit"</item>
-    <item msgid="3033215374382962216">"Gedeeltes met overbelasting weergeven"</item>
-    <item msgid="3474333938380896988">"Gebieden voor deuteranomalie weergeven"</item>
+    <item msgid="3033215374382962216">"Gedeelten met overbelasting tonen"</item>
+    <item msgid="3474333938380896988">"Gebieden voor deuteranomalie tonen"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="794656271086646068">"Standaardlimiet"</item>

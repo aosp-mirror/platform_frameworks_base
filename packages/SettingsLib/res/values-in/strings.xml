@@ -36,6 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Tidak akan tersambung otomatis"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Tidak ada akses internet"</string>
     <string name="saved_network" msgid="7143698034077223645">"Disimpan oleh <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Terhubung ke jaringan berbayar"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Tersambung otomatis melalui %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Otomatis tersambung melalui penyedia rating jaringan"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Terhubung melalui %1$s"</string>
@@ -116,8 +117,8 @@
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SAMBUNGKAN"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Batal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Penyandingan memberi akses ke kontak dan histori panggilan saat tersambung"</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Tidak dapat menyandingkan dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Tidak dapat menyandingkan dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> karena PIN atau kode sandi salah."</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Tidak dapat menyambungkan ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Tidak dapat menyambungkan ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g> karena PIN atau kode sandi salah."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Tidak dapat berkomunikasi dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Penyandingan ditolak oleh <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Komputer"</string>
@@ -155,7 +156,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Beberapa setelan default"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Tidak ada setelan default"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Setelan text-to-speech"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Keluaran text-to-speech"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Ouput text-to-speech"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Kecepatan ucapan"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Kecepatan teks diucapkan"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tinggi nada"</string>
@@ -213,7 +214,7 @@
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Untuk melihat dan menggunakan perangkat yang tersedia, aktifkan proses debug nirkabel"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Sambungkan perangkat dengan kode QR"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Sambungkan perangkat baru menggunakan pemindai kode QR"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Sambungkan perangkat dengan kode penghubung"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Sambungkan perangkat dengan kode penyambungan"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Sambungkan perangkat baru menggunakan kode enam digit"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Perangkat disambungkan"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Saat ini tersambung"</string>
@@ -251,8 +252,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Sertifikasi layar nirkabel"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktifkan Pencatatan Log Panjang Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pembatasan pemindaian Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Pengacakan MAC yang ditingkatkan Wi-Fi"</string>
-    <string name="mobile_data_always_on" msgid="8275958101875563572">"Kuota selalu aktif"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Pengacakan MAC nonpersisten Wi‑Fi"</string>
+    <string name="mobile_data_always_on" msgid="8275958101875563572">"Data seluler selalu aktif"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Akselerasi hardware tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Tampilkan perangkat Bluetooth tanpa nama"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Nonaktifkan volume absolut"</string>
@@ -352,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Tampilkan batas klip, margin, dll."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Paksa arah tata letak RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Paksa arah tata letak layar RTL untuk semua lokal"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Paksa 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Aktifkan 4x MSAA dalam aplikasi OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Debug operasi klip non-kotak"</string>
@@ -367,9 +370,9 @@
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikasi"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Jangan simpan aktivitas"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Hancurkan tiap aktivitas setelah ditinggal pengguna"</string>
-    <string name="app_process_limit_title" msgid="8361367869453043007">"Batas proses background"</string>
-    <string name="show_all_anrs" msgid="9160563836616468726">"Tampilkan ANR background"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang berjalan di background"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"Batas proses latar blkng"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"Tampilkan ANR latar blkng"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang ada di latar belakang"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Tampilkan peringatan saluran notifikasi"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Menampilkan peringatan di layar saat aplikasi memposting notifikasi tanpa channel yang valid"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Paksa izinkan aplikasi di eksternal"</string>
@@ -403,6 +406,8 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"Ganti default transcoding"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Aktifkan transcoding"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Asumsikan aplikasi mendukung format modern"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Tampilkan notifikasi transcoding"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Nonaktifkan cache transcoding"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Layanan yang sedang berjalan"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Melihat dan mengontrol layanan yang sedang berjalan"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Penerapan WebView"</string>
@@ -422,7 +427,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (merah-hijau)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (biru-kuning)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koreksi warna"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Koreksi warna memungkinkan Anda untuk menyesuaikan cara warna ditampilkan pada perangkat Anda"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Sesuaikan cara warna ditampilkan di perangkat Anda. Ini dapat bermanfaat saat Anda ingin:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Melihat warna dengan lebih akurat&lt;/li&gt; &lt;li&gt;&amp;nbsp;Menghapus warna untuk membantu Anda fokus&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Digantikan oleh <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Sekitar <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi"</string>
@@ -448,16 +453,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet akan segera dimatikan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Perangkat akan segera dimatikan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Sisa <xliff:g id="TIME">%1$s</xliff:g> hingga terisi penuh"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi terisi penuh"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Mengoptimalkan untuk kesehatan baterai"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi sampai penuh"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi sampai penuh"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengisian daya dibatasi untuk sementara"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tidak diketahui"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Mengisi daya"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mengisi daya cepat"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mengisi daya lambat"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Mengisi daya nirkabel"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Tidak mengisi daya"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Tercolok, tidak dapat mengisi baterai sekarang"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Penuh"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Terhubung, tidak mengisi daya"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Terisi"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Dikontrol oleh admin"</string>
     <string name="disabled" msgid="8017887509554714950">"Dinonaktifkan"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Diizinkan"</string>
@@ -499,6 +505,13 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Lebih cepat."</string>
     <string name="cancel" msgid="5665114069455378395">"Batal"</string>
     <string name="okay" msgid="949938843324579502">"Oke"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarm dan pengingat"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Izinkan menyetel alarm dan pengingat"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarm &amp; pengingat"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Izinkan aplikasi ini menyetel alarm dan menjadwalkan tindakan lainnya. Aplikasi ini dapat digunakan saat Anda tidak menggunakan ponsel, sehingga mungkin memerlukan daya baterai lebih besar. Jika izin ini dinonaktifkan, aplikasi mungkin tidak berfungsi normal dan alarmnya tidak bekerja sesuai yang dijadwalkan."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Izinkan aplikasi ini menyetel alarm dan menjadwalkan tindakan lainnya. Aplikasi ini dapat digunakan saat Anda tidak menggunakan tablet, sehingga mungkin memerlukan daya baterai lebih besar. Jika izin ini dinonaktifkan, aplikasi mungkin tidak berfungsi normal dan alarmnya tidak bekerja sesuai yang dijadwalkan."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Izinkan aplikasi ini menyetel alarm dan menjadwalkan tindakan lainnya. Aplikasi ini dapat digunakan saat Anda tidak menggunakan perangkat, sehingga mungkin memerlukan daya baterai lebih besar. Jika izin ini dinonaktifkan, aplikasi mungkin tidak berfungsi normal dan alarmnya tidak bekerja sesuai yang dijadwalkan."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"jadwal, alarm, pengingat, jam"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktifkan"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktifkan mode Jangan Ganggu"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Tidak pernah"</string>
@@ -513,6 +526,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Sampai Anda menonaktifkannya"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Baru saja"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Speaker ponsel"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ponsel ini"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Ada masalah saat menghubungkan. Nonaktifkan perangkat &amp; aktifkan kembali"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Perangkat audio berkabel"</string>
     <string name="help_label" msgid="3528360748637781274">"Bantuan &amp; masukan"</string>
@@ -551,9 +565,10 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Setel kunci"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Beralih ke <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Membuat pengguna baru …"</string>
+    <string name="add_user_failed" msgid="4809887794313944872">"Gagal membuat pengguna baru"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nama panggilan"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Tambahkan tamu"</string>
-    <string name="guest_exit_guest" msgid="4754204715192830850">"Akhiri sesi tamu"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Hapus tamu"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Tamu"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Ambil foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Pilih gambar"</string>
@@ -576,7 +591,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"Kuota nonaktif"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"Tidak disetel untuk menggunakan data"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"Tidak dapat melakukan panggilan."</string>
@@ -590,5 +605,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Data tiga batang."</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Sinyal data penuh."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet terputus."</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"Ethernet tersambung."</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"Tidak ada panggilan."</string>
 </resources>

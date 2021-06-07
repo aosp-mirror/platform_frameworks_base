@@ -36,6 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"በራስ-ሰር አይገናኝም"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"ምንም የበይነመረብ መዳረሻ ያለም"</string>
     <string name="saved_network" msgid="7143698034077223645">"የተቀመጠው በ<xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"ከሚለካ አውታረ መረብ ጋር ተገናኝቷል"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"በ%1$s በኩል በራስ-ሰር ተገናኝቷል"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"በአውታረ መረብ ደረጃ ሰጪ አቅራቢ በኩል በራስ-ሰር ተገናኝቷል"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"በ%1$s በኩል መገናኘት"</string>
@@ -210,7 +211,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi ሲገናኝ የማረም ሁነታ"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ስህተት"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ገመድ-አልባ debugging"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"የሚገኙ መሣሪያዎችን ለመመልከትና ለመጠቀም ገመድ-አልባ debuggingን ያብሩ"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"የሚገኙ መሣሪያዎችን ለመመልከትና ለመጠቀም ገመድ-አልባ ማረምን ያብሩ"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"የQR ኮድን በመጠቀም መሣሪያን ያጣምሩ"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"የQR ኮድ መቃኛን በመጠቀም አዲስ መሣሪያዎችን ያጣምሩ"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"የማጣመሪያ ኮድን በመጠቀም መሣሪያን ያጣምሩ"</string>
@@ -251,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"የገመድ አልባ ማሳያ እውቅና ማረጋገጫ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"የWi‑Fi ተጨማሪ ቃላት ምዝግብ ማስታወሻ መያዝ"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi scan throttling"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑የተሻሻለ የማክ ዘፈቀደ ማድረጊያ"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"የWi-Fi ወጥ ያልሆነ ማክ የዘፈቀደ ማድረግ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"የተንቀሳቃሽ ስልክ ውሂብ ሁልጊዜ ገቢር ነው"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"የሃርድዌር ማቀላጠፊያን በማስተሳሰር ላይ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"የብሉቱዝ መሣሪያዎችን ያለ ስሞች አሳይ"</string>
@@ -302,7 +303,7 @@
     <string name="adb_warning_title" msgid="7708653449506485728">"የUSB ማረሚያ ይፈቀድ?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"የUSB አድስ ለግንባታ አላማ ብቻ የታሰበ ነው። ከኮምፒዩተርህ ወደ መሳሪያህ ውሂብ ለመገልበጥ፣ መሣሪያህ ላይ ያለ ማሳወቂያ መተግበሪያዎችን መጫን፣ እና ማስታወሻ ውሂብ ማንበብ ለመጠቀም ይቻላል።"</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"ገመድ-አልባ debugging ይፈቀድ?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ገመድ-አልባ debugging ለግንባታ አላማዎች ብቻ የታሰበ ነው። ውሂብን ከኮምፒዩተርዎ ወደ መሳሪያዎ ለመቅዳት፣ መሣሪያዎ ላይ ያለማሳወቂያ መተግበሪያዎችን ለመጫን እና የምዝግብ ማስታወሻ ውሂብን ለማንበብ ይጠቀሙበት።"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ገመድ-አልባ ማረም ለግንባታ አላማዎች ብቻ የታሰበ ነው። ውሂብን ከኮምፒዩተርዎ ወደ መሳሪያዎ ለመቅዳት፣ መሣሪያዎ ላይ ያለማሳወቂያ መተግበሪያዎችን ለመጫን እና የምዝግብ ማስታወሻ ውሂብን ለማንበብ ይጠቀሙበት።"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"የዩ ኤስ ቢ ማረም መዳረሻ ከዚህ ቀደም ፍቃድ ከሰጧቸው ኮምፒውተሮች ላይ ይሻሩ?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"የግንባታ ቅንብሮችን ፍቀድ?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"እነዚህ ቅንብሮች  የታሰቡት ለግንባታ አጠቃቀም ብቻ ናቸው። መሳሪያህን እና በሱ ላይ ያሉትን መተግበሪያዎች እንዲበለሹ ወይም በትክክል እንዳይሰሩ ሊያደርጉ ይችላሉ።"</string>
@@ -352,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"የቅንጥብ ገደቦች፣ ጠርዞች፣ ወዘተ አሳይ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"የቀኝ-ወደ-ግራ አቀማመጥ አቅጣጫ አስገድድ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ለሁሉም አካባቢዎች የማያ ገጽ አቀማመጥ ከቀኝ-ወደ-ግራ እንዲሆን አስገድድ"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA አስገድድ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"4x MSAA በ OpenGL ES 2.0 መተግበሪያዎች ውስጥ ያንቁ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"አራት ማእዘን ያልሆኑ የቅንጥብ ክዋኔዎችን ስህተት አርም"</string>
@@ -360,7 +363,7 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ለስህተት ማረሚያ መተግበሪያዎች የጂፒዩ ንብርብሮችን መስቀልን ፍቀድ"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"የዝርክርክ ቃላት አቅራቢ ምዝግብ ማስታወሻን መያዝ አንቃ"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"በሳንካ ሪፖርቶች ውስጥ ተጨማሪ መሣሪያ-ተኮር የአቅራቢ ምዝግብ ማስታወሻዎችን ያካትቱ፣ ይህም የግል መረጃን ሊይዝ፣ ተጨማሪ ባትሪ ሊፈጅ እና/ወይም ተጨማሪ ማከማቻ ሊጠቀም ይችላል።"</string>
-    <string name="window_animation_scale_title" msgid="5236381298376812508">"የዊንዶው እነማ ልኬት ለውጥ"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"የ Window እነማ ልኬት ለውጥ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"የእነማ ልኬት ለውጥ ሽግግር"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"እነማ አድራጊ ቆይታ መለኪያ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ሁለተኛ ማሳያዎችን አስመስለህ ስራ"</string>
@@ -403,6 +406,8 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"የትራንስኮዲንግ ነባሪዎችን ሻር"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"ትራንስኮዲንግን ያንቁ"</string>
     <string name="transcode_default" msgid="3784803084573509491">"መተግበሪያዎች ዘመናዊ ቅርጸቶችን እንደሚደግፉ አድርገው ይቁጠሩ"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"ትራንስኮዲንግ ማሳወቂያዎችን አሳይ"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"የትራንስኮዲንግ መሸጎጫን አሰናክል"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"አሂድ አገልግሎቶች"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"በአሁኑጊዜ እየሄዱ ያሉ አገልግሎቶችን ተቆጣጠር እና እይ"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"የWebView ትግበራ"</string>
@@ -422,7 +427,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ፕሮታኖማሊ (ቀይ-አረንጓዴ)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ትራይታኖማሊ (ሰማያዊ-ቢጫ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"የቀለም ማስተካከያ"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"ቀለም ማስተካከያ ቀለሞች በመሣሪያዎ ላይ እንዴት እንደሚታዩ እንዲያስተካክሉ ያስችሉዎታል"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"ቀለሞች በመሣሪያዎ ላይ እንዴት እንደሚታዩ ያስተካክሉ። የሚከተሉትን ለማድረግ በሚፈልጉበት ጊዜ ይህ ጠቃሚ ሊሆን ይችላል፦&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;ቀለሞችን የበለጠ ትክክለኛ በሆነ መልኩ ለመመልከት&lt;/li&gt; &lt;li&gt;&amp;nbsp;ትኩረት ለማድረግ እንዲረዳዎ ቀለሞችን ለማስወገድ&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"በ<xliff:g id="TITLE">%1$s</xliff:g> ተሽሯል"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ገደማ ቀርቷል"</string>
@@ -448,16 +453,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ጡባዊው በቅርቡ ሊዘጋ ይችላል (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"መሣሪያው በቅርቡ ሊዘጋ ይችላል (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ኃይል እስከሚሞላ ድረስ ይቀራል"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ኃይል እስከሚሞላ ድረስ"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ለባትሪ ጤና ማመቻቸት"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"እስኪሞላ ድረስ <xliff:g id="TIME">%1$s</xliff:g> ይቀራል"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - እስኪሞላ ድረስ <xliff:g id="TIME">%2$s</xliff:g> ይቀራል"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - ኃይል መሙላት ለጊዜው ተገድቧል"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ያልታወቀ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ኃይል በመሙላት ላይ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ኃይል በፍጥነት በመሙላት ላይ"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ኃይል በዝግታ በመሙላት ላይ"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"በገመድ-አልባ ኃይል በመሙላት ላይ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ባትሪ እየሞላ አይደለም"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ተሰክቷል፣ አሁን ኃይል መሙላት አይቻልም"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"ሙሉነው"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ተገናኝቷል፣ ኃይል በመሙላት ላይ አይደለም"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"ባትሪ ሞልቷል"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"በአስተዳዳሪ ቁጥጥር የተደረገበት"</string>
     <string name="disabled" msgid="8017887509554714950">"ቦዝኗል"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ይፈቀዳል"</string>
@@ -499,6 +505,13 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ያነሰ ጊዜ።"</string>
     <string name="cancel" msgid="5665114069455378395">"ይቅር"</string>
     <string name="okay" msgid="949938843324579502">"እሺ"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ማንቂያዎች እና አስታዋሾች"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ማንቂያዎች እና አስታዋሾች እንዲዋቀሩ ይፍቀዱ"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ማንቂያዎች እና አስታዋሾች"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"ይህ መተግበሪያ ማንቂያዎችን እንዲያቀናብር እና ለሌሎች እርምጃዎች የጊዜ መርሐግብር እንዲያዘጋጅ ይፍቀዱለት። ይህ መተግበሪያ መሣሪያዎን በማይጠቀሙበት ጊዜ ጥቅም ላይ ሊውል ይችላል፤ ይኽም ተጨማሪ ባትሪ ሊጠቀም ይችላል። ይህ ፈቃድ ከጠፋ ይህ መተግበሪያ መደበኛ ሥራውን ላይሰራ ይችላል፣ እንዲሁም ማንቂያዎቹ በጊዜ መርሐግብራቸው መሰረት አይሰሩም።"</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"ይህ መተግበሪያ ማንቂያዎችን እንዲያቀናብር እና ለሌሎች እርምጃዎች የጊዜ መርሐግብር እንዲያዘጋጅ ይፍቀዱለት። ይህ መተግበሪያ መሣሪያዎን በማይጠቀሙበት ጊዜ ጥቅም ላይ ሊውል ይችላል፤ ይኽም ተጨማሪ ባትሪ ሊጠቀም ይችላል። ይህ ፈቃድ ከጠፋ ይህ መተግበሪያ መደበኛ ሥራውን ላይሰራ ይችላል፣ እንዲሁም ማንቂያዎቹ በጊዜ መርሐግብራቸው መሰረት አይሰሩም።"</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"ይህ መተግበሪያ ማንቂያዎችን እንዲያቀናብር እና ለሌሎች እርምጃዎች የጊዜ መርሐግብር እንዲያዘጋጅ ይፍቀዱለት። ይህ መተግበሪያ መሣሪያዎን በማይጠቀሙበት ጊዜ ጥቅም ላይ ሊውል ይችላል፤ ይኽም ተጨማሪ ባትሪ ሊጠቀም ይችላል። ይህ ፈቃድ ከጠፋ ይህ መተግበሪያ መደበኛ ሥራውን ላይሰራ ይችላል፣ እንዲሁም ማንቂያዎቹ በጊዜ መርሐግብራቸው መሰረት አይሰሩም።"</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"የጊዜ መርሐግብር፣ ማንቂያ፣ አስታዋሽ ሰዓት"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"አብራ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"አትረብሽን አብራ"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"በጭራሽ"</string>
@@ -513,6 +526,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"እስኪያጠፉት ድረስ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ልክ አሁን"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"የስልክ ድምጽ ማጉያ"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"ይህ ስልክ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"መገናኘት ላይ ችግር። መሳሪያውን ያጥፉት እና እንደገና ያብሩት"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ባለገመድ የኦዲዮ መሣሪያ"</string>
     <string name="help_label" msgid="3528360748637781274">"እገዛ እና ግብረመልስ"</string>
@@ -551,9 +565,10 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"ቁልፍ አዘጋጅ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"ወደ <xliff:g id="USER_NAME">%s</xliff:g> ቀይር"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"አዲስ ተጠቃሚ በመፍጠር ላይ…"</string>
+    <string name="add_user_failed" msgid="4809887794313944872">"አዲስ ተጠቃሚን መፍጠር አልተሳካም"</string>
     <string name="user_nickname" msgid="262624187455825083">"ቅጽል ስም"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"እንግዳን አክል"</string>
-    <string name="guest_exit_guest" msgid="4754204715192830850">"የእንግዳ ክፍለ-ጊዜ ጨርስ"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"እንግዳን አስወግድ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"እንግዳ"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ፎቶ አንሳ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ምስል ይምረጡ"</string>
@@ -576,7 +591,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"የተንቀሳቃሽ ስልክ ውሂብ ጠፍቷል"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"ውሂብን ለመጠቀም አልተቀናበረም"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"ምንም ስልክ የለም።"</string>
@@ -590,5 +605,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"የውሂብ ሦስት አሞሌዎች።"</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"የውሂብ አመልካች ሙሉ ነው።"</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ኤተርኔት ተነቅሏል።"</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"ኤተርኔት ተገናኝቷል።"</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ኢተርኔት።"</string>
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"መደወል የለም።"</string>
 </resources>

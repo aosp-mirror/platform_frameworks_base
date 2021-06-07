@@ -36,6 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Savienojums netiks izveidots automātiski"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Nav piekļuves internetam"</string>
     <string name="saved_network" msgid="7143698034077223645">"Saglabāja: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Izveidots savienojums ar maksas tīklu"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automātiski savienots, izmantojot %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automātiski izveidots savienojums, izmantojot tīkla vērtējuma sniedzēju"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Savienots, izmantojot %1$s"</string>
@@ -251,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Bezvadu attēlošanas sertifikācija"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Iespējot Wi‑Fi detalizēto reģistrēšanu"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi meklēšanas ierobežošana"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"MAC adrešu nejauša izveide ar Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Nepastāvīgu MAC adrešu nejauša izveide Wi-Fi savienojumiem"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Vienmēr aktīvs mobilo datu savienojums"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Paātrināta aparatūras darbība piesaistei"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Rādīt Bluetooth ierīces bez nosaukumiem"</string>
@@ -352,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Rādīt klipu robežas, malas utt."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Virziens no labās uz kreiso (Obligāts) WL: 295"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Obl. izkārt. virz. no labās uz kr. pusi visām lok."</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA piespiedu palaiš."</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Iespējot 4x MSAA OpenGL ES 2.0 lietotnēs"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Atkļūdot darbības daļā, kas nav taisnstūris."</string>
@@ -403,6 +406,8 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"Ignorēt pārkodēšanas noklusējuma iestatījumus"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Iespējot pārkodēšanu"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Pieņemt, ka lietotnēs tiek atbalstīti moderni formāti"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Rādīt paziņojumus par pārkodēšanu"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Atspējot saglabāšanu kešatmiņā pārkodēšanai"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Aktīvie pakalpojumi"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Pašreiz darbojošos pakalpojumu skatīšana un vadība"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ieviešana"</string>
@@ -422,7 +427,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomālija (sarkans/zaļš)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomālija (zils/dzeltens)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Krāsu korekcija"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Izmantojot krāsu korekciju, varat koriģēt krāsu attēlojumu savā ierīcē"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Pielāgojiet krāsu attēlojumu savā ierīcē. Izmantojot šo iestatījumu, varat:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;skatīt precīzāku krāsu attēlojumu;&lt;/li&gt; &lt;li&gt;&amp;nbsp;noņemt krāsas, lai būtu vieglāk koncentrēties.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Jaunā preference: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> — <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Aptuvenais atlikušais laiks: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -448,16 +453,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Planšetdators, iespējams, drīz izslēgsies (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Ierīce, iespējams, drīz izslēgsies (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> — <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Vēl <xliff:g id="TIME">%1$s</xliff:g> līdz pilnai uzlādei"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> — <xliff:g id="TIME">%2$s</xliff:g> līdz pilnai uzlādei"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g>: akumulatora darbības optimizēšana"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> līdz pilnai uzlādei"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> — <xliff:g id="TIME">%2$s</xliff:g> līdz pilnai uzlādei"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> — uzlāde īslaicīgi ierobežota"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nezināms"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Uzlāde"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Notiek ātrā uzlāde"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Notiek lēnā uzlāde"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Bezvadu uzlāde"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nenotiek uzlāde"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Pievienots, taču pašlaik nevar veikt uzlādi"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Pilns"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Ierīce pievienota, uzlāde nenotiek"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Uzlādēts"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolē administrators"</string>
     <string name="disabled" msgid="8017887509554714950">"Atspējots"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Atļauts"</string>
@@ -500,6 +506,13 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mazāk laika."</string>
     <string name="cancel" msgid="5665114069455378395">"Atcelt"</string>
     <string name="okay" msgid="949938843324579502">"LABI"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Signāli un atgādinājumi"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Atļaut iestatīt signālus un atgādinājumus"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Signāli un atgādinājumi"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Atļaut šai lietotnei iestatīt signālus un ieplānot citas darbības. Šī lietotne var tikt izmantota, kamēr jūs neizmantojat tālruni, tāpēc var tikt patērēts vairāk akumulatora enerģijas. Ja šī atļauja ir izslēgta, šī lietotne var nedarboties, kā paredzēts, un tās signāli netiek rādīti ieplānotajā laikā."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Atļaut šai lietotnei iestatīt signālus un ieplānot citas darbības. Šī lietotne var tikt izmantota, kamēr jūs neizmantojat planšetdatoru, tāpēc var tikt patērēts vairāk akumulatora enerģijas. Ja šī atļauja ir izslēgta, šī lietotne var nedarboties, kā paredzēts, un tās signāli netiek rādīti ieplānotajā laikā."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Atļaut šai lietotnei iestatīt signālus un ieplānot citas darbības. Šī lietotne var tikt izmantota, kamēr jūs neizmantojat ierīci, tāpēc var tikt patērēts vairāk akumulatora enerģijas. Ja šī atļauja ir izslēgta, šī lietotne var nedarboties, kā paredzēts, un tās signāli netiek rādīti ieplānotajā laikā."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ieplānot, signāls, atgādinājums, pulkstenis"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ieslēgt"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Režīma “Netraucēt” ieslēgšana"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nekad"</string>
@@ -514,6 +527,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Līdz brīdim, kad izslēgsiet"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Tikko"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Tālruņa skaļrunis"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Šis tālrunis"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Radās problēma ar savienojuma izveidi. Izslēdziet un atkal ieslēdziet ierīci."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Vadu audioierīce"</string>
     <string name="help_label" msgid="3528360748637781274">"Palīdzība un atsauksmes"</string>
@@ -552,9 +566,10 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Iestatīt bloķēšanu"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Pārslēgties uz: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Notiek jauna lietotāja izveide…"</string>
+    <string name="add_user_failed" msgid="4809887794313944872">"Neizdevās izveidot jaunu lietotāju"</string>
     <string name="user_nickname" msgid="262624187455825083">"Segvārds"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Pievienot viesi"</string>
-    <string name="guest_exit_guest" msgid="4754204715192830850">"Beigt viesa sesiju"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Noņemt viesi"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Viesis"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Uzņemt fotoattēlu"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Izvēlēties attēlu"</string>
@@ -577,7 +592,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"Mobilie dati izslēgti"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"Nav iestatīts datu lietošanai"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"Nav tālruņa."</string>
@@ -591,5 +606,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Dati: trīs joslas."</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Pilna piekļuve datu signālam."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Pārtraukts savienojums ar tīklu Ethernet."</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"Izveidots savienojums ar tīklu Ethernet."</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Tīkls Ethernet"</string>
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"Zvanīšana nav pieejama."</string>
 </resources>

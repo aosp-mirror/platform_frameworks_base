@@ -36,6 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"خودکار طور پر منسلک نہیں ہو گا"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"انٹرنیٹ تک کوئی رسائی نہیں"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> کی جانب سے محفوظ کردہ"</string>
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"میٹرڈ نیٹ ورک سے منسلک ہے"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"‏‎%1$s کے ذریعے از خود منسلک کردہ"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"نیٹ ورک درجہ بندی کے فراہم کنندہ کے ذریعے از خود منسلک"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"‏منسلک بذریعہ ‎%1$s"</string>
@@ -251,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"وائرلیس ڈسپلے سرٹیفیکیشن"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏Wi‑Fi وربوس لاگنگ فعال کریں"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏Wi‑Fi اسکین کو زبردستی روکا جا رہا ہے"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏بہتر Wi-Fi ‏ MAC رینڈمائزیشن"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"‏Wi-Fi غیر مستقل MAC کی رینڈمائزیشن"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"موبائل ڈیٹا ہمیشہ فعال رکھیں"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ٹیدرنگ ہارڈویئر سرعت کاری"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"بغیر نام والے بلوٹوتھ آلات دکھائیں"</string>
@@ -352,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"کلپ باؤنڈز، حاشیے وغیرہ دکھائیں"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"‏RTL لے آؤٹ سمت زبردستی نافذ کریں"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"‏سبھی زبانوں کیلئے اسکرین لے آؤٹ کی سمت کو RTL پر مجبور کریں"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"‏4x MSAA زبردستی نافذ کریں"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"‏OpenGL ES 2.0 ایپس میں 4x MSAA فعال کریں"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"غیر مستطیل نما کلپ آپریشنز ڈیبگ کریں"</string>
@@ -403,6 +406,8 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"ٹرانسکوڈنگ ڈیفالٹس کو اوور رائیڈ کریں"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"ٹرانسکوڈنگ فعال کریں"</string>
     <string name="transcode_default" msgid="3784803084573509491">"فرض کریں کہ ایپس جدید فارمیٹس کو سپورٹ کرتی ہیں"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"ٹرانسکوڈنگ اطلاعات دکھائیں"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"ٹرانسکوڈنگ کیش غیر فعال کریں"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"چل رہی سروسز"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"فی الحال چل رہی سروسز دیکھیں اور انہیں کنٹرول کریں"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"‏WebView کا نفاذ"</string>
@@ -422,7 +427,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"‏Protanomaly (سرخ سبز)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"‏Tritanomaly (نیلا پیلا)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"رنگ کی اصلاح"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"رنگ کی اصلاح آپ کو یہ ایڈجسٹ کرنے کی سہولت دیتی ہے کہ آپ کے آلے پر رنگ کیسے ڈسپلے کئے جاتے ہیں"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"‏آپ کے آلے پر رنگوں کے ڈسپلے ہونے کے طریقے کو ایڈجسٹ کریں۔ یہ درج ذیل کے لیے مددگار ثابت ہوسکتا ہے:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;جب آپ رنگوں کو مزید درست طریقے سے دیکھنا چاہیں&lt;/li&gt; &lt;li&gt;&amp;nbsp;فوکس کرنے میں مدد کرنے کے لئے رنگوں کو ہٹانا چاہیں&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> کے ذریعہ منسوخ کردیا گیا"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"تقریباً <xliff:g id="TIME_REMAINING">%1$s</xliff:g> باقی ہے"</string>
@@ -448,16 +453,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ٹیبلیٹ جلد ہی بند ہو سکتا ہے (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"آلہ جلد ہی بند ہو سکتا ہے (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"‎<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>‎"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"چارج ہونے میں <xliff:g id="TIME">%1$s</xliff:g> باقی"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> چارج ہونے تک"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - بیٹری کی صحت کیلئے بہتر بنایا جا رہا ہے"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"مکمل چارج ہونے میں <xliff:g id="TIME">%1$s</xliff:g> باقی ہے"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"مکمل چارج ہونے میں <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> باقی ہے"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> • چارجنگ عارضی طور پر محدود ہے"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"نامعلوم"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"چارج ہو رہا ہے"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"تیزی سے چارج ہو رہا ہے"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"آہستہ چارج ہو رہا ہے"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"وائرلیس طریقے سے چارج ہو رہی ہے"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"چارج نہیں ہو رہا ہے"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"پلگ ان ہے، ابھی چارج نہیں کر سکتے"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"مکمل"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"منسلک ہے، چارج نہیں ہو رہی ہے"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"چارج ہو گئی"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"کنٹرول کردہ بذریعہ منتظم"</string>
     <string name="disabled" msgid="8017887509554714950">"غیر فعال"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"اجازت ہے"</string>
@@ -499,6 +505,13 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"کم وقت۔"</string>
     <string name="cancel" msgid="5665114069455378395">"منسوخ کریں"</string>
     <string name="okay" msgid="949938843324579502">"ٹھیک ہے"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"الارمز اور یاد دہانیاں"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"الارمز اور یاد دہانیاں سیٹ کرنے کی اجازت دیں"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"الارمز اور یاد دہانیاں"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"اس ایپ کو الارمز سیٹ کرنے اور دیگر کارروائیوں کو شیڈول کرنے کی اجازت دیں۔ اس ایپ کا استعمال اس وقت کیا جا سکتا ہے جب آپ اپنا آلہ استعمال نہ کر رہے ہوں جس میں زیادہ بیٹری کا استعمال ہو سکتا ہے۔ اجازت غیر فعال ہونے کی صورت میں ہو سکتا ہے یہ ایپ عام طور پر کام نہ کرے اور اس کے الارمز شیڈول کے مطابق کام نہیں کریں گے۔"</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"اس ایپ کو الارمز سیٹ کرنے اور دیگر کارروائیوں کو شیڈول کرنے کی اجازت دیں۔ اس ایپ کا استعمال اس وقت کیا جا سکتا ہے جب آپ اپنا آلہ استعمال نہ کر رہے ہوں جس میں زیادہ بیٹری کا استعمال ہو سکتا ہے۔ اجازت غیر فعال ہونے کی صورت میں ہو سکتا ہے یہ ایپ عام طور پر کام نہ کرے اور اس کے الارمز شیڈول کے مطابق کام نہیں کریں گے۔"</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"اس ایپ کو الارمز سیٹ کرنے اور دیگر کارروائیوں کو شیڈول کرنے کی اجازت دیں۔ اس ایپ کا استعمال اس وقت کیا جا سکتا ہے جب آپ اپنا آلہ استعمال نہ کر رہے ہوں جس میں زیادہ بیٹری کا استعمال ہو سکتا ہے۔ اجازت غیر فعال ہونے کی صورت میں ہو سکتا ہے یہ ایپ عام طور پر کام نہ کرے اور اس کے الارمز شیڈول کے مطابق کام نہیں کریں گے۔"</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"شیڈول، الارم، یاد دہانی، گھڑی"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"آن کریں"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'ڈسٹرب نہ کریں\' کو آن کریں"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"کبھی نہیں"</string>
@@ -513,6 +526,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"یہاں تک کہ آپ آف کر دیں"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ابھی ابھی"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"فون اسپیکر"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"یہ فون"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"منسلک کرنے میں مسئلہ پیش آ گیا۔ آلہ کو آف اور بیک آن کریں"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"وائرڈ آڈیو آلہ"</string>
     <string name="help_label" msgid="3528360748637781274">"مدد اور تاثرات"</string>
@@ -550,10 +564,11 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"ایک محدود پروفائل بنانے سے پہلے، آپ کو اپنی ایپس اور ذاتی ڈیٹا کو محفوظ کرنے کیلئے ایک اسکرین لاک سیٹ اپ کرنا ہوگا۔"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"لاک سیٹ کریں"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"‫<xliff:g id="USER_NAME">%s</xliff:g> پر سوئچ کریں"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"نیا صارف تخلیق کرنا…"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"نیا صارف تخلیق ہو رہا ہے…"</string>
+    <string name="add_user_failed" msgid="4809887794313944872">"نیا صارف بنانے میں ناکام"</string>
     <string name="user_nickname" msgid="262624187455825083">"عرفی نام"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"مہمان کو شامل کریں"</string>
-    <string name="guest_exit_guest" msgid="4754204715192830850">"مہمان سیشن ختم کریں"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"مہمان کو ہٹائیں"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"مہمان"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ایک تصویر لیں"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ایک تصویر منتخب کریں"</string>
@@ -576,7 +591,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+‎"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+‎"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"+W"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"موبائل ڈیٹا آف ہے"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"ڈیٹا استعمال کرنے کے لیے سیٹ نہیں ہے"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"کوئی فون نہیں ہے۔"</string>
@@ -590,5 +605,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"ڈیٹا کے تین بارز۔"</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"ڈیٹا سگنل بھرا ہوا ہے۔"</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ایتھرنیٹ منقطع ہے۔"</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"ایتھرنیٹ منسلک ہے۔"</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ایتھرنیٹ۔"</string>
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"کوئی کالنگ نہیں ہے۔"</string>
 </resources>

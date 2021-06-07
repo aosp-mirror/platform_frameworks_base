@@ -36,6 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Hindi awtomatikong kokonekta"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Walang access sa internet"</string>
     <string name="saved_network" msgid="7143698034077223645">"Na-save ng <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Nakakonekta sa nakametrong network"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Awtomatikong nakakonekta sa pamamagitan ng %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Awtomatikong nakakonekta sa pamamagitan ng provider ng rating ng network"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Nakakonekta sa pamamagitan ng %1$s"</string>
@@ -251,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certification ng wireless display"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"I-enable ang Pagla-log sa Wi‑Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pag-throttle ng pag-scan ng Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"MAC randomization na pinahusay ng Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Pag-randomize sa MAC ng hindi persistent na Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Palaging aktibo ang mobile data"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardware acceleration para sa pag-tether"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Ipakita ang mga Bluetooth device na walang pangalan"</string>
@@ -352,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Ipakita ang mga hangganan ng clip, margin, atbp."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Ipilit ang RTL na dir. ng layout"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Ipilit ang RTL na direksyon ng screen layout sa lahat ng lokal"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Puwersahin ang 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Paganahin ang 4x MSAA sa OpenGL ES 2.0 na apps"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"I-debug ang di-parihabang mga clip operation"</string>
@@ -403,6 +406,8 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"I-override ang mga default ng pagta-transcode"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"I-enable ang pagta-transcode"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Ipagpalagay na sinusuportahan ng mga app ang mga modernong format"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Ipakita ang mga notification sa pag-transcode"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"I-disable ang cache ng pag-transcode"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Mga tumatakbong serbisyo"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Tingnan at kontrolin ang mga kasalukuyang tumatakbong serbisyo"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Pagpapatupad sa WebView"</string>
@@ -422,7 +427,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (pula-berde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (asul-dilaw)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Pagtatama ng kulay"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Nagbibigay-daan sa iyo ang pagtatama ng kulay na maisaayos kung paano ipinapakita ang mga kulay sa iyong device"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Isaayos kung paano ipinapakita ang mga kulay sa iyong device. Makakatulong ito kapag gusto mong:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Makakita ng mas tumpak na mga kulay&lt;/li&gt; &lt;li&gt;&amp;nbsp;Mag-alis ng mga kulay para matulungan kang mag-focus&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Na-override ng <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Humigit-kumulang <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ang natitira"</string>
@@ -448,16 +453,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Baka mag-shut down na ang tablet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Baka mag-shut down na ang device (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ang natitira bago matapos mag-charge"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hanggang matapos mag-charge"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ino-optimize para sa tagal ng baterya"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> na lang bago mapuno"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> na lang bago mapuno"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pansamantalang limitado ang pag-charge"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Hindi Kilala"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Nagcha-charge"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mabilis na charge"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mabagal na charge"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Wireless na nagcha-charge"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Hindi nagcha-charge"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Nakasaksak, hindi makapag-charge sa ngayon"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Puno"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Nakakonekta, hindi nagcha-charge"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Nasingil"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Pinapamahalaan ng admin"</string>
     <string name="disabled" msgid="8017887509554714950">"Naka-disable"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Pinapayagan"</string>
@@ -499,6 +505,13 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Bawasan ang oras."</string>
     <string name="cancel" msgid="5665114069455378395">"Kanselahin"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Mga alarm at paalala"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Payagan ang pagtakda ng mga alarm at paalala"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Mga alarm at paalala"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Payagan ang app na ito na magtakda ng mga alarm at mag-iskedyul ng iba pang aksyon. Posibleng gamitin ang app na ito kapag hindi mo ginagamit ang iyong telepono, na posibleng gumamit ng mas maraming baterya. Kung naka-off ang pahintulot na ito, posibleng hindi gumana nang normal ang app na ito, at hindi gagana ang mga alarm nito gaya ng nakaiskedyul."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Payagan ang app na ito na magtakda ng mga alarm at mag-iskedyul ng iba pang aksyon. Posibleng gamitin ang app na ito kapag hindi mo ginagamit ang iyong tablet, na posibleng gumamit ng mas maraming baterya. Kung naka-off ang pahintulot na ito, posibleng hindi gumana nang normal ang app na ito, at hindi gagana ang mga alarm nito gaya ng nakaiskedyul."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Payagan ang app na ito na magtakda ng mga alarm at mag-iskedyul ng iba pang aksyon. Posibleng gamitin ang app na ito kapag hindi mo ginagamit ang iyong device, na posibleng gumamit ng mas maraming baterya. Kung naka-off ang pahintulot na ito, posibleng hindi gumana nang normal ang app na ito, at hindi gagana ang mga alarm nito gaya ng nakaiskedyul."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"iskedyul, alarm, paalala, orasan"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"I-on"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"I-on ang Huwag Istorbohin"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Hindi kailanman"</string>
@@ -513,6 +526,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Hanggang sa i-off mo"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Ngayon lang"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Speaker ng telepono"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ang teleponong ito"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Nagkaproblema sa pagkonekta. I-off at pagkatapos ay i-on ang device"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Wired na audio device"</string>
     <string name="help_label" msgid="3528360748637781274">"Tulong at feedback"</string>
@@ -551,9 +565,10 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Itakda ang lock"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Lumipat sa <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Gumagawa ng bagong user…"</string>
+    <string name="add_user_failed" msgid="4809887794313944872">"Hindi nakagawa ng bagong user"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nickname"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Magdagdag ng bisita"</string>
-    <string name="guest_exit_guest" msgid="4754204715192830850">"Tapusin ang session ng bisita"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Alisin ang bisita"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Bisita"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Kumuha ng larawan"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Pumili ng larawan"</string>
@@ -576,7 +591,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"Naka-off ang mobile data"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"Hindi nakatakdang gumamit ng data"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"Walang telepono."</string>
@@ -590,5 +605,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Data na tatlong bar."</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Puno ang signal ng data."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Nadiskonekta ang Ethernet."</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"Nakakonekta ang Ethernet."</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"Hindi makakatawag."</string>
 </resources>
