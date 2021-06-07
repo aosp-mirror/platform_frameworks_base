@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Паказаць межы абрэзкі, палі і г. д."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Прымусовая раскладка справа налева"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Прымусовая раскладка экрана справа налева для ўсіх рэгіянальных налад"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Прымусовае выкананне 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Уключыць 4x MSAA у праграмах з OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Адладка аперацый непрамавугольнага кліпа"</string>
@@ -466,7 +468,7 @@
     <string name="disabled" msgid="8017887509554714950">"Адключанае"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Дазволена"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Забаронена"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Усталёўваць невядомыя праграмы"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Усталёўка невядомых праграм"</string>
     <string name="home" msgid="973834627243661438">"Галоўная старонка налад"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0 %"</item>

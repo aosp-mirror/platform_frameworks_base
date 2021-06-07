@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Hiện viền của đoạn video, lề, v.v.."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Buộc hướng bố cục phải sang trái"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Buộc hướng bố cục màn hình phải sang trái cho tất cả ngôn ngữ"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Bắt buộc 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Bật 4x MSAA trong ứng dụng OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Gỡ lỗi hoạt động của clip không phải là hình chữ nhật"</string>

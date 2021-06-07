@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"የቅንጥብ ገደቦች፣ ጠርዞች፣ ወዘተ አሳይ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"የቀኝ-ወደ-ግራ አቀማመጥ አቅጣጫ አስገድድ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ለሁሉም አካባቢዎች የማያ ገጽ አቀማመጥ ከቀኝ-ወደ-ግራ እንዲሆን አስገድድ"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA አስገድድ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"4x MSAA በ OpenGL ES 2.0 መተግበሪያዎች ውስጥ ያንቁ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"አራት ማእዘን ያልሆኑ የቅንጥብ ክዋኔዎችን ስህተት አርም"</string>

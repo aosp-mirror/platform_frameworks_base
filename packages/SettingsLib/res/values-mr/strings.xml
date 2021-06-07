@@ -226,7 +226,7 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"डिव्हाइससह पेअर करा"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"वाय-फाय पेअरिंग कोड"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"पेअर करता आले नाही"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"डिव्हाइस समान नेटवर्कशी कनेक्ट केले असल्याची खात्री करा."</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"डिव्हाइस त्याच नेटवर्कशी कनेक्ट केले असल्याची खात्री करा."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR कोड स्कॅन करून वाय-फाय वापरून डिव्हाइस पेअर करा"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"डिव्हाइस पेअर करत आहे…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"डिव्हाइस पेअर करता आले नाही. QR कोड चुकीचा होता किंवा डिव्हाइस समान नेटवर्कशी कनेक्ट केलेले नाही."</string>
@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमा, समास इत्यादी दर्शवा."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL लेआउट दिशानिर्देशाची सक्ती करा"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"सर्व लोकॅलसाठी RTL स्क्रीन लेआउट दिशानिर्देशाची सक्ती करा"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ची सक्ती करा"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ॲप्समध्ये 4x MSAA सुरू करा"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"आयताकृती नसलेले क्लिप ऑपरेशन डीबग करा"</string>
