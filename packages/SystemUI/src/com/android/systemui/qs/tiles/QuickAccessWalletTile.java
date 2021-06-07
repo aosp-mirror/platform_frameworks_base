@@ -56,7 +56,6 @@ import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.systemui.wallet.ui.WalletActivity;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -71,7 +70,6 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     private final KeyguardStateController mKeyguardStateController;
     private final PackageManager mPackageManager;
     private final SecureSettings mSecureSettings;
-    private final Executor mExecutor;
     private final QuickAccessWalletController mController;
     private final FeatureFlags mFeatureFlags;
 
@@ -91,7 +89,6 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
             KeyguardStateController keyguardStateController,
             PackageManager packageManager,
             SecureSettings secureSettings,
-            @Main Executor executor,
             QuickAccessWalletController quickAccessWalletController,
             FeatureFlags featureFlags) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
@@ -100,7 +97,6 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         mKeyguardStateController = keyguardStateController;
         mPackageManager = packageManager;
         mSecureSettings = secureSettings;
-        mExecutor = executor;
         mFeatureFlags = featureFlags;
     }
 
@@ -118,6 +114,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         if (listening) {
             mController.setupWalletChangeObservers(mCardRetriever, DEFAULT_PAYMENT_APP_CHANGE);
             if (!mController.getWalletClient().isWalletServiceAvailable()) {
+                Log.i(TAG, "QAW service is unavailable, recreating the wallet client.");
                 mController.reCreateWalletClient();
             }
             mController.queryWalletCards(mCardRetriever);
