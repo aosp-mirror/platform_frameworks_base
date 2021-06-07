@@ -21,20 +21,13 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.content.res.Resources;
-import android.os.Build;
-import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterCertificateChain;
-import android.security.keymaster.KeymasterDefs;
-import android.telephony.TelephonyManager;
-import android.text.TextUtils;
-import android.util.ArraySet;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.ProviderException;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -43,7 +36,6 @@ import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * Utilities for attesting the device's hardware identifiers.
@@ -112,123 +104,6 @@ public abstract class AttestationUtils {
         }
     }
 
-    @NonNull private static KeymasterArguments prepareAttestationArgumentsForDeviceId(
-            Context context, @NonNull int[] idTypes, @NonNull byte[] attestationChallenge) throws
-            DeviceIdAttestationException {
-        // Verify that device ID attestation types are provided.
-        if (idTypes == null) {
-            throw new NullPointerException("Missing id types");
-        }
-
-        return prepareAttestationArguments(context, idTypes, attestationChallenge);
-    }
-
-    /**
-     * Prepares Keymaster Arguments with attestation data.
-     * @hide should only be used by KeyChain.
-     */
-    @NonNull public static KeymasterArguments prepareAttestationArguments(Context context,
-            @NonNull int[] idTypes, @NonNull byte[] attestationChallenge) throws
-            DeviceIdAttestationException {
-        return prepareAttestationArguments(context, idTypes,attestationChallenge, Build.BRAND);
-    }
-
-    /**
-     * Prepares Keymaster Arguments with attestation data for misprovisioned Pixel 2 device.
-     * See http://go/keyAttestationFailure and http://b/69471841 for more info.
-     * @hide should only be used by KeyChain.
-     */
-    @NonNull public static KeymasterArguments prepareAttestationArgumentsIfMisprovisioned(
-            Context context, @NonNull int[] idTypes, @NonNull byte[] attestationChallenge) throws
-            DeviceIdAttestationException {
-        Resources resources = context.getResources();
-        String misprovisionedBrand = resources.getString(
-                com.android.internal.R.string.config_misprovisionedBrandValue);
-        if (!TextUtils.isEmpty(misprovisionedBrand) && !isPotentiallyMisprovisionedDevice(context)){
-            return null;
-        }
-        return prepareAttestationArguments(
-                context, idTypes, attestationChallenge, misprovisionedBrand);
-    }
-
-    @NonNull private static boolean isPotentiallyMisprovisionedDevice(Context context) {
-        Resources resources = context.getResources();
-        String misprovisionedModel = resources.getString(
-                com.android.internal.R.string.config_misprovisionedDeviceModel);
-        return (Build.MODEL.equals(misprovisionedModel));
-    }
-
-    @NonNull private static KeymasterArguments prepareAttestationArguments(Context context,
-            @NonNull int[] idTypes, @NonNull byte[] attestationChallenge, String brand) throws
-            DeviceIdAttestationException {
-        // Check method arguments, retrieve requested device IDs and prepare attestation arguments.
-        if (attestationChallenge == null) {
-            throw new NullPointerException("Missing attestation challenge");
-        }
-        final KeymasterArguments attestArgs = new KeymasterArguments();
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_CHALLENGE, attestationChallenge);
-        // Return early if the caller did not request any device identifiers to be included in the
-        // attestation record.
-        if (idTypes == null) {
-            return attestArgs;
-        }
-        final Set<Integer> idTypesSet = new ArraySet<>(idTypes.length);
-        for (int idType : idTypes) {
-            idTypesSet.add(idType);
-        }
-        TelephonyManager telephonyService = null;
-        if (idTypesSet.contains(ID_TYPE_IMEI) || idTypesSet.contains(ID_TYPE_MEID)) {
-            telephonyService = (TelephonyManager) context.getSystemService(
-                    Context.TELEPHONY_SERVICE);
-            if (telephonyService == null) {
-                throw new DeviceIdAttestationException("Unable to access telephony service");
-            }
-        }
-        for (final Integer idType : idTypesSet) {
-            switch (idType) {
-                case ID_TYPE_SERIAL:
-                    attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_SERIAL,
-                            Build.getSerial().getBytes(StandardCharsets.UTF_8));
-                    break;
-                case ID_TYPE_IMEI: {
-                    final String imei = telephonyService.getImei(0);
-                    if (imei == null) {
-                        throw new DeviceIdAttestationException("Unable to retrieve IMEI");
-                    }
-                    attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_IMEI,
-                            imei.getBytes(StandardCharsets.UTF_8));
-                    break;
-                }
-                case ID_TYPE_MEID: {
-                    final String meid = telephonyService.getMeid(0);
-                    if (meid == null) {
-                        throw new DeviceIdAttestationException("Unable to retrieve MEID");
-                    }
-                    attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MEID,
-                            meid.getBytes(StandardCharsets.UTF_8));
-                    break;
-                }
-                case USE_INDIVIDUAL_ATTESTATION: {
-                    attestArgs.addBoolean(KeymasterDefs.KM_TAG_DEVICE_UNIQUE_ATTESTATION);
-                    break;
-                }
-                default:
-                    throw new IllegalArgumentException("Unknown device ID type " + idType);
-            }
-        }
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_BRAND,
-                brand.getBytes(StandardCharsets.UTF_8));
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_DEVICE,
-                Build.DEVICE.getBytes(StandardCharsets.UTF_8));
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_PRODUCT,
-                Build.PRODUCT.getBytes(StandardCharsets.UTF_8));
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MANUFACTURER,
-                Build.MANUFACTURER.getBytes(StandardCharsets.UTF_8));
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MODEL,
-                Build.MODEL.getBytes(StandardCharsets.UTF_8));
-        return attestArgs;
-    }
-
     /**
      * Performs attestation of the device's identifiers. This method returns a certificate chain
      * whose first element contains the requested device identifiers in an extension. The device's
@@ -262,6 +137,13 @@ public abstract class AttestationUtils {
     @NonNull public static X509Certificate[] attestDeviceIds(Context context,
             @NonNull int[] idTypes, @NonNull byte[] attestationChallenge) throws
             DeviceIdAttestationException {
+        if (attestationChallenge == null) {
+            throw new NullPointerException("Missing attestation challenge");
+        }
+        if (idTypes == null) {
+            throw new NullPointerException("Missing id types");
+        }
+
         String keystoreAlias = generateRandomAlias();
         KeyGenParameterSpec.Builder builder =
                 new KeyGenParameterSpec.Builder(keystoreAlias, KeyProperties.PURPOSE_SIGN)
@@ -297,6 +179,12 @@ public abstract class AttestationUtils {
             // let's throw the original exception instead of wrapping it yet again.
             if (e.getCause() instanceof DeviceIdAttestationException) {
                 throw (DeviceIdAttestationException) e.getCause();
+            }
+            // Illegal argument errors are wrapped up by a ProviderException. Catch those so that
+            // we can unwrap them into a more meaningful exception type for the caller.
+            if (e instanceof ProviderException
+                    && e.getCause() instanceof IllegalArgumentException) {
+                throw (IllegalArgumentException) e.getCause();
             }
             throw new DeviceIdAttestationException("Unable to perform attestation", e);
         }
