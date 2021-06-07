@@ -428,4 +428,28 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
             }
         }
     }
+
+    /**
+     * Sets the provider of the currently active HotwordDetectionService.
+     *
+     * @see HotwordDetectionServiceProvider
+     */
+    void setHotwordDetectionServiceProvider(@Nullable HotwordDetectionServiceProvider provider);
+
+    /**
+     * Gets the provider of the currently active HotwordDetectionService.
+     *
+     * @see HotwordDetectionServiceProvider
+     */
+    @Nullable
+    HotwordDetectionServiceProvider getHotwordDetectionServiceProvider();
+
+    /**
+     * Provides the uid of the currently active
+     * {@link android.service.voice.HotwordDetectionService}, which should be granted RECORD_AUDIO
+     * and CAPTURE_AUDIO_HOTWORD permissions.
+     */
+    interface HotwordDetectionServiceProvider {
+        int getUid();
+    }
 }

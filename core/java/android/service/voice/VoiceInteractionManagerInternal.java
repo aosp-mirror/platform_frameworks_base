@@ -16,8 +16,11 @@
 
 package android.service.voice;
 
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.IBinder;
+
+import com.android.internal.annotations.Immutable;
 
 
 /**
@@ -46,4 +49,38 @@ public abstract class VoiceInteractionManagerInternal {
      * Returns whether the given package is currently in an active session
      */
     public abstract boolean hasActiveSession(String packageName);
+
+    /**
+     * Gets the identity of the currently active HotwordDetectionService.
+     *
+     * @see HotwordDetectionServiceIdentity
+     */
+    @Nullable
+    public abstract HotwordDetectionServiceIdentity getHotwordDetectionServiceIdentity();
+
+    /**
+     * Provides the uids of the currently active
+     * {@link android.service.voice.HotwordDetectionService} and its owning package. The
+     * HotwordDetectionService is an isolated service, so it has a separate uid.
+     */
+    @Immutable
+    public static class HotwordDetectionServiceIdentity {
+        private final int mIsolatedUid;
+        private final int mOwnerUid;
+
+        public HotwordDetectionServiceIdentity(int isolatedUid, int ownerUid) {
+            mIsolatedUid = isolatedUid;
+            mOwnerUid = ownerUid;
+        }
+
+        /** Gets the uid of the currently active isolated process hosting the service. */
+        public int getIsolatedUid() {
+            return mIsolatedUid;
+        }
+
+        /** Gets the uid of the package that provides the HotwordDetectionService. */
+        public int getOwnerUid() {
+            return mOwnerUid;
+        }
+    }
 }

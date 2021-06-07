@@ -251,6 +251,26 @@ public class VoiceInteractionManagerService extends SystemService {
 
             return TextUtils.equals(packageName, session.mSessionComponentName.getPackageName());
         }
+
+        @Override
+        public HotwordDetectionServiceIdentity getHotwordDetectionServiceIdentity() {
+            // IMPORTANT: This is called when performing permission checks; do not lock!
+
+            // TODO: Have AppOpsPolicy register a listener instead of calling in here everytime.
+            // Then also remove the `volatile`s that were added with this method.
+
+            VoiceInteractionManagerServiceImpl impl =
+                    VoiceInteractionManagerService.this.mServiceStub.mImpl;
+            if (impl == null) {
+                return null;
+            }
+            HotwordDetectionConnection hotwordDetectionConnection =
+                    impl.mHotwordDetectionConnection;
+            if (hotwordDetectionConnection == null) {
+                return null;
+            }
+            return hotwordDetectionConnection.mIdentity;
+        }
     }
 
     // implementation entry point and binder service
@@ -258,7 +278,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
     class VoiceInteractionManagerServiceStub extends IVoiceInteractionManagerService.Stub {
 
-        VoiceInteractionManagerServiceImpl mImpl;
+        volatile VoiceInteractionManagerServiceImpl mImpl;
 
         private boolean mSafeMode;
         private int mCurUser;
