@@ -22,7 +22,7 @@
     <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"अझ छिटो चार्ज गर्न फोनलाई फेरि मिलाउनुहोस्"</string>
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"तारविनै चार्ज गर्न फोनलाई फेरि मिलाउनुहोस्"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android टिभी यन्त्र चाँडै निष्क्रिय हुने छ; सक्रिय राख्न कुनै बटन थिच्नुहोस्।"</string>
-    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"यो यन्त्र चाँडै निष्क्रिय हुने छ; सक्रिय राख्न थिच्नुहोस्।"</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"यो डिभाइस चाँडै निष्क्रिय हुने छ; सक्रिय राख्न थिच्नुहोस्।"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"ट्याब्लेटमा SIM कार्ड छैन।"</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"फोनमा SIM कार्ड छैन।"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN कोडहरू मिलेनन्"</string>
@@ -42,5 +42,5 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक आफ्नो अनलक गर्ने ढाँचा गलत रूपमा कोर्नुभयो। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> पटक असफल प्रयास गरेपछि, तपाईंलाई एउटा इमेल खाता प्रयोग गरेर आफ्नो फोन अनलक गर्न आग्रह गरिने छ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"थप विकल्पहरू हेर्न आफ्नो फोन अनलक गर्नुहोस्"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"थप विकल्पहरू हेर्न आफ्नो ट्याब्लेट अनलक गर्नुहोस्"</string>
-    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"थप विकल्पहरू हेर्न आफ्नो यन्त्र अनलक गर्नुहोस्"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"थप विकल्पहरू हेर्न आफ्नो डिभाइस अनलक गर्नुहोस्"</string>
 </resources>
