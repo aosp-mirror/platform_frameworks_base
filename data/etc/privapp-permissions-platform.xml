@@ -497,6 +497,8 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.statementservice">
         <permission name="android.permission.INTENT_FILTER_VERIFICATION_AGENT"/>
+        <permission name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.traceur">
