@@ -27,7 +27,7 @@
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Inaktiverad"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP-konfigurationsfel"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Ingen anslutning på grund av låg kvalitet på nätverket"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi-anslutningsfel"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wifi-anslutningsfel"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Autentiseringsproblem"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Det gick inte att ansluta"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Det gick inte att ansluta till <xliff:g id="AP_NAME">%1$s</xliff:g>"</string>
@@ -36,6 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Det går inte att ansluta automatiskt"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Ingen internetåtkomst"</string>
     <string name="saved_network" msgid="7143698034077223645">"Sparades av <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Ansluten till nätverk med datapriser"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatiskt ansluten via %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatiskt ansluten via leverantör av nätverksbetyg"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Anslutet via %1$s"</string>
@@ -131,12 +132,12 @@
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Parkopplar höger hörapparat …"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Vänster – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Höger – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi är inaktiverat."</string>
-    <string name="accessibility_no_wifi" msgid="5297119459491085771">"Ingen Wi-Fi-anslutning."</string>
-    <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fi: en stapel."</string>
-    <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi: två staplar."</string>
-    <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi: tre staplar."</string>
-    <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Full signalstyrka för Wi-Fi."</string>
+    <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wifi är inaktiverat."</string>
+    <string name="accessibility_no_wifi" msgid="5297119459491085771">"Ingen wifi-anslutning."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wifi: en stapel."</string>
+    <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wifi: två staplar."</string>
+    <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wifi: tre staplar."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Full signalstyrka för wifi."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Öppet nätverk"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Säkert nätverk"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Operativsystemet Android"</string>
@@ -207,7 +208,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Felsökningsläge när USB har anslutits"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Återkalla åtkomst till USB-felsökning"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Trådlös felsökning"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Felsökningsläge vid Wi-Fi-anslutning"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Felsökningsläge vid wifi-anslutning"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Fel"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Trådlös felsökning"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Aktivera trådlös felsökning om du vill se tillgängliga enheter"</string>
@@ -223,16 +224,16 @@
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Det gick inte att ansluta"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Kontrollera att <xliff:g id="DEVICE_NAME">%1$s</xliff:g> är ansluten till rätt nätverk"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Parkoppla med enheten"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi-Fi-kopplingskod"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wifi-parkopplingskod"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Det gick inte att parkoppla"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Kontrollera att enheten är ansluten till samma nätverk."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Parkoppla enheten via Wi-Fi genom att skanna en QR-kod"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Parkoppla enheten via wifi genom att skanna en QR-kod"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Enheten parkopplas …"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Det gick inte att parkoppla enheten. Antingen var det fel QR-kod eller är enheten inte ansluten till samma nätverk."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adress och port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skanna QR-kod"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Parkoppla enheten via Wi-Fi genom att skanna en QR-kod"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Anslut till ett Wi-Fi-nätverk"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Parkoppla enheten via wifi genom att skanna en QR-kod"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Anslut till ett wifi-nätverk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev, felsöka, felsökning"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Genväg till felrapport"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Visa en knapp för felrapportering i extramenyn"</string>
@@ -248,10 +249,10 @@
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ingen app för påhittad plats har angetts"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"App för påhittad plats: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Nätverk"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifiering för Wi-Fi-skärmdelning"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivera utförlig loggning för Wi-Fi"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begränsning av Wi-Fi-sökning"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑förstärkt MAC-slumpgenerering"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifiering för wifi-skärmdelning"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivera utförlig loggning för wifi"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begränsning av wifi-sökning"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Slumpgenerering av icke-beständig MAC för wifi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata alltid aktiverad"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvaruacceleration för internetdelning"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Visa namnlösa Bluetooth-enheter"</string>
@@ -280,8 +281,8 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Värdnamn för leverantör av privat DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Ange värdnamn för DNS-leverantör"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kan inte ansluta"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Öka loggningsnivån för Wi-Fi, visa per SSID RSSI i Wi‑Fi Picker"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Visa certifieringsalternativ för wifi-skärmdelning"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Öka loggningsnivån för wifi, visa per SSID RSSI i Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Sänker batteriförbrukningen och förbättrar nätverksprestandan"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"När det här läget är aktiverat kan enhetens MAC-adress ändras varje gång den ansluts till ett nätverk där slumpgenerering av MAC-adress har aktiverats."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datapriser"</string>
@@ -297,7 +298,7 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"Tillåt skenplatser"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Tillåt skenplatser"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Aktivera inspektion av visningsattribut"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Håll alltid mobildata aktiverad, även när Wi-Fi är aktiverat (så att du snabbt kan byta mellan nätverk)."</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Håll alltid mobildata aktiverad, även när wifi är aktiverat (så att du snabbt kan byta mellan nätverk)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Använd maskinvaruacceleration för internetdelning om tillgängligt"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Ska USB-felsökning tillåtas?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-felsökning ska endast användas i utvecklingssyfte. Använd den för att kopiera data mellan datorn och enheten, installera appar på enheten utan meddelanden och läsa loggdata."</string>
@@ -352,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Visa gränser för videoklipp, marginaler m.m."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Tvinga fram RTL-layout"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tvinga fram RTL-skärmlayout (hö–vä) för alla språk"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Tvinga 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Aktivera 4x MSAA i OpenGL ES 2.0-appar"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Felsök icke-rektangulära urklippsåtgärder"</string>
@@ -403,6 +406,8 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"Åsidosätta standardinställningar för omkodning"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Aktivera omkodning"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Anta att appar har stöd för moderna format"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Visa aviseringar för omkodning"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Inaktivera cacheminne för omkodning"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Aktiva tjänster"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visa och styr aktiva tjänster"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-implementering"</string>
@@ -422,7 +427,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (rött-grönt)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (blått-gult)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Färgkorrigering"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Med färgkorrigering kan du ändra hur färger visas på enheten"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Ändra hur färger visas på enheten. Det kan vara ett bra hjälpmedel när du vill&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;att färger ska visas mer exakt&lt;/li&gt; &lt;li&gt;&amp;nbsp;ta bort färger för att fokusera bättre.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Har åsidosatts av <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Cirka <xliff:g id="TIME_REMAINING">%1$s</xliff:g> kvar"</string>
@@ -448,16 +453,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Surfplattan kanske stängs av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Enheten kanske stängs av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> kvar till full laddning"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> till full laddning"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimerar batteriets livslängd"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> kvar tills fulladdat"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> kvar tills fulladdat"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – laddning har begränsats tillfälligt"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Okänd"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Laddar"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Laddas snabbt"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Laddas långsamt"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Laddas trådlöst"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Laddar inte"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Ansluten, kan inte laddas just nu"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Fullt"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Ansluten, laddas inte"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Laddat"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Strys av administratören"</string>
     <string name="disabled" msgid="8017887509554714950">"Inaktiverad"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Tillåts"</string>
@@ -499,6 +505,13 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Kortare tid."</string>
     <string name="cancel" msgid="5665114069455378395">"Avbryt"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarm och påminnelser"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Tillåt att alarm och påminnelser ställs in"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarm och påminnelser"</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Tillåt att den här appen ställer in alarm och schemalägger andra åtgärder. Appen kan användas när du inte använder telefonen, vilket drar mer batteri. Om behörigheten är inaktiverad kanske appen inte fungerar som den ska och dess alarm fungerar inte enligt schemat."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Tillåt att den här appen ställer in alarm och schemalägger andra åtgärder. Appen kan användas när du inte använder surfplattan, vilket drar mer batteri. Om behörigheten är inaktiverad kanske appen inte fungerar som den ska och dess alarm fungerar inte enligt schemat."</string>
+    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Tillåt att den här appen ställer in alarm och schemalägger andra åtgärder. Appen kan användas när du inte använder enheten, vilket drar mer batteri. Om behörigheten är inaktiverad kanske appen inte fungerar som den ska och dess alarm fungerar inte enligt schemat."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"schema, alarm, påminnelse, klocka"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivera"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktivera Stör ej."</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Aldrig"</string>
@@ -513,6 +526,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Tills du inaktiverar funktionen"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Nyss"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonens högtalare"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Den här telefonen"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Det gick inte att ansluta. Stäng av enheten och slå på den igen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Ljudenhet med kabelanslutning"</string>
     <string name="help_label" msgid="3528360748637781274">"Hjälp och feedback"</string>
@@ -551,9 +565,10 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Konfigurera lås"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Byt till <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Skapar ny användare …"</string>
+    <string name="add_user_failed" msgid="4809887794313944872">"Det gick inte att skapa en ny användare"</string>
     <string name="user_nickname" msgid="262624187455825083">"Smeknamn"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Lägg till gäst"</string>
-    <string name="guest_exit_guest" msgid="4754204715192830850">"Avsluta gästsession"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Ta bort gäst"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gäst"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Ta ett foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Välj en bild"</string>
@@ -576,7 +591,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"Operatörens Wi-Fi"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"Mobildata har inaktiverats"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"Inte inställd på mobildata"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"Ingen telefon."</string>
@@ -590,5 +605,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Data: tre staplar."</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Datasignalen är full."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet har kopplats från."</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"Ethernet har anslutits."</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"Inga anrop."</string>
 </resources>

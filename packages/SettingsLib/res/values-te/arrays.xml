@@ -55,11 +55,11 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"ఎప్పటికీ HDCP తనిఖీని ఉపయోగించవద్దు"</item>
-    <item msgid="8254225038262324761">"DRM కంటెంట్‌కు మాత్రమే HDCP తనిఖీని ఉపయోగించండి"</item>
+    <item msgid="8254225038262324761">"DRM కంటెంట్‌కు మాత్రమే HDCP చెకింగ్‌ను ఉపయోగించండి"</item>
     <item msgid="6421717003037072581">"ఎప్పటికీ HDCP తనిఖీని ఉపయోగించు"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="695678520785580527">"నిలిపివేయబడింది"</item>
+    <item msgid="695678520785580527">"డిజేబుల్ చేయబడింది"</item>
     <item msgid="6336372935919715515">"ప్రారంభించబడింది ఫిల్టర్ చేయబడింది"</item>
     <item msgid="2779123106632690576">"ప్రారంభించబడింది"</item>
   </string-array>
@@ -252,7 +252,7 @@
     <item msgid="3474333938380896988">"డ్యూటెరానోమలీ కోసం ప్రాంతాలను చూపండి"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="794656271086646068">"ప్రామాణిక పరిమితి"</item>
+    <item msgid="794656271086646068">"స్టాండర్డ్ పరిమితి"</item>
     <item msgid="8628438298170567201">"నేపథ్య ప్రాసెస్‌లు లేవు"</item>
     <item msgid="915752993383950932">"గరిష్టంగా 1 ప్రాసెస్"</item>
     <item msgid="8554877790859095133">"గరిష్టంగా 2 ప్రాసెస్‌లు"</item>

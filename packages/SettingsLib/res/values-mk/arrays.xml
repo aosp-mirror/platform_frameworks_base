@@ -29,7 +29,7 @@
     <item msgid="4613015005934755724">"Поврзано"</item>
     <item msgid="3763530049995655072">"Суспендирана"</item>
     <item msgid="7852381437933824454">"Се исклучува..."</item>
-    <item msgid="5046795712175415059">"Исклучено"</item>
+    <item msgid="5046795712175415059">"Не е поврзано"</item>
     <item msgid="2473654476624070462">"Неуспешна"</item>
     <item msgid="9146847076036105115">"Блокирана"</item>
     <item msgid="4543924085816294893">"Привремено избегнува лоша врска"</item>
@@ -43,7 +43,7 @@
     <item msgid="1043944043827424501">"Поврзано на <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="7445993821842009653">"Суспендирана"</item>
     <item msgid="1175040558087735707">"Исклучување од <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
-    <item msgid="699832486578171722">"Исклучено"</item>
+    <item msgid="699832486578171722">"Не е поврзано"</item>
     <item msgid="522383512264986901">"Неуспешна"</item>
     <item msgid="3602596701217484364">"Блокирано"</item>
     <item msgid="1999413958589971747">"Привремено избегнува лоша врска"</item>
@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"Никогаш не користи HDCP проверка"</item>
-    <item msgid="8254225038262324761">"Користи HDCP проверка само за DRM содржина"</item>
+    <item msgid="8254225038262324761">"Користи HDCP-проверка само за DRM-содржини"</item>
     <item msgid="6421717003037072581">"Секогаш користи HDCP проверка"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
@@ -138,9 +138,9 @@
     <item msgid="1333279807604675720">"Стерео"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="1241278021345116816">"Оптимизирано за квалитет на аудиото (990 кб/с - 909 кб/с)"</item>
+    <item msgid="1241278021345116816">"Оптимизирано за квалитет на аудиото (990 kbps - 909 kbps)"</item>
     <item msgid="3523665555859696539">"Балансиран квалитет на звукот и врската (660 kb/s/606 kb/s)"</item>
-    <item msgid="886408010459747589">"Оптимизирано за квалитет на врската (330 кб/с - 303 кб/с)"</item>
+    <item msgid="886408010459747589">"Оптимизирано за квалитет на врската (330 kbps - 303 kbps)"</item>
     <item msgid="3808414041654351577">"Најдобар напор (приспособлива стапка на битови)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">

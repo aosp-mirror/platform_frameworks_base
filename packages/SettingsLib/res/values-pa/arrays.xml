@@ -64,7 +64,7 @@
     <item msgid="2779123106632690576">"ਚਾਲੂ"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="6603880723315236832">"AVRCP 1.5 (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="6603880723315236832">"AVRCP 1.5 (ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
     <item msgid="5896162189744596291">"AVRCP 1.4"</item>
     <item msgid="7556896992111771426">"AVRCP 1.6"</item>
@@ -76,7 +76,7 @@
     <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_map_versions">
-    <item msgid="8786402640610987099">"MAP 1.2 (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="8786402640610987099">"MAP 1.2 (ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</item>
     <item msgid="6817922176194686449">"MAP 1.3"</item>
     <item msgid="3423518690032737851">"MAP 1.4"</item>
   </string-array>
@@ -86,7 +86,7 @@
     <item msgid="8147982633566548515">"map14"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="2494959071796102843">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="2494959071796102843">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</item>
     <item msgid="4055460186095649420">"SBC"</item>
     <item msgid="720249083677397051">"AAC"</item>
     <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ਆਡੀਓ"</item>
@@ -94,7 +94,7 @@
     <item msgid="3825367753087348007">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="8868109554557331312">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="8868109554557331312">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</item>
     <item msgid="9024885861221697796">"SBC"</item>
     <item msgid="4688890470703790013">"AAC"</item>
     <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ਆਡੀਓ"</item>
@@ -102,38 +102,38 @@
     <item msgid="2553206901068987657">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="926809261293414607">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="926809261293414607">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</item>
     <item msgid="8003118270854840095">"44.1 kHz"</item>
     <item msgid="3208896645474529394">"48.0 kHz"</item>
     <item msgid="8420261949134022577">"88.2 kHz"</item>
     <item msgid="8887519571067543785">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="2284090879080331090">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="2284090879080331090">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</item>
     <item msgid="1872276250541651186">"44.1 kHz"</item>
     <item msgid="8736780630001704004">"48.0 kHz"</item>
     <item msgid="7698585706868856888">"88.2 kHz"</item>
     <item msgid="8946330945963372966">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2574107108483219051">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="2574107108483219051">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</item>
     <item msgid="4671992321419011165">"16 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
     <item msgid="1933898806184763940">"24 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
     <item msgid="1212577207279552119">"32 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="9196208128729063711">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="9196208128729063711">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</item>
     <item msgid="1084497364516370912">"16 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
     <item msgid="2077889391457961734">"24 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
     <item msgid="3836844909491316925">"32 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="3014194562841654656">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="3014194562841654656">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</item>
     <item msgid="5982952342181788248">"ਮੋਨੋ"</item>
     <item msgid="927546067692441494">"ਸਟੀਰੀਓ"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="1997302811102880485">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="1997302811102880485">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</item>
     <item msgid="8005696114958453588">"ਮੋਨੋ"</item>
     <item msgid="1333279807604675720">"ਸਟੀਰੀਓ"</item>
   </string-array>
@@ -155,14 +155,28 @@
     <item msgid="253388653486517049">", ਕਿਰਿਆਸ਼ੀਲ (ਮੀਡੀਆ)"</item>
     <item msgid="5001852592115448348">", ਕਿਰਿਆਸ਼ੀਲ (ਫ਼ੋਨ)"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_titles:5 (6078203297886482480) -->
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"ਬੰਦ"</item>
+    <item msgid="7839165897132179888">"64K"</item>
+    <item msgid="2715700596495505626">"256K"</item>
+    <item msgid="7099386891713159947">"1M"</item>
+    <item msgid="6069075827077845520">"4M"</item>
+    <item msgid="6078203297886482480">"8M"</item>
+  </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"ਬੰਦ"</item>
     <item msgid="4064786181089783077">"64K"</item>
     <item msgid="3052710745383602630">"256K"</item>
     <item msgid="3691785423374588514">"1M"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_summaries:5 (2983219471251787208) -->
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"ਬੰਦ"</item>
+    <item msgid="4195153527464162486">"64K ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ"</item>
+    <item msgid="7464037639415220106">"256K ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ"</item>
+    <item msgid="8539423820514360724">"1M ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ"</item>
+    <item msgid="1984761927103140651">"4M ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ"</item>
+    <item msgid="2983219471251787208">"8M ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ"</item>
+  </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"ਬੰਦ"</item>
     <item msgid="6014837961827347618">"ਸਭ"</item>
