@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"הצגת גבולות אזור, שוליים וכדומה"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"אילוץ כיוון פריסה מימין לשמאל"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"אילוץ של כיוון פריסת מסך מימין לשמאל עבור כל השפות בכל המקומות"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"‏אילוץ הפעלת 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"‏הפעלת 4x MSAA ביישומי OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"ניפוי באגים בפעולות באזור שאינו מלבני"</string>
@@ -506,10 +508,10 @@
     <string name="cancel" msgid="5665114069455378395">"ביטול"</string>
     <string name="okay" msgid="949938843324579502">"אישור"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"שעונים מעוררים ותזכורות"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"הרשאה להגדרה של שעונים מעוררים ותזכורות"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"אישור להגדיר שעונים מעוררים ותזכורות"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"שעונים מעוררים ותזכורות"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"הגדרה זו מתירה לאפליקציה להגדיר שעון מעורר ולתזמן אירועים אחרים. ייתכן שהאפליקציה תפעל גם כשלא נעשה שימוש בטלפון שלך, ולכן תגביר את צריכת הסוללה. אם ההרשאה הזו תושבת, ייתכן שהאפליקציה לא תפעל כראוי ושהשעונים המעוררים לא יפעלו כפי שתוזמנו."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"הגדרה זו מתירה לאפליקציה להגדיר שעון מעורר ולתזמן אירועים אחרים. ייתכן שהאפליקציה תפעל גם כשלא נעשה שימוש בטאבלט שלך, ולכן תגביר את צריכת הסוללה. אם ההרשאה הזו תושבת, ייתכן שהאפליקציה לא תפעל כראוי ושהשעונים המעוררים לא יפעלו כפי שתוזמנו."</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"ההגדרה הזו מתירה לאפליקציה להגדיר שעון מעורר ולתזמן פעולות אחרות. ייתכן שהאפליקציה תפעל גם כשלא נעשה שימוש בטלפון שלך, ולכן תגביר את צריכת הסוללה. אם ההרשאה הזו תושבת, יכול להיות שהאפליקציה לא תפעל כראוי ושהשעונים המעוררים לא יפעלו כפי שתוזמנו."</string>
+    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"ההגדרה הזו מתירה לאפליקציה להגדיר שעון מעורר ולתזמן פעולות אחרות. ייתכן שהאפליקציה תפעל גם כשלא נעשה שימוש בטאבלט שלך, ולכן תגביר את צריכת הסוללה. אם ההרשאה הזו תושבת, יכול להיות שהאפליקציה לא תפעל כראוי ושהשעונים המעוררים לא יפעלו כפי שתוזמנו."</string>
     <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"הגדרה זו מתירה לאפליקציה להגדיר שעון מעורר ולתזמן אירועים אחרים. ייתכן שהאפליקציה תפעל גם כשלא נעשה שימוש במכשיר שלך, ולכן תגביר את צריכת הסוללה. אם ההרשאה הזו תושבת, ייתכן שהאפליקציה לא תפעל כראוי ושהשעונים המעוררים לא יפעלו כפי שתוזמנו."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"תזמון, שעון מעורר, תזכורת, שעון"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"הפעלה"</string>
