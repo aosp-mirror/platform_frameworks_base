@@ -1866,8 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ඔබගේ පරිපාලක මඟින් යාවත්කාලීන කර ඇත"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ඔබගේ පරිපාලක මඟින් මකා දමා ඇත"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"හරි"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග, යම් විශේෂාංග සහ සමහර ජාල සම්බන්ධතා සීමා හෝ ක්‍රියාවිරහිත කරයි."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග, යම් විශේෂාංග සහ සමහර ජාල සම්බන්ධතා සීමා හෝ ක්‍රියාවිරහිත කරයි."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>
