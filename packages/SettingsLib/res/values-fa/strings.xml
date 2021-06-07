@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"نمایش مرزها، حاشیه‌ها و ویژگی‌های دیگر کلیپ."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"اجباری کردن چیدمان راست‌چین"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"اجباری کردن چیدمان راست‌چین صفحه برای همه زبان‌ها"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"‏اجبار 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"‏فعال کردن 4X MSAA در برنامه‌های OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"اشکال‌زدایی عملکردهای کلیپ غیرمربعی"</string>
