@@ -65,7 +65,6 @@ public class ScrollCaptureClientTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        Context context = InstrumentationRegistry.getInstrumentation().getContext();
         mWm = mock(IWindowManager.class);
     }
 
