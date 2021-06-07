@@ -1473,7 +1473,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Бұл өтініштің орындалуын қалайсыз ба?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Кіру өтініші"</string>
     <string name="allow" msgid="6195617008611933762">"Рұқсат беру"</string>
-    <string name="deny" msgid="6632259981847676572">"Бас тарту"</string>
+    <string name="deny" msgid="6632259981847676572">"Тыйым салу"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Рұқсат өтінілді"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Рұқсат \nесептік жазба үшін <xliff:g id="ACCOUNT">%s</xliff:g> өтінілді."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Осы қолданбаны жұмыс профиліңізден тыс пайдаланып жатырсыз"</string>
@@ -1866,8 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Әкімші жаңартқан"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Әкімші жойған"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Жарайды"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Батареяны үнемдеу режимі қараңғы тақырыпты іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Батареяны үнемдеу режимі қараңғы тақырыпты іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу режимі қосылсын ба?"</string>
@@ -1972,7 +1971,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Толығырақ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Қолданбаны қайта қосу"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"Жұмыс қолданбаларын қосасыз ба?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Жұмыс қолданбалары мен хабарландыруларына рұқсат алу"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Жұмыс қолданбалары мен хабарландыруларына қол жеткізесіз."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Қосу"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Қолданба қолжетімді емес"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> қазір қолжетімді емес."</string>

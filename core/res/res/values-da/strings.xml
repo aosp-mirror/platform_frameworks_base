@@ -1866,8 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Opdateret af din administrator"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Slettet af din administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Batterisparefunktionen aktiverer Mørkt tema og begrænser eller deaktiverer aktivitet i baggrunden og visse visuelle effekter, funktioner og netværksforbindelser."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Batterisparefunktionen aktiverer Mørkt tema og begrænser eller deaktiverer aktivitet i baggrunden og visse visuelle effekter, funktioner og netværksforbindelser."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datasparefunktionen forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vil du aktivere Datasparefunktion?"</string>
