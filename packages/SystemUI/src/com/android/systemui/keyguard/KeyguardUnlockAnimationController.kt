@@ -317,7 +317,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
     }
 
     override fun onKeyguardDismissAmountChanged() {
-        if (!KeyguardService.sEnableRemoteKeyguardAnimation) {
+        if (!KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation) {
             return
         }
 

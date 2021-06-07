@@ -2180,7 +2180,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             IRemoteAnimationRunner runner = mKeyguardExitAnimationRunner;
             mKeyguardExitAnimationRunner = null;
 
-            if (KeyguardService.sEnableRemoteKeyguardAnimation && runner != null
+            if (KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation && runner != null
                     && finishedCallback != null) {
                 // Wrap finishedCallback to clean up the keyguard state once the animation is done.
                 IRemoteAnimationFinishedCallback callback =
@@ -2211,7 +2211,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
             // When remaining on the shade, there's no need to do a fancy remote animation,
             // it will dismiss the panel in that case.
-            } else if (KeyguardService.sEnableRemoteKeyguardAnimation
+            } else if (KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation
                     && !mStatusBarStateController.leaveOpenOnKeyguardHide()
                     && apps != null && apps.length > 0) {
                 mSurfaceBehindRemoteAnimationFinishedCallback = finishedCallback;
