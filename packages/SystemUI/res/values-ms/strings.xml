@@ -1038,7 +1038,7 @@
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Tambah kawalan untuk peranti yang disambungkan"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Sediakan kawalan peranti"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Tahan butang Kuasa untuk mengakses kawalan anda"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"Pilih apl untuk menambah kawalan"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Pilih apl untuk menambahkan kawalan"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kawalan ditambah.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kawalan ditambah.</item>
