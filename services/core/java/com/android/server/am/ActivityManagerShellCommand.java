@@ -90,7 +90,6 @@ import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -759,8 +758,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        File file = new File(filename);
-        file.delete();
+        // Writes an error message to stderr on failure
         ParcelFileDescriptor fd = openFileForSystem(filename, "w");
         if (fd == null) {
             return -1;
@@ -914,15 +912,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
             t.set(System.currentTimeMillis());
             heapFile = "/data/local/tmp/heapdump-" + t.format("%Y%m%d-%H%M%S") + ".prof";
         }
-        pw.println("File: " + heapFile);
-        pw.flush();
 
-        File file = new File(heapFile);
-        file.delete();
+        // Writes an error message to stderr on failure
         ParcelFileDescriptor fd = openFileForSystem(heapFile, "w");
         if (fd == null) {
             return -1;
         }
+
+        pw.println("File: " + heapFile);
+        pw.flush();
 
         final CountDownLatch latch = new CountDownLatch(1);
 
