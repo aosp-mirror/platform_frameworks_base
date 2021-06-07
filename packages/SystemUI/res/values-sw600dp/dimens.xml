@@ -68,8 +68,6 @@
      phone hints. -->
     <dimen name="edge_tap_area_width">80dp</dimen>
 
-    <dimen name="keyguard_indication_margin_bottom">90dp</dimen>
-
     <!-- Margin on the right side of the system icon group on Keyguard. -->
     <dimen name="system_icons_keyguard_padding_end">2dp</dimen>
 
