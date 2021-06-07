@@ -206,11 +206,11 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB debaq prosesi"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB qoşulu olan zaman debaq rejimi"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB debaq avtorizasiyasını ləğv edin"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"WiFi sazlaması"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Wi-Fi vasitəsilə sazlama"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi qoşulduqda sazlama rejimi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Xəta"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"WiFi sazlaması"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Əlçatan cihazları görmək və onlardan istifadə etmək üçün WiFi sazlamasını yandırın"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Wi-Fi vasitəsilə sazlama"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Cihazları görmək və istifadə etmək üçün WiFi vasitəsilə sazlamanı işə salın"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR kodu ilə cihazı cütləşdirin"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR kod skanerindən istifadə etməklə yeni cihazları birləşdirin"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Qoşulma kodu ilə cihazı əlavə edin"</string>
@@ -222,10 +222,10 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Cihaz barmaq izi: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Bağlantı uğursuz oldu"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> cihazının düzgün şəbəkəyə qoşulduğundan əmin olun"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Cihaz ilə cütləşdirin"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Cihaza qoşulma"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi qoşulma kodu"</string>
-    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Cütləşdirmə uğursuz oldu"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Cihazın eyni şəbəkəyə qoşulduğundan əmin olun."</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Qoşula bilmir"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Eyni şəbəkəyə qoşulduğunu dəqiqləşdirin."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR kodu skanlamaqla cihazı Wi‑Fi vasitəsilə cütləşdirin"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Cihaz cütləşdirilir…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Cihazı cütləşdirmək alınmadı. Ya QR kodu yanlış idi, ya da cihaz eyni şəbəkəyə qoşulmayıb."</string>
