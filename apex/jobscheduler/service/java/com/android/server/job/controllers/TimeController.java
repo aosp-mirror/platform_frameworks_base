@@ -18,11 +18,9 @@ package com.android.server.job.controllers;
 
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
-import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
 import android.content.Context;
-import android.os.Process;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.IndentingPrintWriter;
@@ -62,8 +60,6 @@ public final class TimeController extends StateController {
     private long mNextDelayExpiredElapsedMillis;
     private volatile long mLastFiredDelayExpiredElapsedMillis;
 
-    private final boolean mChainedAttributionEnabled;
-
     private AlarmManager mAlarmService = null;
     /** List of tracked jobs, sorted asc. by deadline */
     private final List<JobStatus> mTrackedJobs = new LinkedList<>();
@@ -73,7 +69,6 @@ public final class TimeController extends StateController {
 
         mNextJobExpiredElapsedMillis = Long.MAX_VALUE;
         mNextDelayExpiredElapsedMillis = Long.MAX_VALUE;
-        mChainedAttributionEnabled = mService.isChainedAttributionEnabled();
     }
 
     /**
@@ -117,7 +112,8 @@ public final class TimeController extends StateController {
             it.add(job);
 
             job.setTrackingController(JobStatus.TRACKING_TIME);
-            WorkSource ws = deriveWorkSource(job.getSourceUid(), job.getSourcePackageName());
+            WorkSource ws =
+                    mService.deriveWorkSource(job.getSourceUid(), job.getSourcePackageName());
 
             // Only update alarms if the job would be ready with the relevant timing constraint
             // satisfied.
@@ -165,7 +161,7 @@ public final class TimeController extends StateController {
             } else if (wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_DEADLINE)) {
                 // This job's deadline is earlier than the current set alarm. Update the alarm.
                 setDeadlineExpiredAlarmLocked(job.getLatestRunTimeElapsed(),
-                        deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
+                        mService.deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
             }
         }
         if (job.hasTimingDelayConstraint()
@@ -177,7 +173,7 @@ public final class TimeController extends StateController {
                     && wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_TIMING_DELAY)) {
                 // This job's delay is earlier than the current set alarm. Update the alarm.
                 setDelayExpiredAlarmLocked(job.getEarliestRunTime(),
-                        deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
+                        mService.deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
             }
         }
     }
@@ -248,7 +244,7 @@ public final class TimeController extends StateController {
                 }
             }
             setDeadlineExpiredAlarmLocked(nextExpiryTime,
-                    deriveWorkSource(nextExpiryUid, nextExpiryPackageName));
+                    mService.deriveWorkSource(nextExpiryUid, nextExpiryPackageName));
         }
     }
 
@@ -312,19 +308,7 @@ public final class TimeController extends StateController {
                 mStateChangedListener.onControllerStateChanged();
             }
             setDelayExpiredAlarmLocked(nextDelayTime,
-                    deriveWorkSource(nextDelayUid, nextDelayPackageName));
-        }
-    }
-
-    private WorkSource deriveWorkSource(int uid, @Nullable String packageName) {
-        if (mChainedAttributionEnabled) {
-            WorkSource ws = new WorkSource();
-            ws.createWorkChain()
-                    .addNode(uid, packageName)
-                    .addNode(Process.SYSTEM_UID, "JobScheduler");
-            return ws;
-        } else {
-            return packageName == null ? new WorkSource(uid) : new WorkSource(uid, packageName);
+                    mService.deriveWorkSource(nextDelayUid, nextDelayPackageName));
         }
     }
 
