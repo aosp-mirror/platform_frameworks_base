@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"ပက်ကေ့ဂျ်ထည့်သွင်းကိရိယာ"</string>
     <string name="install" msgid="711829760615509273">"ထည့်သွင်းရန်"</string>
+    <string name="update" msgid="3932142540719227615">"အပ်ဒိတ်လုပ်ရန်"</string>
     <string name="done" msgid="6632441120016885253">"ပြီးပြီ"</string>
     <string name="cancel" msgid="1018267193425558088">"မလုပ်တော့"</string>
     <string name="installing" msgid="4921993079741206516">"ထည့်သွင်းနေသည်…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ကို ထည့်သွင်းနေသည်…"</string>
     <string name="install_done" msgid="5987363587661783896">"အက်ပ်ထည့်သွင်းပြီးပါပြီ"</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"ဤအပလီကေးရှင်းကို ထည့်သွင်းလိုသလား။"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"ဤလက်ရှိအပလီကေးရှင်းအတွက် အပ်ဒိတ်ကို ထည့်သွင်းလိုပါသလား။ သင်၏ လက်ရှိဒေတာများ ဆုံးရှုံးသွားမည် မဟုတ်ပါ။"</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"ဤနဂိုအသင့်ပါ အပလီကေးရှင်းအတွက် အပ်ဒိတ်ကို ထည့်သွင်းလိုပါသလား။ သင်၏ လက်ရှိဒေတာများ ဆုံးရှုံးသွားမည် မဟုတ်ပါ။"</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"ဤအက်ပ်ကို ထည့်သွင်းလိုသလား။"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"ဤအက်ပ်ကို အပ်ဒိတ်လုပ်လိုသလား။"</string>
     <string name="install_failed" msgid="5777824004474125469">"အက်ပ်မထည့်သွင်းရသေးပါ"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ပက်ကေ့ဂျ်ထည့်သွင်းခြင်းကို ပိတ်ထားသည်။"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ပက်ကေ့ဂျ်အဖြစ် ထည့်သွင်းမထားသော အက်ပ်သည် လက်ရှိပက်ကေ့ဂျ်နှင့် တိုက်နေသည်။"</string>
@@ -67,8 +67,8 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ကို ဖယ်ရှားလိုက်ပါပြီ"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ဖယ်ရှား၍ မရပါ။"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ကို ဖယ်ရှား၍မရပါ။"</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ဖွင့်ထားသော စက်ပစ္စည်းစီမံခန့်ခွဲမှုအက်ပ်အား ဖယ်ရှား၍မရပါ"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> အတွက် ဖွင့်ထားသော စက်ပစ္စည်းစီမံခန့်ခွဲမှုအက်ပ်အား ဖယ်ရှား၍မရပါ"</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"အသုံးပြုနေသော စက်စီမံအက်ပ်ကို ဖယ်ရှား၍မရပါ"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> အတွက် ဖွင့်ထားသော စက်စီမံအက်ပ်ကို ဖယ်ရှား၍မရပါ"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ဤအက်ပ်သည် အချို့အသုံးပြုသူများ သို့မဟုတ် ပရိုဖိုင်များအတွက် လိုအပ်ပြီး အခြားသူများအတွက် ဖယ်ရှားထားသည်"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"သင့်ပရိုဖိုင်အတွက် ဤအက်ပ်ကိုလိုအပ်သောကြောင့် ဖယ်ရှား၍မရပါ။"</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"ဤအက်ပ်ကို သင်၏ စီမံခန့်ခွဲသူကလိုအပ်သောကြောင့် ၎င်းကို ဖယ်ရှား၍မရပါ။"</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear ပေါ်တွင် ထည့်သွင်းခြင်း/ဖယ်ရှားခြင်းများကို ပံ့ပိုးမထားပါ။"</string>
     <string name="message_staging" msgid="8032722385658438567">"အက်ပ်ကို ပြင်ဆင်နေသည်…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"အမည်မသိ"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"လုံခြုံရေးအရ ဤနေရာမှရယူထားသည့် အမျိုးအမည်မသိသောအက်ပ်များကို သင်၏တက်ဘလက်တွင် ထည့်သွင်းခွင့်မရှိပါ။"</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"လုံခြုံရေးအရ ဤနေရာမှရယူထားသည့် အမျိုးအမည်မသိသောအက်ပ်များကို သင်၏တီဗီတွင် ထည့်သွင်းခွင့်မရှိပါ။"</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"လုံခြုံရေးအရ ဤနေရာမှရယူထားသည့် အမျိုးအမည်မသိသောအက်ပ်များကို သင်၏ဖုန်းတွင် ထည့်သွင်းခွင့်မရှိပါ။"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"လုံခြုံရေးအရ ဤရင်းမြစ်မှရယူထားသည့် အမျိုးအမည်မသိသောအက်ပ်များကို သင့်တက်ဘလက်တွင် လောလောဆယ် ထည့်သွင်းခွင့်မရှိပါ။ ၎င်းကို ‘ဆက်တင်များ’ တွင် ပြောင်းနိုင်ပါသည်။"</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"လုံခြုံရေးအရ ဤရင်းမြစ်မှရယူထားသည့် အမျိုးအမည်မသိသောအက်ပ်များကို သင့် TV တွင် လောလောဆယ် ထည့်သွင်းခွင့်မရှိပါ။ ၎င်းကို ‘ဆက်တင်များ’ တွင် ပြောင်းနိုင်ပါသည်။"</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"လုံခြုံရေးအရ ဤရင်းမြစ်မှရယူထားသည့် အမျိုးအမည်မသိသောအက်ပ်များကို သင့်ဖုန်းတွင် လောလောဆယ် ထည့်သွင်းခွင့်မရှိပါ။ ၎င်းကို ‘ဆက်တင်များ’ တွင် ပြောင်းနိုင်ပါသည်။"</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"သင်၏ဖုန်းနှင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များသည် အမျိုးအမည် မသိသောအက်ပ်များ၏ တိုက်ခိုက်ခြင်းကို ပိုမိုခံရနိုင်ပါသည်။ ဤအက်ပ်ကို ထည့်သွင်းအသုံးပြုခြင်းအားဖြင့် ဖြစ်ပေါ်လာနိုင်သော ဖုန်းပျက်စီးမှု သို့မဟုတ် ဒေတာဆုံးရှုံးမှုများအတွက် သင့်ထံ၌သာ တာဝန်ရှိကြောင်း သဘောတူရာရောက်ပါသည်။"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"သင်၏ တက်ဘလက်နှင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များသည် အမျိုးအမည် မသိသောအက်ပ်များ၏ တိုက်ခိုက်ခြင်းကို ပိုမိုခံရနိုင်ပါသည်။ ဤအက်ပ်ကို ထည့်သွင်းအသုံးပြုခြင်းအားဖြင့် ဖြစ်ပေါ်လာနိုင်သော တက်ဘလက်ပျက်စီးမှု သို့မဟုတ် ဒေတာဆုံးရှုံးမှုများအတွက် သင့်ထံ၌သာ တာဝန်ရှိကြောင်း သဘောတူရာရောက်ပါသည်။"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"သင်၏ TV နှင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များသည် အမျိုးအမည် မသိသောအက်ပ်များ၏ တိုက်ခိုက်ခြင်းကို ပိုမိုခံရနိုင်ပါသည်။ ဤအက်ပ်ကို ထည့်သွင်းအသုံးပြုခြင်းအားဖြင့် ဖြစ်ပေါ်လာနိုင်သော TV ပျက်စီးမှု သို့မဟုတ် ဒေတာဆုံးရှုံးမှုများအတွက် သင့်ထံ၌သာ တာဝန်ရှိကြောင်း သဘောတူရာရောက်ပါသည်။"</string>

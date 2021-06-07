@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Program de instalare a pachetelor"</string>
     <string name="install" msgid="711829760615509273">"Instalați"</string>
+    <string name="update" msgid="3932142540719227615">"Actualizați"</string>
     <string name="done" msgid="6632441120016885253">"Gata"</string>
     <string name="cancel" msgid="1018267193425558088">"Anulați"</string>
     <string name="installing" msgid="4921993079741206516">"Se instalează…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Se instalează <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Aplicație instalată."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Doriți să instalați această aplicație?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Doriți să instalați o actualizare pentru această aplicație? Datele existente nu se vor pierde."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Doriți să instalați o actualizare pentru această aplicație încorporată? Datele existente nu se vor pierde."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Doriți să instalați această aplicație?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Doriți să actualizați această aplicație?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplicația nu a fost instalată."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Instalarea pachetului a fost blocată."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplicația nu a fost instalată deoarece pachetul intră în conflict cu un pachet existent."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Acțiunile de instalare și dezinstalare nu sunt acceptate pe Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Se pregătește aplicația…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Necunoscut"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Din motive de securitate, tableta dvs. nu are permisiunea să instaleze aplicații necunoscute din această sursă."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Din motive de securitate, televizorul dvs. nu are permisiunea să instaleze aplicații necunoscute din această sursă."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Din motive de securitate, telefonul dvs. nu are permisiunea să instaleze aplicații necunoscute din această sursă."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Din motive de securitate, tableta dvs. nu are permisiunea să instaleze aplicații necunoscute din această sursă. Puteți modifica această opțiune în Setări."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Din motive de securitate, televizorul dvs. nu are permisiunea să instaleze aplicații necunoscute din această sursă. Puteți modifica această opțiune în Setări."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Din motive de securitate, telefonul dvs. nu are permisiunea să instaleze aplicații necunoscute din această sursă. Puteți modifica această opțiune în Setări."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefonul și datele dvs. personale sunt mai vulnerabile la un atac din partea aplicațiilor necunoscute. Dacă instalați această aplicație, acceptați că sunteți singura persoană responsabilă pentru deteriorarea telefonului sau pentru pierderea datelor, care pot avea loc în urma folosirii acesteia."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tableta și datele dvs. personale sunt mai vulnerabile la un atac din partea aplicațiilor necunoscute. Dacă instalați aplicația, acceptați că sunteți singura persoană responsabilă pentru deteriorarea tabletei sau pentru pierderea datelor, care pot avea loc în urma folosirii acesteia."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Televizorul și datele dvs. personale sunt mai vulnerabile la un atac din partea aplicațiilor necunoscute. Dacă instalați această aplicație, acceptați că sunteți singura persoană responsabilă pentru deteriorarea televizorului sau pentru pierderea datelor, care pot avea loc în urma folosirii acesteia."</string>
