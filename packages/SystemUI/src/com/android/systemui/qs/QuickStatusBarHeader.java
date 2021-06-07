@@ -249,10 +249,9 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     private void updateAlphaAnimator() {
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
-                // The following two views have to be hidden manually, so as not to hide the
-                // Privacy chip in QQS
-                .addFloat(mDateView, "alpha", 0, 1)
                 .addFloat(mSecurityHeaderView, "alpha", 0, 1)
+                // These views appear on expanding down
+                .addFloat(mClockView, "alpha", 0, 1)
                 .addFloat(mQSCarriers, "alpha", 0, 1)
                 .setListener(new TouchAnimator.ListenerAdapter() {
                     @Override
