@@ -21,7 +21,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.util.Property;
 import android.view.View;
-import android.view.animation.Interpolator;
 
 import com.android.keyguard.KeyguardSliceView;
 import com.android.systemui.R;
@@ -50,11 +49,8 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_SWIPE = 260;
     public static final int ANIMATION_DURATION_DIMMED_ACTIVATED = 220;
     public static final int ANIMATION_DURATION_CLOSE_REMOTE_INPUT = 150;
-    public static final int ANIMATION_DURATION_HEADS_UP_APPEAR = 550;
-    public static final int ANIMATION_DURATION_HEADS_UP_APPEAR_CLOSED
-            = (int) (ANIMATION_DURATION_HEADS_UP_APPEAR
-                    * HeadsUpAppearInterpolator.getFractionUntilOvershoot());
-    public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 300;
+    public static final int ANIMATION_DURATION_HEADS_UP_APPEAR = 400;
+    public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 400;
     public static final int ANIMATION_DURATION_PULSE_APPEAR =
             KeyguardSliceView.DEFAULT_ANIM_DURATION;
     public static final int ANIMATION_DURATION_BLOCKING_HELPER_FADE = 240;
@@ -64,8 +60,6 @@ public class StackStateAnimator {
     public static final int ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE = 48;
     public static final int DELAY_EFFECT_MAX_INDEX_DIFFERENCE = 2;
     private static final int MAX_STAGGER_COUNT = 5;
-    private static final HeadsUpAppearInterpolator HEADS_UP_APPEAR_INTERPOLATOR =
-            new HeadsUpAppearInterpolator();
 
     private final int mGoToFullShadeAppearingTranslation;
     private final int mPulsingAppearingTranslation;
@@ -114,14 +108,6 @@ public class StackStateAnimator {
             @Override
             public boolean wasAdded(View view) {
                 return mNewAddChildren.contains(view);
-            }
-
-            @Override
-            public Interpolator getCustomInterpolator(View child, Property property) {
-                if (mHeadsUpAppearChildren.contains(child) && View.TRANSLATION_Y.equals(property)) {
-                    return HEADS_UP_APPEAR_INTERPOLATOR;
-                }
-                return null;
             }
         };
     }
@@ -422,7 +408,7 @@ public class StackStateAnimator {
                 if (event.headsUpFromBottom) {
                     mTmpState.yTranslation = mHeadsUpAppearHeightBottom;
                 } else {
-                    changingView.performAddAnimation(0, ANIMATION_DURATION_HEADS_UP_APPEAR_CLOSED,
+                    changingView.performAddAnimation(0, ANIMATION_DURATION_HEADS_UP_APPEAR,
                             true /* isHeadsUpAppear */);
                 }
                 mHeadsUpAppearChildren.add(changingView);

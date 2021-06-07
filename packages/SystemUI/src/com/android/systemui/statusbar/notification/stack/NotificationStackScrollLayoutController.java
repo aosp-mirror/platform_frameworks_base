@@ -544,7 +544,11 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public void onHeadsUpUnPinned(NotificationEntry entry) {
-                    mNotificationRoundnessManager.updateView(entry.getRow(), true /* animate */);
+                    ExpandableNotificationRow row = entry.getRow();
+                    // update the roundedness posted, because we might be animating away the
+                    // headsup soon, so no need to set the roundedness to 0 and then back to 1.
+                    row.post(() -> mNotificationRoundnessManager.updateView(row,
+                            true /* animate */));
                 }
 
                 @Override
@@ -553,7 +557,9 @@ public class NotificationStackScrollLayoutController {
                     NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
                     mView.setNumHeadsUp(numEntries);
                     mView.setTopHeadsUpEntry(topEntry);
-                    mNotificationRoundnessManager.updateView(entry.getRow(), false /* animate */);
+                    generateHeadsUpAnimation(entry, isHeadsUp);
+                    ExpandableNotificationRow row = entry.getRow();
+                    mNotificationRoundnessManager.updateView(row, true /* animate */);
                 }
             };
 
@@ -1238,7 +1244,7 @@ public class NotificationStackScrollLayoutController {
         return mView.getFirstChildNotGone();
     }
 
-    public void generateHeadsUpAnimation(NotificationEntry entry, boolean isHeadsUp) {
+    private void generateHeadsUpAnimation(NotificationEntry entry, boolean isHeadsUp) {
         mView.generateHeadsUpAnimation(entry, isHeadsUp);
     }
 
