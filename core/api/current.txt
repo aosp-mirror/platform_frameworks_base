@@ -22563,6 +22563,7 @@ package android.media {
     field public static final String KEY_ROTATION = "rotation-degrees";
     field public static final String KEY_SAMPLE_RATE = "sample-rate";
     field public static final String KEY_SLICE_HEIGHT = "slice-height";
+    field public static final String KEY_SLOW_MOTION_MARKERS = "slow-motion-markers";
     field public static final String KEY_STRIDE = "stride";
     field public static final String KEY_TEMPORAL_LAYERING = "ts-schema";
     field public static final String KEY_TILE_HEIGHT = "tile-height";
