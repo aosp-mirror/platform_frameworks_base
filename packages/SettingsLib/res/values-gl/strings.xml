@@ -456,8 +456,8 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"Completa"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Opción controlada polo administrador"</string>
     <string name="disabled" msgid="8017887509554714950">"Desactivada"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Con permiso"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"Sen permiso"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Permiso concedido"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"Permiso non concedido"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Instalar aplicacións descoñecidas"</string>
     <string name="home" msgid="973834627243661438">"Inicio da configuración"</string>
   <string-array name="battery_labels">
