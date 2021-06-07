@@ -211,6 +211,12 @@ public class UdfpsController implements DozeReceiver {
             }
         }
 
+        void onAcquiredGood() {
+            if (mEnrollHelper != null) {
+                mEnrollHelper.animateIfLastStep();
+            }
+        }
+
         void onEnrollmentHelp() {
             if (mEnrollHelper != null) {
                 mEnrollHelper.onEnrollmentHelp();
@@ -260,6 +266,11 @@ public class UdfpsController implements DozeReceiver {
                 }
                 mGoodCaptureReceived = true;
                 mView.stopIllumination();
+                if (mServerRequest != null) {
+                    mServerRequest.onAcquiredGood();
+                } else {
+                    Log.e(TAG, "Null serverRequest when onAcquiredGood");
+                }
             });
         }
 
