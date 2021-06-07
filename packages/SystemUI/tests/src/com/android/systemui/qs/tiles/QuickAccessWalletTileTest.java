@@ -46,7 +46,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
 import android.service.quickaccesswallet.GetWalletCardsError;
-import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.QuickAccessWalletService;
@@ -74,8 +73,6 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
-
-import com.google.common.util.concurrent.MoreExecutors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -126,8 +123,6 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     @Captor
     ArgumentCaptor<Intent> mIntentCaptor;
     @Captor
-    ArgumentCaptor<GetWalletCardsRequest> mRequestCaptor;
-    @Captor
     ArgumentCaptor<QuickAccessWalletClient.OnWalletCardsRetrievedCallback> mCallbackCaptor;
 
     private Context mSpiedContext;
@@ -163,7 +158,6 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mPackageManager,
                 mSecureSettings,
-                MoreExecutors.directExecutor(),
                 mController,
                 mFeatureFlags);
     }

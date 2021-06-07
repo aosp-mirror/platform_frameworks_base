@@ -161,10 +161,12 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
             OnClickListener clickListener) {
         mEmptyStateView.setVisibility(VISIBLE);
         mErrorView.setVisibility(GONE);
-        mCardCarouselContainer.setVisibility(GONE);
+        mCardCarousel.setVisibility(GONE);
+        mIcon.setImageDrawable(logo);
+        mIcon.setContentDescription(logoContentDescription);
+        mCardLabel.setText(R.string.wallet_empty_state_label);
         ImageView logoView = mEmptyStateView.requireViewById(R.id.empty_state_icon);
-        logoView.setImageDrawable(logo);
-        logoView.setContentDescription(logoContentDescription);
+        logoView.setImageDrawable(mContext.getDrawable(R.drawable.ic_qs_plus));
         mEmptyStateView.<TextView>requireViewById(R.id.empty_state_title).setText(label);
         mEmptyStateView.setOnClickListener(clickListener);
     }

@@ -20,13 +20,9 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.PendingIntent;
@@ -43,7 +39,6 @@ import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.QuickAccessWalletService;
 import android.service.quickaccesswallet.WalletCard;
-import android.service.quickaccesswallet.WalletServiceEvent;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -250,7 +245,7 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         callback.onWalletCardsRetrieved(response);
         mTestableLooper.processAllMessages();
 
-        assertEquals(GONE, mWalletView.getCardCarouselContainer().getVisibility());
+        assertEquals(GONE, mWalletView.getCardCarousel().getVisibility());
         assertEquals(VISIBLE, mWalletView.getEmptyStateView().getVisibility());
         assertEquals(GONE, mWalletView.getErrorView().getVisibility());
     }
@@ -267,7 +262,7 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         mCallbackCaptor.getValue().onWalletCardsRetrieved(response);
         mTestableLooper.processAllMessages();
 
-        assertEquals(GONE, mWalletView.getCardCarouselContainer().getVisibility());
+        assertEquals(GONE, mWalletView.getCardCarousel().getVisibility());
         assertEquals(VISIBLE, mWalletView.getEmptyStateView().getVisibility());
         assertEquals(GONE, mWalletView.getErrorView().getVisibility());
     }
@@ -289,40 +284,6 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         assertEquals(GONE, mWalletView.getEmptyStateView().getVisibility());
         assertEquals(VISIBLE, mWalletView.getErrorView().getVisibility());
         assertEquals(errorMessage, mWalletView.getErrorView().getText().toString());
-    }
-
-    @Test
-    public void onWalletServiceEvent_nfcPaymentStart_doNothing() {
-        WalletServiceEvent event =
-                new WalletServiceEvent(WalletServiceEvent.TYPE_NFC_PAYMENT_STARTED);
-
-        mController.onWalletServiceEvent(event);
-        mTestableLooper.processAllMessages();
-
-        assertNull(mController.mSelectedCardId);
-        assertFalse(mController.mIsDismissed);
-        verifyZeroInteractions(mWalletClient);
-    }
-
-    @Test
-    public void onWalletServiceEvent_walletCardsUpdate_queryCards() {
-        mController.queryWalletCards();
-
-        verify(mWalletClient).addWalletServiceEventListener(mListenerCaptor.capture());
-
-        WalletServiceEvent event =
-                new WalletServiceEvent(WalletServiceEvent.TYPE_WALLET_CARDS_UPDATED);
-
-        QuickAccessWalletClient.WalletServiceEventListener listener = mListenerCaptor.getValue();
-        listener.onWalletServiceEvent(event);
-        mTestableLooper.processAllMessages();
-
-        verify(mWalletClient, times(2))
-                .getWalletCards(any(), mRequestCaptor.capture(), mCallbackCaptor.capture());
-
-        GetWalletCardsRequest request = mRequestCaptor.getValue();
-
-        assertEquals(MAX_CARDS, request.getMaxCards());
     }
 
     @Test
