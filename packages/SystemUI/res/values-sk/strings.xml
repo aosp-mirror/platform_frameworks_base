@@ -1136,13 +1136,13 @@
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g> má čoskoro narodeniny"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Výročie"</string>
     <string name="anniversary_status_content_description" msgid="8212171790843327442">"<xliff:g id="NAME">%1$s</xliff:g> má výročie"</string>
-    <string name="location_status" msgid="1294990572202541812">"Zdieľa sa poloha"</string>
+    <string name="location_status" msgid="1294990572202541812">"Zdieľam polohu"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> zdieľa polohu"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Nová správa"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> zdieľal(a) nový príbeh"</string>
-    <string name="video_status" msgid="4548544654316843225">"Pozerá sa video"</string>
+    <string name="video_status" msgid="4548544654316843225">"Pozerám video"</string>
     <string name="audio_status" msgid="4237055636967709208">"Počúvam"</string>
-    <string name="game_status" msgid="1340694320630973259">"Hrá sa hra"</string>
+    <string name="game_status" msgid="1340694320630973259">"Hrám hru"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Priatelia"</string>
     <string name="empty_status" msgid="5938893404951307749">"Poďme sa rozprávať."</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Obsah sa čoskoro zobrazí"</string>
