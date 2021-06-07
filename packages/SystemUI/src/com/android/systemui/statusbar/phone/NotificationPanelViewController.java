@@ -2220,6 +2220,7 @@ public class NotificationPanelViewController extends PanelViewController {
             left = getView().getLeft() - mDisplayCutoutLeftInset;
             right = getView().getRight() - mDisplayCutoutLeftInset;
         } else if (qsPanelBottomY > 0) { // so bounds are empty on lockscreen
+            mAmbientState.setNotificationScrimTop(mSplitShadeNotificationsTopPadding);
             top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
             bottom = mNotificationStackScrollLayoutController.getHeight();
             left = mNotificationStackScrollLayoutController.getLeft();
