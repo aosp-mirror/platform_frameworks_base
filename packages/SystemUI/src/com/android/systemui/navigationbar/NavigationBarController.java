@@ -111,6 +111,7 @@ public class NavigationBarController implements Callbacks,
     private final SystemActions mSystemActions;
     private final UiEventLogger mUiEventLogger;
     private final Handler mHandler;
+    private final NavigationBarA11yHelper mNavigationBarA11yHelper;
     private final DisplayManager mDisplayManager;
     private final NavigationBarOverlayController mNavBarOverlayController;
     private final TaskbarDelegate mTaskbarDelegate;
@@ -151,7 +152,8 @@ public class NavigationBarController implements Callbacks,
             @Main Handler mainHandler,
             UiEventLogger uiEventLogger,
             NavigationBarOverlayController navBarOverlayController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            NavigationBarA11yHelper navigationBarA11yHelper) {
         mContext = context;
         mWindowManager = windowManager;
         mAssistManagerLazy = assistManagerLazy;
@@ -175,6 +177,7 @@ public class NavigationBarController implements Callbacks,
         mSystemActions = systemActions;
         mUiEventLogger = uiEventLogger;
         mHandler = mainHandler;
+        mNavigationBarA11yHelper = navigationBarA11yHelper;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         commandQueue.addCallback(this);
         configurationController.addCallback(this);
@@ -182,7 +185,8 @@ public class NavigationBarController implements Callbacks,
         mNavBarOverlayController = navBarOverlayController;
         mNavMode = mNavigationModeController.addListener(this);
         mNavigationModeController.addListener(this);
-        mTaskbarDelegate = new TaskbarDelegate(mOverviewProxyService);
+        mTaskbarDelegate = new TaskbarDelegate(mOverviewProxyService,
+                navigationBarA11yHelper, mSysUiFlagsContainer);
         mIsTablet = isTablet(mContext.getResources().getConfiguration());
     }
 
@@ -241,10 +245,12 @@ public class NavigationBarController implements Callbacks,
             // Remove navigation bar when taskbar is showing, currently only for 3 button mode
             removeNavigationBar(mContext.getDisplayId());
             mCommandQueue.addCallback(mTaskbarDelegate);
+            mTaskbarDelegate.init(mContext.getDisplayId());
         } else if (mNavigationBars.get(mContext.getDisplayId()) == null) {
             // Add navigation bar after taskbar goes away
             createNavigationBar(mContext.getDisplay(), null, null);
             mCommandQueue.removeCallback(mTaskbarDelegate);
+            mTaskbarDelegate.destroy();
         }
 
         return true;
@@ -361,7 +367,8 @@ public class NavigationBarController implements Callbacks,
                 mSystemActions,
                 mHandler,
                 mNavBarOverlayController,
-                mUiEventLogger);
+                mUiEventLogger,
+                mNavigationBarA11yHelper);
         mNavigationBars.put(displayId, navBar);
 
         View navigationBarView = navBar.createView(savedState);

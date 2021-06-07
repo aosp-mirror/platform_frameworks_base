@@ -276,7 +276,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 mock(SystemActions.class),
                 mHandler,
                 mock(NavigationBarOverlayController.class),
-                mUiEventLogger));
+                mUiEventLogger,
+                mock(NavigationBarA11yHelper.class)));
     }
 
     private void processAllMessages() {
