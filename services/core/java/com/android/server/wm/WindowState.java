@@ -445,6 +445,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     float mOverrideScale = 1;
     float mHScale=1, mVScale=1;
     float mLastHScale=1, mLastVScale=1;
+
+    // An offset in pixel of the surface contents from the window position. Used for Wallpaper
+    // to provide the effect of scrolling within a large surface. We just use these values as
+    // a cache.
+    int mXOffset = 0;
+    int mYOffset = 0;
+
+    // A scale factor for the surface contents, that will be applied from the center of the visible
+    // region.
+    float mWallpaperScale = 1f;
+
     final Matrix mTmpMatrix = new Matrix();
     final float[] mTmpMatrixArray = new float[9];
 
@@ -5443,10 +5454,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void updateScaleIfNeeded() {
-        if (mLastGlobalScale != mGlobalScale || mLastHScale != mHScale ||
-            mLastVScale != mVScale ) {
+        float newHScale = mHScale * mGlobalScale * mWallpaperScale;
+        float newVScale = mVScale * mGlobalScale * mWallpaperScale;
+        if (mLastHScale != newHScale ||
+            mLastVScale != newVScale ) {
             getPendingTransaction().setMatrix(getSurfaceControl(),
-                mGlobalScale*mHScale, 0, 0, mGlobalScale*mVScale);
+                newHScale, 0, 0, newVScale);
             mLastGlobalScale = mGlobalScale;
             mLastHScale = mHScale;
             mLastVScale = mVScale;
@@ -5484,6 +5497,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSurfacePlacementNeeded = false;
         transformFrameToSurfacePosition(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top,
                 mSurfacePosition);
+        mSurfacePosition.offset(mXOffset, mYOffset);
 
         // Freeze position while we're unrotated, so the surface remains at the position it was
         // prior to the rotation.
@@ -6095,5 +6109,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void markRedrawForSyncReported() {
        mRedrawForSyncReported = true;
+    }
+
+    boolean setWallpaperOffset(int dx, int dy, float scale) {
+        if (mXOffset == dx && mYOffset == dy && Float.compare(mWallpaperScale, scale) == 0) {
+            return false;
+        }
+        mXOffset = dx;
+        mYOffset = dy;
+        mWallpaperScale = scale;
+        scheduleAnimation();
+        return true;
     }
 }
