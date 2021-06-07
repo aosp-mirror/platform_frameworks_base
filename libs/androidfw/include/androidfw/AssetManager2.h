@@ -508,13 +508,13 @@ class Theme {
   // data failed.
   base::expected<std::monostate, NullOrIOError> ApplyStyle(uint32_t resid, bool force = false);
 
-  // Sets this Theme to be a copy of `other` if `other` has the same AssetManager as this Theme.
+  // Sets this Theme to be a copy of `source` if `source` has the same AssetManager as this Theme.
   //
-  // If `other` does not have the same AssetManager as this theme, only attributes from ApkAssets
+  // If `source` does not have the same AssetManager as this theme, only attributes from ApkAssets
   // loaded into both AssetManagers will be copied to this theme.
   //
   // Returns an I/O error if reading resource data failed.
-  base::expected<std::monostate, IOError> SetTo(const Theme& other);
+  base::expected<std::monostate, IOError> SetTo(const Theme& source);
 
   void Clear();
 
@@ -546,20 +546,16 @@ class Theme {
 
   void Dump() const;
 
+  struct Entry;
  private:
   DISALLOW_COPY_AND_ASSIGN(Theme);
 
-  // Called by AssetManager2.
   explicit Theme(AssetManager2* asset_manager);
 
-  AssetManager2* asset_manager_;
+  AssetManager2* asset_manager_ = nullptr;
   uint32_t type_spec_flags_ = 0u;
 
-  // Defined in the cpp.
-  struct Package;
-
-  constexpr static size_t kPackageCount = std::numeric_limits<uint8_t>::max() + 1;
-  std::array<std::unique_ptr<Package>, kPackageCount> packages_;
+  std::vector<Entry> entries_;
 };
 
 inline const ResolvedBag::Entry* begin(const ResolvedBag* bag) {
