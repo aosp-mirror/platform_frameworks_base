@@ -752,7 +752,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
                         f = new FileOutputStream(wallpaper.cropFile);
                         bos = new BufferedOutputStream(f, 32*1024);
-                        finalCrop.compress(Bitmap.CompressFormat.PNG, 100, bos);
+                        finalCrop.compress(Bitmap.CompressFormat.JPEG, 100, bos);
                         bos.flush();  // don't rely on the implicit flush-at-close when noting success
                         success = true;
                     }
