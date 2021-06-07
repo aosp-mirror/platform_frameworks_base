@@ -74,6 +74,7 @@ import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.pm.permission.CompatibilityPermissionInfo;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
@@ -904,7 +905,7 @@ public class ParsingPackageUtils {
             );
         }
 
-        convertNewPermissions(pkg);
+        convertCompatPermissions(pkg);
 
         convertSplitPermissions(pkg);
 
@@ -2790,30 +2791,15 @@ public class ParsingPackageUtils {
         }
     }
 
-    private static void convertNewPermissions(ParsingPackage pkg) {
-        final int NP = PackageParser.NEW_PERMISSIONS.length;
-        StringBuilder newPermsMsg = null;
-        for (int ip = 0; ip < NP; ip++) {
-            final PackageParser.NewPermissionInfo npi
-                    = PackageParser.NEW_PERMISSIONS[ip];
-            if (pkg.getTargetSdkVersion() >= npi.sdkVersion) {
+    private static void convertCompatPermissions(ParsingPackage pkg) {
+        for (int i = 0, size = CompatibilityPermissionInfo.COMPAT_PERMS.length; i < size; i++) {
+            final CompatibilityPermissionInfo info = CompatibilityPermissionInfo.COMPAT_PERMS[i];
+            if (pkg.getTargetSdkVersion() >= info.sdkVersion) {
                 break;
             }
-            if (!pkg.getRequestedPermissions().contains(npi.name)) {
-                if (newPermsMsg == null) {
-                    newPermsMsg = new StringBuilder(128);
-                    newPermsMsg.append(pkg.getPackageName());
-                    newPermsMsg.append(": compat added ");
-                } else {
-                    newPermsMsg.append(' ');
-                }
-                newPermsMsg.append(npi.name);
-                pkg.addUsesPermission(new ParsedUsesPermission(npi.name, 0))
-                        .addImplicitPermission(npi.name);
+            if (!pkg.getRequestedPermissions().contains(info.name)) {
+                pkg.addImplicitPermission(info.name);
             }
-        }
-        if (newPermsMsg != null) {
-            Slog.i(TAG, newPermsMsg.toString());
         }
     }
 
@@ -2830,8 +2816,7 @@ public class ParsingPackageUtils {
             for (int in = 0; in < newPerms.size(); in++) {
                 final String perm = newPerms.get(in);
                 if (!requestedPermissions.contains(perm)) {
-                    pkg.addUsesPermission(new ParsedUsesPermission(perm, 0))
-                            .addImplicitPermission(perm);
+                    pkg.addImplicitPermission(perm);
                 }
             }
         }

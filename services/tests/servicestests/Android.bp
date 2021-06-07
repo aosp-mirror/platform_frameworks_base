@@ -117,6 +117,7 @@ android_test {
         ":PackageParserTestApp2",
         ":PackageParserTestApp3",
         ":PackageParserTestApp4",
+        ":PackageParserTestApp5",
         ":apex.test",
         ":test.rebootless_apex_v1",
         ":test.rebootless_apex_v2",

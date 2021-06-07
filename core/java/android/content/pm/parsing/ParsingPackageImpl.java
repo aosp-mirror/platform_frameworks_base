@@ -723,6 +723,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl addImplicitPermission(String permission) {
+        addUsesPermission(new ParsedUsesPermission(permission, 0 /*usesPermissionFlags*/));
         this.implicitPermissions = CollectionUtils.add(this.implicitPermissions,
                 TextUtils.safeIntern(permission));
         return this;

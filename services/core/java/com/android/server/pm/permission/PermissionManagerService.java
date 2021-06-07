@@ -82,13 +82,13 @@ import android.content.pm.PackageManager.PermissionGroupInfoFlags;
 import android.content.pm.PackageManager.PermissionInfoFlags;
 import android.content.pm.PackageManager.PermissionWhitelistFlags;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.permission.CompatibilityPermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
@@ -2822,7 +2822,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             // Except...  if this is a permission that was added
                             // to the platform (note: need to only do this when
                             // updating the platform).
-                            if (!isNewPlatformPermissionForPackage(perm, pkg)) {
+                            if (!isCompatPlatformPermissionForPackage(perm, pkg)) {
                                 shouldGrantNormalPermission = false;
                             }
                         }
@@ -3358,14 +3358,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return result;
     }
 
-    private static boolean isNewPlatformPermissionForPackage(String perm, AndroidPackage pkg) {
+    private static boolean isCompatPlatformPermissionForPackage(String perm, AndroidPackage pkg) {
         boolean allowed = false;
-        final int NP = PackageParser.NEW_PERMISSIONS.length;
-        for (int ip=0; ip<NP; ip++) {
-            final PackageParser.NewPermissionInfo npi
-                    = PackageParser.NEW_PERMISSIONS[ip];
-            if (npi.name.equals(perm)
-                    && pkg.getTargetSdkVersion() < npi.sdkVersion) {
+        for (int i = 0, size = CompatibilityPermissionInfo.COMPAT_PERMS.length; i < size; i++) {
+            final CompatibilityPermissionInfo info = CompatibilityPermissionInfo.COMPAT_PERMS[i];
+            if (info.name.equals(perm)
+                    && pkg.getTargetSdkVersion() < info.sdkVersion) {
                 allowed = true;
                 Log.i(TAG, "Auto-granting " + perm + " to old pkg "
                         + pkg.getPackageName());
