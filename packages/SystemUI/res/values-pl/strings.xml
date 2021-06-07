@@ -708,13 +708,13 @@
     <string name="inline_block_button" msgid="479892866568378793">"Zablokuj"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Pokazuj nadal"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Minimalizuj"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Bez dźwięku"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Ciche"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Zachowaj wyciszenie"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Alerty"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Powiadamiaj dalej"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Wyłącz powiadomienia"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Nadal pokazywać powiadomienia z tej aplikacji?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Bez dźwięku"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Ciche"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Domyślne"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Dymek"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brak dźwięku i wibracji"</string>
@@ -724,7 +724,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Przyciąga uwagę dzięki pływającym skrótom do treści."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wyświetla się jako pływający dymek u góry sekcji rozmów, pokazuje zdjęcie profilowe na ekranie blokady"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ustawienia"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Priorytet"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Priorytetowe"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje funkcji rozmów"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Brak ostatnich dymków"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Tutaj będą pojawiać się ostatnie i odrzucone dymki"</string>

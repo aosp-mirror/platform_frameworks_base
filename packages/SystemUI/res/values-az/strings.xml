@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Batareya Qənaətini aktiv edin"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Ayarlar"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Ekran avtodönüşü"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Ekranın avtomatik dönməsi"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"SUSDUR"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AVTO"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"Bildirişlər"</string>
@@ -358,7 +358,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Aktiv edilir..."</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Parlaqlıq"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Avtodönüş"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Ekran avtodönüşü"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Ekranın avtomatik dönməsi"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> rejimi"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Fırlanma kilidlidir"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Portret"</string>
@@ -506,7 +506,7 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Bu funksiyanı təmin edən xidmətin yazma və ya yayım zamanı ekranda görünən və ya cihazdan oxudulan bütün bilgilərə girişi olacaq. Buraya parollar, ödəniş detalları, fotolar, mesajlar və oxudulan audio kimi məlumatlar daxildir."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Yazma və ya yayımlama başladılsın?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilə yazma və ya yayımlama başladılsın?"</string>
-    <string name="media_projection_remember_text" msgid="6896767327140422951">"Daha göstərmə"</string>
+    <string name="media_projection_remember_text" msgid="6896767327140422951">"Göstərilməsin"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hamısını silin"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"İdarə edin"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Tarixçə"</string>

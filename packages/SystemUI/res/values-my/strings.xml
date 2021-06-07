@@ -1020,7 +1020,7 @@
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"လော့ခ်မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံကို ပြရန်"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"အက်ပ်အပေါ်တွင် မျောနေသောပူ‌ဖောင်းကွက်အဖြစ် ပေါ်မည်"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'မနှောင့်ယှက်ရ\' ကို ကြားဖြတ်ခြင်း"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Ok"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ရပါပြီ"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ဆက်တင်များ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ဝင်းဒိုး ထပ်ပိုးလွှာ ချဲ့ခြင်း"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ဝင်းဒိုး ချဲ့ခြင်း"</string>
@@ -1080,5 +1080,5 @@
     <string name="controls_in_progress" msgid="4421080500238215939">"ဆောင်ရွက်နေသည်"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"ထိန်းချုပ်မှုအသစ်များ ကြည့်ရန် ဖွင့်ပိတ်ခလုတ်ကို ဖိထားပါ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"ထိန်းချုပ်မှုများ ထည့်ရန်"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"ထိန်းချုပ်မှုများ တည်းဖြတ်ရန်"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"ထိန်းချုပ်မှုများ ပြင်ရန်"</string>
 </resources>
