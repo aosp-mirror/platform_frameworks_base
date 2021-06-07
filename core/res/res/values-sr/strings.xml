@@ -1889,8 +1889,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирао је администратор"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избрисао је администратор"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Потврди"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Уштеда батерије укључује тамну тему и ограничава или искључује активности у позадини, неке визуелне ефекте, одређене функције и неке мрежне везе."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Уштеда батерије укључује тамну тему и ограничава или искључује активности у позадини, неке визуелне ефекте, одређене функције и неке мрежне везе."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Да би се смањила потрошња података, Уштеда података спречава неке апликације да шаљу или примају податке у позадини. Апликација коју тренутно користите може да приступа подацима, али ће то чинити ређе. На пример, слике се неће приказивати док их не додирнете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Желите да укључите Уштеду података?"</string>
@@ -2003,7 +2002,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Апликација <xliff:g id="APP_NAME_0">%1$s</xliff:g> тренутно није доступна. <xliff:g id="APP_NAME_1">%2$s</xliff:g> управља доступношћу."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Сазнајте више"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Опозови паузирање апликације"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Укључити пословне апликације?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Укључујете пословне апликације?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Приступајте пословним апликацијама и обавештењима"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Укључи"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликација није доступна"</string>
@@ -2126,7 +2125,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Потврди"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Искључи"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Сазнајте више"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Побољшана обавештења су заменила Android прилагодљива обавештења у Android-у 12. Ова функција показује предложене радње и одговоре и организује обавештења.\n\nПобољшана обавештења могу да приступају садржају обавештења, укључујући личне податке попут имена контаката и порука. Ова функција може и да одбацује обавештења или да одговара на њих, на пример, да се јавља на телефонске позиве и контролише режим Не узнемиравај."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Побољшана обавештења су заменила Android прилагодљива обавештења у Android-у 12. Ова функција показује предложене радње и одговоре, и организује обавештења.\n\nПобољшана обавештења могу да приступају садржају обавештења, укључујући личне податке попут имена контаката и порука. Ова функција може и да одбацује обавештења или да одговара на њих, на пример, да се јавља на телефонске позиве и контролише режим Не узнемиравај."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Обавештење о информацијама Рутинског режима"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батерија ће се можда испразнити пре уобичајеног пуњења"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Уштеда батерије је активирана да би се продужило трајање батерије"</string>

@@ -1866,8 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Fshirë nga administratori"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Në rregull"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"\"Kursyesi i baterisë\" aktivizon \"Temën e errët\" dhe kufizon ose çaktivizon aktivitetin në sfond, disa efekte vizuale, veçori të caktuara dhe disa lidhje të rrjetit."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"\"Kursyesi i baterisë\" aktivizon \"Temën e errët\" dhe kufizon ose çaktivizon aktivitetin në sfond, disa efekte vizuale, veçori të caktuara dhe disa lidhje të rrjetit."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Për të ndihmuar në reduktimin e përdorimit të të dhënave, \"Kursyesi i të dhënave\" pengon që disa aplikacione të dërgojnë apo të marrin të dhëna në sfond. Një aplikacion që po përdor aktualisht mund të ketë qasje te të dhënat, por këtë mund ta bëjë më rrallë. Kjo mund të nënkuptojë, për shembull, se imazhet nuk shfaqen kur troket mbi to."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Të aktivizohet \"Kursyesi i të dhënave\"?"</string>
@@ -1972,7 +1971,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Mëso më shumë"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anulo pauzën për aplikacionin"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"Të aktivizohen aplikacionet e punës?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Merr qasjen tek aplikacionet e punës dhe njoftimet e tua"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Merr qasje tek aplikacionet e punës dhe njoftimet e tua"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivizo"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacioni nuk ofrohet"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk ofrohet për momentin."</string>
