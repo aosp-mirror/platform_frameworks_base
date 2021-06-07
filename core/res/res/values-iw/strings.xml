@@ -816,7 +816,7 @@
     <string name="relationTypeSister" msgid="3721676005094140671">"אחות"</string>
     <string name="relationTypeSpouse" msgid="6916682664436031703">"בן/בת זוג"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"בהתאמה אישית"</string>
-    <string name="sipAddressTypeHome" msgid="5918441930656878367">"דף הבית"</string>
+    <string name="sipAddressTypeHome" msgid="5918441930656878367">"בית"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"עבודה"</string>
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"אחר"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"לא נמצאה אפליקציה להצגת התוכן הזה."</string>
