@@ -131,6 +131,17 @@ final class HotwordDetectionConnection {
             protected long getAutoDisconnectTimeoutMs() {
                 return -1;
             }
+
+            @Override
+            public void binderDied() {
+                super.binderDied();
+                Slog.w(TAG, "binderDied");
+                try {
+                    callback.onError(-1);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to report onError status: " + e);
+                }
+            }
         };
         mRemoteHotwordDetectionService.connect();
         if (callback == null) {
