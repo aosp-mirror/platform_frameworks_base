@@ -43,8 +43,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.NonaFunction;
-import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
@@ -65,6 +63,11 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private static final String ACTIVITY_RECOGNITION_TAGS =
             "android:activity_recognition_allow_listed_tags";
     private static final String ACTIVITY_RECOGNITION_TAGS_SEPARATOR = ";";
+
+    private static ArraySet<String> sExpectedTags = new ArraySet<>(new String[] {
+            "awareness_provider", "activity_recognition_provider", "network_location_provider",
+            "network_location_calibration", "fused_location_provider", "geofencer_provider"});
+
 
     @NonNull
     private final Object mLock = new Object();
@@ -224,8 +227,14 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         if (resolvedCode != code) {
             if (isDatasourceAttributionTag(uid, packageName, attributionTag,
                     mLocationTags)) {
+                if (packageName.equals("com.google.android.gms")
+                        && !sExpectedTags.contains(attributionTag)) {
+                    Log.i("AppOpsDebugRemapping", "remapping " + packageName + " location "
+                            + "for tag " + attributionTag);
+                }
                 return resolvedCode;
-            } else if (packageName.equals("com.google.android.gms")) {
+            } else if (packageName.equals("com.google.android.gms")
+                    && sExpectedTags.contains(attributionTag)) {
                 Log.i("AppOpsDebugRemapping", "NOT remapping " + packageName + " code "
                         + code + " for tag " + attributionTag);
             }
@@ -234,10 +243,14 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             if (resolvedCode != code) {
                 if (isDatasourceAttributionTag(uid, packageName, attributionTag,
                         mActivityRecognitionTags)) {
-                    Log.i("AppOpsDebugRemapping", "remapping " + packageName + " code "
-                            + code + " to " + resolvedCode + " for tag " + attributionTag);
+                    if (packageName.equals("com.google.android.gms")
+                            && !sExpectedTags.contains(attributionTag)) {
+                        Log.i("AppOpsDebugRemapping", "remapping " + packageName + " "
+                                + "activity recognition for tag " + attributionTag);
+                    }
                     return resolvedCode;
-                } else if (packageName.equals("com.google.android.gms")) {
+                } else if (packageName.equals("com.google.android.gms")
+                        && sExpectedTags.contains(attributionTag)) {
                     Log.i("AppOpsDebugRemapping", "NOT remapping " + packageName
                             + " code " + code + " for tag " + attributionTag);
                 }
@@ -342,13 +355,15 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         if (appIdTags != null) {
             final ArraySet<String> packageTags = appIdTags.get(packageName);
             if (packageTags != null && packageTags.contains(attributionTag)) {
-                if (packageName.equals("com.google.android.gms")) {
+                if (packageName.equals("com.google.android.gms")
+                        && !sExpectedTags.contains(attributionTag)) {
                     Log.i("AppOpsDebugRemapping", packageName + " tag "
                             + attributionTag + " in " + packageTags);
                 }
                 return true;
             }
-            if (packageName.equals("com.google.android.gms")) {
+            if (packageName.equals("com.google.android.gms")
+                    && sExpectedTags.contains(attributionTag)) {
                 Log.i("AppOpsDebugRemapping", packageName + " tag " + attributionTag
                         + " NOT in " + packageTags);
             }
