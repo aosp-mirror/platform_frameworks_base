@@ -19,8 +19,8 @@ package com.android.systemui.wallet.ui;
 import static android.provider.Settings.ACTION_LOCKSCREEN_SETTINGS;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.hardware.biometrics.BiometricSourceType;
 import android.os.Bundle;
 import android.os.Handler;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -34,6 +34,9 @@ import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -63,7 +66,10 @@ public class WalletActivity extends LifecycleActivity implements
     private final Handler mHandler;
     private final FalsingManager mFalsingManager;
     private final UserTracker mUserTracker;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final StatusBarKeyguardViewManager mKeyguardViewManager;
+
+    private KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback;
     private WalletScreenController mWalletScreenController;
     private QuickAccessWalletClient mWalletClient;
     private boolean mHasRegisteredListener;
@@ -77,6 +83,7 @@ public class WalletActivity extends LifecycleActivity implements
             @Main Handler handler,
             FalsingManager falsingManager,
             UserTracker userTracker,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarKeyguardViewManager keyguardViewManager) {
         mKeyguardStateController = keyguardStateController;
         mKeyguardDismissUtil = keyguardDismissUtil;
@@ -85,6 +92,7 @@ public class WalletActivity extends LifecycleActivity implements
         mHandler = handler;
         mFalsingManager = falsingManager;
         mUserTracker = userTracker;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardViewManager = keyguardViewManager;
     }
 
@@ -116,7 +124,17 @@ public class WalletActivity extends LifecycleActivity implements
                 mHandler,
                 mUserTracker,
                 mFalsingManager,
+                mKeyguardUpdateMonitor,
                 mKeyguardStateController);
+        mKeyguardUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
+            @Override
+            public void onBiometricRunningStateChanged(
+                    boolean running,
+                    BiometricSourceType biometricSourceType) {
+                Log.d(TAG, "Biometric running state has changed.");
+                mWalletScreenController.queryWalletCards();
+            }
+        };
 
         walletView.getAppButton().setOnClickListener(
                 v -> {
@@ -146,7 +164,9 @@ public class WalletActivity extends LifecycleActivity implements
         // Click the action button to re-render the screen when the device is unlocked.
         walletView.setDeviceLockedActionOnClickListener(
                 v -> {
+                    Log.d(TAG, "Wallet action button is clicked.");
                     if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                        Log.d(TAG, "False tap detected on wallet action button.");
                         return;
                     }
 
@@ -164,13 +184,17 @@ public class WalletActivity extends LifecycleActivity implements
             mHasRegisteredListener = true;
         }
         mKeyguardStateController.addCallback(mWalletScreenController);
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mWalletScreenController.queryWalletCards();
-        mKeyguardViewManager.requestFp(true, Color.BLACK);
+        mKeyguardViewManager.requestFp(
+                true,
+                Utils.getColorAttrDefaultColor(
+                        this, com.android.internal.R.attr.colorAccentPrimary));
         mKeyguardViewManager.requestFace(true);
     }
 
@@ -195,7 +219,6 @@ public class WalletActivity extends LifecycleActivity implements
     public void onWalletServiceEvent(WalletServiceEvent event) {
         switch (event.getEventType()) {
             case WalletServiceEvent.TYPE_NFC_PAYMENT_STARTED:
-                finish();
                 break;
             case WalletServiceEvent.TYPE_WALLET_CARDS_UPDATED:
                 mWalletScreenController.queryWalletCards();
@@ -224,6 +247,9 @@ public class WalletActivity extends LifecycleActivity implements
     @Override
     protected void onDestroy() {
         mKeyguardStateController.removeCallback(mWalletScreenController);
+        if (mKeyguardUpdateMonitorCallback != null) {
+            mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
+        }
         mWalletScreenController.onDismissed();
         mWalletClient.removeWalletServiceEventListener(this);
         mHasRegisteredListener = false;

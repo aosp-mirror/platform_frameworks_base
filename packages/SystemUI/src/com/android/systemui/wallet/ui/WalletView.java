@@ -63,6 +63,7 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     private final ViewGroup mEmptyStateView;
     private CharSequence mCenterCardText;
     private boolean mIsDeviceLocked = false;
+    private boolean mIsUdfpsEnabled = false;
     private OnClickListener mDeviceLockedActionOnClickListener;
 
     public WalletView(Context context) {
@@ -108,7 +109,7 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
             mCardLabel.setText(centerCardText);
             mIcon.setImageDrawable(centerCardIcon);
         }
-        renderActionButton(centerCard, mIsDeviceLocked);
+        renderActionButton(centerCard, mIsDeviceLocked, mIsUdfpsEnabled);
         if (TextUtils.equals(centerCardText, getLabelText(nextCard))) {
             mCardLabel.setAlpha(1f);
         } else {
@@ -128,15 +129,19 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
      * @param isDeviceLocked indicates whether the device is locked.
      */
     void showCardCarousel(
-            List<WalletCardViewInfo> data, int selectedIndex, boolean isDeviceLocked) {
+            List<WalletCardViewInfo> data,
+            int selectedIndex,
+            boolean isDeviceLocked,
+            boolean isUdfpsEnabled) {
         boolean shouldAnimate =
                 mCardCarousel.setData(data, selectedIndex, mIsDeviceLocked != isDeviceLocked);
         mIsDeviceLocked = isDeviceLocked;
+        mIsUdfpsEnabled = isUdfpsEnabled;
         mCardCarouselContainer.setVisibility(VISIBLE);
         mErrorView.setVisibility(GONE);
         mEmptyStateView.setVisibility(GONE);
         mIcon.setImageDrawable(getHeaderIcon(mContext, data.get(selectedIndex)));
-        renderActionButton(data.get(selectedIndex), isDeviceLocked);
+        renderActionButton(data.get(selectedIndex), isDeviceLocked, mIsUdfpsEnabled);
         if (shouldAnimate) {
             animateViewsShown(mIcon, mCardLabel, mActionButton);
         }
@@ -240,13 +245,14 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         return icon;
     }
 
-    private void renderActionButton(WalletCardViewInfo walletCard, boolean isDeviceLocked) {
+    private void renderActionButton(
+            WalletCardViewInfo walletCard, boolean isDeviceLocked, boolean isUdfpsEnabled) {
         CharSequence actionButtonText = getActionButtonText(walletCard);
-        if (isDeviceLocked) {
+        if (!isUdfpsEnabled && isDeviceLocked) {
             mActionButton.setVisibility(VISIBLE);
             mActionButton.setText(R.string.wallet_action_button_label_unlock);
             mActionButton.setOnClickListener(mDeviceLockedActionOnClickListener);
-        } else if (actionButtonText != null) {
+        } else if (!isDeviceLocked && actionButtonText != null) {
             mActionButton.setText(actionButtonText);
             mActionButton.setVisibility(VISIBLE);
             mActionButton.setOnClickListener(v -> {
