@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"கிளிப் எல்லைகள், ஓரங்கள், மேலும் பலவற்றைக் காட்டு"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL தளவமைப்பின் திசையை வலியுறுத்து"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"எல்லா மொழிகளுக்கும் திரையின் தளவமைப்பு திசையை RTL க்கு மாற்று"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ஐ வலியுறுத்து"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 பயன்பாடுகளில் 4x MSAA ஐ இயக்கு"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"செவ்வகம் அல்லாத கிளிப் செயல்பாடுகளைப் பிழைத்திருத்து"</string>

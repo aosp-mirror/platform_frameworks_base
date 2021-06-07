@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Ցույց տալ կտրվածքի սահմանները, լուսանցքները և այլն"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Ուղղությունը դարձնել RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Բոլոր լեզուների համար էկրանի տեքստի ուղղությունը դարձնել աջից ձախ"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Ստիպել  4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Միացնել 4x MSAA-ը  OpenGL ES 2.0 հավելվածներում"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Վրիպազերծել ոչ ուղղանկյուն կտրումների գործողությունները"</string>
