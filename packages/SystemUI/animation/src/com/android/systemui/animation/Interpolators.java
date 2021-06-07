@@ -94,6 +94,16 @@ public class Interpolators {
     }
 
     /**
+     * Similar to {@link #getOvershootInterpolation(float, float, float)} but the overshoot
+     * starts immediately here, instead of first having a section of non-overshooting
+     *
+     * @param progress a progress value going from 0 to 1
+     */
+    public static float getOvershootInterpolation(float progress) {
+        return MathUtils.max(0.0f, (float) (1.0f - Math.exp(-4 * progress)));
+    }
+
+    /**
      * Interpolate alpha for notifications background scrim during shade expansion.
      * @param fraction Shade expansion fraction
      * @param forNotification If we want the alpha of the notification shade or the scrim.
