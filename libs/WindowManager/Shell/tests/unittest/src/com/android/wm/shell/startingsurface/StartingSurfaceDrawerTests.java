@@ -18,25 +18,27 @@ package com.android.wm.shell.startingsurface;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.testing.TestableContext;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -58,6 +60,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.function.IntSupplier;
+
 /**
  * Tests for the starting surface drawer.
  */
@@ -71,6 +75,9 @@ public class StartingSurfaceDrawerTests {
     @Mock
     private TransactionPool mTransactionPool;
 
+    private final Handler mTestHandler = new Handler(Looper.getMainLooper());
+    private final TestableContext mTestContext = new TestContext(
+            InstrumentationRegistry.getInstrumentation().getTargetContext());
     TestStartingSurfaceDrawer mStartingSurfaceDrawer;
 
     static final class TestStartingSurfaceDrawer extends StartingSurfaceDrawer{
@@ -83,7 +90,7 @@ public class StartingSurfaceDrawerTests {
         }
 
         @Override
-        protected boolean postAddWindow(int taskId, IBinder appToken,
+        protected boolean addWindow(int taskId, IBinder appToken,
                 View view, WindowManager wm, WindowManager.LayoutParams params) {
             // listen for addView
             mAddWindowForTask = taskId;
@@ -101,45 +108,50 @@ public class StartingSurfaceDrawerTests {
         }
     }
 
+    private static class TestContext extends TestableContext {
+        TestContext(Context context) {
+            super(context);
+        }
+
+        @Override
+        public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
+                throws PackageManager.NameNotFoundException {
+            return this;
+        }
+
+        @Override
+        public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+                IntentFilter filter, String broadcastPermission, Handler scheduler) {
+            return null;
+        }
+    }
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        final TestableContext context = new TestableContext(
-                InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
-        final WindowManager realWindowManager = context.getSystemService(WindowManager.class);
+        final WindowManager realWindowManager = mTestContext.getSystemService(WindowManager.class);
         final WindowMetrics metrics = realWindowManager.getMaximumWindowMetrics();
-        context.addMockSystemService(WindowManager.class, mMockWindowManager);
+        mTestContext.addMockSystemService(WindowManager.class, mMockWindowManager);
 
-        spyOn(context);
-        spyOn(realWindowManager);
-        try {
-            doReturn(context).when(context)
-                    .createPackageContextAsUser(anyString(), anyInt(), any());
-        } catch (PackageManager.NameNotFoundException e) {
-            //
-        }
         doReturn(metrics).when(mMockWindowManager).getMaximumWindowMetrics();
         doNothing().when(mMockWindowManager).addView(any(), any());
 
-        final HandlerExecutor testExecutor =
-                new HandlerExecutor(new Handler(Looper.getMainLooper()));
-        mStartingSurfaceDrawer = spy(new TestStartingSurfaceDrawer(context, testExecutor,
-                mTransactionPool));
+        mStartingSurfaceDrawer = spy(new TestStartingSurfaceDrawer(mTestContext,
+                new HandlerExecutor(mTestHandler), mTransactionPool));
     }
 
     @Test
     public void testAddSplashScreenSurface() {
         final int taskId = 1;
-        final Handler mainLoop = new Handler(Looper.getMainLooper());
         final StartingWindowInfo windowInfo =
                 createWindowInfo(taskId, android.R.style.Theme);
         mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder, false);
-        waitHandlerIdle(mainLoop);
-        verify(mStartingSurfaceDrawer).postAddWindow(eq(taskId), eq(mBinder), any(), any(), any());
+        waitHandlerIdle(mTestHandler);
+        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any());
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, taskId);
 
         mStartingSurfaceDrawer.removeStartingWindow(windowInfo.taskInfo.taskId, null, null, false);
-        waitHandlerIdle(mainLoop);
+        waitHandlerIdle(mTestHandler);
         verify(mStartingSurfaceDrawer).removeWindowSynced(eq(taskId), any(), any(), eq(false));
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, 0);
     }
@@ -147,13 +159,43 @@ public class StartingSurfaceDrawerTests {
     @Test
     public void testFallbackDefaultTheme() {
         final int taskId = 1;
-        final Handler mainLoop = new Handler(Looper.getMainLooper());
         final StartingWindowInfo windowInfo =
                 createWindowInfo(taskId, 0);
         mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder, false);
-        waitHandlerIdle(mainLoop);
-        verify(mStartingSurfaceDrawer).postAddWindow(eq(taskId), eq(mBinder), any(), any(), any());
+        waitHandlerIdle(mTestHandler);
+        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any());
         assertNotEquals(mStartingSurfaceDrawer.mViewThemeResId, 0);
+    }
+
+    @Test
+    public void testColorCache() {
+        final String packageName = mTestContext.getPackageName();
+        final int configHash = 1;
+        final int windowBgColor = 0xff000000;
+        final int windowBgResId = 1;
+        final IntSupplier windowBgColorSupplier = () -> windowBgColor;
+        final SplashscreenContentDrawer.ColorCache colorCache =
+                mStartingSurfaceDrawer.mSplashscreenContentDrawer.mColorCache;
+        final SplashscreenContentDrawer.ColorCache.WindowColor windowColor1 =
+                colorCache.getWindowColor(packageName, configHash, windowBgColor, windowBgResId,
+                        windowBgColorSupplier);
+        assertEquals(windowBgColor, windowColor1.mBgColor);
+        assertEquals(0, windowColor1.mReuseCount);
+
+        final SplashscreenContentDrawer.ColorCache.WindowColor windowColor2 =
+                colorCache.getWindowColor(packageName, configHash, windowBgColor, windowBgResId,
+                        windowBgColorSupplier);
+        assertEquals(windowColor1, windowColor2);
+        assertEquals(1, windowColor1.mReuseCount);
+
+        final Intent packageRemoved = new Intent(Intent.ACTION_PACKAGE_REMOVED);
+        packageRemoved.setData(Uri.parse("package:" + packageName));
+        colorCache.onReceive(mTestContext, packageRemoved);
+
+        final SplashscreenContentDrawer.ColorCache.WindowColor windowColor3 =
+                colorCache.getWindowColor(packageName, configHash, windowBgColor, windowBgResId,
+                        windowBgColorSupplier);
+        assertEquals(0, windowColor3.mReuseCount);
     }
 
     private StartingWindowInfo createWindowInfo(int taskId, int themeResId) {
