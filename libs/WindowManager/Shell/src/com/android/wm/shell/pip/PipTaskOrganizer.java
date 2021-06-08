@@ -628,8 +628,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final Rect destinationBounds = mPipBoundsState.getBounds();
         final SurfaceControl swipeToHomeOverlay = mSwipePipToHomeOverlay;
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
-        mSurfaceTransactionHelper.resetScale(tx, mLeash, destinationBounds);
-        mSurfaceTransactionHelper.crop(tx, mLeash, destinationBounds);
+        mSurfaceTransactionHelper
+                .resetScale(tx, mLeash, destinationBounds)
+                .crop(tx, mLeash, destinationBounds)
+                .round(tx, mLeash, isInPip());
         // The animation is finished in the Launcher and here we directly apply the final touch.
         applyEnterPipSyncTransaction(destinationBounds, () -> {
             // Ensure menu's settled in its final bounds first.
