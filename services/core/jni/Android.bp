@@ -74,6 +74,7 @@ cc_library_static {
         "frameworks/base/libs",
         "frameworks/native/services",
         "system/gatekeeper/include",
+        "system/memory/libmeminfo/include",
     ],
 
     header_libs: [
@@ -111,6 +112,7 @@ cc_defaults {
         "libhardware",
         "libhardware_legacy",
         "libhidlbase",
+        "libmeminfo",
         "libmemtrackproxy",
         "libmtp",
         "libnativehelper",
