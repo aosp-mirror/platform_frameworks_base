@@ -58,6 +58,7 @@ import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -707,20 +708,28 @@ public class ContentProviderHelper {
         mService.enforceNotIsolatedCaller("removeContentProvider");
         final long ident = Binder.clearCallingIdentity();
         try {
-            synchronized (mService) {
-                ContentProviderConnection conn;
-                try {
-                    conn = (ContentProviderConnection) connection;
-                } catch (ClassCastException e) {
-                    String msg = "removeContentProvider: " + connection
-                            + " not a ContentProviderConnection";
-                    Slog.w(TAG, msg);
-                    throw new IllegalArgumentException(msg);
+            ContentProviderConnection conn;
+            try {
+                conn = (ContentProviderConnection) connection;
+            } catch (ClassCastException e) {
+                String msg = "removeContentProvider: " + connection
+                        + " not a ContentProviderConnection";
+                Slog.w(TAG, msg);
+                throw new IllegalArgumentException(msg);
+            }
+            if (conn == null) {
+                throw new NullPointerException("connection is null");
+            }
+            ActivityManagerService.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "removeContentProvider: ",
+                    (conn.provider != null && conn.provider.info != null
+                    ? conn.provider.info.authority : ""));
+            try {
+                synchronized (mService) {
+                    decProviderCountLocked(conn, null, null, stable, true, true);
                 }
-                if (conn == null) {
-                    throw new NullPointerException("connection is null");
-                }
-                decProviderCountLocked(conn, null, null, stable, true, true);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -781,8 +790,15 @@ public class ContentProviderHelper {
             throw new NullPointerException("connection is null");
         }
 
-        conn.adjustCounts(stable, unstable);
-        return !conn.dead;
+        ActivityManagerService.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "refContentProvider: ",
+                (conn.provider != null && conn.provider.info != null
+                ? conn.provider.info.authority : ""));
+        try {
+            conn.adjustCounts(stable, unstable);
+            return !conn.dead;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     void unstableProviderDied(IBinder connection) {
@@ -798,50 +814,60 @@ public class ContentProviderHelper {
             throw new NullPointerException("connection is null");
         }
 
-        // Safely retrieve the content provider associated with the connection.
-        IContentProvider provider;
-        synchronized (mService) {
-            provider = conn.provider.provider;
-        }
+        ActivityManagerService.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "unstableProviderDied: ",
+                (conn.provider != null && conn.provider.info != null
+                ? conn.provider.info.authority : ""));
 
-        if (provider == null) {
-            // Um, yeah, we're way ahead of you.
-            return;
-        }
-
-        // Make sure the caller is being honest with us.
-        if (provider.asBinder().pingBinder()) {
-            // Er, no, still looks good to us.
+        try {
+            // Safely retrieve the content provider associated with the connection.
+            IContentProvider provider;
             synchronized (mService) {
-                Slog.w(TAG, "unstableProviderDied: caller " + Binder.getCallingUid()
-                        + " says " + conn + " died, but we don't agree");
-                return;
+                provider = conn.provider.provider;
             }
-        }
 
-        // Well look at that!  It's dead!
-        synchronized (mService) {
-            if (conn.provider.provider != provider) {
-                // But something changed...  good enough.
+            if (provider == null) {
+                // Um, yeah, we're way ahead of you.
                 return;
             }
 
-            ProcessRecord proc = conn.provider.proc;
-            if (proc == null || proc.getThread() == null) {
-                // Seems like the process is already cleaned up.
-                return;
+            // Make sure the caller is being honest with us.
+            if (provider.asBinder().pingBinder()) {
+                // Er, no, still looks good to us.
+                synchronized (mService) {
+                    Slog.w(TAG, "unstableProviderDied: caller " + Binder.getCallingUid()
+                            + " says " + conn + " died, but we don't agree");
+                    return;
+                }
             }
 
-            // As far as we're concerned, this is just like receiving a
-            // death notification...  just a bit prematurely.
-            mService.reportUidInfoMessageLocked(TAG, "Process " + proc.processName
-                            + " (pid " + proc.getPid() + ") early provider death", proc.info.uid);
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mService.appDiedLocked(proc, "unstable content provider");
-            } finally {
-                Binder.restoreCallingIdentity(token);
+            // Well look at that!  It's dead!
+            synchronized (mService) {
+                if (conn.provider.provider != provider) {
+                    // But something changed...  good enough.
+                    return;
+                }
+
+                ProcessRecord proc = conn.provider.proc;
+                if (proc == null || proc.getThread() == null) {
+                    // Seems like the process is already cleaned up.
+                    return;
+                }
+
+                // As far as we're concerned, this is just like receiving a
+                // death notification...  just a bit prematurely.
+                mService.reportUidInfoMessageLocked(TAG, "Process " + proc.processName
+                                + " (pid " + proc.getPid() + ") early provider death",
+                                proc.info.uid);
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mService.appDiedLocked(proc, "unstable content provider");
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
@@ -855,13 +881,21 @@ public class ContentProviderHelper {
             return;
         }
 
-        final ProcessRecord host = conn.provider.proc;
-        if (host == null) {
-            Slog.w(TAG, "Failed to find hosting ProcessRecord");
-            return;
-        }
+        ActivityManagerService.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "appNotRespondingViaProvider: ",
+                (conn.provider != null && conn.provider.info != null
+                ? conn.provider.info.authority : ""));
+        try {
+            final ProcessRecord host = conn.provider.proc;
+            if (host == null) {
+                Slog.w(TAG, "Failed to find hosting ProcessRecord");
+                return;
+            }
 
-        mService.mAnrHelper.appNotResponding(host, "ContentProvider not responding");
+            mService.mAnrHelper.appNotResponding(host, "ContentProvider not responding");
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     /**
