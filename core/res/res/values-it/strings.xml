@@ -1866,8 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminato dall\'amministratore"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"L\'opzione Risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, nonché alcuni effetti visivi, funzionalità e connessioni di rete."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"L\'opzione Risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, nonché alcuni effetti visivi, funzionalità e connessioni di rete."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Attivare Risparmio dati?"</string>

@@ -69,7 +69,7 @@ public class DexMetadataHelperTest {
     private static final String DEX_METADATA_FILE_EXTENSION = ".dm";
     private static final String DEX_METADATA_PACKAGE_NAME =
             "com.android.frameworks.servicestests.install_split";
-    private static long DEX_METADATA_VERSION_CODE = 30;
+    private static final long DEX_METADATA_VERSION_CODE = 9001;
 
     @Rule
     public TemporaryFolder mTemporaryFolder = new TemporaryFolder();

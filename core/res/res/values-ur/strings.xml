@@ -1866,8 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"آپ کے منتظم کے ذریعے اپ ڈیٹ کیا گیا"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"آپ کے منتظم کے ذریعے حذف کیا گیا"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ٹھیک ہے"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"بیٹری سیور گہری تھیم کو آن کرتی ہے اور پس منظر کی سرگرمی، کچھ بصری اثرات، مخصوص خصوصیات اور کچھ نیٹ ورک کنکشنز کو محدود یا آف کرتی ہے۔"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"بیٹری سیور گہری تھیم کو آن کرتی ہے اور پس منظر کی سرگرمی، کچھ بصری اثرات، مخصوص خصوصیات اور کچھ نیٹ ورک کنکشنز کو محدود یا آف کرتی ہے۔"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتی ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا تک رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا اکثر نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ڈیٹا سیور آن کریں؟"</string>

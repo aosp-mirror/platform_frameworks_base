@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ക്ലിപ്പ് ബൗണ്ടുകൾ, മാർജിനുകൾ തുടങ്ങിയവ ദൃശ്യമാക്കുക"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL ലേഔട്ട് ഡയറക്ഷൻ നിർബന്ധമാക്കുക"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"എല്ലാ ഭാഷകൾക്കുമായി സ്‌ക്രീൻ ലേഔട്ട് ഡയറക്ഷൻ RTL-ലേക്ക് നിർബന്ധമാക്കുക"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA നിർബന്ധമാക്കുക"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ആപ്പുകളിൽ 4x MSAA പ്രവർത്തനക്ഷമമാക്കൂ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"ചതുരമല്ലാത്ത ക്ലിപ്പ്‌ പ്രവർത്തനം ഡീബഗ്ഗ് ചെയ്യുക"</string>
