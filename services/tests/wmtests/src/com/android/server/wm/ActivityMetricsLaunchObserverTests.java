@@ -353,8 +353,22 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         mTrampolineActivity.setVisibility(false);
         notifyWindowsDrawn(mTopActivity);
 
-        assertWithMessage("Trampoline activity is invisble so there should be no undrawn windows")
+        assertWithMessage("Trampoline activity is invisible so there should be no undrawn windows")
                 .that(mLaunchingState.allDrawn()).isTrue();
+
+        // Since the activity is drawn, the launch event should be reported.
+        notifyTransitionStarting(mTopActivity);
+        verifyOnActivityLaunchFinished(mTopActivity);
+        mLaunchTopByTrampoline = false;
+        clearInvocations(mLaunchObserver);
+
+        // Another round without setting visibility of the trampoline activity.
+        onActivityLaunchedTrampoline();
+        notifyWindowsDrawn(mTopActivity);
+        // If the transition can start, the invisible activities should be discarded and the launch
+        // event be reported successfully.
+        notifyTransitionStarting(mTopActivity);
+        verifyOnActivityLaunchFinished(mTopActivity);
     }
 
     @Test
