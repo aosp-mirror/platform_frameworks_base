@@ -4502,8 +4502,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                         Slog.i("AppOpsDebug", "tag " + attributionTag + " found in "
                                 + packageName);
                     } else {
+                        ArrayList<String> tagList = new ArrayList<>();
+                        for (int i = 0; i < pkg.getAttributions().size(); i++) {
+                            tagList.add(pkg.getAttributions().get(i).tag);
+                        }
                         Slog.i("AppOpsDebug", "tag " + attributionTag + " missing from "
-                                + packageName);
+                                + packageName + ", tags: " + tagList);
                     }
                 }
 
