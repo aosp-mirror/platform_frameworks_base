@@ -4153,11 +4153,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 entry.setHeadsUpIsVisible();
             }
         }
-
-        @Override
-        public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-            mNotificationStackScrollLayoutController.generateHeadsUpAnimation(entry, isHeadsUp);
-        }
     }
 
     private class HeightListener implements QS.HeightListener {
