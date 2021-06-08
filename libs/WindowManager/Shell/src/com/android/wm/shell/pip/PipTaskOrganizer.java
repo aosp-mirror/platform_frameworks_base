@@ -184,6 +184,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mTaskOrganizer.applyTransaction(wct);
                 // The final task bounds will be applied by onFixedRotationFinished so that all
                 // coordinates are in new rotation.
+                mSurfaceTransactionHelper.round(tx, mLeash, isInPip());
                 mDeferredAnimEndTransaction = tx;
                 return;
             }
@@ -1041,7 +1042,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
-        mSurfaceTransactionHelper.scale(tx, mLeash, startBounds, toBounds, degrees);
+        mSurfaceTransactionHelper
+                .scale(tx, mLeash, startBounds, toBounds, degrees)
+                .round(tx, mLeash, startBounds, toBounds);
         if (mPipMenuController.isMenuVisible()) {
             mPipMenuController.movePipMenu(mLeash, tx, toBounds);
         } else {
@@ -1216,6 +1219,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // Just a resize in PIP
             taskBounds = destinationBounds;
         }
+        mSurfaceTransactionHelper.round(tx, mLeash, isInPip());
 
         wct.setBounds(mToken, taskBounds);
         wct.setBoundsChangeTransaction(mToken, tx);
