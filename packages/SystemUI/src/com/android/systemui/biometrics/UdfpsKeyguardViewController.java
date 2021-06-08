@@ -111,11 +111,11 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mStatusBarState = mStatusBarStateController.getState();
         mQsExpanded = mKeyguardViewManager.isQsExpanded();
         mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
+        mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
         updateAlpha();
         updatePauseAuth();
 
         mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
-        mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
     }
 
     @Override
