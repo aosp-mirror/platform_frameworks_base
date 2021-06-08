@@ -29,12 +29,12 @@
     android:paddingTop="@dimen/status_bar_padding_top"
     android:minHeight="48dp">
 
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/date_container"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:minHeight="48dp"
         android:layout_weight="1"
-        android:orientation="horizontal"
         android:gravity="center_vertical|start" >
 
         <com.android.systemui.statusbar.policy.DateView
@@ -46,7 +46,7 @@
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.QS.Status"
             systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
-    </LinearLayout>
+    </FrameLayout>
 
     <android.widget.Space
         android:id="@+id/space"
@@ -59,21 +59,22 @@
     <FrameLayout
         android:id="@+id/header_text_container"
         android:layout_height="match_parent"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:gravity="center"
     />
 
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/privacy_container"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:minHeight="48dp"
         android:layout_weight="1"
-        android:orientation="horizontal"
         android:gravity="center_vertical|end" >
 
     <include layout="@layout/ongoing_privacy_chip" />
 
-    </LinearLayout>
+    </FrameLayout>
 </LinearLayout>
