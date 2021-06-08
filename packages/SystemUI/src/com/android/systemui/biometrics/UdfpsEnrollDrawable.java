@@ -47,7 +47,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
     @NonNull private final Drawable mMovingTargetFpIcon;
     @NonNull private final Paint mSensorOutlinePaint;
     @NonNull private final Paint mBlueFill;
-    @NonNull private final Paint mBlueStroke;
 
     @Nullable private RectF mSensorRect;
     @Nullable private UdfpsEnrollHelper mEnrollHelper;
@@ -75,12 +74,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
         mBlueFill.setAntiAlias(true);
         mBlueFill.setColor(context.getColor(R.color.udfps_moving_target_fill));
         mBlueFill.setStyle(Paint.Style.FILL);
-
-        mBlueStroke = new Paint(0 /* flags */);
-        mBlueStroke.setAntiAlias(true);
-        mBlueStroke.setColor(context.getColor(R.color.udfps_moving_target_stroke));
-        mBlueStroke.setStyle(Paint.Style.STROKE);
-        mBlueStroke.setStrokeWidth(12);
 
         mMovingTargetFpIcon = context.getResources().getDrawable(R.drawable.ic_fingerprint, null);
         mMovingTargetFpIcon.setTint(Color.WHITE);
@@ -146,6 +139,10 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
         }
     }
 
+    void onLastStepAcquired() {
+        mProgressDrawable.onLastStepAcquired();
+    }
+
     @Override
     public void draw(@NonNull Canvas canvas) {
         mProgressDrawable.draw(canvas);
@@ -163,7 +160,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
                 canvas.scale(mCurrentScale, mCurrentScale,
                         mSensorRect.centerX(), mSensorRect.centerY());
                 canvas.drawOval(mSensorRect, mBlueFill);
-                canvas.drawOval(mSensorRect, mBlueStroke);
             }
 
             mMovingTargetFpIcon.draw(canvas);
@@ -188,7 +184,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
         super.setAlpha(alpha);
         mSensorOutlinePaint.setAlpha(alpha);
         mBlueFill.setAlpha(alpha);
-        mBlueStroke.setAlpha(alpha);
         mMovingTargetFpIcon.setAlpha(alpha);
         invalidateSelf();
     }
