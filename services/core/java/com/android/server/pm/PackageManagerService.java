@@ -2335,11 +2335,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 List<CrossProfileIntentFilter> matchingFilters =
                         getMatchingCrossProfileIntentFilters(intent, resolvedType, userId);
                 // Check for results that need to skip the current profile.
-                ResolveInfo xpResolveInfo  = querySkipCurrentProfileIntents(matchingFilters, intent,
-                        resolvedType, flags, userId);
-                if (xpResolveInfo != null) {
+                ResolveInfo skipProfileInfo  = querySkipCurrentProfileIntents(matchingFilters,
+                        intent, resolvedType, flags, userId);
+                if (skipProfileInfo != null) {
                     List<ResolveInfo> xpResult = new ArrayList<>(1);
-                    xpResult.add(xpResolveInfo);
+                    xpResult.add(skipProfileInfo);
                     return new QueryIntentActivitiesResult(
                             applyPostResolutionFilter(
                                     filterIfNotSystemUser(xpResult, userId), instantAppPkgName,
@@ -2354,54 +2354,55 @@ public class PackageManagerService extends IPackageManager.Stub
                         false /*skipPackageCheck*/, flags);
                 // Check for cross profile results.
                 boolean hasNonNegativePriorityResult = hasNonNegativePriority(result);
-                xpResolveInfo = queryCrossProfileIntents(
+                CrossProfileDomainInfo specificXpInfo = queryCrossProfileIntents(
                         matchingFilters, intent, resolvedType, flags, userId,
                         hasNonNegativePriorityResult);
-                if (xpResolveInfo != null && isUserEnabled(xpResolveInfo.targetUserId)) {
-                    boolean isVisibleToUser = filterIfNotSystemUser(
-                            Collections.singletonList(xpResolveInfo), userId).size() > 0;
-                    if (isVisibleToUser) {
-                        result.add(xpResolveInfo);
-                        sortResult = true;
-                    }
-                }
                 if (intent.hasWebURI()) {
-                    CrossProfileDomainInfo xpDomainInfo = null;
+                    CrossProfileDomainInfo generalXpInfo = null;
                     final UserInfo parent = getProfileParent(userId);
                     if (parent != null) {
-                        xpDomainInfo = getCrossProfileDomainPreferredLpr(intent, resolvedType,
+                        generalXpInfo = getCrossProfileDomainPreferredLpr(intent, resolvedType,
                                 flags, userId, parent.id);
                     }
-                    if (xpDomainInfo != null) {
-                        if (xpResolveInfo != null) {
-                            // If we didn't remove it, the cross-profile ResolveInfo would be twice
-                            // in the result.
-                            result.remove(xpResolveInfo);
-                        }
-                        if (result.size() == 0 && !addInstant) {
+
+                    // Generalized cross profile intents take precedence over specific.
+                    // Note that this is the opposite of the intuitive order.
+                    CrossProfileDomainInfo prioritizedXpInfo =
+                            generalXpInfo != null ? generalXpInfo : specificXpInfo;
+
+                    if (!addInstant) {
+                        if (result.isEmpty() && prioritizedXpInfo != null) {
                             // No result in current profile, but found candidate in parent user.
                             // And we are not going to add ephemeral app, so we can return the
                             // result straight away.
-                            result.add(xpDomainInfo.resolveInfo);
+                            result.add(prioritizedXpInfo.resolveInfo);
+                            return new QueryIntentActivitiesResult(
+                                    applyPostResolutionFilter(result, instantAppPkgName,
+                                            allowDynamicSplits, filterCallingUid, resolveForStart,
+                                            userId, intent));
+                        } else if (result.size() <= 1 && prioritizedXpInfo == null) {
+                            // No result in parent user and <= 1 result in current profile, and we
+                            // are not going to add ephemeral app, so we can return the result
+                            // without further processing.
                             return new QueryIntentActivitiesResult(
                                     applyPostResolutionFilter(result, instantAppPkgName,
                                             allowDynamicSplits, filterCallingUid, resolveForStart,
                                             userId, intent));
                         }
-                    } else if (result.size() <= 1 && !addInstant) {
-                        // No result in parent user and <= 1 result in current profile, and we
-                        // are not going to add ephemeral app, so we can return the result without
-                        // further processing.
-                        return new QueryIntentActivitiesResult(
-                                applyPostResolutionFilter(result, instantAppPkgName,
-                                allowDynamicSplits, filterCallingUid, resolveForStart, userId,
-                                intent));
                     }
+
                     // We have more than one candidate (combining results from current and parent
                     // profile), so we need filtering and sorting.
                     result = filterCandidatesWithDomainPreferredActivitiesLPr(
-                            intent, flags, result, xpDomainInfo, userId);
+                            intent, flags, result, prioritizedXpInfo, userId);
                     sortResult = true;
+                } else {
+                    // If not web Intent, just add result to candidate set and let ResolverActivity
+                    // figure it out.
+                    if (specificXpInfo != null) {
+                        result.add(specificXpInfo.resolveInfo);
+                        sortResult = true;
+                    }
                 }
             } else {
                 final PackageSetting setting =
@@ -2833,15 +2834,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps == null) {
                     continue;
                 }
-                if (result == null) {
-                    result = new CrossProfileDomainInfo();
-                    result.resolveInfo = createForwardingResolveInfoUnchecked(
-                            new WatchedIntentFilter(), sourceUserId, parentUserId);
-                }
 
-                result.highestApprovalLevel = Math.max(mDomainVerificationManager
-                        .approvalLevelForDomain(ps, intent, resultTargetUser, flags,
-                                parentUserId), result.highestApprovalLevel);
+                int approvalLevel = mDomainVerificationManager
+                        .approvalLevelForDomain(ps, intent, flags, parentUserId);
+
+                if (result == null) {
+                    result = new CrossProfileDomainInfo(createForwardingResolveInfoUnchecked(
+                            new WatchedIntentFilter(), sourceUserId, parentUserId), approvalLevel);
+                } else {
+                    result.highestApprovalLevel =
+                            Math.max(approvalLevel, result.highestApprovalLevel);
+                }
             }
             if (result != null && result.highestApprovalLevel
                     <= DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
@@ -3088,8 +3091,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     final String packageName = info.activityInfo.packageName;
                     final PackageSetting ps = mSettings.getPackageLPr(packageName);
                     if (ps.getInstantApp(userId)) {
-                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
-                                instantApps, flags, userId)) {
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent, flags,
+                                userId)) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "Instant app approved for intent; pkg: "
                                         + packageName);
@@ -3416,28 +3419,59 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         /**
-         * If the filter's target user can handle the intent and is enabled: returns a ResolveInfo
-         * that
-         * will forward the intent to the filter's target user.
-         * Otherwise, returns null.
+         * If the filter's target user can handle the intent and is enabled: a [ResolveInfo] that
+         * will forward the intent to the filter's target user, along with the highest approval of
+         * any handler in the target user. Otherwise, returns null.
          */
-        private ResolveInfo createForwardingResolveInfo(CrossProfileIntentFilter filter,
-                Intent intent,
-                String resolvedType, int flags, int sourceUserId) {
+        @Nullable
+        private CrossProfileDomainInfo createForwardingResolveInfo(
+                @NonNull CrossProfileIntentFilter filter, @NonNull Intent intent,
+                @Nullable String resolvedType, int flags, int sourceUserId) {
             int targetUserId = filter.getTargetUserId();
+            if (!isUserEnabled(targetUserId)) {
+                return null;
+            }
+
             List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(intent,
                     resolvedType, flags, targetUserId);
-            if (resultTargetUser != null && isUserEnabled(targetUserId)) {
-                // If all the matches in the target profile are suspended, return null.
-                for (int i = resultTargetUser.size() - 1; i >= 0; i--) {
-                    if ((resultTargetUser.get(i).activityInfo.applicationInfo.flags
-                            & ApplicationInfo.FLAG_SUSPENDED) == 0) {
-                        return createForwardingResolveInfoUnchecked(filter,
-                              sourceUserId, targetUserId);
-                    }
+            if (CollectionUtils.isEmpty(resultTargetUser)) {
+                return null;
+            }
+
+            ResolveInfo forwardingInfo = null;
+            for (int i = resultTargetUser.size() - 1; i >= 0; i--) {
+                ResolveInfo targetUserResolveInfo = resultTargetUser.get(i);
+                if ((targetUserResolveInfo.activityInfo.applicationInfo.flags
+                        & ApplicationInfo.FLAG_SUSPENDED) == 0) {
+                    forwardingInfo = createForwardingResolveInfoUnchecked(filter, sourceUserId,
+                            targetUserId);
+                    break;
                 }
             }
-            return null;
+
+            if (forwardingInfo == null) {
+                // If all the matches in the target profile are suspended, return null.
+                return null;
+            }
+
+            int highestApprovalLevel = DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
+
+            int size = resultTargetUser.size();
+            for (int i = 0; i < size; i++) {
+                ResolveInfo riTargetUser = resultTargetUser.get(i);
+                if (riTargetUser.handleAllWebDataURI) {
+                    continue;
+                }
+                String packageName = riTargetUser.activityInfo.packageName;
+                PackageSetting ps = mSettings.getPackageLPr(packageName);
+                if (ps == null) {
+                    continue;
+                }
+                highestApprovalLevel = Math.max(highestApprovalLevel, mDomainVerificationManager
+                                .approvalLevelForDomain(ps, intent, flags, targetUserId));
+            }
+
+            return new CrossProfileDomainInfo(forwardingInfo, highestApprovalLevel);
         }
 
         public ResolveInfo createForwardingResolveInfoUnchecked(WatchedIntentFilter filter,
@@ -3476,34 +3510,59 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // Return matching ResolveInfo in target user if any.
-        private ResolveInfo queryCrossProfileIntents(
+        @Nullable
+        private CrossProfileDomainInfo queryCrossProfileIntents(
                 List<CrossProfileIntentFilter> matchingFilters, Intent intent, String resolvedType,
                 int flags, int sourceUserId, boolean matchInCurrentProfile) {
-            if (matchingFilters != null) {
-                // Two {@link CrossProfileIntentFilter}s can have the same targetUserId and
-                // match the same intent. For performance reasons, it is better not to
-                // run queryIntent twice for the same userId
-                SparseBooleanArray alreadyTriedUserIds = new SparseBooleanArray();
-                int size = matchingFilters.size();
-                for (int i = 0; i < size; i++) {
-                    CrossProfileIntentFilter filter = matchingFilters.get(i);
-                    int targetUserId = filter.getTargetUserId();
-                    boolean skipCurrentProfile =
-                            (filter.getFlags() & PackageManager.SKIP_CURRENT_PROFILE) != 0;
-                    boolean skipCurrentProfileIfNoMatchFound =
-                            (filter.getFlags() & PackageManager.ONLY_IF_NO_MATCH_FOUND) != 0;
-                    if (!skipCurrentProfile && !alreadyTriedUserIds.get(targetUserId)
-                            && (!skipCurrentProfileIfNoMatchFound || !matchInCurrentProfile)) {
-                        // Checking if there are activities in the target user that can handle the
-                        // intent.
-                        ResolveInfo resolveInfo = createForwardingResolveInfo(filter, intent,
-                                resolvedType, flags, sourceUserId);
-                        if (resolveInfo != null) return resolveInfo;
-                        alreadyTriedUserIds.put(targetUserId, true);
+            if (matchingFilters == null) {
+                return null;
+            }
+            // Two {@link CrossProfileIntentFilter}s can have the same targetUserId and
+            // match the same intent. For performance reasons, it is better not to
+            // run queryIntent twice for the same userId
+            SparseBooleanArray alreadyTriedUserIds = new SparseBooleanArray();
+
+            CrossProfileDomainInfo resultInfo = null;
+
+            int size = matchingFilters.size();
+            for (int i = 0; i < size; i++) {
+                CrossProfileIntentFilter filter = matchingFilters.get(i);
+                int targetUserId = filter.getTargetUserId();
+                boolean skipCurrentProfile =
+                        (filter.getFlags() & PackageManager.SKIP_CURRENT_PROFILE) != 0;
+                boolean skipCurrentProfileIfNoMatchFound =
+                        (filter.getFlags() & PackageManager.ONLY_IF_NO_MATCH_FOUND) != 0;
+                if (!skipCurrentProfile && !alreadyTriedUserIds.get(targetUserId)
+                        && (!skipCurrentProfileIfNoMatchFound || !matchInCurrentProfile)) {
+                    // Checking if there are activities in the target user that can handle the
+                    // intent.
+                    CrossProfileDomainInfo info = createForwardingResolveInfo(filter, intent,
+                            resolvedType, flags, sourceUserId);
+                    if (info != null) {
+                        resultInfo = info;
+                        break;
                     }
+                    alreadyTriedUserIds.put(targetUserId, true);
                 }
             }
-            return null;
+
+            if (resultInfo == null) {
+                return null;
+            }
+
+            ResolveInfo forwardingResolveInfo = resultInfo.resolveInfo;
+            if (!isUserEnabled(forwardingResolveInfo.targetUserId)) {
+                return null;
+            }
+
+            List<ResolveInfo> filteredResult =
+                    filterIfNotSystemUser(Collections.singletonList(forwardingResolveInfo),
+                            sourceUserId);
+            if (filteredResult.isEmpty()) {
+                return null;
+            }
+
+            return resultInfo;
         }
 
         private ResolveInfo querySkipCurrentProfileIntents(
@@ -3516,10 +3575,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     if ((filter.getFlags() & PackageManager.SKIP_CURRENT_PROFILE) != 0) {
                         // Checking if there are activities in the target user that can handle the
                         // intent.
-                        ResolveInfo resolveInfo = createForwardingResolveInfo(filter, intent,
+                        CrossProfileDomainInfo info = createForwardingResolveInfo(filter, intent,
                                 resolvedType, flags, sourceUserId);
-                        if (resolveInfo != null) {
-                            return resolveInfo;
+                        if (info != null) {
+                            return info.resolveInfo;
                         }
                     }
                 }
@@ -4029,8 +4088,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     // only check domain verification status if the app is not a browser
                     if (!info.handleAllWebDataURI) {
-                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
-                                resolvedActivities, flags, userId)) {
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent, flags,
+                                userId)) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "DENY instant app;" + " pkg: " + packageName
                                         + ", approved");
@@ -8167,7 +8226,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (best == null || cur.priority > best.priority) {
-                if (cur.getComponentInfo().enabled) {
+                if (isComponentEffectivelyEnabled(cur.getComponentInfo(), UserHandle.USER_SYSTEM)) {
                     best = cur;
                 } else {
                     Slog.w(TAG, "Domain verification agent found but not enabled");
@@ -9497,21 +9556,19 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public boolean isProtectedBroadcast(String actionName) {
-        // allow instant applications
-        synchronized (mProtectedBroadcasts) {
-            if (mProtectedBroadcasts.contains(actionName)) {
+        if (actionName != null) {
+            // TODO: remove these terrible hacks
+            if (actionName.startsWith("android.net.netmon.lingerExpired")
+                    || actionName.startsWith("com.android.server.sip.SipWakeupTimer")
+                    || actionName.startsWith("com.android.internal.telephony.data-reconnect")
+                    || actionName.startsWith("android.net.netmon.launchCaptivePortalApp")) {
                 return true;
-            } else if (actionName != null) {
-                // TODO: remove these terrible hacks
-                if (actionName.startsWith("android.net.netmon.lingerExpired")
-                        || actionName.startsWith("com.android.server.sip.SipWakeupTimer")
-                        || actionName.startsWith("com.android.internal.telephony.data-reconnect")
-                        || actionName.startsWith("android.net.netmon.launchCaptivePortalApp")) {
-                    return true;
-                }
             }
         }
-        return false;
+         // allow instant applications
+        synchronized (mProtectedBroadcasts) {
+            return mProtectedBroadcasts.contains(actionName);
+        }
     }
 
     @Override
@@ -10131,7 +10188,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         final String packageName = ri.activityInfo.packageName;
                         final PackageSetting ps = mSettings.getPackageLPr(packageName);
                         if (ps != null && hasAnyDomainApproval(mDomainVerificationManager, ps,
-                                intent, query, flags, userId)) {
+                                intent, flags, userId)) {
                             return ri;
                         }
                     }
@@ -10188,10 +10245,10 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private static boolean hasAnyDomainApproval(
             @NonNull DomainVerificationManagerInternal manager, @NonNull PackageSetting pkgSetting,
-            @NonNull Intent intent, @NonNull List<ResolveInfo> candidates,
-            @PackageManager.ResolveInfoFlags int resolveInfoFlags, @UserIdInt int userId) {
-        return manager.approvalLevelForDomain(pkgSetting, intent, candidates, resolveInfoFlags,
-                userId) > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
+            @NonNull Intent intent, @PackageManager.ResolveInfoFlags int resolveInfoFlags,
+            @UserIdInt int userId) {
+        return manager.approvalLevelForDomain(pkgSetting, intent, resolveInfoFlags, userId)
+                > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
     }
 
     /**
@@ -10624,7 +10681,20 @@ public class PackageManagerService extends IPackageManager.Stub
     private static class CrossProfileDomainInfo {
         /* ResolveInfo for IntentForwarderActivity to send the intent to the other profile */
         ResolveInfo resolveInfo;
-        int highestApprovalLevel = DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
+        int highestApprovalLevel;
+
+        CrossProfileDomainInfo(ResolveInfo resolveInfo, int highestApprovalLevel) {
+            this.resolveInfo = resolveInfo;
+            this.highestApprovalLevel = highestApprovalLevel;
+        }
+
+        @Override
+        public String toString() {
+            return "CrossProfileDomainInfo{"
+                    + "resolveInfo=" + resolveInfo
+                    + ", highestApprovalLevel=" + highestApprovalLevel
+                    + '}';
+        }
     }
 
     private CrossProfileDomainInfo getCrossProfileDomainPreferredLpr(Intent intent,
@@ -15143,9 +15213,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Instrumentation: " + r);
             }
 
-            if (!pkg.getProtectedBroadcasts().isEmpty()) {
+            final List<String> protectedBroadcasts = pkg.getProtectedBroadcasts();
+            if (!protectedBroadcasts.isEmpty()) {
                 synchronized (mProtectedBroadcasts) {
-                    mProtectedBroadcasts.addAll(pkg.getProtectedBroadcasts());
+                    mProtectedBroadcasts.addAll(protectedBroadcasts);
                 }
             }
 
@@ -16915,6 +16986,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void setInstallerPackageName(String targetPackage, String installerPackageName) {
         final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
         if (getInstantAppPackageName(callingUid) != null) {
             return;
         }
@@ -16923,14 +16995,16 @@ public class PackageManagerService extends IPackageManager.Stub
             PackageSetting targetPackageSetting = mSettings.getPackageLPr(targetPackage);
             if (targetPackageSetting == null
                     || shouldFilterApplicationLocked(
-                            targetPackageSetting, callingUid, UserHandle.getUserId(callingUid))) {
+                            targetPackageSetting, callingUid, callingUserId)) {
                 throw new IllegalArgumentException("Unknown target package: " + targetPackage);
             }
 
             PackageSetting installerPackageSetting;
             if (installerPackageName != null) {
                 installerPackageSetting = mSettings.getPackageLPr(installerPackageName);
-                if (installerPackageSetting == null) {
+                if (installerPackageSetting == null
+                        || shouldFilterApplicationLocked(
+                                installerPackageSetting, callingUid, callingUserId)) {
                     throw new IllegalArgumentException("Unknown installer package: "
                             + installerPackageName);
                 }
@@ -22266,7 +22340,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
         final int flags;
-        if (umInternal.isUserUnlockingOrUnlocked(userId)) {
+        if (StorageManager.isUserKeyUnlocked(userId)) {
             flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
         } else if (umInternal.isUserRunning(userId)) {
             flags = StorageManager.FLAG_STORAGE_DE;
@@ -24113,6 +24187,42 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    /**
+     * @return true if the runtime app user enabled state, runtime component user enabled state,
+     * install-time app manifest enabled state, and install-time component manifest enabled state
+     * are all effectively enabled for the given component. Or if the component cannot be found,
+     * returns false.
+     */
+    private boolean isComponentEffectivelyEnabled(@NonNull ComponentInfo componentInfo,
+            @UserIdInt int userId) {
+        synchronized (mLock) {
+            try {
+                String packageName = componentInfo.packageName;
+                int appEnabledSetting =
+                        mSettings.getApplicationEnabledSettingLPr(packageName, userId);
+                if (appEnabledSetting == COMPONENT_ENABLED_STATE_DEFAULT) {
+                    if (!componentInfo.applicationInfo.enabled) {
+                        return false;
+                    }
+                } else if (appEnabledSetting != COMPONENT_ENABLED_STATE_ENABLED) {
+                    return false;
+                }
+
+                int componentEnabledSetting = mSettings.getComponentEnabledSettingLPr(
+                                componentInfo.getComponentName(), userId);
+                if (componentEnabledSetting == COMPONENT_ENABLED_STATE_DEFAULT) {
+                    return componentInfo.isEnabled();
+                } else if (componentEnabledSetting != COMPONENT_ENABLED_STATE_ENABLED) {
+                    return false;
+                }
+
+                return true;
+            } catch (PackageManager.NameNotFoundException ignored) {
+                return false;
+            }
+        }
+    }
+
     @Override
     public void enterSafeMode() {
         enforceSystemOrRoot("Only the system can request entering safe mode");
@@ -25136,7 +25246,7 @@ public class PackageManagerService extends IPackageManager.Stub
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
         for (UserInfo user : mUserManager.getUsers(false /* includeDying */)) {
             final int flags;
-            if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+            if (StorageManager.isUserKeyUnlocked(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (umInternal.isUserRunning(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE;
@@ -25476,7 +25586,7 @@ public class PackageManagerService extends IPackageManager.Stub
         StorageManagerInternal smInternal = mInjector.getLocalService(StorageManagerInternal.class);
         for (UserInfo user : mUserManager.getUsers(false /*excludeDying*/)) {
             final int flags;
-            if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+            if (StorageManager.isUserKeyUnlocked(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (umInternal.isUserRunning(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE;
@@ -25490,7 +25600,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // Note: this code block is executed with the Installer lock
                     // already held, since it's invoked as a side-effect of
                     // executeBatchLI()
-                    if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+                    if (StorageManager.isUserKeyUnlocked(user.id)) {
                         // Prepare app data on external storage; currently this is used to
                         // setup any OBB dirs that were created by the installer correctly.
                         int uid = UserHandle.getUid(user.id, UserHandle.getAppId(pkg.getUid()));

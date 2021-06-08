@@ -727,13 +727,13 @@
     <string name="inline_block_button" msgid="479892866568378793">"Zablokuj"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Pokazuj nadal"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Minimalizuj"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Bez dźwięku"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Ciche"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Zachowaj wyciszenie"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Alerty"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Powiadamiaj dalej"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Wyłącz powiadomienia"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Nadal pokazywać powiadomienia z tej aplikacji?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Bez dźwięku"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Ciche"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Domyślne"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatycznie"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brak dźwięku i wibracji"</string>
@@ -751,7 +751,7 @@
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekran blokady, przerywa działanie trybu Nie przeszkadzać"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekran blokady, jako dymek, przerywa działanie trybu Nie przeszkadzać"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ustawienia"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Priorytet"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Priorytetowe"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje funkcji rozmów"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tych powiadomień nie można zmodyfikować."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tej grupy powiadomień nie można tu skonfigurować"</string>

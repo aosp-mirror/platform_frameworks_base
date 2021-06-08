@@ -2821,9 +2821,17 @@
     <string name="controls_media_resume">Resume</string>
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->
     <string name="controls_media_settings_button">Settings</string>
+    <!-- Description for media control's playing media item, including information for the media's title, the artist, and source app [CHAR LIMIT=NONE]-->
+    <string name="controls_media_playing_item_description"><xliff:g id="song_name" example="Daily mix">%1$s</xliff:g> by <xliff:g id="artist_name" example="Various artists">%2$s</xliff:g> is playing from <xliff:g id="app_label" example="Spotify">%3$s</xliff:g></string>
 
     <!-- Title for Smartspace recommendation card within media controls. The "Play" means the action to play a media [CHAR_LIMIT=10] -->
     <string name="controls_media_smartspace_rec_title">Play</string>
+    <!-- Description for Smartspace recommendation card within media controls [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_smartspace_rec_description">Open <xliff:g id="app_label" example="Spotify">%1$s</xliff:g></string>
+    <!-- Description for Smartspace recommendation's media item, including information for the media's title, the artist, and source app [CHAR LIMIT=NONE]-->
+    <string name="controls_media_smartspace_rec_item_description">Play <xliff:g id="song_name" example="Daily mix">%1$s</xliff:g> by <xliff:g id="artist_name" example="Various artists">%2$s</xliff:g> from <xliff:g id="app_label" example="Spotify">%3$s</xliff:g></string>
+    <!-- Description for Smartspace recommendation's media item which doesn't have artist info, including information for the media's title and the source app [CHAR LIMIT=NONE]-->
+    <string name="controls_media_smartspace_rec_item_no_artist_description">Play <xliff:g id="song_name" example="Daily mix">%1$s</xliff:g> from <xliff:g id="app_label" example="Spotify">%2$s</xliff:g></string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
