@@ -49,6 +49,7 @@ public class UdfpsEnrollHelper {
 
     interface Listener {
         void onEnrollmentProgress(int remaining, int totalSteps);
+        void onLastStepAcquired();
     }
 
     @NonNull private final Context mContext;
@@ -177,5 +178,16 @@ public class UdfpsEnrollHelper {
         final PointF originalPoint = mGuidedEnrollmentPoints
                 .get(index % mGuidedEnrollmentPoints.size());
         return new PointF(originalPoint.x * scale, originalPoint.y * scale);
+    }
+
+    void animateIfLastStep() {
+        if (mListener == null) {
+            Log.e(TAG, "animateIfLastStep, null listener");
+            return;
+        }
+
+        if (mRemainingSteps <= 2 && mRemainingSteps >= 0) {
+            mListener.onLastStepAcquired();
+        }
     }
 }

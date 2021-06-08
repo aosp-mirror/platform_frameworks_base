@@ -23,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
@@ -46,6 +47,8 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
 
     @Nullable private ValueAnimator mProgressAnimator;
     private float mProgress;
+    private int mRotation; // After last step, rotate the progress bar once
+    private boolean mLastStepAcquired;
 
     public UdfpsEnrollProgressBarDrawable(@NonNull Context context,
             @NonNull UdfpsEnrollDrawable parent) {
@@ -81,13 +84,34 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
         // Add one so that the first steps actually changes progress, but also so that the last
         // step ends at 1.0
         final float progress = (totalSteps - remaining + 1) / (float) (totalSteps + 1);
+        setEnrollmentProgress(progress);
+    }
+
+    private void setEnrollmentProgress(float progress) {
+        if (mLastStepAcquired) {
+            return;
+        }
+
+        long animationDuration = 150;
+
+        if (progress == 1.f) {
+            animationDuration = 400;
+            final ValueAnimator rotationAnimator = ValueAnimator.ofInt(0, 400);
+            rotationAnimator.setDuration(animationDuration);
+            rotationAnimator.addUpdateListener(animation -> {
+                Log.d(TAG, "Rotation: " + mRotation);
+                mRotation = (int) animation.getAnimatedValue();
+                mParent.invalidateSelf();
+            });
+            rotationAnimator.start();
+        }
 
         if (mProgressAnimator != null && mProgressAnimator.isRunning()) {
             mProgressAnimator.cancel();
         }
 
         mProgressAnimator = ValueAnimator.ofFloat(mProgress, progress);
-        mProgressAnimator.setDuration(150);
+        mProgressAnimator.setDuration(animationDuration);
         mProgressAnimator.addUpdateListener(animation -> {
             mProgress = (float) animation.getAnimatedValue();
             // Use the parent to invalidate, since it's the one that's attached as the view's
@@ -99,12 +123,17 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
         mProgressAnimator.start();
     }
 
+    void onLastStepAcquired() {
+        setEnrollmentProgress(1.f);
+        mLastStepAcquired = true;
+    }
+
     @Override
     public void draw(@NonNull Canvas canvas) {
         canvas.save();
 
         // Progress starts from the top, instead of the right
-        canvas.rotate(-90, getBounds().centerX(), getBounds().centerY());
+        canvas.rotate(-90 + mRotation, getBounds().centerX(), getBounds().centerY());
 
         // Progress bar "background track"
         final float halfPaddingPx = Utils.dpToPixels(mContext, PROGRESS_BAR_THICKNESS_DP) / 2;
