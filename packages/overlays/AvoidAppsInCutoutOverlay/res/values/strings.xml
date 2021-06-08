@@ -17,7 +17,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- [CHAR_LIMIT=NONE] Developer Settings: Label for the option that masks the display cutout, i.e. avoid apps in cutout region.-->
-    <string name="display_cutout_emulation_overlay">Hide (avoid apps in cutout region)</string>
+    <string name="display_cutout_emulation_overlay">Render apps below cutout area</string>
 
 </resources>
 
