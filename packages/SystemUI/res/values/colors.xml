@@ -281,4 +281,6 @@
 
     <!-- Wallet screen -->
     <color name="wallet_card_border">#33FFFFFF</color>
+
+    <color name="people_tile_background">@android:color/system_accent2_50</color>
 </resources>
