@@ -66,8 +66,25 @@ public final class TelephonyDisplayInfo implements Parcelable {
      * {@link TelephonyManager#NETWORK_TYPE_LTE} network and has E-UTRA-NR Dual Connectivity(EN-DC)
      * capability or is currently connected to the secondary
      * {@link TelephonyManager#NETWORK_TYPE_NR} cellular network on millimeter wave bands.
+     * @deprecated Use{@link #OVERRIDE_NETWORK_TYPE_NR_ADVANCED} instead.
      */
+    @Deprecated
     public static final int OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE = 4;
+
+    /**
+     * Override network type when the device is connected NR cellular network and the data rate is
+     * higher than the generic 5G date rate.
+     * Including but not limited to
+     * <ul>
+     *   <li>The device is connected to the NR cellular network on millimeter wave bands. </li>
+     *   <li>The device is connected to the specific network which the carrier is using
+     *   proprietary means to provide a faster overall data connection than would be otherwise
+     *   possible. This may include using other bands unique to the carrier, or carrier
+     *   aggregation, for example.</li>
+     * </ul>
+     * One of the use case is that UX can show a different icon, for example, "5G+"
+     */
+    public static final int OVERRIDE_NETWORK_TYPE_NR_ADVANCED = 4;
 
     @NetworkType
     private final  int mNetworkType;
@@ -169,7 +186,7 @@ public final class TelephonyDisplayInfo implements Parcelable {
             case OVERRIDE_NETWORK_TYPE_LTE_CA: return "LTE_CA";
             case OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO: return "LTE_ADV_PRO";
             case OVERRIDE_NETWORK_TYPE_NR_NSA: return "NR_NSA";
-            case OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE: return "NR_NSA_MMWAVE";
+            case OVERRIDE_NETWORK_TYPE_NR_ADVANCED: return "NR_NSA_MMWAVE";
             default: return "UNKNOWN";
         }
     }
