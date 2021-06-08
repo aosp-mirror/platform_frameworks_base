@@ -38,7 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya dengan cepat"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya dengan lambat"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengoptimalkan untuk kesehatan baterai"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Pengisian daya dibatasi untuk sementara"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"Hubungkan pengisi daya."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Tekan Menu untuk membuka kunci."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Jaringan terkunci"</string>
@@ -100,7 +100,7 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Operasi PUK SIM gagal!"</string>
     <string name="kg_pin_accepted" msgid="1625501841604389716">"Kode Diterima!"</string>
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Tidak ada layanan."</string>
-    <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Beralih metode masukan"</string>
+    <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Beralih metode input"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Mode pesawat"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Pola diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"PIN diperlukan setelah perangkat dimulai ulang"</string>
