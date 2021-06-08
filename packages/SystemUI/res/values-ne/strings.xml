@@ -711,8 +711,8 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"साइलेन्ट"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"डिफल्ट"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"बबल"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"न घन्टी बज्छ न त कम्पन नै हुन्छ"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"न घन्टी बज्छ न त कम्पन नै हुन्छ र वार्तालाप खण्डको तलतिर देखा पर्छ"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"बज्दैन पनि, भाइब्रेट पनि हुँदैन"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"बज्दैन पनि, भाइब्रेट पनि हुँदैन र वार्तालाप खण्डको तलतिर देखा पर्छ"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"फोनको सेटिङका आधारमा घन्टी बज्न वा भाइब्रेट हुन सक्छ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फोनको सेटिङका आधारमा घन्टी बज्न वा भाइब्रेट हुन सक्छ। <xliff:g id="APP_NAME">%1$s</xliff:g> का वार्तालापहरू डिफल्ट रूपमा बबलमा देखाइन्छन्।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ्लोटिङ सर्टकटमार्फत यो सामग्रीतर्फ तपाईंको ध्यान आकर्षित गर्दछ।"</string>
