@@ -85,6 +85,7 @@ import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
@@ -136,6 +137,7 @@ public class BubbleController {
     private final TaskStackListenerImpl mTaskStackListener;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final DisplayController mDisplayController;
+    private final SyncTransactionQueue mSyncQueue;
 
     // Used to post to main UI thread
     private final ShellExecutor mMainExecutor;
@@ -208,7 +210,8 @@ public class BubbleController {
             ShellTaskOrganizer organizer,
             DisplayController displayController,
             ShellExecutor mainExecutor,
-            Handler mainHandler) {
+            Handler mainHandler,
+            SyncTransactionQueue syncQueue) {
         BubbleLogger logger = new BubbleLogger(uiEventLogger);
         BubblePositioner positioner = new BubblePositioner(context, windowManager);
         BubbleData data = new BubbleData(context, logger, positioner, mainExecutor);
@@ -216,7 +219,7 @@ public class BubbleController {
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
                 logger, taskStackListener, organizer, positioner, displayController, mainExecutor,
-                mainHandler);
+                mainHandler, syncQueue);
     }
 
     /**
@@ -238,7 +241,8 @@ public class BubbleController {
             BubblePositioner positioner,
             DisplayController displayController,
             ShellExecutor mainExecutor,
-            Handler mainHandler) {
+            Handler mainHandler,
+            SyncTransactionQueue syncQueue) {
         mContext = context;
         mLauncherApps = launcherApps;
         mBarService = statusBarService == null
@@ -261,6 +265,7 @@ public class BubbleController {
         mSavedBubbleKeysPerUser = new SparseSetArray<>();
         mBubbleIconFactory = new BubbleIconFactory(context);
         mDisplayController = displayController;
+        mSyncQueue = syncQueue;
     }
 
     public void initialize() {
@@ -542,6 +547,10 @@ public class BubbleController {
     /** The task listener for events in bubble tasks. */
     public ShellTaskOrganizer getTaskOrganizer() {
         return mTaskOrganizer;
+    }
+
+    SyncTransactionQueue getSyncTransactionQueue() {
+        return mSyncQueue;
     }
 
     /** Contains information to help position things on the screen.  */
