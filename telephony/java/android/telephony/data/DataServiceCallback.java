@@ -63,6 +63,11 @@ public class DataServiceCallback {
     public static final int RESULT_ERROR_BUSY           = 3;
     /** Request sent in illegal state */
     public static final int RESULT_ERROR_ILLEGAL_STATE  = 4;
+    /**
+     * Service is temporarily unavailable. Frameworks should retry the request again.
+     * @hide
+     */
+    public static final int RESULT_ERROR_TEMPORARILY_UNAVAILABLE = 5;
 
     private final IDataServiceCallback mCallback;
 
