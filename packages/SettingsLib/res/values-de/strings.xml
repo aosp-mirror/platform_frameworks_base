@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Zuschnittbegrenzungen, Ränder usw. anzeigen"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Linksläufiges Layout erzwingen"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Für alle Sprachen wird das linksläufige Bildschirmlayout verwendet"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA erzwingen"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"In OpenGL ES 2.0-Apps 4x MSAA aktivieren"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Nichtrechteckige Zuschnitte debuggen"</string>

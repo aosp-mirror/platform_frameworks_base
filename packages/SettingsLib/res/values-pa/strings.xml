@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ਕਲਿੱਪ ਸੀਮਾਵਾਂ, ਹਾਸ਼ੀਏ ਆਦਿ ਦਿਖਾਓ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਖਾਕਾ ਲਾਗੂ ਕਰੋ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ਸਾਰੀਆਂ ਭਾਸ਼ਾਵਾਂ ਲਈ ਸਕ੍ਰੀਨ \'ਤੇ ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਖਾਕਾ ਲਾਗੂ ਕਰੋ"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ਤੇ ਜ਼ੋਰ ਪਾਓ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ਐਪਾਂ ਵਿੱਚ 4x MSAA ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"ਗੈਰ-ਆਇਤਾਕਾਰ ਕਲਿੱਪ ਓਪਰੇਸ਼ਨ ਡੀਬੱਗ ਕਰੋ"</string>

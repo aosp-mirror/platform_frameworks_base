@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"କ୍ଲିପ୍‌ ବାଉଣ୍ଡ, ମାର୍ଜିନ୍‌ ଆଦି ଦେଖନ୍ତୁ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL ଲେଆଉଟ୍ ଦିଗ ବାଧ୍ୟ କରନ୍ତୁ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ସମସ୍ତ ଲୋକେଲ୍‌ ସକାଶେ ସ୍କ୍ରୀନ୍‌ ଲେଆଉଟ୍‌ ଦିଗ RTL ପାଇଁ ବାଧ୍ୟ କରନ୍ତୁ"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ବାଧ୍ୟ କରନ୍ତୁ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ଆପ୍‌ରେ 4x MSAA ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"ଅଣ-ଆୟତାକାର କ୍ଲିପ୍‌ କାର୍ଯ୍ୟକୁ ଡିବଗ୍‌ କରନ୍ତୁ"</string>

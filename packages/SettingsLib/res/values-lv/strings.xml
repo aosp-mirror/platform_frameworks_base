@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Rādīt klipu robežas, malas utt."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Virziens no labās uz kreiso (Obligāts) WL: 295"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Obl. izkārt. virz. no labās uz kr. pusi visām lok."</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA piespiedu palaiš."</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Iespējot 4x MSAA OpenGL ES 2.0 lietotnēs"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Atkļūdot darbības daļā, kas nav taisnstūris."</string>

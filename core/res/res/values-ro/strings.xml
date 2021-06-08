@@ -1889,8 +1889,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizat de administratorul dvs."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Șters de administratorul dvs."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Economisirea bateriei activează tema întunecată și restricționează sau dezactivează activitatea în fundal, unele efecte vizuale, alte funcții și câteva conexiuni la rețea."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Economisirea bateriei activează tema întunecată și restricționează sau dezactivează activitatea în fundal, unele efecte vizuale, alte funcții și câteva conexiuni la rețea."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți poate accesa datele, însă mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activați Economizorul de date?"</string>

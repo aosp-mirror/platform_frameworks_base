@@ -1866,8 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Imesasishwa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Imefutwa na msimamizi wako"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Sawa"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Kiokoa Betri huwasha Mandhari meusi na kudhibiti au kuzima shughuli za chinichini, baadhi ya madoido yanayoonekana, vipengele fulani na baadhi ya miunganisho ya mtandao."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Kiokoa Betri huwasha Mandhari meusi na kudhibiti au kuzima shughuli za chinichini, baadhi ya madoido yanayoonekana, vipengele fulani na baadhi ya miunganisho ya mtandao."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ungependa Kuwasha Kiokoa Data?"</string>
@@ -1971,7 +1970,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> haipatikani kwa sasa. Inasimamiwa na <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Pata maelezo zaidi"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Acha kusimamisha programu"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Utawasha programu za kazini?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Iwashe programu za kazini?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Pata uwezo wa kufikia arifa na programu zako za kazini"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Washa"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Programu haipatikani"</string>
