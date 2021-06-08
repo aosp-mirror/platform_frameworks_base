@@ -746,7 +746,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"یہ گفتگو کی اطلاعات کے اوپری حصّے پر اور مقفل اسکرین پر پروفائل کی تصویر کے بطور دکھائی دیتا ہے، بلبلے کے بطور ظاہر ہوتا ہے، \'ڈسٹرب نہ کریں\' میں مداخلت کرتا ہے"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ترتیبات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ترجیح"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> گفتگو کی خصوصیات کو سپورٹ نہیں کرتا ہے"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ایپ گفتگو کی خصوصیات کو سپورٹ نہیں کرتی ہے"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ان اطلاعات کی ترمیم نہیں کی جا سکتی۔"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"اطلاعات کے اس گروپ کو یہاں کنفیگر نہیں کیا جا سکتا"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"پراکسی اطلاع"</string>
