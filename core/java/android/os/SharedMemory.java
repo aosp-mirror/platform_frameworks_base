@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -91,6 +92,18 @@ public final class SharedMemory implements Parcelable, Closeable {
         if (!mFileDescriptor.valid()) {
             throw new IllegalStateException("SharedMemory is closed");
         }
+    }
+
+    /**
+     * Creates from existing shared memory passed as {@link ParcelFileDesciptor}.
+     *
+     * @param fd File descriptor of shared memory passed as {@link #ParcelFileDescriptor}.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static @NonNull SharedMemory create(@NonNull ParcelFileDescriptor fd) {
+        return new SharedMemory(fd.getFileDescriptor());
     }
 
     private static final int PROT_MASK = OsConstants.PROT_READ | OsConstants.PROT_WRITE
