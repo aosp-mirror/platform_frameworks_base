@@ -974,20 +974,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
-    public void notifyImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher) {
-        try {
-            if (mOverviewProxy != null) {
-                mOverviewProxy.onImeWindowStatusChanged(displayId, token, vis, backDisposition,
-                        showImeSwitcher);
-            } else {
-                Log.e(TAG_OPS, "Failed to get overview proxy for setting IME status.");
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG_OPS, "Failed to call notifyImeWindowStatus()", e);
-        }
-    }
-
     public void onRotationProposal(int rotation, boolean isValid) {
         try {
             if (mOverviewProxy != null) {
