@@ -16,6 +16,7 @@
 
 package com.android.server.pm.test.override
 
+import android.app.PropertyInvalidatedCache
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
@@ -26,8 +27,10 @@ import android.util.ArrayMap
 import com.android.server.pm.AppsFilter
 import com.android.server.pm.ComponentResolver
 import com.android.server.pm.PackageManagerService
+import com.android.server.pm.PackageManagerTracedLock
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.Settings
+import com.android.server.pm.UserManagerInternal
 import com.android.server.pm.UserManagerService
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
@@ -42,6 +45,7 @@ import com.android.server.wm.ActivityTaskManagerInternal
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -63,6 +67,7 @@ class PackageManagerComponentLabelIconOverrideTest {
         private const val VALID_PKG = "com.android.server.pm.test.override"
         private const val SHARED_PKG = "com.android.server.pm.test.override.shared"
         private const val INVALID_PKG = "com.android.server.pm.test.override.invalid"
+        private const val NON_EXISTENT_PKG = "com.android.server.pm.test.override.nonexistent"
 
         private const val SEND_PENDING_BROADCAST = 1 // PackageManagerService.SEND_PENDING_BROADCAST
 
@@ -94,7 +99,8 @@ class PackageManagerComponentLabelIconOverrideTest {
                 // Start with an array of the simplest known inputs and expected outputs
                 Params(VALID_PKG, AppType.SYSTEM_APP, Result.Changed),
                 Params(SHARED_PKG, AppType.SYSTEM_APP, Result.Changed),
-                Params(INVALID_PKG, AppType.SYSTEM_APP, SecurityException::class.java)
+                Params(INVALID_PKG, AppType.SYSTEM_APP, SecurityException::class.java),
+                Params(NON_EXISTENT_PKG, AppType.SYSTEM_APP, SecurityException::class.java)
         )
                 .flatMap { param ->
                     mutableListOf(param).apply {
@@ -119,6 +125,13 @@ class PackageManagerComponentLabelIconOverrideTest {
                                 result = Result.Exception(SecurityException::class.java))
                     }
                 }
+
+        @BeforeClass
+        @JvmStatic
+        fun disablePropertyInvalidatedCache() {
+            // Disable binder caches in this process.
+            PropertyInvalidatedCache.disableForTestMode()
+        }
 
         data class Params(
             val pkgName: String,
@@ -210,8 +223,10 @@ class PackageManagerComponentLabelIconOverrideTest {
     fun verifyExpectedResult() {
         if (params.componentName != null) {
             val activityInfo = service.getActivityInfo(params.componentName, 0, userId)
-            assertThat(activityInfo.nonLocalizedLabel).isEqualTo(params.expectedLabel)
-            assertThat(activityInfo.icon).isEqualTo(params.expectedIcon)
+            if (activityInfo != null) {
+                assertThat(activityInfo.nonLocalizedLabel).isEqualTo(params.expectedLabel)
+                assertThat(activityInfo.icon).isEqualTo(params.expectedIcon)
+            }
         }
     }
 
@@ -294,34 +309,41 @@ class PackageManagerComponentLabelIconOverrideTest {
                 SHARED_PKG to makePkg(SHARED_PKG) { uid = Binder.getCallingUid() },
                 INVALID_PKG to makePkg(INVALID_PKG) { uid = Binder.getCallingUid() + 1 }
         )
-        val mockedPkgSettings = mapOf(
+        val mockedPkgSettings = mutableMapOf(
                 VALID_PKG to makePkgSetting(VALID_PKG),
                 SHARED_PKG to makePkgSetting(SHARED_PKG),
                 INVALID_PKG to makePkgSetting(INVALID_PKG)
         )
-                // Add pkgSetting under test so its attributes override the defaults added above
-                .plus(params.pkgName to mockPkgSetting)
 
-        val mockActivity: ParsedActivity = mock {
-            whenever(this.packageName) { params.pkgName }
-            whenever(this.nonLocalizedLabel) { DEFAULT_LABEL }
-            whenever(this.icon) { DEFAULT_ICON }
-            whenever(this.componentName) { params.componentName }
-            whenever(this.name) { params.componentName?.className }
-            whenever(this.isEnabled) { true }
-            whenever(this.isDirectBootAware) { params.isSystem }
+        var mockActivity: ParsedActivity? = null
+        if (mockedPkgSettings.containsKey(params.pkgName)) {
+            // Add pkgSetting under test so its attributes override the defaults added above
+            mockedPkgSettings.put(params.pkgName, mockPkgSetting)
+
+            mockActivity = mock<ParsedActivity> {
+                whenever(this.packageName) { params.pkgName }
+                whenever(this.nonLocalizedLabel) { DEFAULT_LABEL }
+                whenever(this.icon) { DEFAULT_ICON }
+                whenever(this.componentName) { params.componentName }
+                whenever(this.name) { params.componentName?.className }
+                whenever(this.isEnabled) { true }
+                whenever(this.isDirectBootAware) { params.isSystem }
+            }
         }
 
         val mockSettings = Settings(mockedPkgSettings)
         val mockComponentResolver: ComponentResolver = mockThrowOnUnmocked {
             params.componentName?.let {
-                whenever(this.componentExists(same(it))) { true }
+                whenever(this.componentExists(same(it))) { mockActivity != null }
                 whenever(this.getActivity(same(it))) { mockActivity }
             }
         }
         val mockUserManagerService: UserManagerService = mockThrowOnUnmocked {
             val matcher: (Int) -> Boolean = { it == userId || it == userIdDifferent }
             whenever(this.exists(intThat(matcher))) { true }
+        }
+        val mockUserManagerInternal: UserManagerInternal = mockThrowOnUnmocked {
+            val matcher: (Int) -> Boolean = { it == userId || it == userIdDifferent }
             whenever(this.isUserUnlockingOrUnlocked(intThat(matcher))) { true }
         }
         val mockActivityTaskManager: ActivityTaskManagerInternal = mockThrowOnUnmocked {
@@ -340,18 +362,19 @@ class PackageManagerComponentLabelIconOverrideTest {
             }
         }
         val mockInjector: PackageManagerService.Injector = mock {
-            whenever(this.lock) { Object() }
+            whenever(this.lock) { PackageManagerTracedLock() }
             whenever(this.componentResolver) { mockComponentResolver }
             whenever(this.userManagerService) { mockUserManagerService }
+            whenever(this.getUserManagerInternal()) { mockUserManagerInternal }
             whenever(this.settings) { mockSettings }
             whenever(this.getLocalService(ActivityTaskManagerInternal::class.java)) {
                 mockActivityTaskManager
             }
             whenever(this.appsFilter) { mockAppsFilter }
             whenever(this.context) { mockContext }
+            whenever(this.getHandler()) { testHandler }
         }
         val testParams = PackageManagerService.TestParams().apply {
-            this.handler = testHandler
             this.pendingPackageBroadcasts = mockPendingBroadcasts
             this.resolveComponentName = ComponentName("android", ".Test")
             this.packages = ArrayMap<String, AndroidPackage>().apply { putAll(mockedPkgs) }
