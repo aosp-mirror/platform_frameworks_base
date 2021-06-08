@@ -16,7 +16,10 @@
 
 package com.android.settingslib;
 
+import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
+
 import android.content.Context;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -30,8 +33,8 @@ import com.android.settingslib.widget.TwoTargetPreference;
  * Preference class that supports being disabled by a user restriction
  * set by a device admin.
  */
-public class RestrictedPreference extends TwoTargetPreference implements Restrictable {
-    private RestrictedPreferenceHelper mHelper;
+public class RestrictedPreference extends TwoTargetPreference {
+    RestrictedPreferenceHelper mHelper;
 
     public RestrictedPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -79,20 +82,22 @@ public class RestrictedPreference extends TwoTargetPreference implements Restric
         }
     }
 
-    @Override
-    public RestrictedPreferenceHelper getHelper() {
-        return mHelper;
-    }
-
-    @Override
-    public void notifyPreferenceChanged() {
-        notifyChanged();
+    public void useAdminDisabledSummary(boolean useSummary) {
+        mHelper.useAdminDisabledSummary(useSummary);
     }
 
     @Override
     protected void onAttachedToHierarchy(PreferenceManager preferenceManager) {
         mHelper.onAttachedToHierarchy();
         super.onAttachedToHierarchy(preferenceManager);
+    }
+
+    public void checkRestrictionAndSetDisabled(String userRestriction) {
+        mHelper.checkRestrictionAndSetDisabled(userRestriction, UserHandle.myUserId());
+    }
+
+    public void checkRestrictionAndSetDisabled(String userRestriction, int userId) {
+        mHelper.checkRestrictionAndSetDisabled(userRestriction, userId);
     }
 
     @Override
@@ -102,5 +107,15 @@ public class RestrictedPreference extends TwoTargetPreference implements Restric
             return;
         }
         super.setEnabled(enabled);
+    }
+
+    public void setDisabledByAdmin(EnforcedAdmin admin) {
+        if (mHelper.setDisabledByAdmin(admin)) {
+            notifyChanged();
+        }
+    }
+
+    public boolean isDisabledByAdmin() {
+        return mHelper.isDisabledByAdmin();
     }
 }
