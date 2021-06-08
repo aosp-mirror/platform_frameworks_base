@@ -319,6 +319,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
+import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
@@ -342,6 +343,7 @@ import com.google.android.collect.Sets;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -1140,6 +1142,76 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         mLetterboxUiController.dump(pw, prefix);
+    }
+
+    static boolean dumpActivity(FileDescriptor fd, PrintWriter pw, int index, ActivityRecord r,
+            String prefix, String label, boolean complete, boolean brief, boolean client,
+            String dumpPackage, boolean needNL, Runnable header, Task lastTask) {
+        if (dumpPackage != null && !dumpPackage.equals(r.packageName)) {
+            return false;
+        }
+
+        final boolean full = !brief && (complete || !r.isInHistory());
+        if (needNL) {
+            pw.println("");
+        }
+        if (header != null) {
+            header.run();
+        }
+
+        String innerPrefix = prefix + "      ";
+        String[] args = new String[0];
+        if (lastTask != r.getTask()) {
+            lastTask = r.getTask();
+            pw.print(prefix);
+            pw.print(full ? "* " : "  ");
+            pw.println(lastTask);
+            if (full) {
+                lastTask.dump(pw, prefix + "  ");
+            } else if (complete) {
+                // Complete + brief == give a summary.  Isn't that obvious?!?
+                if (lastTask.intent != null) {
+                    pw.print(prefix);
+                    pw.print("  ");
+                    pw.println(lastTask.intent.toInsecureString());
+                }
+            }
+        }
+        pw.print(prefix); pw.print(full ? "  * " : "    "); pw.print(label);
+        pw.print(" #"); pw.print(index); pw.print(": ");
+        pw.println(r);
+        if (full) {
+            r.dump(pw, innerPrefix, true /* dumpAll */);
+        } else if (complete) {
+            // Complete + brief == give a summary.  Isn't that obvious?!?
+            pw.print(innerPrefix);
+            pw.println(r.intent.toInsecureString());
+            if (r.app != null) {
+                pw.print(innerPrefix);
+                pw.println(r.app);
+            }
+        }
+        if (client && r.attachedToProcess()) {
+            // flush anything that is already in the PrintWriter since the thread is going
+            // to write to the file descriptor directly
+            pw.flush();
+            try {
+                TransferPipe tp = new TransferPipe();
+                try {
+                    r.app.getThread().dumpActivity(
+                            tp.getWriteFd(), r.appToken, innerPrefix, args);
+                    // Short timeout, since blocking here can deadlock with the application.
+                    tp.go(fd, 2000);
+                } finally {
+                    tp.kill();
+                }
+            } catch (IOException e) {
+                pw.println(innerPrefix + "Failure while dumping the activity: " + e);
+            } catch (RemoteException e) {
+                pw.println(innerPrefix + "Got a RemoteException while dumping the activity");
+            }
+        }
+        return true;
     }
 
     void setAppTimeTracker(AppTimeTracker att) {
