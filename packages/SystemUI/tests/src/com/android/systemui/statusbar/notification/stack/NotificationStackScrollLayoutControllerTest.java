@@ -92,7 +92,7 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-public class NotificationStackScrollerControllerTest extends SysuiTestCase {
+public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     @Mock private NotificationGutsManager mNotificationGutsManager;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
@@ -232,16 +232,15 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                true /* visible */,
-
-                true /* notifVisibleInShade */);
+                /* visible= */ true,
+                /* notifVisibleInShade= */ true);
 
         setupShowEmptyShadeViewState(stateListener, false);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                false /* visible */,
-                true /* notifVisibleInShade */);
+                /* visible= */ false,
+                /* notifVisibleInShade= */ true);
     }
 
     @Test
@@ -257,15 +256,42 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                true /* visible */,
-                false /* notifVisibleInShade */);
+                /* visible= */ true,
+                /* notifVisibleInShade= */ false);
 
         setupShowEmptyShadeViewState(stateListener, false);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                false /* visible */,
-                false /* notifVisibleInShade */);
+                /* visible= */ false,
+                /* notifVisibleInShade= */ false);
+    }
+
+    @Test
+    public void testUpdateEmptyShadeView_splitShadeMode_alwaysShowEmptyView() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
+        mController.attach(mNotificationStackScrollLayout);
+        verify(mSysuiStatusBarStateController).addCallback(
+                mStateListenerArgumentCaptor.capture(), anyInt());
+        StatusBarStateController.StateListener stateListener =
+                mStateListenerArgumentCaptor.getValue();
+        when(mNotificationStackScrollLayout.isUsingSplitNotificationShade()).thenReturn(true);
+        stateListener.onStateChanged(SHADE);
+        mController.getView().removeAllViews();
+
+        mController.setQsExpanded(false);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ true,
+                /* notifVisibleInShade= */ false);
+
+        mController.setQsExpanded(true);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ true,
+                /* notifVisibleInShade= */ false);
     }
 
     @Test
