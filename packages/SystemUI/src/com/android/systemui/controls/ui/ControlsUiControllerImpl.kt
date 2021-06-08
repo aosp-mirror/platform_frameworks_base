@@ -399,6 +399,12 @@ class ControlsUiControllerImpl @Inject constructor (
                 val baseLayout = inflater.inflate(
                     R.layout.controls_base_item, lastRow, false) as ViewGroup
                 lastRow.addView(baseLayout)
+
+                // Use ConstraintLayout in the future... for now, manually adjust margins
+                if (lastRow.getChildCount() == 1) {
+                    val lp = baseLayout.getLayoutParams() as ViewGroup.MarginLayoutParams
+                    lp.setMarginStart(0)
+                }
                 val cvh = ControlViewHolder(
                     baseLayout,
                     controlsController.get(),
