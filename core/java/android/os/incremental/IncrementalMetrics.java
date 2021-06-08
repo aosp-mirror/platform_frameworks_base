@@ -90,7 +90,7 @@ public class IncrementalMetrics {
      * @return total duration in milliseconds of delayed reads
      */
     public long getTotalDelayedReadsDurationMillis() {
-        return mData.getInt(IIncrementalService.METRICS_TOTAL_DELAYED_READS_MILLIS, -1);
+        return mData.getLong(IIncrementalService.METRICS_TOTAL_DELAYED_READS_MILLIS, -1);
     }
 
     /**
