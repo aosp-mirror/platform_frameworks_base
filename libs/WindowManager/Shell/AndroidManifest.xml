@@ -19,7 +19,7 @@
     package="com.android.wm.shell">
     <!-- System permission required by WM Shell Task Organizer. -->
     <uses-permission android:name="android.permission.CAPTURE_BLACKOUT_CONTENT" />
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.ROTATE_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
 </manifest>
