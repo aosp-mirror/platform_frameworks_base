@@ -249,9 +249,18 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     @Override
     public boolean setTopRoundness(float topRoundness, boolean animate) {
         if (mTopRoundness != topRoundness) {
+            float diff = Math.abs(topRoundness - mTopRoundness);
             mTopRoundness = topRoundness;
+            boolean shouldAnimate = animate;
+            if (PropertyAnimator.isAnimating(this, TOP_ROUNDNESS) && diff > 0.5f) {
+                // Fail safe:
+                // when we've been animating previously and we're now getting an update in the
+                // other direction, make sure to animate it too, otherwise, the localized updating
+                // may make the start larger than 1.0.
+                shouldAnimate = true;
+            }
             PropertyAnimator.setProperty(this, TOP_ROUNDNESS, topRoundness,
-                    ROUNDNESS_PROPERTIES, animate);
+                    ROUNDNESS_PROPERTIES, shouldAnimate);
             return true;
         }
         return false;
@@ -286,9 +295,18 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     @Override
     public boolean setBottomRoundness(float bottomRoundness, boolean animate) {
         if (mBottomRoundness != bottomRoundness) {
+            float diff = Math.abs(bottomRoundness - mBottomRoundness);
             mBottomRoundness = bottomRoundness;
+            boolean shouldAnimate = animate;
+            if (PropertyAnimator.isAnimating(this, BOTTOM_ROUNDNESS) && diff > 0.5f) {
+                // Fail safe:
+                // when we've been animating previously and we're now getting an update in the
+                // other direction, make sure to animate it too, otherwise, the localized updating
+                // may make the start larger than 1.0.
+                shouldAnimate = true;
+            }
             PropertyAnimator.setProperty(this, BOTTOM_ROUNDNESS, bottomRoundness,
-                    ROUNDNESS_PROPERTIES, animate);
+                    ROUNDNESS_PROPERTIES, shouldAnimate);
             return true;
         }
         return false;
