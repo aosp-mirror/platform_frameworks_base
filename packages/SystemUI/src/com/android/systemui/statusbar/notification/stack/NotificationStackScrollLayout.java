@@ -5256,6 +5256,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSwipeHelper.resetExposedMenuView(animate, force);
     }
 
+    boolean isUsingSplitNotificationShade() {
+        return mShouldUseSplitNotificationShade;
+    }
+
     static boolean matchesSelection(
             ExpandableNotificationRow row,
             @SelectedRows int selection) {
