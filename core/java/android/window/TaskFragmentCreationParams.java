@@ -27,6 +27,11 @@ import android.os.Parcelable;
  * @hide
  */
 public final class TaskFragmentCreationParams implements Parcelable {
+
+    /** The organizer that will organize this TaskFragment. */
+    @NonNull
+    private final ITaskFragmentOrganizer mOrganizer;
+
     /**
      * Unique token assigned from the client organizer to identify the {@link TaskFragmentInfo} when
      * a new TaskFragment is created with this option.
@@ -46,11 +51,16 @@ public final class TaskFragmentCreationParams implements Parcelable {
     private final Rect mInitialBounds = new Rect();
 
     private TaskFragmentCreationParams(
-            @NonNull IBinder fragmentToken, @NonNull IBinder ownerToken,
-            @NonNull Rect initialBounds) {
+            @NonNull ITaskFragmentOrganizer organizer, @NonNull IBinder fragmentToken,
+            @NonNull IBinder ownerToken, @NonNull Rect initialBounds) {
+        mOrganizer = organizer;
         mFragmentToken = fragmentToken;
         mOwnerToken = ownerToken;
         mInitialBounds.set(initialBounds);
+    }
+
+    public ITaskFragmentOrganizer getOrganizer() {
+        return mOrganizer;
     }
 
     public IBinder getFragmentToken() {
@@ -66,6 +76,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
     }
 
     private TaskFragmentCreationParams(Parcel in) {
+        mOrganizer = ITaskFragmentOrganizer.Stub.asInterface(in.readStrongBinder());
         mFragmentToken = in.readStrongBinder();
         mOwnerToken = in.readStrongBinder();
         mInitialBounds.readFromParcel(in);
@@ -73,6 +84,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeStrongInterface(mOrganizer);
         dest.writeStrongBinder(mFragmentToken);
         dest.writeStrongBinder(mOwnerToken);
         mInitialBounds.writeToParcel(dest, flags);
@@ -95,6 +107,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
     @Override
     public String toString() {
         return "TaskFragmentCreationParams{"
+                + " organizer=" + mOrganizer
                 + " fragmentToken=" + mFragmentToken
                 + " ownerToken=" + mOwnerToken
                 + " initialBounds=" + mInitialBounds

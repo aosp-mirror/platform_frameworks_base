@@ -59,6 +59,9 @@ public final class TaskFragmentInfo implements Parcelable {
             @NonNull IBinder fragmentToken, @NonNull ComponentName initialComponentName,
             @NonNull WindowContainerToken token, @NonNull Configuration configuration,
             boolean isEmpty, boolean isVisible) {
+        if (fragmentToken == null || initialComponentName == null) {
+            throw new IllegalArgumentException("Invalid TaskFragmentInfo.");
+        }
         mFragmentToken = fragmentToken;
         mInitialComponentName = initialComponentName;
         mToken = token;

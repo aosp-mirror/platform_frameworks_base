@@ -74,13 +74,16 @@ import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
+import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
+import android.window.TaskFragmentInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -180,6 +183,19 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     @Nullable
     private ActivityRecord mResumedActivity = null;
+
+    /** Client assigned unique token for this TaskFragment if this is created by an organizer. */
+    // TODO(b/190433129) set the value when creating TaskFragment from WCT.
+    @Nullable
+    private IBinder mFragmentToken;
+
+    /**
+     * The component name of the root activity that initiated this TaskFragment, which will be used
+     * to configure the relationships for TaskFragments.
+     */
+    // TODO(b/190433129) set the value when creating TaskFragment from WCT.
+    @Nullable
+    private ComponentName mInitialComponentName;
 
     private final Rect mTmpInsets = new Rect();
     private final Rect mTmpBounds = new Rect();
@@ -1898,6 +1914,25 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return applicationType;
         }
         return getTopChild().getActivityType();
+    }
+
+    /**
+     * Returns a {@link TaskFragmentInfo} with information from this TaskFragment. Should not be
+     * called from {@link Task}.
+     */
+    TaskFragmentInfo getTaskFragmentInfo() {
+        return new TaskFragmentInfo(
+                mFragmentToken,
+                mInitialComponentName,
+                mRemoteToken.toWindowContainerToken(),
+                getConfiguration(),
+                getChildCount() == 0,
+                isVisible());
+    }
+
+    @Nullable
+    IBinder getFragmentToken() {
+        return mFragmentToken;
     }
 
     boolean dump(String prefix, FileDescriptor fd, PrintWriter pw, boolean dumpAll,

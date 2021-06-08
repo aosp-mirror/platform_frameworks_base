@@ -46,6 +46,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.IDisplayAreaOrganizerController;
+import android.window.ITaskFragmentOrganizerController;
 import android.window.ITaskOrganizerController;
 import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
@@ -95,6 +96,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     final TaskOrganizerController mTaskOrganizerController;
     final DisplayAreaOrganizerController mDisplayAreaOrganizerController;
+    final TaskFragmentOrganizerController mTaskFragmentOrganizerController;
 
     final TransitionController mTransitionController;
 
@@ -103,6 +105,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mGlobalLock = atm.mGlobalLock;
         mTaskOrganizerController = new TaskOrganizerController(mService);
         mDisplayAreaOrganizerController = new DisplayAreaOrganizerController(mService);
+        mTaskFragmentOrganizerController = new TaskFragmentOrganizerController(atm);
         mTransitionController = new TransitionController(atm);
     }
 
@@ -745,6 +748,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     public IDisplayAreaOrganizerController getDisplayAreaOrganizerController() {
         enforceTaskPermission("getDisplayAreaOrganizerController()");
         return mDisplayAreaOrganizerController;
+    }
+
+    @Override
+    public ITaskFragmentOrganizerController getTaskFragmentOrganizerController() {
+        return mTaskFragmentOrganizerController;
     }
 
     @VisibleForTesting
