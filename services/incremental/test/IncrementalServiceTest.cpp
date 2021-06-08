@@ -808,7 +808,9 @@ public:
                                                     METRICS_MILLIS_SINCE_OLDEST_PENDING_READ()
                                                             .c_str()),
                                    &millisSinceOldestPendingRead));
-        ASSERT_EQ(expectedMillisSinceOldestPendingRead, millisSinceOldestPendingRead);
+        // Allow 10ms.
+        ASSERT_LE(expectedMillisSinceOldestPendingRead, millisSinceOldestPendingRead);
+        ASSERT_GE(expectedMillisSinceOldestPendingRead + 10, millisSinceOldestPendingRead);
         int storageHealthStatusCode = -1;
         ASSERT_TRUE(
                 result.getInt(String16(BnIncrementalService::METRICS_STORAGE_HEALTH_STATUS_CODE()
