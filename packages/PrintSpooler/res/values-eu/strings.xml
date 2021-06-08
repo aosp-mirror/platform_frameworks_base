@@ -49,10 +49,10 @@
     <string name="print_options_collapsed" msgid="7455930445670414332">"Inprimatzeko aukerak tolestuta daude"</string>
     <string name="search" msgid="5421724265322228497">"Bilatu"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Inprimagailu guztiak"</string>
-    <string name="add_print_service_label" msgid="5356702546188981940">"Gehitu zerbitzua"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"Gehitu zerbitzu bat"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Bilaketa-koadroa erakutsi da"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Bilaketa-koadroa ezkutatu da"</string>
-    <string name="print_add_printer" msgid="1088656468360653455">"Gehitu inprimagailua"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"Gehitu inprimagailu bat"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"Hautatu inprimagailua"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"Ahaztu inprimagailua"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
