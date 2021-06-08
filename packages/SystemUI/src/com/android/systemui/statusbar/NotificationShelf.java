@@ -29,6 +29,8 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
@@ -55,6 +57,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     private static final int TAG_CONTINUOUS_CLIPPING = R.id.continuous_clipping_tag;
     private static final String TAG = "NotificationShelf";
+
+    // More extreme version of SLOW_OUT_LINEAR_IN which keeps the icon nearly invisible until after
+    // the next icon has translated out of the way, to avoid overlapping.
+    private static final Interpolator ICON_ALPHA_INTERPOLATOR =
+            new PathInterpolator(0.6f, 0f, 0.6f, 0f);
 
     private NotificationIconContainer mShelfIcons;
     private int[] mTmp = new int[2];
@@ -659,7 +666,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         if (iconState == null) {
             return;
         }
-        iconState.alpha = transitionAmount;
+        iconState.alpha = ICON_ALPHA_INTERPOLATOR.getInterpolation(transitionAmount);
         boolean isAppearing = row.isDrawingAppearAnimation() && !row.isInShelf();
         iconState.hidden = isAppearing
                 || (view instanceof ExpandableNotificationRow
