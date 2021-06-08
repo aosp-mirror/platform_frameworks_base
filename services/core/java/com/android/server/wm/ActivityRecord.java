@@ -309,6 +309,7 @@ import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
 import android.window.IRemoteTransition;
 import android.window.SizeConfigurationBuckets;
+import android.window.SplashScreen;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
 import android.window.TransitionInfo.AnimationOptions;
@@ -6202,6 +6203,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     private boolean shouldUseEmptySplashScreen(ActivityRecord sourceRecord) {
+        if (mPendingOptions != null) {
+            final int optionsStyle = mPendingOptions.getSplashScreenStyle();
+            if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_EMPTY) {
+                return true;
+            } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON) {
+                return false;
+            }
+        }
         if (sourceRecord == null) {
             sourceRecord = searchCandidateLaunchingActivity();
         }
