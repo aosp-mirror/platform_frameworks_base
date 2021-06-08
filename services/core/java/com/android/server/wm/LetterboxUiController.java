@@ -128,12 +128,9 @@ final class LetterboxUiController {
         if (w == null || winHint != null && w != winHint) {
             return;
         }
-        final boolean surfaceReady = w.isDrawn()  // Regular case
-                || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
-        final boolean needsLetterbox = surfaceReady && shouldShowLetterboxUi(w);
         updateRoundedCorners(w);
         updateWallpaperForLetterbox(w);
-        if (needsLetterbox) {
+        if (shouldShowLetterboxUi(w)) {
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> mActivityRecord.makeChildSurface(null),
                         mActivityRecord.mWmService.mTransactionFactory,
@@ -161,17 +158,24 @@ final class LetterboxUiController {
         }
     }
 
-    /**
-     * @return {@code true} when the main window is letterboxed, this activity isn't transparent
-     * and doesn't show a wallpaper.
-     */
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        return mainWindow.areAppWindowBoundsLetterboxed() && mActivityRecord.fillsParent()
+        return isSurfaceReadyAndVisible(mainWindow) && mainWindow.areAppWindowBoundsLetterboxed()
+                // Check that an activity isn't transparent.
+                && mActivityRecord.fillsParent()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
                 // activity is using blurred wallpaper for letterbox backgroud.
                 && (mainWindow.mAttrs.flags & FLAG_SHOW_WALLPAPER) == 0;
+    }
+
+    @VisibleForTesting
+    boolean isSurfaceReadyAndVisible(WindowState mainWindow) {
+        boolean surfaceReady = mainWindow.isDrawn() // Regular case
+                // Waiting for relayoutWindow to call preserveSurface
+                || mainWindow.isDragResizeChanged();
+        return surfaceReady && (mActivityRecord.isVisible()
+                || mActivityRecord.isVisibleRequested());
     }
 
     private Color getLetterboxBackgroundColor() {

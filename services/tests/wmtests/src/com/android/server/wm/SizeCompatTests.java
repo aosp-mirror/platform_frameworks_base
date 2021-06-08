@@ -50,6 +50,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.same;
@@ -357,6 +358,11 @@ public class SizeCompatTests extends WindowTestsBase {
         final WindowState window = createWindow(null, TYPE_BASE_APPLICATION, mActivity, "window");
 
         assertEquals(window, mActivity.findMainWindow());
+
+        spyOn(mActivity.mLetterboxUiController);
+        doReturn(true).when(mActivity.mLetterboxUiController)
+                .isSurfaceReadyAndVisible(any());
+
         assertTrue(mActivity.mLetterboxUiController.shouldShowLetterboxUi(
                 mActivity.findMainWindow()));
 
