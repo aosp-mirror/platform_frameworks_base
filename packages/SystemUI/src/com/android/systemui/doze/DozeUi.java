@@ -62,6 +62,7 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable {
     private final DozeParameters mDozeParameters;
     private final DozeLog mDozeLog;
     private final Lazy<StatusBarStateController> mStatusBarStateController;
+    private final TunerService mTunerService;
 
     private boolean mKeyguardShowing;
     private final KeyguardUpdateMonitorCallback mKeyguardVisibilityCallback =
@@ -102,8 +103,15 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable {
         mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick", handler);
         keyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
         mDozeLog = dozeLog;
-        tunerService.addTunable(this, Settings.Secure.DOZE_ALWAYS_ON);
+        mTunerService = tunerService;
         mStatusBarStateController = statusBarStateController;
+
+        mTunerService.addTunable(this, Settings.Secure.DOZE_ALWAYS_ON);
+    }
+
+    @Override
+    public void destroy() {
+        mTunerService.removeTunable(this);
     }
 
     @Override
