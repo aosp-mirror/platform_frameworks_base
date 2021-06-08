@@ -554,16 +554,15 @@ public class ScreenshotController {
         // Wait until this window is attached to request because it is
         // the reference used to locate the target window (below).
         withWindowAttached(() -> {
-            mScrollCaptureClient.setHostWindowToken(mWindow.getDecorView().getWindowToken());
-            if (mLastScrollCaptureRequest != null) {
-                mLastScrollCaptureRequest.cancel(true);
-            }
-            mLastScrollCaptureRequest = mScrollCaptureClient.request(DEFAULT_DISPLAY);
-            mLastScrollCaptureRequest.addListener(() ->
-                    onScrollCaptureResponseReady(mLastScrollCaptureRequest), mMainExecutor);
+            requestScrollCapture();
             mWindow.peekDecorView().getViewRootImpl().setActivityConfigCallback(
                     (overrideConfig, newDisplayId) -> {
                         if (mConfigChanges.applyNewConfig(mContext.getResources())) {
+                            // Hide the scroll chip until we know it's available in this orientation
+                            mScreenshotView.hideScrollChip();
+                            // Delay scroll capture eval a bit to allow the underlying activity
+                            // to set up in the new orientation.
+                            mScreenshotHandler.postDelayed(this::requestScrollCapture, 150);
                             updateDisplayCutout();
                         }
                     });
@@ -591,6 +590,16 @@ public class ScreenshotController {
         mWindow.getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> WindowInsets.CONSUMED);
         cancelTimeout(); // restarted after animation
+    }
+
+    private void requestScrollCapture() {
+        mScrollCaptureClient.setHostWindowToken(mWindow.getDecorView().getWindowToken());
+        if (mLastScrollCaptureRequest != null) {
+            mLastScrollCaptureRequest.cancel(true);
+        }
+        mLastScrollCaptureRequest = mScrollCaptureClient.request(DEFAULT_DISPLAY);
+        mLastScrollCaptureRequest.addListener(() ->
+                onScrollCaptureResponseReady(mLastScrollCaptureRequest), mMainExecutor);
     }
 
     private void onScrollCaptureResponseReady(Future<ScrollCaptureResponse> responseFuture) {

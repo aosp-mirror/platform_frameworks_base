@@ -204,6 +204,10 @@ public class ScreenshotView extends FrameLayout implements
         mSwipeDismissHandler = new SwipeDismissHandler();
     }
 
+    public void hideScrollChip() {
+        mScrollChip.setVisibility(View.GONE);
+    }
+
     /**
      * Called to display the scroll action chip when support is detected.
      *
