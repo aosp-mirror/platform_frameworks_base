@@ -32,7 +32,17 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
     private final int mEnrollProgressBarRadius;
     @NonNull private final UdfpsEnrollHelper mEnrollHelper;
     @NonNull private final UdfpsEnrollHelper.Listener mEnrollHelperListener =
-            mView::onEnrollmentProgress;
+            new UdfpsEnrollHelper.Listener() {
+        @Override
+        public void onEnrollmentProgress(int remaining, int totalSteps) {
+            mView.onEnrollmentProgress(remaining, totalSteps);
+        }
+
+        @Override
+        public void onLastStepAcquired() {
+            mView.onLastStepAcquired();
+        }
+    };
 
     protected UdfpsEnrollViewController(
             @NonNull UdfpsEnrollView view,

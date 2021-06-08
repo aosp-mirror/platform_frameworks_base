@@ -63,8 +63,10 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
     }
 
     void onEnrollmentProgress(int remaining, int totalSteps) {
-        mHandler.post(() -> {
-            mFingerprintDrawable.onEnrollmentProgress(remaining, totalSteps);
-        });
+        mHandler.post(() -> mFingerprintDrawable.onEnrollmentProgress(remaining, totalSteps));
+    }
+
+    void onLastStepAcquired() {
+        mHandler.post(mFingerprintDrawable::onLastStepAcquired);
     }
 }
