@@ -63,6 +63,8 @@ class TransitionController {
      */
     private final ArrayList<Transition> mPlayingTransitions = new ArrayList<>();
 
+    final Lock mRunningLock = new Lock();
+
     private final IBinder.DeathRecipient mTransitionPlayerDeath = () -> {
         // clean-up/finish any playing transitions.
         for (int i = 0; i < mPlayingTransitions.size(); ++i) {
@@ -70,6 +72,7 @@ class TransitionController {
         }
         mPlayingTransitions.clear();
         mTransitionPlayer = null;
+        mRunningLock.doNotifyLocked();
     };
 
     /** The transition currently being constructed (collecting participants). */
@@ -285,6 +288,7 @@ class TransitionController {
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Finish Transition: %s", record);
         mPlayingTransitions.remove(record);
         record.finishTransition();
+        mRunningLock.doNotifyLocked();
     }
 
     void moveToPlaying(Transition transition) {
@@ -355,6 +359,45 @@ class TransitionController {
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
             mLegacyListeners.get(i).onAppTransitionCancelledLocked(
                     false /* keyguardGoingAway */);
+        }
+    }
+
+    class Lock {
+        private int mTransitionWaiters = 0;
+        void runWhenIdle(long timeout, Runnable r) {
+            synchronized (mAtm.mGlobalLock) {
+                if (!inTransition()) {
+                    r.run();
+                    return;
+                }
+                mTransitionWaiters += 1;
+            }
+            final long startTime = SystemClock.uptimeMillis();
+            final long endTime = startTime + timeout;
+            while (true) {
+                synchronized (mAtm.mGlobalLock) {
+                    if (!inTransition() || SystemClock.uptimeMillis() > endTime) {
+                        mTransitionWaiters -= 1;
+                        r.run();
+                        return;
+                    }
+                }
+                synchronized (this) {
+                    try {
+                        this.wait(timeout);
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+                }
+            }
+        }
+
+        void doNotifyLocked() {
+            synchronized (this) {
+                if (mTransitionWaiters > 0) {
+                    this.notifyAll();
+                }
+            }
         }
     }
 }
