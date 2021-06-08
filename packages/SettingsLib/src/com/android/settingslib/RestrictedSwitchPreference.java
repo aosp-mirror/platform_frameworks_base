@@ -16,11 +16,8 @@
 
 package com.android.settingslib;
 
-import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -37,10 +34,10 @@ import androidx.preference.SwitchPreference;
  * Version of SwitchPreference that can be disabled by a device admin
  * using a user restriction.
  */
-public class RestrictedSwitchPreference extends SwitchPreference {
-    RestrictedPreferenceHelper mHelper;
-    boolean mUseAdditionalSummary = false;
-    CharSequence mRestrictedSwitchSummary;
+public class RestrictedSwitchPreference extends SwitchPreference implements Restrictable {
+    private RestrictedPreferenceHelper mHelper;
+    private boolean mUseAdditionalSummary = false;
+    private CharSequence mRestrictedSwitchSummary;
     private int mIconSize;
 
     public RestrictedSwitchPreference(Context context, AttributeSet attrs,
@@ -153,22 +150,20 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         }
     }
 
-    public void useAdminDisabledSummary(boolean useSummary) {
-        mHelper.useAdminDisabledSummary(useSummary);
+    @Override
+    public RestrictedPreferenceHelper getHelper() {
+        return mHelper;
+    }
+
+    @Override
+    public void notifyPreferenceChanged() {
+        notifyChanged();
     }
 
     @Override
     protected void onAttachedToHierarchy(PreferenceManager preferenceManager) {
         mHelper.onAttachedToHierarchy();
         super.onAttachedToHierarchy(preferenceManager);
-    }
-
-    public void checkRestrictionAndSetDisabled(String userRestriction) {
-        mHelper.checkRestrictionAndSetDisabled(userRestriction, UserHandle.myUserId());
-    }
-
-    public void checkRestrictionAndSetDisabled(String userRestriction, int userId) {
-        mHelper.checkRestrictionAndSetDisabled(userRestriction, userId);
     }
 
     @Override
@@ -178,15 +173,5 @@ public class RestrictedSwitchPreference extends SwitchPreference {
             return;
         }
         super.setEnabled(enabled);
-    }
-
-    public void setDisabledByAdmin(EnforcedAdmin admin) {
-        if (mHelper.setDisabledByAdmin(admin)) {
-            notifyChanged();
-        }
-    }
-
-    public boolean isDisabledByAdmin() {
-        return mHelper.isDisabledByAdmin();
     }
 }
