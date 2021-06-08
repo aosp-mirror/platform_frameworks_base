@@ -21,10 +21,66 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 
+import java.util.function.Consumer;
+
 /**
  * Helpers for working with screenshots.
  */
 public class ScreenshotUtils {
+
+    /**
+     * Take a screenshot of the specified SurfaceControl.
+     *
+     * @param sc the SurfaceControl to take a screenshot of
+     * @param crop the crop to use when capturing the screenshot
+     * @param consumer Consumer for the captured buffer
+     */
+    public static void captureLayer(SurfaceControl sc, Rect crop,
+            Consumer<SurfaceControl.ScreenshotHardwareBuffer> consumer) {
+        consumer.accept(SurfaceControl.captureLayers(
+                new SurfaceControl.LayerCaptureArgs.Builder(sc)
+                    .setSourceCrop(crop)
+                    .setCaptureSecureLayers(true)
+                    .setAllowProtected(true)
+                    .build()));
+    }
+
+    private static class BufferConsumer implements
+            Consumer<SurfaceControl.ScreenshotHardwareBuffer> {
+        SurfaceControl mScreenshot = null;
+        SurfaceControl.Transaction mTransaction;
+        SurfaceControl mSurfaceControl;
+        int mLayer;
+
+        BufferConsumer(SurfaceControl.Transaction t, SurfaceControl sc, int layer) {
+            mTransaction = t;
+            mSurfaceControl = sc;
+            mLayer = layer;
+        }
+
+        @Override
+        public void accept(SurfaceControl.ScreenshotHardwareBuffer buffer) {
+            if (buffer == null || buffer.getHardwareBuffer() == null) {
+                return;
+            }
+            final GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
+                buffer.getHardwareBuffer());
+            mScreenshot = new SurfaceControl.Builder()
+                .setName("ScreenshotUtils screenshot")
+                .setFormat(PixelFormat.TRANSLUCENT)
+                .setSecure(buffer.containsSecureLayers())
+                .setCallsite("ScreenshotUtils.takeScreenshot")
+                .setBLASTLayer()
+                .build();
+
+            mTransaction.setBuffer(mScreenshot, graphicBuffer);
+            mTransaction.setColorSpace(mScreenshot, buffer.getColorSpace());
+            mTransaction.reparent(mScreenshot, mSurfaceControl);
+            mTransaction.setLayer(mScreenshot, mLayer);
+            mTransaction.show(mScreenshot);
+            mTransaction.apply();
+        }
+    }
 
     /**
      * Take a screenshot of the specified SurfaceControl.
@@ -38,32 +94,8 @@ public class ScreenshotUtils {
      */
     public static SurfaceControl takeScreenshot(SurfaceControl.Transaction t, SurfaceControl sc,
             Rect crop, int layer) {
-        final SurfaceControl.ScreenshotHardwareBuffer buffer = SurfaceControl.captureLayers(
-                new SurfaceControl.LayerCaptureArgs.Builder(sc)
-                        .setSourceCrop(crop)
-                        .setCaptureSecureLayers(true)
-                        .setAllowProtected(true)
-                        .build()
-        );
-        if (buffer == null || buffer.getHardwareBuffer() == null) {
-            return null;
-        }
-        final GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
-                buffer.getHardwareBuffer());
-        final SurfaceControl screenshot = new SurfaceControl.Builder()
-                .setName("ScreenshotUtils screenshot")
-                .setFormat(PixelFormat.TRANSLUCENT)
-                .setSecure(buffer.containsSecureLayers())
-                .setCallsite("ScreenshotUtils.takeScreenshot")
-                .setBLASTLayer()
-                .build();
-
-        t.setBuffer(screenshot, graphicBuffer);
-        t.setColorSpace(screenshot, buffer.getColorSpace());
-        t.reparent(screenshot, sc);
-        t.setLayer(screenshot, layer);
-        t.show(screenshot);
-        t.apply();
-        return screenshot;
+        BufferConsumer consumer = new BufferConsumer(t, sc, layer);
+        captureLayer(sc, crop, consumer);
+        return consumer.mScreenshot;
     }
 }

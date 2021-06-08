@@ -16,10 +16,15 @@
 
 package com.android.wm.shell.tasksurfacehelper;
 
+import android.app.ActivityManager.RunningTaskInfo;
+import android.graphics.Rect;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
+
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Intermediary controller that communicates with {@link ShellTaskOrganizer} to send commands
@@ -49,11 +54,28 @@ public class TaskSurfaceHelperController {
         mTaskOrganizer.setSurfaceMetadata(taskId, SurfaceControl.METADATA_GAME_MODE, gameMode);
     }
 
+    /**
+     * Take screenshot of the specified task.
+     */
+    public void screenshotTask(RunningTaskInfo taskInfo, Rect crop,
+            Consumer<SurfaceControl.ScreenshotHardwareBuffer> consumer) {
+        mTaskOrganizer.screenshotTask(taskInfo, crop, consumer);
+    }
+
     private class TaskSurfaceHelperImpl implements TaskSurfaceHelper {
         @Override
         public void setGameModeForTask(int taskId, int gameMode) {
             mMainExecutor.execute(() -> {
                 TaskSurfaceHelperController.this.setGameModeForTask(taskId, gameMode);
+            });
+        }
+
+        @Override
+        public void screenshotTask(RunningTaskInfo taskInfo, Rect crop, Executor executor,
+                Consumer<SurfaceControl.ScreenshotHardwareBuffer> consumer) {
+            mMainExecutor.execute(() -> {
+                TaskSurfaceHelperController.this.screenshotTask(taskInfo, crop,
+                        (t) -> executor.execute(() -> consumer.accept(t)));
             });
         }
     }
