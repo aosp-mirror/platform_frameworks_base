@@ -7842,7 +7842,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 incrementalMetrics != null ? incrementalMetrics.getMillisSinceLastReadError()
                         : -1,
                 incrementalMetrics != null ? incrementalMetrics.getLastReadErrorNumber()
-                        : 0
+                        : 0,
+                incrementalMetrics != null ? incrementalMetrics.getTotalDelayedReadsDurationMillis()
+                        : -1
         );
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE
