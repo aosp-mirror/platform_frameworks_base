@@ -22333,7 +22333,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
         final int flags;
-        if (umInternal.isUserUnlockingOrUnlocked(userId)) {
+        if (StorageManager.isUserKeyUnlocked(userId)) {
             flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
         } else if (umInternal.isUserRunning(userId)) {
             flags = StorageManager.FLAG_STORAGE_DE;
@@ -25220,7 +25220,7 @@ public class PackageManagerService extends IPackageManager.Stub
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
         for (UserInfo user : mUserManager.getUsers(false /* includeDying */)) {
             final int flags;
-            if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+            if (StorageManager.isUserKeyUnlocked(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (umInternal.isUserRunning(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE;
@@ -25560,7 +25560,7 @@ public class PackageManagerService extends IPackageManager.Stub
         StorageManagerInternal smInternal = mInjector.getLocalService(StorageManagerInternal.class);
         for (UserInfo user : mUserManager.getUsers(false /*excludeDying*/)) {
             final int flags;
-            if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+            if (StorageManager.isUserKeyUnlocked(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (umInternal.isUserRunning(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE;
@@ -25574,7 +25574,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // Note: this code block is executed with the Installer lock
                     // already held, since it's invoked as a side-effect of
                     // executeBatchLI()
-                    if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+                    if (StorageManager.isUserKeyUnlocked(user.id)) {
                         // Prepare app data on external storage; currently this is used to
                         // setup any OBB dirs that were created by the installer correctly.
                         int uid = UserHandle.getUid(user.id, UserHandle.getAppId(pkg.getUid()));
