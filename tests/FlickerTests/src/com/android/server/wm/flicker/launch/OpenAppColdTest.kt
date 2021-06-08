@@ -40,7 +40,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 185400889)
 @Group1
 class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
@@ -71,14 +70,32 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
 
     @FlakyTest
     @Test
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
+    }
+
+    @FlakyTest
+    @Test
     override fun navBarLayerRotatesAndScales() {
         super.navBarLayerRotatesAndScales()
     }
 
     @FlakyTest
     @Test
-    override fun focusChanges() {
-        super.focusChanges()
+    override fun statusBarLayerIsAlwaysVisible() {
+        super.statusBarLayerIsAlwaysVisible()
+    }
+
+    @FlakyTest
+    @Test
+    override fun appLayerReplacesLauncher() {
+        super.appLayerReplacesLauncher()
+    }
+
+    @FlakyTest
+    @Test
+    override fun appWindowReplacesLauncherAsTopWindow() {
+        super.appWindowReplacesLauncherAsTopWindow()
     }
 
     companion object {

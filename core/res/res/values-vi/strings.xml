@@ -1866,8 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Do quản trị viên của bạn xóa"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Trình tiết kiệm pin sẽ bật Giao diện tối, đồng thời hạn chế hoặc tắt hoạt động chạy trong nền, một số hiệu ứng hình ảnh, các tính năng nhất định và một số đường kết nối mạng."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Trình tiết kiệm pin sẽ bật Giao diện tối, đồng thời hạn chế hoặc tắt hoạt động chạy trong nền, một số hiệu ứng hình ảnh, các tính năng nhất định, và một số kết nối mạng."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu sẽ chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể dùng dữ liệu nhưng tần suất sẽ giảm. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bật Trình tiết kiệm dữ liệu?"</string>

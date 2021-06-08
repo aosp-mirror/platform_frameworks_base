@@ -1764,6 +1764,7 @@ public abstract class WallpaperService extends Service {
                 float finalStep = step;
                 int finalPageIndx = pageIndx;
                 Bitmap screenShot = page.getBitmap();
+                if (screenShot == null) screenShot = mLastScreenshot;
                 if (screenShot == null || screenShot.isRecycled()) {
                     if (DEBUG) {
                         Log.d(TAG, "invalid bitmap " + screenShot

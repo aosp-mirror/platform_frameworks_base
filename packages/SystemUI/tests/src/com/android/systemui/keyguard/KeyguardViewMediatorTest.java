@@ -46,6 +46,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -82,6 +83,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock DozeParameters mDozeParameters;
     private @Mock SysuiStatusBarStateController mStatusBarStateController;
     private @Mock KeyguardStateController mKeyguardStateController;
+    private @Mock NotificationShadeDepthController mNotificationShadeDepthController;
     private @Mock KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private @Mock UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
@@ -104,7 +106,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mPowerManager, mTrustManager, mDeviceConfig, mNavigationModeController,
                 mKeyguardDisplayManager, mDozeParameters, mStatusBarStateController,
                 mKeyguardStateController, () -> mKeyguardUnlockAnimationController,
-                mUnlockedScreenOffAnimationController);
+                mUnlockedScreenOffAnimationController, () -> mNotificationShadeDepthController);
         mViewMediator.start();
     }
 
