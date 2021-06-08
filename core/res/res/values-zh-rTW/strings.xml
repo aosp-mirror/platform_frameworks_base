@@ -1867,8 +1867,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由你的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由你的管理員刪除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"確定"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"省電模式會開啟深色主題，並限制或關閉背景活動、某些視覺效果、特定功能和部分網路連線。"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"省電模式會開啟深色主題，並限制或關閉背景活動、某些視覺效果、特定功能和部分網路連線。"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟數據節省模式嗎？"</string>
@@ -2094,7 +2093,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"確定"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"關閉"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"瞭解詳情"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，加強型通知功能已取代 Android 自動調整通知。這項功能可以顯示建議的操作和回覆內容，也可以整理通知。\n\n加強型通知功能可存取通知內容，包括聯絡人名稱和訊息內文等個人資訊。此外，這項功能還能關閉或回覆通知，例如接聽來電及控管「零打擾」功能。"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，加強型通知功能已取代 Android 自動調整通知。這項功能可以顯示建議的操作和回覆內容，也可以幫你整理通知訊息。\n\n加強型通知功能可存取通知內容，包括聯絡人名稱和訊息內文等個人資訊。此外，這項功能還能關閉或回覆通知，例如接聽來電及控管「零打擾」功能。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式資訊通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電池電力可能會在你平常的充電時間前耗盡"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已啟用省電模式以延長電池續航力"</string>

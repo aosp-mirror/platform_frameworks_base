@@ -1867,8 +1867,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Uitgevee deur jou administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Batterybespaarder skakel Donkertema aan en beperk of skakel agtergrondaktiwiteit, sommige visuele effekte, sekere kenmerke en sommige netwerkverbindings af"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Batterybespaarder skakel Donkertema aan en beperk of skakel agtergrondaktiwiteit, sommige visuele effekte, sekere kenmerke en sommige netwerkverbindings af"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys voordat jy op hulle tik nie."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Skakel Databespaarder aan?"</string>
