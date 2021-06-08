@@ -265,7 +265,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 // Return an empty cursor for all columns.
                 return new MatrixCursor(cursor.getColumnNames(), 0);
             }
-            Trace.traceBegin(TRACE_TAG_DATABASE, "query");
+            traceBegin(TRACE_TAG_DATABASE, "query: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -285,7 +285,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             // getCallingPackage() isn't available in getType(), as the javadoc states.
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            Trace.traceBegin(TRACE_TAG_DATABASE, "getType");
+            traceBegin(TRACE_TAG_DATABASE, "getType: ", uri.getAuthority());
             try {
                 return mInterface.getType(uri);
             } catch (RemoteException e) {
@@ -323,7 +323,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     setCallingAttributionSource(original);
                 }
             }
-            Trace.traceBegin(TRACE_TAG_DATABASE, "insert");
+            traceBegin(TRACE_TAG_DATABASE, "insert: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -345,7 +345,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return 0;
             }
-            Trace.traceBegin(TRACE_TAG_DATABASE, "bulkInsert");
+            traceBegin(TRACE_TAG_DATABASE, "bulkInsert: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -391,7 +391,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     }
                 }
             }
-            Trace.traceBegin(TRACE_TAG_DATABASE, "applyBatch");
+            traceBegin(TRACE_TAG_DATABASE, "applyBatch: ", authority);
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -423,7 +423,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return 0;
             }
-            Trace.traceBegin(TRACE_TAG_DATABASE, "delete");
+            traceBegin(TRACE_TAG_DATABASE, "delete: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -445,7 +445,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return 0;
             }
-            Trace.traceBegin(TRACE_TAG_DATABASE, "update");
+            traceBegin(TRACE_TAG_DATABASE, "update: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -465,7 +465,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(attributionSource, uri, mode);
-            Trace.traceBegin(TRACE_TAG_DATABASE, "openFile");
+            traceBegin(TRACE_TAG_DATABASE, "openFile: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -486,7 +486,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(attributionSource, uri, mode);
-            Trace.traceBegin(TRACE_TAG_DATABASE, "openAssetFile");
+            traceBegin(TRACE_TAG_DATABASE, "openAssetFile: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -505,7 +505,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 String method, @Nullable String arg, @Nullable Bundle extras) {
             validateIncomingAuthority(authority);
             Bundle.setDefusable(extras, true);
-            Trace.traceBegin(TRACE_TAG_DATABASE, "call");
+            traceBegin(TRACE_TAG_DATABASE, "call: ", authority);
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -523,7 +523,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             // getCallingPackage() isn't available in getType(), as the javadoc states.
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            Trace.traceBegin(TRACE_TAG_DATABASE, "getStreamTypes");
+            traceBegin(TRACE_TAG_DATABASE, "getStreamTypes: ", uri.getAuthority());
             try {
                 return mInterface.getStreamTypes(uri, mimeTypeFilter);
             } catch (RemoteException e) {
@@ -541,7 +541,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(attributionSource, uri, "r");
-            Trace.traceBegin(TRACE_TAG_DATABASE, "openTypedAssetFile");
+            traceBegin(TRACE_TAG_DATABASE, "openTypedAssetFile: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -569,7 +569,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return null;
             }
-            Trace.traceBegin(TRACE_TAG_DATABASE, "canonicalize");
+            traceBegin(TRACE_TAG_DATABASE, "canonicalize: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -605,7 +605,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return null;
             }
-            Trace.traceBegin(TRACE_TAG_DATABASE, "uncanonicalize");
+            traceBegin(TRACE_TAG_DATABASE, "uncanonicalize: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -641,7 +641,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return false;
             }
-            Trace.traceBegin(TRACE_TAG_DATABASE, "refresh");
+            traceBegin(TRACE_TAG_DATABASE, "refresh: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -658,7 +658,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 int uid, int modeFlags) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            Trace.traceBegin(TRACE_TAG_DATABASE, "checkUriPermission");
+            traceBegin(TRACE_TAG_DATABASE, "checkUriPermission: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -2682,5 +2682,11 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             }
         }
         return uri;
+    }
+
+    private static void traceBegin(long traceTag, String methodName, String subInfo) {
+        if (Trace.isTagEnabled(traceTag)) {
+            Trace.traceBegin(traceTag, methodName + subInfo);
+        }
     }
 }
