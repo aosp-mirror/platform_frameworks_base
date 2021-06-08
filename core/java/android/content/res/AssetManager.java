@@ -1174,9 +1174,12 @@ public final class AssetManager implements AutoCloseable {
 
     void releaseTheme(long themePtr) {
         synchronized (this) {
-            nativeThemeDestroy(themePtr);
             decRefsLocked(themePtr);
         }
+    }
+
+    static long getThemeFreeFunction() {
+        return nativeGetThemeFreeFunction();
     }
 
     void applyStyleToTheme(long themePtr, @StyleRes int resId, boolean force) {
@@ -1580,7 +1583,7 @@ public final class AssetManager implements AutoCloseable {
 
     // Theme related native methods
     private static native long nativeThemeCreate(long ptr);
-    private static native void nativeThemeDestroy(long themePtr);
+    private static native long nativeGetThemeFreeFunction();
     private static native void nativeThemeApplyStyle(long ptr, long themePtr, @StyleRes int resId,
             boolean force);
     private static native void nativeThemeRebase(long ptr, long themePtr, @NonNull int[] styleIds,

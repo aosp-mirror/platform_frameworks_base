@@ -54,6 +54,8 @@ import android.view.DisplayAdjustments;
 
 import com.android.internal.util.GrowingArrayUtils;
 
+import libcore.util.NativeAllocationRegistry;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -1265,6 +1267,10 @@ public class ResourcesImpl {
         return new ThemeImpl();
     }
 
+    private static final NativeAllocationRegistry sThemeRegistry =
+            NativeAllocationRegistry.createMalloced(ResourcesImpl.class.getClassLoader(),
+                    AssetManager.getThemeFreeFunction());
+
     public class ThemeImpl {
         /**
          * Unique key for the series of styles applied to this theme.
@@ -1283,6 +1289,7 @@ public class ResourcesImpl {
         /*package*/ ThemeImpl() {
             mAssets = ResourcesImpl.this.mAssets;
             mTheme = mAssets.createTheme();
+            sThemeRegistry.registerNativeAllocation(this, mTheme);
         }
 
         @Override

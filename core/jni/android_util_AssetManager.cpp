@@ -1244,8 +1244,12 @@ static jlong NativeThemeCreate(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
   return reinterpret_cast<jlong>(assetmanager->NewTheme().release());
 }
 
-static void NativeThemeDestroy(JNIEnv* /*env*/, jclass /*clazz*/, jlong theme_ptr) {
+static void NativeThemeDestroy(jlong theme_ptr) {
   delete reinterpret_cast<Theme*>(theme_ptr);
+}
+
+static jlong NativeGetThemeFreeFunction(JNIEnv* /*env*/, jclass /*clazz*/) {
+  return static_cast<jlong>(reinterpret_cast<uintptr_t>(&NativeThemeDestroy));
 }
 
 static void NativeThemeApplyStyle(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlong theme_ptr,
@@ -1474,7 +1478,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
 
     // Theme related methods.
     {"nativeThemeCreate", "(J)J", (void*)NativeThemeCreate},
-    {"nativeThemeDestroy", "(J)V", (void*)NativeThemeDestroy},
+    {"nativeGetThemeFreeFunction", "()J", (void*)NativeGetThemeFreeFunction},
     {"nativeThemeApplyStyle", "(JJIZ)V", (void*)NativeThemeApplyStyle},
     {"nativeThemeRebase", "(JJ[I[ZI)V", (void*)NativeThemeRebase},
 
