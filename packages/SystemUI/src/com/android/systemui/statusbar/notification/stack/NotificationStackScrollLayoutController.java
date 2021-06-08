@@ -1099,11 +1099,16 @@ public class NotificationStackScrollLayoutController {
     /**
      * Update whether we should show the empty shade view (no notifications in the shade).
      * If so, send the update to our view.
+     *
+     * When in split mode, notifications are always visible regardless of the state of the
+     * QuickSettings panel. That being the case, empty view is always shown if the other conditions
+     * are true.
      */
     public void updateShowEmptyShadeView() {
         mShowEmptyShadeView = mBarState != KEYGUARD
-                && !mView.isQsExpanded()
+                && (!mView.isQsExpanded() || mView.isUsingSplitNotificationShade())
                 && mView.getVisibleNotificationCount() == 0;
+
         mView.updateEmptyShadeView(
                 mShowEmptyShadeView,
                 mZenModeController.areNotificationsHiddenInShade());
