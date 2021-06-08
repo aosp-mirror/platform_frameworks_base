@@ -16211,6 +16211,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         public PendingIntent getPendingIntentActivityAsApp(
                 int requestCode, @NonNull Intent intent, int flags, Bundle options,
                 String ownerPkg, int ownerUid) {
+            return getPendingIntentActivityAsApp(requestCode, new Intent[] { intent }, flags,
+                    options, ownerPkg, ownerUid);
+        }
+
+        @Override
+        public PendingIntent getPendingIntentActivityAsApp(
+                int requestCode, @NonNull Intent[] intents, int flags, Bundle options,
+                String ownerPkg, int ownerUid) {
             // system callers must explicitly set mutability state
             final boolean flagImmutableSet = (flags & PendingIntent.FLAG_IMMUTABLE) != 0;
             final boolean flagMutableSet = (flags & PendingIntent.FLAG_MUTABLE) != 0;
@@ -16220,15 +16228,21 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final Context context = ActivityManagerService.this.mContext;
-            String resolvedType = intent.resolveTypeIfNeeded(context.getContentResolver());
-            intent.migrateExtraStreamToClipData(context);
-            intent.prepareToLeaveProcess(context);
+            final ContentResolver resolver = context.getContentResolver();
+            final int len = intents.length;
+            final String[] resolvedTypes = new String[len];
+            for (int i = 0; i < len; i++) {
+                final Intent intent = intents[i];
+                resolvedTypes[i] = intent.resolveTypeIfNeeded(resolver);
+                intent.migrateExtraStreamToClipData(context);
+                intent.prepareToLeaveProcess(context);
+            }
             IIntentSender target =
                     ActivityManagerService.this.getIntentSenderWithFeatureAsApp(
                             INTENT_SENDER_ACTIVITY, ownerPkg,
                             context.getAttributionTag(), null, null, requestCode,
-                            new Intent[] { intent },
-                            resolvedType != null ? new String[] { resolvedType } : null,
+                            intents,
+                            resolvedTypes,
                             flags, options, UserHandle.getUserId(ownerUid), ownerUid);
             return target != null ? new PendingIntent(target) : null;
         }
