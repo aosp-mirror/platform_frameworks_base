@@ -45,12 +45,17 @@ import android.view.translation.UiTranslationSpec;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.os.TransferPipe;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractPerUserSystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.ActivityTokens;
 
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 final class TranslationManagerServiceImpl extends
@@ -68,6 +73,9 @@ final class TranslationManagerServiceImpl extends
 
     @GuardedBy("mLock")
     private TranslationServiceInfo mTranslationServiceInfo;
+
+    @GuardedBy("mLock")
+    private WeakReference<ActivityTokens> mLastActivityTokens;
 
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
 
@@ -178,10 +186,33 @@ final class TranslationManagerServiceImpl extends
             taskTopActivityTokens.getApplicationThread().updateUiTranslationState(
                     taskTopActivityTokens.getActivityToken(), state, sourceSpec, targetSpec,
                     viewIds, uiTranslationSpec);
+            mLastActivityTokens = new WeakReference<>(taskTopActivityTokens);
         } catch (RemoteException e) {
             Slog.w(TAG, "Update UiTranslationState fail: " + e);
         }
         invokeCallbacks(state, sourceSpec, targetSpec);
+    }
+
+    @GuardedBy("mLock")
+    public void dumpLocked(String prefix, FileDescriptor fd, PrintWriter pw) {
+        if (mLastActivityTokens != null) {
+            ActivityTokens activityTokens = mLastActivityTokens.get();
+            if (activityTokens == null) {
+                return;
+            }
+            try (TransferPipe tp = new TransferPipe()) {
+                activityTokens.getApplicationThread().dumpActivity(tp.getWriteFd(),
+                        activityTokens.getActivityToken(), prefix,
+                        new String[]{"--translation"});
+                tp.go(fd);
+            } catch (IOException e) {
+                pw.println(prefix + "Failure while dumping the activity: " + e);
+            } catch (RemoteException e) {
+                pw.println(prefix + "Got a RemoteException while dumping the activity");
+            }
+        } else {
+            pw.print(prefix); pw.println("No requested UiTranslation Activity.");
+        }
     }
 
     private void invokeCallbacks(
