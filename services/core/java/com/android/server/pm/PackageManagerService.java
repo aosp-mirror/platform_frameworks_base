@@ -16987,6 +16987,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void setInstallerPackageName(String targetPackage, String installerPackageName) {
         final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
         if (getInstantAppPackageName(callingUid) != null) {
             return;
         }
@@ -16995,14 +16996,16 @@ public class PackageManagerService extends IPackageManager.Stub
             PackageSetting targetPackageSetting = mSettings.getPackageLPr(targetPackage);
             if (targetPackageSetting == null
                     || shouldFilterApplicationLocked(
-                            targetPackageSetting, callingUid, UserHandle.getUserId(callingUid))) {
+                            targetPackageSetting, callingUid, callingUserId)) {
                 throw new IllegalArgumentException("Unknown target package: " + targetPackage);
             }
 
             PackageSetting installerPackageSetting;
             if (installerPackageName != null) {
                 installerPackageSetting = mSettings.getPackageLPr(installerPackageName);
-                if (installerPackageSetting == null) {
+                if (installerPackageSetting == null
+                        || shouldFilterApplicationLocked(
+                                installerPackageSetting, callingUid, callingUserId)) {
                     throw new IllegalArgumentException("Unknown installer package: "
                             + installerPackageName);
                 }
