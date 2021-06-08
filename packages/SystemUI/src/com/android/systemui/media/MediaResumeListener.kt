@@ -163,8 +163,10 @@ class MediaResumeListener @Inject constructor(
     ) {
         if (useMediaResumption) {
             // If this had been started from a resume state, disconnect now that it's live
-            mediaBrowser?.disconnect()
-            mediaBrowser = null
+            if (!key.equals(oldKey)) {
+                mediaBrowser?.disconnect()
+                mediaBrowser = null
+            }
             // If we don't have a resume action, check if we haven't already
             if (data.resumeAction == null && !data.hasCheckedForResume && data.isLocalSession) {
                 // TODO also check for a media button receiver intended for restarting (b/154127084)
@@ -194,6 +196,9 @@ class MediaResumeListener @Inject constructor(
      */
     private fun tryUpdateResumptionList(key: String, componentName: ComponentName) {
         Log.d(TAG, "Testing if we can connect to $componentName")
+        // Set null action to prevent additional attempts to connect
+        mediaDataManager.setResumeAction(key, null)
+        mediaBrowser?.disconnect()
         mediaBrowser = mediaBrowserFactory.create(
                 object : ResumeMediaBrowser.Callback() {
                     override fun onConnected() {
@@ -202,7 +207,6 @@ class MediaResumeListener @Inject constructor(
 
                     override fun onError() {
                         Log.e(TAG, "Cannot resume with $componentName")
-                        mediaDataManager.setResumeAction(key, null)
                         mediaBrowser = null
                     }
 
