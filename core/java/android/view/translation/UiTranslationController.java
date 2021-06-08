@@ -90,6 +90,8 @@ public class UiTranslationController {
     @NonNull
     private final Handler mWorkerHandler;
     private int mCurrentState;
+    @NonNull
+    private ArraySet<AutofillId> mLastRequestAutofillIds;
 
     public UiTranslationController(Activity activity, Context context) {
         mActivity = activity;
@@ -120,6 +122,9 @@ public class UiTranslationController {
                 + (DEBUG ? (", views: " + views + ", spec: " + uiTranslationSpec) : ""));
         synchronized (mLock) {
             mCurrentState = state;
+            if (views != null) {
+                setLastRequestAutofillIdsLocked(views);
+            }
         }
         switch (state) {
             case STATE_UI_TRANSLATION_STARTED:
@@ -175,13 +180,25 @@ public class UiTranslationController {
         }
     }
 
+    private void setLastRequestAutofillIdsLocked(List<AutofillId> views) {
+        if (mLastRequestAutofillIds == null) {
+            mLastRequestAutofillIds = new ArraySet<>();
+        }
+        if (mLastRequestAutofillIds.size() > 0) {
+            mLastRequestAutofillIds.clear();
+        }
+        mLastRequestAutofillIds.addAll(views);
+    }
+
     /**
      * Called to dump the translation information for Activity.
      */
     public void dump(String outerPrefix, PrintWriter pw) {
         pw.print(outerPrefix); pw.println("UiTranslationController:");
         final String pfx = outerPrefix + "  ";
-        pw.print(pfx); pw.print("activity: "); pw.println(mActivity);
+        pw.print(pfx); pw.print("activity: "); pw.print(mActivity);
+        pw.print(pfx); pw.print("resumed: "); pw.println(mActivity.isResumed());
+        pw.print(pfx); pw.print("current state: "); pw.println(mCurrentState);
         final int translatorSize = mTranslators.size();
         pw.print(outerPrefix); pw.print("number translator: "); pw.println(translatorSize);
         for (int i = 0; i < translatorSize; i++) {
@@ -244,13 +261,18 @@ public class UiTranslationController {
         pw.print(outerPrefix); pw.print("autofillId: "); pw.print(autofillId);
         // TODO: print TranslationTransformation
         boolean isContainsView = false;
+        boolean isRequestedView = false;
         synchronized (mLock) {
+            if (mLastRequestAutofillIds.contains(autofillId)) {
+                isRequestedView = true;
+            }
             final WeakReference<View> viewRef = mViews.get(autofillId);
             if (viewRef != null && viewRef.get() != null) {
                 isContainsView = true;
             }
         }
-        pw.print(outerPrefix); pw.print("isContainsView: "); pw.println(isContainsView);
+        pw.print(outerPrefix); pw.print("isContainsView: "); pw.print(isContainsView);
+        pw.print(outerPrefix); pw.print("isRequestedView: "); pw.println(isRequestedView);
     }
 
     /**
