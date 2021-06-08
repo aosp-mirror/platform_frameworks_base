@@ -8167,7 +8167,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (best == null || cur.priority > best.priority) {
-                if (cur.getComponentInfo().enabled) {
+                if (isComponentEffectivelyEnabled(cur.getComponentInfo(), UserHandle.USER_SYSTEM)) {
                     best = cur;
                 } else {
                     Slog.w(TAG, "Domain verification agent found but not enabled");
@@ -17118,7 +17118,7 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             // Should directory scanning logic be moved to ApexManager for better test coverage?
             final File dir = request.args.origin.resolvedFile;
-            final String[] apexes = dir.list();
+            final File[] apexes = dir.listFiles();
             if (apexes == null) {
                 throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                         dir.getAbsolutePath() + " is not a directory");
@@ -17128,7 +17128,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         "Expected exactly one .apex file under " + dir.getAbsolutePath()
                                 + " got: " + apexes.length);
             }
-            mApexManager.installPackage(dir.getAbsolutePath() + "/" + apexes[0]);
+            try (PackageParser2 packageParser = mInjector.getScanningPackageParser()) {
+                mApexManager.installPackage(apexes[0], packageParser);
+            }
         } catch (PackageManagerException e) {
             request.installResult.setError("APEX installation failed", e);
         }
@@ -24107,6 +24109,42 @@ public class PackageManagerService extends IPackageManager.Stub
                 return mSettings.getComponentEnabledSettingLPr(component, userId);
             } catch (PackageManager.NameNotFoundException e) {
                 throw new IllegalArgumentException("Unknown component: " + component);
+            }
+        }
+    }
+
+    /**
+     * @return true if the runtime app user enabled state, runtime component user enabled state,
+     * install-time app manifest enabled state, and install-time component manifest enabled state
+     * are all effectively enabled for the given component. Or if the component cannot be found,
+     * returns false.
+     */
+    private boolean isComponentEffectivelyEnabled(@NonNull ComponentInfo componentInfo,
+            @UserIdInt int userId) {
+        synchronized (mLock) {
+            try {
+                String packageName = componentInfo.packageName;
+                int appEnabledSetting =
+                        mSettings.getApplicationEnabledSettingLPr(packageName, userId);
+                if (appEnabledSetting == COMPONENT_ENABLED_STATE_DEFAULT) {
+                    if (!componentInfo.applicationInfo.enabled) {
+                        return false;
+                    }
+                } else if (appEnabledSetting != COMPONENT_ENABLED_STATE_ENABLED) {
+                    return false;
+                }
+
+                int componentEnabledSetting = mSettings.getComponentEnabledSettingLPr(
+                                componentInfo.getComponentName(), userId);
+                if (componentEnabledSetting == COMPONENT_ENABLED_STATE_DEFAULT) {
+                    return componentInfo.isEnabled();
+                } else if (componentEnabledSetting != COMPONENT_ENABLED_STATE_ENABLED) {
+                    return false;
+                }
+
+                return true;
+            } catch (PackageManager.NameNotFoundException ignored) {
+                return false;
             }
         }
     }

@@ -21,9 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -127,17 +125,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void queryWalletCards_walletNotEnabled_notQuery() {
-        when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(false);
-
-        mController.queryWalletCards(mCardsRetriever);
-
-        verify(mQuickAccessWalletClient, never()).getWalletCards(any(), any(), any());
-    }
-
-    @Test
     public void queryWalletCards_walletEnabled_queryCards() {
-        mController.updateWalletPreference();
         mController.queryWalletCards(mCardsRetriever);
 
         verify(mQuickAccessWalletClient)

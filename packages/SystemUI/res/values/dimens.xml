@@ -771,6 +771,9 @@
     <!-- Move distance for the unlock hint animation on the lockscreen -->
     <dimen name="hint_move_distance">75dp</dimen>
 
+    <!-- The overshoot amount when the panel flings open -->
+    <dimen name="panel_overshoot_amount">16dp</dimen>
+
     <!-- The width of the region on the left/right edge of the screen for performing the camera/
          phone hints. -->
     <dimen name="edge_tap_area_width">48dp</dimen>
@@ -892,6 +895,10 @@
     <!-- The width/height of the keyguard bottom area icon view on keyguard. -->
     <dimen name="keyguard_affordance_height">48dp</dimen>
     <dimen name="keyguard_affordance_width">48dp</dimen>
+
+    <dimen name="keyguard_affordance_wallet_height">48dp</dimen>
+    <dimen name="keyguard_affordance_wallet_width">48dp</dimen>
+
     <dimen name="keyguard_affordance_horizontal_offset">32dp</dimen>
     <dimen name="keyguard_affordance_vertical_offset">32dp</dimen>
     <!-- Value should be at least sum of 'keyguard_affordance_width' +
@@ -903,7 +910,7 @@
     <dimen name="keyguard_lock_width">42dp</dimen>
     <dimen name="keyguard_lock_padding">20dp</dimen>
 
-    <dimen name="keyguard_indication_margin_bottom">40dp</dimen>
+    <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
 
     <!-- The text size for battery level -->
     <dimen name="battery_level_text_size">12sp</dimen>

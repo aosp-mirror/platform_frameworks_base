@@ -638,8 +638,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     public void testCancelSwipeWhileLocked_notifiesKeyguardState() {
         mStatusBarStateController.setState(KEYGUARD);
 
-        mNotificationPanelViewController.setOverExpansion(100f, true);
-
         // Fling expanded (cancelling the keyguard exit swipe). We should notify keyguard state that
         // the fling occurred and did not dismiss the keyguard.
         mNotificationPanelViewController.flingToHeight(

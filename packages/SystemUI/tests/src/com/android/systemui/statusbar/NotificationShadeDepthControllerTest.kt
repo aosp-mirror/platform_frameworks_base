@@ -27,7 +27,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScrimController
@@ -237,12 +236,10 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun updateBlurCallback_appLaunchAnimation_overridesZoom() {
+    fun updateBlurCallback_ignoreShadeBlurUntilHidden_overridesZoom() {
         `when`(shadeSpring.radius).thenReturn(maxBlur)
         `when`(shadeAnimation.radius).thenReturn(maxBlur)
-        val animProgress = ExpandAnimationParameters()
-        animProgress.linearProgress = 1f
-        notificationShadeDepthController.notificationLaunchAnimationParams = animProgress
+        notificationShadeDepthController.ignoreShadeBlurUntilHidden = true
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(blurUtils).applyBlur(any(), eq(0), eq(false))
     }
@@ -263,21 +260,17 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun setNotificationLaunchAnimationParams_schedulesFrame() {
-        val animProgress = ExpandAnimationParameters()
-        animProgress.linearProgress = 0.5f
-        notificationShadeDepthController.notificationLaunchAnimationParams = animProgress
+    fun ignoreShadeBlurUntilHidden_schedulesFrame() {
+        notificationShadeDepthController.ignoreShadeBlurUntilHidden = true
         verify(choreographer).postFrameCallback(
                 eq(notificationShadeDepthController.updateBlurCallback))
     }
 
     @Test
-    fun setNotificationLaunchAnimationParams_whennNull_ignoresIfShadeHasNoBlur() {
-        val animProgress = ExpandAnimationParameters()
-        animProgress.linearProgress = 0.5f
+    fun ignoreShadeBlurUntilHidden_whennNull_ignoresIfShadeHasNoBlur() {
         `when`(shadeSpring.radius).thenReturn(0)
         `when`(shadeAnimation.radius).thenReturn(0)
-        notificationShadeDepthController.notificationLaunchAnimationParams = animProgress
+        notificationShadeDepthController.ignoreShadeBlurUntilHidden = true
         verify(shadeSpring, never()).animateTo(anyInt(), any())
         verify(shadeAnimation, never()).animateTo(anyInt(), any())
     }

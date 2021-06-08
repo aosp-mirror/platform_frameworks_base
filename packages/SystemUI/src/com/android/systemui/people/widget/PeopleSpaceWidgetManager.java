@@ -26,6 +26,7 @@ import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_ANYONE
 
 import static com.android.systemui.people.NotificationHelper.getContactUri;
 import static com.android.systemui.people.NotificationHelper.getHighestPriorityNotification;
+import static com.android.systemui.people.NotificationHelper.shouldFilterOut;
 import static com.android.systemui.people.NotificationHelper.shouldMatchNotificationByUri;
 import static com.android.systemui.people.PeopleSpaceUtils.EMPTY_STRING;
 import static com.android.systemui.people.PeopleSpaceUtils.INVALID_USER_ID;
@@ -87,6 +88,7 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -119,6 +121,7 @@ public class PeopleSpaceWidgetManager {
     private NotificationEntryManager mNotificationEntryManager;
     private PackageManager mPackageManager;
     private INotificationManager mINotificationManager;
+    private Optional<Bubbles> mBubblesOptional;
     private UserManager mUserManager;
     private PeopleSpaceWidgetManager mManager;
     public UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
@@ -142,9 +145,9 @@ public class PeopleSpaceWidgetManager {
     @Inject
     public PeopleSpaceWidgetManager(Context context, LauncherApps launcherApps,
             NotificationEntryManager notificationEntryManager,
-            PackageManager packageManager, UserManager userManager,
-            NotificationManager notificationManager, BroadcastDispatcher broadcastDispatcher,
-            @Background Executor bgExecutor) {
+            PackageManager packageManager, Optional<Bubbles> bubblesOptional,
+            UserManager userManager, NotificationManager notificationManager,
+            BroadcastDispatcher broadcastDispatcher, @Background Executor bgExecutor) {
         if (DEBUG) Log.d(TAG, "constructor");
         mContext = context;
         mAppWidgetManager = AppWidgetManager.getInstance(context);
@@ -157,6 +160,7 @@ public class PeopleSpaceWidgetManager {
         mPackageManager = packageManager;
         mINotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        mBubblesOptional = bubblesOptional;
         mUserManager = userManager;
         mNotificationManager = notificationManager;
         mManager = this;
@@ -207,8 +211,9 @@ public class PeopleSpaceWidgetManager {
             AppWidgetManager appWidgetManager, IPeopleManager iPeopleManager,
             PeopleManager peopleManager, LauncherApps launcherApps,
             NotificationEntryManager notificationEntryManager, PackageManager packageManager,
-            UserManager userManager, INotificationManager iNotificationManager,
-            NotificationManager notificationManager, @Background Executor executor) {
+            Optional<Bubbles> bubblesOptional, UserManager userManager,
+            INotificationManager iNotificationManager, NotificationManager notificationManager,
+            @Background Executor executor) {
         mContext = context;
         mAppWidgetManager = appWidgetManager;
         mIPeopleManager = iPeopleManager;
@@ -216,6 +221,7 @@ public class PeopleSpaceWidgetManager {
         mLauncherApps = launcherApps;
         mNotificationEntryManager = notificationEntryManager;
         mPackageManager = packageManager;
+        mBubblesOptional = bubblesOptional;
         mUserManager = userManager;
         mINotificationManager = iNotificationManager;
         mNotificationManager = notificationManager;
@@ -483,7 +489,8 @@ public class PeopleSpaceWidgetManager {
                 notifications
                         .stream()
                         .filter(entry -> NotificationHelper.isValid(entry)
-                                && NotificationHelper.isMissedCallOrHasContent(entry))
+                                && NotificationHelper.isMissedCallOrHasContent(entry)
+                                && !shouldFilterOut(mBubblesOptional, entry))
                         .collect(Collectors.groupingBy(
                                 PeopleTileKey::new,
                                 Collectors.mapping(Function.identity(), Collectors.toSet())));

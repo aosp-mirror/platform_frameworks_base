@@ -1970,7 +1970,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"L\'application <xliff:g id="APP_NAME_0">%1$s</xliff:g> n\'est pas disponible pour le moment. Cette suspension est gérée par l\'application <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"En savoir plus"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Débloquer l\'application"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Activer les applis pros ?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Activer les applis pro ?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Accéder à vos applis et notifications professionnelles"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activer"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Application non disponible"</string>
