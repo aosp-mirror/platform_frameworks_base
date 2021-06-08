@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Toon clipgrenzen, marges en meer"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"V.r.n.l.-indelingsrichting afdwingen"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Stel de schermindelingsrichting geforceerd in op v.r.n.l. voor alle talen"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA forceren"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Zet 4x MSAA aan in OpenGL ES 2.0-apps"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Foutopsporing niet-rechthoekig bijsnijden"</string>
@@ -506,7 +508,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wekkers en herinneringen"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Wekkers en herinneringen laten instellen"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wekkers en herinneringen"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Sta deze app toe om wekkers te zetten en andere acties te plannen. Deze app kan worden gebruikt als je je telefoon niet gebruikt, waardoor er meer batterijlading wordt verbruikt. Als deze toestemming uit staat, werkt deze app mogelijk niet naar behoren en werken de wekkers niet zoals gepland."</string>
+    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Sta deze app toe om wekkers te zetten en andere acties te plannen. Deze app kan actief zijn als je je telefoon niet gebruikt, waardoor je meer batterijlading verbruikt. Als dit recht uitstaat, werkt deze app mogelijk niet naar behoren en de wekkers niet zoals gepland."</string>
     <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Sta deze app toe om wekkers te zetten en andere acties te plannen. Deze app kan worden gebruikt als je je tablet niet gebruikt, waardoor er meer batterijlading wordt verbruikt. Als deze toestemming uit staat, werkt deze app mogelijk niet naar behoren en werken de wekkers niet zoals gepland."</string>
     <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Sta deze app toe om wekkers te zetten en andere acties te plannen. Deze app kan worden gebruikt als je je apparaat niet gebruikt, waardoor er meer batterijlading wordt verbruikt. Als deze toestemming uit staat, werkt deze app mogelijk niet naar behoren en werken de wekkers niet zoals gepland."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"plannen, schema, wekker, alarm, herinnering, klok"</string>

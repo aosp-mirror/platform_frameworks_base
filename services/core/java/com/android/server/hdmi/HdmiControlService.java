@@ -618,6 +618,23 @@ public class HdmiControlService extends SystemService {
                         initializeCec(INITIATED_BY_ENABLE_CEC);
                     }
                 }, mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        boolean enabled = mHdmiCecConfig.getIntValue(
+                                HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL)
+                                    == HdmiControlManager.ROUTING_CONTROL_ENABLED;
+                        if (isAudioSystemDevice()) {
+                            if (audioSystem() == null) {
+                                Slog.w(TAG, "Switch device has not registered yet."
+                                        + " Can't turn routing on.");
+                            } else {
+                                audioSystem().setRoutingControlFeatureEnabled(enabled);
+                            }
+                        }
+                    }
+                }, mServiceThreadExecutor);
         mHdmiCecConfig.registerChangeListener(
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
                 new HdmiCecConfig.SettingChangeListener() {
@@ -789,7 +806,6 @@ public class HdmiControlService extends SystemService {
         String[] settings = new String[] {
                 Global.MHL_INPUT_SWITCHING_ENABLED,
                 Global.MHL_POWER_CHARGE_ENABLED,
-                Global.HDMI_CEC_SWITCH_ENABLED,
                 Global.DEVICE_NAME
         };
         for (String s : settings) {
@@ -809,16 +825,6 @@ public class HdmiControlService extends SystemService {
             String option = uri.getLastPathSegment();
             boolean enabled = readBooleanSetting(option, true);
             switch (option) {
-                case Global.HDMI_CEC_SWITCH_ENABLED:
-                    if (isAudioSystemDevice()) {
-                        if (audioSystem() == null) {
-                            Slog.w(TAG, "Switch device has not registered yet."
-                                    + " Can't turn routing on.");
-                            break;
-                        }
-                        audioSystem().setRoutingControlFeatureEnables(enabled);
-                    }
-                    break;
                 case Global.MHL_INPUT_SWITCHING_ENABLED:
                     setMhlInputChangeEnabled(enabled);
                     break;

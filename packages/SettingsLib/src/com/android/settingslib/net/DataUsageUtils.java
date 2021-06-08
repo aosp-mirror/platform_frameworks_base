@@ -73,7 +73,10 @@ public class DataUsageUtils {
 
     private static NetworkTemplate getMobileTemplateForSubId(
             TelephonyManager telephonyManager, int subId) {
-        return NetworkTemplate.buildTemplateCarrierMetered(
-                telephonyManager.getSubscriberId(subId));
+        // The null subscriberId means that no any mobile/carrier network will be matched.
+        // Using old API: buildTemplateMobileAll for the null subscriberId to avoid NPE.
+        String subscriberId = telephonyManager.getSubscriberId(subId);
+        return subscriberId != null ? NetworkTemplate.buildTemplateCarrierMetered(subscriberId)
+                : NetworkTemplate.buildTemplateMobileAll(subscriberId);
     }
 }

@@ -4854,6 +4854,12 @@
     <bool name="config_cecHdmiCecVersion20_allowed">true</bool>
     <bool name="config_cecHdmiCecVersion20_default">false</bool>
 
+    <bool name="config_cecRoutingControl_userConfigurable">true</bool>
+    <bool name="config_cecRoutingControlEnabled_allowed">true</bool>
+    <bool name="config_cecRoutingControlEnabled_default">false</bool>
+    <bool name="config_cecRoutingControlDisabled_allowed">true</bool>
+    <bool name="config_cecRoutingControlDisabled_default">true</bool>
+
     <bool name="config_cecPowerControlMode_userConfigurable">true</bool>
     <bool name="config_cecPowerControlModeTv_allowed">true</bool>
     <bool name="config_cecPowerControlModeTv_default">false</bool>

@@ -17968,28 +17968,23 @@ public class PackageManagerService extends IPackageManager.Stub
             // it will not miss the broadcast.
             enableRollbackIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
 
-            mContext.sendOrderedBroadcastAsUser(enableRollbackIntent, UserHandle.SYSTEM,
-                    android.Manifest.permission.PACKAGE_ROLLBACK_AGENT,
-                    new BroadcastReceiver() {
-                        @Override
-                        public void onReceive(Context context, Intent intent) {
-                            // the duration to wait for rollback to be enabled, in millis
-                            long rollbackTimeout = DeviceConfig.getLong(
-                                    DeviceConfig.NAMESPACE_ROLLBACK,
-                                    PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS,
-                                    DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS);
-                            if (rollbackTimeout < 0) {
-                                rollbackTimeout = DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS;
-                            }
-                            final Message msg = mHandler.obtainMessage(
-                                    ENABLE_ROLLBACK_TIMEOUT);
-                            msg.arg1 = enableRollbackToken;
-                            msg.arg2 = mSessionId;
-                            mHandler.sendMessageDelayed(msg, rollbackTimeout);
-                        }
-                    }, null, 0, null, null);
+            mContext.sendBroadcastAsUser(enableRollbackIntent, UserHandle.SYSTEM,
+                    android.Manifest.permission.PACKAGE_ROLLBACK_AGENT);
 
             mWaitForEnableRollbackToComplete = true;
+
+            // the duration to wait for rollback to be enabled, in millis
+            long rollbackTimeout = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_ROLLBACK,
+                    PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS,
+                    DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS);
+            if (rollbackTimeout < 0) {
+                rollbackTimeout = DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS;
+            }
+            final Message msg = mHandler.obtainMessage(ENABLE_ROLLBACK_TIMEOUT);
+            msg.arg1 = enableRollbackToken;
+            msg.arg2 = mSessionId;
+            mHandler.sendMessageDelayed(msg, rollbackTimeout);
         }
 
         /**

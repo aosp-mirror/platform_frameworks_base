@@ -30,7 +30,6 @@ import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.SelectWalletCardRequest;
 import android.service.quickaccesswallet.WalletCard;
-import android.service.quickaccesswallet.WalletServiceEvent;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -55,7 +54,6 @@ import java.util.concurrent.TimeUnit;
 public class WalletScreenController implements
         WalletCardCarousel.OnSelectionListener,
         QuickAccessWalletClient.OnWalletCardsRetrievedCallback,
-        QuickAccessWalletClient.WalletServiceEventListener,
         KeyguardStateController.Callback {
 
     private static final String TAG = "WalletScreenCtrl";
@@ -77,7 +75,6 @@ public class WalletScreenController implements
 
     @VisibleForTesting String mSelectedCardId;
     @VisibleForTesting boolean mIsDismissed;
-    private boolean mHasRegisteredListener;
 
     public WalletScreenController(
             Context context,
@@ -117,6 +114,7 @@ public class WalletScreenController implements
         if (mIsDismissed) {
             return;
         }
+        Log.i(TAG, "Successfully retrieved wallet cards.");
         List<WalletCard> walletCards = response.getWalletCards();
         List<WalletCardViewInfo> data = new ArrayList<>(walletCards.size());
         for (WalletCard card : walletCards) {
@@ -156,26 +154,6 @@ public class WalletScreenController implements
             }
             mWalletView.showErrorMessage(error.getMessage());
         });
-    }
-
-    /**
-     * Implements {@link QuickAccessWalletClient.WalletServiceEventListener}. Called when the wallet
-     * application propagates an event, such as an NFC tap, to the quick access wallet view.
-     */
-    @Override
-    public void onWalletServiceEvent(WalletServiceEvent event) {
-        if (mIsDismissed) {
-            return;
-        }
-        switch (event.getEventType()) {
-            case WalletServiceEvent.TYPE_NFC_PAYMENT_STARTED:
-                break;
-            case WalletServiceEvent.TYPE_WALLET_CARDS_UPDATED:
-                queryWalletCards();
-                break;
-            default:
-                Log.w(TAG, "onWalletServiceEvent: Unknown event type");
-        }
     }
 
     @Override
@@ -236,11 +214,6 @@ public class WalletScreenController implements
         if (cardWidthPx == 0 || cardHeightPx == 0) {
             return;
         }
-        if (!mHasRegisteredListener) {
-            // Listener is registered even when device is locked. Should only be registered once.
-            mWalletClient.addWalletServiceEventListener(this);
-            mHasRegisteredListener = true;
-        }
 
         mWalletView.show();
         mWalletView.hideErrorMessage();
@@ -261,7 +234,6 @@ public class WalletScreenController implements
         mSelectedCardId = null;
         mHandler.removeCallbacks(mSelectionRunnable);
         mWalletClient.notifyWalletDismissed();
-        mWalletClient.removeWalletServiceEventListener(this);
         mWalletView.animateDismissal();
         // clear refs to the Wallet Activity
         mContext = null;
@@ -282,7 +254,6 @@ public class WalletScreenController implements
             mWalletView.hide();
             mPrefs.edit().putInt(PREFS_WALLET_VIEW_HEIGHT, 0).apply();
         } else {
-            logo.setTint(mContext.getColor(R.color.GM2_grey_900));
             mWalletView.showEmptyStateView(
                     logo,
                     logoContentDesc,
