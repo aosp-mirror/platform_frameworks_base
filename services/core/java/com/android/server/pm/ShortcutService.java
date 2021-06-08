@@ -1208,16 +1208,6 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    void postValue(@NonNull final ShortcutInfo shortcutInfo,
-            @NonNull final Consumer<ShortcutInfo> cb) {
-        final String pkg = shortcutInfo.getPackage();
-        final int userId = shortcutInfo.getUserId();
-        final String id = shortcutInfo.getId();
-        synchronized (mLock) {
-            getPackageShortcutsLocked(pkg, userId).mutateShortcut(id, shortcutInfo, cb);
-        }
-    }
-
     /** Return the last reset time. */
     @GuardedBy("mLock")
     long getLastResetTimeLocked() {
