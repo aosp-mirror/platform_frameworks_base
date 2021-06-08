@@ -429,7 +429,9 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
                 kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, nullptr);
         if (bufferInfo->skSurface.get() == nullptr) {
             ALOGE("SkSurface::MakeFromAHardwareBuffer failed");
-            mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer, fence_fd.release());
+            mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer,
+                                        mNativeBuffers[idx].dequeue_fence.release());
+            mNativeBuffers[idx].dequeued = false;
             return nullptr;
         }
     }
