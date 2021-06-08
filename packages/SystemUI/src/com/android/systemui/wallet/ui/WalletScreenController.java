@@ -39,6 +39,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -66,6 +67,7 @@ public class WalletScreenController implements
     private final ActivityStarter mActivityStarter;
     private final Executor mExecutor;
     private final Handler mHandler;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
     private final Runnable mSelectionRunnable = this::selectCard;
     private final SharedPreferences mPrefs;
@@ -85,6 +87,7 @@ public class WalletScreenController implements
             Handler handler,
             UserTracker userTracker,
             FalsingManager falsingManager,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardStateController keyguardStateController) {
         mContext = context;
         mWalletClient = walletClient;
@@ -92,6 +95,7 @@ public class WalletScreenController implements
         mExecutor = executor;
         mHandler = handler;
         mFalsingManager = falsingManager;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardStateController = keyguardStateController;
         mPrefs = userTracker.getUserContext().getSharedPreferences(TAG, Context.MODE_PRIVATE);
         mWalletView = walletView;
@@ -134,8 +138,13 @@ public class WalletScreenController implements
                     Log.w(TAG, "Invalid selected card index, showing empty state.");
                     showEmptyStateView();
                 } else {
+                    boolean isUdfpsEnabled = mKeyguardUpdateMonitor.isUdfpsEnrolled()
+                            && mKeyguardUpdateMonitor.isFingerprintDetectionRunning();
                     mWalletView.showCardCarousel(
-                            data, selectedIndex, !mKeyguardStateController.isUnlocked());
+                            data,
+                            selectedIndex,
+                            !mKeyguardStateController.isUnlocked(),
+                            isUdfpsEnabled);
                 }
             }
             removeMinHeightAndRecordHeightOnLayout();
