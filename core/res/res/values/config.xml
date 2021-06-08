@@ -4857,9 +4857,9 @@
 
     <bool name="config_cecHdmiCecVersion_userConfigurable">true</bool>
     <bool name="config_cecHdmiCecVersion14b_allowed">true</bool>
-    <bool name="config_cecHdmiCecVersion14b_default">true</bool>
+    <bool name="config_cecHdmiCecVersion14b_default">false</bool>
     <bool name="config_cecHdmiCecVersion20_allowed">true</bool>
-    <bool name="config_cecHdmiCecVersion20_default">false</bool>
+    <bool name="config_cecHdmiCecVersion20_default">true</bool>
 
     <bool name="config_cecRoutingControl_userConfigurable">true</bool>
     <bool name="config_cecRoutingControlEnabled_allowed">true</bool>
