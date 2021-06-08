@@ -1126,10 +1126,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setStatusBar(mStatusBar);
         mKeyguardBottomArea.setUserSetupComplete(mUserSetupComplete);
         mKeyguardBottomArea.setFalsingManager(mFalsingManager);
-
-        if (mFeatureFlags.isQuickAccessWalletEnabled()) {
-            mKeyguardBottomArea.initWallet(mQuickAccessWalletController);
-        }
+        mKeyguardBottomArea.initWallet(mQuickAccessWalletController);
     }
 
     private void updateMaxDisplayedNotifications(boolean recompute) {
