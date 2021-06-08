@@ -40,7 +40,6 @@ import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.Slog;
 
-import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
@@ -357,14 +356,14 @@ public class ApkLiteParseUtils {
                 "versionCodeMajor",
                 0);
         int revisionCode = parser.getAttributeIntValue(ANDROID_RES_NAMESPACE, "revisionCode", 0);
-        boolean coreApp = parser.getAttributeBooleanValue("", "coreApp", false);
+        boolean coreApp = parser.getAttributeBooleanValue(null, "coreApp", false);
         boolean isolatedSplits = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                 "isolatedSplits", false);
         boolean isFeatureSplit = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                 "isFeatureSplit", false);
         boolean isSplitRequired = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                 "isSplitRequired", false);
-        String configForSplit = parser.getAttributeValue(ANDROID_RES_NAMESPACE, "configForSplit");
+        String configForSplit = parser.getAttributeValue(null, "configForSplit");
 
         int targetSdkVersion = DEFAULT_TARGET_SDK_VERSION;
         int minSdkVersion = DEFAULT_MIN_SDK_VERSION;
