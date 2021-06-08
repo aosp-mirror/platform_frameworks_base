@@ -15,6 +15,6 @@
   -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:shape="oval">
-    <solid android:color="?android:attr/colorBackground" />
+    <solid android:color="@color/people_tile_background" />
     <stroke android:width="2dp" android:color="?android:attr/colorAccent" />
 </shape>
