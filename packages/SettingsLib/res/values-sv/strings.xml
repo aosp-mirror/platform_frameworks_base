@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Visa gränser för videoklipp, marginaler m.m."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Tvinga fram RTL-layout"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tvinga fram RTL-skärmlayout (hö–vä) för alla språk"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Tvinga 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Aktivera 4x MSAA i OpenGL ES 2.0-appar"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Felsök icke-rektangulära urklippsåtgärder"</string>

@@ -1198,7 +1198,7 @@
     <string name="whichSendToApplication" msgid="77101541959464018">"यसको प्रयोग गरी पठाउनुहोस्"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"%1$s को प्रयोग गरी पठाउनुहोस्"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"पठाउनुहोस्"</string>
-    <string name="whichHomeApplication" msgid="8276350727038396616">"गृह एप चयन गर्नुहोस्"</string>
+    <string name="whichHomeApplication" msgid="8276350727038396616">"होम एप चयन गर्नुहोस्"</string>
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"%1$s लाई गृहको रूपमा प्रयोग गर्नुहोस्"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"छविलाई कैंद गर्नुहोस्"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"यस मार्फत छविलाई कैंद गर्नुहोस्"</string>

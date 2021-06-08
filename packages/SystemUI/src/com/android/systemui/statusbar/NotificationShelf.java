@@ -20,14 +20,11 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
-import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.MathUtils;
-import android.view.DisplayCutout;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -666,8 +663,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         boolean isAppearing = row.isDrawingAppearAnimation() && !row.isInShelf();
         iconState.hidden = isAppearing
                 || (view instanceof ExpandableNotificationRow
-                    && ((ExpandableNotificationRow) view).isLowPriority()
-                    && mShelfIcons.hasMaxNumDot())
+                && ((ExpandableNotificationRow) view).isLowPriority()
+                && mShelfIcons.hasMaxNumDot())
                 || (transitionAmount == 0.0f && !iconState.isAnimating(icon))
                 || row.isAboveShelf()
                 || row.showingPulsing()

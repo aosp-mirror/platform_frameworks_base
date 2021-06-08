@@ -1912,8 +1912,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Posodobil skrbnik"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisal skrbnik"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"V redu"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Funkcija varčevanja z energijo baterije vklopi temno temo ter omeji ali izklopi dejavnost v ozadju, nekatere vizualne učinke, določene funkcije in nekatere omrežne povezave."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Funkcija varčevanja z energijo baterije vklopi temno temo ter omeji ali izklopi dejavnost v ozadju, nekatere vizualne učinke, določene funkcije in nekatere omrežne povezave."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vklop varčevanja s podatki?"</string>
@@ -2036,8 +2035,8 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Več o tem"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Prekliči začasno zaustavitev aplikacije"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"Vklop delovnih aplikacij?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Omogočanje dostopa do delovnih aplikacij in obvestil za delovni profil"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Vklop"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Pridobite dostop do delovnih aplikacij in obvestil za delovni profil."</string>
+    <string name="work_mode_turn_on" msgid="3662561662475962285">"Vklopi"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacija ni na voljo"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutno ni na voljo."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ta aplikacija je bila zasnovana za starejšo različico Androida in morda ne bo delovala pravilno. Preverite, ali so na voljo posodobitve, ali pa se obrnite na razvijalca."</string>

@@ -187,7 +187,7 @@
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Av en ukjent tredjepart"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Av administratoren for jobbprofilen din"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Av <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
-    <string name="work_profile_deleted" msgid="5891181538182009328">"Arbeidsprofilen er slettet"</string>
+    <string name="work_profile_deleted" msgid="5891181538182009328">"Jobbprofilen er slettet"</string>
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Administratorappen for jobbprofilen mangler eller er skadet. Dette har ført til at jobbprofilen og alle data knyttet til den, har blitt slettet. Ta kontakt med administratoren for å få hjelp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Jobbprofilen din er ikke lenger tilgjengelig på denne enheten"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"For mange passordforsøk"</string>
@@ -1476,7 +1476,7 @@
     <string name="deny" msgid="6632259981847676572">"Avslå"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Tillatelse forespurt"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Tillatelse forespurt\nfor kontoen <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Du bruker denne appen utenfor arbeidsprofilen"</string>
+    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Du bruker denne appen utenfor jobbprofilen"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Du bruker denne appen i jobbprofilen din"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Inndatametode"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Synkronisering"</string>
@@ -1866,8 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Oppdatert av administratoren din"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Slettet av administratoren din"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Batterisparing slår på mørkt tema og begrenser eller slår av bakgrunnsaktivitet, enkelte visuelle effekter, noen funksjoner og noen nettverkstilkoblinger."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Batterisparing slår på mørkt tema og begrenser eller slår av bakgrunnsaktivitet, enkelte visuelle effekter, noen funksjoner og noen nettverkstilkoblinger."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datasparing hindrer noen apper fra å sende og motta data i bakgrunnen, for å redusere dataforbruket. Aktive apper kan bruke data, men kanskje ikke så mye som ellers – for eksempel vises ikke bilder før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vil du slå på Datasparing?"</string>

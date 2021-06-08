@@ -95,6 +95,7 @@ import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.testing.AndroidTestingRunner;
+import android.text.TextUtils;
 
 import androidx.preference.PreferenceManager;
 import androidx.test.filters.SmallTest;
@@ -112,6 +113,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.wm.shell.bubbles.Bubbles;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -224,6 +226,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private NotificationManager mNotificationManager;
     @Mock
     private NotificationManager.Policy mNotificationPolicy;
+    @Mock
+    private Bubbles mBubbles;
 
     @Captor
     private ArgumentCaptor<NotificationHandler> mListenerCaptor;
@@ -242,7 +246,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
         mManager = new PeopleSpaceWidgetManager(mContext, mAppWidgetManager, mIPeopleManager,
                 mPeopleManager, mLauncherApps, mNotificationEntryManager, mPackageManager,
-                mUserManager, mINotificationManager, mNotificationManager, mFakeExecutor);
+                Optional.of(mBubbles), mUserManager, mINotificationManager, mNotificationManager,
+                mFakeExecutor);
         mManager.attach(mListenerService);
 
         verify(mListenerService).addNotificationHandler(mListenerCaptor.capture());
@@ -267,6 +272,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 INTERRUPTION_FILTER_ALL);
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT};
         when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+        when(mBubbles.isBubbleNotificationSuppressedFromShade(any(), any())).thenReturn(false);
 
         when(mMockContext.getPackageName()).thenReturn(TEST_PACKAGE_A);
         when(mMockContext.getUserId()).thenReturn(0);
@@ -1187,6 +1193,28 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                         Optional.of(WIDGET_ID_WITH_SHORTCUT));
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_CONTENT_1);
+
+        verify(mNotificationEntryManager, times(1))
+                .getVisibleNotifications();
+    }
+
+    @Test
+    public void testAugmentTileFromNotificationEntryManager_notificationHidden() {
+        when(mBubbles.isBubbleNotificationSuppressedFromShade(any(), any())).thenReturn(true);
+        PeopleSpaceTile tile =
+                new PeopleSpaceTile
+                        .Builder(SHORTCUT_ID, "userName", ICON, new Intent())
+                        .setPackageName(TEST_PACKAGE_A)
+                        .setUserHandle(new UserHandle(0))
+                        .build();
+        when(mNotificationEntryManager.getVisibleNotifications())
+                .thenReturn(List.of(mNotificationEntry));
+
+        PeopleSpaceTile actual =
+                mManager.augmentTileFromNotificationEntryManager(tile,
+                        Optional.of(WIDGET_ID_WITH_SHORTCUT));
+
+        assertThat(TextUtils.isEmpty(actual.getNotificationContent())).isTrue();
 
         verify(mNotificationEntryManager, times(1))
                 .getVisibleNotifications();
