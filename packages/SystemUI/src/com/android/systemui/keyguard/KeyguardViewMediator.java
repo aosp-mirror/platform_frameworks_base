@@ -1651,14 +1651,19 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         Trace.endSection();
     }
 
-    /** Hide the keyguard and let {@code runner} handle the animation. */
+    /**
+     * Hide the keyguard and let {@code runner} handle the animation.
+     *
+     * This method should typically be called after {@link ViewMediatorCallback#keyguardDonePending}
+     * was called, when we are ready to hide the keyguard.
+     */
     public void hideWithAnimation(IRemoteAnimationRunner runner) {
-        if (!mShowing) {
+        if (!mKeyguardDonePending) {
             return;
         }
 
         mKeyguardExitAnimationRunner = runner;
-        hideLocked();
+        mViewMediatorCallback.readyForKeyguardDone();
     }
 
     /**
