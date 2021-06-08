@@ -16,6 +16,7 @@
 
 package com.android.server.tare;
 
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Trace;
@@ -28,6 +29,7 @@ import android.os.Trace;
 final class TareHandlerThread extends HandlerThread {
 
     private static TareHandlerThread sInstance;
+    private static Handler sHandler;
 
     private TareHandlerThread() {
         super("tare");
@@ -39,6 +41,7 @@ final class TareHandlerThread extends HandlerThread {
             sInstance.start();
             final Looper looper = sInstance.getLooper();
             looper.setTraceTag(Trace.TRACE_TAG_SYSTEM_SERVER);
+            sHandler = new Handler(sInstance.getLooper());
         }
     }
 
@@ -47,5 +50,13 @@ final class TareHandlerThread extends HandlerThread {
             ensureThreadLocked();
         }
         return sInstance;
+    }
+
+    /** Returns the singleton handler for TareHandlerThread. */
+    public static Handler getHandler() {
+        synchronized (TareHandlerThread.class) {
+            ensureThreadLocked();
+        }
+        return sHandler;
     }
 }

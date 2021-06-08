@@ -1653,6 +1653,8 @@
     <!-- Wallet strings -->
     <!-- Wallet empty state, title [CHAR LIMIT=32] -->
     <string name="wallet_title">Wallet</string>
+    <!-- Wallet empty state label. [CHAR LIMIT=NONE] -->
+    <string name="wallet_empty_state_label">Get set up to make faster, more secure purchases with your phone</string>
     <!-- Label of the button at the bottom prompting user enter wallet app. [CHAR LIMIT=NONE] -->
     <string name="wallet_app_button_label">Show all</string>
     <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->

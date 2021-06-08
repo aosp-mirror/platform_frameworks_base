@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Pokaži meje obrezovanja, obrobe ipd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Vsili od desne proti levi"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Vsili smer postavitve na zaslonu od desne proti levi za vse jezike."</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Vsili 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"V aplikacijah OpenGL ES 2.0 omogoči 4x MSAA."</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Odpravljanje težav s postopki nepravokotnega izrezovanja"</string>

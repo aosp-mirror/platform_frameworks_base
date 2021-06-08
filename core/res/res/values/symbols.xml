@@ -4291,6 +4291,12 @@
   <java-symbol type="bool" name="config_cecHdmiCecVersion20_allowed" />
   <java-symbol type="bool" name="config_cecHdmiCecVersion20_default" />
 
+  <java-symbol type="bool" name="config_cecRoutingControl_userConfigurable" />
+  <java-symbol type="bool" name="config_cecRoutingControlEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecRoutingControlEnabled_default" />
+  <java-symbol type="bool" name="config_cecRoutingControlDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecRoutingControlDisabled_default" />
+
   <java-symbol type="bool" name="config_cecPowerControlMode_userConfigurable" />
   <java-symbol type="bool" name="config_cecPowerControlModeTv_allowed" />
   <java-symbol type="bool" name="config_cecPowerControlModeTv_default" />

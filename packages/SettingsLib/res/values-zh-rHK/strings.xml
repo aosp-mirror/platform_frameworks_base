@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"顯示剪輯範圍、邊界等"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"強制使用從右至左的版面配置方向"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"強制將所有語言代碼的畫面配置方向改為從右至左"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"強制 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"在 OpenGL ES 2.0 應用程式中啟用 4x MSAA"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"對非矩形裁剪操作進行偵錯"</string>

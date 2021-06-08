@@ -1424,7 +1424,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
                 mStackScrollerController.getNotificationListContainer(),
-                mNotificationShadeDepthControllerLazy.get(),
                 mHeadsUpManager
         );
 
@@ -2120,6 +2119,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         mKeyguardViewMediator.hideWithAnimation(runner);
+    }
+
+    @Override
+    public void disableKeyguardBlurs() {
+        mMainThreadHandler.post(mKeyguardViewMediator::disableBlursUntilHidden);
     }
 
     public boolean isDeviceInVrMode() {

@@ -1997,23 +1997,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return false;
     }
 
-    @Override
-    public float getCurrentTopRoundness() {
-        if (mExpandAnimationRunning) {
-            return mTopRoundnessDuringExpandAnimation;
-        }
-
-        return super.getCurrentTopRoundness();
-    }
-
-    @Override
-    public float getCurrentBottomRoundness() {
-        if (mExpandAnimationRunning) {
-            return mBottomRoundnessDuringExpandAnimation;
-        }
-
-        return super.getCurrentBottomRoundness();
-    }
 
     public void applyExpandAnimationParams(ExpandAnimationParameters params) {
         if (params == null) {

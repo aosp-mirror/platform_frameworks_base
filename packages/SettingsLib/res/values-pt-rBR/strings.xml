@@ -353,6 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostrar limites de corte, margens, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forçar layout da direita p/ esquerda"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forçar a direção do layout da direita para a esquerda para todas as localidades"</string>
+    <!-- no translation found for window_blurs (6831008984828425106) -->
+    <skip />
     <string name="force_msaa" msgid="4081288296137775550">"Forçar 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Ativar 4x MSAA em apps OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operações de corte não retangulares"</string>
@@ -511,7 +513,7 @@
     <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Permitir que esse app defina alarmes e programe outras ações. Ele poderá ser usado quando você não estiver usando o dispositivo, o que consumirá mais bateria. Se essa permissão for desativada, o app e os alarmes dele poderão não funcionar como planejado."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programar, alarme, lembrete, relógio"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ativar"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ativar o \"Não perturbe\""</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ativar o Não perturbe"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nunca"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Somente prioridade"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
