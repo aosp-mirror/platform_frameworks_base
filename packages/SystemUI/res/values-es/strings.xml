@@ -765,7 +765,7 @@
       <item quantity="other">%d minutos</item>
       <item quantity="one">%d minuto</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"Uso de la batería"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"Uso de batería"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Ahorro de batería no disponible mientras se carga el dispositivo"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Ahorro de batería"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Reduce el rendimiento y los datos en segundo plano"</string>

@@ -718,7 +718,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"گفتگو کے سیکشن کے اوپری حصے پر دکھاتا ہے، تیرتے بلبلے کی طرح ظاہر ہوتا ہے، لاک اسکرین پر پروفائل تصویر دکھاتا ہے"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ترتیبات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ترجیح"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> گفتگو کی خصوصیات کو سپورٹ نہیں کرتا ہے"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ایپ گفتگو کی خصوصیات کو سپورٹ نہیں کرتی ہے"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"کوئی حالیہ بلبلہ نہیں"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"حالیہ بلبلے اور برخاست شدہ بلبلے یہاں ظاہر ہوں گے"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ان اطلاعات کی ترمیم نہیں کی جا سکتی۔"</string>

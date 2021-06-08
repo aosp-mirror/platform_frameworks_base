@@ -715,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Pot sonar o vibrar en funció de la configuració del telèfon"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pot sonar o vibrar en funció de la configuració del telèfon. Les converses de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g> es mostren com a bombolles de manera predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Atrau la teva atenció amb una drecera flotant a aquest contingut."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Es mostra com a bombolla flotant a la part superior de la secció de converses i la foto de perfil apareix a la pantalla de bloqueig"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Es mostra a la part superior de la secció de converses i com a bombolla flotant, i la foto de perfil apareix a la pantalla de bloqueig"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuració"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritat"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet les funcions de converses"</string>
