@@ -24,7 +24,6 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.policy.NextAlarmController
 import java.util.Locale
 import javax.inject.Inject
@@ -38,7 +37,6 @@ class AlarmTile @Inject constructor(
     statusBarStateController: StatusBarStateController,
     activityStarter: ActivityStarter,
     qsLogger: QSLogger,
-    private val featureFlags: FeatureFlags,
     private val userTracker: UserTracker,
     nextAlarmController: NextAlarmController
 ) : QSTileImpl<QSTile.State>(
@@ -63,10 +61,6 @@ class AlarmTile @Inject constructor(
 
     init {
         nextAlarmController.observe(this, callback)
-    }
-
-    override fun isAvailable(): Boolean {
-        return featureFlags.isAlarmTileAvailable
     }
 
     override fun newTileState(): QSTile.State {
