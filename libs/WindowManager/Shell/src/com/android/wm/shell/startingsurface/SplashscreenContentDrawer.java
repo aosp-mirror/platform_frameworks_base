@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 /**
  * Util class to create the view for a splash screen content.
@@ -207,6 +208,15 @@ public class SplashscreenContentDrawer {
                 .build();
     }
 
+    private static <T> T safeReturnAttrDefault(UnaryOperator<T> getMethod, T def) {
+        try {
+            return getMethod.apply(def);
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Get attribute fail, return default: " + e.getMessage());
+            return def;
+        }
+    }
+
     /**
      * Get the {@link SplashScreenWindowAttrs} from {@code context} and fill them into
      * {@code attrs}.
@@ -215,16 +225,18 @@ public class SplashscreenContentDrawer {
         final TypedArray typedArray = context.obtainStyledAttributes(
                 com.android.internal.R.styleable.Window);
         attrs.mWindowBgResId = typedArray.getResourceId(R.styleable.Window_windowBackground, 0);
-        attrs.mWindowBgColor = typedArray.getColor(
-                R.styleable.Window_windowSplashScreenBackground, Color.TRANSPARENT);
-        attrs.mReplaceIcon = typedArray.getDrawable(
-                R.styleable.Window_windowSplashScreenAnimatedIcon);
-        attrs.mAnimationDuration = typedArray.getInt(
-                R.styleable.Window_windowSplashScreenAnimationDuration, 0);
-        attrs.mBrandingImage = typedArray.getDrawable(
-                R.styleable.Window_windowSplashScreenBrandingImage);
-        attrs.mIconBgColor = typedArray.getColor(
-                R.styleable.Window_windowSplashScreenIconBackgroundColor, Color.TRANSPARENT);
+        attrs.mWindowBgColor = safeReturnAttrDefault((def) -> typedArray.getColor(
+                R.styleable.Window_windowSplashScreenBackground, def),
+                Color.TRANSPARENT);
+        attrs.mReplaceIcon = safeReturnAttrDefault((def) -> typedArray.getDrawable(
+                R.styleable.Window_windowSplashScreenAnimatedIcon), null);
+        attrs.mAnimationDuration = safeReturnAttrDefault((def) -> typedArray.getInt(
+                R.styleable.Window_windowSplashScreenAnimationDuration, def), 0);
+        attrs.mBrandingImage = safeReturnAttrDefault((def) -> typedArray.getDrawable(
+                R.styleable.Window_windowSplashScreenBrandingImage), null);
+        attrs.mIconBgColor = safeReturnAttrDefault((def) -> typedArray.getColor(
+                R.styleable.Window_windowSplashScreenIconBackgroundColor, def),
+                Color.TRANSPARENT);
         typedArray.recycle();
         if (DEBUG) {
             Slog.d(TAG, "window attributes color: "
@@ -476,9 +488,14 @@ public class SplashscreenContentDrawer {
                     drawable = layerDrawable.getDrawable(0);
                 }
             }
-            mColorChecker = drawable instanceof ColorDrawable
-                    ? new SingleColorTester((ColorDrawable) drawable)
-                    : new ComplexDrawableTester(drawable, filterTransparent);
+            if (drawable == null) {
+                mColorChecker = new SingleColorTester(
+                        (ColorDrawable) createDefaultBackgroundDrawable());
+            } else {
+                mColorChecker = drawable instanceof ColorDrawable
+                        ? new SingleColorTester((ColorDrawable) drawable)
+                        : new ComplexDrawableTester(drawable, filterTransparent);
+            }
         }
 
         public float nonTransparentRatio() {
