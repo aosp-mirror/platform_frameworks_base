@@ -675,7 +675,7 @@ public class PeopleSpaceWidgetManager {
             updatedTile.setUserIcon(icon);
         }
         if (DEBUG) Log.d(TAG, "Statuses: " + conversation.getStatuses().toString());
-        NotificationChannel channel = conversation.getParentNotificationChannel();
+        NotificationChannel channel = conversation.getNotificationChannel();
         if (channel != null) {
             if (DEBUG) Log.d(TAG, "Important:" + channel.isImportantConversation());
             updatedTile.setIsImportantConversation(channel.isImportantConversation());
