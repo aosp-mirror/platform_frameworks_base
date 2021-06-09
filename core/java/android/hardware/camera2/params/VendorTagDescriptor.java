@@ -36,13 +36,7 @@ public final class VendorTagDescriptor implements Parcelable {
             new Parcelable.Creator<VendorTagDescriptor>() {
         @Override
         public VendorTagDescriptor createFromParcel(Parcel source) {
-            try {
-                VendorTagDescriptor vendorDescriptor = new VendorTagDescriptor(source);
-                return vendorDescriptor;
-            } catch (Exception e) {
-                Log.e(TAG, "Exception creating VendorTagDescriptor from parcel", e);
-                return null;
-            }
+            return new VendorTagDescriptor(source);
         }
 
         @Override
