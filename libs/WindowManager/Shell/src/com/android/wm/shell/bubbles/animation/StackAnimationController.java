@@ -529,6 +529,11 @@ public class StackAnimationController extends
         mImeHeight = imeHeight;
     }
 
+    /** Returns the current IME height that the stack is offset by. */
+    public float getImeHeight() {
+        return mImeHeight;
+    }
+
     /**
      * Animates the stack either away from the newly visible IME, or back to its original position
      * due to the IME going away.
