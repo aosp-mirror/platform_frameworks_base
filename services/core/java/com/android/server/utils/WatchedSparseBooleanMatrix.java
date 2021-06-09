@@ -67,7 +67,8 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
      * <ul>
      * <li> The matrix does not automatically shrink but there is a compress() method that
      *      will recover unused space.
-     * <li> Equality is a very, very expesive operation.
+     * <li> Equality is a very, very expensive operation because it must walk the matrices
+     *      beimg compared element by element.
      * </ul>
      */
 
@@ -79,10 +80,9 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     static final int STEP = 64;
 
     /**
-     * There are 8 bits in a byte.  The constant is defined here only to make it easy to
-     * find in the code.
+     * The number of bits in the mValues array element.
      */
-    private static final int BYTE = 8;
+    private static final int PACKING = 32;
 
     /**
      * Constants that index into the string array returned by matrixToString.  The primary
@@ -123,7 +123,7 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     /**
      * The boolean array.  This array is always {@code mOrder x mOrder} in size.
      */
-    private byte[] mValues;
+    private int[] mValues;
 
     /**
      * A convenience function called when the elements are added to or removed from the storage.
@@ -157,10 +157,10 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
             throw new RuntimeException("mOrder is " + mOrder + " initCap is " + initialCapacity);
         }
 
-        mInUse = new boolean[mOrder];
+        mInUse = ArrayUtils.newUnpaddedBooleanArray(mOrder);
         mKeys = ArrayUtils.newUnpaddedIntArray(mOrder);
         mMap = ArrayUtils.newUnpaddedIntArray(mOrder);
-        mValues = new byte[mOrder * mOrder / 8];
+        mValues = ArrayUtils.newUnpaddedIntArray(mOrder * mOrder / PACKING);
         mSize = 0;
     }
 
@@ -301,8 +301,8 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
      */
     private boolean valueAtInternal(int row, int col) {
         int element = row * mOrder + col;
-        int offset = element / BYTE;
-        int mask = 1 << (element % BYTE);
+        int offset = element / PACKING;
+        int mask = 1 << (element % PACKING);
         return (mValues[offset] & mask) != 0;
     }
 
@@ -324,8 +324,8 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
      */
     private void setValueAtInternal(int row, int col, boolean value) {
         int element = row * mOrder + col;
-        int offset = element / BYTE;
-        byte mask = (byte) (1 << (element % BYTE));
+        int offset = element / PACKING;
+        int mask = 1 << (element % PACKING);
         if (value) {
             mValues[offset] |= mask;
         } else {
@@ -377,10 +377,10 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
             mSize++;
 
             // Initialize the row and column corresponding to the new index.
-            int valueRow = mOrder / BYTE;
-            int offset = newIndex / BYTE;
-            byte mask = (byte) (~(1 << (newIndex % BYTE)));
-            Arrays.fill(mValues, newIndex * valueRow, (newIndex + 1) * valueRow, (byte) 0);
+            int valueRow = mOrder / PACKING;
+            int offset = newIndex / PACKING;
+            int mask = ~(1 << (newIndex % PACKING));
+            Arrays.fill(mValues, newIndex * valueRow, (newIndex + 1) * valueRow, 0);
             for (int n = 0; n < mSize; n++) {
                 mValues[n * valueRow + offset] &= mask;
             }
@@ -412,25 +412,36 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
      * Expand the 2D array.  This also extends the free list.
      */
     private void growMatrix() {
-        resizeValues(mOrder + STEP);
+        resizeMatrix(mOrder + STEP);
     }
 
     /**
      * Resize the values array to the new dimension.
      */
-    private void resizeValues(int newOrder) {
-
-        boolean[] newInuse = Arrays.copyOf(mInUse, newOrder);
+    private void resizeMatrix(int newOrder) {
+        if (newOrder % STEP != 0) {
+            throw new IllegalArgumentException("matrix order " + newOrder
+                                               + " is not a multiple of " + STEP);
+        }
         int minOrder = Math.min(mOrder, newOrder);
 
-        byte[] newValues = new byte[newOrder * newOrder / BYTE];
+        boolean[] newInUse = ArrayUtils.newUnpaddedBooleanArray(newOrder);
+        System.arraycopy(mInUse, 0, newInUse, 0, minOrder);
+        int[] newMap = ArrayUtils.newUnpaddedIntArray(newOrder);
+        System.arraycopy(mMap, 0, newMap, 0, minOrder);
+        int[] newKeys = ArrayUtils.newUnpaddedIntArray(newOrder);
+        System.arraycopy(mKeys, 0, newKeys, 0, minOrder);
+
+        int[] newValues = ArrayUtils.newUnpaddedIntArray(newOrder * newOrder / PACKING);
         for (int i = 0; i < minOrder; i++) {
-            int row = mOrder * i / BYTE;
-            int newRow = newOrder * i / BYTE;
-            System.arraycopy(mValues, row, newValues, newRow, minOrder / BYTE);
+            int row = mOrder * i / PACKING;
+            int newRow = newOrder * i / PACKING;
+            System.arraycopy(mValues, row, newValues, newRow, minOrder / PACKING);
         }
 
-        mInUse = newInuse;
+        mInUse = newInUse;
+        mMap = newMap;
+        mKeys = newKeys;
         mValues = newValues;
         mOrder = newOrder;
     }
@@ -482,21 +493,21 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
             int src = mMap[srcIndex];
             mInUse[src] = false;
             mMap[srcIndex] = dst;
-            System.arraycopy(mValues, src * mOrder / BYTE,
-                             mValues, dst * mOrder / BYTE,
-                             mOrder / BYTE);
-            int srcOffset = (src / BYTE);
-            byte srcMask = (byte) (1 << (src % BYTE));
-            int dstOffset = (dst / BYTE);
-            byte dstMask = (byte) (1 << (dst % BYTE));
+            System.arraycopy(mValues, src * mOrder / PACKING,
+                             mValues, dst * mOrder / PACKING,
+                             mOrder / PACKING);
+            int srcOffset = (src / PACKING);
+            int srcMask = 1 << (src % PACKING);
+            int dstOffset = (dst / PACKING);
+            int dstMask = 1 << (dst % PACKING);
             for (int i = 0; i < mOrder; i++) {
                 if ((mValues[srcOffset] & srcMask) == 0) {
                     mValues[dstOffset] &= ~dstMask;
                 } else {
                     mValues[dstOffset] |= dstMask;
                 }
-                srcOffset += mOrder / BYTE;
-                dstOffset += mOrder / BYTE;
+                srcOffset += mOrder / PACKING;
+                dstOffset += mOrder / PACKING;
             }
         }
     }
@@ -508,7 +519,7 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
         pack();
         int unused = (mOrder - mSize) / STEP;
         if (unused > 0) {
-            resizeValues(mOrder - (unused * STEP));
+            resizeMatrix(mOrder - (unused * STEP));
         }
     }
 

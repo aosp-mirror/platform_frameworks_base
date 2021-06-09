@@ -340,6 +340,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     mSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                     opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
+                    mSensors.get(sensorId).getSensorProperties(),
                     mUdfpsOverlayController, mSidefpsController, maxTemplatesPerUser, enrollReason);
             scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
 

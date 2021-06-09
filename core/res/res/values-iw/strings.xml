@@ -865,7 +865,7 @@
     <string name="relationTypeSister" msgid="3721676005094140671">"אחות"</string>
     <string name="relationTypeSpouse" msgid="6916682664436031703">"בן/בת זוג"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"בהתאמה אישית"</string>
-    <string name="sipAddressTypeHome" msgid="5918441930656878367">"דף הבית"</string>
+    <string name="sipAddressTypeHome" msgid="5918441930656878367">"בית"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"עבודה"</string>
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"אחר"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"לא נמצאה אפליקציה להצגת התוכן הזה."</string>
@@ -1913,8 +1913,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"עודכנה על ידי מנהל המערכת"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"נמחקה על ידי מנהל המערכת"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"אישור"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"התכונה \'חיסכון בסוללה\' מפעילה עיצוב כהה ומגבילה או מכבה פעילות ברקע, חלק מהאפקטים החזותיים, תכונות מסוימות וחלק מהחיבורים לרשתות."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"התכונה \'חיסכון בסוללה\' מפעילה עיצוב כהה ומגבילה או מכבה פעילות ברקע, חלק מהאפקטים החזותיים, תכונות מסוימות וחלק מהחיבורים לרשתות."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות לשלוח או לקבל נתונים ברקע. אפליקציות שבהן נעשה שימוש כרגע יכולות לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"להפעיל את חוסך הנתונים?"</string>
@@ -2037,7 +2036,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"מידע נוסף"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ביטול ההשהיה של האפליקציה"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"להפעיל את האפליקציות לעבודה?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"קבלת גישה להתראות ולאפליקציות לעבודה"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"קבלת גישה להתראות ולאפליקציות בפרופיל העבודה"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"הפעלה"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"האפליקציה לא זמינה"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא זמינה בשלב זה."</string>

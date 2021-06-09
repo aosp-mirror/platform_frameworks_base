@@ -115,6 +115,7 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import com.google.common.collect.ImmutableList;
@@ -318,7 +319,8 @@ public class BubblesTest extends SysuiTestCase {
                 mPositioner,
                 mock(DisplayController.class),
                 syncExecutor,
-                mock(Handler.class));
+                mock(Handler.class),
+                mock(SyncTransactionQueue.class));
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
         mBubblesManager = new BubblesManager(

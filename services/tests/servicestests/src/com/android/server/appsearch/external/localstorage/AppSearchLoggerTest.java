@@ -40,7 +40,6 @@ import com.android.server.appsearch.proto.PutDocumentStatsProto;
 import com.android.server.appsearch.proto.QueryStatsProto;
 import com.android.server.appsearch.proto.ScoringSpecProto;
 import com.android.server.appsearch.proto.TermMatchType;
-import com.android.server.appsearch.visibilitystore.VisibilityStore;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -64,7 +63,6 @@ public class AppSearchLoggerTest {
                 AppSearchImpl.create(
                         mTemporaryFolder.newFolder(),
                         context,
-                        VisibilityStore.NO_OP_USER_ID,
                         /*logger=*/ null);
         mLogger = new TestLogger();
     }
@@ -292,7 +290,6 @@ public class AppSearchLoggerTest {
                 AppSearchImpl.create(
                         mTemporaryFolder.newFolder(),
                         context,
-                        VisibilityStore.NO_OP_USER_ID,
                         mLogger);
 
         InitializeStats iStats = mLogger.mInitializeStats;

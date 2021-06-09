@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.view.WindowManager
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -27,6 +28,7 @@ import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SeamlessRotationAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,16 +62,33 @@ class SeamlessAppRotationTest(
             }
         }
 
-    @FlakyTest(bugId = 140855415)
+    @Postsubmit
     @Test
-    override fun statusBarWindowIsAlwaysVisible() {
-        super.statusBarWindowIsAlwaysVisible()
+    fun appWindowFullScreen() {
+        testSpec.assertWm {
+            this.invoke("isFullScreen") {
+                val appWindow = it.windowState(testApp.`package`)
+                val flags = appWindow.windowState?.attributes?.flags ?: 0
+                appWindow.verify("isFullScreen")
+                    .that(flags.and(WindowManager.LayoutParams.FLAG_FULLSCREEN))
+                    .isGreaterThan(0)
+            }
+        }
     }
 
-    @FlakyTest(bugId = 140855415)
+    @Postsubmit
     @Test
-    override fun statusBarLayerIsAlwaysVisible() {
-        super.statusBarLayerIsAlwaysVisible()
+    fun appWindowSeamlessRotation() {
+        testSpec.assertWm {
+            this.invoke("isRotationSeamless") {
+                val appWindow = it.windowState(testApp.`package`)
+                val rotationAnimation = appWindow.windowState?.attributes?.rotationAnimation ?: 0
+                appWindow.verify("isRotationSeamless")
+                    .that(rotationAnimation
+                        .and(WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS))
+                    .isGreaterThan(0)
+            }
+        }
     }
 
     @Presubmit
@@ -90,10 +109,44 @@ class SeamlessAppRotationTest(
         }
     }
 
+    @Presubmit
+    @Test
+    fun statusBarWindowIsAlwaysInvisible() {
+        testSpec.assertWm {
+            this.hidesAboveAppWindow(WindowManagerStateHelper.STATUS_BAR_WINDOW_NAME)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun statusBarLayerIsAlwaysInvisible() {
+        testSpec.assertLayers {
+            this.isInvisible(WindowManagerStateHelper.STATUS_BAR_LAYER_NAME)
+        }
+    }
+
     @Postsubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+
+    @FlakyTest
+    @Test
+    override fun navBarWindowIsAlwaysVisible() {
+        super.navBarWindowIsAlwaysVisible()
+    }
+
+    @FlakyTest
+    @Test
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
+    }
+
+    @FlakyTest
+    @Test
+    override fun navBarLayerRotatesAndScales() {
+        super.navBarLayerRotatesAndScales()
     }
 
     companion object {

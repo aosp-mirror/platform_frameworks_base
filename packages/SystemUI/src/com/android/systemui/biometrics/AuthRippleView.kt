@@ -110,7 +110,8 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
                 visibility = GONE
             }
         })
-        vibrate()
+        // TODO (b/185124905):  custom haptic TBD
+        // vibrate()
         animatorSet.start()
         visibility = VISIBLE
         rippleInProgress = true

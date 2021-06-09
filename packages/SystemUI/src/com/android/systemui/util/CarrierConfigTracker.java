@@ -37,20 +37,16 @@ public class CarrierConfigTracker extends BroadcastReceiver {
     private final SparseArray<Boolean> mCallStrengthConfigs = new SparseArray<>();
     private final SparseArray<Boolean> mNoCallingConfigs = new SparseArray<>();
     private final CarrierConfigManager mCarrierConfigManager;
-    private final boolean mDefaultCallStrengthConfig;
-    private final boolean mDefaultNoCallingConfig;
+    private boolean mDefaultCallStrengthConfigLoaded;
+    private boolean mDefaultCallStrengthConfig;
+    private boolean mDefaultNoCallingConfigLoaded;
+    private boolean mDefaultNoCallingConfig;
 
     @Inject
     public CarrierConfigTracker(Context context) {
         mCarrierConfigManager = context.getSystemService(CarrierConfigManager.class);
         context.registerReceiver(
                 this, new IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED));
-        mDefaultCallStrengthConfig =
-                CarrierConfigManager.getDefaultConfig().getBoolean(
-                        CarrierConfigManager.KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL);
-        mDefaultNoCallingConfig =
-                CarrierConfigManager.getDefaultConfig().getBoolean(
-                        CarrierConfigManager.KEY_USE_IP_FOR_CALLING_INDICATOR_BOOL);
     }
 
     @Override
@@ -81,6 +77,12 @@ public class CarrierConfigTracker extends BroadcastReceiver {
         if (mCallStrengthConfigs.indexOfKey(subId) >= 0) {
             return mCallStrengthConfigs.get(subId);
         }
+        if (!mDefaultCallStrengthConfigLoaded) {
+            mDefaultCallStrengthConfig =
+                    CarrierConfigManager.getDefaultConfig().getBoolean(
+                            CarrierConfigManager.KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL);
+            mDefaultCallStrengthConfigLoaded = true;
+        }
         return mDefaultCallStrengthConfig;
     }
 
@@ -90,6 +92,12 @@ public class CarrierConfigTracker extends BroadcastReceiver {
     public boolean getNoCallingConfig(int subId) {
         if (mNoCallingConfigs.indexOfKey(subId) >= 0) {
             return mNoCallingConfigs.get(subId);
+        }
+        if (!mDefaultNoCallingConfigLoaded) {
+            mDefaultNoCallingConfig =
+                    CarrierConfigManager.getDefaultConfig().getBoolean(
+                            CarrierConfigManager.KEY_USE_IP_FOR_CALLING_INDICATOR_BOOL);
+            mDefaultNoCallingConfigLoaded = true;
         }
         return mDefaultNoCallingConfig;
     }
