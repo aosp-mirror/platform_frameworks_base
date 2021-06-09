@@ -4213,33 +4213,35 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // If the target package is being uninstalled, we need to revoke this permission
                 // From all other packages
                 if (pkg == null || !hasPermission(pkg, bp.getName())) {
-                    Slog.i(TAG, "Removing permission " + bp.getName()
-                            + " that used to be declared by " + bp.getPackageName());
-                    if (bp.isRuntime()) {
-                        final int[] userIds = mUserManagerInt.getUserIds();
-                        final int numUserIds = userIds.length;
-                        for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
-                            final int userId = userIds[userIdNum];
-                            mPackageManagerInt.forEachPackage((AndroidPackage p) ->
-                                    revokePermissionFromPackageForUser(p.getPackageName(),
-                                            bp.getName(), true, userId, callback));
-                        }
-                    } else {
-                        mPackageManagerInt.forEachPackage(p -> {
+                    if (!isPermissionDeclaredByDisabledSystemPkg(bp)) {
+                        Slog.i(TAG, "Removing permission " + bp.getName()
+                                + " that used to be declared by " + bp.getPackageName());
+                        if (bp.isRuntime()) {
                             final int[] userIds = mUserManagerInt.getUserIds();
-                            synchronized (mLock) {
-                                for (final int userId : userIds) {
-                                    final UidPermissionState uidState = getUidStateLocked(p,
-                                            userId);
-                                    if (uidState == null) {
-                                        Slog.e(TAG, "Missing permissions state for "
-                                                + p.getPackageName() + " and user " + userId);
-                                        continue;
-                                    }
-                                    uidState.removePermissionState(bp.getName());
-                                }
+                            final int numUserIds = userIds.length;
+                            for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
+                                final int userId = userIds[userIdNum];
+                                mPackageManagerInt.forEachPackage((AndroidPackage p) ->
+                                        revokePermissionFromPackageForUser(p.getPackageName(),
+                                                bp.getName(), true, userId, callback));
                             }
-                        });
+                        } else {
+                            mPackageManagerInt.forEachPackage(p -> {
+                                final int[] userIds = mUserManagerInt.getUserIds();
+                                synchronized (mLock) {
+                                    for (final int userId : userIds) {
+                                        final UidPermissionState uidState = getUidStateLocked(p,
+                                                userId);
+                                        if (uidState == null) {
+                                            Slog.e(TAG, "Missing permissions state for "
+                                                    + p.getPackageName() + " and user " + userId);
+                                            continue;
+                                        }
+                                        uidState.removePermissionState(bp.getName());
+                                    }
+                                }
+                            });
+                        }
                     }
                     synchronized (mLock) {
                         mRegistry.removePermission(bp.getName());
@@ -4262,6 +4264,22 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
         return changed;
+    }
+
+    private boolean isPermissionDeclaredByDisabledSystemPkg(@NonNull Permission permission) {
+        final PackageSetting disabledSourcePs = mPackageManagerInt.getDisabledSystemPackage(
+                    permission.getPackageName());
+        if (disabledSourcePs != null && disabledSourcePs.getPkg() != null) {
+            final String permissionName = permission.getName();
+            final List<ParsedPermission> sourcePerms = disabledSourcePs.getPkg().getPermissions();
+            for (ParsedPermission sourcePerm : sourcePerms) {
+                if (TextUtils.equals(permissionName, sourcePerm.getName())
+                        && permission.getProtectionLevel() == sourcePerm.getProtectionLevel()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
