@@ -28,7 +28,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> үлдсэн байна. Таны хэрэглээнд тулгуурлан ойролцоогоор <xliff:g id="TIME">%2$s</xliff:g>-н хугацаа үлдсэн"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> үлдсэн байна. Ойролцоогоор <xliff:g id="TIME">%2$s</xliff:g>-н хугацаа үлдсэн"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн. Тэжээл хэмнэгч асаалттай байна."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн. Батарей хэмнэгч асаалттай байна."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"USB-р цэнэглэх боломжгүй байна. Төхөөрөмждөө дагалдаж ирсэн цэнэглэгчийг ашиглана уу."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB-р цэнэглэх боломжгүй байна"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Төхөөрөмждөө дагалдаж ирсэн цэнэглэгчийг ашиглах"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Батерей хоёр баганатай."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Батерей гурван баганатай."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Батерей дүүрэн."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Батарейн хувь тодорхойгүй байна."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Утас байхгүй."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Утас нэг баганатай."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Утас хоёр баганатай."</string>
@@ -389,7 +390,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"АВТОМАТ"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Өнгийг урвуулах"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Өнгө залруулах горим"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Өөр тохиргоо"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Бусад тохиргоо"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Дууссан"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Холбогдсон"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Холбогдсон, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -433,7 +434,7 @@
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Төхөөрөмж"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Апп сэлгэхийн тулд дээш шударна уу"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Аппуудыг хурдан сэлгэхийн тулд баруун тийш чирнэ үү"</string>
-    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Тоймыг унтраах/асаах"</string>
+    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Тоймыг асаах/унтраах"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Цэнэглэгдсэн"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Цэнэглэж байна"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"дүүргэхэд <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -475,9 +476,9 @@
     <string name="user_add_user" msgid="4336657383006913022">"Хэрэглэгч нэмэх"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Шинэ хэрэглэгч"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Зочныг хасах уу?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Энэ сешний бүх апп болон дата устах болно."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Энэ харилцан үйлдлийн бүх апп болон дата устах болно."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Хасах"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Тавтай морилно уу!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Эргэн тавтай морилно уу!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Та үргэлжлүүлэхийг хүсэж байна уу?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Дахин эхлүүлэх"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Тийм, үргэлжлүүлэх"</string>
@@ -488,7 +489,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Одоогийн хэрэглэгчийг гаргах"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ХЭРЭГЛЭГЧЭЭС ГАРАХ"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Шинэ хэрэглэгч нэмэх үү?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн аппуудыг шинэчлэх боломжтой."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Хэрэглэгчийн хязгаарт хүрсэн"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Та <xliff:g id="COUNT">%d</xliff:g> хүртэлх хэрэглэгч нэмэх боломжтой.</item>
@@ -497,9 +498,9 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Хэрэглэгчийг устгах уу?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Энэ хэрэглэгчийн бүх апп болон мэдээлэл устах болно."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Арилгах"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Тэжээл хэмнэгч асаалттай байна"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Батарей хэмнэгч асаалттай байна"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Ажиллагаа болон далд датаг бууруулна"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Тэжээл хэмнэгчийг унтраах"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Батарей хэмнэгчийг унтраах"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> нь бичлэг хийх эсвэл дамжуулах үед таны дэлгэц дээр харагдах эсвэл таны төхөөрөмжөөс тоглуулах бүх мэдээлэлд хандах боломжтой байна. Үүнд нууц үг, төлбөрийн дэлгэрэнгүй, зураг болон таны тоглуулдаг аудио зэрэг мэдээлэл багтана."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Энэ функцийг ажиллуулж байгаа үйлчилгээ нь бичлэг хийх эсвэл дамжуулах үед таны дэлгэц дээр харагдах эсвэл таны төхөөрөмжөөс тоглуулах бүх мэдээлэлд хандах боломжтой байна. Үүнд нууц үг, төлбөрийн дэлгэрэнгүй, зураг болон таны тоглуулдаг аудио зэрэг мэдээлэл багтана."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Бичлэг хийх эсвэл дамжуулахыг эхлүүлэх үү?"</string>
@@ -765,7 +766,7 @@
       <item quantity="one">%d минут</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Батарей ашиглалт"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Цэнэглэх үед тэжээл хэмнэгч ажиллахгүй"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Цэнэглэх үед батарей хэмнэгч ажиллахгүй"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Батарей хэмнэгч"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Гүйцэтгэл болон дэвсгэрийн датаг багасгадаг"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> товчлуур"</string>
@@ -981,11 +982,11 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"<xliff:g id="APP">%1$s</xliff:g>-д дурын аппаас хэсэг харуулахыг зөвшөөрөх"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Зөвшөөрөх"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Татгалзах"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"Тэжээл хэмнэгч онцлогийг хуваарилахын тулд товших"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"Батарей хэмнэгч онцлогийг хуваарилахын тулд товших"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Батарей дуусах гэж байгаа үед асаана уу"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Үгүй, баярлалаа"</string>
-    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Тэжээл хэмнэгч онцлогийн хуваарийг асаасан"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Батарей <xliff:g id="PERCENTAGE">%d</xliff:g>%%-с бага болсон үед Тэжээл хэмнэгч автоматаар асна."</string>
+    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Батарей хэмнэгч онцлогийн хуваарийг асаасан"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Батарей <xliff:g id="PERCENTAGE">%d</xliff:g>%%-с бага болсон үед Батарей хэмнэгч автоматаар асна."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Тохиргоо"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Ойлголоо"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (салсан)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Холбогдож чадсангүй. Дахин оролдоно уу."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Шинэ төхөөрөмж хослуулах"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Таны батарей хэмжигчийг уншихад асуудал гарлаа"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Нэмэлт мэдээлэл авахын тулд товшино уу"</string>
 </resources>

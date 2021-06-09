@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.car.settings.CarSettings;
 import android.os.Handler;
@@ -29,6 +30,7 @@ import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.IWindowManager;
+import android.view.Surface;
 
 import androidx.test.filters.SmallTest;
 
@@ -60,15 +62,20 @@ public class DisplaySystemBarsControllerTest extends SysuiTestCase {
     private Handler mHandler;
     @Mock
     private TransactionPool mTransactionPool;
+    @Mock
+    private DisplayLayout mDisplayLayout;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mSystemWindows.mContext = mContext;
         mSystemWindows.mWmService = mIWindowManager;
+        when(mDisplayLayout.rotation()).thenReturn(Surface.ROTATION_0);
+        when(mDisplayController.getDisplayLayout(DISPLAY_ID)).thenReturn(mDisplayLayout);
 
         mController = new DisplaySystemBarsController(
-                mSystemWindows,
+                mContext,
+                mIWindowManager,
                 mDisplayController,
                 mHandler,
                 mTransactionPool
@@ -81,7 +88,8 @@ public class DisplaySystemBarsControllerTest extends SysuiTestCase {
         mController.onDisplayAdded(DISPLAY_ID);
 
         verify(mIWindowManager).setDisplayWindowInsetsController(
-                eq(DISPLAY_ID), any(DisplaySystemBarsController.PerDisplay.class));
+                eq(DISPLAY_ID),
+                any(DisplayImeController.PerDisplay.DisplayWindowInsetsControllerImpl.class));
     }
 
     @Test

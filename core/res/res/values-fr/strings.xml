@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour changer de fonctionnalité, balayez l\'écran vers le haut avec trois doigts et appuyez de manière prolongée."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Agrandissement"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Chargement du profil de <xliff:g id="NAME">%1$s</xliff:g>..."</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g>..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Déconnexion de <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Propriétaire"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Erreur"</string>
@@ -2036,7 +2036,7 @@
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Retour"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Applications récentes"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Notifications"</string>
-    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Configuration rapide"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Réglages rapides"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Boîte de dialogue Marche/Arrêt"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Verrouiller l\'écran"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Capture d\'écran"</string>

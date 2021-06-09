@@ -88,6 +88,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import android.annotation.SuppressLint;
 import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
+import android.app.servertransaction.FixedRotationAdjustmentsItem;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -1343,6 +1344,36 @@ public class DisplayContentTests extends WindowTestsBase {
                 eq(recentsActivity));
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
         assertFalse(recentsActivity.hasFixedRotationTransform());
+    }
+
+    @Test
+    public void testClearIntermediateFixedRotationAdjustments() throws RemoteException {
+        final ActivityRecord activity = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+                .setDisplay(mDisplayContent).build().getTopMostActivity();
+        mDisplayContent.setFixedRotationLaunchingApp(activity,
+                (mDisplayContent.getRotation() + 1) % 4);
+        // Create a window so FixedRotationAdjustmentsItem can be sent.
+        createWindow(null, TYPE_APPLICATION_STARTING, activity, "AppWin");
+        final ActivityRecord activity2 = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+                .setDisplay(mDisplayContent).build().getTopMostActivity();
+        activity2.setVisible(false);
+        clearInvocations(mWm.mAtmService.getLifecycleManager());
+        // The first activity has applied fixed rotation but the second activity becomes the top
+        // before the transition is done and it has the same rotation as display, so the dispatched
+        // rotation adjustment of first activity must be cleared.
+        mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(activity2,
+                false /* checkOpening */);
+
+        final ArgumentCaptor<FixedRotationAdjustmentsItem> adjustmentsCaptor =
+                ArgumentCaptor.forClass(FixedRotationAdjustmentsItem.class);
+        verify(mWm.mAtmService.getLifecycleManager(), atLeastOnce()).scheduleTransaction(
+                eq(activity.app.getThread()), adjustmentsCaptor.capture());
+        // The transformation is kept for animation in real case.
+        assertTrue(activity.hasFixedRotationTransform());
+        final FixedRotationAdjustmentsItem clearAdjustments = FixedRotationAdjustmentsItem.obtain(
+                activity.token, null /* fixedRotationAdjustments */);
+        // The captor may match other items. The first one must be the item to clear adjustments.
+        assertEquals(clearAdjustments, adjustmentsCaptor.getAllValues().get(0));
     }
 
     @Test

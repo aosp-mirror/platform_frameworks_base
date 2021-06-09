@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Δύο γραμμές μπαταρίας."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Τρεις γραμμές μπαταρίας."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Πλήρης μπαταρία."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Άγνωστο ποσοστό μπαταρίας."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Δεν υπάρχει τηλέφωνο."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Μία γραμμή τηλεφώνου."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Δύο γραμμές τηλεφώνου."</string>
@@ -477,7 +478,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Κατάργηση επισκέπτη;"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Όλες οι εφαρμογές και τα δεδομένα αυτής της περιόδου σύνδεσης θα διαγραφούν."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Κατάργηση"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Επισκέπτη , καλώς όρισες ξανά!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Kαλώς ορίσατε ξανά!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Θέλετε να συνεχίσετε την περίοδο σύνδεσής σας;"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Έναρξη από την αρχή"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ναι, συνέχεια"</string>
@@ -488,7 +489,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Αποσύνδεση τρέχοντα χρήστη"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ΑΠΟΣΥΝΔΕΣΗ ΧΡΗΣΤΗ"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Προσθήκη νέου χρήστη;"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει το χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει τον χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Συμπληρώθηκε το όριο χρηστών"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Μπορείτε να προσθέσετε έως <xliff:g id="COUNT">%d</xliff:g> χρήστες.</item>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (αποσυνδέθηκε)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Δεν ήταν δυνατή η σύνδεση. Δοκιμάστε ξανά."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Σύζευξη νέας συσκευής"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Υπάρχει κάποιο πρόβλημα με την ανάγνωση του μετρητή μπαταρίας"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Πατήστε για περισσότερες πληροφορίες."</string>
 </resources>

@@ -214,7 +214,7 @@
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"使用二维码配对设备"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"使用二维码扫描器配对新设备"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"使用配对码配对设备"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"使用六位数验证码配对新设备"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"使用六位数的配对码配对新设备"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"已配对的设备"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"当前已连接"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"设备详细信息"</string>

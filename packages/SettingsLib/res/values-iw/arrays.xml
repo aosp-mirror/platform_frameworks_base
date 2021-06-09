@@ -22,13 +22,13 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wifi_status">
     <item msgid="1596683495752107015"></item>
-    <item msgid="3288373008277313483">"סורק..."</item>
-    <item msgid="6050951078202663628">"מתחבר ..."</item>
-    <item msgid="8356618438494652335">"מאמת…"</item>
+    <item msgid="3288373008277313483">"מתבצעת סריקה..."</item>
+    <item msgid="6050951078202663628">"מתבצעת התחברות..."</item>
+    <item msgid="8356618438494652335">"מתבצע אימות…"</item>
     <item msgid="2837871868181677206">"‏משיג כתובת IP…"</item>
     <item msgid="4613015005934755724">"מחובר"</item>
     <item msgid="3763530049995655072">"בהשעיה"</item>
-    <item msgid="7852381437933824454">"מתנתק..."</item>
+    <item msgid="7852381437933824454">"מתבצעת התנתקות..."</item>
     <item msgid="5046795712175415059">"מנותק"</item>
     <item msgid="2473654476624070462">"נכשל"</item>
     <item msgid="9146847076036105115">"חסומה"</item>
@@ -36,27 +36,27 @@
   </string-array>
   <string-array name="wifi_status_with_ssid">
     <item msgid="5969842512724979061"></item>
-    <item msgid="1818677602615822316">"סורק..."</item>
-    <item msgid="8339720953594087771">"מתחבר אל <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="3028983857109369308">"מאמת עם <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
-    <item msgid="4287401332778341890">"‏משיג כתובת IP מ-<xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="1818677602615822316">"מתבצעת סריקה..."</item>
+    <item msgid="8339720953594087771">"מתבצעת התחברות אל <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="3028983857109369308">"מתבצע אימות מול <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="4287401332778341890">"‏המערכת משיגה כתובת IP מ-<xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="1043944043827424501">"מחובר אל <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="7445993821842009653">"בהשעיה"</item>
-    <item msgid="1175040558087735707">"מתנתק מרשת <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="1175040558087735707">"מתבצעת התנתקות מרשת <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="699832486578171722">"מנותק"</item>
     <item msgid="522383512264986901">"נכשל"</item>
     <item msgid="3602596701217484364">"חסומה"</item>
-    <item msgid="1999413958589971747">"נמנע זמנית מחיבור חלש"</item>
+    <item msgid="1999413958589971747">"המערכת נמנעת זמנית מחיבור חלש"</item>
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="2377230797542526134">"בלי לבדוק לעולם"</item>
-    <item msgid="3919638466823112484">"‏בדוק אם יש תוכן DRM בלבד"</item>
+    <item msgid="3919638466823112484">"‏בדיקה אם יש תוכן DRM בלבד"</item>
     <item msgid="9048424957228926377">"בדוק תמיד"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
-    <item msgid="4045840870658484038">"‏לעולם אל תשתמש בבדיקת HDCP"</item>
-    <item msgid="8254225038262324761">"‏השתמש בבדיקת HDCP עבור תוכן DRM בלבד"</item>
-    <item msgid="6421717003037072581">"‏תמיד השתמש בבדיקת HDCP"</item>
+    <item msgid="4045840870658484038">"‏אני לעולם לא רוצה להשתמש בבדיקת HDCP"</item>
+    <item msgid="8254225038262324761">"‏שימוש בבדיקת HDCP עבור תוכן DRM בלבד"</item>
+    <item msgid="6421717003037072581">"‏אני רוצה להשתמש תמיד בבדיקת HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"מושבת"</item>
@@ -123,7 +123,7 @@
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
     <item msgid="9196208128729063711">"השתמש בבחירת המערכת (ברירת המחדל)"</item>
-    <item msgid="1084497364516370912">"16 סיביות לדגימה"</item>
+    <item msgid="1084497364516370912">"16 ביטים לדגימה"</item>
     <item msgid="2077889391457961734">"24 סיביות לדגימה"</item>
     <item msgid="3836844909491316925">"32 סיביות לדגימה"</item>
   </string-array>
@@ -133,7 +133,7 @@
     <item msgid="927546067692441494">"סטריאו"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="1997302811102880485">"השתמש בבחירת המערכת (ברירת המחדל)"</item>
+    <item msgid="1997302811102880485">"שימוש בבחירת המערכת (ברירת המחדל)"</item>
     <item msgid="8005696114958453588">"מונו"</item>
     <item msgid="1333279807604675720">"סטריאו"</item>
   </string-array>
@@ -145,7 +145,7 @@
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="804499336721569838">"אופטימיזציה להשגת איכות אודיו מרבית"</item>
-    <item msgid="7451422070435297462">"אזן בין איכות החיבור לאיכות אודיו"</item>
+    <item msgid="7451422070435297462">"איזון בין איכות החיבור לאיכות אודיו"</item>
     <item msgid="6173114545795428901">"אופטימיזציה להשגת איכות חיבור מרבית"</item>
     <item msgid="4349908264188040530">"האיכות הטובה ביותר (קצב העברת נתונים מותאם)"</item>
   </string-array>
@@ -238,8 +238,8 @@
   </string-array>
   <string-array name="show_non_rect_clip_entries">
     <item msgid="2482978351289846212">"כבוי"</item>
-    <item msgid="3405519300199774027">"שרטט אזור חיתוך שאינו מלבני בצבע כחול"</item>
-    <item msgid="1212561935004167943">"הדגש את פקודות האיור שנבדקות בצבע ירוק"</item>
+    <item msgid="3405519300199774027">"שרטוט אזור חיתוך שאינו מלבני בצבע כחול"</item>
+    <item msgid="1212561935004167943">"הדגשת פקודות האיור שנבדקות בצבע ירוק"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
     <item msgid="634406443901014984">"כבוי"</item>

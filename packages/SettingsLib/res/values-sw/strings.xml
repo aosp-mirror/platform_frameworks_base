@@ -547,7 +547,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Kabla uunde wasifu uliowekekwa vikwazo, utahitajika kuweka skrini iliyofungwa ili kulinda programu zako na data binafsi."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Weka ufunguo"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Badili utumie <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Weka mgeni"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Ongeza mgeni"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ondoa mgeni"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Mgeni"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Hali chaguomsingi ya kifaa"</string>

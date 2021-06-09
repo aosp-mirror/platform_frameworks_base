@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"電池電量為兩格。"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"電池電量為三格。"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"電池已滿。"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"電量百分比不明。"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"沒有電話訊號。"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"電話訊號強度為一格。"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"電話訊號強度為兩格。"</string>
@@ -714,9 +715,9 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"可能會根據手機設定發出鈴聲或震動"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能會根據手機設定發出鈴聲或震動。「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會預設以對話氣泡顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"為此內容建立浮動捷徑以保持注意力。"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"以浮動對話泡顯示在對話部分的頂部，並在上鎖畫面顯示個人檔案相片"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"在對話部分頂部顯示浮動對話氣泡，並在上鎖畫面上顯示個人檔案相片"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"重要"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援對話功能"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"沒有最近曾使用的小視窗"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"最近使用和關閉的小視窗會在這裡顯示"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (已中斷連線)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"無法連線，請再試一次。"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"配對新裝置"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"讀取電池計量器時發生問題"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"輕按即可瞭解詳情"</string>
 </resources>

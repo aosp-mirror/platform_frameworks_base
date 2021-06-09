@@ -116,8 +116,8 @@
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SINCRONIZAR"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"La sincronización te permite acceder a los contactos y al historial de llamadas cuando el dispositivo está conectado."</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"No se pudo sincronizar con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No se pudo sincronizar con <xliff:g id="DEVICE_NAME">%1$s</xliff:g> debido a que el PIN o la clave de acceso son incorrectos."</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"No se pudo vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No se pudo vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g> debido a que el PIN o la clave de acceso son incorrectos."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"No se puede establecer la comunicación con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Vínculo rechazado por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computadora"</string>
@@ -219,7 +219,7 @@
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Conectado actualmente"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Detalles del dispositivo"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Olvidar"</string>
-    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Huellas digitales del dispositivo: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Huellas dactilares del dispositivo: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Error de conexión"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Asegúrate de que <xliff:g id="DEVICE_NAME">%1$s</xliff:g> esté conectado a la red correcta."</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Vincular con dispositivo"</string>

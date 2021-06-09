@@ -2000,7 +2000,7 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式資訊通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電池電力可能會在你平常的充電時間前耗盡"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已啟用省電模式以延長電池續航力"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"省電模式"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"節約耗電量"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"省電模式已關閉"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"手機電力充足，各項功能不再受到限制。"</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"平板電腦電力充足，各項功能不再受到限制。"</string>

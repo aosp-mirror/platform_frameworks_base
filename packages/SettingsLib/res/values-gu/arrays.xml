@@ -252,7 +252,7 @@
     <item msgid="3474333938380896988">"Deuteranomaly માટેના ક્ષેત્રો બતાવો"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="794656271086646068">"માનક સીમા"</item>
+    <item msgid="794656271086646068">"સ્ટૅન્ડર્ડ સીમા"</item>
     <item msgid="8628438298170567201">"કોઈ બૅકગ્રાઉન્ડ પ્રક્રિયાઓ નથી"</item>
     <item msgid="915752993383950932">"સૌથી વધુ 1 પ્રક્રિયા"</item>
     <item msgid="8554877790859095133">"સૌથી વધુ 2 પ્રક્રિયા"</item>
