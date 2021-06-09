@@ -4695,7 +4695,7 @@
     <string name="config_customMediaSessionPolicyProvider"></string>
 
     <!-- The max scale for the wallpaper when it's zoomed in -->
-    <item name="config_wallpaperMaxScale" format="float" type="dimen">1.03</item>
+    <item name="config_wallpaperMaxScale" format="float" type="dimen">1.10</item>
 
     <!-- Package name that will receive an explicit manifest broadcast for
          android.os.action.POWER_SAVE_MODE_CHANGED. -->
