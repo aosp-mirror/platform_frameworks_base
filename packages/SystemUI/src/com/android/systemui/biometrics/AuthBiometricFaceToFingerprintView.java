@@ -130,19 +130,29 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     @Override
     public void onAuthenticationFailed(
             @Modality int modality, @Nullable String failureReason) {
-        if (modality == TYPE_FACE && mActiveSensorType == TYPE_FACE) {
-            // switching from face -> fingerprint mode, suppress soft error messages
-            failureReason = mContext.getString(R.string.fingerprint_dialog_use_fingerprint_instead);
+        super.onAuthenticationFailed(modality, checkErrorForFallback(failureReason));
+    }
+
+    @Override
+    public void onError(int modality, String error) {
+        super.onError(modality, checkErrorForFallback(error));
+    }
+
+    private String checkErrorForFallback(String message) {
+        if (mActiveSensorType == TYPE_FACE) {
+            Log.d(TAG, "Falling back to fingerprint: " + message);
+
+            // switching from face -> fingerprint mode, suppress root error messages
+            mCallback.onAction(Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR);
+            return mContext.getString(R.string.fingerprint_dialog_use_fingerprint_instead);
         }
-        super.onAuthenticationFailed(modality, failureReason);
+        return message;
     }
 
     @Override
     @BiometricState
     protected int getStateForAfterError() {
         if (mActiveSensorType == TYPE_FACE) {
-            mHandler.post(() -> mCallback.onAction(
-                    Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR));
             return STATE_AUTHENTICATING;
         }
 

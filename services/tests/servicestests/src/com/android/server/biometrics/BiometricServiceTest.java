@@ -1036,7 +1036,7 @@ public class BiometricServiceTest {
     }
 
     @Test
-    public void testDismissedReasonNegative_whilePaused_doesntInvokeHalCancel() throws Exception {
+    public void testDismissedReasonNegative_whilePaused_invokeHalCancel() throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
                 false /* requireConfirmation */, null /* authenticators */);
@@ -1050,14 +1050,12 @@ public class BiometricServiceTest {
                 BiometricPrompt.DISMISSED_REASON_NEGATIVE, null /* credentialAttestation */);
         waitForIdle();
 
-        verify(mBiometricService.mSensors.get(0).impl,
-                never()).cancelAuthenticationFromService(
-                any(),
-                any());
+        verify(mBiometricService.mSensors.get(0).impl)
+                .cancelAuthenticationFromService(any(), any());
     }
 
     @Test
-    public void testDismissedReasonUserCancel_whilePaused_doesntInvokeHalCancel() throws
+    public void testDismissedReasonUserCancel_whilePaused_invokesHalCancel() throws
             Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
@@ -1072,10 +1070,8 @@ public class BiometricServiceTest {
                 BiometricPrompt.DISMISSED_REASON_USER_CANCEL, null /* credentialAttestation */);
         waitForIdle();
 
-        verify(mBiometricService.mSensors.get(0).impl,
-                never()).cancelAuthenticationFromService(
-                any(),
-                any());
+        verify(mBiometricService.mSensors.get(0).impl)
+                .cancelAuthenticationFromService(any(), any());
     }
 
     @Test
@@ -1091,11 +1087,8 @@ public class BiometricServiceTest {
                 BiometricPrompt.DISMISSED_REASON_USER_CANCEL, null /* credentialAttestation */);
         waitForIdle();
 
-        // doesn't send cancel to HAL
-        verify(mBiometricService.mSensors.get(0).impl,
-                never()).cancelAuthenticationFromService(
-                any(),
-                any());
+        verify(mBiometricService.mSensors.get(0).impl)
+                .cancelAuthenticationFromService(any(), any());
         verify(mReceiver1).onError(
                 eq(BiometricAuthenticator.TYPE_FACE),
                 eq(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED),
