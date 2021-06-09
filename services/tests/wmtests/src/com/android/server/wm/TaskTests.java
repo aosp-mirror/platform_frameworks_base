@@ -1254,7 +1254,8 @@ public class TaskTests extends WindowTestsBase {
         LaunchParamsPersister persister = mAtm.mTaskSupervisor.mLaunchParamsPersister;
         spyOn(persister);
 
-        final Task task = getTestTask();
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setCreateParentTask(true).build().getRootTask();
         task.setHasBeenVisible(false);
         task.getDisplayContent().setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
         task.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);

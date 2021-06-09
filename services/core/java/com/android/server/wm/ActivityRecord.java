@@ -1284,10 +1284,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return task;
     }
 
+    @Nullable
+    TaskFragment getTaskFragment() {
+        WindowContainer parent = getParent();
+        return parent != null ? parent.asTaskFragment() : null;
+    }
+
     @Override
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        final Task oldTask = oldParent != null ? (Task) oldParent : null;
-        final Task newTask = newParent != null ? (Task) newParent : null;
+        final Task oldTask = oldParent != null ? ((TaskFragment) oldParent).getTask() : null;
+        final Task newTask = newParent != null ? ((TaskFragment) newParent).getTask() : null;
         this.task = newTask;
 
         super.onParentChanged(newParent, oldParent);
@@ -1345,11 +1351,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         updateColorTransform();
 
-        if (oldTask != null) {
-            oldTask.cleanUpActivityReferences(this);
+        if (oldParent != null) {
+            ((TaskFragment) oldParent).cleanUpActivityReferences(this);
         }
-        if (newTask != null && isState(RESUMED)) {
-            newTask.setResumedActivity(this, "onParentChanged");
+
+        if (newParent != null && isState(RESUMED)) {
+            ((TaskFragment) newParent).setResumedActivity(this, "onParentChanged");
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
@@ -2278,23 +2285,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * Reparents this activity into {@param newTask} at the provided {@param position}.  The caller
-     * should ensure that the {@param newTask} is not already the parent of this activity.
+     * Reparents this activity into {@param newTaskFrag} at the provided {@param position}. The
+     * caller should ensure that the {@param newTaskFrag} is not already the parent of this
+     * activity.
      */
-    void reparent(Task newTask, int position, String reason) {
+    void reparent(TaskFragment newTaskFrag, int position, String reason) {
         if (getParent() == null) {
             Slog.w(TAG, "reparent: Attempted to reparent non-existing app token: " + appToken);
             return;
         }
-        final Task prevTask = task;
-        if (prevTask == newTask) {
-            throw new IllegalArgumentException(reason + ": task=" + newTask
+        final TaskFragment prevTaskFrag = getTaskFragment();
+        if (prevTaskFrag == newTaskFrag) {
+            throw new IllegalArgumentException(reason + ": task fragment =" + newTaskFrag
                     + " is already the parent of r=" + this);
         }
 
         ProtoLog.i(WM_DEBUG_ADD_REMOVE, "reparent: moving activity=%s"
-                + " to task=%d at %d", this, task.mTaskId, position);
-        reparent(newTask, position);
+                + " to new task fragment in task=%d at %d", this, task.mTaskId, position);
+        reparent(newTaskFrag, position);
     }
 
     private boolean isHomeIntent(Intent intent) {
@@ -2860,7 +2868,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final Task rootTask = getRootTask();
-        final boolean mayAdjustTop = (isState(RESUMED) || rootTask.getResumedActivity() == null)
+        final boolean mayAdjustTop = (isState(RESUMED) || rootTask.getTopResumedActivity() == null)
                 && rootTask.isFocusedRootTaskOnDisplay()
                 // Do not adjust focus task because the task will be reused to launch new activity.
                 && !task.isClearingToReuseTask();
@@ -2939,12 +2947,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Tell window manager to prepare for this one to be removed.
                 setVisibility(false);
 
-                if (task.getPausingActivity() == null) {
+                if (task.getTopPausingActivity() == null) {
                     ProtoLog.v(WM_DEBUG_STATES, "Finish needs to pause: %s", this);
                     if (DEBUG_USER_LEAVING) {
                         Slog.v(TAG_USER_LEAVING, "finish() => pause with userLeaving=false");
                     }
-                    task.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
+                    task.startPausing(false /* userLeaving */, false /* uiSleeping */,
                             null /* resuming */, "finish");
                 }
 
@@ -3263,8 +3271,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (DEBUG_SWITCH) {
                 final Task task = getTask();
                 Slog.v(TAG_SWITCH, "Safely destroying " + this + " in state " + getState()
-                        + " resumed=" + task.getResumedActivity()
-                        + " pausing=" + task.getPausingActivity()
+                        + " resumed=" + task.getTopResumedActivity()
+                        + " pausing=" + task.getTopPausingActivity()
                         + " for reason " + reason);
             }
             return destroyImmediately(reason);
@@ -3343,7 +3351,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Note: Call before {@link #removeFromHistory(String)}.
      */
     void cleanUp(boolean cleanServices, boolean setState) {
-        task.cleanUpActivityReferences(this);
+        getTaskFragment().cleanUpActivityReferences(this);
         clearLastParentBeforePip();
 
         deferRelaunchUntilPaused = false;
@@ -4824,8 +4832,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mState = state;
 
-        if (task != null) {
-            task.onActivityStateChanged(this, state, reason);
+        if (getTaskFragment() != null) {
+            getTaskFragment().onActivityStateChanged(this, state, reason);
         }
 
         // The WindowManager interprets the app stopping signal as
@@ -5131,7 +5139,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // If the app is capable of entering PIP, we should try pausing it now
                     // so it can PIP correctly.
                     if (deferHidingClient) {
-                        task.startPausingLocked(false /* uiSleeping */,
+                        getTaskFragment().startPausing(false /* uiSleeping */,
                                 null /* resuming */, "makeInvisible");
                         break;
                     }
@@ -5231,7 +5239,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean shouldBeResumed(ActivityRecord activeActivity) {
         return shouldMakeActive(activeActivity) && isFocusable()
-                && getTask().getVisibility(activeActivity) == TASK_FRAGMENT_VISIBILITY_VISIBLE
+                && getTaskFragment().getVisibility(activeActivity)
+                        == TASK_FRAGMENT_VISIBILITY_VISIBLE
                 && canResumeByCompat();
     }
 
@@ -5374,16 +5383,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         ProtoLog.v(WM_DEBUG_STATES, "Activity paused: token=%s, timeout=%b", appToken,
                 timeout);
 
-        if (task != null) {
+        final TaskFragment taskFragment = getTaskFragment();
+        if (taskFragment != null) {
             removePauseTimeout();
 
-            final ActivityRecord pausingActivity = task.getPausingActivity();
+            final ActivityRecord pausingActivity = taskFragment.getPausingActivity();
             if (pausingActivity == this) {
                 ProtoLog.v(WM_DEBUG_STATES, "Moving to PAUSED: %s %s", this,
                         (timeout ? "(due to timeout)" : " (pause complete)"));
                 mAtmService.deferWindowLayout();
                 try {
-                    task.completePauseLocked(true /* resumeNext */, null /* resumingActivity */);
+                    taskFragment.completePause(true /* resumeNext */, null /* resumingActivity */);
                 } finally {
                     mAtmService.continueWindowLayout();
                 }
@@ -6032,9 +6042,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return this;
             }
             // Try to use the one which is closest to top.
-            ActivityRecord r = rootTask.getResumedActivity();
+            ActivityRecord r = rootTask.getTopResumedActivity();
             if (r == null) {
-                r = rootTask.getPausingActivity();
+                r = rootTask.getTopPausingActivity();
             }
             if (r != null) {
                 return r;
@@ -6112,7 +6122,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // This would be redundant.
             return false;
         }
-        if (isState(RESUMED) || getRootTask() == null || this == task.getPausingActivity()
+        if (isState(RESUMED) || getRootTask() == null
+                || this == getTaskFragment().getPausingActivity()
                 || !mHaveState || !stopped) {
             // We're not ready for this kind of thing.
             return false;
