@@ -65,7 +65,7 @@ import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationManagerInternal;
-import android.location.LocationManagerInternal.OnProviderLocationTagsChangeListener;
+import android.location.LocationManagerInternal.LocationPackageTagsListener;
 import android.location.LocationProvider;
 import android.location.LocationRequest;
 import android.location.LocationTime;
@@ -93,6 +93,7 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.location.eventlog.LocationEventLog;
@@ -259,7 +260,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
             new CopyOnWriteArrayList<>();
 
     @GuardedBy("mLock")
-    @Nullable OnProviderLocationTagsChangeListener mOnProviderLocationTagsChangeListener;
+    @Nullable LocationPackageTagsListener mLocationTagsChangedListener;
 
     LocationManagerService(Context context, Injector injector) {
         mContext = context.createAttributionContext(ATTRIBUTION_TAG);
@@ -1363,32 +1364,28 @@ public class LocationManagerService extends ILocationManager.Stub implements
             refreshAppOpsRestrictions(UserHandle.USER_ALL);
         }
 
-        OnProviderLocationTagsChangeListener listener;
-        synchronized (mLock) {
-            listener = mOnProviderLocationTagsChangeListener;
-        }
-
-        if (listener != null) {
-            if (!oldState.extraAttributionTags.equals(newState.extraAttributionTags)
-                    || !Objects.equals(oldState.identity, newState.identity)) {
-                if (oldState.identity != null) {
-                    listener.onLocationTagsChanged(
-                            new LocationManagerInternal.LocationTagInfo(
-                                    oldState.identity.getUid(),
-                                    oldState.identity.getPackageName(),
-                                    Collections.emptySet()));
-                }
-                if (newState.identity != null) {
-                    ArraySet<String> attributionTags = new ArraySet<>(
-                            newState.extraAttributionTags.size() + 1);
-                    attributionTags.addAll(newState.extraAttributionTags);
-                    attributionTags.add(newState.identity.getAttributionTag());
-
-                    listener.onLocationTagsChanged(
-                            new LocationManagerInternal.LocationTagInfo(
-                                    newState.identity.getUid(),
-                                    newState.identity.getPackageName(),
-                                    attributionTags));
+        if (!oldState.extraAttributionTags.equals(newState.extraAttributionTags)
+                || !Objects.equals(oldState.identity, newState.identity)) {
+            // since we're potentially affecting the tag lists for two different uids, acquire the
+            // lock to ensure providers cannot change while we're looping over the providers
+            // multiple times, which could lead to inconsistent results.
+            synchronized (mLock) {
+                LocationPackageTagsListener listener = mLocationTagsChangedListener;
+                if (listener != null) {
+                    int oldUid = oldState.identity != null ? oldState.identity.getUid() : -1;
+                    int newUid = newState.identity != null ? newState.identity.getUid() : -1;
+                    if (oldUid != -1) {
+                        PackageTagsList tags = calculateAppOpsLocationSourceTags(oldUid);
+                        FgThread.getHandler().post(
+                                () -> listener.onLocationPackageTagsChanged(oldUid, tags));
+                    }
+                    // if the new app id is the same as the old app id, no need to invoke the
+                    // listener twice, it's already been taken care of
+                    if (newUid != -1 && newUid != oldUid) {
+                        PackageTagsList tags = calculateAppOpsLocationSourceTags(newUid);
+                        FgThread.getHandler().post(
+                                () -> listener.onLocationPackageTagsChanged(newUid, tags));
+                    }
                 }
             }
         }
@@ -1434,6 +1431,31 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 LocationManagerService.this,
                 allowedPackages,
                 userId);
+    }
+
+    PackageTagsList calculateAppOpsLocationSourceTags(int uid) {
+        PackageTagsList.Builder builder = new PackageTagsList.Builder();
+        for (LocationProviderManager manager : mProviderManagers) {
+            AbstractLocationProvider.State managerState = manager.getState();
+            if (managerState.identity == null) {
+                continue;
+            }
+            if (managerState.identity.getUid() != uid) {
+                continue;
+            }
+
+            builder.add(managerState.identity.getPackageName(), managerState.extraAttributionTags);
+            if (managerState.extraAttributionTags.isEmpty()
+                    || managerState.identity.getAttributionTag() != null) {
+                builder.add(managerState.identity.getPackageName(),
+                        managerState.identity.getAttributionTag());
+            } else {
+                Log.e(TAG, manager.getName() + " provider has specified a null attribution tag and "
+                        + "a non-empty set of extra attribution tags - dropping the null "
+                        + "attribution tag");
+            }
+        }
+        return builder.build();
     }
 
     private class LocalService extends LocationManagerInternal {
@@ -1506,10 +1528,29 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
 
         @Override
-        public void setOnProviderLocationTagsChangeListener(
-                @Nullable OnProviderLocationTagsChangeListener listener) {
+        public void setLocationPackageTagsListener(
+                @Nullable LocationPackageTagsListener listener) {
             synchronized (mLock) {
-                mOnProviderLocationTagsChangeListener = listener;
+                mLocationTagsChangedListener = listener;
+
+                // calculate initial tag list and send to listener
+                if (listener != null) {
+                    ArraySet<Integer> uids = new ArraySet<>(mProviderManagers.size());
+                    for (LocationProviderManager manager : mProviderManagers) {
+                        CallerIdentity identity = manager.getIdentity();
+                        if (identity != null) {
+                            uids.add(identity.getUid());
+                        }
+                    }
+
+                    for (int uid : uids) {
+                        PackageTagsList tags = calculateAppOpsLocationSourceTags(uid);
+                        if (!tags.isEmpty()) {
+                            FgThread.getHandler().post(
+                                    () -> listener.onLocationPackageTagsChanged(uid, tags));
+                        }
+                    }
+                }
             }
         }
     }
