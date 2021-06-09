@@ -7842,7 +7842,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 incrementalMetrics != null ? incrementalMetrics.getMillisSinceLastReadError()
                         : -1,
                 incrementalMetrics != null ? incrementalMetrics.getLastReadErrorNumber()
-                        : 0
+                        : 0,
+                incrementalMetrics != null ? incrementalMetrics.getTotalDelayedReadsDurationMillis()
+                        : -1
         );
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE
@@ -17062,6 +17064,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mOomAdjuster.mCachedAppOptimizer.enableFreezer(enable);
         } else {
             throw new SecurityException("Caller uid " + callerUid + " cannot set freezer state ");
+        }
+    }
+
+    /**
+     * Suppress or reenable the rate limit on foreground service notification deferral.
+     * @param enable false to suppress rate-limit policy; true to reenable it.
+     */
+    @Override
+    public boolean enableFgsNotificationRateLimit(boolean enable) {
+        enforceCallingPermission(permission.WRITE_DEVICE_CONFIG,
+                "enableFgsNotificationRateLimit");
+        synchronized (this) {
+            return mServices.enableFgsNotificationRateLimitLocked(enable);
         }
     }
 

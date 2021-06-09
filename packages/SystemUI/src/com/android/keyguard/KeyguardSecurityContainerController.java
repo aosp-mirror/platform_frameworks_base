@@ -32,6 +32,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.metrics.LogMaker;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 import android.view.MotionEvent;
@@ -49,6 +50,8 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
+import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -74,12 +77,14 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
     private final SecurityCallback mSecurityCallback;
     private final ConfigurationController mConfigurationController;
+    private final FalsingCollector mFalsingCollector;
 
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
 
-    private final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
+    @VisibleForTesting
+    final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
         private MotionEvent mTouchDown;
         @Override
         public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -91,6 +96,17 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             // Do just a bit of our own falsing. People should only be tapping on the input, not
             // swiping.
             if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                // If we're in one handed mode, the user can tap on the opposite side of the screen
+                // to move the bouncer across. In that case, inhibit the falsing (otherwise the taps
+                // to move the bouncer to each screen side can end up closing it instead).
+                if (mView.isOneHandedMode()) {
+                    if ((mView.isOneHandedModeLeftAligned() && ev.getX() > mView.getWidth() / 2f)
+                            || (!mView.isOneHandedModeLeftAligned()
+                            && ev.getX() <= mView.getWidth() / 2f)) {
+                        mFalsingCollector.avoidGesture();
+                    }
+                }
+
                 if (mTouchDown != null) {
                     mTouchDown.recycle();
                     mTouchDown = null;
@@ -202,7 +218,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             KeyguardStateController keyguardStateController,
             SecurityCallback securityCallback,
             KeyguardSecurityViewFlipperController securityViewFlipperController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            FalsingCollector falsingCollector) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -216,6 +233,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 mKeyguardSecurityCallback);
         mConfigurationController = configurationController;
         mLastOrientation = getResources().getConfiguration().orientation;
+        mFalsingCollector = falsingCollector;
     }
 
     @Override
@@ -440,11 +458,47 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         if (newView != null) {
             newView.onResume(KeyguardSecurityView.VIEW_REVEALED);
             mSecurityViewFlipperController.show(newView);
-            mView.updateLayoutForSecurityMode(securityMode);
+            configureOneHandedMode();
         }
 
         mSecurityCallback.onSecurityModeChanged(
                 securityMode, newView != null && newView.needsInput());
+    }
+
+    /** Read whether the one-handed keyguard should be on the left/right from settings. */
+    private boolean isOneHandedKeyguardLeftAligned() {
+        try {
+            return Settings.Global.getInt(mView.getContext().getContentResolver(),
+                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE)
+                    == Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT;
+        } catch (Settings.SettingNotFoundException ex) {
+            return true;
+        }
+    }
+
+    private boolean canUseOneHandedBouncer() {
+        // Is it enabled?
+        if (!getResources().getBoolean(
+                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning)) {
+            return false;
+        }
+
+        if (!KeyguardSecurityModel.isSecurityViewOneHanded(mCurrentSecurityMode)) {
+            return false;
+        }
+
+        return getResources().getBoolean(R.bool.can_use_one_handed_bouncer);
+    }
+
+    private void configureOneHandedMode() {
+        boolean oneHandedMode = canUseOneHandedBouncer();
+
+        mView.setOneHandedMode(oneHandedMode);
+
+        if (oneHandedMode) {
+            mView.setOneHandedModeLeftAligned(
+                    isOneHandedKeyguardLeftAligned(), /* animate= */false);
+        }
     }
 
     public void reportFailedUnlockAttempt(int userId, int timeoutMs) {
@@ -511,13 +565,15 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         int newOrientation = getResources().getConfiguration().orientation;
         if (newOrientation != mLastOrientation) {
             mLastOrientation = newOrientation;
-            mView.updateLayoutForSecurityMode(mCurrentSecurityMode);
+            configureOneHandedMode();
         }
     }
 
     /** Update keyguard position based on a tapped X coordinate. */
     public void updateKeyguardPosition(float x) {
-        mView.updateKeyguardPosition(x);
+        if (mView.isOneHandedMode()) {
+            mView.setOneHandedModeLeftAligned(x <= mView.getWidth() / 2f, false);
+        }
     }
 
     static class Factory {
@@ -533,6 +589,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         private final KeyguardStateController mKeyguardStateController;
         private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
         private final ConfigurationController mConfigurationController;
+        private final FalsingCollector mFalsingCollector;
 
         @Inject
         Factory(KeyguardSecurityContainer view,
@@ -545,7 +602,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 UiEventLogger uiEventLogger,
                 KeyguardStateController keyguardStateController,
                 KeyguardSecurityViewFlipperController securityViewFlipperController,
-                ConfigurationController configurationController) {
+                ConfigurationController configurationController,
+                FalsingCollector falsingCollector) {
             mView = view;
             mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
             mLockPatternUtils = lockPatternUtils;
@@ -556,6 +614,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mKeyguardStateController = keyguardStateController;
             mSecurityViewFlipperController = securityViewFlipperController;
             mConfigurationController = configurationController;
+            mFalsingCollector = falsingCollector;
         }
 
         public KeyguardSecurityContainerController create(
@@ -564,7 +623,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                     mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                     mKeyguardStateController, securityCallback, mSecurityViewFlipperController,
-                    mConfigurationController);
+                    mConfigurationController, mFalsingCollector);
         }
 
     }

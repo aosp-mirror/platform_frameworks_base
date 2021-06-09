@@ -107,6 +107,8 @@ open class BlurUtils @Inject constructor(
             it.println("minBlurRadius: $minBlurRadius")
             it.println("maxBlurRadius: $maxBlurRadius")
             it.println("supportsBlursOnWindows: ${supportsBlursOnWindows()}")
+            it.println("CROSS_WINDOW_BLUR_SUPPORTED: $CROSS_WINDOW_BLUR_SUPPORTED")
+            it.println("isHighEndGfx: ${ActivityManager.isHighEndGfx()}")
         }
     }
 }

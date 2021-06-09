@@ -27,6 +27,7 @@ import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
@@ -46,6 +47,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
 
     private static final String TAG = "FingerprintEnrollClient";
 
+    @NonNull private final FingerprintSensorPropertiesInternal mSensorProps;
     @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
     @Nullable private final ISidefpsController mSidefpsController;
 
@@ -58,12 +60,15 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
+            @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @Nullable IUdfpsOverlayController udfpsOvelayController,
             @Nullable ISidefpsController sidefpsController,
             int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason) {
+        // UDFPS enroll vibrations are handled in SystemUI
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 0 /* timeoutSec */, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
-                true /* shouldVibrate */);
+                !sensorProps.isAnyUdfpsType() /* shouldVibrate */);
+        mSensorProps = sensorProps;
         mUdfpsOverlayController = udfpsOvelayController;
         mSidefpsController = sidefpsController;
         mMaxTemplatesPerUser = maxTemplatesPerUser;
@@ -90,7 +95,8 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     public void onAcquired(@FingerprintAcquired int acquiredInfo, int vendorCode) {
         // For UDFPS, notify SysUI that the illumination can be turned off.
         // See AcquiredInfo#GOOD and AcquiredInfo#RETRYING_CAPTURE
-        if (acquiredInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD) {
+        if (acquiredInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD
+                && mSensorProps.isAnyUdfpsType()) {
             UdfpsHelper.onAcquiredGood(getSensorId(), mUdfpsOverlayController);
         }
 

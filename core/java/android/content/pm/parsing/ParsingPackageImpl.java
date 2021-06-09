@@ -356,7 +356,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private float minAspectRatio;
     @Nullable
     private SparseIntArray minExtensionVersions;
-    private int minSdkVersion;
+    private int minSdkVersion = ParsingUtils.DEFAULT_MIN_SDK_VERSION;
     private int networkSecurityConfigRes;
     @Nullable
     private CharSequence nonLocalizedLabel;
@@ -369,7 +369,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private int requiresSmallestWidthDp;
     private int roundIconRes;
     private int targetSandboxVersion;
-    private int targetSdkVersion;
+    private int targetSdkVersion = ParsingUtils.DEFAULT_TARGET_SDK_VERSION;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String taskAffinity;
