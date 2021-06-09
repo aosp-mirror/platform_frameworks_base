@@ -307,10 +307,10 @@ public class PeopleSpaceTile implements Parcelable {
             mContactUri = getContactUri(info);
             mStatuses = channel.getStatuses();
             mLastInteractionTimestamp = channel.getLastEventTimestamp();
-            mIsImportantConversation = channel.getParentNotificationChannel() != null
-                    && channel.getParentNotificationChannel().isImportantConversation();
-            mCanBypassDnd = channel.getParentNotificationChannel() != null
-                    && channel.getParentNotificationChannel().canBypassDnd();
+            mIsImportantConversation = channel.getNotificationChannel() != null
+                    && channel.getNotificationChannel().isImportantConversation();
+            mCanBypassDnd = channel.getNotificationChannel() != null
+                    && channel.getNotificationChannel().canBypassDnd();
             mNotificationPolicyState = SHOW_CONVERSATIONS;
         }
 
