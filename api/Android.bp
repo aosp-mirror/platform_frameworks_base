@@ -65,7 +65,10 @@ genrule {
             dest: "current.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/public/api",
             dest: "android.txt",
         },
@@ -139,7 +142,10 @@ genrule {
             dest: "removed.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/public/api",
             dest: "removed.txt",
         },
@@ -171,7 +177,10 @@ genrule {
             dest: "system-current.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system/api",
             dest: "android.txt",
         },
@@ -222,7 +231,10 @@ genrule {
             dest: "system-removed.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system/api",
             dest: "removed.txt",
         },
@@ -255,7 +267,10 @@ genrule {
             dest: "module-lib-current.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/module-lib/api",
             dest: "android.txt",
         },
@@ -308,7 +323,10 @@ genrule {
             dest: "module-lib-removed.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/module-lib/api",
             dest: "removed.txt",
         },
@@ -348,7 +366,10 @@ genrule {
             dest: "system-server-current.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system-server/api",
             dest: "android.txt",
         },
@@ -371,7 +392,10 @@ genrule {
             dest: "system-server-removed.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system-server/api",
             dest: "removed.txt",
         },
