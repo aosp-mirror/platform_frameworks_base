@@ -30,6 +30,7 @@ import android.util.Log;
 import android.util.Size;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.graphics.cam.Cam;
 import com.android.internal.graphics.palette.CelebiQuantizer;
 import com.android.internal.graphics.palette.Palette;
 import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
@@ -43,7 +44,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 /**
  * Provides information about the colors of a wallpaper.
@@ -176,7 +177,7 @@ public final class WallpaperColors implements Parcelable {
             shouldRecycle = true;
             Size optimalSize = calculateOptimalSize(bitmap.getWidth(), bitmap.getHeight());
             bitmap = Bitmap.createScaledBitmap(bitmap, optimalSize.getWidth(),
-                    optimalSize.getHeight(), true /* filter */);
+                    optimalSize.getHeight(), false /* filter */);
         }
 
         final Palette palette;
@@ -189,7 +190,7 @@ public final class WallpaperColors implements Parcelable {
         } else {
             palette = Palette
                     .from(bitmap, new CelebiQuantizer())
-                    .maximumColorCount(5)
+                    .maximumColorCount(128)
                     .resizeBitmapArea(MAX_WALLPAPER_EXTRACTION_AREA)
                     .generate();
         }
@@ -278,7 +279,7 @@ public final class WallpaperColors implements Parcelable {
     /**
      * Constructs a new object from a set of colors, where hints can be specified.
      *
-     * @param populationByColor Map with keys of colors, and value representing the number of
+     * @param colorToPopulation Map with keys of colors, and value representing the number of
      *                          occurrences of color in the wallpaper.
      * @param colorHints        A combination of color hints.
      * @hide
@@ -286,18 +287,103 @@ public final class WallpaperColors implements Parcelable {
      * @see WallpaperColors#fromBitmap(Bitmap)
      * @see WallpaperColors#fromDrawable(Drawable)
      */
-    public WallpaperColors(@NonNull Map<Integer, Integer> populationByColor,
+    public WallpaperColors(@NonNull Map<Integer, Integer> colorToPopulation,
             @ColorsHints int colorHints) {
-        mAllColors = populationByColor;
+        mAllColors = colorToPopulation;
 
-        ArrayList<Map.Entry<Integer, Integer>> mapEntries = new ArrayList(
-                populationByColor.entrySet());
-        mapEntries.sort((a, b) ->
-                a.getValue().compareTo(b.getValue())
-        );
-        mMainColors = mapEntries.stream().map(entry -> Color.valueOf(entry.getKey())).collect(
-                Collectors.toList());
+        final Map<Integer, Cam> colorToCam = new HashMap<>();
+        for (int color : colorToPopulation.keySet()) {
+            colorToCam.put(color, Cam.fromInt(color));
+        }
+        final double[] hueProportions = hueProportions(colorToCam, colorToPopulation);
+        final Map<Integer, Double> colorToHueProportion = colorToHueProportion(
+                colorToPopulation.keySet(), colorToCam, hueProportions);
+
+        final Map<Integer, Double> colorToScore = new HashMap<>();
+        for (Map.Entry<Integer, Double> mapEntry : colorToHueProportion.entrySet()) {
+            int color = mapEntry.getKey();
+            double proportion = mapEntry.getValue();
+            double score = score(colorToCam.get(color), proportion);
+            colorToScore.put(color, score);
+        }
+        ArrayList<Map.Entry<Integer, Double>> mapEntries = new ArrayList(colorToScore.entrySet());
+        mapEntries.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+
+        List<Integer> colorsByScoreDescending = new ArrayList<>();
+        for (Map.Entry<Integer, Double> colorToScoreEntry : mapEntries) {
+            colorsByScoreDescending.add(colorToScoreEntry.getKey());
+        }
+
+        List<Integer> mainColorInts = new ArrayList<>();
+        findSeedColorLoop:
+        for (int color : colorsByScoreDescending) {
+            Cam cam = colorToCam.get(color);
+            for (int otherColor : mainColorInts) {
+                Cam otherCam = colorToCam.get(otherColor);
+                if (hueDiff(cam, otherCam) < 15) {
+                    continue findSeedColorLoop;
+                }
+            }
+            mainColorInts.add(color);
+        }
+        List<Color> mainColors = new ArrayList<>();
+        for (int colorInt : mainColorInts) {
+            mainColors.add(Color.valueOf(colorInt));
+        }
+        mMainColors = mainColors;
         mColorHints = colorHints;
+    }
+
+    private static double hueDiff(Cam a, Cam b) {
+        return (180f - Math.abs(Math.abs(a.getHue() - b.getHue()) - 180f));
+    }
+
+    private static double score(Cam cam, double proportion) {
+        return cam.getChroma() + (proportion * 100);
+    }
+
+    private static Map<Integer, Double> colorToHueProportion(Set<Integer> colors,
+            Map<Integer, Cam> colorToCam, double[] hueProportions) {
+        Map<Integer, Double> colorToHueProportion = new HashMap<>();
+        for (int color : colors) {
+            final int hue = wrapDegrees(Math.round(colorToCam.get(color).getHue()));
+            double proportion = 0.0;
+            for (int i = hue - 15; i < hue + 15; i++) {
+                proportion += hueProportions[wrapDegrees(i)];
+            }
+            colorToHueProportion.put(color, proportion);
+        }
+        return colorToHueProportion;
+    }
+
+    private static int wrapDegrees(int degrees) {
+        if (degrees < 0) {
+            return (degrees % 360) + 360;
+        } else if (degrees >= 360) {
+            return degrees % 360;
+        } else {
+            return degrees;
+        }
+    }
+
+    private static double[] hueProportions(@NonNull Map<Integer, Cam> colorToCam,
+            Map<Integer, Integer> colorToPopulation) {
+        final double[] proportions = new double[360];
+
+        double totalPopulation = 0;
+        for (Map.Entry<Integer, Integer> entry : colorToPopulation.entrySet()) {
+            totalPopulation += entry.getValue();
+        }
+
+        for (Map.Entry<Integer, Integer> entry : colorToPopulation.entrySet()) {
+            final int color = (int) entry.getKey();
+            final int population = colorToPopulation.get(color);
+            final Cam cam = colorToCam.get(color);
+            final int hue = wrapDegrees(Math.round(cam.getHue()));
+            proportions[hue] = proportions[hue] + ((double) population / totalPopulation);
+        }
+
+        return proportions;
     }
 
     public static final @android.annotation.NonNull Creator<WallpaperColors> CREATOR = new Creator<WallpaperColors>() {
