@@ -6521,6 +6521,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().settings.settingsSecureGetIntForUser(
                 Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED,
                 0, CALLER_USER_HANDLE)).thenReturn(1);
+        mContext.permissions.add(permission.INTERACT_ACROSS_USERS);
+
         assertThat(dpm.isPackageAllowedToAccessCalendar("TEST_PACKAGE")).isFalse();
     }
 
@@ -6532,6 +6534,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().settings.settingsSecureGetIntForUser(
                 Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED,
                 0, CALLER_USER_HANDLE)).thenReturn(0);
+        mContext.permissions.add(permission.INTERACT_ACROSS_USERS);
+
         assertThat(dpm.isPackageAllowedToAccessCalendar(testPackage)).isFalse();
     }
 
@@ -6543,6 +6547,33 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().settings.settingsSecureGetIntForUser(
                 Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED,
                 0, CALLER_USER_HANDLE)).thenReturn(1);
+        mContext.permissions.add(permission.INTERACT_ACROSS_USERS);
+
+        assertThat(dpm.isPackageAllowedToAccessCalendar(testPackage)).isTrue();
+    }
+
+    @Test
+    public void testIsPackageAllowedToAccessCalendar_requiresPermission() {
+        final String testPackage = "TEST_PACKAGE";
+
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.isPackageAllowedToAccessCalendar(testPackage));
+    }
+
+    @Test
+    public void testIsPackageAllowedToAccessCalendar_samePackageAndSameUser_noPermissionRequired()
+            throws Exception {
+        final String testPackage = "TEST_PACKAGE";
+        setAsProfileOwner(admin1);
+        dpm.setCrossProfileCalendarPackages(admin1, null);
+        when(getServices().settings.settingsSecureGetIntForUser(
+                Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED,
+                0, CALLER_USER_HANDLE)).thenReturn(1);
+        doReturn(mContext.binder.callingUid)
+                .when(getServices().packageManager).getPackageUidAsUser(
+                eq(testPackage),
+                anyInt());
+
         assertThat(dpm.isPackageAllowedToAccessCalendar(testPackage)).isTrue();
     }
 

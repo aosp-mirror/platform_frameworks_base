@@ -13084,6 +13084,10 @@ public class DevicePolicyManager {
      * @see #getCrossProfileCalendarPackages(ComponentName)
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            permission.INTERACT_ACROSS_USERS_FULL,
+            permission.INTERACT_ACROSS_USERS
+    }, conditional = true)
     public boolean isPackageAllowedToAccessCalendar(@NonNull  String packageName) {
         throwIfParentInstance("isPackageAllowedToAccessCalendar");
         if (mService != null) {
