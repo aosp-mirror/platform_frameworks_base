@@ -1867,8 +1867,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratören uppdaterade paketet"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratören raderade paketet"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"I batterisparläget aktiveras mörkt tema medan bakgrundsaktivitet, vissa visuella effekter och funktioner samt vissa nätverksanslutningar begränsas eller inaktiveras."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"I batterisparläget aktiveras mörkt tema medan bakgrundsaktivitet, vissa visuella effekter och funktioner samt vissa nätverksanslutningar begränsas eller inaktiveras."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Med Databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vill du aktivera Databesparing?"</string>

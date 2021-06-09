@@ -186,6 +186,18 @@ public class PipSurfaceTransactionHelper {
     }
 
     /**
+     * Operates the round corner radius on a given transaction and leash, scaled by bounds
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
+     */
+    public PipSurfaceTransactionHelper round(SurfaceControl.Transaction tx, SurfaceControl leash,
+            Rect fromBounds, Rect toBounds) {
+        final float scale = (float) (Math.hypot(fromBounds.width(), fromBounds.height())
+                / Math.hypot(toBounds.width(), toBounds.height()));
+        tx.setCornerRadius(leash, mCornerRadius * scale);
+        return this;
+    }
+
+    /**
      * Re-parents the snapshot to the parent's surface control and shows it.
      */
     public PipSurfaceTransactionHelper reparentAndShowSurfaceSnapshot(

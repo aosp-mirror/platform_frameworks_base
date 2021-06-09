@@ -211,6 +211,12 @@ public class UdfpsController implements DozeReceiver {
             }
         }
 
+        void onAcquiredGood() {
+            if (mEnrollHelper != null) {
+                mEnrollHelper.animateIfLastStep();
+            }
+        }
+
         void onEnrollmentHelp() {
             if (mEnrollHelper != null) {
                 mEnrollHelper.onEnrollmentHelp();
@@ -260,6 +266,11 @@ public class UdfpsController implements DozeReceiver {
                 }
                 mGoodCaptureReceived = true;
                 mView.stopIllumination();
+                if (mServerRequest != null) {
+                    mServerRequest.onAcquiredGood();
+                } else {
+                    Log.e(TAG, "Null serverRequest when onAcquiredGood");
+                }
             });
         }
 
@@ -658,8 +669,7 @@ public class UdfpsController implements DozeReceiver {
                     // during a11y.
                     if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
                             || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
-                        mView.setImportantForAccessibility(
-                                View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+                        mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
                     }
 
                     mWindowManager.addView(mView, computeLayoutParams(animation));

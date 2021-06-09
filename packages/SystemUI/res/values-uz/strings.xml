@@ -1128,9 +1128,9 @@
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> joylashuvni ulashmoqda"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Yangi hikoya"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> yangi hikoyani ulashdi"</string>
-    <string name="video_status" msgid="4548544654316843225">"Tomosha"</string>
-    <string name="audio_status" msgid="4237055636967709208">"Gapiring"</string>
-    <string name="game_status" msgid="1340694320630973259">"Ijro etilmoqda"</string>
+    <string name="video_status" msgid="4548544654316843225">"Tomosha qilmoqda"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Tinglamoqda"</string>
+    <string name="game_status" msgid="1340694320630973259">"Oʻynamoqda"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Doʻstlar"</string>
     <string name="empty_status" msgid="5938893404951307749">"Bugun yozishaylik!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Kontent tezda chiqadi"</string>

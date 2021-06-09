@@ -187,7 +187,6 @@
     <!-- UDFPS colors -->
     <color name="udfps_enroll_icon">#000000</color>                         <!-- 100% black -->
     <color name="udfps_moving_target_fill">#cc4285f4</color>                <!-- 80% blue -->
-    <color name="udfps_moving_target_stroke">#ff669DF6</color>              <!-- 100% blue -->
     <color name="udfps_enroll_progress">#ff669DF6</color>                   <!-- 100% blue -->
 
     <!-- Logout button -->

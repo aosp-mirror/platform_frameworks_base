@@ -1867,8 +1867,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"A rendszergazda által frissítve"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"A rendszergazda által törölve"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Az Akkumulátorkímélő mód bekapcsolja a Sötét témát, és korlátozza vagy kikapcsolja a háttérbeli tevékenységeket, valamint bizonyos vizuális effekteket, funkciókat és hálózati kapcsolatokat."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Az Akkumulátorkímélő mód bekapcsolja a Sötét témát, és korlátozza vagy kikapcsolja a háttérbeli tevékenységeket, valamint bizonyos vizuális effekteket, funkciókat és hálózati kapcsolatokat."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által jelenleg használt alkalmazások hozzáférhetnek az adatokhoz, de csak ritkábban. Ez például azt jelentheti, hogy a képek csak rákoppintás után jelennek meg."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bekapcsolja az Adatforgalom-csökkentőt?"</string>

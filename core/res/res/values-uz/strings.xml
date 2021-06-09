@@ -1867,8 +1867,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administrator tomonidan yangilangan"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administrator tomonidan o‘chirilgan"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Quvvat tejash funksiyasi Tungi mavzuni va cheklovlarni yoqadi hamda fondagi harakatlar, vizual effektlar, ayrim funksiyalar va tarmoq aloqalari kabi boshqa funksiyalarni faolsizlantiradi yoki cheklaydi."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Quvvat tejash funksiyasi Tungi mavzuni va cheklovlarni yoqadi hamda fondagi harakatlar, vizual effektlar, ayrim funksiyalar va tarmoq aloqalari kabi boshqa funksiyalarni faolsizlantiradi yoki cheklaydi."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash yoqilsinmi?"</string>

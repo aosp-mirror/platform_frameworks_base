@@ -1079,7 +1079,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"إزالة من المفضّلة"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"نقل إلى الموضع <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"عناصر التحكّم"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"اختيار عناصر التحكّم التي يتم الوصول إليها من \"الإعدادات السريعة\"."</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"اختَر عناصر التحكّم التي يتم الوصول إليها من \"الإعدادات السريعة\"."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"اضغط مع الاستمرار واسحب لإعادة ترتيب عناصر التحكّم."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"تمت إزالة كل عناصر التحكّم."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"لم يتم حفظ التغييرات."</string>

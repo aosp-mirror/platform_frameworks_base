@@ -250,6 +250,14 @@ public final class ActiveServices {
     final ArrayList<ServiceRecord> mPendingFgsNotifications = new ArrayList<>();
 
     /**
+     * Whether there is a rate limit that suppresses immediate re-deferral of new FGS
+     * notifications from each app.  On by default, disabled only by shell command for
+     * test-suite purposes.  To disable the behavior more generally, use the usual
+     * DeviceConfig mechanism to set the rate limit interval to zero.
+     */
+    private boolean mFgsDeferralRateLimited = true;
+
+    /**
      * Uptime at which a given uid becomes eliglible again for FGS notification deferral
      */
     final SparseLongArray mFgsDeferralEligible = new SparseLongArray();
@@ -2142,8 +2150,10 @@ public final class ActiveServices {
             }
         }
 
-        final long nextEligible = when + mAm.mConstants.mFgsNotificationDeferralExclusionTime;
-        mFgsDeferralEligible.put(uid, nextEligible);
+        if (mFgsDeferralRateLimited) {
+            final long nextEligible = when + mAm.mConstants.mFgsNotificationDeferralExclusionTime;
+            mFgsDeferralEligible.put(uid, nextEligible);
+        }
         r.fgDisplayTime = when;
         r.mFgsNotificationDeferred = true;
         r.mFgsNotificationShown = false;
@@ -2203,6 +2213,38 @@ public final class ActiveServices {
             }
         }
     };
+
+    /**
+     * Suppress or reenable the rate limit on foreground service notification deferral.
+     * Invoked from the activity manager shell command.
+     *
+     * @param enable false to suppress rate-limit policy; true to reenable it.
+     */
+    boolean enableFgsNotificationRateLimitLocked(final boolean enable) {
+        if (enable != mFgsDeferralRateLimited) {
+            mFgsDeferralRateLimited = enable;
+            if (!enable) {
+                // make sure to reset any active rate limiting
+                mFgsDeferralEligible.clear();
+            }
+        }
+        return enable;
+    }
+
+    private void removeServiceNotificationDeferralsLocked(String packageName,
+            final @UserIdInt int userId) {
+        for (int i = mPendingFgsNotifications.size() - 1; i >= 0; i--) {
+            final ServiceRecord r = mPendingFgsNotifications.get(i);
+            if (userId == r.userId
+                    && r.appInfo.packageName.equals(packageName)) {
+                mPendingFgsNotifications.remove(i);
+                if (DEBUG_FOREGROUND_SERVICE) {
+                    Slog.d(TAG_SERVICE, "Removing notification deferral for "
+                            + r);
+                }
+            }
+        }
+    }
 
     private void maybeLogFGSStateEnteredLocked(ServiceRecord r) {
         if (r.mLogEntering) {
@@ -4689,6 +4731,7 @@ public final class ActiveServices {
             }
         }
         removeServiceRestartBackoffEnabledLocked(packageName);
+        removeServiceNotificationDeferralsLocked(packageName, userId);
     }
 
     void cleanUpServices(int userId, ComponentName component, Intent baseIntent) {

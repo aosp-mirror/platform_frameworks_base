@@ -745,7 +745,7 @@
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Görüşme bildirimlerinin üstünde ve kilit ekranında profil resmi olarak gösterilir, Rahatsız Etmeyin\'i kesintiye uğratır"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Görüşme bildirimlerinin üstünde ve kilit ekranında profil resmi olarak gösterilir, baloncuk olarak görünür, Rahatsız Etmeyin\'i kesintiye uğratır"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Öncelik"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Öncelikli"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>, sohbet özelliklerini desteklemiyor"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirimler değiştirilemez."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Bu bildirim grubu burada yapılandırılamaz"</string>
