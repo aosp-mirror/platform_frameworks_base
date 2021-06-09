@@ -77,7 +77,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mDozeParameters = dozeParameters;
         mKeyguardStateController = keyguardStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
-                dozeParameters, unlockedScreenOffAnimationController);
+                dozeParameters, unlockedScreenOffAnimationController, /* animateYPos= */ true);
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mSmartspaceTransitionController = smartspaceTransitionController;
 
