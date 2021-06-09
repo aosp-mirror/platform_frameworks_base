@@ -14481,6 +14481,15 @@ public class TelephonyManager {
     public static final String CAPABILITY_SIM_PHONEBOOK_IN_MODEM =
             "CAPABILITY_SIM_PHONEBOOK_IN_MODEM";
 
+    /**
+     * Indicates whether PHYSICAL_CHANNEL_CONFIG HAL1.6 is supported. See comments on
+     * respective methods for more information.
+     *
+     * @hide
+     */
+    public static final String CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED =
+            "CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(prefix = "CAPABILITY_", value = {
