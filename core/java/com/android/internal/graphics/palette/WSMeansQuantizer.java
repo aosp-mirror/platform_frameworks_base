@@ -16,18 +16,20 @@
 
 package com.android.internal.graphics.palette;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-
 /**
- * A color quantizer based on the Kmeans algorithm.
+ * A color quantizer based on the Kmeans algorithm. Prefer using QuantizerCelebi.
  *
  * This is an implementation of Kmeans based on Celebi's 2011 paper,
  * "Improving the Performance of K-Means for Color Quantization". In the paper, this algorithm is
@@ -36,253 +38,237 @@ import java.util.Set;
  * well as indexing colors by their count, thus minimizing the number of points to move around.
  *
  * Celebi's paper also stabilizes results and guarantees high quality by using starting centroids
- * from Wu's quantization algorithm. See CelebiQuantizer for more info.
+ * from Wu's quantization algorithm. See QuantizerCelebi for more info.
  */
-public class WSMeansQuantizer implements Quantizer {
-    Mean[] mMeans;
-    private final Map<Integer, Integer> mCountByColor = new HashMap<>();
-    private final Map<Integer, Integer> mMeanIndexByColor = new HashMap<>();
-    private final Set<Integer> mUniqueColors = new HashSet<>();
-    private final List<Palette.Swatch> mSwatches = new ArrayList<>();
-    private final CentroidProvider mCentroidProvider;
+public final class WSMeansQuantizer implements Quantizer {
+    private static final String TAG = "QuantizerWsmeans";
+    private static final boolean DEBUG = false;
+    private static final int MAX_ITERATIONS = 10;
+    // Points won't be moved to a closer cluster, if the closer cluster is within
+    // this distance. 3.0 used because L*a*b* delta E < 3 is considered imperceptible.
+    private static final float MIN_MOVEMENT_DISTANCE = 3.0f;
 
-    public WSMeansQuantizer(
-            float[][] means, CentroidProvider centroidProvider, int[] pixels, int maxColors) {
-        if (pixels == null) {
-            pixels = new int[]{};
-        }
-        mCentroidProvider = centroidProvider;
-        mMeans = new Mean[maxColors];
-        for (int i = 0; i < means.length; i++) {
-            mMeans[i] = new Mean(means[i]);
-        }
+    private final PointProvider mPointProvider;
+    private @Nullable Map<Integer, Integer> mInputPixelToCount;
+    private float[][] mClusters;
+    private int[] mClusterPopulations;
+    private float[][] mPoints;
+    private int[] mPixels;
+    private int[] mClusterIndices;
+    private int[][] mIndexMatrix = {};
+    private float[][] mDistanceMatrix = {};
 
-        if (maxColors > means.length) {
-            // Always initialize Random with the same seed. Ensures the results of quantization
-            // are consistent, even when random centroids are required.
-            Random random = new Random(0x42688);
-            int randomMeansToCreate = maxColors - means.length;
-            for (int i = 0; i < randomMeansToCreate; i++) {
-                mMeans[means.length + i] = new Mean(100, random);
-            }
-        }
+    private Palette mPalette;
 
-        for (int pixel : pixels) {
-            // These are pixels from the bitmap that is being quantized.
-            // Depending on the bitmap & downscaling, it may have pixels that are less than opaque
-            // Ignore those pixels.
-            ///
-            // Note: they don't _have_ to be ignored, for example, we could instead turn them
-            // opaque. Traditionally, including outside Android, quantizers ignore transparent
-            // pixels, so that strategy was chosen.
-            int alpha = (pixel >> 24) & 0xff;
-            if (alpha < 255) {
-                continue;
-            }
-            Integer currentCount = mCountByColor.get(pixel);
-            if (currentCount == null) {
-                currentCount = 0;
-                mUniqueColors.add(pixel);
-            }
-            mCountByColor.put(pixel, currentCount + 1);
-        }
-        for (int color : mUniqueColors) {
-            int closestMeanIndex = -1;
-            double closestMeanDistance = -1;
-            float[] centroid = mCentroidProvider.getCentroid(color);
-            for (int i = 0; i < mMeans.length; i++) {
-                double distance = mCentroidProvider.distance(centroid, mMeans[i].center);
-                if (closestMeanIndex == -1 || distance < closestMeanDistance) {
-                    closestMeanIndex = i;
-                    closestMeanDistance = distance;
-                }
-            }
-            mMeanIndexByColor.put(color, closestMeanIndex);
+    public WSMeansQuantizer(int[] inClusters, PointProvider pointProvider,
+            @Nullable Map<Integer, Integer> inputPixelToCount) {
+        mPointProvider = pointProvider;
+
+        mClusters = new float[inClusters.length][3];
+        int index = 0;
+        for (int cluster : inClusters) {
+            float[] point = pointProvider.fromInt(cluster);
+            mClusters[index++] = point;
         }
 
-        if (pixels.length == 0) {
-            return;
-        }
-
-        predict(maxColors, 0);
-    }
-
-    /** Create starting centroids for K-means from a set of colors. */
-    public static float[][] createStartingCentroids(CentroidProvider centroidProvider,
-            List<Palette.Swatch> swatches) {
-        float[][] startingCentroids = new float[swatches.size()][];
-        for (int i = 0; i < swatches.size(); i++) {
-            startingCentroids[i] = centroidProvider.getCentroid(swatches.get(i).getInt());
-        }
-        return startingCentroids;
-    }
-
-    /** Create random starting centroids for K-means. */
-    public static float[][] randomMeans(int maxColors, int upperBound) {
-        float[][] means = new float[maxColors][];
-
-        // Always initialize Random with the same seed. Ensures the results of quantization
-        // are consistent, even when random centroids are required.
-        Random random = new Random(0x42688);
-        for (int i = 0; i < maxColors; i++) {
-            means[i] = new Mean(upperBound, random).center;
-        }
-        return means;
-    }
-
-
-    @Override
-    public void quantize(int[] pixels, int maxColors) {
-
+        mInputPixelToCount = inputPixelToCount;
     }
 
     @Override
     public List<Palette.Swatch> getQuantizedColors() {
-        return mSwatches;
+        return mPalette.getSwatches();
     }
 
-    private void predict(int maxColors, int iterationsCompleted) {
-        double[][] centroidDistance = new double[maxColors][maxColors];
-        for (int i = 0; i <= maxColors; i++) {
-            for (int j = i + 1; j < maxColors; j++) {
-                float[] meanI = mMeans[i].center;
-                float[] meanJ = mMeans[j].center;
-                double distance = mCentroidProvider.distance(meanI, meanJ);
-                centroidDistance[i][j] = distance;
-                centroidDistance[j][i] = distance;
+    @Override
+    public void quantize(@NonNull int[] pixels, int maxColors) {
+        assert (pixels.length > 0);
+
+        if (mInputPixelToCount == null) {
+            QuantizerMap mapQuantizer = new QuantizerMap();
+            mapQuantizer.quantize(pixels, maxColors);
+            mInputPixelToCount = mapQuantizer.getColorToCount();
+        }
+
+        mPoints = new float[mInputPixelToCount.size()][3];
+        mPixels = new int[mInputPixelToCount.size()];
+        int index = 0;
+        for (int pixel : mInputPixelToCount.keySet()) {
+            mPixels[index] = pixel;
+            mPoints[index] = mPointProvider.fromInt(pixel);
+            index++;
+        }
+        if (mClusters.length > 0) {
+            // This implies that the constructor was provided starting clusters. If that was the
+            // case, we limit the number of clusters to the number of starting clusters and don't
+            // initialize random clusters.
+            maxColors = Math.min(maxColors, mClusters.length);
+        }
+        maxColors = Math.min(maxColors, mPoints.length);
+
+        initializeClusters(maxColors);
+        for (int i = 0; i < MAX_ITERATIONS; i++) {
+            calculateClusterDistances(maxColors);
+            if (!reassignPoints(maxColors)) {
+                break;
             }
-        }
-
-        // Construct a K×K matrix M in which row i is a permutation of
-        // 1,2,…,K that represents the clusters in increasing order of
-        // distance of their centers from ci;
-        int[][] distanceMatrix = new int[maxColors][maxColors];
-        for (int i = 0; i < maxColors; i++) {
-            double[] distancesFromIToAnotherMean = centroidDistance[i];
-            double[] sortedByDistanceAscending = distancesFromIToAnotherMean.clone();
-            Arrays.sort(sortedByDistanceAscending);
-            int[] outputRow = new int[maxColors];
-            for (int j = 0; j < maxColors; j++) {
-                outputRow[j] = findIndex(distancesFromIToAnotherMean, sortedByDistanceAscending[j]);
-            }
-            distanceMatrix[i] = outputRow;
-        }
-
-        //   for (i=1;i≤N′;i=i+ 1) do
-        //   Let Sp be the cluster that xi was assigned to in the previous
-        //   iteration;
-        //   p=m[i];
-        //   min_dist=prev_dist=jjxi−cpjj2;
-        boolean anyColorMoved = false;
-        for (int intColor : mUniqueColors) {
-            float[] color = mCentroidProvider.getCentroid(intColor);
-            int indexOfCurrentMean = mMeanIndexByColor.get(intColor);
-            Mean currentMean = mMeans[indexOfCurrentMean];
-            double minDistance = mCentroidProvider.distance(color, currentMean.center);
-            for (int j = 1; j < maxColors; j++) {
-                int indexOfClusterFromCurrentToJ = distanceMatrix[indexOfCurrentMean][j];
-                double distanceBetweenJAndCurrent =
-                        centroidDistance[indexOfCurrentMean][indexOfClusterFromCurrentToJ];
-                if (distanceBetweenJAndCurrent >= (4 * minDistance)) {
-                    break;
-                }
-                double distanceBetweenJAndColor = mCentroidProvider.distance(mMeans[j].center,
-                        color);
-                if (distanceBetweenJAndColor < minDistance) {
-                    minDistance = distanceBetweenJAndColor;
-                    mMeanIndexByColor.remove(intColor);
-                    mMeanIndexByColor.put(intColor, j);
-                    anyColorMoved = true;
-                }
-            }
-        }
-
-        List<MeanBucket> buckets = new ArrayList<>();
-        for (int i = 0; i < maxColors; i++) {
-            buckets.add(new MeanBucket());
-        }
-
-        for (int intColor : mUniqueColors) {
-            int meanIndex = mMeanIndexByColor.get(intColor);
-            MeanBucket meanBucket = buckets.get(meanIndex);
-            meanBucket.add(mCentroidProvider.getCentroid(intColor), intColor,
-                    mCountByColor.get(intColor));
+            recalculateClusterCenters(maxColors);
         }
 
         List<Palette.Swatch> swatches = new ArrayList<>();
-        boolean done = !anyColorMoved && iterationsCompleted > 0 || iterationsCompleted >= 100;
-        if (done) {
-            for (int i = 0; i < buckets.size(); i++) {
-                MeanBucket a = buckets.get(i);
-                if (a.mCount <= 0) {
-                    continue;
-                }
-                List<MeanBucket> bucketsToMerge = new ArrayList<>();
-                for (int j = i + 1; j < buckets.size(); j++) {
-                    MeanBucket b = buckets.get(j);
-                    if (b.mCount == 0) {
-                        continue;
-                    }
-                    float[] bCentroid = b.getCentroid();
-                    assert (a.mCount > 0);
-                    assert (a.getCentroid() != null);
-
-                    assert (bCentroid != null);
-                    if (mCentroidProvider.distance(a.getCentroid(), b.getCentroid()) < 5) {
-                        bucketsToMerge.add(b);
-                    }
-                }
-
-                for (MeanBucket bucketToMerge : bucketsToMerge) {
-                    float[] centroid = bucketToMerge.getCentroid();
-                    a.add(centroid, mCentroidProvider.getColor(centroid), bucketToMerge.mCount);
-                    buckets.remove(bucketToMerge);
-                }
-            }
-
-            for (MeanBucket bucket : buckets) {
-                float[] centroid = bucket.getCentroid();
-                if (centroid == null) {
-                    continue;
-                }
-
-                int rgb = mCentroidProvider.getColor(centroid);
-                swatches.add(new Palette.Swatch(rgb, bucket.mCount));
-                mSwatches.clear();
-                mSwatches.addAll(swatches);
-            }
-        } else {
-            List<MeanBucket> emptyBuckets = new ArrayList<>();
-            for (int i = 0; i < buckets.size(); i++) {
-                MeanBucket bucket = buckets.get(i);
-                if ((bucket.getCentroid() == null) || (bucket.mCount == 0)) {
-                    emptyBuckets.add(bucket);
-                    for (Integer color : mUniqueColors) {
-                        int meanIndex = mMeanIndexByColor.get(color);
-                        if (meanIndex > i) {
-                            mMeanIndexByColor.put(color, meanIndex--);
-                        }
-                    }
-                }
-            }
-
-            Mean[] newMeans = new Mean[buckets.size()];
-            for (int i = 0; i < buckets.size(); i++) {
-                float[] centroid = buckets.get(i).getCentroid();
-                newMeans[i] = new Mean(centroid);
-            }
-
-            predict(buckets.size(), iterationsCompleted + 1);
+        for (int i = 0; i < maxColors; i++) {
+            float[] cluster = mClusters[i];
+            int colorInt = mPointProvider.toInt(cluster);
+            swatches.add(new Palette.Swatch(colorInt, mClusterPopulations[i]));
         }
-
+        mPalette = Palette.from(swatches);
     }
 
-    private static int findIndex(double[] list, double element) {
-        for (int i = 0; i < list.length; i++) {
-            if (list[i] == element) {
-                return i;
+
+    private void initializeClusters(int maxColors) {
+        boolean hadInputClusters = mClusters.length > 0;
+        if (!hadInputClusters) {
+            int additionalClustersNeeded = maxColors - mClusters.length;
+            if (DEBUG) {
+                Log.d(TAG, "have " + mClusters.length + " clusters, want " + maxColors
+                        + " results, so need " + additionalClustersNeeded + " additional clusters");
+            }
+
+            Random random = new Random(0x42688);
+            List<float[]> additionalClusters = new ArrayList<>(additionalClustersNeeded);
+            Set<Integer> clusterIndicesUsed = new HashSet<>();
+            for (int i = 0; i < additionalClustersNeeded; i++) {
+                int index = random.nextInt(mPoints.length);
+                while (clusterIndicesUsed.contains(index)
+                        && clusterIndicesUsed.size() < mPoints.length) {
+                    index = random.nextInt(mPoints.length);
+                }
+                clusterIndicesUsed.add(index);
+                additionalClusters.add(mPoints[index]);
+            }
+
+            float[][] newClusters = (float[][]) additionalClusters.toArray();
+            float[][] clusters = Arrays.copyOf(mClusters, maxColors);
+            System.arraycopy(newClusters, 0, clusters, clusters.length, newClusters.length);
+            mClusters = clusters;
+        }
+
+        mClusterIndices = new int[mPixels.length];
+        mClusterPopulations = new int[mPixels.length];
+        Random random = new Random(0x42688);
+        for (int i = 0; i < mPixels.length; i++) {
+            int clusterIndex = random.nextInt(maxColors);
+            mClusterIndices[i] = clusterIndex;
+            mClusterPopulations[i] = mInputPixelToCount.get(mPixels[i]);
+        }
+    }
+
+    void calculateClusterDistances(int maxColors) {
+        if (mDistanceMatrix.length != maxColors) {
+            mDistanceMatrix = new float[maxColors][maxColors];
+        }
+
+        for (int i = 0; i <= maxColors; i++) {
+            for (int j = i + 1; j < maxColors; j++) {
+                float distance = mPointProvider.distance(mClusters[i], mClusters[j]);
+                mDistanceMatrix[j][i] = distance;
+                mDistanceMatrix[i][j] = distance;
             }
         }
-        throw new IllegalArgumentException("Element not in list");
+
+        if (mIndexMatrix.length != maxColors) {
+            mIndexMatrix = new int[maxColors][maxColors];
+        }
+
+        for (int i = 0; i < maxColors; i++) {
+            ArrayList<Distance> distances = new ArrayList<>(maxColors);
+            for (int index = 0; index < maxColors; index++) {
+                distances.add(new Distance(index, mDistanceMatrix[i][index]));
+            }
+            distances.sort(
+                    (a, b) -> Float.compare(a.getDistance(), b.getDistance()));
+
+            for (int j = 0; j < maxColors; j++) {
+                mIndexMatrix[i][j] = distances.get(j).getIndex();
+            }
+        }
+    }
+
+    boolean reassignPoints(int maxColors) {
+        boolean colorMoved = false;
+        for (int i = 0; i < mPoints.length; i++) {
+            float[] point = mPoints[i];
+            int previousClusterIndex = mClusterIndices[i];
+            float[] previousCluster = mClusters[previousClusterIndex];
+            float previousDistance = mPointProvider.distance(point, previousCluster);
+
+            float minimumDistance = previousDistance;
+            int newClusterIndex = -1;
+            for (int j = 1; j < maxColors; j++) {
+                int t = mIndexMatrix[previousClusterIndex][j];
+                if (mDistanceMatrix[previousClusterIndex][t] >= 4 * previousDistance) {
+                    // Triangle inequality proves there's can be no closer center.
+                    break;
+                }
+                float distance = mPointProvider.distance(point, mClusters[t]);
+                if (distance < minimumDistance) {
+                    minimumDistance = distance;
+                    newClusterIndex = t;
+                }
+            }
+            if (newClusterIndex != -1) {
+                float distanceChange = (float)
+                        Math.abs((Math.sqrt(minimumDistance) - Math.sqrt(previousDistance)));
+                if (distanceChange > MIN_MOVEMENT_DISTANCE) {
+                    colorMoved = true;
+                    mClusterIndices[i] = newClusterIndex;
+                }
+            }
+        }
+        return colorMoved;
+    }
+
+    void recalculateClusterCenters(int maxColors) {
+        mClusterPopulations = new int[maxColors];
+        float[] aSums = new float[maxColors];
+        float[] bSums = new float[maxColors];
+        float[] cSums = new float[maxColors];
+        for (int i = 0; i < mPoints.length; i++) {
+            int clusterIndex = mClusterIndices[i];
+            float[] point = mPoints[i];
+            int pixel = mPixels[i];
+            int count =  mInputPixelToCount.get(pixel);
+            mClusterPopulations[clusterIndex] += count;
+            aSums[clusterIndex] += point[0] * count;
+            bSums[clusterIndex] += point[1] * count;
+            cSums[clusterIndex] += point[2] * count;
+
+        }
+        for (int i = 0; i < maxColors; i++) {
+            int count = mClusterPopulations[i];
+            float aSum = aSums[i];
+            float bSum = bSums[i];
+            float cSum = cSums[i];
+            mClusters[i][0] = aSum / count;
+            mClusters[i][1] = bSum / count;
+            mClusters[i][2] = cSum / count;
+        }
+    }
+
+    private static class Distance {
+        private final int mIndex;
+        private final float mDistance;
+
+        int getIndex() {
+            return mIndex;
+        }
+
+        float getDistance() {
+            return mDistance;
+        }
+
+        Distance(int index, float distance) {
+            mIndex = index;
+            mDistance = distance;
+        }
     }
 }
