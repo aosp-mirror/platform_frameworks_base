@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.WindowConfiguration;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -374,6 +375,76 @@ public final class WindowContainerTransaction implements Parcelable {
     @NonNull
     public WindowContainerTransaction startTask(int taskId, @Nullable Bundle options) {
         mHierarchyOps.add(HierarchyOp.createForTaskLaunch(taskId, options));
+        return this;
+    }
+
+    /**
+     * Creates a new TaskFragment with the given options.
+     * @param taskFragmentOptions the options used to create the TaskFragment.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction createTaskFragment(
+            @NonNull TaskFragmentCreationParams taskFragmentOptions) {
+        // TODO(b/190433129) add actual implementation
+        return this;
+    }
+
+    /**
+     * Deletes an existing TaskFragment. Any remaining activities below it will be destroyed.
+     * @param taskFragment  the TaskFragment to be removed.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction deleteTaskFragment(
+            @NonNull WindowContainerToken taskFragment) {
+        // TODO(b/190433129) add actual implementation
+        return this;
+    }
+
+    /**
+     * Starts an activity in the TaskFragment.
+     * @param fragmentToken client assigned unique token to create TaskFragment with specified in
+     *                      {@link TaskFragmentCreationParams#fragmentToken}.
+     * @param activityIntent    intent to start the activity.
+     * @param activityOptions    ActivityOptions to start the activity with.
+     * @see android.content.Context#startActivity(Intent, Bundle).
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction startActivityInTaskFragment(
+            @NonNull IBinder fragmentToken, @NonNull Intent activityIntent,
+            @Nullable Bundle activityOptions) {
+        // TODO(b/190433129) add actual implementation
+        return this;
+    }
+
+    /**
+     * Moves an activity into the TaskFragment.
+     * @param fragmentToken client assigned unique token to create TaskFragment with specified in
+     *                      {@link TaskFragmentCreationParams#fragmentToken}.
+     * @param activityToken activity to be reparented.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction reparentActivityToTaskFragment(
+            @NonNull IBinder fragmentToken, @NonNull IBinder activityToken) {
+        // TODO(b/190433129) add actual implementation
+        return this;
+    }
+
+    /**
+     * Reparents all children of one TaskFragment to another.
+     * @param oldParent children of this TaskFragment will be reparented.
+     * @param newParent the new parent TaskFragment to move the children to. If {@code null}, the
+     *                  children will be moved to the leaf Task.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction reparentChildren(
+            @NonNull WindowContainerToken oldParent,
+            @Nullable WindowContainerToken newParent) {
+        // TODO(b/190433129) add actual implementation
         return this;
     }
 
