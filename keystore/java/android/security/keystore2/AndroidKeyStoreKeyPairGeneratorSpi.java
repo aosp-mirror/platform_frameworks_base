@@ -580,7 +580,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             } catch (RemoteException e) {
                 // This is not really an error state, and necessarily does not apply to non RKP
                 // systems or hybrid systems where RKP is not currently turned on.
-                Log.d(TAG, "Couldn't connect to the RemoteProvisioner backend.", e);
+                Log.d(TAG, "Couldn't connect to the RemoteProvisioner backend.");
             }
             success = true;
             return new KeyPair(publicKey, publicKey.getPrivateKey());
