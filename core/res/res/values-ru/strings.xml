@@ -224,7 +224,7 @@
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Подготовка обновлений…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Обработка обновлений…"</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Перезагрузка…"</string>
-    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Сбросить к заводским настройкам"</string>
+    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Сбросить настройки"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Перезагрузка…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Выключение..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Планшетный ПК будет отключен."</string>
@@ -1168,10 +1168,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Открыть с помощью приложения:"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Открыть с помощью приложения \"%1$s\""</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Открыть"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Открывать ссылки вида <xliff:g id="HOST">%1$s</xliff:g> с помощью:"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Открывать ссылки <xliff:g id="HOST">%1$s</xliff:g> с помощью:"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Открывать ссылки с помощью:"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Открывать ссылки в браузере <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Открывать ссылки вида <xliff:g id="HOST">%1$s</xliff:g> в браузере <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Открывать ссылки <xliff:g id="HOST">%1$s</xliff:g> в браузере <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Открыть доступ"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Редактировать с помощью приложения:"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Редактировать с помощью приложения \"%1$s\""</string>
@@ -1705,7 +1705,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Для переключения между функциями проведите по экрану снизу вверх тремя пальцами и задержите их."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Увеличение"</string>
     <string name="user_switched" msgid="7249833311585228097">"Выбран аккаунт пользователя <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Смена профиля на <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Смена профиля на \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Выход из аккаунта <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Владелец"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Ошибка"</string>

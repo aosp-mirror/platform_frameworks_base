@@ -189,7 +189,8 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public boolean isFalseTouch() {
+    public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
+        mDataProvider.setInteractionType(interactionType);
         if (!mDataProvider.isDirty()) {
             return mPreviousResult;
         }

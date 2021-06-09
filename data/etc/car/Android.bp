@@ -129,13 +129,6 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.companiondevicesupport",
-    sub_dir: "permissions",
-    src: "com.android.car.companiondevicesupport.xml",
-    filename_from_src: true,
-}
-
-prebuilt_etc {
     name: "privapp_whitelist_com.google.android.car.kitchensink",
     sub_dir: "permissions",
     src: "com.google.android.car.kitchensink.xml",
@@ -151,13 +144,6 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.floatingcardslauncher",
-    sub_dir: "permissions",
-    src: "com.android.car.floatingcardslauncher.xml",
-    filename_from_src: true,
-}
-
-prebuilt_etc {
     name: "privapp_whitelist_com.android.car.ui.paintbooth",
     sub_dir: "permissions",
     src: "com.android.car.ui.paintbooth.xml",
@@ -168,5 +154,19 @@ prebuilt_etc {
     name: "allowed_privapp_com.android.carshell",
     sub_dir: "permissions",
     src: "com.android.car.shell.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "allowed_privapp_com.android.car.activityresolver",
+    sub_dir: "permissions",
+    src: "com.android.car.activityresolver.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "allowed_privapp_com.android.car.rotary",
+    sub_dir: "permissions",
+    src: "com.android.car.rotary.xml",
     filename_from_src: true,
 }

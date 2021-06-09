@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Duas barras de bateria."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Três barras de bateria."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Bateria cheia."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Porcentagem da bateria desconhecida."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Sem telefone."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Uma barra de sinal do telefone."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Duas barras de sinal do telefone."</string>
@@ -474,16 +475,16 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostrar perfil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Adicionar usuário"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novo usuário"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remover convidado?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remover visitante?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todos os apps e dados nesta sessão serão excluídos."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Remover"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bem-vindo, convidado."</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Você voltou, visitante!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Quer continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Recomeçar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sim, continuar"</string>
-    <string name="guest_notification_title" msgid="4434456703930764167">"Usuário convidado"</string>
-    <string name="guest_notification_text" msgid="4202692942089571351">"Para excluir apps e dados, remova o usuário convidado"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"REMOVER CONVIDADO"</string>
+    <string name="guest_notification_title" msgid="4434456703930764167">"Usuário visitante"</string>
+    <string name="guest_notification_text" msgid="4202692942089571351">"Para excluir apps e dados, remova o usuário visitante"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"REMOVER VISITANTE"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Desconectar usuário"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Desconectar usuário atual"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"DESCONECTAR USUÁRIO"</string>
@@ -784,7 +785,7 @@
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Parar"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Avançar"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Anterior"</string>
-    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Retroceder"</string>
+    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Voltar"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"Avançar rapidamente"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
@@ -843,7 +844,7 @@
     <item msgid="7453955063378349599">"Inclinação à esquerda"</item>
     <item msgid="5874146774389433072">"Inclinação à direita"</item>
   </string-array>
-    <string name="menu_ime" msgid="5677467548258017952">"Alternador de teclado"</string>
+    <string name="menu_ime" msgid="5677467548258017952">"Seletor de teclado"</string>
     <string name="save" msgid="3392754183673848006">"Salvar"</string>
     <string name="reset" msgid="8715144064608810383">"Redefinir"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Ajustar largura do botão"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (desconectado)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Não foi possível conectar. Tente novamente."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Parear novo dispositivo"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema para ler seu medidor de bateria"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toque para mais informações"</string>
 </resources>

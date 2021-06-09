@@ -301,7 +301,8 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     }
     sk_sp<SkImage> image = bitmap.makeImage();
 
-    applyLooper(get_looper(paint), *filterBitmap(paint), [&](SkScalar x, SkScalar y, const SkPaint& p) {
+    applyLooper(get_looper(paint), *filterBitmap(*filteredPaint), [&](SkScalar x, SkScalar y,
+                                                                      const SkPaint& p) {
         mRecorder.drawImageLattice(image, lattice, dst.makeOffset(x, y), &p, bitmap.palette());
     });
 

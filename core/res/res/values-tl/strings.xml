@@ -220,7 +220,7 @@
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Naghahandang i-update…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Pinoproseso ang package ng update…"</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Nagre-restart…"</string>
-    <string name="reboot_to_reset_title" msgid="2226229680017882787">"I-reset ang data ng factory"</string>
+    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Pag-reset sa factory data"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Nagre-restart…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Nagsa-shut down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Mag-shut down ang iyong tablet."</string>

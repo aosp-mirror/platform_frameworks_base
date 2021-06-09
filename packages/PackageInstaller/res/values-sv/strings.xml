@@ -24,8 +24,8 @@
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> installeras …"</string>
     <string name="install_done" msgid="5987363587661783896">"Appen har installerats."</string>
     <string name="install_confirm_question" msgid="8176284075816604590">"Vill du installera det här programmet?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Vill du installera en uppdatering till den här befintliga appen? Dina befintliga data försvinner inte."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Vill du installera en uppdatering av den inbyggda appen? Dina befintliga data försvinner inte."</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"Vill du installera en uppdatering till den här befintliga appen? Din befintliga data försvinner inte."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Vill du installera en uppdatering av den inbyggda appen? Din befintliga data försvinner inte."</string>
     <string name="install_failed" msgid="5777824004474125469">"Appen har inte installerats."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketet har blockerats för installation."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Appen har inte installerats på grund av en konflikt mellan detta paket och ett befintligt paket."</string>

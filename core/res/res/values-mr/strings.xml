@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5626377160840915617">"समवयस्क व्यक्तीने TTY मोड HCO ची विनंती केली"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"समवयस्क व्यक्तीने TTY मोड VCO ची विनंती केली"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"समवयस्क व्यक्तीने TTY मोड बंद ची विनंती केली"</string>
-    <string name="serviceClassVoice" msgid="2065556932043454987">"व्हॉइस"</string>
+    <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"डेटा"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"फॅक्स"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
@@ -146,11 +146,11 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"वाय-फायवरून कॉल करा"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"मोबाइल नेटवर्कवरून कॉल करा"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"केवळ वाय-फाय"</string>
-    <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
+    <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकंदांनंतर <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
-    <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
-    <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
+    <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
+    <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
     <string name="fcComplete" msgid="1080909484660507044">"वैशिष्ट्य कोड पूर्ण."</string>
     <string name="fcError" msgid="5325116502080221346">"कनेक्शन समस्या किंवा अवैध फीचर कोड."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ठीक"</string>
@@ -388,9 +388,9 @@
     <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्टम सेटिंग्ज सुधारित करा"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"सिस्टीमचा सेटिंग्ज डेटा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स आपल्या सिस्टीमचे कॉंफिगरेशन दूषित करू शकतात."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"सुरूवातीस चालवा"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"जसे सिस्टम बूट करणे समाप्त करते तसे अ‍ॅप ला स्वतः प्रारंभ करण्यास अनुमती देते. यामुळे टॅबलेट प्रारंभ करण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर टॅबलेटला धीमे करण्यास अ‍ॅप ला अनुमती देते."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"जसे सिस्टम बूट करणे समाप्त करते तसे अ‍ॅप ला स्वतः सुरू करण्यास अनुमती देते. यामुळे टॅबलेट सुरू करण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर टॅबलेटला धीमे करण्यास अ‍ॅप ला अनुमती देते."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"सिस्टम बूट होणे संपल्यावर ॲपला स्वतः सुरू होण्याची अनुमती देते. यामुळे तुमच्या Android TV डिव्हाइसला सुरू होण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर डिव्हाइसलाच धीमे करण्याची अनुमती ॲपला देते."</string>
-    <string name="permdesc_receiveBootCompleted" product="default" msgid="7912677044558690092">"जसे सिस्टम बूट करणे समाप्त करते तसे अ‍ॅप ला स्वतः प्रारंभ करण्यास अनुमती देते. यामुळे फोन प्रारंभ करण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर फोनला धीमे करण्यास अ‍ॅप ला अनुमती देते."</string>
+    <string name="permdesc_receiveBootCompleted" product="default" msgid="7912677044558690092">"जसे सिस्टम बूट करणे समाप्त करते तसे अ‍ॅप ला स्वतः सुरू करण्यास अनुमती देते. यामुळे फोन सुरू करण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर फोनला धीमे करण्यास अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_broadcastSticky" msgid="4552241916400572230">"रोचक प्रसारण पाठवा"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="5058486069846384013">"रोचक प्रसारणे पाठविण्यासाठी अ‍ॅप ला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर देखील तसेच राहते. अत्याधिक वापरामुळे बरीच मेमरी वापरली जाऊन तो टॅब्लेटला धीमा किंवा अस्थिर करू शकतो."</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"चिकट प्रसारणे पाठविण्यासाठी ॲपला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर देखील तसेच राहते. अत्याधिक वापरामुळे बरीच मेमरी वापरली जाऊन तो तुमच्या Android TV डिव्हाइसला धीमा किंवा अस्थिर करू शकतो."</string>
@@ -899,7 +899,7 @@
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"स्थिती"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"कॅमेरा"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"मीडिया नियंत्रणे"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"विजेट पुनर्क्रमित करणे प्रारंभ झाले."</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"विजेट पुनर्क्रमित करणे सुरू झाले."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"विजेट पुनर्क्रमित करणे समाप्त झाले."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"विजेट <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> हटविले."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"अनलॉक क्षेत्र विस्तृत करा."</string>
@@ -1190,7 +1190,7 @@
     <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"टॅबलेट अपडेट होत आहे…"</string>
     <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"डिव्‍हाइस अपडेट होत आहे…"</string>
     <string name="android_start_title" product="default" msgid="4036708252778757652">"फोन सुरू होत आहे…"</string>
-    <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android प्रारंभ करत आहे…"</string>
+    <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android सुरू करत आहे…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"टॅबलेट सुरू होत आहे…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"डिव्‍हाइस सुरू होत आहे…"</string>
     <string name="android_upgrading_fstrim" msgid="3259087575528515329">"संचयन ऑप्टिमाइझ करत आहे."</string>
@@ -1198,7 +1198,7 @@
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> श्रेणीसुधारित करत आहे…"</string>
     <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> पैकी <xliff:g id="NUMBER_0">%1$d</xliff:g> अ‍ॅप ऑप्टिमाइझ करत आहे."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तयार करत आहे."</string>
-    <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"अ‍ॅप्स प्रारंभ करत आहे."</string>
+    <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"अ‍ॅप्स सुरू करत आहे."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बूट समाप्त होत आहे."</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"रन होणारे <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"गेमवर परत जाण्यासाठी टॅप करा"</string>
@@ -1275,7 +1275,7 @@
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"नेहमी अनुमती द्या"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"कधीही अनुमती देऊ नका"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"सिम कार्ड काढले"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"तुम्ही एक वैध सिम कार्ड घालून प्रारंभ करेपर्यंत मोबाइल नेटवर्क अनुपलब्ध असेल."</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"तुम्ही एक वैध सिम कार्ड घालून सुरू करेपर्यंत मोबाइल नेटवर्क अनुपलब्ध असेल."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"पूर्ण झाले"</string>
     <string name="sim_added_title" msgid="7930779986759414595">"सिम कार्ड जोडले"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"मोबाइल नेटवर्कवर अ‍ॅक्सेस करण्यासाठी तुमचे डिव्हाइस रीस्टार्ट करा."</string>
@@ -1906,7 +1906,7 @@
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g> ला अनपिन करा"</string>
     <string name="app_info" msgid="6113278084877079851">"अ‍ॅप माहिती"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="demo_starting_message" msgid="6577581216125805905">"डेमो प्रारंभ करत आहे..."</string>
+    <string name="demo_starting_message" msgid="6577581216125805905">"डेमो सुरू करत आहे..."</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"डिव्हाइस रीसेट करत आहे..."</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"<xliff:g id="LABEL">%1$s</xliff:g> अक्षम केले"</string>
     <string name="conference_call" msgid="5731633152336490471">"कॉंफरन्स कॉल"</string>

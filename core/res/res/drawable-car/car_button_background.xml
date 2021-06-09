@@ -25,6 +25,22 @@ limitations under the License.
                     android:color="#0059B3"/>
         </shape>
     </item>
+    <item android:state_focused="true" android:state_pressed="true" android:state_ux_restricted="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@*android:dimen/car_button_radius"/>
+            <solid android:color="@*android:color/car_grey_300"/>
+            <stroke android:width="4dp"
+                    android:color="#0059B3"/>
+        </shape>
+    </item>
+    <item android:state_focused="true" android:state_ux_restricted="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@*android:dimen/car_button_radius"/>
+            <solid android:color="@*android:color/car_grey_300"/>
+            <stroke android:width="8dp"
+                    android:color="#0059B3"/>
+        </shape>
+    </item>
     <item android:state_focused="true" android:state_pressed="true">
         <shape android:shape="rectangle">
             <corners android:radius="@*android:dimen/car_button_radius"/>
@@ -42,6 +58,12 @@ limitations under the License.
         </shape>
     </item>
     <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="@*android:dimen/car_button_radius"/>
+            <solid android:color="@*android:color/car_grey_300"/>
+        </shape>
+    </item>
+    <item android:state_ux_restricted="true">
         <shape android:shape="rectangle">
             <corners android:radius="@*android:dimen/car_button_radius"/>
             <solid android:color="@*android:color/car_grey_300"/>

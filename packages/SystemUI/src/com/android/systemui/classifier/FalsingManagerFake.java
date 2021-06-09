@@ -70,7 +70,7 @@ public class FalsingManagerFake implements FalsingManager {
     }
 
     @Override
-    public boolean isFalseTouch() {
+    public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
         return mIsFalseTouch;
     }
 
