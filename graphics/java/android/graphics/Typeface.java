@@ -1387,6 +1387,7 @@ public class Typeface {
     static {
         // Preload Roboto-Regular.ttf in Zygote for improving app launch performance.
         preloadFontFile("/system/fonts/Roboto-Regular.ttf");
+        preloadFontFile("/system/fonts/RobotoStatic-Regular.ttf");
 
         String locale = SystemProperties.get("persist.sys.locale", "en-US");
         String script = ULocale.addLikelySubtags(ULocale.forLanguageTag(locale)).getScript();

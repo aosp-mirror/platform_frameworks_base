@@ -102,7 +102,6 @@ import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.apphibernation.AppHibernationService;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -216,7 +215,7 @@ class ActivityMetricsLogger {
         /** whether the process of the launching activity didn't have any active activity. */
         final boolean mProcessSwitch;
         /** The activities that should be drawn. */
-        final LinkedList<ActivityRecord> mPendingDrawActivities = new LinkedList<>();
+        final ArrayList<ActivityRecord> mPendingDrawActivities = new ArrayList<>(2);
         /** The latest activity to have been launched. */
         @NonNull ActivityRecord mLastLaunchedActivity;
 
@@ -326,6 +325,17 @@ class ActivityMetricsLogger {
 
         boolean allDrawn() {
             return mPendingDrawActivities.isEmpty();
+        }
+
+        /** Only keep the records which can be drawn. */
+        void updatePendingDraw() {
+            for (int i = mPendingDrawActivities.size() - 1; i >= 0; i--) {
+                final ActivityRecord r = mPendingDrawActivities.get(i);
+                if (!r.mVisibleRequested) {
+                    if (DEBUG_METRICS) Slog.i(TAG, "Discard pending draw " + r);
+                    mPendingDrawActivities.remove(i);
+                }
+            }
         }
 
         /**
@@ -701,6 +711,7 @@ class ActivityMetricsLogger {
             info.mCurrentTransitionDelayMs = info.calculateDelay(timestampNs);
             info.mReason = activityToReason.valueAt(index);
             info.mLoggedTransitionStarting = true;
+            info.updatePendingDraw();
             if (info.allDrawn()) {
                 done(false /* abort */, info, "notifyTransitionStarting - all windows drawn",
                         timestampNs);

@@ -728,7 +728,7 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Desaktibatu jakinarazpenak"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Aplikazio honen jakinarazpenak erakusten jarraitzea nahi duzu?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Isila"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"Balio lehenetsia"</string>
+    <string name="notification_alert_title" msgid="3656229781017543655">"Lehenetsia"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatikoa"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Ez du tonurik jotzen edo dar-dar egiten"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Ez du tonurik jotzen edo dar-dar egiten, eta elkarrizketaren atalaren behealdean agertzen da"</string>
@@ -1130,7 +1130,7 @@
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzaileak istorio berri bat partekatu du"</string>
     <string name="video_status" msgid="4548544654316843225">"Ikusten"</string>
     <string name="audio_status" msgid="4237055636967709208">"Entzuten"</string>
-    <string name="game_status" msgid="1340694320630973259">"Erreproduzitzen"</string>
+    <string name="game_status" msgid="1340694320630973259">"Jolasten"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Lagunak"</string>
     <string name="empty_status" msgid="5938893404951307749">"Txatea dezagun gaur gauean!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Laster agertuko da edukia"</string>

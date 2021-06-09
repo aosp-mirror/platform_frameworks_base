@@ -56,6 +56,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.window.IRemoteTransition;
+import android.window.SplashScreen;
 import android.window.WindowContainerToken;
 
 import java.lang.annotation.Retention;
@@ -327,6 +328,10 @@ public class ActivityOptions {
     private static final String KEY_LAUNCHED_FROM_BUBBLE =
             "android.activity.launchTypeBubble";
 
+    /** See {@link #setSplashscreenStyle(int)}. */
+    private static final String KEY_SPLASH_SCREEN_STYLE =
+            "android.activity.splashScreenStyle";
+
     /** See {@link #setTransientLaunch()}. */
     private static final String KEY_TRANSIENT_LAUNCH = "android.activity.transientLaunch";
 
@@ -415,6 +420,8 @@ public class ActivityOptions {
     private IRemoteTransition mRemoteTransition;
     private boolean mOverrideTaskTransition;
     private int mSplashScreenThemeResId;
+    @SplashScreen.SplashScreenStyle
+    private int mSplashScreenStyle;
     private boolean mRemoveWithTaskOrganizer;
     private boolean mLaunchedFromBubble;
     private boolean mTransientLaunch;
@@ -1171,6 +1178,7 @@ public class ActivityOptions {
         mRemoveWithTaskOrganizer = opts.getBoolean(KEY_REMOVE_WITH_TASK_ORGANIZER);
         mLaunchedFromBubble = opts.getBoolean(KEY_LAUNCHED_FROM_BUBBLE);
         mTransientLaunch = opts.getBoolean(KEY_TRANSIENT_LAUNCH);
+        mSplashScreenStyle = opts.getInt(KEY_SPLASH_SCREEN_STYLE);
     }
 
     /**
@@ -1362,6 +1370,23 @@ public class ActivityOptions {
      */
     public int getSplashScreenThemeResId() {
         return mSplashScreenThemeResId;
+    }
+
+    /**
+     * Sets the preferred splash screen style.
+     * @hide
+     */
+    public void setSplashscreenStyle(@SplashScreen.SplashScreenStyle int style) {
+        mSplashScreenStyle = style;
+    }
+
+    /**
+     * Gets the preferred splash screen style from caller
+     * @hide
+     */
+    @SplashScreen.SplashScreenStyle
+    public int getSplashScreenStyle() {
+        return mSplashScreenStyle;
     }
 
     /**
@@ -1931,6 +1956,9 @@ public class ActivityOptions {
         }
         if (mTransientLaunch) {
             b.putBoolean(KEY_TRANSIENT_LAUNCH, mTransientLaunch);
+        }
+        if (mSplashScreenStyle != 0) {
+            b.putInt(KEY_SPLASH_SCREEN_STYLE, mSplashScreenStyle);
         }
         return b;
     }

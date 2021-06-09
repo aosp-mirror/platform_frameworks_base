@@ -71,12 +71,14 @@ import kotlin.Unit;
  */
 public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
+
     private static final float DISABLED_ALPHA = 0.38f;
     private static final String EXTRAS_SMARTSPACE_INTENT =
             "com.google.android.apps.gsa.smartspace.extra.SMARTSPACE_INTENT";
-    private static final String KEY_SMARTSPACE_OPEN_IN_FOREGROUND = "KEY_OPEN_IN_FOREGROUND";
     private static final int MEDIA_RECOMMENDATION_ITEMS_PER_ROW = 3;
     private static final int MEDIA_RECOMMENDATION_MAX_NUM = 6;
+    private static final String KEY_SMARTSPACE_ARTIST_NAME = "artist_name";
+    private static final String KEY_SMARTSPACE_OPEN_IN_FOREGROUND = "KEY_OPEN_IN_FOREGROUND";
 
     private static final Intent SETTINGS_INTENT = new Intent(ACTION_MEDIA_CONTROLS_SETTINGS);
 
@@ -292,6 +294,12 @@ public class MediaControlPanel {
             });
         }
 
+        // Accessibility label
+        mPlayerViewHolder.getPlayer().setContentDescription(
+                mContext.getString(
+                        R.string.controls_media_playing_item_description,
+                        data.getSong(), data.getArtist(), data.getApp()));
+
         ImageView albumView = mPlayerViewHolder.getAlbumView();
         boolean hasArtwork = data.getArtwork() != null;
         if (hasArtwork) {
@@ -330,7 +338,6 @@ public class MediaControlPanel {
         }
 
         // Song name
-
         TextView titleText = mPlayerViewHolder.getTitleText();
         titleText.setText(data.getSong());
 
@@ -497,8 +504,8 @@ public class MediaControlPanel {
 
         mInstanceId = data.getTargetId().hashCode();
         mBackgroundColor = data.getBackgroundColor();
-        mRecommendationViewHolder.getRecommendations()
-                .setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
+        TransitionLayout recommendationCard = mRecommendationViewHolder.getRecommendations();
+        recommendationCard.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
 
         List<SmartspaceAction> mediaRecommendationList = data.getRecommendations();
         if (mediaRecommendationList == null || mediaRecommendationList.isEmpty()) {
@@ -522,15 +529,17 @@ public class MediaControlPanel {
         icon.setColorFilter(getGrayscaleFilter());
         ImageView headerLogoImageView = mRecommendationViewHolder.getCardIcon();
         headerLogoImageView.setImageDrawable(icon);
-        // Set up media source app's label text. Fallback to "Play" if the found label is empty.
+        // Set up media source app's label text.
         CharSequence appLabel = packageManager.getApplicationLabel(applicationInfo);
         if (appLabel.length() != 0) {
             TextView headerTitleText = mRecommendationViewHolder.getCardText();
             headerTitleText.setText(appLabel);
         }
-        // Set up media card's tap action if applicable.
-        setSmartspaceRecItemOnClickListener(
-                mRecommendationViewHolder.getRecommendations(), data.getCardAction());
+        // Set up media rec card's tap action if applicable.
+        setSmartspaceRecItemOnClickListener(recommendationCard, data.getCardAction());
+        // Set up media rec card's accessibility label.
+        recommendationCard.setContentDescription(
+                mContext.getString(R.string.controls_media_smartspace_rec_description, appLabel));
 
         List<ImageView> mediaCoverItems = mRecommendationViewHolder.getMediaCoverItems();
         List<Integer> mediaCoverItemsResIds = mRecommendationViewHolder.getMediaCoverItemsResIds();
@@ -553,6 +562,21 @@ public class MediaControlPanel {
 
             // Set up the media item's click listener if applicable.
             setSmartspaceRecItemOnClickListener(mediaCoverImageView, recommendation);
+
+            // Set up the accessibility label for the media item.
+            String artistName = recommendation.getExtras()
+                    .getString(KEY_SMARTSPACE_ARTIST_NAME, "");
+            if (artistName.isEmpty()) {
+                mediaCoverImageView.setContentDescription(
+                        mContext.getString(
+                                R.string.controls_media_smartspace_rec_item_no_artist_description,
+                                recommendation.getTitle(), appLabel));
+            } else {
+                mediaCoverImageView.setContentDescription(
+                        mContext.getString(
+                                R.string.controls_media_smartspace_rec_item_description,
+                                recommendation.getTitle(), artistName, appLabel));
+            }
 
             if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
                 setVisibleAndAlpha(collapsedSet,
