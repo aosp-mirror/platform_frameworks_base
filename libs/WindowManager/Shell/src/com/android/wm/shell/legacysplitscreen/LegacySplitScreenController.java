@@ -550,12 +550,14 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         update(mDisplayController.getDisplayContext(
                 mContext.getDisplayId()).getResources().getConfiguration());
         // Set resizable directly here because applyEnterSplit already resizes home stack.
-        mHomeStackResizable = mWindowManagerProxy.applyEnterSplit(mSplits, mSplitLayout);
+        mHomeStackResizable = mWindowManagerProxy.applyEnterSplit(mSplits,
+                mRotateSplitLayout != null ? mRotateSplitLayout : mSplitLayout);
     }
 
     public void prepareEnterSplitTransition(WindowContainerTransaction outWct) {
         // Set resizable directly here because buildEnterSplit already resizes home stack.
-        mHomeStackResizable = mWindowManagerProxy.buildEnterSplit(outWct, mSplits, mSplitLayout);
+        mHomeStackResizable = mWindowManagerProxy.buildEnterSplit(outWct, mSplits,
+                mRotateSplitLayout != null ? mRotateSplitLayout : mSplitLayout);
     }
 
     public void finishEnterSplitTransition(boolean minimized) {
