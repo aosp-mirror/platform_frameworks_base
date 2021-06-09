@@ -78,6 +78,7 @@ import com.android.internal.util.PerfettoTrigger;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -713,7 +714,8 @@ public class InteractionJankMonitor {
         }
 
         public String getPerfettoTrigger() {
-            return String.format("com.android.telemetry.interaction-jank-monitor-%d", mCujType);
+            return String.format(Locale.US, "com.android.telemetry.interaction-jank-monitor-%d",
+                    mCujType);
         }
 
         public String getName() {
