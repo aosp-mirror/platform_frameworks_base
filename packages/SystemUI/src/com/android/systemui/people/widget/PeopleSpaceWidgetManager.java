@@ -199,7 +199,8 @@ public class PeopleSpaceWidgetManager {
                         "Received updated conversation: "
                                 + conversation.getShortcutInfo().getLabel());
             }
-            updateWidgetsWithConversationChanged(conversation);
+            mBgExecutor.execute(() ->
+                    updateWidgetsWithConversationChanged(conversation));
         }
     }
 
