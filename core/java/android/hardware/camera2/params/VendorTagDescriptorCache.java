@@ -36,13 +36,7 @@ public final class VendorTagDescriptorCache implements Parcelable {
             new Parcelable.Creator<VendorTagDescriptorCache>() {
         @Override
         public VendorTagDescriptorCache createFromParcel(Parcel source) {
-            try {
-                VendorTagDescriptorCache vendorDescriptorCache = new VendorTagDescriptorCache(source);
-                return vendorDescriptorCache;
-            } catch (Exception e) {
-                Log.e(TAG, "Exception creating VendorTagDescriptorCache from parcel", e);
-                return null;
-            }
+            return new VendorTagDescriptorCache(source);
         }
 
         @Override
