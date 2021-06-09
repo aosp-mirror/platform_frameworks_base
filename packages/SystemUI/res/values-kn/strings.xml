@@ -1128,7 +1128,7 @@
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರು ಸ್ಥಳವನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿದ್ದಾರೆ"</string>
     <string name="new_story_status" msgid="9012195158584846525">"ಹೊಸ ಸುದ್ದಿ"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರು ಹೊಸ ಸ್ಟೋರಿಯನ್ನು ಹಂಚಿಕೊಂಡಿದ್ದಾರೆ"</string>
-    <string name="video_status" msgid="4548544654316843225">"ವೀಕ್ಷಿಸುತ್ತಿರುವವರು"</string>
+    <string name="video_status" msgid="4548544654316843225">"ವೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="audio_status" msgid="4237055636967709208">"ಆಲಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="game_status" msgid="1340694320630973259">"ಪ್ಲೇ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"ಸ್ನೇಹಿತರು"</string>

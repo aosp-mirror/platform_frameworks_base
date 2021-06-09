@@ -653,13 +653,20 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
 
         if (params.isStaged && !isCalledBySystemOrShell(callingUid)) {
-            if (mBypassNextStagedInstallerCheck) {
-                mBypassNextStagedInstallerCheck = false;
-            } else if (!isStagedInstallerAllowed(requestedInstallerPackageName)) {
+            if (!mBypassNextStagedInstallerCheck
+                    && !isStagedInstallerAllowed(requestedInstallerPackageName)) {
                 throw new SecurityException("Installer not allowed to commit staged install");
             }
         }
+        if (isApex && !isCalledBySystemOrShell(callingUid)) {
+            if (!mBypassNextStagedInstallerCheck
+                    && !isStagedInstallerAllowed(requestedInstallerPackageName)) {
+                throw new SecurityException(
+                        "Installer not allowed to commit non-staged APEX install");
+            }
+        }
 
+        mBypassNextStagedInstallerCheck = false;
         if (!params.isMultiPackage) {
             // Only system components can circumvent runtime permissions when installing.
             if ((params.installFlags & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0

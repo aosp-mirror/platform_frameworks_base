@@ -62,7 +62,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     private boolean mQsExpanded;
     private boolean mFaceDetectRunning;
     private boolean mHintShown;
-    private boolean mTransitioningFromHome;
     private int mStatusBarState;
 
     /**
@@ -112,11 +111,11 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mStatusBarState = mStatusBarStateController.getState();
         mQsExpanded = mKeyguardViewManager.isQsExpanded();
         mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
+        mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
         updateAlpha();
         updatePauseAuth();
 
         mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
-        mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
     }
 
     @Override
@@ -127,7 +126,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
         mStatusBarStateController.removeCallback(mStateListener);
         mKeyguardViewManager.removeAlternateAuthInterceptor(mAlternateAuthInterceptor);
-        mTransitioningFromHome = false;
         mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
 
         if (mCancelDelayedHintRunnable != null) {
@@ -141,7 +139,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         super.dump(fd, pw, args);
         pw.println("mShowingUdfpsBouncer=" + mShowingUdfpsBouncer);
         pw.println("mFaceDetectRunning=" + mFaceDetectRunning);
-        pw.println("mTransitioningFromHomeToKeyguard=" + mTransitioningFromHome);
         pw.println("mStatusBarState=" + StatusBarState.toShortString(mStatusBarState));
         pw.println("mQsExpanded=" + mQsExpanded);
         pw.println("mIsBouncerVisible=" + mIsBouncerVisible);
@@ -192,10 +189,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         }
 
         if (mStatusBarState != KEYGUARD) {
-            return true;
-        }
-
-        if (mTransitioningFromHome && mKeyguardViewMediator.isAnimatingScreenOff()) {
             return true;
         }
 
@@ -277,17 +270,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         public void onDozeAmountChanged(float linear, float eased) {
             if (linear != 0) showUdfpsBouncer(false);
             mView.onDozeAmountChanged(linear, eased);
-            if (linear == 1f) {
-                // transition has finished
-                mTransitioningFromHome = false;
-            }
-            updatePauseAuth();
-        }
-
-        @Override
-        public void onStatePreChange(int oldState, int newState) {
-            mTransitioningFromHome = oldState == StatusBarState.SHADE
-                    && newState == StatusBarState.KEYGUARD;
             updatePauseAuth();
         }
 

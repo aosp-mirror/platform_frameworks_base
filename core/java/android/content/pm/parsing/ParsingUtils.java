@@ -35,6 +35,11 @@ public class ParsingUtils {
 
     public static final String TAG = "PackageParsing";
 
+    public static final String ANDROID_RES_NAMESPACE = "http://schemas.android.com/apk/res/android";
+
+    public static final int DEFAULT_MIN_SDK_VERSION = 1;
+    public static final int DEFAULT_TARGET_SDK_VERSION = 0;
+
     @Nullable
     public static String buildClassName(String pkg, CharSequence clsSeq) {
         if (clsSeq == null || clsSeq.length() <= 0) {

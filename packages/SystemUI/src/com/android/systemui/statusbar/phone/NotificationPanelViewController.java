@@ -2233,6 +2233,7 @@ public class NotificationPanelViewController extends PanelViewController {
             left = 0;
             right = getView().getRight() + mDisplayRightInset;
         } else if (qsPanelBottomY > 0) { // so bounds are empty on lockscreen
+            mAmbientState.setNotificationScrimTop(mSplitShadeNotificationsTopPadding);
             top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
             bottom = mNotificationStackScrollLayoutController.getHeight();
             left = mNotificationStackScrollLayoutController.getLeft();
@@ -4151,11 +4152,6 @@ public class NotificationPanelViewController extends PanelViewController {
                         entry.getHeadsUpAnimationView(), false);
                 entry.setHeadsUpIsVisible();
             }
-        }
-
-        @Override
-        public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-            mNotificationStackScrollLayoutController.generateHeadsUpAnimation(entry, isHeadsUp);
         }
     }
 
