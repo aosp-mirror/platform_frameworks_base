@@ -18,6 +18,7 @@ package com.android.server.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+import static android.hardware.biometrics.BiometricPrompt.DISMISSED_REASON_NEGATIVE;
 
 import static com.android.server.biometrics.BiometricServiceStateProto.*;
 
@@ -38,7 +39,6 @@ import android.annotation.NonNull;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.Context;
-import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricAuthenticator;
@@ -67,6 +67,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 @Presubmit
 @SmallTest
@@ -245,9 +246,6 @@ public class AuthSessionTest {
             assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
             assertEquals(BiometricSensor.STATE_COOKIE_RETURNED,
                     session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getSensorState());
-            session.onErrorReceived(fingerprintSensorId,
-                    session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getCookie(),
-                    BiometricConstants.BIOMETRIC_ERROR_VENDOR, 0 /* vendorCode */);
             session.onStartFingerprint();
         }
         assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
@@ -258,6 +256,21 @@ public class AuthSessionTest {
     @Test
     public void testCancelAuthentication_whenStateAuthCalled_invokesCancel()
             throws RemoteException {
+        testInvokesCancel(session -> session.onCancelAuthSession(false /* force */));
+    }
+
+    @Test
+    public void testCancelAuthentication_whenStateAuthForcedCalled_invokesCancel()
+            throws RemoteException {
+        testInvokesCancel(session -> session.onCancelAuthSession(true /* force */));
+    }
+
+    @Test
+    public void testCancelAuthentication_whenDialogDismissed() throws RemoteException {
+        testInvokesCancel(session -> session.onDialogDismissed(DISMISSED_REASON_NEGATIVE, null));
+    }
+
+    private void testInvokesCancel(Consumer<AuthSession> sessionConsumer) throws RemoteException {
         final IBiometricAuthenticator faceAuthenticator = mock(IBiometricAuthenticator.class);
 
         setupFace(0 /* id */, false /* confirmationAlwaysRequired */, faceAuthenticator);
@@ -269,7 +282,8 @@ public class AuthSessionTest {
 
         session.goToInitialState();
         assertEquals(STATE_AUTH_CALLED, session.getState());
-        session.onCancelAuthSession(false /* force */);
+
+        sessionConsumer.accept(session);
 
         verify(faceAuthenticator).cancelAuthenticationFromService(eq(mToken), eq(TEST_PACKAGE));
     }
