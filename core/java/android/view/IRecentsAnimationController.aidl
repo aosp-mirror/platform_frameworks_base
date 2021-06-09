@@ -154,4 +154,13 @@ interface IRecentsAnimationController {
      *                      app.
      */
     void detachNavigationBarFromApp(boolean moveHomeToTop);
+
+    /**
+     * Used for animating the navigation bar during app launch from recents in live tile mode.
+     *
+     * First fade out the navigation bar at the bottom of the display and then fade in to the app.
+     *
+     * @param duration the duration of the app launch animation
+     */
+    void animateNavigationBarToApp(long duration);
 }
