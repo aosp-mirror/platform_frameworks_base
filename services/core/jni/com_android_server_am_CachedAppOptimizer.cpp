@@ -86,7 +86,7 @@ static int compactMemory(const std::vector<Vma>& vmas, int pid, int madviseType)
 
     int pidfd = syscall(__NR_pidfd_open, pid, 0);
     err = -errno;
-    if (err < 0) {
+    if (pidfd < 0) {
         // Skip compaction if failed to open pidfd with any error
         return err;
     }
