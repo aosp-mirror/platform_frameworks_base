@@ -290,27 +290,6 @@ public class BubbleExpandedView extends LinearLayout {
         applyThemeAttrs();
 
         setClipToPadding(false);
-        setOnTouchListener((view, motionEvent) -> {
-            if (mTaskView == null) {
-                return false;
-            }
-
-            final Rect avBounds = new Rect();
-            mTaskView.getBoundsOnScreen(avBounds);
-
-            // Consume and ignore events on the expanded view padding that are within the
-            // ActivityView's vertical bounds. These events are part of a back gesture, and so they
-            // should not collapse the stack (which all other touches on areas around the AV would
-            // do).
-            if (motionEvent.getRawY() >= avBounds.top
-                            && motionEvent.getRawY() <= avBounds.bottom
-                            && (motionEvent.getRawX() < avBounds.left
-                                || motionEvent.getRawX() > avBounds.right)) {
-                return true;
-            }
-
-            return false;
-        });
 
         // BubbleStackView is forced LTR, but we want to respect the locale for expanded view layout
         // so the Manage button appears on the right.
