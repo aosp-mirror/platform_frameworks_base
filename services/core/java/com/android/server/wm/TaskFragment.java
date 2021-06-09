@@ -28,6 +28,10 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
+import static com.android.server.wm.ActivityRecord.State.PAUSED;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
@@ -38,10 +42,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_USER_
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.wm.Task.ActivityState.PAUSED;
-import static com.android.server.wm.Task.ActivityState.PAUSING;
-import static com.android.server.wm.Task.ActivityState.RESUMED;
-import static com.android.server.wm.Task.ActivityState.STOPPING;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -270,12 +270,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     /**
      * This should be called when an child activity changes state. This should only
      * be called from
-     * {@link ActivityRecord#setState(Task.ActivityState, String)} .
+     * {@link ActivityRecord#setState(ActivityRecord.State, String)} .
      * @param record The {@link ActivityRecord} whose state has changed.
      * @param state The new state.
      * @param reason The reason for the change.
      */
-    void onActivityStateChanged(ActivityRecord record, Task.ActivityState state, String reason) {
+    void onActivityStateChanged(ActivityRecord record, ActivityRecord.State state,
+            String reason) {
         warnForNonLeafTaskFragment("onActivityStateChanged");
         if (record == mResumedActivity && state != RESUMED) {
             setResumedActivity(null, reason + " - onActivityStateChanged");
@@ -853,7 +854,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             ActivityRecord lastResumedActivity =
                     lastFocusedRootTask == null ? null
                             : lastFocusedRootTask.getTopResumedActivity();
-            final Task.ActivityState lastState = next.getState();
+            final ActivityRecord.State lastState = next.getState();
 
             mAtmService.updateCpuStats();
 

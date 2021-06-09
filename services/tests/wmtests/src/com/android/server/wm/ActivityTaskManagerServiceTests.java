@@ -24,6 +24,10 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.ActivityRecord.State.PAUSED;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -242,7 +246,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 .setTask(mRootWindowContainer.getDefaultTaskDisplayArea().getOrCreateRootHomeTask())
                 .build();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        activity.setState(Task.ActivityState.RESUMED, "test");
+        activity.setState(RESUMED, "test");
         mSupervisor.endDeferResume();
 
         assertEquals(activity.app, mAtm.mInternal.getTopApp());
@@ -252,13 +256,13 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         activity.mVisibleRequested = false;
         activity.setVisible(false);
         activity.getTask().setPausingActivity(activity);
-        homeActivity.setState(Task.ActivityState.PAUSED, "test");
+        homeActivity.setState(PAUSED, "test");
 
         // Even the visibility states are invisible, the next activity should be resumed because
         // the crashed activity was pausing.
         mAtm.mInternal.handleAppDied(activity.app, false /* restarting */,
                 null /* finishInstrumentationCallback */);
-        assertEquals(Task.ActivityState.RESUMED, homeActivity.getState());
+        assertEquals(RESUMED, homeActivity.getState());
         assertEquals(homeActivity.app, mAtm.mInternal.getTopApp());
     }
 
@@ -269,7 +273,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         final Task rootHomeTask = mWm.mRoot.getDefaultTaskDisplayArea().getOrCreateRootHomeTask();
         final ActivityRecord homeActivity = new ActivityBuilder(mAtm).setTask(rootHomeTask).build();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        topActivity.setState(Task.ActivityState.RESUMED, "test");
+        topActivity.setState(RESUMED, "test");
 
         final Consumer<ActivityRecord> assertTopNonSleeping = activity -> {
             assertFalse(mAtm.mInternal.isSleeping());
@@ -285,7 +289,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         verify(mSupervisor.mGoingToSleepWakeLock).acquire();
         doReturn(true).when(mSupervisor.mGoingToSleepWakeLock).isHeld();
 
-        assertEquals(Task.ActivityState.PAUSING, topActivity.getState());
+        assertEquals(PAUSING, topActivity.getState());
         assertTrue(mAtm.mInternal.isSleeping());
         assertEquals(ActivityManager.PROCESS_STATE_TOP_SLEEPING,
                 mAtm.mInternal.getTopProcessState());
@@ -296,7 +300,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         final Task topRootTask = topActivity.getRootTask();
         doReturn(true).when(rootHomeTask).goToSleepIfPossible(anyBoolean());
         doReturn(true).when(topRootTask).goToSleepIfPossible(anyBoolean());
-        topActivity.setState(Task.ActivityState.STOPPING, "test");
+        topActivity.setState(STOPPING, "test");
         topActivity.activityStopped(null /* newIcicle */, null /* newPersistentState */,
                 null /* description */);
         verify(mSupervisor.mGoingToSleepWakeLock).release();

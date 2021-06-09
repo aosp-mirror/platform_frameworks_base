@@ -79,6 +79,11 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMA
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
+import static com.android.server.wm.ActivityRecord.State.INITIALIZING;
+import static com.android.server.wm.ActivityRecord.State.PAUSED;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STARTED;
 import static com.android.server.wm.ActivityRecord.TRANSFER_SPLASH_SCREEN_COPYING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -109,10 +114,6 @@ import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
-import static com.android.server.wm.Task.ActivityState.PAUSED;
-import static com.android.server.wm.Task.ActivityState.PAUSING;
-import static com.android.server.wm.Task.ActivityState.RESUMED;
-import static com.android.server.wm.Task.ActivityState.STARTED;
 import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
 import static com.android.server.wm.TaskProto.AFFINITY;
 import static com.android.server.wm.TaskProto.BOUNDS;
@@ -310,20 +311,6 @@ class Task extends TaskFragment {
     static final int REPARENT_KEEP_ROOT_TASK_AT_FRONT = 1;
     // Do not move the root task as a part of reparenting
     static final int REPARENT_LEAVE_ROOT_TASK_IN_PLACE = 2;
-
-    enum ActivityState {
-        INITIALIZING,
-        STARTED,
-        RESUMED,
-        PAUSING,
-        PAUSED,
-        STOPPING,
-        STOPPED,
-        FINISHING,
-        DESTROYING,
-        DESTROYED,
-        RESTARTING_PROCESS
-    }
 
     // The topmost Activity passed to convertToTranslucent(). When non-null it means we are
     // waiting for all Activities in mUndrawnActivitiesBelowTopTranslucent to be removed as they
@@ -4214,7 +4201,7 @@ class Task extends TaskFragment {
             // Increment the total number of non-finishing activities
             numActivities++;
 
-            if (top == null || (top.isState(ActivityState.INITIALIZING))) {
+            if (top == null || (top.isState(INITIALIZING))) {
                 top = r;
                 // Reset the number of running activities until we hit the first non-initializing
                 // activity

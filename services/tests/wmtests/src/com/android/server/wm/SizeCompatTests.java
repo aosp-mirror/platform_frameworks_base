@@ -40,8 +40,10 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STOPPED;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
-import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -128,7 +130,7 @@ public class SizeCompatTests extends WindowTestsBase {
         doNothing().when(mSupervisor).scheduleRestartTimeout(mActivity);
         mActivity.mVisibleRequested = true;
         mActivity.setSavedState(null /* savedState */);
-        mActivity.setState(Task.ActivityState.RESUMED, "testRestart");
+        mActivity.setState(RESUMED, "testRestart");
         prepareUnresizable(mActivity, 1.5f /* maxAspect */, SCREEN_ORIENTATION_UNSPECIFIED);
 
         final Rect originalOverrideBounds = new Rect(mActivity.getBounds());
@@ -136,7 +138,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // The visible activity should recompute configuration according to the last parent bounds.
         mAtm.mActivityClientController.restartActivityProcessIfVisible(mActivity.appToken);
 
-        assertEquals(Task.ActivityState.RESTARTING_PROCESS, mActivity.getState());
+        assertEquals(RESTARTING_PROCESS, mActivity.getState());
         assertNotEquals(originalOverrideBounds, mActivity.getBounds());
     }
 
@@ -578,7 +580,7 @@ public class SizeCompatTests extends WindowTestsBase {
     public void testHandleActivitySizeCompatModeChanged() {
         setUpDisplaySizeWithApp(1000, 2000);
         doReturn(true).when(mTask).isOrganized();
-        mActivity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatModeChanged");
+        mActivity.setState(RESUMED, "testHandleActivitySizeCompatModeChanged");
         prepareUnresizable(mActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
         assertFitted();
 
@@ -598,7 +600,7 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mVisibleRequested = true;
         mActivity.restartProcessIfVisible();
         // The full lifecycle isn't hooked up so manually set state to resumed
-        mActivity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatModeChanged");
+        mActivity.setState(RESUMED, "testHandleActivitySizeCompatModeChanged");
         mTask.mDisplayContent.handleActivitySizeCompatModeIfNeeded(mActivity);
 
         // Expect null token when switching to non-size-compat mode activity.
@@ -613,7 +615,7 @@ public class SizeCompatTests extends WindowTestsBase {
     public void testHandleActivitySizeCompatModeChangedOnDifferentTask() {
         setUpDisplaySizeWithApp(1000, 2000);
         doReturn(true).when(mTask).isOrganized();
-        mActivity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatModeChanged");
+        mActivity.setState(RESUMED, "testHandleActivitySizeCompatModeChanged");
         prepareUnresizable(mActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
         assertFitted();
 
@@ -633,7 +635,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 .setCreateActivity(true).build();
         final ActivityRecord secondActivity = secondTask.getTopNonFinishingActivity();
         doReturn(true).when(secondTask).isOrganized();
-        secondActivity.setState(Task.ActivityState.RESUMED,
+        secondActivity.setState(RESUMED,
                 "testHandleActivitySizeCompatModeChanged");
         prepareUnresizable(secondActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
 
