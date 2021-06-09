@@ -77,6 +77,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 @LargeTest
 @RunWith(AndroidTestingRunner.class)
 public class WindowMagnificationControllerTest extends SysuiTestCase {
@@ -149,6 +151,19 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         verify(mWindowMagnifierCallback,
                 timeout(LAYOUT_CHANGE_TIMEOUT_MS).atLeastOnce()).onWindowMagnifierBoundsChanged(
                 eq(mContext.getDisplayId()), any(Rect.class));
+    }
+
+    @Test
+    public void enableWindowMagnification_systemGestureExclusionRectsIsSet() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+        // Wait for Rects updated.
+        waitForIdleSync();
+
+        List<Rect> rects = mWindowManager.getAttachedView().getSystemGestureExclusionRects();
+        assertFalse(rects.isEmpty());
     }
 
     @Test
