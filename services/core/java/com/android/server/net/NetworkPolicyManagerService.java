@@ -1155,8 +1155,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setContentText(body);
                 builder.setDefaults(Notification.DEFAULT_ALL);
                 builder.setChannelId(SystemNotificationChannels.NETWORK_ALERTS);
-
-                final Intent snoozeIntent = buildSnoozeWarningIntent(policy.template);
+                final Intent snoozeIntent = buildSnoozeWarningIntent(policy.template,
+                        mContext.getPackageName());
                 builder.setDeleteIntent(PendingIntent.getBroadcast(
                         mContext, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT));
 
@@ -4243,9 +4243,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return new Intent(ACTION_ALLOW_BACKGROUND);
     }
 
-    private static Intent buildSnoozeWarningIntent(NetworkTemplate template) {
+    private static Intent buildSnoozeWarningIntent(NetworkTemplate template, String targetPackage) {
         final Intent intent = new Intent(ACTION_SNOOZE_WARNING);
         intent.putExtra(EXTRA_NETWORK_TEMPLATE, template);
+        intent.setPackage(targetPackage);
         return intent;
     }
 
