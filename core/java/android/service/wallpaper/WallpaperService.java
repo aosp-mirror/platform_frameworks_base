@@ -1511,9 +1511,12 @@ public abstract class WallpaperService extends Service {
         void updatePage(EngineWindowPage currentPage, int pageIndx, int numPages,
                 float xOffsetStep) {
             // to save creating a runnable, check twice
-            long current = System.nanoTime() / 1_000_000;
+            long current = SystemClock.elapsedRealtime();
             long lapsed = current - currentPage.getLastUpdateTime();
-            if (lapsed < DEFAULT_UPDATE_SCREENSHOT_DURATION) {
+            // Always update the page when the last update time is <= 0
+            // This is important especially when the device first boots
+            if (lapsed < DEFAULT_UPDATE_SCREENSHOT_DURATION
+                    && currentPage.getLastUpdateTime() > 0) {
                 return;
             }
             Surface surface = mSurfaceHolder.getSurface();
