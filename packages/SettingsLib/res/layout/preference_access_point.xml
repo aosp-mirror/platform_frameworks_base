@@ -64,7 +64,7 @@
                 android:id="@android:id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
+                android:maxLines="2"
                 android:textAppearance="?android:attr/textAppearanceListItem"
                 android:ellipsize="marquee" />
 
