@@ -28,6 +28,7 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import com.android.server.appsearch.external.localstorage.AppSearchLogger;
+import com.android.server.appsearch.external.localstorage.FrameworkOptimizeStrategy;
 
 import java.io.File;
 import java.util.Map;
@@ -172,6 +173,10 @@ public final class ImplInstanceManager {
             @Nullable AppSearchLogger logger)
             throws AppSearchException {
         File appSearchDir = getAppSearchDir(userHandle);
-        return AppSearchImpl.create(appSearchDir, userContext, /*logger=*/ null);
+        return AppSearchImpl.create(
+                appSearchDir,
+                userContext,
+                /*logger=*/ null,
+                new FrameworkOptimizeStrategy());
     }
 }

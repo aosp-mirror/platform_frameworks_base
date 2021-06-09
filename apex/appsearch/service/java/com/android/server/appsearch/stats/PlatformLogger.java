@@ -192,9 +192,8 @@ public final class PlatformLogger implements AppSearchLogger {
     @GuardedBy("mLock")
     private void logStatsImplLocked(@NonNull CallStats stats) {
         mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
-        ExtraStats extraStats = createExtraStatsLocked(stats.getGeneralStats().getPackageName(),
-                stats.getCallType());
-        String database = stats.getGeneralStats().getDatabase();
+        ExtraStats extraStats = createExtraStatsLocked(stats.getPackageName(), stats.getCallType());
+        String database = stats.getDatabase();
         try {
             int hashCodeForDatabase = calculateHashCodeMd5(database);
             AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_CALL_STATS_REPORTED,
@@ -202,8 +201,8 @@ public final class PlatformLogger implements AppSearchLogger {
                     extraStats.mSkippedSampleCount,
                     extraStats.mPackageUid,
                     hashCodeForDatabase,
-                    stats.getGeneralStats().getStatusCode(),
-                    stats.getGeneralStats().getTotalLatencyMillis(),
+                    stats.getStatusCode(),
+                    stats.getTotalLatencyMillis(),
                     stats.getCallType(),
                     stats.getEstimatedBinderLatencyMillis(),
                     stats.getNumOperationsSucceeded(),
@@ -224,9 +223,9 @@ public final class PlatformLogger implements AppSearchLogger {
     @GuardedBy("mLock")
     private void logStatsImplLocked(@NonNull PutDocumentStats stats) {
         mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
-        ExtraStats extraStats = createExtraStatsLocked(stats.getGeneralStats().getPackageName(),
-                CallStats.CALL_TYPE_PUT_DOCUMENT);
-        String database = stats.getGeneralStats().getDatabase();
+        ExtraStats extraStats = createExtraStatsLocked(
+                stats.getPackageName(), CallStats.CALL_TYPE_PUT_DOCUMENT);
+        String database = stats.getDatabase();
         try {
             int hashCodeForDatabase = calculateHashCodeMd5(database);
             AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_PUT_DOCUMENT_STATS_REPORTED,
@@ -234,8 +233,8 @@ public final class PlatformLogger implements AppSearchLogger {
                     extraStats.mSkippedSampleCount,
                     extraStats.mPackageUid,
                     hashCodeForDatabase,
-                    stats.getGeneralStats().getStatusCode(),
-                    stats.getGeneralStats().getTotalLatencyMillis(),
+                    stats.getStatusCode(),
+                    stats.getTotalLatencyMillis(),
                     stats.getGenerateDocumentProtoLatencyMillis(),
                     stats.getRewriteDocumentTypesLatencyMillis(),
                     stats.getNativeLatencyMillis(),

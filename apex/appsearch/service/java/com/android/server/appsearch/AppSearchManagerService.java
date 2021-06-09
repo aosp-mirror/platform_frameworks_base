@@ -348,19 +348,19 @@ public class AppSearchManagerService extends SystemService {
                                 2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
                         int totalLatencyMillis =
                                 (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
-                        CallStats.Builder cBuilder = new CallStats.Builder(packageName,
-                                databaseName)
+                        logger.logStats(new CallStats.Builder()
+                                .setPackageName(packageName)
+                                .setDatabase(databaseName)
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis)
                                 .setCallType(CallStats.CALL_TYPE_SET_SCHEMA)
                                 // TODO(b/173532925) check the existing binder call latency chart
                                 // is good enough for us:
                                 // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
                                 .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
                                 .setNumOperationsSucceeded(operationSuccessCount)
-                                .setNumOperationsFailed(operationFailureCount);
-                        cBuilder.getGeneralStatsBuilder()
-                                .setStatusCode(statusCode)
-                                .setTotalLatencyMillis(totalLatencyMillis);
-                        logger.logStats(cBuilder.build());
+                                .setNumOperationsFailed(operationFailureCount)
+                                .build());
                     }
                 }
             });
@@ -480,19 +480,19 @@ public class AppSearchManagerService extends SystemService {
                                 2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
                         int totalLatencyMillis =
                                 (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
-                        CallStats.Builder cBuilder = new CallStats.Builder(packageName,
-                                databaseName)
+                        logger.logStats(new CallStats.Builder()
+                                .setPackageName(packageName)
+                                .setDatabase(databaseName)
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis)
                                 .setCallType(CallStats.CALL_TYPE_PUT_DOCUMENTS)
                                 // TODO(b/173532925) check the existing binder call latency chart
                                 // is good enough for us:
                                 // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
                                 .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
                                 .setNumOperationsSucceeded(operationSuccessCount)
-                                .setNumOperationsFailed(operationFailureCount);
-                        cBuilder.getGeneralStatsBuilder()
-                                .setStatusCode(statusCode)
-                                .setTotalLatencyMillis(totalLatencyMillis);
-                        logger.logStats(cBuilder.build());
+                                .setNumOperationsFailed(operationFailureCount)
+                                .build());
                     }
                 }
             });
@@ -563,19 +563,19 @@ public class AppSearchManagerService extends SystemService {
                                 2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
                         int totalLatencyMillis =
                                 (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
-                        CallStats.Builder cBuilder = new CallStats.Builder(packageName,
-                                databaseName)
+                        logger.logStats(new CallStats.Builder()
+                                .setPackageName(packageName)
+                                .setDatabase(databaseName)
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis)
                                 .setCallType(CallStats.CALL_TYPE_GET_DOCUMENTS)
                                 // TODO(b/173532925) check the existing binder call latency chart
                                 // is good enough for us:
                                 // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
                                 .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
                                 .setNumOperationsSucceeded(operationSuccessCount)
-                                .setNumOperationsFailed(operationFailureCount);
-                        cBuilder.getGeneralStatsBuilder()
-                                .setStatusCode(statusCode)
-                                .setTotalLatencyMillis(totalLatencyMillis);
-                        logger.logStats(cBuilder.build());
+                                .setNumOperationsFailed(operationFailureCount)
+                                .build());
                     }
                 }
             });
@@ -631,19 +631,19 @@ public class AppSearchManagerService extends SystemService {
                                 2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
                         int totalLatencyMillis =
                                 (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
-                        CallStats.Builder cBuilder = new CallStats.Builder(packageName,
-                                databaseName)
+                        logger.logStats(new CallStats.Builder()
+                                .setPackageName(packageName)
+                                .setDatabase(databaseName)
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis)
                                 .setCallType(CallStats.CALL_TYPE_SEARCH)
                                 // TODO(b/173532925) check the existing binder call latency chart
                                 // is good enough for us:
                                 // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
                                 .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
                                 .setNumOperationsSucceeded(operationSuccessCount)
-                                .setNumOperationsFailed(operationFailureCount);
-                        cBuilder.getGeneralStatsBuilder()
-                                .setStatusCode(statusCode)
-                                .setTotalLatencyMillis(totalLatencyMillis);
-                        logger.logStats(cBuilder.build());
+                                .setNumOperationsFailed(operationFailureCount)
+                                .build());
                     }
                 }
             });
@@ -697,20 +697,18 @@ public class AppSearchManagerService extends SystemService {
                                 2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
                         int totalLatencyMillis =
                                 (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
-                        // TODO(b/173532925) database would be nulluable once we remove generalStats
-                        CallStats.Builder cBuilder = new CallStats.Builder(packageName,
-                                /*database=*/ "")
+                        logger.logStats(new CallStats.Builder()
+                                .setPackageName(packageName)
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis)
                                 .setCallType(CallStats.CALL_TYPE_GLOBAL_SEARCH)
                                 // TODO(b/173532925) check the existing binder call latency chart
                                 // is good enough for us:
                                 // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
                                 .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
                                 .setNumOperationsSucceeded(operationSuccessCount)
-                                .setNumOperationsFailed(operationFailureCount);
-                        cBuilder.getGeneralStatsBuilder()
-                                .setStatusCode(statusCode)
-                                .setTotalLatencyMillis(totalLatencyMillis);
-                        logger.logStats(cBuilder.build());
+                                .setNumOperationsFailed(operationFailureCount)
+                                .build());
                     }
                 }
             });
@@ -965,19 +963,19 @@ public class AppSearchManagerService extends SystemService {
                                 2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
                         int totalLatencyMillis =
                                 (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
-                        CallStats.Builder cBuilder = new CallStats.Builder(packageName,
-                                databaseName)
+                        logger.logStats(new CallStats.Builder()
+                                .setPackageName(packageName)
+                                .setDatabase(databaseName)
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis)
                                 .setCallType(CallStats.CALL_TYPE_REMOVE_DOCUMENTS_BY_ID)
                                 // TODO(b/173532925) check the existing binder call latency chart
                                 // is good enough for us:
                                 // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
                                 .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
                                 .setNumOperationsSucceeded(operationSuccessCount)
-                                .setNumOperationsFailed(operationFailureCount);
-                        cBuilder.getGeneralStatsBuilder()
-                                .setStatusCode(statusCode)
-                                .setTotalLatencyMillis(totalLatencyMillis);
-                        logger.logStats(cBuilder.build());
+                                .setNumOperationsFailed(operationFailureCount)
+                                .build());
                     }
                 }
             });
@@ -1033,19 +1031,19 @@ public class AppSearchManagerService extends SystemService {
                                 2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
                         int totalLatencyMillis =
                                 (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
-                        CallStats.Builder cBuilder = new CallStats.Builder(packageName,
-                                databaseName)
+                        logger.logStats(new CallStats.Builder()
+                                .setPackageName(packageName)
+                                .setDatabase(databaseName)
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis)
                                 .setCallType(CallStats.CALL_TYPE_REMOVE_DOCUMENTS_BY_SEARCH)
                                 // TODO(b/173532925) check the existing binder call latency chart
                                 // is good enough for us:
                                 // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
                                 .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
                                 .setNumOperationsSucceeded(operationSuccessCount)
-                                .setNumOperationsFailed(operationFailureCount);
-                        cBuilder.getGeneralStatsBuilder()
-                                .setStatusCode(statusCode)
-                                .setTotalLatencyMillis(totalLatencyMillis);
-                        logger.logStats(cBuilder.build());
+                                .setNumOperationsFailed(operationFailureCount)
+                                .build());
                     }
                 }
             });
@@ -1110,19 +1108,17 @@ public class AppSearchManagerService extends SystemService {
                                 2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
                         int totalLatencyMillis =
                                 (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
-                        CallStats.Builder cBuilder = new CallStats.Builder(/*packageName=*/ "",
-                                /*databaseName=*/ "")
+                        logger.logStats(new CallStats.Builder()
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis)
                                 .setCallType(CallStats.CALL_TYPE_FLUSH)
                                 // TODO(b/173532925) check the existing binder call latency chart
                                 // is good enough for us:
                                 // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
                                 .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
                                 .setNumOperationsSucceeded(operationSuccessCount)
-                                .setNumOperationsFailed(operationFailureCount);
-                        cBuilder.getGeneralStatsBuilder()
-                                .setStatusCode(statusCode)
-                                .setTotalLatencyMillis(totalLatencyMillis);
-                        logger.logStats(cBuilder.build());
+                                .setNumOperationsFailed(operationFailureCount)
+                                .build());
                     }
                 }
             });
@@ -1162,21 +1158,17 @@ public class AppSearchManagerService extends SystemService {
                                 2 * (int) (totalLatencyStartTimeMillis - binderCallStartTimeMillis);
                         int totalLatencyMillis =
                                 (int) (SystemClock.elapsedRealtime() - totalLatencyStartTimeMillis);
-                        // TODO(b/173532925) make packageName and database nullable after
-                        //  removing generalStats
-                        CallStats.Builder cBuilder = new CallStats.Builder(/*packageName=*/"",
-                                /*database=*/ "")
+                        logger.logStats(new CallStats.Builder()
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(totalLatencyMillis)
                                 .setCallType(CallStats.CALL_TYPE_INITIALIZE)
                                 // TODO(b/173532925) check the existing binder call latency chart
                                 // is good enough for us:
                                 // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
                                 .setEstimatedBinderLatencyMillis(estimatedBinderLatencyMillis)
                                 .setNumOperationsSucceeded(operationSuccessCount)
-                                .setNumOperationsFailed(operationFailureCount);
-                        cBuilder.getGeneralStatsBuilder()
-                                .setStatusCode(statusCode)
-                                .setTotalLatencyMillis(totalLatencyMillis);
-                        logger.logStats(cBuilder.build());
+                                .setNumOperationsFailed(operationFailureCount)
+                                .build());
                     }
                 }
             });
