@@ -80,20 +80,22 @@ public final class CachedAppOptimizer {
 
     // Phenotype sends int configurations and we map them to the strings we'll use on device,
     // preventing a weird string value entering the kernel.
+    private static final int COMPACT_ACTION_NONE = 0;
+    private static final int COMPACT_ACTION_FILE = 1;
+    private static final int COMPACT_ACTION_ANON = 2;
+    private static final int COMPACT_ACTION_FULL = 3;
+
+    private static final String COMPACT_ACTION_STRING[] = {"", "file", "anon", "all"};
+
+    // Keeps these flags in sync with services/core/jni/com_android_server_am_CachedAppOptimizer.cpp
     private static final int COMPACT_ACTION_FILE_FLAG = 1;
     private static final int COMPACT_ACTION_ANON_FLAG = 2;
-    private static final int COMPACT_ACTION_FULL_FLAG = 3;
-    private static final int COMPACT_ACTION_NONE_FLAG = 4;
-    private static final String COMPACT_ACTION_NONE = "";
-    private static final String COMPACT_ACTION_FILE = "file";
-    private static final String COMPACT_ACTION_ANON = "anon";
-    private static final String COMPACT_ACTION_FULL = "all";
 
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = false;
     @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = false;
-    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_1 = COMPACT_ACTION_FILE_FLAG;
-    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_2 = COMPACT_ACTION_FULL_FLAG;
+    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_1 = COMPACT_ACTION_FILE;
+    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_2 = COMPACT_ACTION_FULL;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_1 = 5_000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_2 = 10_000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_3 = 500;
@@ -406,6 +408,14 @@ public final class CachedAppOptimizer {
     private native void compactSystem();
 
     /**
+     * Compacts a process or app
+     * @param pid pid of process to compact
+     * @param compactionFlags selects the compaction type as defined by COMPACT_ACTION_{TYPE}_FLAG
+     *         constants
+     */
+    static private native void compactProcess(int pid, int compactionFlags);
+
+    /**
      * Reads the flag value from DeviceConfig to determine whether app compaction
      * should be enabled, and starts the freeze/compaction thread if needed.
      */
@@ -706,18 +716,11 @@ public final class CachedAppOptimizer {
 
     @VisibleForTesting
     static String compactActionIntToString(int action) {
-        switch(action) {
-            case COMPACT_ACTION_NONE_FLAG:
-                return COMPACT_ACTION_NONE;
-            case COMPACT_ACTION_FILE_FLAG:
-                return COMPACT_ACTION_FILE;
-            case COMPACT_ACTION_ANON_FLAG:
-                return COMPACT_ACTION_ANON;
-            case COMPACT_ACTION_FULL_FLAG:
-                return COMPACT_ACTION_FULL;
-            default:
-                return COMPACT_ACTION_NONE;
+        if (action < 0 || action >= COMPACT_ACTION_STRING.length) {
+            return "";
         }
+
+        return COMPACT_ACTION_STRING[action];
     }
 
     // This will ensure app will be out of the freezer for at least FREEZE_TIMEOUT_MS
@@ -950,11 +953,11 @@ public final class CachedAppOptimizer {
                             action = mCompactActionFull;
                             break;
                         default:
-                            action = COMPACT_ACTION_NONE;
+                            action = COMPACT_ACTION_STRING[COMPACT_ACTION_NONE];
                             break;
                     }
 
-                    if (COMPACT_ACTION_NONE.equals(action)) {
+                    if (COMPACT_ACTION_STRING[COMPACT_ACTION_NONE].equals(action)) {
                         return;
                     }
 
@@ -978,7 +981,8 @@ public final class CachedAppOptimizer {
                         return;
                     }
 
-                    if (action.equals(COMPACT_ACTION_FULL) || action.equals(COMPACT_ACTION_ANON)) {
+                    if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FULL])
+                            || action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_ANON])) {
                         if (mFullAnonRssThrottleKb > 0L
                                 && anonRssBefore < mFullAnonRssThrottleKb) {
                             if (DEBUG_COMPACTION) {
@@ -1054,8 +1058,8 @@ public final class CachedAppOptimizer {
                             proc.lastCompactTime = end;
                             proc.lastCompactAction = pendingAction;
                         }
-                        if (action.equals(COMPACT_ACTION_FULL)
-                                || action.equals(COMPACT_ACTION_ANON)) {
+                        if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FULL])
+                                || action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_ANON])) {
                             // Remove entry and insert again to update insertion order.
                             mLastCompactionStats.remove(pid);
                             mLastCompactionStats.put(pid, new LastCompactionStats(rssAfter));
@@ -1197,8 +1201,12 @@ public final class CachedAppOptimizer {
         // Compact process.
         @Override
         public void performCompaction(String action, int pid) throws IOException {
-            try (FileOutputStream fos = new FileOutputStream("/proc/" + pid + "/reclaim")) {
-                fos.write(action.getBytes());
+            if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FULL])) {
+                compactProcess(pid, COMPACT_ACTION_FILE_FLAG | COMPACT_ACTION_ANON_FLAG);
+            } else if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FILE])) {
+                compactProcess(pid, COMPACT_ACTION_FILE_FLAG);
+            } else if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_ANON])) {
+                compactProcess(pid, COMPACT_ACTION_ANON_FLAG);
             }
         }
     }
