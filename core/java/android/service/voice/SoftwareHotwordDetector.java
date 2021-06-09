@@ -147,8 +147,9 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         }
 
         @Override
-        public void onKeyphraseDetected(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent)
-                throws RemoteException {
+        public void onKeyphraseDetected(
+                SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
+                HotwordDetectedResult result) {
 
         }
 
