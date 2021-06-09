@@ -29,6 +29,7 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.appsearch.AppSearchConfig;
 import com.android.server.appsearch.external.localstorage.AppSearchLogger;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
@@ -60,15 +61,15 @@ public final class PlatformLogger implements AppSearchLogger {
     // User we're logging for.
     private final UserHandle mUserHandle;
 
-    // Configuration for the logger
-    private final Config mConfig;
+    // Manager holding the configuration flags
+    private final AppSearchConfig mConfig;
 
     private final Random mRng = new Random();
     private final Object mLock = new Object();
 
     /**
      * SparseArray to track how many stats we skipped due to
-     * {@link Config#mMinTimeIntervalBetweenSamplesMillis}.
+     * {@link AppSearchConfig#getCachedMinTimeIntervalBetweenSamplesMillis()}.
      *
      * <p> We can have correct extrapolated number by adding those counts back when we log
      * the same type of stats next time. E.g. the true count of an event could be estimated as:
@@ -98,53 +99,6 @@ public final class PlatformLogger implements AppSearchLogger {
     private long mLastPushTimeMillisLocked = 0;
 
     /**
-     * Class to configure the {@link PlatformLogger}
-     */
-    public static final class Config {
-        // Minimum time interval (in millis) since last message logged to Westworld before
-        // logging again.
-        private final long mMinTimeIntervalBetweenSamplesMillis;
-
-        // Default sampling interval for all types of stats
-        private final int mDefaultSamplingInterval;
-
-        /**
-         * Sampling intervals for different types of stats
-         *
-         * <p>This SparseArray is passed by client and is READ-ONLY. The key to that SparseArray is
-         * {@link CallStats.CallType}
-         *
-         * <p>If sampling interval is missing for certain stats type,
-         * {@link Config#mDefaultSamplingInterval} will be used.
-         *
-         * <p>E.g. sampling interval=10 means that one out of every 10 stats was logged. If sampling
-         * interval is 1, we will log each sample and it acts as if the sampling is disabled.
-         */
-        @NonNull
-        private final SparseIntArray mSamplingIntervals;
-
-        /**
-         * Configuration for {@link PlatformLogger}
-         *
-         * @param minTimeIntervalBetweenSamplesMillis minimum time interval apart in Milliseconds
-         *                                            required for two consecutive stats logged
-         * @param defaultSamplingInterval             default sampling interval
-         * @param samplingIntervals                   SparseArray to customize sampling interval for
-         *                                            different stat types
-         */
-        public Config(long minTimeIntervalBetweenSamplesMillis,
-                int defaultSamplingInterval,
-                @NonNull SparseIntArray samplingIntervals) {
-            // TODO(b/173532925) Probably we can get rid of those three after we have p/h flags
-            // for them.
-            // e.g. we can just call DeviceConfig.get(SAMPLING_INTERVAL_FOR_PUT_DOCUMENTS).
-            mMinTimeIntervalBetweenSamplesMillis = minTimeIntervalBetweenSamplesMillis;
-            mDefaultSamplingInterval = defaultSamplingInterval;
-            mSamplingIntervals = samplingIntervals;
-        }
-    }
-
-    /**
      * Helper class to hold platform specific stats for Westworld.
      */
     static final class ExtraStats {
@@ -166,7 +120,8 @@ public final class PlatformLogger implements AppSearchLogger {
      * Westworld constructor
      */
     public PlatformLogger(
-            @NonNull Context context, @NonNull UserHandle userHandle, @NonNull Config config) {
+            @NonNull Context context, @NonNull UserHandle userHandle,
+            @NonNull AppSearchConfig config) {
         mContext = Objects.requireNonNull(context);
         mUserHandle = Objects.requireNonNull(userHandle);
         mConfig = Objects.requireNonNull(config);
@@ -430,9 +385,12 @@ public final class PlatformLogger implements AppSearchLogger {
             packageUid = getPackageUidAsUserLocked(packageName);
         }
 
-        int samplingInterval = mConfig.mSamplingIntervals.get(callType,
-                mConfig.mDefaultSamplingInterval);
-
+        // The sampling ratio here might be different from the one used in
+        // shouldLogForTypeLocked if there is a config change in the middle.
+        // Since it is only one sample, we can just ignore this difference.
+        // Or we can retrieve samplingRatio at beginning and pass along
+        // as function parameter, but it will make code less cleaner with some duplication.
+        int samplingInterval = getSamplingIntervalFromConfig(callType);
         int skippedSampleCount = mSkippedSampleCountLocked.get(callType,
                 /*valueOfKeyIfNotFound=*/ 0);
         mSkippedSampleCountLocked.put(callType, 0);
@@ -452,9 +410,7 @@ public final class PlatformLogger implements AppSearchLogger {
     // rate limiting.
     @VisibleForTesting
     boolean shouldLogForTypeLocked(@CallStats.CallType int callType) {
-        int samplingInterval = mConfig.mSamplingIntervals.get(callType,
-                mConfig.mDefaultSamplingInterval);
-
+        int samplingInterval = getSamplingIntervalFromConfig(callType);
         // Sampling
         if (!shouldSample(samplingInterval)) {
             return false;
@@ -464,7 +420,7 @@ public final class PlatformLogger implements AppSearchLogger {
         // Check the timestamp to see if it is too close to last logged sample
         long currentTimeMillis = SystemClock.elapsedRealtime();
         if (mLastPushTimeMillisLocked
-                > currentTimeMillis - mConfig.mMinTimeIntervalBetweenSamplesMillis) {
+                > currentTimeMillis - mConfig.getCachedMinTimeIntervalBetweenSamplesMillis()) {
             int count = mSkippedSampleCountLocked.get(callType, /*valueOfKeyIfNotFound=*/ 0);
             ++count;
             mSkippedSampleCountLocked.put(callType, count);
@@ -502,6 +458,32 @@ public final class PlatformLogger implements AppSearchLogger {
             }
         }
         return packageUid;
+    }
+
+    /** Returns sampling ratio for stats type specified form {@link AppSearchConfig}. */
+    private int getSamplingIntervalFromConfig(@CallStats.CallType int statsType) {
+        switch (statsType) {
+            case CallStats.CALL_TYPE_PUT_DOCUMENTS:
+            case CallStats.CALL_TYPE_GET_DOCUMENTS:
+            case CallStats.CALL_TYPE_REMOVE_DOCUMENTS_BY_ID:
+            case CallStats.CALL_TYPE_REMOVE_DOCUMENTS_BY_SEARCH:
+                return mConfig.getCachedSamplingIntervalForBatchCallStats();
+            case CallStats.CALL_TYPE_PUT_DOCUMENT:
+                return mConfig.getCachedSamplingIntervalForPutDocumentStats();
+            case CallStats.CALL_TYPE_UNKNOWN:
+            case CallStats.CALL_TYPE_INITIALIZE:
+            case CallStats.CALL_TYPE_SET_SCHEMA:
+            case CallStats.CALL_TYPE_GET_DOCUMENT:
+            case CallStats.CALL_TYPE_REMOVE_DOCUMENT_BY_ID:
+            case CallStats.CALL_TYPE_SEARCH:
+            case CallStats.CALL_TYPE_OPTIMIZE:
+            case CallStats.CALL_TYPE_FLUSH:
+            case CallStats.CALL_TYPE_GLOBAL_SEARCH:
+            case CallStats.CALL_TYPE_REMOVE_DOCUMENT_BY_SEARCH:
+                // TODO(b/173532925) Some of them above will have dedicated sampling ratio config
+            default:
+                return mConfig.getCachedSamplingIntervalDefault();
+        }
     }
 
     //
