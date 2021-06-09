@@ -18,6 +18,9 @@ package com.android.keyguard
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Typeface
+import android.graphics.fonts.Font
+import android.graphics.fonts.FontFamily
 import android.testing.AndroidTestingRunner
 import android.text.Layout
 import android.text.StaticLayout
@@ -29,6 +32,7 @@ import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
 import kotlin.math.ceil
 
 private const val TEXT = "Hello, World."
@@ -36,16 +40,24 @@ private const val BIDI_TEXT = "abc\u05D0\u05D1\u05D2"
 private const val BMP_WIDTH = 400
 private const val BMP_HEIGHT = 300
 
+// Due to b/189235998 the weight 400 of the default font is no longer variable font. To be able to
+// test variable behavior, create the interpolatable typefaces with manually here.
+private val VF_FONT = Font.Builder(File("/system/fonts/Roboto-Regular.ttf")).build()
+
+private fun Font.toTypeface() =
+        Typeface.CustomFallbackBuilder(FontFamily.Builder(this).build()).build()
+
 private val PAINT = TextPaint().apply {
+    typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 400").build().toTypeface()
     textSize = 32f
 }
 
 private val START_PAINT = TextPaint(PAINT).apply {
-    fontVariationSettings = "'wght' 400"
+    typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 400").build().toTypeface()
 }
 
 private val END_PAINT = TextPaint(PAINT).apply {
-    fontVariationSettings = "'wght' 700"
+    typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 700").build().toTypeface()
 }
 
 @RunWith(AndroidTestingRunner::class)
