@@ -372,7 +372,7 @@ public class InfoMediaManager extends MediaManager {
             Log.w(TAG, "shouldDisableMediaOutput() package name is null or empty!");
             return false;
         }
-        final List<MediaRoute2Info> infos = mRouterManager.getAvailableRoutes(packageName);
+        final List<MediaRoute2Info> infos = mRouterManager.getTransferableRoutes(packageName);
         if (infos.size() == 1) {
             final MediaRoute2Info info = infos.get(0);
             final int deviceType = info.getType();
@@ -456,7 +456,7 @@ public class InfoMediaManager extends MediaManager {
     }
 
     private void buildAvailableRoutes() {
-        for (MediaRoute2Info route : mRouterManager.getAvailableRoutes(mPackageName)) {
+        for (MediaRoute2Info route : mRouterManager.getTransferableRoutes(mPackageName)) {
             if (DEBUG) {
                 Log.d(TAG, "buildAvailableRoutes() route : " + route.getName() + ", volume : "
                         + route.getVolume() + ", type : " + route.getType());
