@@ -98,8 +98,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
             }
         }
 
-    private var animatingScreenOff = false
-
     private var collapsedEnoughToHide: Boolean = false
 
     var pulsing: Boolean = false
@@ -236,11 +234,11 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onDozeAmountChanged(linear: Float, eased: Float) {
-        if (overrideDozeAmountIfBypass()) {
+        if (overrideDozeAmountIfAnimatingScreenOff(linear)) {
             return
         }
 
-        if (overrideDozeAmountIfAnimatingScreenOff(linear)) {
+        if (overrideDozeAmountIfBypass()) {
             return
         }
 
@@ -267,7 +265,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     override fun onStateChanged(newState: Int) {
         if (unlockedScreenOffAnimationController.shouldPlayScreenOffAnimation()) {
-            if (animatingScreenOff &&
+            if (unlockedScreenOffAnimationController.isScreenOffAnimationPlaying() &&
                     state == StatusBarState.KEYGUARD &&
                     newState == StatusBarState.SHADE) {
                 // If we're animating the screen off and going from KEYGUARD back to SHADE, the
@@ -275,12 +273,16 @@ class NotificationWakeUpCoordinator @Inject constructor(
                 // dozing) so that the notifications are no longer hidden.
                 setDozeAmount(0f, 0f)
             }
-
-            animatingScreenOff =
-                    state == StatusBarState.SHADE && newState == StatusBarState.KEYGUARD
         }
 
-        overrideDozeAmountIfBypass()
+        if (overrideDozeAmountIfAnimatingScreenOff(mLinearDozeAmount)) {
+            return
+        }
+
+        if (overrideDozeAmountIfBypass()) {
+            return
+        }
+
         if (bypassController.bypassEnabled &&
                 newState == StatusBarState.KEYGUARD && state == StatusBarState.SHADE_LOCKED &&
             (!statusBarStateController.isDozing || shouldAnimateVisibility())) {
@@ -330,12 +332,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
      * animation. If true, the original doze amount should be ignored.
      */
     private fun overrideDozeAmountIfAnimatingScreenOff(linearDozeAmount: Float): Boolean {
-        if (animatingScreenOff) {
-            if (linearDozeAmount == 1f) {
-                animatingScreenOff = false
-                return false
-            }
-
+        if (unlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
             setDozeAmount(1f, 1f)
             return true
         }
@@ -395,11 +392,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
     override fun onDozingChanged(isDozing: Boolean) {
         if (isDozing) {
             setNotificationsVisible(visible = false, animate = false, increaseSpeed = false)
-        } else {
-            // We only unset the flag once we fully went asleep. If the user interrupts the
-            // animation in the middle, we have to abort the animation as well to make sure
-            // the notifications are visible again.
-            animatingScreenOff = false
         }
     }
 
