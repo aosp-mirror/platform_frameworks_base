@@ -54,6 +54,8 @@ import android.view.DisplayAdjustments;
 
 import com.android.internal.util.GrowingArrayUtils;
 
+import libcore.util.NativeAllocationRegistry;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -1265,15 +1267,9 @@ public class ResourcesImpl {
         return new ThemeImpl();
     }
 
-    /**
-     * Creates a new ThemeImpl which is already set to the given Resources.ThemeKey.
-     */
-    ThemeImpl newThemeImpl(Resources.ThemeKey key) {
-        ThemeImpl impl = new ThemeImpl();
-        impl.mKey.setTo(key);
-        impl.rebase();
-        return impl;
-    }
+    private static final NativeAllocationRegistry sThemeRegistry =
+            NativeAllocationRegistry.createMalloced(ResourcesImpl.class.getClassLoader(),
+                    AssetManager.getThemeFreeFunction());
 
     public class ThemeImpl {
         /**
@@ -1282,7 +1278,7 @@ public class ResourcesImpl {
         private final Resources.ThemeKey mKey = new Resources.ThemeKey();
 
         @SuppressWarnings("hiding")
-        private final AssetManager mAssets;
+        private AssetManager mAssets;
         private final long mTheme;
 
         /**
@@ -1293,6 +1289,7 @@ public class ResourcesImpl {
         /*package*/ ThemeImpl() {
             mAssets = ResourcesImpl.this.mAssets;
             mTheme = mAssets.createTheme();
+            sThemeRegistry.registerNativeAllocation(this, mTheme);
         }
 
         @Override
@@ -1404,14 +1401,18 @@ public class ResourcesImpl {
          * {@link #applyStyle(int, boolean)}.
          */
         void rebase() {
-            AssetManager.nativeThemeClear(mTheme);
+            rebase(mAssets);
+        }
 
-            // Reapply the same styles in the same order.
-            for (int i = 0; i < mKey.mCount; i++) {
-                final int resId = mKey.mResId[i];
-                final boolean force = mKey.mForce[i];
-                mAssets.applyStyleToTheme(mTheme, resId, force);
-            }
+        /**
+         * Rebases the theme against the {@code newAssets} by re-applying the styles passed to
+         * {@link #applyStyle(int, boolean)}.
+         *
+         * The theme will use {@code newAssets} for all future invocations of
+         * {@link #applyStyle(int, boolean)}.
+         */
+        void rebase(AssetManager newAssets) {
+            mAssets = mAssets.rebaseTheme(mTheme, newAssets, mKey.mResId, mKey.mForce, mKey.mCount);
         }
 
         /**
