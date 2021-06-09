@@ -22,6 +22,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -124,14 +126,48 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
     }
 
     @Test
-    public void testModeUpdated_whenSwitchToFingerprint() {
+    public void testModeUpdated_onSoftError_whenSwitchToFingerprint() {
         mFaceToFpView.onDialogAnimatedIn();
         mFaceToFpView.onAuthenticationFailed(TYPE_FACE, "no face");
         waitForIdleSync();
 
         verify(mIndicatorView).setText(
                 eq(mContext.getString(R.string.fingerprint_dialog_use_fingerprint_instead)));
+        verify(mCallback).onAction(
+                eq(AuthBiometricView.Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR));
         assertEquals(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING, mFaceToFpView.mState);
+    }
+
+    @Test
+    public void testModeUpdated_onHardError_whenSwitchToFingerprint() {
+        mFaceToFpView.onDialogAnimatedIn();
+        mFaceToFpView.onError(TYPE_FACE, "oh no!");
+        waitForIdleSync();
+
+        verify(mIndicatorView).setText(
+                eq(mContext.getString(R.string.fingerprint_dialog_use_fingerprint_instead)));
+        verify(mCallback).onAction(
+                eq(AuthBiometricView.Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR));
+        assertEquals(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING, mFaceToFpView.mState);
+    }
+
+    @Test
+    public void testFingerprintOnlyStartsOnFirstError() {
+        mFaceToFpView.onDialogAnimatedIn();
+        verify(mFaceToFpView.mIconController)
+                .updateState(anyInt(), eq(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING));
+
+        mFaceToFpView.onDialogAnimatedIn();
+        mFaceToFpView.updateState(AuthBiometricFaceToFingerprintView.STATE_ERROR);
+        mFaceToFpView.updateState(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING);
+
+        reset(mCallback);
+
+        mFaceToFpView.onError(TYPE_FACE, "oh no!");
+        mFaceToFpView.onAuthenticationFailed(TYPE_FACE, "no face");
+
+        verify(mCallback, never()).onAction(
+                eq(AuthBiometricView.Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR));
     }
 
     public class TestableView extends AuthBiometricFaceToFingerprintView {

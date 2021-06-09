@@ -355,10 +355,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
         }
     }
 
-    private void cancelAllFingerprintSensors() {
-        cancelAllSensors(sensor -> sensor.modality == TYPE_FINGERPRINT);
-    }
-
     private void cancelAllSensors() {
         cancelAllSensors(sensor -> true);
     }
@@ -387,6 +383,9 @@ public final class AuthSession implements IBinder.DeathRecipient {
      */
     boolean onErrorReceived(int sensorId, int cookie, @BiometricConstants.Errors int error,
             int vendorCode) throws RemoteException {
+        if (DEBUG) {
+            Slog.v(TAG, "onErrorReceived sensor: " + sensorId + " error: " + error);
+        }
 
         if (!containsCookie(cookie)) {
             Slog.e(TAG, "Unknown/expired cookie: " + cookie);
@@ -454,12 +453,14 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     // a round trip to SystemUI.
                     mClientReceiver.onError(modality, error, vendorCode);
                     return true;
-                } else if (shouldErrorTriggerMultiSensorTransition()) {
-                    // wait for the UI to signal when modality should switch
-                    mMultiSensorState = MULTI_SENSOR_STATE_SWITCHING;
-                    Slog.d(TAG, "onErrorReceived: waiting for modality switch callback");
                 } else {
                     mState = STATE_ERROR_PENDING_SYSUI;
+                    if (mMultiSensorMode == BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT
+                            && mMultiSensorState == MULTI_SENSOR_STATE_FACE_SCANNING) {
+                        // wait for the UI to signal when modality should switch
+                        Slog.d(TAG, "onErrorReceived: waiting for modality switch callback");
+                        mMultiSensorState = MULTI_SENSOR_STATE_SWITCHING;
+                    }
                     mStatusBarService.onBiometricError(modality, error, vendorCode);
                 }
                 break;
@@ -627,7 +628,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     void onDeviceCredentialPressed() {
         // Cancel authentication. Skip the token/package check since we are cancelling
         // from system server. The interface is permission protected so this is fine.
-        cancelBiometricOnly();
+        cancelAllSensors();
         mState = STATE_SHOWING_DEVICE_CREDENTIAL;
     }
 
@@ -733,12 +734,10 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     }
                     mClientReceiver.onAuthenticationSucceeded(
                             Utils.getAuthenticationTypeForResult(reason));
-                    cancelBiometricOnly();
                     break;
 
                 case BiometricPrompt.DISMISSED_REASON_NEGATIVE:
                     mClientReceiver.onDialogDismissed(reason);
-                    cancelBiometricOnly();
                     break;
 
                 case BiometricPrompt.DISMISSED_REASON_USER_CANCEL:
@@ -747,7 +746,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
                             BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED,
                             0 /* vendorCode */
                     );
-                    cancelBiometricOnly();
                     break;
 
                 case BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED:
@@ -765,6 +763,9 @@ public final class AuthSession implements IBinder.DeathRecipient {
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
+        } finally {
+            // ensure everything is cleaned up when dismissed
+            cancelAllSensors();
         }
     }
 
@@ -780,8 +781,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                 || mState == STATE_AUTH_STARTED
                 || mState == STATE_AUTH_STARTED_UI_SHOWING;
 
+        cancelAllSensors();
         if (authStarted && !force) {
-            cancelAllSensors();
             // Wait for ERROR_CANCELED to be returned from the sensors
             return false;
         } else {
@@ -802,22 +803,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
             }
         }
         return false;
-    }
-
-    /**
-     * Cancels biometric authentication only. AuthSession may either be going into
-     * {@link #STATE_SHOWING_DEVICE_CREDENTIAL} or dismissed.
-     */
-    private void cancelBiometricOnly() {
-        if (mState == STATE_AUTH_STARTED || mState == STATE_AUTH_STARTED_UI_SHOWING) {
-            cancelAllSensors();
-        } else if (mMultiSensorMode == BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT) {
-            cancelAllFingerprintSensors();
-        } else {
-            if (DEBUG)  {
-                Slog.v(TAG, "nothing to cancel - wrong state: " + mState);
-            }
-        }
     }
 
     boolean isCrypto() {
@@ -894,13 +879,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
             default:
                 return null;
         }
-    }
-
-    private boolean shouldErrorTriggerMultiSensorTransition() {
-        if (mMultiSensorMode == BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT) {
-            return mMultiSensorState == MULTI_SENSOR_STATE_FACE_SCANNING;
-        }
-        return false;
     }
 
     @BiometricMultiSensorMode
