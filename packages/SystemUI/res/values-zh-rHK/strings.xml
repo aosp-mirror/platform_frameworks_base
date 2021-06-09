@@ -1124,12 +1124,12 @@
     <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g>的生日快到了"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"週年紀念"</string>
     <string name="anniversary_status_content_description" msgid="8212171790843327442">"今天是<xliff:g id="NAME">%1$s</xliff:g>的週年紀念"</string>
-    <string name="location_status" msgid="1294990572202541812">"分享位置資訊"</string>
+    <string name="location_status" msgid="1294990572202541812">"正在分享位置"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g>正在分享位置"</string>
-    <string name="new_story_status" msgid="9012195158584846525">"最新報導"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"新故事"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g>分享了新的動態消息"</string>
-    <string name="video_status" msgid="4548544654316843225">"正在觀看"</string>
-    <string name="audio_status" msgid="4237055636967709208">"正在聽取音訊"</string>
+    <string name="video_status" msgid="4548544654316843225">"正在觀看影片"</string>
+    <string name="audio_status" msgid="4237055636967709208">"正在收聽音訊"</string>
     <string name="game_status" msgid="1340694320630973259">"正在玩遊戲"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"朋友"</string>
     <string name="empty_status" msgid="5938893404951307749">"今晚傾下偈啦！"</string>

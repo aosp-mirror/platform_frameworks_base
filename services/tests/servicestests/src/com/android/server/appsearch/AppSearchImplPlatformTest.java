@@ -25,11 +25,18 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+import android.annotation.NonNull;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.PackageIdentifier;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
+import android.os.UserHandle;
+import android.util.ArrayMap;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -43,13 +50,15 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.Mockito;
 
 import java.util.Collections;
+import java.util.Map;
 
 /** This tests AppSearchImpl when it's running with a platform-backed VisibilityStore. */
 public class AppSearchImplPlatformTest {
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
-    private MockPackageManager mMockPackageManager = new MockPackageManager();
+    private final Map<UserHandle, PackageManager> mMockPackageManagers = new ArrayMap<>();
     private Context mContext;
     private AppSearchImpl mAppSearchImpl;
     private int mGlobalQuerierUid;
@@ -57,20 +66,28 @@ public class AppSearchImplPlatformTest {
     @Before
     public void setUp() throws Exception {
         Context context = ApplicationProvider.getApplicationContext();
-        mContext =
-                new ContextWrapper(context) {
+        mContext = new ContextWrapper(context) {
+            @Override
+            public Context createContextAsUser(UserHandle user, int flags) {
+                return new ContextWrapper(super.createContextAsUser(user, flags)) {
                     @Override
                     public PackageManager getPackageManager() {
-                        return mMockPackageManager.getMockPackageManager();
+                        return getMockPackageManager(user);
                     }
                 };
+            }
+
+            @Override
+            public PackageManager getPackageManager() {
+                return createContextAsUser(getUser(), /*flags=*/ 0).getPackageManager();
+            }
+        };
 
         // Give ourselves global query permissions
         mAppSearchImpl =
                 AppSearchImpl.create(
                         mTemporaryFolder.newFolder(),
                         mContext,
-                        mContext.getUserId(),
                         /*logger=*/ null);
 
         mGlobalQuerierUid =
@@ -85,14 +102,19 @@ public class AppSearchImplPlatformTest {
         int uidFoo = 1;
 
         // Make sure foo package will pass package manager checks.
-        mMockPackageManager.mockGetPackageUidAsUser(packageNameFoo, mContext.getUserId(), uidFoo);
-        mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager.getPackageUid(eq(packageNameFoo), /*flags=*/ anyInt()))
+                .thenReturn(uidFoo);
+        when(mockPackageManager.hasSigningCertificate(
+                packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
+                .thenReturn(true);
 
         // Make sure we have global query privileges and "foo" doesn't
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName(), PERMISSION_GRANTED);
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo, PERMISSION_DENIED);
+        when(mockPackageManager.checkPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName()))
+                .thenReturn(PERMISSION_GRANTED);
+        when(mockPackageManager.checkPermission(READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo))
+                .thenReturn(PERMISSION_DENIED);
 
         // Set schema1
         String prefix = PrefixUtil.createPrefix("package", "database");
@@ -145,19 +167,16 @@ public class AppSearchImplPlatformTest {
                 /*schemaVersion=*/ 0);
 
         // Check that "schema1" still has the same visibility settings
-        SystemUtil.runWithShellPermissionIdentity(
-                () -> {
-                    assertThat(
-                                    mAppSearchImpl
-                                            .getVisibilityStoreLocked()
-                                            .isSchemaSearchableByCaller(
-                                                    "package",
-                                                    "database",
-                                                    prefix + "schema1",
-                                                    mContext.getPackageName(),
-                                                    mGlobalQuerierUid))
-                            .isFalse();
-                },
+        SystemUtil.runWithShellPermissionIdentity(() -> assertThat(
+                mAppSearchImpl
+                        .getVisibilityStoreLocked()
+                        .isSchemaSearchableByCaller(
+                                "package",
+                                "database",
+                                prefix + "schema1",
+                                mContext.getPackageName(),
+                                mGlobalQuerierUid))
+                        .isFalse(),
                 READ_GLOBAL_APP_SEARCH_DATA);
 
         assertThat(
@@ -172,19 +191,16 @@ public class AppSearchImplPlatformTest {
                 .isTrue();
 
         // "schema2" has default visibility settings
-        SystemUtil.runWithShellPermissionIdentity(
-                () -> {
-                    assertThat(
-                                    mAppSearchImpl
-                                            .getVisibilityStoreLocked()
-                                            .isSchemaSearchableByCaller(
-                                                    "package",
-                                                    "database",
-                                                    prefix + "schema2",
-                                                    mContext.getPackageName(),
-                                                    mGlobalQuerierUid))
-                            .isTrue();
-                },
+        SystemUtil.runWithShellPermissionIdentity(() -> assertThat(
+                mAppSearchImpl
+                        .getVisibilityStoreLocked()
+                        .isSchemaSearchableByCaller(
+                                "package",
+                                "database",
+                                prefix + "schema2",
+                                mContext.getPackageName(),
+                                mGlobalQuerierUid))
+                        .isTrue(),
                 READ_GLOBAL_APP_SEARCH_DATA);
 
         assertThat(
@@ -207,14 +223,19 @@ public class AppSearchImplPlatformTest {
         int uidFoo = 1;
 
         // Make sure foo package will pass package manager checks.
-        mMockPackageManager.mockGetPackageUidAsUser(packageNameFoo, mContext.getUserId(), uidFoo);
-        mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager.getPackageUid(eq(packageNameFoo), /*flags=*/ anyInt()))
+                .thenReturn(uidFoo);
+        when(mockPackageManager.hasSigningCertificate(
+                packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
+                .thenReturn(true);
 
         // Make sure we have global query privileges and "foo" doesn't
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName(), PERMISSION_GRANTED);
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo, PERMISSION_DENIED);
+        when(mockPackageManager.checkPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName()))
+                .thenReturn(PERMISSION_GRANTED);
+        when(mockPackageManager.checkPermission(READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo))
+                .thenReturn(PERMISSION_DENIED);
 
         String prefix = PrefixUtil.createPrefix("package", "database");
         mAppSearchImpl.setSchema(
@@ -320,8 +341,10 @@ public class AppSearchImplPlatformTest {
     @Test
     public void testSetSchema_defaultPlatformVisible() throws Exception {
         // Make sure we have global query privileges
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName(), PERMISSION_GRANTED);
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager.checkPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName()))
+                .thenReturn(PERMISSION_GRANTED);
 
         String prefix = PrefixUtil.createPrefix("package", "database");
         mAppSearchImpl.setSchema(
@@ -348,8 +371,10 @@ public class AppSearchImplPlatformTest {
     @Test
     public void testSetSchema_platformHidden() throws Exception {
         // Make sure we have global query privileges
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName(), PERMISSION_GRANTED);
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager.checkPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName()))
+                .thenReturn(PERMISSION_GRANTED);
 
         String prefix = PrefixUtil.createPrefix("package", "database");
         mAppSearchImpl.setSchema(
@@ -378,8 +403,9 @@ public class AppSearchImplPlatformTest {
         String packageName = "com.package";
 
         // Make sure package doesn't global query privileges
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, packageName, PERMISSION_DENIED);
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager.checkPermission(
+                READ_GLOBAL_APP_SEARCH_DATA, packageName)).thenReturn(PERMISSION_DENIED);
 
         String prefix = PrefixUtil.createPrefix("package", "database");
         mAppSearchImpl.setSchema(
@@ -410,12 +436,16 @@ public class AppSearchImplPlatformTest {
         int uidFoo = 1;
 
         // Make sure foo package will pass package manager checks.
-        mMockPackageManager.mockGetPackageUidAsUser(packageNameFoo, mContext.getUserId(), uidFoo);
-        mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager.getPackageUid(eq(packageNameFoo), /*flags=*/ anyInt()))
+                .thenReturn(uidFoo);
+        when(mockPackageManager.hasSigningCertificate(
+                packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
+                .thenReturn(true);
 
         // Make sure foo doesn't have global query privileges
-        mMockPackageManager.mockCheckPermission(
-                READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo, PERMISSION_DENIED);
+        when(mockPackageManager.checkPermission(READ_GLOBAL_APP_SEARCH_DATA, packageNameFoo))
+                .thenReturn(PERMISSION_DENIED);
 
         String prefix = PrefixUtil.createPrefix("package", "database");
         mAppSearchImpl.setSchema(
@@ -438,5 +468,15 @@ public class AppSearchImplPlatformTest {
                                         packageNameFoo,
                                         uidFoo))
                 .isTrue();
+    }
+
+    @NonNull
+    private PackageManager getMockPackageManager(@NonNull UserHandle user) {
+        PackageManager pm = mMockPackageManagers.get(user);
+        if (pm == null) {
+            pm = Mockito.mock(PackageManager.class);
+            mMockPackageManagers.put(user, pm);
+        }
+        return pm;
     }
 }

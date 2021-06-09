@@ -16016,9 +16016,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return Collections.emptyList();
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
-
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userHandle));
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS)
+                        || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS_FULL));
 
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);

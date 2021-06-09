@@ -182,6 +182,7 @@ public class RippleDrawable extends LayerDrawable {
     private Canvas mMaskCanvas;
     private Matrix mMaskMatrix;
     private PorterDuffColorFilter mMaskColorFilter;
+    private PorterDuffColorFilter mFocusColorFilter;
     private boolean mHasValidMask;
     private int mComputedRadius = -1;
 
@@ -938,7 +939,7 @@ public class RippleDrawable extends LayerDrawable {
         final int alpha = Math.min((int) (origAlpha * newOpacity + 0.5f), 255);
         if (alpha > 0) {
             ColorFilter origFilter = p.getColorFilter();
-            p.setColorFilter(mMaskColorFilter);
+            p.setColorFilter(mFocusColorFilter);
             p.setAlpha(alpha);
             c.drawCircle(cx, cy, getComputedRadius(), p);
             p.setAlpha(origAlpha);
@@ -1091,6 +1092,7 @@ public class RippleDrawable extends LayerDrawable {
 
         if (mMaskColorFilter == null) {
             mMaskColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_IN);
+            mFocusColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_IN);
         }
 
         // Draw the appropriate mask anchored to (0,0).
@@ -1219,6 +1221,8 @@ public class RippleDrawable extends LayerDrawable {
             int maskColor = mState.mRippleStyle == STYLE_PATTERNED ? color : color | 0xFF000000;
             if (mMaskColorFilter.getColor() != maskColor) {
                 mMaskColorFilter = new PorterDuffColorFilter(maskColor, mMaskColorFilter.getMode());
+                mFocusColorFilter = new PorterDuffColorFilter(color | 0xFF000000,
+                        mFocusColorFilter.getMode());
             }
             p.setColor(color & 0xFF000000);
             p.setColorFilter(mMaskColorFilter);

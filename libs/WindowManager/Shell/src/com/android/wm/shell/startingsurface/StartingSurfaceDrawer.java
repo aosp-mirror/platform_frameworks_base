@@ -17,6 +17,7 @@
 package com.android.wm.shell.startingsurface;
 
 import static android.content.Context.CONTEXT_RESTRICTED;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Choreographer.CALLBACK_INSETS_ANIMATION;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -34,6 +35,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -49,8 +51,10 @@ import android.window.StartingWindowInfo;
 import android.window.TaskSnapshot;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 
 import java.util.function.Supplier;
 
@@ -90,6 +94,7 @@ import java.util.function.Supplier;
  * => WM#addView -> .. waiting for Choreographer#doFrame -> relayout -> draw -> (draw the Paint
  * directly).
  */
+@ShellSplashscreenThread
 public class StartingSurfaceDrawer {
     static final String TAG = StartingSurfaceDrawer.class.getSimpleName();
     static final boolean DEBUG_SPLASH_SCREEN = StartingWindowController.DEBUG_SPLASH_SCREEN;
@@ -98,7 +103,8 @@ public class StartingSurfaceDrawer {
     private final Context mContext;
     private final DisplayManager mDisplayManager;
     private final ShellExecutor mSplashScreenExecutor;
-    private final SplashscreenContentDrawer mSplashscreenContentDrawer;
+    @VisibleForTesting
+    final SplashscreenContentDrawer mSplashscreenContentDrawer;
     private Choreographer mChoreographer;
 
     private static final boolean DEBUG_ENABLE_REVEAL_ANIMATION =
@@ -276,6 +282,7 @@ public class StartingSurfaceDrawer {
         final SplashScreenViewSupplier viewSupplier = new SplashScreenViewSupplier();
         final FrameLayout rootLayout = new FrameLayout(context);
         final Runnable setViewSynchronized = () -> {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "addSplashScreenView");
             // waiting for setContentView before relayoutWindow
             SplashScreenView contentView = viewSupplier.get();
             final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
@@ -294,13 +301,14 @@ public class StartingSurfaceDrawer {
                 }
                 record.setSplashScreenView(contentView);
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         };
         mSplashscreenContentDrawer.createContentView(context, emptyView, activityInfo, taskId,
                 viewSupplier::setView);
 
         try {
             final WindowManager wm = context.getSystemService(WindowManager.class);
-            if (postAddWindow(taskId, appToken, rootLayout, wm, params)) {
+            if (addWindow(taskId, appToken, rootLayout, wm, params)) {
                 // We use the splash screen worker thread to create SplashScreenView while adding
                 // the window, as otherwise Choreographer#doFrame might be delayed on this thread.
                 // And since Choreographer#doFrame won't happen immediately after adding the window,
@@ -393,10 +401,11 @@ public class StartingSurfaceDrawer {
         ActivityTaskManager.getInstance().onSplashScreenViewCopyFinished(taskId, parcelable);
     }
 
-    protected boolean postAddWindow(int taskId, IBinder appToken, View view, WindowManager wm,
+    protected boolean addWindow(int taskId, IBinder appToken, View view, WindowManager wm,
             WindowManager.LayoutParams params) {
         boolean shouldSaveView = true;
         try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "addRootView");
             wm.addView(view, params);
         } catch (WindowManager.BadTokenException e) {
             // ignore
@@ -404,6 +413,7 @@ public class StartingSurfaceDrawer {
                     + e.getMessage());
             shouldSaveView = false;
         } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             if (view != null && view.getParent() == null) {
                 Slog.w(TAG, "view not successfully added to wm, removing view");
                 wm.removeViewImmediate(view);

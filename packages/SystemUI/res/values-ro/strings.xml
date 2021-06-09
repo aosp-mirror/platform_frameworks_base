@@ -1135,8 +1135,8 @@
     <string name="new_story_status" msgid="9012195158584846525">"Subiect nou"</string>
     <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> a trimis o poveste nouă"</string>
     <string name="video_status" msgid="4548544654316843225">"Urmăresc"</string>
-    <string name="audio_status" msgid="4237055636967709208">"Se ascultă"</string>
-    <string name="game_status" msgid="1340694320630973259">"Se redă"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Ascult"</string>
+    <string name="game_status" msgid="1340694320630973259">"Mă joc"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Prieteni"</string>
     <string name="empty_status" msgid="5938893404951307749">"Conversăm prin chat diseară?"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Conținutul va apărea în curând"</string>

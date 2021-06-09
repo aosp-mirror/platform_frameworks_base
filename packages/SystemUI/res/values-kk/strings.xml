@@ -746,7 +746,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті ретінде көрсетіледі, қалқымалы анықтама ретінде шығады, \"Мазаламау\" режимін тоқтатады."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Параметрлер"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маңызды"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> әңгімелесу функцияларын қолдамайды."</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> әңгіме функцияларын қолдамайды."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Бұл хабарландыруларды өзгерту мүмкін емес."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Мұндай хабарландырулар бұл жерде конфигурацияланбайды."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Прокси-сервер арқылы жіберілген хабарландыру"</string>

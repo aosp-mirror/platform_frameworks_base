@@ -26,6 +26,7 @@ import static com.android.systemui.statusbar.phone.BiometricUnlockController.MOD
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.hardware.biometrics.BiometricSourceType;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.KeyEvent;
@@ -768,9 +769,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private void wakeAndUnlockDejank() {
         if (mBiometricUnlockController.getMode() == MODE_WAKE_AND_UNLOCK
                 && LatencyTracker.isEnabled(mContext)) {
-            DejankUtils.postAfterTraversal(() ->
+            BiometricSourceType type = mBiometricUnlockController.getBiometricType();
+            DejankUtils.postAfterTraversal(() -> {
                     LatencyTracker.getInstance(mContext).onActionEnd(
-                            LatencyTracker.ACTION_FINGERPRINT_WAKE_AND_UNLOCK));
+                            type == BiometricSourceType.FACE
+                                    ? LatencyTracker.ACTION_FACE_WAKE_AND_UNLOCK
+                                    : LatencyTracker.ACTION_FINGERPRINT_WAKE_AND_UNLOCK);
+            });
         }
     }
 
