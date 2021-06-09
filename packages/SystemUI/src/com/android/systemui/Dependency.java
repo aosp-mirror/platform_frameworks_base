@@ -99,6 +99,7 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.AccessibilityController;
@@ -371,6 +372,7 @@ public class Dependency {
     @Inject Lazy<PrivacyDotViewController> mPrivacyDotViewControllerLazy;
     @Inject Provider<EdgeBackGestureHandler> mEdgeBackGestureHandlerProvider;
     @Inject Lazy<UiEventLogger> mUiEventLogger;
+    @Inject Lazy<StatusBarContentInsetsProvider> mContentInsetsProviderLazy;
     @Inject Lazy<InternetDialogFactory> mInternetDialogFactory;
     @Inject Lazy<FeatureFlags> mFeatureFlagsLazy;
 
@@ -587,6 +589,7 @@ public class Dependency {
         mProviders.put(EDGE_BACK_GESTURE_HANDLER_PROVIDER, () -> mEdgeBackGestureHandlerProvider);
         mProviders.put(UiEventLogger.class, mUiEventLogger::get);
         mProviders.put(FeatureFlags.class, mFeatureFlagsLazy::get);
+        mProviders.put(StatusBarContentInsetsProvider.class, mContentInsetsProviderLazy::get);
 
         Dependency.setInstance(this);
     }
