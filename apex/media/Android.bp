@@ -27,7 +27,6 @@ package {
 
 sdk {
     name: "media-module-sdk",
-    java_sdk_libs: [
-        "framework-media",
-    ],
+    bootclasspath_fragments: ["com.android.media-bootclasspath-fragment"],
+    java_sdk_libs: ["service-media-s"],
 }

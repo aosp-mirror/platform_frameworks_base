@@ -13112,6 +13112,10 @@ public class DevicePolicyManager {
      * @see #getCrossProfileCalendarPackages(ComponentName)
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            permission.INTERACT_ACROSS_USERS_FULL,
+            permission.INTERACT_ACROSS_USERS
+    })
     public @Nullable Set<String> getCrossProfileCalendarPackages() {
         throwIfParentInstance("getCrossProfileCalendarPackages");
         if (mService != null) {

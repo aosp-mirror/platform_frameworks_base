@@ -1096,7 +1096,7 @@
     <string name="controls_in_progress" msgid="4421080500238215939">"ဆောင်ရွက်နေသည်"</string>
     <string name="controls_added_tooltip" msgid="5866098408470111984">"ထိန်းချုပ်မှုအသစ်များ ကြည့်ရန် အမြန် ဆက်တင်များကို ဖွင့်ပါ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"ထိန်းချုပ်မှုများ ထည့်ရန်"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"ထိန်းချုပ်မှုများ တည်းဖြတ်ရန်"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"ထိန်းချုပ်မှုများ ပြင်ရန်"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"မီဒီယာအထွက်များ ထည့်ရန်"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"အုပ်စု"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"စက်ပစ္စည်း ၁ ခုကို ရွေးချယ်ထားသည်"</string>

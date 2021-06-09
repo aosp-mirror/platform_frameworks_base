@@ -591,7 +591,7 @@ public class ViewState implements Dumpable {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                HeadsUpUtil.setIsClickedHeadsUpNotification(child, false);
+                HeadsUpUtil.setNeedsHeadsUpDisappearAnimationAfterClick(child, false);
                 child.setTag(TAG_ANIMATOR_TRANSLATION_Y, null);
                 child.setTag(TAG_START_TRANSLATION_Y, null);
                 child.setTag(TAG_END_TRANSLATION_Y, null);

@@ -17,6 +17,11 @@
 package com.android.statementservice.retriever;
 
 import android.annotation.NonNull;
+import android.net.Network;
+
+import com.android.statementservice.network.retriever.StatementRetriever;
+
+import kotlin.coroutines.Continuation;
 
 /**
  * An immutable value type representing a statement, consisting of a source, target, and relation.
@@ -31,9 +36,9 @@ import android.annotation.NonNull;
  * }
  * </pre>
  *
- * Then invoking {@link AbstractStatementRetriever#retrieveStatements(AbstractAsset)} will return a
- * {@link Statement} with {@link #getSource} equal to the input parameter, {@link #getRelation}
- * equal to
+ * Then invoking {@link StatementRetriever#retrieve(AbstractAsset, Network, Continuation)} will
+ * return a {@link Statement} with {@link #getSource} equal to the input parameter,
+ * {@link #getRelation} equal to
  *
  * <pre>Relation.create("delegate_permission", "common.get_login_creds");</pre>
  *

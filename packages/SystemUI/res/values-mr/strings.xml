@@ -1096,7 +1096,7 @@
     <string name="controls_in_progress" msgid="4421080500238215939">"प्रगतीपथावर आहे"</string>
     <string name="controls_added_tooltip" msgid="5866098408470111984">"नवीन नियंत्रणे पाहण्यासाठी क्विक सेटिंग्ज उघडा"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"नियंत्रणे जोडा"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"नियंत्रणे व्यवस्थापित करा"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"नियंत्रणे संपादित करा"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"आउटपुट जोडा"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"गट"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"एक डिव्हाइस निवडले"</string>

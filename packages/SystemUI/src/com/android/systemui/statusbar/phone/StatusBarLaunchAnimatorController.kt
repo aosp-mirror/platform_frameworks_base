@@ -28,8 +28,8 @@ class StatusBarLaunchAnimatorController(
 
     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
         delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
-        statusBar.onLaunchAnimationEnd(isExpandingFullyAbove)
         statusBar.notificationPanelViewController.setIsLaunchAnimationRunning(false)
+        statusBar.onLaunchAnimationEnd(isExpandingFullyAbove)
     }
 
     override fun onLaunchAnimationProgress(

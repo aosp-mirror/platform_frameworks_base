@@ -294,6 +294,11 @@ public final class TranslationManagerService
 
             synchronized (mLock) {
                 dumpLocked("", pw);
+                final int userId = UserHandle.getCallingUserId();
+                final TranslationManagerServiceImpl service = getServiceForUserLocked(userId);
+                if (service != null) {
+                    service.dumpLocked("  ", fd, pw);
+                }
             }
         }
 

@@ -122,7 +122,6 @@ public class UnderlyingNetworkTracker {
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
-    @NonNull private final Set<Integer> mRequiredUnderlyingNetworkCapabilities;
     @NonNull private final UnderlyingNetworkTrackerCallback mCb;
     @NonNull private final Dependencies mDeps;
     @NonNull private final Handler mHandler;
@@ -147,13 +146,11 @@ public class UnderlyingNetworkTracker {
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
-            @NonNull Set<Integer> requiredUnderlyingNetworkCapabilities,
             @NonNull UnderlyingNetworkTrackerCallback cb) {
         this(
                 vcnContext,
                 subscriptionGroup,
                 snapshot,
-                requiredUnderlyingNetworkCapabilities,
                 cb,
                 new Dependencies());
     }
@@ -162,16 +159,11 @@ public class UnderlyingNetworkTracker {
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
-            @NonNull Set<Integer> requiredUnderlyingNetworkCapabilities,
             @NonNull UnderlyingNetworkTrackerCallback cb,
             @NonNull Dependencies deps) {
         mVcnContext = Objects.requireNonNull(vcnContext, "Missing vcnContext");
         mSubscriptionGroup = Objects.requireNonNull(subscriptionGroup, "Missing subscriptionGroup");
         mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
-        mRequiredUnderlyingNetworkCapabilities =
-                Objects.requireNonNull(
-                        requiredUnderlyingNetworkCapabilities,
-                        "Missing requiredUnderlyingNetworkCapabilities");
         mCb = Objects.requireNonNull(cb, "Missing cb");
         mDeps = Objects.requireNonNull(deps, "Missing deps");
 

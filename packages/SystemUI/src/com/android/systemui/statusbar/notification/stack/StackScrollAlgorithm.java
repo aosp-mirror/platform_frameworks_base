@@ -403,10 +403,6 @@ public class StackScrollAlgorithm {
         }
 
         viewState.yTranslation = algorithmState.mCurrentYPosition;
-        if (view instanceof SectionHeaderView) {
-            // Add padding before sections for overscroll effect.
-            viewState.yTranslation += expansionFraction * ambientState.getSectionPadding();
-        }
 
         if (view instanceof FooterView) {
             final boolean shadeClosed = !ambientState.isShadeExpanded();
