@@ -1204,8 +1204,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // If this is coming from the currently resumed activity, it is
             // effectively saying that app switches are allowed at this point.
             final Task topFocusedRootTask = getTopDisplayFocusedRootTask();
-            if (topFocusedRootTask != null && topFocusedRootTask.getResumedActivity() != null
-                    && topFocusedRootTask.getResumedActivity().info.applicationInfo.uid
+            if (topFocusedRootTask != null && topFocusedRootTask.getTopResumedActivity() != null
+                    && topFocusedRootTask.getTopResumedActivity().info.applicationInfo.uid
                     == Binder.getCallingUid()) {
                 mAppSwitchesAllowed = true;
             }

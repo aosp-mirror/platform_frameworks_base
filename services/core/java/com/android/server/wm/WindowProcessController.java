@@ -735,10 +735,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         if (canUpdate) {
             // Make sure the previous top activity in the process no longer be resumed.
             if (mPreQTopResumedActivity != null && mPreQTopResumedActivity.isState(RESUMED)) {
-                final Task task = mPreQTopResumedActivity.getTask();
-                if (task != null) {
-                    boolean userLeaving = task.shouldBeVisible(null);
-                    task.startPausingLocked(userLeaving, false /* uiSleeping */,
+                final TaskFragment taskFrag = mPreQTopResumedActivity.getTaskFragment();
+                if (taskFrag != null) {
+                    boolean userLeaving = taskFrag.shouldBeVisible(null);
+                    taskFrag.startPausing(userLeaving, false /* uiSleeping */,
                             activity, "top-resumed-changed");
                 }
             }
@@ -1213,12 +1213,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 hasVisibleActivities = true;
             }
 
-            final Task task = r.getTask();
-            if (task != null) {
+            final TaskFragment taskFragment = r.getTaskFragment();
+            if (taskFragment != null) {
                 // There may be a pausing activity that hasn't shown any window and was requested
                 // to be hidden. But pausing is also a visible state, it should be regarded as
                 // visible, so the caller can know the next activity should be resumed.
-                hasVisibleActivities |= task.handleAppDied(this);
+                hasVisibleActivities |= taskFragment.handleAppDied(this);
             }
             r.handleAppDied();
         }

@@ -1904,8 +1904,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(wpc.registeredForActivityConfigChanges());
 
         // Create a new task with custom config to reparent the activity to.
-        final Task newTask =
-                new TaskBuilder(mSupervisor).setParentTask(initialTask.getRootTask()).build();
+        final Task newTask = new TaskBuilder(mSupervisor).build();
         final Configuration newConfig = newTask.getConfiguration();
         newConfig.densityDpi += 100;
         newTask.onRequestedOverrideConfigurationChanged(newConfig);
@@ -1937,8 +1936,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .diff(wpc.getRequestedOverrideConfiguration()));
 
         // Create a new task with custom config to reparent the second activity to.
-        final Task newTask =
-                new TaskBuilder(mSupervisor).setParentTask(initialTask.getRootTask()).build();
+        final Task newTask = new TaskBuilder(mSupervisor).build();
         final Configuration newConfig = newTask.getConfiguration();
         newConfig.densityDpi += 100;
         newTask.onRequestedOverrideConfigurationChanged(newConfig);
