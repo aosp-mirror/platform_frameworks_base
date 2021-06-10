@@ -187,7 +187,6 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CircleReveal;
@@ -249,6 +248,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
+import com.android.unfold.config.UnfoldTransitionConfig;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
@@ -268,7 +268,8 @@ import javax.inject.Provider;
 
 import dagger.Lazy;
 
-public class StatusBar extends SystemUI implements DemoMode,
+/** */
+public class StatusBar extends SystemUI implements
         ActivityStarter, KeyguardStateController.Callback,
         OnHeadsUpChangedListener, CommandQueue.Callbacks,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
@@ -716,6 +717,60 @@ public class StatusBar extends SystemUI implements DemoMode,
     private ActivityIntentHelper mActivityIntentHelper;
     private NotificationStackScrollLayoutController mStackScrollerController;
 
+    private final DemoMode mDemoMode = new DemoMode() {
+
+        @Override
+        public List<String> demoCommands() {
+            List<String> s = new ArrayList<>();
+            s.add(DemoMode.COMMAND_BARS);
+            s.add(DemoMode.COMMAND_CLOCK);
+            s.add(DemoMode.COMMAND_OPERATOR);
+            return s;
+        }
+
+        @Override
+        public void onDemoModeStarted() {
+            // Must send this message to any view that we delegate to via dispatchDemoCommandToView
+            dispatchDemoModeStartedToView(R.id.clock);
+            dispatchDemoModeStartedToView(R.id.operator_name);
+        }
+
+        @Override
+        public void onDemoModeFinished() {
+            dispatchDemoModeFinishedToView(R.id.clock);
+            dispatchDemoModeFinishedToView(R.id.operator_name);
+            checkBarModes();
+        }
+
+        @Override
+        public void dispatchDemoCommand(String command, @NonNull Bundle args) {
+            if (command.equals(COMMAND_CLOCK)) {
+                dispatchDemoCommandToView(command, args, R.id.clock);
+            }
+            if (command.equals(COMMAND_BARS)) {
+                String mode = args.getString("mode");
+                int barMode = "opaque".equals(mode) ? MODE_OPAQUE :
+                        "translucent".equals(mode) ? MODE_TRANSLUCENT :
+                                "semi-transparent".equals(mode) ? MODE_SEMI_TRANSPARENT :
+                                        "transparent".equals(mode) ? MODE_TRANSPARENT :
+                                                "warning".equals(mode) ? MODE_WARNING :
+                                                        -1;
+                if (barMode != -1) {
+                    boolean animate = true;
+                    if (mNotificationShadeWindowController != null
+                            && mNotificationShadeWindowViewController.getBarTransitions() != null) {
+                        mNotificationShadeWindowViewController.getBarTransitions().transitionTo(
+                                barMode, animate);
+                    }
+                    mNavigationBarController.transitionTo(mDisplayId, barMode, animate);
+                }
+            }
+            if (command.equals(COMMAND_OPERATOR)) {
+                dispatchDemoCommandToView(command, args, R.id.operator_name);
+            }
+        }
+    };
+
     /**
      * Public constructor for StatusBar.
      *
@@ -969,7 +1024,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mCommandQueue.addCallback(this);
 
         // Listen for demo mode changes
-        mDemoModeController.addCallback(this);
+        mDemoModeController.addCallback(mDemoMode);
 
         RegisterStatusBarResult result = null;
         try {
@@ -3361,56 +3416,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 delay);
     }
 
-    @Override
-    public List<String> demoCommands() {
-        List<String> s = new ArrayList<>();
-        s.add(DemoMode.COMMAND_BARS);
-        s.add(DemoMode.COMMAND_CLOCK);
-        s.add(DemoMode.COMMAND_OPERATOR);
-        return s;
-    }
-
-    @Override
-    public void onDemoModeStarted() {
-        // Must send this message to any view that we delegate to via dispatchDemoCommandToView
-        dispatchDemoModeStartedToView(R.id.clock);
-        dispatchDemoModeStartedToView(R.id.operator_name);
-    }
-
-    @Override
-    public void onDemoModeFinished() {
-        dispatchDemoModeFinishedToView(R.id.clock);
-        dispatchDemoModeFinishedToView(R.id.operator_name);
-        checkBarModes();
-    }
-
-    @Override
-    public void dispatchDemoCommand(String command, @NonNull Bundle args) {
-        if (command.equals(COMMAND_CLOCK)) {
-            dispatchDemoCommandToView(command, args, R.id.clock);
-        }
-        if (command.equals(COMMAND_BARS)) {
-            String mode = args.getString("mode");
-            int barMode = "opaque".equals(mode) ? MODE_OPAQUE :
-                    "translucent".equals(mode) ? MODE_TRANSLUCENT :
-                    "semi-transparent".equals(mode) ? MODE_SEMI_TRANSPARENT :
-                    "transparent".equals(mode) ? MODE_TRANSPARENT :
-                    "warning".equals(mode) ? MODE_WARNING :
-                    -1;
-            if (barMode != -1) {
-                boolean animate = true;
-                if (mNotificationShadeWindowController != null
-                        && mNotificationShadeWindowViewController.getBarTransitions() != null) {
-                    mNotificationShadeWindowViewController.getBarTransitions().transitionTo(
-                            barMode, animate);
-                }
-                mNavigationBarController.transitionTo(mDisplayId, barMode, animate);
-            }
-        }
-        if (command.equals(COMMAND_OPERATOR)) {
-            dispatchDemoCommandToView(command, args, R.id.operator_name);
-        }
-    }
 
     //TODO: these should have controllers, and this method should be removed
     private void dispatchDemoCommandToView(String command, Bundle args, int id) {
