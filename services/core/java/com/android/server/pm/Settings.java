@@ -4185,17 +4185,10 @@ public final class Settings implements Watchable, Snappable {
     }
 
     boolean setPackageStoppedStateLPw(PackageManagerService pm, String packageName,
-            boolean stopped, boolean allowedByPermission, int uid, int userId) {
-        int appId = UserHandle.getAppId(uid);
+            boolean stopped, int userId) {
         final PackageSetting pkgSetting = mPackages.get(packageName);
         if (pkgSetting == null) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-        if (!allowedByPermission && (appId != pkgSetting.appId)) {
-            throw new SecurityException(
-                    "Permission Denial: attempt to change stopped state from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + uid + ", package uid=" + pkgSetting.appId);
         }
         if (DEBUG_STOPPED) {
             if (stopped) {

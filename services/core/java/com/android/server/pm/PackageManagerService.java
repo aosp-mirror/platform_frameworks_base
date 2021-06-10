@@ -23984,6 +23984,13 @@ public class PackageManagerService extends IPackageManager.Stub
         final int permission = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE);
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
+        if (!allowedByPermission
+                && !ArrayUtils.contains(getPackagesForUid(callingUid), packageName)) {
+            throw new SecurityException(
+                    "Permission Denial: attempt to change stopped state from pid="
+                            + Binder.getCallingPid()
+                            + ", uid=" + callingUid + ", package=" + packageName);
+        }
         enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 true /* checkShell */, "stop package");
         boolean shouldUnhibernate = false;
@@ -23994,8 +24001,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 shouldUnhibernate = true;
             }
             if (!shouldFilterApplicationLocked(ps, callingUid, userId)
-                    && mSettings.setPackageStoppedStateLPw(this, packageName, stopped,
-                            allowedByPermission, callingUid, userId)) {
+                    && mSettings.setPackageStoppedStateLPw(this, packageName, stopped, userId)) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
         }
