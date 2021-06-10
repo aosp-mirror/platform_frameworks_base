@@ -39,9 +39,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OU
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import static com.android.wm.shell.bubbles.BubbleController.TASKBAR_CHANGED_BROADCAST;
 
@@ -158,8 +156,6 @@ import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.demomode.DemoMode;
-import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.fragments.ExtensionFragmentListener;
@@ -717,60 +713,6 @@ public class StatusBar extends SystemUI implements
     private ActivityIntentHelper mActivityIntentHelper;
     private NotificationStackScrollLayoutController mStackScrollerController;
 
-    private final DemoMode mDemoMode = new DemoMode() {
-
-        @Override
-        public List<String> demoCommands() {
-            List<String> s = new ArrayList<>();
-            s.add(DemoMode.COMMAND_BARS);
-            s.add(DemoMode.COMMAND_CLOCK);
-            s.add(DemoMode.COMMAND_OPERATOR);
-            return s;
-        }
-
-        @Override
-        public void onDemoModeStarted() {
-            // Must send this message to any view that we delegate to via dispatchDemoCommandToView
-            dispatchDemoModeStartedToView(R.id.clock);
-            dispatchDemoModeStartedToView(R.id.operator_name);
-        }
-
-        @Override
-        public void onDemoModeFinished() {
-            dispatchDemoModeFinishedToView(R.id.clock);
-            dispatchDemoModeFinishedToView(R.id.operator_name);
-            checkBarModes();
-        }
-
-        @Override
-        public void dispatchDemoCommand(String command, @NonNull Bundle args) {
-            if (command.equals(COMMAND_CLOCK)) {
-                dispatchDemoCommandToView(command, args, R.id.clock);
-            }
-            if (command.equals(COMMAND_BARS)) {
-                String mode = args.getString("mode");
-                int barMode = "opaque".equals(mode) ? MODE_OPAQUE :
-                        "translucent".equals(mode) ? MODE_TRANSLUCENT :
-                                "semi-transparent".equals(mode) ? MODE_SEMI_TRANSPARENT :
-                                        "transparent".equals(mode) ? MODE_TRANSPARENT :
-                                                "warning".equals(mode) ? MODE_WARNING :
-                                                        -1;
-                if (barMode != -1) {
-                    boolean animate = true;
-                    if (mNotificationShadeWindowController != null
-                            && mNotificationShadeWindowViewController.getBarTransitions() != null) {
-                        mNotificationShadeWindowViewController.getBarTransitions().transitionTo(
-                                barMode, animate);
-                    }
-                    mNavigationBarController.transitionTo(mDisplayId, barMode, animate);
-                }
-            }
-            if (command.equals(COMMAND_OPERATOR)) {
-                dispatchDemoCommandToView(command, args, R.id.operator_name);
-            }
-        }
-    };
-
     /**
      * Public constructor for StatusBar.
      *
@@ -1023,8 +965,6 @@ public class StatusBar extends SystemUI implements
         // Connect in to the status bar manager service
         mCommandQueue.addCallback(this);
 
-        // Listen for demo mode changes
-        mDemoModeController.addCallback(mDemoMode);
 
         RegisterStatusBarResult result = null;
         try {
@@ -1646,6 +1586,9 @@ public class StatusBar extends SystemUI implements
 
         mAuthRippleController = statusBarComponent.getAuthRippleController();
         mAuthRippleController.init();
+
+        // Listen for demo mode changes
+        mDemoModeController.addCallback(statusBarComponent.getStatusBarDemoMode());
     }
 
     protected void startKeyguard() {
@@ -3414,32 +3357,6 @@ public class StatusBar extends SystemUI implements
                                 0 /* flags */,
                                 animationController),
                 delay);
-    }
-
-
-    //TODO: these should have controllers, and this method should be removed
-    private void dispatchDemoCommandToView(String command, Bundle args, int id) {
-        if (mStatusBarView == null) return;
-        View v = mStatusBarView.findViewById(id);
-        if (v instanceof DemoModeCommandReceiver) {
-            ((DemoModeCommandReceiver) v).dispatchDemoCommand(command, args);
-        }
-    }
-
-    private void dispatchDemoModeStartedToView(int id) {
-        if (mStatusBarView == null) return;
-        View v = mStatusBarView.findViewById(id);
-        if (v instanceof DemoModeCommandReceiver) {
-            ((DemoModeCommandReceiver) v).onDemoModeStarted();
-        }
-    }
-
-    private void dispatchDemoModeFinishedToView(int id) {
-        if (mStatusBarView == null) return;
-        View v = mStatusBarView.findViewById(id);
-        if (v instanceof DemoModeCommandReceiver) {
-            ((DemoModeCommandReceiver) v).onDemoModeFinished();
-        }
     }
 
     public void showKeyguard() {
