@@ -16,11 +16,10 @@
 package com.android.server.appsearch.visibilitystore;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.PackageIdentifier;
-
-import androidx.annotation.Nullable;
 
 /**
  * Holds configuration about a package+cert that can access a schema.
