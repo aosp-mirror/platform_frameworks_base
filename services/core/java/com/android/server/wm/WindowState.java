@@ -3928,7 +3928,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void notifyInsetsChanged() {
         ProtoLog.d(WM_DEBUG_IME, "notifyInsetsChanged for %s ", this);
         try {
-            mClient.insetsChanged(getCompatInsetsState());
+            mClient.insetsChanged(getCompatInsetsState(),
+                    hasMoved(),
+                    mWindowFrames.isFrameSizeChangeReported());
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change w=" + this, e);
         }
@@ -3944,7 +3946,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 getDisplayContent().getInsetsStateController();
         try {
             mClient.insetsControlChanged(getCompatInsetsState(),
-                    stateController.getControlsForDispatch(this));
+                    stateController.getControlsForDispatch(this),
+                    hasMoved(),
+                    mWindowFrames.isFrameSizeChangeReported());
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change to w=" + this, e);
         }
