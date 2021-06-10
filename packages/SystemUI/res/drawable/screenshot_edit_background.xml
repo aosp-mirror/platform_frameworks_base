@@ -20,7 +20,7 @@
         android:color="?android:textColorPrimary">
     <item android:id="@android:id/background">
         <shape android:shape="rectangle">
-            <solid android:color="?androidprv:attr/colorAccentSecondary"/>
+            <solid android:color="?androidprv:attr/colorAccentPrimary"/>
             <corners android:radius="16dp"/>
         </shape>
     </item>
