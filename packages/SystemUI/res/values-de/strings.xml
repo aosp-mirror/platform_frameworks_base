@@ -801,7 +801,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Letzte"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Zurück"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Benachrichtigungen"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Tastenkombinationen"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Tastenkürzel"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Tastaturlayout wechseln"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apps"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assistent"</string>

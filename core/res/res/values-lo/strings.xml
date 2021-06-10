@@ -569,7 +569,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ໄອຄອນລາຍນິ້ວມື"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"ຈັດການຮາດແວປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"ອະນຸຍາດໃຫ້ແອັບເປີດວິທີການຕ່າງໆເພື່ອເພີ່ມ ແລະ ລຶບແມ່ແບບໃບໜ້າສຳລັບການນຳໃຊ້."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ໃຊ້ຮາດແວການປົດລັອກໃບໜ້າ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"ໃຊ້ຮາດແວການປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ຮາດແວການປົດລັອກດ້ວຍໜ້າເພື່ອພິສູດຢືນຢັນ"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ລົງທະບຽນໃບໜ້າຂອງທ່ານຄືນໃໝ່"</string>
