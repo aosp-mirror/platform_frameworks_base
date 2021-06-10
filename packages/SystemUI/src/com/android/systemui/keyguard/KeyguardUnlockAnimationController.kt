@@ -162,7 +162,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 // If the surface alpha is 0f, it's no longer visible so we can safely be done with
                 // the animation.
                 if (surfaceBehindAlpha == 0f) {
-                    keyguardViewMediator.get().finishSurfaceBehindRemoteAnimation()
+                    keyguardViewMediator.get().finishSurfaceBehindRemoteAnimation(
+                            false /* cancelled */)
                 }
             }
         })
@@ -175,7 +176,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
         surfaceBehindEntryAnimator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
-                keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished()
+                keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
+                        false /* cancelled */)
             }
         })
 
@@ -370,7 +372,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         } else if (keyguardViewMediator.get()
                         .isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe &&
                 reachedHideKeyguardThreshold) {
-            keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished()
+            keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(false /* cancelled */)
         }
     }
 
