@@ -50,6 +50,7 @@ import android.media.IAudioService;
 import android.net.ConnectivityManager;
 import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
+import android.net.VpnManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -123,6 +124,7 @@ public class MockSystemServices {
     public final PersistentDataBlockManagerInternal persistentDataBlockManagerInternal;
     public final AppOpsManager appOpsManager;
     public final UsbManager usbManager;
+    public final VpnManager vpnManager;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
     public final BuildMock buildMock = new BuildMock();
@@ -169,6 +171,7 @@ public class MockSystemServices {
         persistentDataBlockManagerInternal = mock(PersistentDataBlockManagerInternal.class);
         appOpsManager = mock(AppOpsManager.class);
         usbManager = mock(UsbManager.class);
+        vpnManager = mock(VpnManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());

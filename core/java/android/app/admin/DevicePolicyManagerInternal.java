@@ -265,5 +265,4 @@ public abstract class DevicePolicyManagerInternal {
      */
     public abstract void notifyUnsafeOperationStateChanged(DevicePolicySafetyChecker checker,
             @OperationSafetyReason int reason, boolean isSafe);
-
 }
