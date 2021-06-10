@@ -33,7 +33,10 @@ import android.content.pm.ResolveInfo;
 import android.location.LocationManagerInternal;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.UserHandle;
+import android.service.voice.VoiceInteractionManagerInternal;
+import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -78,6 +81,9 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     @NonNull
     private final RoleManager mRoleManager;
 
+    @NonNull
+    private final VoiceInteractionManagerInternal mVoiceInteractionManagerInternal;
+
     /**
      * The locking policy around the location tags is a bit special. Since we want to
      * avoid grabbing the lock on every op note we are taking the approach where the
@@ -101,6 +107,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     public AppOpsPolicy(@NonNull Context context) {
         mContext = context;
         mRoleManager = mContext.getSystemService(RoleManager.class);
+        mVoiceInteractionManagerInternal = LocalServices.getService(
+                VoiceInteractionManagerInternal.class);
 
         final LocationManagerInternal locationManagerInternal = LocalServices.getService(
                 LocationManagerInternal.class);
@@ -150,7 +158,7 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     public int checkOperation(int code, int uid, String packageName,
             @Nullable String attributionTag, boolean raw,
             QuintFunction<Integer, Integer, String, String, Boolean, Integer> superImpl) {
-        return superImpl.apply(code, uid, packageName, attributionTag, raw);
+        return superImpl.apply(code, resolveUid(code, uid), packageName, attributionTag, raw);
     }
 
     @Override
@@ -164,8 +172,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             @Nullable String attributionTag, boolean shouldCollectAsyncNotedOp, @Nullable
             String message, boolean shouldCollectMessage, @NonNull HeptFunction<Integer, Integer,
                     String, String, Boolean, String, Boolean, SyncNotedAppOp> superImpl) {
-        return superImpl.apply(resolveDatasourceOp(code, uid, packageName, attributionTag), uid,
-                packageName, attributionTag, shouldCollectAsyncNotedOp,
+        return superImpl.apply(resolveDatasourceOp(code, uid, packageName, attributionTag),
+                resolveUid(code, uid), packageName, attributionTag, shouldCollectAsyncNotedOp,
                 message, shouldCollectMessage);
     }
 
@@ -190,8 +198,9 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
                     String, Boolean, Boolean, String, Boolean, Integer, Integer,
             SyncNotedAppOp> superImpl) {
         return superImpl.apply(token, resolveDatasourceOp(code, uid, packageName, attributionTag),
-                uid, packageName, attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp,
-                message, shouldCollectMessage, attributionFlags, attributionChainId);
+                resolveUid(code, uid), packageName, attributionTag, startIfModeDefault,
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage, attributionFlags,
+                attributionChainId);
     }
 
     @Override
@@ -403,5 +412,24 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             return AppOpsManager.OP_ACTIVITY_RECOGNITION_SOURCE;
         }
         return code;
+    }
+
+    private int resolveUid(int code, int uid) {
+        // The HotwordDetectionService is an isolated service, which ordinarily cannot hold
+        // permissions. So we allow it to assume the owning package identity for certain
+        // operations.
+        // Note: The package name coming from the audio server is already the one for the owning
+        // package, so we don't need to modify it.
+        if (Process.isIsolated(uid) // simple check which fails-fast for the common case
+                && (code == AppOpsManager.OP_RECORD_AUDIO
+                || code == AppOpsManager.OP_RECORD_AUDIO_HOTWORD)) {
+            final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
+                    mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
+            if (hotwordDetectionServiceIdentity != null
+                    && uid == hotwordDetectionServiceIdentity.getIsolatedUid()) {
+                uid = hotwordDetectionServiceIdentity.getOwnerUid();
+            }
+        }
+        return uid;
     }
 }
