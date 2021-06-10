@@ -157,7 +157,7 @@ public abstract class WallpaperService extends Service {
     private static final int NOTIFY_COLORS_RATE_LIMIT_MS = 1000;
 
     private static final boolean ENABLE_WALLPAPER_DIMMING =
-            SystemProperties.getBoolean("persist.debug.enable_wallpaper_dimming", false);
+            SystemProperties.getBoolean("persist.debug.enable_wallpaper_dimming", true);
 
     private final ArrayList<Engine> mActiveEngines
             = new ArrayList<Engine>();

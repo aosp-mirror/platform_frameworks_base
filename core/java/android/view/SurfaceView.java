@@ -1554,12 +1554,21 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      * @hide
      */
     public void setResizeBackgroundColor(int bgColor) {
+        setResizeBackgroundColor(mTmpTransaction, bgColor);
+        mTmpTransaction.apply();
+    }
+
+    /**
+     * Version of {@link #setResizeBackgroundColor(int)} that allows you to provide
+     * {@link SurfaceControl.Transaction}.
+     * @hide
+     */
+    public void setResizeBackgroundColor(@NonNull SurfaceControl.Transaction t, int bgColor) {
         if (mBackgroundControl == null) {
             return;
         }
-
         mBackgroundColor = bgColor;
-        updateBackgroundColor(mTmpTransaction).apply();
+        updateBackgroundColor(t);
     }
 
     @UnsupportedAppUsage

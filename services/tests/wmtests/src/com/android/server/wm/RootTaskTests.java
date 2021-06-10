@@ -280,11 +280,11 @@ public class RootTaskTests extends WindowTestsBase {
     public void testResumedActivity() {
         final ActivityRecord r = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final Task task = r.getTask();
-        assertNull(task.getResumedActivity());
+        assertNull(task.getTopResumedActivity());
         r.setState(RESUMED, "testResumedActivity");
-        assertEquals(r, task.getResumedActivity());
+        assertEquals(r, task.getTopResumedActivity());
         r.setState(PAUSING, "testResumedActivity");
-        assertNull(task.getResumedActivity());
+        assertNull(task.getTopResumedActivity());
     }
 
     @Test
@@ -295,15 +295,15 @@ public class RootTaskTests extends WindowTestsBase {
         final Task task = r.getTask();
         // Ensure moving task between two root tasks updates resumed activity
         r.setState(RESUMED, "testResumedActivityFromTaskReparenting");
-        assertEquals(r, rootTask.getResumedActivity());
+        assertEquals(r, rootTask.getTopResumedActivity());
 
         final Task destRootTask = new TaskBuilder(mSupervisor).setOnTop(true).build();
         task.reparent(destRootTask, true /* toTop */, REPARENT_KEEP_ROOT_TASK_AT_FRONT,
                 false /* animate */, true /* deferResume*/,
                 "testResumedActivityFromTaskReparenting");
 
-        assertNull(rootTask.getResumedActivity());
-        assertEquals(r, destRootTask.getResumedActivity());
+        assertNull(rootTask.getTopResumedActivity());
+        assertEquals(r, destRootTask.getTopResumedActivity());
     }
 
     @Test
@@ -314,15 +314,15 @@ public class RootTaskTests extends WindowTestsBase {
         final Task task = r.getTask();
         // Ensure moving task between two root tasks updates resumed activity
         r.setState(RESUMED, "testResumedActivityFromActivityReparenting");
-        assertEquals(r, rootTask.getResumedActivity());
+        assertEquals(r, rootTask.getTopResumedActivity());
 
         final Task destRootTask = new TaskBuilder(mSupervisor).setOnTop(true).build();
         task.reparent(destRootTask, true /*toTop*/, REPARENT_MOVE_ROOT_TASK_TO_FRONT,
                 false /* animate */, false /* deferResume*/,
                 "testResumedActivityFromActivityReparenting");
 
-        assertNull(rootTask.getResumedActivity());
-        assertEquals(r, destRootTask.getResumedActivity());
+        assertNull(rootTask.getTopResumedActivity());
+        assertEquals(r, destRootTask.getTopResumedActivity());
     }
 
     @Test
@@ -707,13 +707,14 @@ public class RootTaskTests extends WindowTestsBase {
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, true /* onTop */);
         final Task splitPrimary = createTaskForShouldBeVisibleTest(mDefaultTaskDisplayArea,
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED, true /* onTop */);
+        // Creating as two-level tasks so home task can be reparented to split-secondary root task.
         final Task splitSecondary = createTaskForShouldBeVisibleTest(mDefaultTaskDisplayArea,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_UNDEFINED, true /* onTop */);
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_UNDEFINED, true /* onTop */,
+                true /* twoLevelTask */);
 
         doReturn(false).when(homeRootTask).isTranslucent(any());
         doReturn(false).when(splitPrimary).isTranslucent(any());
         doReturn(false).when(splitSecondary).isTranslucent(any());
-
 
         // Re-parent home to split secondary.
         homeRootTask.reparent(splitSecondary, POSITION_TOP);
@@ -1152,12 +1153,12 @@ public class RootTaskTests extends WindowTestsBase {
         } else if (twoLevelTask) {
             task = new TaskBuilder(mSupervisor)
                     .setTaskDisplayArea(taskDisplayArea)
-                    .setWindowingMode(windowingMode)
                     .setActivityType(activityType)
                     .setOnTop(onTop)
                     .setCreateActivity(true)
                     .setCreateParentTask(true)
                     .build().getRootTask();
+            task.setWindowingMode(windowingMode);
         } else {
             task = new TaskBuilder(mSupervisor)
                     .setTaskDisplayArea(taskDisplayArea)
@@ -1311,9 +1312,9 @@ public class RootTaskTests extends WindowTestsBase {
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
         topActivity.info.flags |= FLAG_RESUME_WHILE_PAUSING;
 
-        task.startPausingLocked(false /* uiSleeping */, topActivity,
+        task.startPausing(false /* uiSleeping */, topActivity,
                 "test");
-        verify(task).completePauseLocked(anyBoolean(), eq(topActivity));
+        verify(task).completePause(anyBoolean(), eq(topActivity));
     }
 
     @Test

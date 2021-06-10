@@ -698,14 +698,13 @@ public class LauncherAppsService extends SystemService {
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                return injectCreatePendingIntent(mContext.createPackageContextAsUser(packageName,
-                        0, user), 0 /* requestCode */, intents, FLAG_MUTABLE, opts, user);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(TAG, "Cannot create pending intent from shortcut " + shortcutId, e);
+                return injectCreatePendingIntent(0 /* requestCode */, intents,
+                        FLAG_MUTABLE, opts, packageName, mPackageManagerInternal.getPackageUid(
+                                packageName, PackageManager.MATCH_DIRECT_BOOT_AUTO,
+                                user.getIdentifier()));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-            return null;
         }
 
         @Override
@@ -812,10 +811,10 @@ public class LauncherAppsService extends SystemService {
         }
 
         @VisibleForTesting
-        PendingIntent injectCreatePendingIntent(Context context, int requestCode,
-                @NonNull Intent[] intents, int flags, Bundle options, UserHandle user) {
-            return PendingIntent.getActivitiesAsUser(context, requestCode, intents, flags, options,
-                    user);
+        PendingIntent injectCreatePendingIntent(int requestCode, @NonNull Intent[] intents,
+                int flags, Bundle options, String ownerPackage, int ownerUserId) {
+            return mActivityManagerInternal.getPendingIntentActivityAsApp(requestCode, intents,
+                    flags, options, ownerPackage, ownerUserId);
         }
 
         @Override

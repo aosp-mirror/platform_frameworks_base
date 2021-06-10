@@ -16,11 +16,14 @@
 
 package com.android.systemui.shared.recents.utilities;
 
+import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
+
 import android.graphics.Color;
+import android.inputmethodservice.InputMethodService;
 import android.os.Handler;
 import android.os.Message;
 import android.view.Surface;
-import android.view.View;
 
 /* Common code */
 public class Utilities {
@@ -76,5 +79,35 @@ public class Utilities {
      */
     public static float clamp(float value, float min, float max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    /**
+     * @return updated set of flags from InputMethodService based off {@param oldHints}
+     *          Leaves original hints unmodified
+     */
+    public static int calculateBackDispositionHints(int oldHints, int backDisposition,
+            boolean imeShown, boolean showImeSwitcher) {
+        int hints = oldHints;
+        switch (backDisposition) {
+            case InputMethodService.BACK_DISPOSITION_DEFAULT:
+            case InputMethodService.BACK_DISPOSITION_WILL_NOT_DISMISS:
+            case InputMethodService.BACK_DISPOSITION_WILL_DISMISS:
+                if (imeShown) {
+                    hints |= NAVIGATION_HINT_BACK_ALT;
+                } else {
+                    hints &= ~NAVIGATION_HINT_BACK_ALT;
+                }
+                break;
+            case InputMethodService.BACK_DISPOSITION_ADJUST_NOTHING:
+                hints &= ~NAVIGATION_HINT_BACK_ALT;
+                break;
+        }
+        if (showImeSwitcher) {
+            hints |= NAVIGATION_HINT_IME_SHOWN;
+        } else {
+            hints &= ~NAVIGATION_HINT_IME_SHOWN;
+        }
+
+        return hints;
     }
 }

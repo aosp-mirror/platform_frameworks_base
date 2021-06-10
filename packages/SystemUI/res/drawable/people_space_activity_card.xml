@@ -14,5 +14,5 @@
   ~ limitations under the License.
   -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="?android:attr/colorBackgroundFloating" />
+    <solid android:color="@color/people_tile_background" />
 </shape>

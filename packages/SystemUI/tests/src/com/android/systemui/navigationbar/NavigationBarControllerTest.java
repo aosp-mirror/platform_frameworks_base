@@ -108,7 +108,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         Dependency.get(Dependency.MAIN_HANDLER),
                         mock(UiEventLogger.class),
                         mock(NavigationBarOverlayController.class),
-                        mock(ConfigurationController.class)));
+                        mock(ConfigurationController.class),
+                        mock(NavigationBarA11yHelper.class)));
         initializeNavigationBars();
     }
 

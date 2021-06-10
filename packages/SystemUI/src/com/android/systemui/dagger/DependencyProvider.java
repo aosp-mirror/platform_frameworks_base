@@ -60,6 +60,7 @@ import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.NavigationBarA11yHelper;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarOverlayController;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -231,7 +232,8 @@ public class DependencyProvider {
             @Main Handler mainHandler,
             UiEventLogger uiEventLogger,
             NavigationBarOverlayController navBarOverlayController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            NavigationBarA11yHelper navigationBarA11yHelper) {
         return new NavigationBarController(context,
                 windowManager,
                 assistManagerLazy,
@@ -256,7 +258,8 @@ public class DependencyProvider {
                 mainHandler,
                 uiEventLogger,
                 navBarOverlayController,
-                configurationController);
+                configurationController,
+                navigationBarA11yHelper);
     }
 
     /** */

@@ -49,7 +49,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
@@ -71,7 +70,6 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     private final PackageManager mPackageManager;
     private final SecureSettings mSecureSettings;
     private final QuickAccessWalletController mController;
-    private final FeatureFlags mFeatureFlags;
 
     private WalletCard mSelectedCard;
     @VisibleForTesting Drawable mCardViewDrawable;
@@ -89,15 +87,13 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
             KeyguardStateController keyguardStateController,
             PackageManager packageManager,
             SecureSettings secureSettings,
-            QuickAccessWalletController quickAccessWalletController,
-            FeatureFlags featureFlags) {
+            QuickAccessWalletController quickAccessWalletController) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = quickAccessWalletController;
         mKeyguardStateController = keyguardStateController;
         mPackageManager = packageManager;
         mSecureSettings = secureSettings;
-        mFeatureFlags = featureFlags;
     }
 
 
@@ -192,8 +188,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
     @Override
     public boolean isAvailable() {
-        return mFeatureFlags.isQuickAccessWalletEnabled()
-                && mPackageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
+        return mPackageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
                 && !mPackageManager.hasSystemFeature(FEATURE_CHROME_OS)
                 && mSecureSettings.getString(NFC_PAYMENT_DEFAULT_COMPONENT) != null;
     }

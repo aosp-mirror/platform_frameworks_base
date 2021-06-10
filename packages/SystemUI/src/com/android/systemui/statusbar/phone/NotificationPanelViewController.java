@@ -139,6 +139,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
+import com.android.systemui.statusbar.notification.stack.MediaHeaderView;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -1126,10 +1127,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setStatusBar(mStatusBar);
         mKeyguardBottomArea.setUserSetupComplete(mUserSetupComplete);
         mKeyguardBottomArea.setFalsingManager(mFalsingManager);
-
-        if (mFeatureFlags.isQuickAccessWalletEnabled()) {
-            mKeyguardBottomArea.initWallet(mQuickAccessWalletController);
-        }
+        mKeyguardBottomArea.initWallet(mQuickAccessWalletController);
     }
 
     private void updateMaxDisplayedNotifications(boolean recompute) {
@@ -1329,28 +1327,33 @@ public class NotificationPanelViewController extends PanelViewController {
                 mNotificationStackScrollLayoutController.getHeight()
                         - minPadding
                         - shelfSize
-                        - bottomPadding
-                        - mKeyguardStatusViewController.getLogoutButtonHeight();
+                        - bottomPadding;
 
         int count = 0;
         ExpandableView previousView = null;
         for (int i = 0; i < mNotificationStackScrollLayoutController.getChildCount(); i++) {
             ExpandableView child = mNotificationStackScrollLayoutController.getChildAt(i);
-            if (!(child instanceof ExpandableNotificationRow)) {
-                continue;
-            }
-            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            boolean
-                    suppressedSummary =
-                    mGroupManager != null && mGroupManager.isSummaryOfSuppressedGroup(
-                            row.getEntry().getSbn());
-            if (suppressedSummary) {
-                continue;
-            }
-            if (!canShowViewOnLockscreen(child)) {
-                continue;
-            }
-            if (row.isRemoved()) {
+            if (child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                boolean suppressedSummary = mGroupManager != null
+                        && mGroupManager.isSummaryOfSuppressedGroup(row.getEntry().getSbn());
+                if (suppressedSummary) {
+                    continue;
+                }
+                if (!canShowViewOnLockscreen(child)) {
+                    continue;
+                }
+                if (row.isRemoved()) {
+                    continue;
+                }
+            } else if (child instanceof MediaHeaderView) {
+                if (child.getVisibility() == GONE) {
+                    continue;
+                }
+                if (child.getIntrinsicHeight() == 0) {
+                    continue;
+                }
+            } else {
                 continue;
             }
             availableSpace -= child.getMinHeight(true /* ignoreTemporaryStates */);
@@ -4159,11 +4162,6 @@ public class NotificationPanelViewController extends PanelViewController {
                         entry.getHeadsUpAnimationView(), false);
                 entry.setHeadsUpIsVisible();
             }
-        }
-
-        @Override
-        public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-            mNotificationStackScrollLayoutController.generateHeadsUpAnimation(entry, isHeadsUp);
         }
     }
 

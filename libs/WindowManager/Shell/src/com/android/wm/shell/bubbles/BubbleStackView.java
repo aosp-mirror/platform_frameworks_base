@@ -1492,22 +1492,22 @@ public class BubbleStackView extends FrameLayout
             mStackAnimationController.setStackPosition(mPositioner.getDefaultStartPosition());
         }
 
-        if (getBubbleCount() == 0) {
-            mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
-        }
-
         if (bubble.getIconView() == null) {
             return;
         }
 
+        mBubbleContainer.addView(bubble.getIconView(), 0,
+                new FrameLayout.LayoutParams(mPositioner.getBubbleSize(),
+                        mPositioner.getBubbleSize()));
+
+        if (getBubbleCount() == 0) {
+            mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
+        }
         // Set the dot position to the opposite of the side the stack is resting on, since the stack
         // resting slightly off-screen would result in the dot also being off-screen.
         bubble.getIconView().setDotBadgeOnLeft(!mStackOnLeftOrWillBe /* onLeft */);
         bubble.getIconView().setOnClickListener(mBubbleClickListener);
         bubble.getIconView().setOnTouchListener(mBubbleTouchListener);
-        mBubbleContainer.addView(bubble.getIconView(), 0,
-                new FrameLayout.LayoutParams(mPositioner.getBubbleSize(),
-                        mPositioner.getBubbleSize()));
         updateBubbleShadows(false /* showForAllBubbles */);
         animateInFlyoutForBubble(bubble);
         requestUpdate();
@@ -2400,7 +2400,8 @@ public class BubbleStackView extends FrameLayout
 
             if (mFlyout.getVisibility() == View.VISIBLE) {
                 mFlyout.animateUpdate(bubble.getFlyoutMessage(), getWidth(),
-                        mStackAnimationController.getStackPosition(), !bubble.showDot());
+                        mStackAnimationController.getStackPosition(), !bubble.showDot(),
+                        mAfterFlyoutHidden /* onHide */);
             } else {
                 mFlyout.setVisibility(INVISIBLE);
                 mFlyout.setupFlyoutStartingAsDot(bubble.getFlyoutMessage(),
@@ -2408,7 +2409,7 @@ public class BubbleStackView extends FrameLayout
                         mStackAnimationController.isStackOnLeftSide(),
                         bubble.getIconView().getDotColor() /* dotColor */,
                         expandFlyoutAfterDelay /* onLayoutComplete */,
-                        mAfterFlyoutHidden,
+                        mAfterFlyoutHidden /* onHide */,
                         bubble.getIconView().getDotCenter(),
                         !bubble.showDot(),
                         mPositioner);

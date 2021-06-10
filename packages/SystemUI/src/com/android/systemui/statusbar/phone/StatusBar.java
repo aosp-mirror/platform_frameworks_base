@@ -2118,7 +2118,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
 
-        mKeyguardViewMediator.hideWithAnimation(runner);
+        // We post to the main thread for 2 reasons:
+        //   1. KeyguardViewMediator is not thread-safe.
+        //   2. To ensure that ViewMediatorCallback#keyguardDonePending is called before
+        //      ViewMediatorCallback#readyForKeyguardDone. The wrong order could occur when doing
+        //      dismissKeyguardThenExecute { hideKeyguardWithAnimation(runner) }.
+        mMainThreadHandler.post(() -> mKeyguardViewMediator.hideWithAnimation(runner));
     }
 
     @Override
