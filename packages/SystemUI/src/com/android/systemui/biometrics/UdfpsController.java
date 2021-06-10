@@ -405,9 +405,8 @@ public class UdfpsController implements DozeReceiver {
                         ? event.getPointerId(0)
                         : event.findPointerIndex(mActivePointerId);
                 if (idx == event.getActionIndex()) {
-                    final float x = event.getX(idx);
-                    final float y = event.getY(idx);
-                    if (isWithinSensorArea(udfpsView, x, y, fromUdfpsView)) {
+                    if (isWithinSensorArea(udfpsView, event.getX(idx), event.getY(idx),
+                            fromUdfpsView)) {
                         if (mVelocityTracker == null) {
                             // touches could be injected, so the velocity tracker may not have
                             // been initialized (via ACTION_DOWN).
@@ -427,7 +426,8 @@ public class UdfpsController implements DozeReceiver {
                         final long sinceLastLog = SystemClock.elapsedRealtime() - mTouchLogTime;
                         if (!isIlluminationRequested && !mGoodCaptureReceived &&
                                 !exceedsVelocityThreshold) {
-                            onFingerDown((int) x, (int) y, minor, major);
+                            onFingerDown((int) event.getRawX(), (int) event.getRawY(), minor,
+                                    major);
                             Log.v(TAG, "onTouch | finger down: " + touchInfo);
                             mTouchLogTime = SystemClock.elapsedRealtime();
                             mPowerManager.userActivity(SystemClock.uptimeMillis(),
