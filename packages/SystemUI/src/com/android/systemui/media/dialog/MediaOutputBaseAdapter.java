@@ -64,10 +64,12 @@ public abstract class MediaOutputBaseAdapter extends
     Context mContext;
     View mHolderView;
     boolean mIsDragging;
+    int mCurrentActivePosition;
 
     public MediaOutputBaseAdapter(MediaOutputController controller) {
         mController = controller;
         mIsDragging = false;
+        mCurrentActivePosition = -1;
     }
 
     @Override
@@ -97,6 +99,10 @@ public abstract class MediaOutputBaseAdapter extends
 
     boolean isAnimating() {
         return mIsAnimating;
+    }
+
+    int getCurrentActivePosition() {
+        return mCurrentActivePosition;
     }
 
     /**
@@ -136,7 +142,7 @@ public abstract class MediaOutputBaseAdapter extends
             mCheckBox = view.requireViewById(R.id.check_box);
         }
 
-        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin) {
+        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
             mDeviceId = device.getId();
             ThreadUtils.postOnBackgroundThread(() -> {
                 Icon icon = mController.getDeviceIconCompat(device).toIcon(mContext);
