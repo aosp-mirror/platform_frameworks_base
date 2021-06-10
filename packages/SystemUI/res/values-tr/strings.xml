@@ -718,7 +718,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Kayan kısayolla dikkatinizi bu içerik üzerinde tutar."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Görüşme bölümünün üstünde gösterilir, kayan baloncuk olarak görünür, kilit ekranında profil resmini görüntüler"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Öncelik"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Öncelikli"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>, sohbet özelliklerini desteklemiyor"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Son kapatılan baloncuk yok"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Son baloncuklar ve kapattığınız baloncuklar burada görünür"</string>
