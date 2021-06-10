@@ -158,10 +158,9 @@ class ConfigurationController {
         int configDiff;
         boolean equivalent;
 
-        final Resources.Theme systemTheme = mActivityThread.getSystemContext().getTheme();
-        final Resources.Theme systemUiTheme = mActivityThread.getSystemUiContext().getTheme();
-
         synchronized (mResourcesManager) {
+            final Resources.Theme systemTheme = mActivityThread.getSystemContext().getTheme();
+            final Resources.Theme systemUiTheme = mActivityThread.getSystemUiContext().getTheme();
             if (mPendingConfiguration != null) {
                 if (!mPendingConfiguration.isOtherSeqNewer(config)) {
                     config = mPendingConfiguration;
