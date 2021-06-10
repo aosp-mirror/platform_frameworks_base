@@ -233,6 +233,7 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeRemoveJankDataListener(long nativeListener);
     private static native long nativeCreateJankDataListenerWrapper(OnJankDataListener listener);
     private static native int nativeGetGPUContextPriority();
+    private static native void nativeSetTransformHint(long nativeObject, int transformHint);
 
     @Nullable
     @GuardedBy("mLock")
@@ -347,6 +348,8 @@ public final class SurfaceControl implements Parcelable {
     private int mWidth;
     @GuardedBy("mLock")
     private int mHeight;
+
+    private int mTransformHint;
 
     private WeakReference<View> mLocalOwnerView;
 
@@ -605,6 +608,7 @@ public final class SurfaceControl implements Parcelable {
         mName = other.mName;
         mWidth = other.mWidth;
         mHeight = other.mHeight;
+        mTransformHint = other.mTransformHint;
         mLocalOwnerView = other.mLocalOwnerView;
         assignNativeObject(nativeCopyFromSurfaceControl(other.mNativeObject), callsite);
     }
@@ -1467,6 +1471,7 @@ public final class SurfaceControl implements Parcelable {
         mName = in.readString8();
         mWidth = in.readInt();
         mHeight = in.readInt();
+        mTransformHint = in.readInt();
 
         long object = 0;
         if (in.readInt() != 0) {
@@ -1485,6 +1490,7 @@ public final class SurfaceControl implements Parcelable {
         dest.writeString8(mName);
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
+        dest.writeInt(mTransformHint);
         if (mNativeObject == 0) {
             dest.writeInt(0);
         } else {
@@ -3601,5 +3607,28 @@ public final class SurfaceControl implements Parcelable {
         mWidth = w;
         mHeight = h;
         nativeUpdateDefaultBufferSize(mNativeObject, w, h);
+    }
+
+    /**
+     * @hide
+     */
+    public int getTransformHint() {
+        return mTransformHint;
+    }
+
+    /**
+     * Update the transform hint of current SurfaceControl. Only affect if type is
+     * {@link #FX_SURFACE_BLAST}
+     *
+     * The transform hint is used to prevent allocating a buffer of different size when a
+     * layer is rotated. The producer can choose to consume the hint and allocate the buffer
+     * with the same size.
+     * @hide
+     */
+    public void setTransformHint(@Surface.Rotation int transformHint) {
+        if (mTransformHint != transformHint) {
+            mTransformHint = transformHint;
+            nativeSetTransformHint(mNativeObject, transformHint);
+        }
     }
 }

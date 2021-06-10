@@ -30,7 +30,6 @@ import android.graphics.BLASTBufferQueue;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.HardwareRenderer;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -214,6 +213,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final Rect mSurfaceFrame = new Rect();
     int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
+    int mTransformHint = 0;
 
     private boolean mGlobalListenersAdded;
     private boolean mAttachedToWindow;
@@ -944,7 +944,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private boolean performSurfaceTransaction(ViewRootImpl viewRoot, Translator translator,
-            boolean creating, boolean sizeChanged) {
+            boolean creating, boolean sizeChanged, boolean hintChanged) {
         boolean realSizeChanged = false;
 
         mSurfaceLock.lock();
@@ -1009,7 +1009,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 }
             }
             mTmpTransaction.setCornerRadius(mSurfaceControl, mCornerRadius);
-            if (sizeChanged && !creating) {
+            if ((sizeChanged || hintChanged) && !creating) {
                 setBufferSize(mTmpTransaction);
             }
 
@@ -1081,17 +1081,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             || mWindowSpaceTop != mLocation[1];
         final boolean layoutSizeChanged = getWidth() != mScreenRect.width()
             || getHeight() != mScreenRect.height();
-
+        final boolean hintChanged = viewRoot.getSurfaceTransformHint() != mTransformHint;
 
         if (creating || formatChanged || sizeChanged || visibleChanged ||
                 (mUseAlpha && alphaChanged) || windowVisibleChanged ||
-                positionChanged || layoutSizeChanged) {
+                positionChanged || layoutSizeChanged || hintChanged) {
             getLocationInWindow(mLocation);
 
             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
                     + "Changes: creating=" + creating
                     + " format=" + formatChanged + " size=" + sizeChanged
                     + " visible=" + visibleChanged + " alpha=" + alphaChanged
+                    + " hint=" + hintChanged
                     + " mUseAlpha=" + mUseAlpha
                     + " visible=" + visibleChanged
                     + " left=" + (mWindowSpaceLeft != mLocation[0])
@@ -1105,6 +1106,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mSurfaceHeight = myHeight;
                 mFormat = mRequestedFormat;
                 mLastWindowVisibility = mWindowVisibility;
+                mTransformHint = viewRoot.getSurfaceTransformHint();
 
                 mScreenRect.left = mWindowSpaceLeft;
                 mScreenRect.top = mWindowSpaceTop;
@@ -1130,9 +1132,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 }
 
                 final boolean realSizeChanged = performSurfaceTransaction(viewRoot,
-                        translator, creating, sizeChanged);
-                final boolean redrawNeeded = sizeChanged || creating ||
-                    (mVisible && !mDrawFinished);
+                        translator, creating, sizeChanged, hintChanged);
+                final boolean redrawNeeded = sizeChanged || creating || hintChanged
+                        || (mVisible && !mDrawFinished);
 
                 try {
                     SurfaceHolder.Callback[] callbacks = null;
@@ -1158,7 +1160,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                                 c.surfaceCreated(mSurfaceHolder);
                             }
                         }
-                        if (creating || formatChanged || sizeChanged
+                        if (creating || formatChanged || sizeChanged || hintChanged
                                 || visibleChanged || realSizeChanged) {
                             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
                                     + "surfaceChanged -- format=" + mFormat
@@ -1234,6 +1236,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void setBufferSize(Transaction transaction) {
         if (mUseBlastAdapter) {
+            mBlastSurfaceControl.setTransformHint(mTransformHint);
             mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, mFormat);
         } else {
             transaction.setBufferSize(mSurfaceControl, mSurfaceWidth, mSurfaceHeight);
@@ -1330,6 +1333,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         if (mBlastBufferQueue != null) {
             mBlastBufferQueue.destroy();
         }
+        mTransformHint = viewRoot.getSurfaceTransformHint();
+        mBlastSurfaceControl.setTransformHint(mTransformHint);
         mBlastBufferQueue = new BLASTBufferQueue(name, mBlastSurfaceControl, mSurfaceWidth,
                 mSurfaceHeight, mFormat);
     }
