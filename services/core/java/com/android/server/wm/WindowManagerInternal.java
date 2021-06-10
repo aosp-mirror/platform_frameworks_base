@@ -160,11 +160,11 @@ public abstract class WindowManagerInternal {
         void onRectangleOnScreenRequested(int left, int top, int right, int bottom);
 
         /**
-         * Notifies that the rotation changed.
+         * Notifies that the display size is changed when rotation or the
+         * logical display is changed.
          *
-         * @param rotation The current rotation.
          */
-        void onRotationChanged(int rotation);
+        void onDisplaySizeChanged();
 
         /**
          * Notifies that the context of the user changed. For example, an application

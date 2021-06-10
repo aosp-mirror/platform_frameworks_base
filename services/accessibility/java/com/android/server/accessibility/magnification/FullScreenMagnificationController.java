@@ -283,7 +283,7 @@ public class FullScreenMagnificationController {
         }
 
         @Override
-        public void onRotationChanged(int rotation) {
+        public void onDisplaySizeChanged() {
             // Treat as context change and reset
             final Message m = PooledLambda.obtainMessage(
                     FullScreenMagnificationController::resetIfNeeded,

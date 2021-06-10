@@ -326,7 +326,8 @@ final class AccessibilityController {
         }
     }
 
-    void onRotationChanged(DisplayContent displayContent) {
+    void onDisplaySizeChanged(DisplayContent displayContent) {
+
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
                 | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
             mAccessibilityTracing.logTrace(TAG + ".onRotationChanged",
@@ -336,7 +337,7 @@ final class AccessibilityController {
         final int displayId = displayContent.getDisplayId();
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
-            displayMagnifier.onRotationChanged(displayContent);
+            displayMagnifier.onDisplaySizeChanged(displayContent);
         }
         final WindowsForAccessibilityObserver windowsForA11yObserver =
                 mWindowsForAccessibilityObserver.get(displayId);
@@ -608,7 +609,7 @@ final class AccessibilityController {
         private static final String LOG_TAG = TAG_WITH_CLASS_NAME ? "DisplayMagnifier" : TAG_WM;
 
         private static final boolean DEBUG_WINDOW_TRANSITIONS = false;
-        private static final boolean DEBUG_ROTATION = false;
+        private static final boolean DEBUG_DISPLAY_SIZE = false;
         private static final boolean DEBUG_LAYERS = false;
         private static final boolean DEBUG_RECTANGLE_REQUESTED = false;
         private static final boolean DEBUG_VIEWPORT_WINDOW = false;
@@ -725,18 +726,18 @@ final class AccessibilityController {
             mService.scheduleAnimationLocked();
         }
 
-        void onRotationChanged(DisplayContent displayContent) {
+        void onDisplaySizeChanged(DisplayContent displayContent) {
             if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-                mAccessibilityTracing.logTrace(LOG_TAG + ".onRotationChanged",
+                mAccessibilityTracing.logTrace(LOG_TAG + ".onDisplaySizeChanged",
                         FLAGS_MAGNIFICATION_CALLBACK, "displayContent={" + displayContent + "}");
             }
-            if (DEBUG_ROTATION) {
+            if (DEBUG_DISPLAY_SIZE) {
                 final int rotation = displayContent.getRotation();
                 Slog.i(LOG_TAG, "Rotation: " + Surface.rotationToString(rotation)
                         + " displayId: " + displayContent.getDisplayId());
             }
-            mMagnifedViewport.onRotationChanged();
-            mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_ROTATION_CHANGED);
+            mMagnifedViewport.onDisplaySizeChanged();
+            mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_DISPLAY_SIZE_CHANGED);
         }
 
         void onAppWindowTransition(int displayId, int transition) {
@@ -923,7 +924,8 @@ final class AccessibilityController {
 
                 if (mDisplayContext.getResources().getConfiguration().isScreenRound()) {
                     mCircularPath = new Path();
-                    mDisplay.getRealSize(mScreenSize);
+
+                    getDisplaySizeLocked(mScreenSize);
                     final int centerXY = mScreenSize.x / 2;
                     mCircularPath.addCircle(centerXY, centerXY, centerXY, Path.Direction.CW);
                 } else {
@@ -953,7 +955,7 @@ final class AccessibilityController {
             }
 
             void recomputeBounds() {
-                mDisplay.getRealSize(mScreenSize);
+                getDisplaySizeLocked(mScreenSize);
                 final int screenWidth = mScreenSize.x;
                 final int screenHeight = mScreenSize.y;
 
@@ -1088,9 +1090,10 @@ final class AccessibilityController {
                         || windowType == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
             }
 
-            void onRotationChanged() {
+            void onDisplaySizeChanged() {
                 // If we are showing the magnification border, hide it immediately so
-                // the user does not see strange artifacts during rotation. The screenshot
+                // the user does not see strange artifacts during display size changed caused by
+                // rotation or folding/unfolding the device. In the rotation case, the screenshot
                 // used for rotation already has the border. After the rotation is complete
                 // we will show the border.
                 if (isMagnifying() || isForceShowingMagnifiableBounds()) {
@@ -1146,6 +1149,12 @@ final class AccessibilityController {
                         outWindows.put(mTempLayer, w);
                     }
                 }, false /* traverseTopToBottom */ );
+            }
+
+            private void getDisplaySizeLocked(Point outSize) {
+                final Rect bounds =
+                        mDisplayContent.getConfiguration().windowConfiguration.getBounds();
+                outSize.set(bounds.width(), bounds.height());
             }
 
             void dump(PrintWriter pw, String prefix) {
@@ -1262,7 +1271,7 @@ final class AccessibilityController {
 
                 void updateSize() {
                     synchronized (mService.mGlobalLock) {
-                        mDisplay.getRealSize(mScreenSize);
+                        getDisplaySizeLocked(mScreenSize);
                         mBlastBufferQueue.update(mSurfaceControl, mScreenSize.x, mScreenSize.y,
                                 PixelFormat.RGBA_8888);
                         invalidate(mDirtyRect);
@@ -1401,7 +1410,7 @@ final class AccessibilityController {
             public static final int MESSAGE_NOTIFY_MAGNIFICATION_REGION_CHANGED = 1;
             public static final int MESSAGE_NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED = 2;
             public static final int MESSAGE_NOTIFY_USER_CONTEXT_CHANGED = 3;
-            public static final int MESSAGE_NOTIFY_ROTATION_CHANGED = 4;
+            public static final int MESSAGE_NOTIFY_DISPLAY_SIZE_CHANGED = 4;
             public static final int MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED = 5;
             public static final int MESSAGE_NOTIFY_IME_WINDOW_VISIBILITY_CHANGED = 6;
 
@@ -1433,9 +1442,8 @@ final class AccessibilityController {
                         mCallbacks.onUserContextChanged();
                     } break;
 
-                    case MESSAGE_NOTIFY_ROTATION_CHANGED: {
-                        final int rotation = message.arg1;
-                        mCallbacks.onRotationChanged(rotation);
+                    case MESSAGE_NOTIFY_DISPLAY_SIZE_CHANGED: {
+                        mCallbacks.onDisplaySizeChanged();
                     } break;
 
                     case MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED : {
