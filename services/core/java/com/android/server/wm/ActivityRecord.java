@@ -1273,11 +1273,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private void computeConfigurationAfterMultiWindowModeChange() {
         final Configuration newConfig = new Configuration();
-        newConfig.setTo(task.getRequestedOverrideConfiguration());
+        final TaskFragment taskFrag = getTaskFragment();
+        newConfig.setTo(taskFrag.getRequestedOverrideConfiguration());
         Rect outBounds = newConfig.windowConfiguration.getBounds();
-        final Configuration parentConfig = task.getParent().getConfiguration();
-        task.adjustForMinimalTaskDimensions(outBounds, outBounds, parentConfig);
-        task.computeConfigResourceOverrides(newConfig, parentConfig);
+        // TODO(b/189384393): which parent does this Activity really needed?
+        // I guess we should either call getRootTask or getDisplayArea for this case.
+        final Configuration parentConfig = taskFrag.getParent().getConfiguration();
+        taskFrag.adjustForMinimalTaskDimensions(outBounds, outBounds, parentConfig);
+        taskFrag.computeConfigResourceOverrides(newConfig, parentConfig);
     }
 
     Task getTask() {
@@ -7064,7 +7067,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // If the activity has requested override bounds, the configuration needs to be
             // computed accordingly.
             if (!matchParentBounds()) {
-                task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration);
+                getTaskFragment().computeConfigResourceOverrides(resolvedConfig,
+                        newParentConfiguration);
             }
         // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
         // are already calculated in resolveFixedOrientationConfiguration.
@@ -7179,7 +7183,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Since bounds has changed, the configuration needs to be computed accordingly.
-        task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration);
+        getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration);
     }
 
     /**
@@ -7364,7 +7368,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Calculate app bounds using fixed orientation bounds because they will be needed later
         // for comparison with size compat app bounds in {@link resolveSizeCompatModeConfiguration}.
-        task.computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
+        getTaskFragment().computeConfigResourceOverrides(getResolvedOverrideConfiguration(),
+                newParentConfig);
         mLetterboxBoundsForFixedOrientationAndAspectRatio = new Rect(resolvedBounds);
     }
 
@@ -7394,7 +7399,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!resolvedBounds.isEmpty() && !resolvedBounds.equals(parentBounds)) {
             // Compute the configuration based on the resolved bounds. If aspect ratio doesn't
             // restrict, the bounds should be the requested override bounds.
-            task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
+            getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
                     getFixedRotationTransformDisplayInfo());
         }
     }
@@ -7461,10 +7466,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Use resolvedBounds to compute other override configurations such as appBounds. The bounds
         // are calculated in compat container space. The actual position on screen will be applied
         // later, so the calculation is simpler that doesn't need to involve offset from parent.
-        task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
+        getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
                 mCompatDisplayInsets);
         // Use current screen layout as source because the size of app is independent to parent.
-        resolvedConfig.screenLayout = Task.computeScreenLayoutOverride(
+        resolvedConfig.screenLayout = TaskFragment.computeScreenLayoutOverride(
                 getConfiguration().screenLayout, resolvedConfig.screenWidthDp,
                 resolvedConfig.screenHeightDp);
 
@@ -8784,7 +8789,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 outAppBounds.offset(insets.left, insets.top);
             } else if (rotation != ROTATION_UNDEFINED) {
                 // Ensure the app bounds won't overlap with insets.
-                Task.intersectWithInsetsIfFits(outAppBounds, outBounds, mNonDecorInsets[rotation]);
+                TaskFragment.intersectWithInsetsIfFits(outAppBounds, outBounds,
+                        mNonDecorInsets[rotation]);
             }
         }
     }
