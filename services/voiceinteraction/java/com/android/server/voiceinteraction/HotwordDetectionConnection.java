@@ -34,6 +34,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -48,6 +49,7 @@ import android.service.voice.HotwordRejectedResult;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IHotwordDetectionService;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
+import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.contentcapture.IContentCaptureManager;
@@ -56,6 +58,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
+import com.android.server.LocalServices;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -94,20 +98,24 @@ final class HotwordDetectionConnection {
     private final AtomicBoolean mUpdateStateFinish = new AtomicBoolean(false);
 
     final Object mLock;
+    final int mVoiceInteractionServiceUid;
     final ComponentName mDetectionComponentName;
     final int mUser;
     final Context mContext;
     final @NonNull ServiceConnector<IHotwordDetectionService> mRemoteHotwordDetectionService;
     boolean mBound;
+    volatile HotwordDetectionServiceIdentity mIdentity;
 
     @GuardedBy("mLock")
     private ParcelFileDescriptor mCurrentAudioSink;
 
-    HotwordDetectionConnection(Object lock, Context context, ComponentName serviceName,
-            int userId, boolean bindInstantServiceAllowed, @Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
+    HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
+            ComponentName serviceName, int userId, boolean bindInstantServiceAllowed,
+            @Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory,
+            IHotwordRecognitionStatusCallback callback) {
         mLock = lock;
         mContext = context;
+        mVoiceInteractionServiceUid = voiceInteractionServiceUid;
         mDetectionComponentName = serviceName;
         mUser = userId;
         final Intent intent = new Intent(HotwordDetectionService.SERVICE_INTERFACE);
@@ -164,7 +172,15 @@ final class HotwordDetectionConnection {
                 public void sendResult(Bundle bundle) throws RemoteException {
                     if (DEBUG) {
                         Slog.d(TAG, "updateState finish");
+                        Slog.d(TAG, "updating hotword UID " + Binder.getCallingUid());
                     }
+                    // TODO: Do this earlier than this callback and have the provider point to the
+                    // current state stored in VoiceInteractionManagerServiceImpl.
+                    final int uid = Binder.getCallingUid();
+                    LocalServices.getService(PermissionManagerServiceInternal.class)
+                            .setHotwordDetectionServiceProvider(() -> uid);
+                    mIdentity =
+                            new HotwordDetectionServiceIdentity(uid, mVoiceInteractionServiceUid);
                     future.complete(null);
                     try {
                         if (mUpdateStateFinish.getAndSet(true)) {
@@ -235,6 +251,9 @@ final class HotwordDetectionConnection {
         if (mBound) {
             mRemoteHotwordDetectionService.unbind();
             mBound = false;
+            LocalServices.getService(PermissionManagerServiceInternal.class)
+                    .setHotwordDetectionServiceProvider(null);
+            mIdentity = null;
         }
     }
 
