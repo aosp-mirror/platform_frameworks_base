@@ -319,7 +319,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"קריאה וכתיבה של יומן השיחות של הטלפון"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"טלפון"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ביצוע וניהול של שיחות טלפון"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"חיישנים לבישים"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"חיישנים גופניים"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"גישה אל נתוני חיישנים של הסימנים החיוניים שלך"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"אחזור תוכן של חלון"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"בדיקת התוכן של חלון שאיתו מתבצעת אינטראקציה."</string>
@@ -816,7 +816,7 @@
     <string name="relationTypeSister" msgid="3721676005094140671">"אחות"</string>
     <string name="relationTypeSpouse" msgid="6916682664436031703">"בן/בת זוג"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"בהתאמה אישית"</string>
-    <string name="sipAddressTypeHome" msgid="5918441930656878367">"דף הבית"</string>
+    <string name="sipAddressTypeHome" msgid="5918441930656878367">"בית"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"עבודה"</string>
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"אחר"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"לא נמצאה אפליקציה להצגת התוכן הזה."</string>

@@ -1103,7 +1103,7 @@
     <string name="redo" msgid="7231448494008532233">"Yenidən edin"</string>
     <string name="autofill" msgid="511224882647795296">"Avtodoldurma"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Mətn seçimi"</string>
-    <string name="addToDictionary" msgid="8041821113480950096">"Lüğətə əlavə et"</string>
+    <string name="addToDictionary" msgid="8041821113480950096">"Lüğətə əlavə edin"</string>
     <string name="deleteText" msgid="4200807474529938112">"Sil"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Daxiletmə metodu"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Mətn əməliyyatları"</string>
@@ -1306,8 +1306,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Qoşulmuş cihaza enerji doldurulur. Əlavə seçimlər üçün klikləyin."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analoq audio aksesuar aşkarlandı"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Əlavə edilən cihaz bu telefonla uyğun deyil. Ətraflı məlumat üçün klikləyin."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB sazlama qoşuludur"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB sazlamanı deaktiv etmək üçün klikləyin"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB vasitəsilə sazlama qoşuludur"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Deaktiv etmək üçün klikləyin"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USb debaqı deaktivasiya etməyi seçin."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"WiFi sazlaması qoşulub"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"WiFi sazlamasını deaktiv etmək üçün toxunun"</string>
@@ -1327,7 +1327,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"PAYLAŞIN"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RƏDD EDİN"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Daxiletmə metodunu seçin"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Fiziki klaviatura aktiv olduğu halda ekranda saxlayın"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Fiziki klaviatura aktiv olanda görünsün"</string>
     <string name="hardware" msgid="1800597768237606953">"Virtual klaviaturanı göstərin"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Fiziki klaviaturanı konfiqurasiya edin"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Dil və tərtibatı seçmək üçün tıklayın"</string>

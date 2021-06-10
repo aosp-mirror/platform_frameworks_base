@@ -65,7 +65,7 @@
     <string name="notification_channel_failure" msgid="9042250774797916414">"ବିଫଳ ହୋଇଥିବା ପ୍ରିଣ୍ଟ ଜବ୍‌"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"ଫାଇଲ୍‍ ତିଆରି କରିହେଲା ନାହିଁ"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"କିଛି ପ୍ରିଣ୍ଟ ସର୍ଭିସ୍‌କୁ ଅକ୍ଷମ କରାଯାଇଛି"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"ପ୍ରିଣ୍ଟର୍‌ ଖୋଜାଯାଉଛି"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"ପ୍ରିଣ୍ଟରକୁ ସନ୍ଧାନ କରାଯାଉଛି"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"କୌଣସି ପ୍ରିଣ୍ଟ ସେବା ସକ୍ଷମ କରାଯାଇନାହିଁ"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"କୌଣସି ପ୍ରିଣ୍ଟର୍‍ ମିଳିଲା ନାହିଁ"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"ପ୍ରିଣ୍ଟର ଯୋଡ଼ିହେବ ନାହିଁ"</string>

@@ -1920,7 +1920,7 @@
     <string name="app_category_maps" msgid="6395725487922533156">"ផែនទី និង​ការ​រុករក"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ផលិត​ភាព"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ទំហំផ្ទុកឧបករណ៍"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"ការ​កែកំហុសតាម USB"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"ការ​ជួសជុលតាម USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ម៉ោង"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"នាទី"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"កំណត់​ម៉ោង"</string>

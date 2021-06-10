@@ -305,9 +305,9 @@
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"သင့်ဖုန်းရှိ ဓာတ်ပုံများ၊ မီဒီယာနှင့် ဖိုင်များအား ဝင်သုံးပါ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"မိုက်ခရိုဖုန်း"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"အသံဖမ်းခြင်း"</string>
-    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ကိုယ်လက်လှုပ်ရှားမှု"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"သင့်ကိုယ်လက်လှုပ်ရှားမှုကို ဝင်ကြည့်ရန်"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Camera"</string>
+    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ကိုယ်ခန္ဓာလှုပ်ရှားမှု"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"သင့်ကိုယ်ခန္ဓာလှုပ်ရှားမှုကို ဝင်ကြည့်ရန်"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"ကင်မရာ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ဓာတ်ပုံ ရိုက်ပြီးနောက် ဗွီဒီယို မှတ်တမ်းတင်ရန်"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"ခေါ်ဆိုမှတ်တမ်း"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ဖုန်းခေါ်ဆိုထားသော မှတ်တမ်း ဖတ်ပြီး ရေးရန်"</string>
@@ -433,8 +433,8 @@
     <string name="permdesc_recordAudio" msgid="3976213377904701093">"ဤအက်ပ်သည် မိုက်ခရိုဖုန်းကို အသုံးပြုပြီး အချိန်မရွေး အသံသွင်းနိုင်ပါသည်။"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM ထံသို့ ညွှန်ကြားချက်များကို ပို့ပါ"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"အက်ပ်အား ဆင်းမ်ကဒ်ဆီသို့ အမိန့်များ ပေးပို့ခွင့် ပြုခြင်း။ ဤခွင့်ပြုမှုမှာ အန္တရာယ်အလွန် ရှိပါသည်။"</string>
-    <string name="permlab_activityRecognition" msgid="1782303296053990884">"ကိုယ်လက်လှုပ်ရှားမှုကို မှတ်သားပါ"</string>
-    <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ဤအက်ပ်က သင်၏ကိုယ်လက်လှုပ်ရှားမှုကို မှတ်သားနိုင်ပါသည်။"</string>
+    <string name="permlab_activityRecognition" msgid="1782303296053990884">"ကိုယ်ခန္ဓာလှုပ်ရှားမှုကို မှတ်သားပါ"</string>
+    <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ဤအက်ပ်က သင်၏ကိုယ်ခန္ဓာလှုပ်ရှားမှု မှတ်သားနိုင်ပါသည်။"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ဓါတ်ပုံနှင့်ဗွီဒီယိုရိုက်ခြင်း"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ဤအက်ပ်သည် ကင်မရာကို အသုံးပြု၍ ဓာတ်ပုံနှင့် ဗီဒီယိုများကို အချိန်မရွေး ရိုက်ကူးနိုင်ပါသည်။"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ဓာတ်ပုံနှင့် ဗီဒီယိုများရိုက်ရန်အတွက် စနစ်ကင်မရာများကို အက်ပ် သို့မဟုတ် ဝန်‌ဆောင်မှုအား အသုံးပြုခွင့်ပေးခြင်း"</string>
@@ -1994,7 +1994,7 @@
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"စနစ်"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ဆက်တင်များ"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Camera"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"ကင်မရာ"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"မိုက်ခရိုဖုန်း"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"သင့်မျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များပေါ်တွင် ပြသခြင်း"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ပုံမှန်မုဒ်အတွက် အချက်အလက်ပြသည့် အကြောင်းကြားချက်"</string>

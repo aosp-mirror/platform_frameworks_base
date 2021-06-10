@@ -46,7 +46,7 @@
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Non se puido instalar a aplicación <xliff:g id="APP_NAME">%1$s</xliff:g>. Libera espazo e téntao de novo."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Non se atopou a aplicación"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Non se atopou a aplicación na lista de aplicacións instaladas."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Sen permiso"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Permiso non concedido"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"O usuario actual non pode realizar esta desinstalación."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Erro"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"Non se puido desinstalar a aplicación."</string>

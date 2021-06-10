@@ -1952,7 +1952,7 @@
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Prekliči začasno zaustavitev aplikacije"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Želite vklopiti delovni profil?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Vklopili boste svoje delovne aplikacije, obvestila, podatke in druge funkcije delovnega profila"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Vklop"</string>
+    <string name="work_mode_turn_on" msgid="3662561662475962285">"Vklopi"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacija ni na voljo"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutno ni na voljo."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ta aplikacija je bila zasnovana za starejšo različico Androida in morda ne bo delovala pravilno. Preverite, ali so na voljo posodobitve, ali pa se obrnite na razvijalca."</string>
@@ -2131,7 +2131,7 @@
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Tega ne smete odpreti z osebnimi aplikacijami"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Skrbnik za IT vam ne dovoli odpiranja te vsebine z aplikacijami v osebnem profilu"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Delovni profil je začasno zaustavljen"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Vklop"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Vklopi"</string>
     <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Nobena delovna aplikacija ne podpira te vsebine"</string>
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Nobena delovna aplikacija ne more odpreti te vsebine"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Nobena osebna aplikacija ne podpira te vsebine"</string>

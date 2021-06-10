@@ -1410,7 +1410,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Бұл өтініштің орындалуын қалайсыз ба?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Кіру өтініші"</string>
     <string name="allow" msgid="6195617008611933762">"Рұқсат беру"</string>
-    <string name="deny" msgid="6632259981847676572">"Бас тарту"</string>
+    <string name="deny" msgid="6632259981847676572">"Тыйым салу"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Рұқсат өтінілді"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Рұқсат \nесептік жазба үшін <xliff:g id="ACCOUNT">%s</xliff:g> өтінілді."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Осы қолданбаны жұмыс профиліңізден тыс пайдаланып жатырсыз"</string>

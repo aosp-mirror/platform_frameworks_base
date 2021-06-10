@@ -1196,7 +1196,7 @@
     <string name="noApplications" msgid="1186909265235544019">"Żadna z aplikacji nie może wykonać tej czynności."</string>
     <string name="aerr_application" msgid="4090916809370389109">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> przestała działać"</string>
     <string name="aerr_process" msgid="4268018696970966407">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> przestał działać"</string>
-    <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> wciąż przestaje działać"</string>
+    <string name="aerr_application_repeated" msgid="7804378743218496566">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> wciąż przestaje działać"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> wciąż przestaje działać"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Otwórz aplikację ponownie"</string>
     <string name="aerr_report" msgid="3095644466849299308">"Prześlij opinię"</string>
