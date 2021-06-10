@@ -604,6 +604,14 @@ public abstract class ActivityManagerInternal {
             String ownerPkgName, int ownerUid);
 
     /**
+     * Effectively PendingIntent.getActivityForUser(), but the PendingIntent is
+     * owned by the given uid rather than by the caller (i.e. the system).
+     */
+    public abstract PendingIntent getPendingIntentActivityAsApp(
+            int requestCode, @NonNull Intent[] intents, int flags, Bundle options,
+            String ownerPkgName, int ownerUid);
+
+    /**
      * @return mBootTimeTempAllowlistDuration of ActivityManagerConstants.
      */
     public abstract long getBootTimeTempAllowListDuration();

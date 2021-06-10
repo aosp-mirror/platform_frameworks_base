@@ -44,6 +44,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Formatter;
 import java.util.Locale;
 
@@ -451,7 +452,9 @@ public class AnalogClock extends View {
         if (mSecondHandTintInfo.mHasTintList || mSecondHandTintInfo.mHasTintBlendMode) {
             mSecondHand = mSecondHandTintInfo.apply(mSecondHand);
         }
-        mSecondsTick.run();
+        // Re-run the tick runnable immediately as the presence or absence of a seconds hand affects
+        // the next time we need to tick the clock.
+        mTick.run();
 
         mChanged = true;
         invalidate();
@@ -583,10 +586,10 @@ public class AnalogClock extends View {
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
 
             // OK, this is gross but needed. This class is supported by the
-            // remote views machanism and as a part of that the remote views
+            // remote views mechanism and as a part of that the remote views
             // can be inflated by a context for another user without the app
             // having interact users permission - just for loading resources.
-            // For exmaple, when adding widgets from a user profile to the
+            // For example, when adding widgets from a user profile to the
             // home screen. Therefore, we register the receiver as the current
             // user not the one the context is for.
             getContext().registerReceiverAsUser(mIntentReceiver,
@@ -616,14 +619,14 @@ public class AnalogClock extends View {
     private void onVisible() {
         if (!mVisible) {
             mVisible = true;
-            mSecondsTick.run();
+            mTick.run();
         }
 
     }
 
     private void onInvisible() {
         if (mVisible) {
-            removeCallbacks(mSecondsTick);
+            removeCallbacks(mTick);
             mVisible = false;
         }
     }
@@ -760,6 +763,7 @@ public class AnalogClock extends View {
         }
     }
 
+    /** Intent receiver for the time or time zone changing. */
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -767,36 +771,56 @@ public class AnalogClock extends View {
                 createClock();
             }
 
-            onTimeChanged();
-
-            invalidate();
+            mTick.run();
         }
     };
     private boolean mReceiverAttached;
 
-    private final Runnable mSecondsTick = new Runnable() {
+    private final Runnable mTick = new Runnable() {
         @Override
         public void run() {
             removeCallbacks(this);
-            if (!mVisible || mSecondHand == null) {
+            if (!mVisible) {
                 return;
             }
 
             Instant now = mClock.instant();
-            LocalTime localTime = now.atZone(mClock.getZone()).toLocalTime();
-            // How many milliseconds through the second we currently are.
-            long millisOfSecond = Duration.ofNanos(localTime.getNano()).toMillis();
-            // How many milliseconds there are between tick positions for the seconds hand.
-            double millisPerTick = 1000 / (double) mSecondsHandFps;
-            // How many milliseconds we are past the last tick position.
-            long millisPastLastTick = Math.round(millisOfSecond % millisPerTick);
-            // How many milliseconds there are until the next tick position.
-            long millisUntilNextTick = Math.round(millisPerTick - millisPastLastTick);
-            // If we are exactly at the tick position, this could be 0 milliseconds due to rounding.
-            // In this case, advance by the full amount of millis to the next position.
-            if (millisUntilNextTick <= 0) {
-                millisUntilNextTick = Math.round(millisPerTick);
+            ZonedDateTime zonedDateTime = now.atZone(mClock.getZone());
+            LocalTime localTime = zonedDateTime.toLocalTime();
+
+            long millisUntilNextTick;
+            if (mSecondHand == null) {
+                // If there's no second hand, then tick at the start of the next minute.
+                //
+                // This must be done with ZonedDateTime as opposed to LocalDateTime to ensure proper
+                // handling of DST. Also note that because of leap seconds, it should not be assumed
+                // that one minute == 60 seconds.
+                Instant startOfNextMinute = zonedDateTime.plusMinutes(1).withSecond(0).toInstant();
+                millisUntilNextTick = Duration.between(now, startOfNextMinute).toMillis();
+                if (millisUntilNextTick <= 0) {
+                    // This should never occur, but if it does, then just check the tick again in
+                    // one minute to ensure we're always moving forward.
+                    millisUntilNextTick = Duration.ofMinutes(1).toMillis();
+                }
+            } else {
+                // If there is a seconds hand, then determine the next tick point based on the fps.
+                //
+                // How many milliseconds through the second we currently are.
+                long millisOfSecond = Duration.ofNanos(localTime.getNano()).toMillis();
+                // How many milliseconds there are between tick positions for the seconds hand.
+                double millisPerTick = 1000 / (double) mSecondsHandFps;
+                // How many milliseconds we are past the last tick position.
+                long millisPastLastTick = Math.round(millisOfSecond % millisPerTick);
+                // How many milliseconds there are until the next tick position.
+                millisUntilNextTick = Math.round(millisPerTick - millisPastLastTick);
+                // If we are exactly at the tick position, this could be 0 milliseconds due to
+                // rounding. In this case, advance by the full amount of millis to the next
+                // position.
+                if (millisUntilNextTick <= 0) {
+                    millisUntilNextTick = Math.round(millisPerTick);
+                }
             }
+
             // Schedule a callback for when the next tick should occur.
             postDelayed(this, millisUntilNextTick);
 

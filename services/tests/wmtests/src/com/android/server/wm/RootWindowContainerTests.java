@@ -363,7 +363,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         TaskDisplayArea defaultTaskDisplayArea = display.getDefaultTaskDisplayArea();
         doReturn(isFocusedTask ? task : null).when(defaultTaskDisplayArea).getFocusedRootTask();
         mRootWindowContainer.applySleepTokens(true);
-        verify(task, times(expectWakeFromSleep ? 1 : 0)).awakeFromSleepingLocked();
+        verify(task, times(expectWakeFromSleep ? 1 : 0)).awakeFromSleeping();
         verify(task, times(expectResumeTopActivity ? 1 : 0)).resumeTopActivityUncheckedLocked(
                 null /* target */, null /* targetOptions */);
     }

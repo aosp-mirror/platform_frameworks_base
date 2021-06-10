@@ -194,11 +194,12 @@ public abstract class WMShellBaseModule {
             ShellTaskOrganizer organizer,
             DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor,
-            @ShellMainThread Handler mainHandler) {
+            @ShellMainThread Handler mainHandler,
+            SyncTransactionQueue syncQueue) {
         return Optional.of(BubbleController.create(context, null /* synchronizer */,
                 floatingContentCoordinator, statusBarService, windowManager,
                 windowManagerShellWrapper, launcherApps, taskStackListener,
-                uiEventLogger, organizer, displayController, mainExecutor, mainHandler));
+                uiEventLogger, organizer, displayController, mainExecutor, mainHandler, syncQueue));
     }
 
     //
@@ -424,8 +425,9 @@ public abstract class WMShellBaseModule {
     @Provides
     static TaskViewFactoryController provideTaskViewFactoryController(
             ShellTaskOrganizer shellTaskOrganizer,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new TaskViewFactoryController(shellTaskOrganizer, mainExecutor);
+            @ShellMainThread ShellExecutor mainExecutor,
+            SyncTransactionQueue syncQueue) {
+        return new TaskViewFactoryController(shellTaskOrganizer, mainExecutor, syncQueue);
     }
 
     //

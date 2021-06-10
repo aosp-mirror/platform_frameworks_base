@@ -647,9 +647,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
             final CompatibilityOverrideConfig changeConfig = new CompatibilityOverrideConfig(
                     overrides);
             try {
-                mPlatformCompat.setOverridesOnReleaseBuilds(changeConfig, packageName);
+                mPlatformCompat.putOverridesOnReleaseBuilds(changeConfig, packageName);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to call IPlatformCompat#setOverridesOnReleaseBuilds", e);
+                Slog.e(TAG, "Failed to call IPlatformCompat#putOverridesOnReleaseBuilds", e);
             }
         } finally {
             Binder.restoreCallingIdentity(uid);
@@ -671,9 +671,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
             final CompatibilityOverrideConfig changeConfig = new CompatibilityOverrideConfig(
                     overrides);
             try {
-                mPlatformCompat.setOverridesOnReleaseBuilds(changeConfig, packageName);
+                mPlatformCompat.putOverridesOnReleaseBuilds(changeConfig, packageName);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to call IPlatformCompat#setOverridesOnReleaseBuilds", e);
+                Slog.e(TAG, "Failed to call IPlatformCompat#putOverridesOnReleaseBuilds", e);
             }
         } finally {
             Binder.restoreCallingIdentity(uid);

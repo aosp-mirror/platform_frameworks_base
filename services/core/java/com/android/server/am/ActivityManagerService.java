@@ -5996,13 +5996,23 @@ public class ActivityManagerService extends IActivityManager.Stub
     public final ContentProviderHolder getContentProvider(
             IApplicationThread caller, String callingPackage, String name, int userId,
             boolean stable) {
-        return mCpHelper.getContentProvider(caller, callingPackage, name, userId, stable);
+        traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "getContentProvider: ", name);
+        try {
+            return mCpHelper.getContentProvider(caller, callingPackage, name, userId, stable);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     @Override
     public ContentProviderHolder getContentProviderExternal(
             String name, int userId, IBinder token, String tag) {
-        return mCpHelper.getContentProviderExternal(name, userId, token, tag);
+        traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "getContentProviderExternal: ", name);
+        try {
+            return mCpHelper.getContentProviderExternal(name, userId, token, tag);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     /**
@@ -6017,18 +6027,57 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Deprecated
     @Override
     public void removeContentProviderExternal(String name, IBinder token) {
-        removeContentProviderExternalAsUser(name, token, UserHandle.getCallingUserId());
+        traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "removeContentProviderExternal: ", name);
+        try {
+            removeContentProviderExternalAsUser(name, token, UserHandle.getCallingUserId());
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     @Override
     public void removeContentProviderExternalAsUser(String name, IBinder token, int userId) {
-        mCpHelper.removeContentProviderExternalAsUser(name, token, userId);
+        traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "removeContentProviderExternalAsUser: ", name);
+        try {
+            mCpHelper.removeContentProviderExternalAsUser(name, token, userId);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     @Override
     public final void publishContentProviders(IApplicationThread caller,
             List<ContentProviderHolder> providers) {
-        mCpHelper.publishContentProviders(caller, providers);
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            final int maxLength = 256;
+            final StringBuilder sb = new StringBuilder(maxLength);
+            sb.append("publishContentProviders: ");
+            if (providers != null) {
+                boolean first = true;
+                for (int i = 0, size = providers.size(); i < size; i++) {
+                    final ContentProviderHolder holder = providers.get(i);
+                    if (holder != null && holder.info != null && holder.info.authority != null) {
+                        final int len = holder.info.authority.length();
+                        if (sb.length() + len > maxLength) {
+                            sb.append("[[TRUNCATED]]");
+                            break;
+                        }
+                        if (!first) {
+                            sb.append(';');
+                        } else {
+                            first = false;
+                        }
+                        sb.append(holder.info.authority);
+                    }
+                }
+            }
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, sb.toString());
+        }
+        try {
+            mCpHelper.publishContentProviders(caller, providers);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     @Override
@@ -16178,6 +16227,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         public PendingIntent getPendingIntentActivityAsApp(
                 int requestCode, @NonNull Intent intent, int flags, Bundle options,
                 String ownerPkg, int ownerUid) {
+            return getPendingIntentActivityAsApp(requestCode, new Intent[] { intent }, flags,
+                    options, ownerPkg, ownerUid);
+        }
+
+        @Override
+        public PendingIntent getPendingIntentActivityAsApp(
+                int requestCode, @NonNull Intent[] intents, int flags, Bundle options,
+                String ownerPkg, int ownerUid) {
             // system callers must explicitly set mutability state
             final boolean flagImmutableSet = (flags & PendingIntent.FLAG_IMMUTABLE) != 0;
             final boolean flagMutableSet = (flags & PendingIntent.FLAG_MUTABLE) != 0;
@@ -16187,15 +16244,21 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final Context context = ActivityManagerService.this.mContext;
-            String resolvedType = intent.resolveTypeIfNeeded(context.getContentResolver());
-            intent.migrateExtraStreamToClipData(context);
-            intent.prepareToLeaveProcess(context);
+            final ContentResolver resolver = context.getContentResolver();
+            final int len = intents.length;
+            final String[] resolvedTypes = new String[len];
+            for (int i = 0; i < len; i++) {
+                final Intent intent = intents[i];
+                resolvedTypes[i] = intent.resolveTypeIfNeeded(resolver);
+                intent.migrateExtraStreamToClipData(context);
+                intent.prepareToLeaveProcess(context);
+            }
             IIntentSender target =
                     ActivityManagerService.this.getIntentSenderWithFeatureAsApp(
                             INTENT_SENDER_ACTIVITY, ownerPkg,
                             context.getAttributionTag(), null, null, requestCode,
-                            new Intent[] { intent },
-                            resolvedType != null ? new String[] { resolvedType } : null,
+                            intents,
+                            resolvedTypes,
                             flags, options, UserHandle.getUserId(ownerUid), ownerUid);
             return target != null ? new PendingIntent(target) : null;
         }
@@ -17092,6 +17155,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized (this) {
             SystemClock.sleep(durationMs);
+        }
+    }
+
+    static void traceBegin(long traceTag, String methodName, String subInfo) {
+        if (Trace.isTagEnabled(traceTag)) {
+            Trace.traceBegin(traceTag, methodName + subInfo);
         }
     }
 }
