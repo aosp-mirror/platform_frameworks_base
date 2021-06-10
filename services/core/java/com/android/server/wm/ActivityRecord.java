@@ -128,6 +128,17 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SWITCH;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
+import static com.android.server.wm.ActivityRecord.State.DESTROYING;
+import static com.android.server.wm.ActivityRecord.State.FINISHING;
+import static com.android.server.wm.ActivityRecord.State.INITIALIZING;
+import static com.android.server.wm.ActivityRecord.State.PAUSED;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STARTED;
+import static com.android.server.wm.ActivityRecord.State.STOPPED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.ActivityRecordProto.ALL_DRAWN;
 import static com.android.server.wm.ActivityRecordProto.APP_STOPPED;
 import static com.android.server.wm.ActivityRecordProto.CLIENT_VISIBLE;
@@ -190,17 +201,6 @@ import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
-import static com.android.server.wm.Task.ActivityState.DESTROYED;
-import static com.android.server.wm.Task.ActivityState.DESTROYING;
-import static com.android.server.wm.Task.ActivityState.FINISHING;
-import static com.android.server.wm.Task.ActivityState.INITIALIZING;
-import static com.android.server.wm.Task.ActivityState.PAUSED;
-import static com.android.server.wm.Task.ActivityState.PAUSING;
-import static com.android.server.wm.Task.ActivityState.RESTARTING_PROCESS;
-import static com.android.server.wm.Task.ActivityState.RESUMED;
-import static com.android.server.wm.Task.ActivityState.STARTED;
-import static com.android.server.wm.Task.ActivityState.STOPPED;
-import static com.android.server.wm.Task.ActivityState.STOPPING;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
 import static com.android.server.wm.TaskPersister.DEBUG;
 import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
@@ -334,7 +334,6 @@ import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
-import com.android.server.wm.Task.ActivityState;
 import com.android.server.wm.WindowManagerService.H;
 import com.android.server.wm.utils.InsetUtils;
 
@@ -486,7 +485,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     ActivityServiceConnectionsHolder mServiceConnectionsHolder; // Service connections.
     UriPermissionOwner uriPermissions; // current special URI access perms.
     WindowProcessController app;      // if non-null, hosting application
-    private ActivityState mState;    // current state we are in
+    private State mState;    // current state we are in
     private Bundle mIcicle;         // last saved activity state
     private PersistableBundle mPersistentState; // last persistently saved activity state
     private boolean mHaveState = true; // Indicates whether the last saved state of activity is
@@ -548,6 +547,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     static final int LAUNCH_SOURCE_TYPE_HOME = 2;
     static final int LAUNCH_SOURCE_TYPE_SYSTEMUI = 3;
     static final int LAUNCH_SOURCE_TYPE_APPLICATION = 4;
+
+    enum State {
+        INITIALIZING,
+        STARTED,
+        RESUMED,
+        PAUSING,
+        PAUSED,
+        STOPPING,
+        STOPPED,
+        FINISHING,
+        DESTROYING,
+        DESTROYED,
+        RESTARTING_PROCESS
+    }
+
     /**
      * The type of launch source.
      */
@@ -1240,7 +1254,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // If the activity is in stopping or stopped state, for instance, it's in the
                 // split screen task and not the top one, the last configuration it should keep
                 // is the one before multi-window mode change.
-                final ActivityState state = getState();
+                final State state = getState();
                 if (state != STOPPED && state != STOPPING) {
                     ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
                             true /* ignoreVisibility */);
@@ -3459,7 +3473,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // failed more than twice. Skip activities that's already finishing cleanly by itself.
             remove = false;
         } else if ((!mHaveState && !stateNotNeeded
-                && !isState(ActivityState.RESTARTING_PROCESS)) || finishing) {
+                && !isState(State.RESTARTING_PROCESS)) || finishing) {
             // Don't currently have state for the activity, or it is finishing -- always remove it.
             remove = true;
         } else if (!mVisibleRequested && launchCount > 2
@@ -4823,7 +4837,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mCurrentLaunchCanTurnScreenOn;
     }
 
-    void setState(ActivityState state, String reason) {
+    void setState(State state, String reason) {
         ProtoLog.v(WM_DEBUG_STATES, "State movement: %s from:%s to:%s reason:%s",
                 this, getState(), state, reason);
 
@@ -4890,44 +4904,42 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    ActivityState getState() {
+    State getState() {
         return mState;
     }
 
     /**
      * Returns {@code true} if the Activity is in the specified state.
      */
-    boolean isState(ActivityState state) {
+    boolean isState(State state) {
         return state == mState;
     }
 
     /**
      * Returns {@code true} if the Activity is in one of the specified states.
      */
-    boolean isState(ActivityState state1, ActivityState state2) {
+    boolean isState(State state1, State state2) {
         return state1 == mState || state2 == mState;
     }
 
     /**
      * Returns {@code true} if the Activity is in one of the specified states.
      */
-    boolean isState(ActivityState state1, ActivityState state2, ActivityState state3) {
+    boolean isState(State state1, State state2, State state3) {
         return state1 == mState || state2 == mState || state3 == mState;
     }
 
     /**
      * Returns {@code true} if the Activity is in one of the specified states.
      */
-    boolean isState(ActivityState state1, ActivityState state2, ActivityState state3,
-            ActivityState state4) {
+    boolean isState(State state1, State state2, State state3, State state4) {
         return state1 == mState || state2 == mState || state3 == mState || state4 == mState;
     }
 
     /**
      * Returns {@code true} if the Activity is in one of the specified states.
      */
-    boolean isState(ActivityState state1, ActivityState state2, ActivityState state3,
-            ActivityState state4, ActivityState state5) {
+    boolean isState(State state1, State state2, State state3, State state4, State state5) {
         return state1 == mState || state2 == mState || state3 == mState || state4 == mState
                 || state5 == mState;
     }
@@ -4935,8 +4947,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * Returns {@code true} if the Activity is in one of the specified states.
      */
-    boolean isState(ActivityState state1, ActivityState state2, ActivityState state3,
-            ActivityState state4, ActivityState state5, ActivityState state6) {
+    boolean isState(State state1, State state2, State state3, State state4, State state5,
+            State state6) {
         return state1 == mState || state2 == mState || state3 == mState || state4 == mState
                 || state5 == mState || state6 == mState;
     }
