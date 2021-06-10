@@ -179,7 +179,7 @@ public class AppSearchManagerService extends SystemService {
      */
     private void handleUserRemoved(@NonNull UserHandle userHandle) {
         try {
-            mImplInstanceManager.removeAppSearchImplForUser(userHandle);
+            mImplInstanceManager.closeAndRemoveAppSearchImplForUser(userHandle);
             mLoggerInstanceManager.removePlatformLoggerForUser(userHandle);
             Log.i(TAG, "Removed AppSearchImpl instance for: " + userHandle);
         } catch (Throwable t) {
