@@ -48,6 +48,9 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.server.wm.ActivityRecord.State.PAUSED;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
@@ -72,8 +75,6 @@ import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_R
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
-import static com.android.server.wm.Task.ActivityState.PAUSED;
-import static com.android.server.wm.Task.ActivityState.PAUSING;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.REPARENT_KEEP_ROOT_TASK_AT_FRONT;
 import static com.android.server.wm.Task.TAG_CLEANUP;
@@ -2393,8 +2394,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     String processName = null;
                     int uid = 0;
                     synchronized (mService.mGlobalLock) {
-                        if (r.attachedToProcess()
-                                && r.isState(Task.ActivityState.RESTARTING_PROCESS)) {
+                        if (r.attachedToProcess() && r.isState(RESTARTING_PROCESS)) {
                             processName = r.app.mName;
                             uid = r.app.mUid;
                         }

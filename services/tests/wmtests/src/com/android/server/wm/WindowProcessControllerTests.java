@@ -23,6 +23,12 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.ActivityRecord.State.PAUSED;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STARTED;
+import static com.android.server.wm.ActivityRecord.State.STOPPED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -309,17 +315,17 @@ public class WindowProcessControllerTests extends WindowTestsBase {
 
         callbackResult[0] = 0;
         activity.mVisibleRequested = false;
-        activity.setState(Task.ActivityState.PAUSED, "test");
+        activity.setState(PAUSED, "test");
         mWpc.computeOomAdjFromActivities(callback);
         assertEquals(paused, callbackResult[0]);
 
         callbackResult[0] = 0;
-        activity.setState(Task.ActivityState.STOPPING, "test");
+        activity.setState(STOPPING, "test");
         mWpc.computeOomAdjFromActivities(callback);
         assertEquals(stopping, callbackResult[0]);
 
         callbackResult[0] = 0;
-        activity.setState(Task.ActivityState.STOPPED, "test");
+        activity.setState(STOPPED, "test");
         mWpc.computeOomAdjFromActivities(callback);
         assertEquals(other, callbackResult[0]);
     }
@@ -330,25 +336,25 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         spyOn(tracker);
         final ActivityRecord activity = createActivityRecord(mWpc);
         activity.mVisibleRequested = true;
-        activity.setState(Task.ActivityState.STARTED, "test");
+        activity.setState(STARTED, "test");
 
         verify(tracker).onAnyActivityVisible(mWpc);
         assertTrue(mWpc.hasVisibleActivities());
 
-        activity.setState(Task.ActivityState.RESUMED, "test");
+        activity.setState(RESUMED, "test");
 
         verify(tracker).onActivityResumedWhileVisible(mWpc);
         assertTrue(tracker.hasResumedActivity(mWpc.mUid));
 
         activity.makeFinishingLocked();
-        activity.setState(Task.ActivityState.PAUSING, "test");
+        activity.setState(PAUSING, "test");
 
         assertFalse(tracker.hasResumedActivity(mWpc.mUid));
         assertTrue(mWpc.hasForegroundActivities());
 
         activity.setVisibility(false);
         activity.mVisibleRequested = false;
-        activity.setState(Task.ActivityState.STOPPED, "test");
+        activity.setState(STOPPED, "test");
 
         verify(tracker).onAllActivitiesInvisible(mWpc);
         assertFalse(mWpc.hasVisibleActivities());

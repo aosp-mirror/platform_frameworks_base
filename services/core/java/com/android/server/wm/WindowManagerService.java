@@ -8553,7 +8553,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (win.mActivityRecord == null || !win.mActivityRecord.isState(
-                    Task.ActivityState.RESUMED)) {
+                    ActivityRecord.State.RESUMED)) {
                 mDisplayHashController.sendDisplayHashError(callback,
                         DISPLAY_HASH_ERROR_MISSING_WINDOW);
                 return;

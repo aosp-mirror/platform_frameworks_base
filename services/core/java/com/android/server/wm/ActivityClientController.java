@@ -28,6 +28,11 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
+import static com.android.server.wm.ActivityRecord.State.DESTROYING;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
@@ -35,8 +40,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
-import static com.android.server.wm.Task.ActivityState.DESTROYED;
-import static com.android.server.wm.Task.ActivityState.DESTROYING;
 
 import android.annotation.NonNull;
 import android.app.Activity;
@@ -189,7 +192,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activityStopped");
             r = ActivityRecord.isInRootTaskLocked(token);
             if (r != null) {
-                if (r.attachedToProcess() && r.isState(Task.ActivityState.RESTARTING_PROCESS)) {
+                if (r.attachedToProcess() && r.isState(RESTARTING_PROCESS)) {
                     // The activity was requested to restart from
                     // {@link #restartActivityProcessIfVisible}.
                     restartingName = r.app.mName;
@@ -1011,7 +1014,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-            if (r != null && r.isState(Task.ActivityState.RESUMED, Task.ActivityState.PAUSING)) {
+            if (r != null && r.isState(RESUMED, PAUSING)) {
                 r.mDisplayContent.mAppTransition.overridePendingAppTransition(
                         packageName, enterAnim, exitAnim, null, null,
                         r.mOverrideTaskTransition);
