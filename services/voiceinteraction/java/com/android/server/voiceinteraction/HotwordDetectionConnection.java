@@ -329,7 +329,7 @@ final class HotwordDetectionConnection {
                 if (DEBUG) {
                     Slog.d(TAG, "onDetected");
                 }
-                externalCallback.onKeyphraseDetected(recognitionEvent);
+                externalCallback.onKeyphraseDetected(recognitionEvent, result);
             }
 
             @Override
@@ -362,8 +362,7 @@ final class HotwordDetectionConnection {
                 if (DEBUG) {
                     Slog.d(TAG, "onDetected");
                 }
-                // TODO: Propagate the HotwordDetectedResult.
-                externalCallback.onKeyphraseDetected(recognitionEvent);
+                externalCallback.onKeyphraseDetected(recognitionEvent, result);
             }
 
             @Override
@@ -407,7 +406,7 @@ final class HotwordDetectionConnection {
                 mHotwordDetectionConnection.detectFromDspSource(
                         recognitionEvent, mExternalCallback);
             } else {
-                mExternalCallback.onKeyphraseDetected(recognitionEvent);
+                mExternalCallback.onKeyphraseDetected(recognitionEvent, null);
             }
         }
 

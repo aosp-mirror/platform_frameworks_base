@@ -18,21 +18,18 @@ package com.android.internal.graphics.palette;
 
 import android.annotation.ColorInt;
 
-interface CentroidProvider {
-    /**
-     * @return 3 dimensions representing the color
-     */
-    float[] getCentroid(@ColorInt int color);
+/**
+ * Interface that allows quantizers to have a plug-and-play interface for experimenting with
+ * quantization in different color spaces.
+ */
+public interface PointProvider {
+    /** Convert a color to 3 coordinates representing the color in a color space. */
+    float[] fromInt(@ColorInt int argb);
 
-    /**
-     * @param centroid 3 dimensions representing the color
-     * @return 32-bit ARGB representation
-     */
+    /** Convert 3 coordinates in the color space into a color */
     @ColorInt
-    int getColor(float[] centroid);
+    int toInt(float[] point);
 
-    /**
-     * Distance between two centroids.
-     */
+    /** Find the distance between two colosrin the color space */
     float distance(float[] a, float[] b);
 }
