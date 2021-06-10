@@ -152,4 +152,15 @@ public class RecentsAnimationControllerCompat {
             Log.e(TAG, "Failed to detach the navigation bar from app", e);
         }
     }
+
+    /**
+     * @see IRecentsAnimationController#animateNavigationBarToApp(long)
+     */
+    public void animateNavigationBarToApp(long duration) {
+        try {
+            mAnimationController.animateNavigationBarToApp(duration);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to animate the navigation bar to app", e);
+        }
+    }
 }

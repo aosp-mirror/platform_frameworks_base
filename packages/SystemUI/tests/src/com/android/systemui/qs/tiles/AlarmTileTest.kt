@@ -16,7 +16,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.policy.NextAlarmController
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
@@ -46,8 +45,6 @@ class AlarmTileTest : SysuiTestCase() {
     private lateinit var activityStarter: ActivityStarter
     @Mock
     private lateinit var qsLogger: QSLogger
-    @Mock
-    private lateinit var featureFlags: FeatureFlags
     @Mock
     private lateinit var userTracker: UserTracker
     @Mock
@@ -79,7 +76,6 @@ class AlarmTileTest : SysuiTestCase() {
             statusBarStateController,
             activityStarter,
             qsLogger,
-            featureFlags,
             userTracker,
             nextAlarmController
         )
@@ -90,14 +86,7 @@ class AlarmTileTest : SysuiTestCase() {
     }
 
     @Test
-    fun testNotAvailableFeatureFlag() {
-        `when`(featureFlags.isAlarmTileAvailable).thenReturn(false)
-        assertThat(tile.isAvailable).isFalse()
-    }
-
-    @Test
-    fun testAvailableFeatureFlag() {
-        `when`(featureFlags.isAlarmTileAvailable).thenReturn(true)
+    fun testAvailable() {
         assertThat(tile.isAvailable).isTrue()
     }
 

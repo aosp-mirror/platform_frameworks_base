@@ -2383,7 +2383,7 @@ android_media_AudioSystem_setSurroundFormatEnabled(JNIEnv *env, jobject thiz,
 }
 
 static jint android_media_AudioSystem_getMaxChannelCount(JNIEnv *env, jobject thiz) {
-    return FCC_8;
+    return FCC_LIMIT;
 }
 
 static jint android_media_AudioSystem_getMaxSampleRate(JNIEnv *env, jobject thiz) {

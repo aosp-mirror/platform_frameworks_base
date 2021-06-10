@@ -35,43 +35,11 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="vertical">
-        <TextView
-            android:id="@+id/logout"
-            android:layout_height="@dimen/logout_button_layout_height"
-            android:layout_width="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="@dimen/logout_button_margin_bottom"
-            android:gravity="center"
-            android:paddingLeft="@dimen/logout_button_padding_horizontal"
-            android:paddingRight="@dimen/logout_button_padding_horizontal"
-            android:background="@drawable/logout_button_background"
-            android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
-            android:textAllCaps="true"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="13sp"
-            android:text="@*android:string/global_action_logout" />
-
         <include
             layout="@layout/keyguard_clock_switch"
             android:id="@+id/keyguard_clock_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/owner_info"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/date_owner_info_margin"
-            android:layout_gravity="center_horizontal"
-            android:layout_centerHorizontal="true"
-            android:textColor="?attr/wallpaperTextColorSecondary"
-            android:textSize="@dimen/widget_label_font_size"
-            android:letterSpacing="0.05"
-            android:ellipsize="marquee"
-            android:singleLine="true" />
         <FrameLayout
             android:id="@+id/status_view_media_container"
             android:layout_width="wrap_content"

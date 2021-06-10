@@ -106,6 +106,7 @@ import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.util.Assert;
@@ -456,6 +457,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private long mNumHeadsUp;
     private NotificationStackScrollLayoutController.TouchHandler mTouchHandler;
     private final FeatureFlags mFeatureFlags;
+    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private boolean mShouldUseSplitNotificationShade;
 
     private final ExpandableView.OnHeightChangedListener mOnChildHeightChangedListener =
@@ -497,11 +499,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             GroupMembershipManager groupMembershipManager,
             GroupExpansionManager groupExpansionManager,
             AmbientState ambientState,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
         mSectionsManager = notificationSectionsManager;
         mFeatureFlags = featureFlags;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mShouldUseSplitNotificationShade = shouldUseSplitNotificationShade(mFeatureFlags, res);
         mSectionsManager.initialize(this, LayoutInflater.from(context));
         mSections = mSectionsManager.createSectionsForBuckets();
@@ -606,6 +610,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         RemoteInputController remoteInputController = mRemoteInputManager.getController();
         boolean showFooterView = (showDismissView || mController.hasActiveNotifications())
                 && mStatusBarState != StatusBarState.KEYGUARD
+                && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
                 && (remoteInputController == null || !remoteInputController.isRemoteInputActive());
         boolean showHistory = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
@@ -2097,11 +2102,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (height != 0) {
                     height += mPaddingBetweenElements;
                 }
-                height += calculateGapHeight(previousView, expandableView, numShownItems);
+                float gapHeight = calculateGapHeight(previousView, expandableView, numShownNotifs);
+                height += gapHeight;
                 height += viewHeight;
 
                 numShownItems++;
-                if (!(expandableView instanceof MediaHeaderView)) {
+                if (viewHeight > 0 || !(expandableView instanceof MediaHeaderView)) {
+                    // Only count the media as a notification if it has a positive height.
                     numShownNotifs++;
                 }
                 previousView = expandableView;
@@ -4615,7 +4622,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     @VisibleForTesting
-    protected void setStatusBarState(int statusBarState) {
+    public void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
         mAmbientState.setStatusBarState(statusBarState);
         updateSpeedBumpIndex();
