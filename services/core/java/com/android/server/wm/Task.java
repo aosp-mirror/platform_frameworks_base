@@ -6614,17 +6614,23 @@ class Task extends TaskFragment {
     void clearLastRecentsAnimationTransaction() {
         mLastRecentsAnimationTransaction = null;
         mLastRecentsAnimationOverlay = null;
-        // reset also the transform introduced by mLastRecentsAnimationTransaction
-        getPendingTransaction().setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9]);
+        // reset also the crop and transform introduced by mLastRecentsAnimationTransaction
+        Rect bounds = getBounds();
+        getPendingTransaction().setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9])
+                .setWindowCrop(mSurfaceControl, bounds.width(), bounds.height());
     }
 
     void maybeApplyLastRecentsAnimationTransaction() {
         if (mLastRecentsAnimationTransaction != null) {
+            final SurfaceControl.Transaction tx = getPendingTransaction();
             if (mLastRecentsAnimationOverlay != null) {
-                getPendingTransaction().reparent(mLastRecentsAnimationOverlay, mSurfaceControl);
+                tx.reparent(mLastRecentsAnimationOverlay, mSurfaceControl);
             }
             PictureInPictureSurfaceTransaction.apply(mLastRecentsAnimationTransaction,
-                    mSurfaceControl, getPendingTransaction());
+                    mSurfaceControl, tx);
+            // If we are transferring the transform from the root task entering PIP, then also show
+            // the new task immediately
+            tx.show(mSurfaceControl);
             mLastRecentsAnimationTransaction = null;
             mLastRecentsAnimationOverlay = null;
         }
