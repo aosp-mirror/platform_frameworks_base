@@ -26,11 +26,11 @@ import android.graphics.ColorSpace;
  *  in L*a*b* space, also known as deltaE, is a universally accepted standard across industries
  *  and worldwide.
  */
-public class LABCentroid implements CentroidProvider {
+public class LABPointProvider implements PointProvider {
     final ColorSpace.Connector mRgbToLab;
     final ColorSpace.Connector mLabToRgb;
 
-    public LABCentroid() {
+    public LABPointProvider() {
         mRgbToLab = ColorSpace.connect(
                 ColorSpace.get(ColorSpace.Named.SRGB),
                 ColorSpace.get(ColorSpace.Named.CIE_LAB));
@@ -39,7 +39,7 @@ public class LABCentroid implements CentroidProvider {
     }
 
     @Override
-    public float[] getCentroid(int color) {
+    public float[] fromInt(int color) {
         float r = Color.red(color) / 255.f;
         float g =  Color.green(color) / 255.f;
         float b = Color.blue(color) / 255.f;
@@ -49,7 +49,7 @@ public class LABCentroid implements CentroidProvider {
     }
 
     @Override
-    public int getColor(float[] centroid) {
+    public int toInt(float[] centroid) {
         float[] rgb = mLabToRgb.transform(centroid);
         int color = Color.rgb(rgb[0], rgb[1], rgb[2]);
         return color;

@@ -1244,8 +1244,12 @@ static jlong NativeThemeCreate(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
   return reinterpret_cast<jlong>(assetmanager->NewTheme().release());
 }
 
-static void NativeThemeDestroy(JNIEnv* /*env*/, jclass /*clazz*/, jlong theme_ptr) {
+static void NativeThemeDestroy(jlong theme_ptr) {
   delete reinterpret_cast<Theme*>(theme_ptr);
+}
+
+static jlong NativeGetThemeFreeFunction(JNIEnv* /*env*/, jclass /*clazz*/) {
+  return static_cast<jlong>(reinterpret_cast<uintptr_t>(&NativeThemeDestroy));
 }
 
 static void NativeThemeApplyStyle(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlong theme_ptr,
@@ -1262,6 +1266,38 @@ static void NativeThemeApplyStyle(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlon
   // CTS currently expects no exceptions from this method.
   // std::string error_msg = StringPrintf("Failed to apply style 0x%08x to theme", resid);
   // jniThrowException(env, "java/lang/IllegalArgumentException", error_msg.c_str());
+}
+
+static void NativeThemeRebase(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlong theme_ptr,
+                              jintArray style_ids, jbooleanArray force,
+                              jint style_count) {
+  // Lock both the original asset manager of the theme and the new asset manager to be used for the
+  // theme.
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+
+  uint32_t* style_id_args = nullptr;
+  if (style_ids != nullptr) {
+    CHECK(style_count <= env->GetArrayLength(style_ids));
+    style_id_args = reinterpret_cast<uint32_t*>(env->GetPrimitiveArrayCritical(style_ids, nullptr));
+    if (style_id_args == nullptr) {
+      return;
+    }
+  }
+
+  jboolean* force_args = nullptr;
+  if (force != nullptr) {
+    CHECK(style_count <= env->GetArrayLength(force));
+    force_args = reinterpret_cast<jboolean*>(env->GetPrimitiveArrayCritical(force, nullptr));
+    if (force_args == nullptr) {
+      env->ReleasePrimitiveArrayCritical(style_ids, style_id_args, JNI_ABORT);
+      return;
+    }
+  }
+
+  auto theme = reinterpret_cast<Theme*>(theme_ptr);
+  theme->Rebase(&(*assetmanager), style_id_args, force_args, static_cast<size_t>(style_count));
+  env->ReleasePrimitiveArrayCritical(style_ids, style_id_args, JNI_ABORT);
+  env->ReleasePrimitiveArrayCritical(force, force_args, JNI_ABORT);
 }
 
 static void NativeThemeCopy(JNIEnv* env, jclass /*clazz*/, jlong dst_asset_manager_ptr,
@@ -1282,10 +1318,6 @@ static void NativeThemeCopy(JNIEnv* env, jclass /*clazz*/, jlong dst_asset_manag
   } else {
       dst_theme->SetTo(*src_theme);
   }
-}
-
-static void NativeThemeClear(JNIEnv* /*env*/, jclass /*clazz*/, jlong theme_ptr) {
-  reinterpret_cast<Theme*>(theme_ptr)->Clear();
 }
 
 static jint NativeThemeGetAttributeValue(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlong theme_ptr,
@@ -1446,10 +1478,11 @@ static const JNINativeMethod gAssetManagerMethods[] = {
 
     // Theme related methods.
     {"nativeThemeCreate", "(J)J", (void*)NativeThemeCreate},
-    {"nativeThemeDestroy", "(J)V", (void*)NativeThemeDestroy},
+    {"nativeGetThemeFreeFunction", "()J", (void*)NativeGetThemeFreeFunction},
     {"nativeThemeApplyStyle", "(JJIZ)V", (void*)NativeThemeApplyStyle},
+    {"nativeThemeRebase", "(JJ[I[ZI)V", (void*)NativeThemeRebase},
+
     {"nativeThemeCopy", "(JJJJ)V", (void*)NativeThemeCopy},
-    {"nativeThemeClear", "(J)V", (void*)NativeThemeClear},
     {"nativeThemeGetAttributeValue", "(JJILandroid/util/TypedValue;Z)I",
      (void*)NativeThemeGetAttributeValue},
     {"nativeThemeDump", "(JJILjava/lang/String;Ljava/lang/String;)V", (void*)NativeThemeDump},

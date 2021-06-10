@@ -156,6 +156,7 @@ public class RecentsAnimationController implements DeathRecipient {
     @VisibleForTesting
     boolean mShouldAttachNavBarToAppDuringTransition;
     private boolean mNavigationBarAttachedToApp;
+    private ActivityRecord mNavBarAttachedApp;
 
     /**
      * Animates the screenshot of task that used to be controlled by RecentsAnimation.
@@ -392,6 +393,18 @@ public class RecentsAnimationController implements DeathRecipient {
                 Binder.restoreCallingIdentity(token);
             }
         }
+
+        @Override
+        public void animateNavigationBarToApp(long duration) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mService.getWindowManagerLock()) {
+                    animateNavigationBarForAppLaunch(duration);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     };
 
     /**
@@ -613,7 +626,6 @@ public class RecentsAnimationController implements DeathRecipient {
                 || mDisplayContent.getFadeRotationAnimationController() != null) {
             return;
         }
-        ActivityRecord topActivity = null;
         boolean shouldTranslateNavBar = false;
         final boolean isDisplayLandscape =
                 mDisplayContent.getConfiguration().orientation == ORIENTATION_LANDSCAPE;
@@ -630,12 +642,12 @@ public class RecentsAnimationController implements DeathRecipient {
                 continue;
             }
             shouldTranslateNavBar = isSplitScreenSecondary;
-            topActivity = task.getTopVisibleActivity();
+            mNavBarAttachedApp = task.getTopVisibleActivity();
             break;
         }
 
         final WindowState navWindow = getNavigationBarWindow();
-        if (topActivity == null || navWindow == null || navWindow.mToken == null) {
+        if (mNavBarAttachedApp == null || navWindow == null || navWindow.mToken == null) {
             return;
         }
         mNavigationBarAttachedToApp = true;
@@ -643,9 +655,9 @@ public class RecentsAnimationController implements DeathRecipient {
         final SurfaceControl.Transaction t = navWindow.mToken.getPendingTransaction();
         final SurfaceControl navSurfaceControl = navWindow.mToken.getSurfaceControl();
         if (shouldTranslateNavBar) {
-            navWindow.setSurfaceTranslationY(-topActivity.getBounds().top);
+            navWindow.setSurfaceTranslationY(-mNavBarAttachedApp.getBounds().top);
         }
-        t.reparent(navSurfaceControl, topActivity.getSurfaceControl());
+        t.reparent(navSurfaceControl, mNavBarAttachedApp.getSurfaceControl());
         t.show(navSurfaceControl);
 
         final WindowContainer imeContainer = mDisplayContent.getImeContainer();
@@ -695,9 +707,25 @@ public class RecentsAnimationController implements DeathRecipient {
         }
     }
 
+    void animateNavigationBarForAppLaunch(long duration) {
+        if (!mShouldAttachNavBarToAppDuringTransition
+                // Skip the case where the nav bar is controlled by fade rotation.
+                || mDisplayContent.getFadeRotationAnimationController() != null
+                || mNavigationBarAttachedToApp
+                || mNavBarAttachedApp == null) {
+            return;
+        }
+
+        final NavBarFadeAnimationController controller =
+                new NavBarFadeAnimationController(mDisplayContent);
+        controller.fadeOutAndInSequentially(duration, null /* fadeOutParent */,
+                mNavBarAttachedApp.getSurfaceControl());
+    }
+
     void addTaskToTargets(Task task, OnAnimationFinishedCallback finishedCallback) {
         if (mRunner != null) {
             mIsAddingTaskToTargets = task != null;
+            mNavBarAttachedApp = task == null ? null : task.getTopVisibleActivity();
             // No need to send task appeared when the task target already exists, or when the
             // task is being managed as a multi-window mode outside of recents (e.g. bubbles).
             if (isAnimatingTask(task) || skipAnimation(task)) {

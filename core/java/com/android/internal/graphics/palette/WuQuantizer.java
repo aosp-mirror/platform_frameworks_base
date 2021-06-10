@@ -16,431 +16,447 @@
 
 package com.android.internal.graphics.palette;
 
+import static java.lang.System.arraycopy;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.graphics.Color;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-// All reference Wu implementations are based on the original C code by Wu.
-// Comments on methods are the same as in the original implementation, and the comment below
-// is the original class header.
 
 /**
- * Wu's Color Quantizer (v. 2) (see Graphics Gems vol. II, pp. 126-133) Author: Xiaolin Wu
+ * Wu's quantization algorithm is a box-cut quantizer that minimizes variance. It takes longer to
+ * run than, say, median color cut, but provides the highest quality results currently known.
  *
- * <p>Algorithm: Greedy orthogonal bipartition of RGB space for variance minimization aided by
- * inclusion-exclusion tricks. For speed no nearest neighbor search is done. Slightly better
- * performance can be expected by more sophisticated but more expensive versions.
+ * Prefer `QuantizerCelebi`: coupled with Kmeans, this provides the best-known results for image
+ * quantization.
+ *
+ * Seemingly all Wu implementations are based off of one C code snippet that cites a book from 1992
+ * Graphics Gems vol. II, pp. 126-133. As a result, it is very hard to understand the mechanics of
+ * the algorithm, beyond the commentary provided in the C code. Comments on the methods of this
+ * class are avoided in favor of finding another implementation and reading the commentary there,
+ * avoiding perpetuating the same incomplete and somewhat confusing commentary here.
  */
-public class WuQuantizer implements Quantizer {
-    private static final int MAX_COLORS = 256;
-    private static final int RED = 2;
-    private static final int GREEN = 1;
-    private static final int BLUE = 0;
+public final class WuQuantizer implements Quantizer {
+    // A histogram of all the input colors is constructed. It has the shape of a
+    // cube. The cube would be too large if it contained all 16 million colors:
+    // historical best practice is to use 5 bits  of the 8 in each channel,
+    // reducing the histogram to a volume of ~32,000.
+    private static final int BITS = 5;
+    private static final int MAX_INDEX = 32;
+    private static final int SIDE_LENGTH = 33;
+    private static final int TOTAL_SIZE = 35937;
 
-    private static final int QUANT_SIZE = 33;
-    private final List<Palette.Swatch> mSwatches = new ArrayList<>();
+    private int[] mWeights;
+    private int[] mMomentsR;
+    private int[] mMomentsG;
+    private int[] mMomentsB;
+    private double[] mMoments;
+    private Box[] mCubes;
+    private Palette mPalette;
+    private int[] mColors;
+    private Map<Integer, Integer> mInputPixelToCount;
 
     @Override
     public List<Palette.Swatch> getQuantizedColors() {
-        return mSwatches;
-    }
-
-    private static final class Box {
-        int mR0; /* min value, exclusive */
-        int mR1; /* max value, inclusive */
-        int mG0;
-        int mG1;
-        int mB0;
-        int mB1;
-        int mVol;
-    }
-
-    private final int mSize; /* image size, in bytes. */
-    private int mMaxColors;
-    private int[] mQadd;
-    private final int[] mPixels;
-
-    private final double[][][] mM2 = new double[QUANT_SIZE][QUANT_SIZE][QUANT_SIZE];
-    private final long[][][] mWt = new long[QUANT_SIZE][QUANT_SIZE][QUANT_SIZE];
-    private final long[][][] mMr = new long[QUANT_SIZE][QUANT_SIZE][QUANT_SIZE];
-    private final long[][][] mMg = new long[QUANT_SIZE][QUANT_SIZE][QUANT_SIZE];
-    private final long[][][] mMb = new long[QUANT_SIZE][QUANT_SIZE][QUANT_SIZE];
-
-    public WuQuantizer(int[] pixels, int maxColorCount) {
-        if (pixels == null) {
-            pixels = new int[]{};
-        }
-        this.mPixels = pixels;
-        this.mSize = pixels.length;
+        return mPalette.getSwatches();
     }
 
     @Override
-    public void quantize(int[] colors, int maxColorCount) {
-        // All of the sample Wu implementations are reimplementations of a snippet of C code from
-        // the early 90s. They all cap the maximum # of colors at 256, and it is impossible to tell
-        // if this is a requirement, a consequence of QUANT_SIZE, or arbitrary.
-        //
-        // Also, the number of maximum colors should be capped at the number of pixels - otherwise,
-        // If extraction is run on a set of pixels whose count is less than max colors,
-        // then colors.length < max colors, and accesses to colors[index] throw an
-        // ArrayOutOfBoundsException.
-        this.mMaxColors = Math.min(Math.min(MAX_COLORS, maxColorCount), colors.length);
-        Box[] cube = new Box[mMaxColors];
-        int red, green, blue;
+    public void quantize(@NonNull int[] pixels, int colorCount) {
+        assert (pixels.length > 0);
 
-        int next, i, k;
-        long weight;
-        double[] vv = new double[mMaxColors];
-        double temp;
-
-        compute3DHistogram(mWt, mMr, mMg, mMb, mM2);
-        computeMoments(mWt, mMr, mMg, mMb, mM2);
-
-        for (i = 0; i < mMaxColors; i++) {
-            cube[i] = new Box();
-        }
-
-        cube[0].mR0 = cube[0].mG0 = cube[0].mB0 = 0;
-        cube[0].mR1 = cube[0].mG1 = cube[0].mB1 = QUANT_SIZE - 1;
-        next = 0;
-
-        for (i = 1; i < mMaxColors; ++i) {
-            if (cut(cube[next], cube[i])) {
-                vv[next] = (cube[next].mVol > 1) ? getVariance(cube[next]) : 0.0f;
-                vv[i] = (cube[i].mVol > 1) ? getVariance(cube[i]) : 0.0f;
-            } else {
-                vv[next] = 0.0f;
-                i--;
+        QuantizerMap quantizerMap = new QuantizerMap();
+        quantizerMap.quantize(pixels, colorCount);
+        mInputPixelToCount = quantizerMap.getColorToCount();
+        // Extraction should not be run on using a color count higher than the number of colors
+        // in the pixels. The algorithm doesn't expect that to be the case, unexpected results and
+        // exceptions may occur.
+        Set<Integer> uniqueColors = mInputPixelToCount.keySet();
+        if (uniqueColors.size() <= colorCount) {
+            mColors = new int[mInputPixelToCount.keySet().size()];
+            int index = 0;
+            for (int color : uniqueColors) {
+                mColors[index++] = color;
             }
-            next = 0;
-            temp = vv[0];
-            for (k = 1; k <= i; ++k) {
-                if (vv[k] > temp) {
-                    temp = vv[k];
-                    next = k;
-                }
-            }
-            if (temp <= 0.0f) {
-                break;
-            }
-        }
-
-        for (k = 0; k < mMaxColors; ++k) {
-            weight = getVolume(cube[k], mWt);
-            if (weight > 0) {
-                red = (int) (getVolume(cube[k], mMr) / weight);
-                green = (int) (getVolume(cube[k], mMg) / weight);
-                blue = (int) (getVolume(cube[k], mMb) / weight);
-                colors[k] = (255 << 24) | (red << 16) | (green << 8) | blue;
-            } else {
-                colors[k] = 0;
-            }
-        }
-
-        int bitsPerPixel = 0;
-        while ((1 << bitsPerPixel) < mMaxColors) {
-            bitsPerPixel++;
+        } else {
+            constructHistogram(mInputPixelToCount);
+            createMoments();
+            CreateBoxesResult createBoxesResult = createBoxes(colorCount);
+            mColors = createResult(createBoxesResult.mResultCount);
         }
 
         List<Palette.Swatch> swatches = new ArrayList<>();
-        for (int l = 0; l < k; l++) {
-            int pixel = colors[l];
-            if (pixel == 0) {
-                continue;
-            }
-            swatches.add(new Palette.Swatch(pixel, 0));
+        for (int color : mColors) {
+            swatches.add(new Palette.Swatch(color, 0));
         }
-        mSwatches.clear();
-        mSwatches.addAll(swatches);
+        mPalette = Palette.from(swatches);
     }
 
-    /* Histogram is in elements 1..HISTSIZE along each axis,
-     * element 0 is for base or marginal value
-     * NB: these must start out 0!
-     */
-    private void compute3DHistogram(
-            long[][][] vwt, long[][][] vmr, long[][][] vmg, long[][][] vmb, double[][][] m2) {
-        // build 3-D color histogram of counts, r/g/b, and c^2
-        int r, g, b;
-        int i;
-        int inr;
-        int ing;
-        int inb;
-        int[] table = new int[256];
+    @Nullable
+    public int[] getColors() {
+        return mColors;
+    }
 
-        for (i = 0; i < 256; i++) {
-            table[i] = i * i;
-        }
+    /** Keys are color ints, values are the number of pixels in the image matching that color int */
+    @Nullable
+    public Map<Integer, Integer> inputPixelToCount() {
+        return mInputPixelToCount;
+    }
 
-        mQadd = new int[mSize];
+    private static int getIndex(int r, int g, int b) {
+        return (r << 10) + (r << 6) + (g << 5) + r + g + b;
+    }
 
-        for (i = 0; i < mSize; ++i) {
-            int rgb = mPixels[i];
-            // Skip less than opaque pixels. They're not meaningful in the context of palette
-            // generation for UI schemes.
-            if ((rgb >>> 24) < 0xff) {
-                continue;
-            }
-            r = ((rgb >> 16) & 0xff);
-            g = ((rgb >> 8) & 0xff);
-            b = (rgb & 0xff);
-            inr = (r >> 3) + 1;
-            ing = (g >> 3) + 1;
-            inb = (b >> 3) + 1;
-            mQadd[i] = (inr << 10) + (inr << 6) + inr + (ing << 5) + ing + inb;
-            /*[inr][ing][inb]*/
-            ++vwt[inr][ing][inb];
-            vmr[inr][ing][inb] += r;
-            vmg[inr][ing][inb] += g;
-            vmb[inr][ing][inb] += b;
-            m2[inr][ing][inb] += table[r] + table[g] + table[b];
+    private void constructHistogram(Map<Integer, Integer> pixels) {
+        mWeights = new int[TOTAL_SIZE];
+        mMomentsR = new int[TOTAL_SIZE];
+        mMomentsG = new int[TOTAL_SIZE];
+        mMomentsB = new int[TOTAL_SIZE];
+        mMoments = new double[TOTAL_SIZE];
+
+        for (Map.Entry<Integer, Integer> pair : pixels.entrySet()) {
+            int pixel = pair.getKey();
+            int count = pair.getValue();
+            int red = Color.red(pixel);
+            int green = Color.green(pixel);
+            int blue = Color.blue(pixel);
+            int bitsToRemove = 8 - BITS;
+            int iR = (red >> bitsToRemove) + 1;
+            int iG = (green >> bitsToRemove) + 1;
+            int iB = (blue >> bitsToRemove) + 1;
+            int index = getIndex(iR, iG, iB);
+            mWeights[index] += count;
+            mMomentsR[index] += (red * count);
+            mMomentsG[index] += (green * count);
+            mMomentsB[index] += (blue * count);
+            mMoments[index] += (count * ((red * red) + (green * green) + (blue * blue)));
         }
     }
 
-    /* At conclusion of the histogram step, we can interpret
-     *   wt[r][g][b] = sum over voxel of P(c)
-     *   mr[r][g][b] = sum over voxel of r*P(c)  ,  similarly for mg, mb
-     *   m2[r][g][b] = sum over voxel of c^2*P(c)
-     * Actually each of these should be divided by 'size' to give the usual
-     * interpretation of P() as ranging from 0 to 1, but we needn't do that here.
-     *
-     * We now convert histogram into moments so that we can rapidly calculate
-     * the sums of the above quantities over any desired box.
-     */
-    private void computeMoments(
-            long[][][] vwt, long[][][] vmr, long[][][] vmg, long[][][] vmb, double[][][] m2) {
-        /* compute cumulative moments. */
-        int i, r, g, b;
-        int line, line_r, line_g, line_b;
-        int[] area = new int[QUANT_SIZE];
-        int[] area_r = new int[QUANT_SIZE];
-        int[] area_g = new int[QUANT_SIZE];
-        int[] area_b = new int[QUANT_SIZE];
-        double line2;
-        double[] area2 = new double[QUANT_SIZE];
+    private void createMoments() {
+        for (int r = 1; r < SIDE_LENGTH; ++r) {
+            int[] area = new int[SIDE_LENGTH];
+            int[] areaR = new int[SIDE_LENGTH];
+            int[] areaG = new int[SIDE_LENGTH];
+            int[] areaB = new int[SIDE_LENGTH];
+            double[] area2 = new double[SIDE_LENGTH];
 
-        for (r = 1; r < QUANT_SIZE; ++r) {
-            for (i = 0; i < QUANT_SIZE; ++i) {
-                area2[i] = area[i] = area_r[i] = area_g[i] = area_b[i] = 0;
-            }
-            for (g = 1; g < QUANT_SIZE; ++g) {
-                line2 = line = line_r = line_g = line_b = 0;
-                for (b = 1; b < QUANT_SIZE; ++b) {
-                    line += vwt[r][g][b];
-                    line_r += vmr[r][g][b];
-                    line_g += vmg[r][g][b];
-                    line_b += vmb[r][g][b];
-                    line2 += m2[r][g][b];
+            for (int g = 1; g < SIDE_LENGTH; ++g) {
+                int line = 0;
+                int lineR = 0;
+                int lineG = 0;
+                int lineB = 0;
+
+                double line2 = 0.0;
+                for (int b = 1; b < SIDE_LENGTH; ++b) {
+                    int index = getIndex(r, g, b);
+                    line += mWeights[index];
+                    lineR += mMomentsR[index];
+                    lineG += mMomentsG[index];
+                    lineB += mMomentsB[index];
+                    line2 += mMoments[index];
 
                     area[b] += line;
-                    area_r[b] += line_r;
-                    area_g[b] += line_g;
-                    area_b[b] += line_b;
+                    areaR[b] += lineR;
+                    areaG[b] += lineG;
+                    areaB[b] += lineB;
                     area2[b] += line2;
 
-                    vwt[r][g][b] = vwt[r - 1][g][b] + area[b];
-                    vmr[r][g][b] = vmr[r - 1][g][b] + area_r[b];
-                    vmg[r][g][b] = vmg[r - 1][g][b] + area_g[b];
-                    vmb[r][g][b] = vmb[r - 1][g][b] + area_b[b];
-                    m2[r][g][b] = m2[r - 1][g][b] + area2[b];
+                    int previousIndex = getIndex(r - 1, g, b);
+                    mWeights[index] = mWeights[previousIndex] + area[b];
+                    mMomentsR[index] = mMomentsR[previousIndex] + areaR[b];
+                    mMomentsG[index] = mMomentsG[previousIndex] + areaG[b];
+                    mMomentsB[index] = mMomentsB[previousIndex] + areaB[b];
+                    mMoments[index] = mMoments[previousIndex] + area2[b];
                 }
             }
         }
     }
 
-    private long getVolume(Box cube, long[][][] mmt) {
-        /* Compute sum over a box of any given statistic */
-        return (mmt[cube.mR1][cube.mG1][cube.mB1]
-                - mmt[cube.mR1][cube.mG1][cube.mB0]
-                - mmt[cube.mR1][cube.mG0][cube.mB1]
-                + mmt[cube.mR1][cube.mG0][cube.mB0]
-                - mmt[cube.mR0][cube.mG1][cube.mB1]
-                + mmt[cube.mR0][cube.mG1][cube.mB0]
-                + mmt[cube.mR0][cube.mG0][cube.mB1]
-                - mmt[cube.mR0][cube.mG0][cube.mB0]);
-    }
-
-    /* The next two routines allow a slightly more efficient calculation
-     * of Vol() for a proposed subbox of a given box.  The sum of Top()
-     * and Bottom() is the Vol() of a subbox split in the given direction
-     * and with the specified new upper bound.
-     */
-    private long getBottom(Box cube, int dir, long[][][] mmt) {
-        /* Compute part of Vol(cube, mmt) that doesn't depend on r1, g1, or b1 */
-        /* (depending on dir) */
-        switch (dir) {
-            case RED:
-                return (-mmt[cube.mR0][cube.mG1][cube.mB1]
-                        + mmt[cube.mR0][cube.mG1][cube.mB0]
-                        + mmt[cube.mR0][cube.mG0][cube.mB1]
-                        - mmt[cube.mR0][cube.mG0][cube.mB0]);
-            case GREEN:
-                return (-mmt[cube.mR1][cube.mG0][cube.mB1]
-                        + mmt[cube.mR1][cube.mG0][cube.mB0]
-                        + mmt[cube.mR0][cube.mG0][cube.mB1]
-                        - mmt[cube.mR0][cube.mG0][cube.mB0]);
-            case BLUE:
-                return (-mmt[cube.mR1][cube.mG1][cube.mB0]
-                        + mmt[cube.mR1][cube.mG0][cube.mB0]
-                        + mmt[cube.mR0][cube.mG1][cube.mB0]
-                        - mmt[cube.mR0][cube.mG0][cube.mB0]);
-            default:
-                return 0;
+    private CreateBoxesResult createBoxes(int maxColorCount) {
+        mCubes = new Box[maxColorCount];
+        for (int i = 0; i < maxColorCount; i++) {
+            mCubes[i] = new Box();
         }
-    }
+        double[] volumeVariance = new double[maxColorCount];
+        Box firstBox = mCubes[0];
+        firstBox.r1 = MAX_INDEX;
+        firstBox.g1 = MAX_INDEX;
+        firstBox.b1 = MAX_INDEX;
 
-    private long getTop(Box cube, int dir, int pos, long[][][] mmt) {
-        /* Compute remainder of Vol(cube, mmt), substituting pos for */
-        /* r1, g1, or b1 (depending on dir) */
-        switch (dir) {
-            case RED:
-                return (mmt[pos][cube.mG1][cube.mB1]
-                        - mmt[pos][cube.mG1][cube.mB0]
-                        - mmt[pos][cube.mG0][cube.mB1]
-                        + mmt[pos][cube.mG0][cube.mB0]);
-            case GREEN:
-                return (mmt[cube.mR1][pos][cube.mB1]
-                        - mmt[cube.mR1][pos][cube.mB0]
-                        - mmt[cube.mR0][pos][cube.mB1]
-                        + mmt[cube.mR0][pos][cube.mB0]);
-            case BLUE:
-                return (mmt[cube.mR1][cube.mG1][pos]
-                        - mmt[cube.mR1][cube.mG0][pos]
-                        - mmt[cube.mR0][cube.mG1][pos]
-                        + mmt[cube.mR0][cube.mG0][pos]);
-            default:
-                return 0;
-        }
-    }
+        int generatedColorCount = 0;
+        int next = 0;
 
-    private double getVariance(Box cube) {
-        /* Compute the weighted variance of a box */
-        /* NB: as with the raw statistics, this is really the variance * size */
-        double dr, dg, db, xx;
-        dr = getVolume(cube, mMr);
-        dg = getVolume(cube, mMg);
-        db = getVolume(cube, mMb);
-        xx =
-                mM2[cube.mR1][cube.mG1][cube.mB1]
-                        - mM2[cube.mR1][cube.mG1][cube.mB0]
-                        - mM2[cube.mR1][cube.mG0][cube.mB1]
-                        + mM2[cube.mR1][cube.mG0][cube.mB0]
-                        - mM2[cube.mR0][cube.mG1][cube.mB1]
-                        + mM2[cube.mR0][cube.mG1][cube.mB0]
-                        + mM2[cube.mR0][cube.mG0][cube.mB1]
-                        - mM2[cube.mR0][cube.mG0][cube.mB0];
-        return xx - (dr * dr + dg * dg + db * db) / getVolume(cube, mWt);
-    }
-
-    /* We want to minimize the sum of the variances of two subboxes.
-     * The sum(c^2) terms can be ignored since their sum over both subboxes
-     * is the same (the sum for the whole box) no matter where we split.
-     * The remaining terms have a minus sign in the variance formula,
-     * so we drop the minus sign and MAXIMIZE the sum of the two terms.
-     */
-    private double maximize(
-            Box cube,
-            int dir,
-            int first,
-            int last,
-            int[] cut,
-            long wholeR,
-            long wholeG,
-            long wholeB,
-            long wholeW) {
-        long half_r, half_g, half_b, half_w;
-        long base_r, base_g, base_b, base_w;
-        int i;
-        double temp, max;
-
-        base_r = getBottom(cube, dir, mMr);
-        base_g = getBottom(cube, dir, mMg);
-        base_b = getBottom(cube, dir, mMb);
-        base_w = getBottom(cube, dir, mWt);
-
-        max = 0.0f;
-        cut[0] = -1;
-
-        for (i = first; i < last; ++i) {
-            half_r = base_r + getTop(cube, dir, i, mMr);
-            half_g = base_g + getTop(cube, dir, i, mMg);
-            half_b = base_b + getTop(cube, dir, i, mMb);
-            half_w = base_w + getTop(cube, dir, i, mWt);
-            /* now half_x is sum over lower half of box, if split at i */
-            if (half_w == 0) /* subbox could be empty of pixels! */ {
-                continue; /* never split into an empty box */
+        for (int i = 1; i < maxColorCount; i++) {
+            if (cut(mCubes[next], mCubes[i])) {
+                volumeVariance[next] = (mCubes[next].vol > 1) ? variance(mCubes[next]) : 0.0;
+                volumeVariance[i] = (mCubes[i].vol > 1) ? variance(mCubes[i]) : 0.0;
+            } else {
+                volumeVariance[next] = 0.0;
+                i--;
             }
-            temp = (half_r * half_r + half_g * half_g + half_b * half_b) / (double) half_w;
-            half_r = wholeR - half_r;
-            half_g = wholeG - half_g;
-            half_b = wholeB - half_b;
-            half_w = wholeW - half_w;
-            if (half_w == 0) /* subbox could be empty of pixels! */ {
-                continue; /* never split into an empty box */
-            }
-            temp += (half_r * half_r + half_g * half_g + half_b * half_b) / (double) half_w;
 
-            if (temp > max) {
-                max = temp;
-                cut[0] = i;
+            next = 0;
+
+            double temp = volumeVariance[0];
+            for (int k = 1; k <= i; k++) {
+                if (volumeVariance[k] > temp) {
+                    temp = volumeVariance[k];
+                    next = k;
+                }
+            }
+            generatedColorCount = i + 1;
+            if (temp <= 0.0) {
+                break;
             }
         }
 
-        return max;
+        return new CreateBoxesResult(maxColorCount, generatedColorCount);
     }
 
-    private boolean cut(Box set1, Box set2) {
-        int dir;
-        int[] cutr = new int[1];
-        int[] cutg = new int[1];
-        int[] cutb = new int[1];
-        double maxr, maxg, maxb;
-        long whole_r, whole_g, whole_b, whole_w;
+    private int[] createResult(int colorCount) {
+        int[] colors = new int[colorCount];
+        int nextAvailableIndex = 0;
+        for (int i = 0; i < colorCount; ++i) {
+            Box cube = mCubes[i];
+            int weight = volume(cube, mWeights);
+            if (weight > 0) {
+                int r = (volume(cube, mMomentsR) / weight);
+                int g = (volume(cube, mMomentsG) / weight);
+                int b = (volume(cube, mMomentsB) / weight);
+                int color = Color.rgb(r, g, b);
+                colors[nextAvailableIndex++] = color;
+            }
+        }
+        int[] resultArray = new int[nextAvailableIndex];
+        arraycopy(colors, 0, resultArray, 0, nextAvailableIndex);
+        return resultArray;
+    }
 
-        whole_r = getVolume(set1, mMr);
-        whole_g = getVolume(set1, mMg);
-        whole_b = getVolume(set1, mMb);
-        whole_w = getVolume(set1, mWt);
+    private double variance(Box cube) {
+        int dr = volume(cube, mMomentsR);
+        int dg = volume(cube, mMomentsG);
+        int db = volume(cube, mMomentsB);
+        double xx =
+                mMoments[getIndex(cube.r1, cube.g1, cube.b1)]
+                        - mMoments[getIndex(cube.r1, cube.g1, cube.b0)]
+                        - mMoments[getIndex(cube.r1, cube.g0, cube.b1)]
+                        + mMoments[getIndex(cube.r1, cube.g0, cube.b0)]
+                        - mMoments[getIndex(cube.r0, cube.g1, cube.b1)]
+                        + mMoments[getIndex(cube.r0, cube.g1, cube.b0)]
+                        + mMoments[getIndex(cube.r0, cube.g0, cube.b1)]
+                        - mMoments[getIndex(cube.r0, cube.g0, cube.b0)];
 
-        maxr = maximize(set1, RED, set1.mR0 + 1, set1.mR1, cutr, whole_r, whole_g, whole_b,
-                whole_w);
-        maxg = maximize(set1, GREEN, set1.mG0 + 1, set1.mG1, cutg, whole_r, whole_g, whole_b,
-                whole_w);
-        maxb = maximize(set1, BLUE, set1.mB0 + 1, set1.mB1, cutb, whole_r, whole_g, whole_b,
-                whole_w);
+        int hypotenuse = (dr * dr + dg * dg + db * db);
+        int volume2 = volume(cube, mWeights);
+        double variance2 = xx - ((double) hypotenuse / (double) volume2);
+        return variance2;
+    }
 
-        if (maxr >= maxg && maxr >= maxb) {
-            dir = RED;
-            if (cutr[0] < 0) return false; /* can't split the box */
-        } else if (maxg >= maxr && maxg >= maxb) {
-            dir = GREEN;
+    private boolean cut(Box one, Box two) {
+        int wholeR = volume(one, mMomentsR);
+        int wholeG = volume(one, mMomentsG);
+        int wholeB = volume(one, mMomentsB);
+        int wholeW = volume(one, mWeights);
+
+        MaximizeResult maxRResult =
+                maximize(one, Direction.RED, one.r0 + 1, one.r1, wholeR, wholeG, wholeB, wholeW);
+        MaximizeResult maxGResult =
+                maximize(one, Direction.GREEN, one.g0 + 1, one.g1, wholeR, wholeG, wholeB, wholeW);
+        MaximizeResult maxBResult =
+                maximize(one, Direction.BLUE, one.b0 + 1, one.b1, wholeR, wholeG, wholeB, wholeW);
+        Direction cutDirection;
+        double maxR = maxRResult.mMaximum;
+        double maxG = maxGResult.mMaximum;
+        double maxB = maxBResult.mMaximum;
+        if (maxR >= maxG && maxR >= maxB) {
+            if (maxRResult.mCutLocation < 0) {
+                return false;
+            }
+            cutDirection = Direction.RED;
+        } else if (maxG >= maxR && maxG >= maxB) {
+            cutDirection = Direction.GREEN;
         } else {
-            dir = BLUE;
+            cutDirection = Direction.BLUE;
         }
 
-        set2.mR1 = set1.mR1;
-        set2.mG1 = set1.mG1;
-        set2.mB1 = set1.mB1;
+        two.r1 = one.r1;
+        two.g1 = one.g1;
+        two.b1 = one.b1;
 
-        switch (dir) {
+        switch (cutDirection) {
             case RED:
-                set2.mR0 = set1.mR1 = cutr[0];
-                set2.mG0 = set1.mG0;
-                set2.mB0 = set1.mB0;
+                one.r1 = maxRResult.mCutLocation;
+                two.r0 = one.r1;
+                two.g0 = one.g0;
+                two.b0 = one.b0;
                 break;
             case GREEN:
-                set2.mG0 = set1.mG1 = cutg[0];
-                set2.mR0 = set1.mR0;
-                set2.mB0 = set1.mB0;
+                one.g1 = maxGResult.mCutLocation;
+                two.r0 = one.r0;
+                two.g0 = one.g1;
+                two.b0 = one.b0;
                 break;
             case BLUE:
-                set2.mB0 = set1.mB1 = cutb[0];
-                set2.mR0 = set1.mR0;
-                set2.mG0 = set1.mG0;
+                one.b1 = maxBResult.mCutLocation;
+                two.r0 = one.r0;
+                two.g0 = one.g0;
+                two.b0 = one.b1;
                 break;
+            default:
+                throw new IllegalArgumentException("unexpected direction " + cutDirection);
         }
-        set1.mVol = (set1.mR1 - set1.mR0) * (set1.mG1 - set1.mG0) * (set1.mB1 - set1.mB0);
-        set2.mVol = (set2.mR1 - set2.mR0) * (set2.mG1 - set2.mG0) * (set2.mB1 - set2.mB0);
+
+        one.vol = (one.r1 - one.r0) * (one.g1 - one.g0) * (one.b1 - one.b0);
+        two.vol = (two.r1 - two.r0) * (two.g1 - two.g0) * (two.b1 - two.b0);
 
         return true;
     }
+
+    private MaximizeResult maximize(
+            Box cube,
+            Direction direction,
+            int first,
+            int last,
+            int wholeR,
+            int wholeG,
+            int wholeB,
+            int wholeW) {
+        int baseR = bottom(cube, direction, mMomentsR);
+        int baseG = bottom(cube, direction, mMomentsG);
+        int baseB = bottom(cube, direction, mMomentsB);
+        int baseW = bottom(cube, direction, mWeights);
+
+        double max = 0.0;
+        int cut = -1;
+        for (int i = first; i < last; i++) {
+            int halfR = baseR + top(cube, direction, i, mMomentsR);
+            int halfG = baseG + top(cube, direction, i, mMomentsG);
+            int halfB = baseB + top(cube, direction, i, mMomentsB);
+            int halfW = baseW + top(cube, direction, i, mWeights);
+
+            if (halfW == 0) {
+                continue;
+            }
+            double tempNumerator = halfR * halfR + halfG * halfG + halfB * halfB;
+            double tempDenominator = halfW;
+            double temp = tempNumerator / tempDenominator;
+
+            halfR = wholeR - halfR;
+            halfG = wholeG - halfG;
+            halfB = wholeB - halfB;
+            halfW = wholeW - halfW;
+            if (halfW == 0) {
+                continue;
+            }
+
+            tempNumerator = halfR * halfR + halfG * halfG + halfB * halfB;
+            tempDenominator = halfW;
+            temp += (tempNumerator / tempDenominator);
+            if (temp > max) {
+                max = temp;
+                cut = i;
+            }
+        }
+        return new MaximizeResult(cut, max);
+    }
+
+    private static int volume(Box cube, int[] moment) {
+        return (moment[getIndex(cube.r1, cube.g1, cube.b1)]
+                - moment[getIndex(cube.r1, cube.g1, cube.b0)]
+                - moment[getIndex(cube.r1, cube.g0, cube.b1)]
+                + moment[getIndex(cube.r1, cube.g0, cube.b0)]
+                - moment[getIndex(cube.r0, cube.g1, cube.b1)]
+                + moment[getIndex(cube.r0, cube.g1, cube.b0)]
+                + moment[getIndex(cube.r0, cube.g0, cube.b1)]
+                - moment[getIndex(cube.r0, cube.g0, cube.b0)]);
+    }
+
+    private static int bottom(Box cube, Direction direction, int[] moment) {
+        switch (direction) {
+            case RED:
+                return -moment[getIndex(cube.r0, cube.g1, cube.b1)]
+                        + moment[getIndex(cube.r0, cube.g1, cube.b0)]
+                        + moment[getIndex(cube.r0, cube.g0, cube.b1)]
+                        - moment[getIndex(cube.r0, cube.g0, cube.b0)];
+            case GREEN:
+                return -moment[getIndex(cube.r1, cube.g0, cube.b1)]
+                        + moment[getIndex(cube.r1, cube.g0, cube.b0)]
+                        + moment[getIndex(cube.r0, cube.g0, cube.b1)]
+                        - moment[getIndex(cube.r0, cube.g0, cube.b0)];
+            case BLUE:
+                return -moment[getIndex(cube.r1, cube.g1, cube.b0)]
+                        + moment[getIndex(cube.r1, cube.g0, cube.b0)]
+                        + moment[getIndex(cube.r0, cube.g1, cube.b0)]
+                        - moment[getIndex(cube.r0, cube.g0, cube.b0)];
+            default:
+                throw new IllegalArgumentException("unexpected direction " + direction);
+        }
+    }
+
+    private static int top(Box cube, Direction direction, int position, int[] moment) {
+        switch (direction) {
+            case RED:
+                return (moment[getIndex(position, cube.g1, cube.b1)]
+                        - moment[getIndex(position, cube.g1, cube.b0)]
+                        - moment[getIndex(position, cube.g0, cube.b1)]
+                        + moment[getIndex(position, cube.g0, cube.b0)]);
+            case GREEN:
+                return (moment[getIndex(cube.r1, position, cube.b1)]
+                        - moment[getIndex(cube.r1, position, cube.b0)]
+                        - moment[getIndex(cube.r0, position, cube.b1)]
+                        + moment[getIndex(cube.r0, position, cube.b0)]);
+            case BLUE:
+                return (moment[getIndex(cube.r1, cube.g1, position)]
+                        - moment[getIndex(cube.r1, cube.g0, position)]
+                        - moment[getIndex(cube.r0, cube.g1, position)]
+                        + moment[getIndex(cube.r0, cube.g0, position)]);
+            default:
+                throw new IllegalArgumentException("unexpected direction " + direction);
+        }
+    }
+
+    private enum Direction {
+        RED,
+        GREEN,
+        BLUE
+    }
+
+    private static class MaximizeResult {
+        // < 0 if cut impossible
+        final int mCutLocation;
+        final double mMaximum;
+
+        MaximizeResult(int cut, double max) {
+            mCutLocation = cut;
+            mMaximum = max;
+        }
+    }
+
+    private static class CreateBoxesResult {
+        final int mRequestedCount;
+        final int mResultCount;
+
+        CreateBoxesResult(int requestedCount, int resultCount) {
+            mRequestedCount = requestedCount;
+            mResultCount = resultCount;
+        }
+    }
+
+    private static class Box {
+        public int r0 = 0;
+        public int r1 = 0;
+        public int g0 = 0;
+        public int g1 = 0;
+        public int b0 = 0;
+        public int b1 = 0;
+        public int vol = 0;
+    }
 }
+
+

@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
@@ -46,11 +48,11 @@ public final class ScrollCaptureTarget {
 
     public ScrollCaptureTarget(@NonNull View scrollTarget, @NonNull Rect localVisibleRect,
             @NonNull Point positionInWindow, @NonNull ScrollCaptureCallback callback) {
-        mContainingView = scrollTarget;
+        mContainingView = requireNonNull(scrollTarget);
         mHint = mContainingView.getScrollCaptureHint();
-        mCallback = callback;
-        mLocalVisibleRect = localVisibleRect;
-        mPositionInWindow = positionInWindow;
+        mCallback = requireNonNull(callback);
+        mLocalVisibleRect = requireNonNull(localVisibleRect);
+        mPositionInWindow = requireNonNull(positionInWindow);
     }
 
     /**

@@ -4980,6 +4980,11 @@
     <!-- List containing the allowed install sources for accessibility service. -->
     <string-array name="config_accessibility_allowed_install_source" translatable="false"/>
 
+    <!-- Default value for Settings.ASSIST_LONG_PRESS_HOME_ENABLED -->
+    <bool name="config_assistLongPressHomeEnabledDefault">true</bool>
+    <!-- Default value for Settings.ASSIST_TOUCH_GESTURE_ENABLED -->
+    <bool name="config_assistTouchGestureEnabledDefault">true</bool>
+
     <!-- The amount of dimming to apply to wallpapers with mid range luminance. 0 displays
          the wallpaper at full brightness. 1 displays the wallpaper as fully black. -->
     <item name="config_wallpaperDimAmount" format="float" type="dimen">0.05</item>
