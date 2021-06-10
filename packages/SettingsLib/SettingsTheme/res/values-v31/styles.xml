@@ -28,4 +28,10 @@
         <item name="android:track">@drawable/settingslib_switch_track</item>
         <item name="android:thumb">@drawable/settingslib_switch_thumb</item>
     </style>
+
+    <style name="HorizontalProgressBar.SettingsLib"
+           parent="android:style/Widget.Material.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/settingslib_progress_horizontal</item>
+        <item name="android:scaleY">0.5</item>
+    </style>
 </resources>
