@@ -4551,15 +4551,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
 
                 try {
-                    if (mPlatformCompat.isChangeEnabledByPackageName(
+                    if (!mPlatformCompat.isChangeEnabledByPackageName(
                             SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE, packageName,
-                            userId) && mPlatformCompat.isChangeEnabledByUid(
+                            userId) || !mPlatformCompat.isChangeEnabledByUid(
                                     SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE,
-                            callingUid) && !isAttributionTagValid) {
-                        Slog.e(TAG, msg);
-                    } else {
-                        Slog.e(TAG, msg);
+                            callingUid)) {
+                        // Do not override tags if overriding is not enabled for this package
+                        isAttributionTagValid = true;
                     }
+                    Slog.e(TAG, msg);
                 } catch (RemoteException neverHappens) {
                 }
             }
