@@ -107,38 +107,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     private static final int ONE_SHOT_ALPHA_ANIMATION_TIMEOUT_MS = 1000;
 
-    // Not a complete set of states but serves what we want right now.
-    private enum State {
-        UNDEFINED(0),
-        TASK_APPEARED(1),
-        ENTRY_SCHEDULED(2),
-        ENTERING_PIP(3),
-        ENTERED_PIP(4),
-        EXITING_PIP(5);
-
-        private final int mStateValue;
-
-        State(int value) {
-            mStateValue = value;
-        }
-
-        private boolean isInPip() {
-            return mStateValue >= TASK_APPEARED.mStateValue
-                    && mStateValue != EXITING_PIP.mStateValue;
-        }
-
-        /**
-         * Resize request can be initiated in other component, ignore if we are no longer in PIP,
-         * still waiting for animation or we're exiting from it.
-         *
-         * @return {@code true} if the resize request should be blocked/ignored.
-         */
-        private boolean shouldBlockResizeRequest() {
-            return mStateValue < ENTERING_PIP.mStateValue
-                    || mStateValue == EXITING_PIP.mStateValue;
-        }
-    }
-
     private final Context mContext;
     private final SyncTransactionQueue mSyncTransactionQueue;
     private final PipBoundsState mPipBoundsState;
@@ -190,7 +158,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             }
             final boolean isExitPipDirection = isOutPipDirection(direction)
                     || isRemovePipDirection(direction);
-            if (mState != State.EXITING_PIP || isExitPipDirection) {
+            if (mPipTransitionState.getTransitionState() != PipTransitionState.EXITING_PIP
+                    || isExitPipDirection) {
                 // Finish resize as long as we're not exiting PIP, or, if we are, only if this is
                 // the end of an exit PIP animation.
                 // This is necessary in case there was a resize animation ongoing when exit PIP
@@ -233,7 +202,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private ActivityManager.RunningTaskInfo mDeferredTaskInfo;
     private WindowContainerToken mToken;
     private SurfaceControl mLeash;
-    private State mState = State.UNDEFINED;
+    private PipTransitionState mPipTransitionState;
     private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
     private long mLastOneShotAlphaAnimationTime;
     private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
@@ -278,6 +247,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     public PipTaskOrganizer(Context context,
             @NonNull SyncTransactionQueue syncTransactionQueue,
+            @NonNull PipTransitionState pipTransitionState,
             @NonNull PipBoundsState pipBoundsState,
             @NonNull PipBoundsAlgorithm boundsHandler,
             @NonNull PipMenuController pipMenuController,
@@ -291,6 +261,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @ShellMainThread ShellExecutor mainExecutor) {
         mContext = context;
         mSyncTransactionQueue = syncTransactionQueue;
+        mPipTransitionState = pipTransitionState;
         mPipBoundsState = pipBoundsState;
         mPipBoundsAlgorithm = boundsHandler;
         mPipMenuController = pipMenuController;
@@ -326,14 +297,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     public boolean isInPip() {
-        return mState.isInPip();
+        return mPipTransitionState.isInPip();
     }
 
     /**
      * Returns whether the entry animation is waiting to be started.
      */
     public boolean isEntryScheduled() {
-        return mState == State.ENTRY_SCHEDULED;
+        return mPipTransitionState.getTransitionState() == PipTransitionState.ENTRY_SCHEDULED;
     }
 
     /**
@@ -401,9 +372,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * @param animationDurationMs duration in millisecond for the exiting PiP transition
      */
     public void exitPip(int animationDurationMs) {
-        if (!mState.isInPip() || mState == State.EXITING_PIP || mToken == null) {
+        if (!mPipTransitionState.isInPip()
+                || mPipTransitionState.getTransitionState() == PipTransitionState.EXITING_PIP
+                || mToken == null) {
             Log.wtf(TAG, "Not allowed to exitPip in current state"
-                    + " mState=" + mState + " mToken=" + mToken);
+                    + " mState=" + mPipTransitionState.getTransitionState() + " mToken=" + mToken);
             return;
         }
 
@@ -427,7 +400,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         wct.setBoundsChangeTransaction(mToken, tx);
         // Set the exiting state first so if there is fixed rotation later, the running animation
         // won't be interrupted by alpha animation for existing PiP.
-        mState = State.EXITING_PIP;
+        mPipTransitionState.setTransitionState(PipTransitionState.EXITING_PIP);
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mPipTransitionController.startTransition(destinationBounds, wct);
@@ -470,9 +443,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Removes PiP immediately.
      */
     public void removePip() {
-        if (!mState.isInPip() ||  mToken == null) {
+        if (!mPipTransitionState.isInPip() ||  mToken == null) {
             Log.wtf(TAG, "Not allowed to removePip in current state"
-                    + " mState=" + mState + " mToken=" + mToken);
+                    + " mState=" + mPipTransitionState.getTransitionState() + " mToken=" + mToken);
             return;
         }
 
@@ -486,7 +459,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         animator.setDuration(mExitAnimationDuration);
         animator.setInterpolator(Interpolators.ALPHA_OUT);
         animator.start();
-        mState = State.EXITING_PIP;
+        mPipTransitionState.setTransitionState(PipTransitionState.EXITING_PIP);
     }
 
     private void removePipImmediately() {
@@ -508,7 +481,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         Objects.requireNonNull(info, "Requires RunningTaskInfo");
         mTaskInfo = info;
         mToken = mTaskInfo.token;
-        mState = State.TASK_APPEARED;
+        mPipTransitionState.setTransitionState(PipTransitionState.TASK_APPEARED);
         mLeash = leash;
         mPictureInPictureParams = mTaskInfo.pictureInPictureParams;
         setBoundsStateForEntry(mTaskInfo.topActivity, mPictureInPictureParams,
@@ -562,7 +535,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             scheduleAnimateResizePip(currentBounds, destinationBounds, 0 /* startingAngle */,
                     sourceHintRect, TRANSITION_DIRECTION_TO_PIP, mEnterAnimationDuration,
                     null /* updateBoundsCallback */);
-            mState = State.ENTERING_PIP;
+            mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             enterPipWithAlphaAnimation(destinationBounds, mEnterAnimationDuration);
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
@@ -589,7 +562,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         animateResizePip(currentBounds, destinationBounds, sourceHintRect,
                 TRANSITION_DIRECTION_TO_PIP, mEnterAnimationDuration, 0 /* startingAngle */);
-        mState = State.ENTERING_PIP;
+        mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
     }
 
     /**
@@ -614,7 +587,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mSurfaceControlTransactionFactory.getTransaction();
         tx.setAlpha(mLeash, 0f);
         tx.apply();
-        mState = State.ENTRY_SCHEDULED;
+        mPipTransitionState.setTransitionState(PipTransitionState.ENTRY_SCHEDULED);
         applyEnterPipSyncTransaction(destinationBounds, () -> {
             mPipAnimationController
                     .getAnimator(mTaskInfo, mLeash, destinationBounds, 0f, 1f)
@@ -625,7 +598,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     .start();
             // mState is set right after the animation is kicked off to block any resize
             // requests such as offsetPip that may have been called prior to the transition.
-            mState = State.ENTERING_PIP;
+            mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
         }, null /* boundsChangeTransaction */);
     }
 
@@ -672,7 +645,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private void sendOnPipTransitionStarted(
             @PipAnimationController.TransitionDirection int direction) {
         if (direction == TRANSITION_DIRECTION_TO_PIP) {
-            mState = State.ENTERING_PIP;
+            mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
         }
         mPipTransitionController.sendOnPipTransitionStarted(direction);
     }
@@ -681,7 +654,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     void sendOnPipTransitionFinished(
             @PipAnimationController.TransitionDirection int direction) {
         if (direction == TRANSITION_DIRECTION_TO_PIP) {
-            mState = State.ENTERED_PIP;
+            mPipTransitionState.setTransitionState(PipTransitionState.ENTERED_PIP);
         }
         mPipTransitionController.sendOnPipTransitionFinished(direction);
         // Apply the deferred RunningTaskInfo if applicable after all proper callbacks are sent.
@@ -706,7 +679,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
-        if (mState == State.UNDEFINED) {
+        if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
             return;
         }
         final WindowContainerToken token = info.token;
@@ -718,7 +691,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         clearWaitForFixedRotation();
         mInSwipePipToHomeTransition = false;
         mPictureInPictureParams = null;
-        mState = State.UNDEFINED;
+        mPipTransitionState.setTransitionState(PipTransitionState.UNDEFINED);
         // Re-set the PIP bounds to none.
         mPipBoundsState.setBounds(new Rect());
         mPipUiEventLoggerLogger.setTaskInfo(null);
@@ -732,8 +705,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(mToken, "onTaskInfoChanged requires valid existing mToken");
-        if (mState != State.ENTERED_PIP && mState != State.EXITING_PIP) {
-            Log.d(TAG, "Defer onTaskInfoChange in current state: " + mState);
+        if (mPipTransitionState.getTransitionState() != PipTransitionState.ENTERED_PIP
+                && mPipTransitionState.getTransitionState() != PipTransitionState.EXITING_PIP) {
+            Log.d(TAG, "Defer onTaskInfoChange in current state: "
+                    + mPipTransitionState.getTransitionState());
             // Defer applying PiP parameters if the task is entering PiP to avoid disturbing
             // the animation.
             mDeferredTaskInfo = info;
@@ -766,7 +741,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mNextRotation = newRotation;
         mWaitForFixedRotation = true;
 
-        if (mState.isInPip()) {
+        if (mPipTransitionState.isInPip()) {
             // Fade out the existing PiP to avoid jump cut during seamless rotation.
             fadeExistingPip(false /* show */);
         }
@@ -777,7 +752,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (!mWaitForFixedRotation) {
             return;
         }
-        if (mState == State.TASK_APPEARED) {
+        if (mPipTransitionState.getTransitionState() == PipTransitionState.TASK_APPEARED) {
             if (mInSwipePipToHomeTransition) {
                 onEndOfSwipePipToHomeTransition();
             } else {
@@ -785,9 +760,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 enterPipWithAlphaAnimation(mPipBoundsAlgorithm.getEntryDestinationBounds(),
                         mEnterAnimationDuration);
             }
-        } else if (mState == State.ENTERED_PIP && mHasFadeOut) {
+        } else if (mPipTransitionState.getTransitionState() == PipTransitionState.ENTERED_PIP
+                && mHasFadeOut) {
             fadeExistingPip(true /* show */);
-        } else if (mState == State.ENTERING_PIP && mDeferredAnimEndTransaction != null) {
+        } else if (mPipTransitionState.getTransitionState() == PipTransitionState.ENTERING_PIP
+                && mDeferredAnimEndTransaction != null) {
             final PipAnimationController.PipTransitionAnimator<?> animator =
                     mPipAnimationController.getCurrentAnimator();
             final Rect destinationBounds = animator.getDestinationBounds();
@@ -848,7 +825,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mPipAnimationController.getCurrentAnimator();
         if (animator == null || !animator.isRunning()
                 || animator.getTransitionDirection() != TRANSITION_DIRECTION_TO_PIP) {
-            final boolean rotatingPip = mState.isInPip() && fromRotation;
+            final boolean rotatingPip = mPipTransitionState.isInPip() && fromRotation;
             if (rotatingPip && mWaitForFixedRotation && mHasFadeOut) {
                 // The position will be used by fade-in animation when the fixed rotation is done.
                 mPipBoundsState.setBounds(destinationBoundsOut);
@@ -981,7 +958,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             Rect currentBounds, Rect destinationBounds, float startingAngle, Rect sourceHintRect,
             @PipAnimationController.TransitionDirection int direction, int durationMs,
             Consumer<Rect> updateBoundsCallback) {
-        if (!mState.isInPip()) {
+        if (!mPipTransitionState.isInPip()) {
             // TODO: tend to use shouldBlockResizeRequest here as well but need to consider
             // the fact that when in exitPip, scheduleAnimateResizePip is executed in the window
             // container transaction callback and we want to set the mState immediately.
@@ -1011,7 +988,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
                 .crop(tx, mLeash, toBounds)
-                .round(tx, mLeash, mState.isInPip());
+                .round(tx, mLeash, mPipTransitionState.isInPip());
         if (mPipMenuController.isMenuVisible()) {
             mPipMenuController.resizePipMenu(mLeash, tx, toBounds);
         } else {
@@ -1089,7 +1066,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void scheduleFinishResizePip(Rect destinationBounds,
             @PipAnimationController.TransitionDirection int direction,
             Consumer<Rect> updateBoundsCallback) {
-        if (mState.shouldBlockResizeRequest()) {
+        if (mPipTransitionState.shouldBlockResizeRequest()) {
             return;
         }
 
@@ -1106,7 +1083,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSurfaceTransactionHelper
                 .crop(tx, mLeash, destinationBounds)
                 .resetScale(tx, mLeash, destinationBounds)
-                .round(tx, mLeash, mState.isInPip());
+                .round(tx, mLeash, mPipTransitionState.isInPip());
         return tx;
     }
 
@@ -1115,7 +1092,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public void scheduleOffsetPip(Rect originalBounds, int offset, int duration,
             Consumer<Rect> updateBoundsCallback) {
-        if (mState.shouldBlockResizeRequest()) {
+        if (mPipTransitionState.shouldBlockResizeRequest()) {
             return;
         }
         if (mWaitForFixedRotation) {
@@ -1373,7 +1350,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         pw.println(innerPrefix + "mToken=" + mToken
                 + " binder=" + (mToken != null ? mToken.asBinder() : null));
         pw.println(innerPrefix + "mLeash=" + mLeash);
-        pw.println(innerPrefix + "mState=" + mState);
+        pw.println(innerPrefix + "mState=" + mPipTransitionState.getTransitionState());
         pw.println(innerPrefix + "mOneShotAnimationType=" + mOneShotAnimationType);
         pw.println(innerPrefix + "mPictureInPictureParams=" + mPictureInPictureParams);
     }
