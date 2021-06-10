@@ -293,4 +293,7 @@
          be able to connect to the internet when such a proxy is in use, since
          all outgoing connections originate from this app. -->
     <allow-in-power-save-except-idle package="com.android.proxyhandler" />
+
+    <!-- Allow IMS service entitlement app to schedule jobs to run when app in background. -->
+    <allow-in-power-save-except-idle package="com.android.imsserviceentitlement" />
 </permissions>

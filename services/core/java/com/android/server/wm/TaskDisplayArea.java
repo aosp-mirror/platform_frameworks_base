@@ -467,7 +467,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Update the top resumed activity because the preferred top focusable task may be changed.
         mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded();
 
-        final ActivityRecord r = child.getResumedActivity();
+        final ActivityRecord r = child.getTopResumedActivity();
         if (r != null && r == mRootWindowContainer.getTopResumedActivity()) {
             mAtmService.setResumedActivityUncheckLocked(r, "positionChildAt");
         }
@@ -1373,11 +1373,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
         // TODO(b/111541062): Move this into Task#getResumedActivity()
         // Check if the focused root task has the resumed activity
-        ActivityRecord resumedActivity = focusedRootTask.getResumedActivity();
+        ActivityRecord resumedActivity = focusedRootTask.getTopResumedActivity();
         if (resumedActivity == null || resumedActivity.app == null) {
             // If there is no registered resumed activity in the root task or it is not running -
             // try to use previously resumed one.
-            resumedActivity = focusedRootTask.getPausingActivity();
+            resumedActivity = focusedRootTask.getTopPausingActivity();
             if (resumedActivity == null || resumedActivity.app == null) {
                 // If previously resumed activity doesn't work either - find the topmost running
                 // activity that can be focused.
@@ -1425,7 +1425,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 continue;
             }
 
-            final ActivityRecord r = mChildren.get(i).asTask().getResumedActivity();
+            final ActivityRecord r = mChildren.get(i).asTask().getTopResumedActivity();
             if (r != null && !r.isState(RESUMED)) {
                 return false;
             }
@@ -1451,14 +1451,14 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      */
     boolean pauseBackTasks(ActivityRecord resuming) {
         final int[] someActivityPaused = {0};
-        forAllLeafTasks((task) -> {
-            final ActivityRecord resumedActivity = task.getResumedActivity();
+        forAllLeafTaskFragments((taskFragment) -> {
+            final ActivityRecord resumedActivity = taskFragment.getResumedActivity();
             if (resumedActivity != null
-                    && (task.getVisibility(resuming) != TASK_FRAGMENT_VISIBILITY_VISIBLE
-                    || !task.isTopActivityFocusable())) {
-                ProtoLog.d(WM_DEBUG_STATES, "pauseBackTasks: task=%s "
-                        + "mResumedActivity=%s", task, resumedActivity);
-                if (task.startPausingLocked(false /* uiSleeping*/,
+                    && (taskFragment.getVisibility(resuming) != TASK_FRAGMENT_VISIBILITY_VISIBLE
+                    || !taskFragment.isTopActivityFocusable())) {
+                ProtoLog.d(WM_DEBUG_STATES, "pauseBackTasks: taskFrag=%s "
+                        + "mResumedActivity=%s", taskFragment, resumedActivity);
+                if (taskFragment.startPausing(false /* uiSleeping*/,
                         resuming, "pauseBackTasks")) {
                     someActivityPaused[0]++;
                 }

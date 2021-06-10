@@ -1671,6 +1671,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
+    boolean forAllLeafTaskFragments(Function<TaskFragment, Boolean> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).forAllLeafTaskFragments(callback)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * For all root tasks at or below this container call the callback.
      *
@@ -1735,6 +1744,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         } else {
             for (int i = 0; i < count; i++) {
                 mChildren.get(i).forAllLeafTasks(callback, traverseTopToBottom);
+            }
+        }
+    }
+
+    void forAllLeafTaskFragments(Consumer<TaskFragment> callback, boolean traverseTopToBottom) {
+        final int count = mChildren.size();
+        if (traverseTopToBottom) {
+            for (int i = count - 1; i >= 0; --i) {
+                mChildren.get(i).forAllLeafTaskFragments(callback, traverseTopToBottom);
+            }
+        } else {
+            for (int i = 0; i < count; i++) {
+                mChildren.get(i).forAllLeafTaskFragments(callback, traverseTopToBottom);
             }
         }
     }

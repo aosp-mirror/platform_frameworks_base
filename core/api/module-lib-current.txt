@@ -266,6 +266,10 @@ package android.os {
     field public static final int VPN_UID = 1016; // 0x3f8
   }
 
+  public final class SharedMemory implements java.io.Closeable android.os.Parcelable {
+    method @NonNull public static android.os.SharedMemory create(@NonNull android.os.ParcelFileDescriptor);
+  }
+
   public class StatsServiceManager {
     method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsCompanionServiceRegisterer();
     method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsManagerServiceRegisterer();
