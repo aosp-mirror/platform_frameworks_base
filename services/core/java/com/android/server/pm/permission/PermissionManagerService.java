@@ -17,7 +17,9 @@
 package com.android.server.pm.permission;
 
 import static android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY;
+import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
@@ -149,6 +151,7 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.permission.PermissionManagerServiceInternal.HotwordDetectionServiceProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.SoftRestrictedPermissionPolicy;
@@ -308,6 +311,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @NonNull
     private final OnPermissionChangeListeners mOnPermissionChangeListeners;
+
+    @Nullable
+    private HotwordDetectionServiceProvider mHotwordDetectionServiceProvider;
 
     // TODO: Take a look at the methods defined in the callback.
     // The callback was initially created to support the split between permission
@@ -5191,6 +5197,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public int[] getGidsForUid(int uid) {
             return PermissionManagerService.this.getGidsForUid(uid);
         }
+
+        @Override
+        public void setHotwordDetectionServiceProvider(HotwordDetectionServiceProvider provider) {
+            mHotwordDetectionServiceProvider = provider;
+        }
+
+        @Override
+        public HotwordDetectionServiceProvider getHotwordDetectionServiceProvider() {
+            return mHotwordDetectionServiceProvider;
+        }
     }
 
     /**
@@ -5467,10 +5483,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         private final @NonNull Context mContext;
         private final @NonNull AppOpsManager mAppOpsManager;
+        private final @NonNull PermissionManagerServiceInternal mPermissionManagerServiceInternal;
 
         PermissionCheckerService(@NonNull Context context) {
             mContext = context;
             mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
+            mPermissionManagerServiceInternal =
+                    LocalServices.getService(PermissionManagerServiceInternal.class);
         }
 
         @Override
@@ -5483,8 +5502,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             Objects.requireNonNull(attributionSourceState);
             final AttributionSource attributionSource = new AttributionSource(
                     attributionSourceState);
-            final int result = checkPermission(mContext, permission, attributionSource, message,
-                    forDataDelivery, startDataDelivery, fromDatasource, attributedOp);
+            final int result = checkPermission(mContext, mPermissionManagerServiceInternal,
+                    permission, attributionSource, message, forDataDelivery, startDataDelivery,
+                    fromDatasource, attributedOp);
             // Finish any started op if some step in the attribution chain failed.
             if (startDataDelivery && result != PermissionChecker.PERMISSION_GRANTED
                     && result != PermissionChecker.PERMISSION_SOFT_DENIED) {
@@ -5573,10 +5593,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @PermissionCheckerManager.PermissionResult
-        private static int checkPermission(@NonNull Context context, @NonNull String permission,
-                @NonNull AttributionSource attributionSource, @Nullable String message,
-                boolean forDataDelivery, boolean startDataDelivery, boolean fromDatasource,
-                int attributedOp) {
+        private static int checkPermission(@NonNull Context context,
+                @NonNull PermissionManagerServiceInternal permissionManagerServiceInt,
+                @NonNull String permission, @NonNull AttributionSource attributionSource,
+                @Nullable String message, boolean forDataDelivery, boolean startDataDelivery,
+                boolean fromDatasource, int attributedOp) {
             PermissionInfo permissionInfo = sPlatformPermissions.get(permission);
 
             if (permissionInfo == null) {
@@ -5593,22 +5614,25 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
 
             if (permissionInfo.isAppOp()) {
-                return checkAppOpPermission(context, permission, attributionSource, message,
-                        forDataDelivery, fromDatasource);
+                return checkAppOpPermission(context, permissionManagerServiceInt, permission,
+                        attributionSource, message, forDataDelivery, fromDatasource);
             }
             if (permissionInfo.isRuntime()) {
-                return checkRuntimePermission(context, permission, attributionSource, message,
-                        forDataDelivery, startDataDelivery, fromDatasource, attributedOp);
+                return checkRuntimePermission(context, permissionManagerServiceInt, permission,
+                        attributionSource, message, forDataDelivery, startDataDelivery,
+                        fromDatasource, attributedOp);
             }
 
-            if (!fromDatasource && !checkPermission(context, permission, attributionSource.getUid(),
+            if (!fromDatasource && !checkPermission(context, permissionManagerServiceInt,
+                    permission, attributionSource.getUid(),
                     attributionSource.getRenouncedPermissions())) {
                 return PermissionChecker.PERMISSION_HARD_DENIED;
             }
 
             if (attributionSource.getNext() != null) {
-                return checkPermission(context, permission, attributionSource.getNext(), message,
-                        forDataDelivery, startDataDelivery, /*fromDatasource*/ false, attributedOp);
+                return checkPermission(context, permissionManagerServiceInt, permission,
+                        attributionSource.getNext(), message, forDataDelivery, startDataDelivery,
+                        /*fromDatasource*/ false, attributedOp);
             }
 
             return PermissionChecker.PERMISSION_GRANTED;
@@ -5616,6 +5640,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @PermissionCheckerManager.PermissionResult
         private static int checkAppOpPermission(@NonNull Context context,
+                @NonNull PermissionManagerServiceInternal permissionManagerServiceInt,
                 @NonNull String permission, @NonNull AttributionSource attributionSource,
                 @Nullable String message, boolean forDataDelivery, boolean fromDatasource) {
             final int op = AppOpsManager.permissionToOpCode(permission);
@@ -5659,13 +5684,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         return PermissionChecker.PERMISSION_HARD_DENIED;
                     }
                     case AppOpsManager.MODE_DEFAULT: {
-                        if (!skipCurrentChecks && !checkPermission(context, permission,
-                                attributionSource.getUid(), attributionSource
-                                        .getRenouncedPermissions())) {
+                        if (!skipCurrentChecks && !checkPermission(context,
+                                permissionManagerServiceInt, permission, attributionSource.getUid(),
+                                attributionSource.getRenouncedPermissions())) {
                             return PermissionChecker.PERMISSION_HARD_DENIED;
                         }
-                        if (next != null && !checkPermission(context, permission,
-                                next.getUid(), next.getRenouncedPermissions())) {
+                        if (next != null && !checkPermission(context, permissionManagerServiceInt,
+                                permission, next.getUid(), next.getRenouncedPermissions())) {
                             return PermissionChecker.PERMISSION_HARD_DENIED;
                         }
                     }
@@ -5680,6 +5705,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         private static int checkRuntimePermission(@NonNull Context context,
+                @NonNull PermissionManagerServiceInternal permissionManagerServiceInt,
                 @NonNull String permission, @NonNull AttributionSource attributionSource,
                 @Nullable String message, boolean forDataDelivery, boolean startDataDelivery,
                 boolean fromDatasource, int attributedOp) {
@@ -5704,13 +5730,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 }
 
                 // If we already checked the permission for this one, skip the work
-                if (!skipCurrentChecks && !checkPermission(context, permission,
-                        current.getUid(), current.getRenouncedPermissions())) {
+                if (!skipCurrentChecks && !checkPermission(context, permissionManagerServiceInt,
+                        permission, current.getUid(), current.getRenouncedPermissions())) {
                     return PermissionChecker.PERMISSION_HARD_DENIED;
                 }
 
-                if (next != null && !checkPermission(context, permission,
-                        next.getUid(), next.getRenouncedPermissions())) {
+                if (next != null && !checkPermission(context, permissionManagerServiceInt,
+                        permission, next.getUid(), next.getRenouncedPermissions())) {
                     return PermissionChecker.PERMISSION_HARD_DENIED;
                 }
 
@@ -5765,10 +5791,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
 
-        private static boolean checkPermission(@NonNull Context context, @NonNull String permission,
-                int uid, @NonNull Set<String> renouncedPermissions) {
-            final boolean permissionGranted = context.checkPermission(permission, /*pid*/ -1,
+        private static boolean checkPermission(@NonNull Context context,
+                @NonNull PermissionManagerServiceInternal permissionManagerServiceInt,
+                @NonNull String permission, int uid, @NonNull Set<String> renouncedPermissions) {
+            boolean permissionGranted = context.checkPermission(permission, /*pid*/ -1,
                     uid) == PackageManager.PERMISSION_GRANTED;
+
+            // Override certain permissions checks for the HotwordDetectionService. This service is
+            // an isolated service, which ordinarily cannot hold permissions.
+            // There's probably a cleaner, more generalizable way to do this. For now, this is
+            // the only use case for this, so simply override here.
+            if (!permissionGranted
+                    && Process.isIsolated(uid) // simple check which fails-fast for the common case
+                    && (permission.equals(RECORD_AUDIO)
+                    || permission.equals(CAPTURE_AUDIO_HOTWORD))) {
+                HotwordDetectionServiceProvider hotwordServiceProvider =
+                        permissionManagerServiceInt.getHotwordDetectionServiceProvider();
+                permissionGranted = hotwordServiceProvider != null
+                        && uid == hotwordServiceProvider.getUid();
+            }
+
             if (permissionGranted && renouncedPermissions.contains(permission)
                     && context.checkPermission(Manifest.permission.RENOUNCE_PERMISSIONS,
                     /*pid*/ -1, uid) == PackageManager.PERMISSION_GRANTED) {
