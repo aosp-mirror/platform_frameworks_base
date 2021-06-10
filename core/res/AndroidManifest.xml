@@ -1408,13 +1408,13 @@
 
     <!-- @SystemApi Required in addition to android.permission.CAMERA to be able to access
            system only camera devices.
-           <p>Protection level: system|signature
+           <p>Protection level: system|signature|role
            @hide -->
     <permission android:name="android.permission.SYSTEM_CAMERA"
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_systemCamera"
         android:description="@string/permdesc_systemCamera"
-        android:protectionLevel="system|signature" />
+        android:protectionLevel="system|signature|role" />
 
     <!-- @SystemApi Allows receiving the camera service notifications when a camera is opened
             (by a certain application package) or closed.
