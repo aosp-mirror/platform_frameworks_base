@@ -16,6 +16,13 @@
 
 package com.android.wm.shell.tasksurfacehelper;
 
+import android.app.ActivityManager.RunningTaskInfo;
+import android.graphics.Rect;
+import android.view.SurfaceControl;
+
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+
 /**
  * Interface to communicate with a Task's SurfaceControl.
  */
@@ -23,4 +30,8 @@ public interface TaskSurfaceHelper {
 
     /** Sets the METADATA_GAME_MODE for the layer corresponding to the task **/
     default void setGameModeForTask(int taskId, int gameMode) {}
+
+    /** Takes a screenshot for a task **/
+    default void screenshotTask(RunningTaskInfo taskInfo, Rect crop, Executor executor,
+            Consumer<SurfaceControl.ScreenshotHardwareBuffer> consumer) {}
 }

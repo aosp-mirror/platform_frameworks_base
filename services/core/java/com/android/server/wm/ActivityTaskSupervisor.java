@@ -2064,7 +2064,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     void updateTopResumedActivityIfNeeded() {
         final ActivityRecord prevTopActivity = mTopResumedActivity;
         final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
-        if (topRootTask == null || topRootTask.getResumedActivity() == prevTopActivity) {
+        if (topRootTask == null || topRootTask.getTopResumedActivity() == prevTopActivity) {
             if (mService.isSleepingLocked()) {
                 // There won't be a next resumed activity. The top process should still be updated
                 // according to the current top focused activity.
@@ -2086,7 +2086,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
 
         // Update the current top activity.
-        mTopResumedActivity = topRootTask.getResumedActivity();
+        mTopResumedActivity = topRootTask.getTopResumedActivity();
         scheduleTopResumedActivityStateIfNeeded();
 
         mService.updateTopApp(mTopResumedActivity);

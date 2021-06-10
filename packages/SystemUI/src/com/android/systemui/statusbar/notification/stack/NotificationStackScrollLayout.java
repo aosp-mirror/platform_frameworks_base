@@ -2097,11 +2097,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (height != 0) {
                     height += mPaddingBetweenElements;
                 }
-                height += calculateGapHeight(previousView, expandableView, numShownItems);
+                float gapHeight = calculateGapHeight(previousView, expandableView, numShownNotifs);
+                height += gapHeight;
                 height += viewHeight;
 
                 numShownItems++;
-                if (!(expandableView instanceof MediaHeaderView)) {
+                if (viewHeight > 0 || !(expandableView instanceof MediaHeaderView)) {
+                    // Only count the media as a notification if it has a positive height.
                     numShownNotifs++;
                 }
                 previousView = expandableView;

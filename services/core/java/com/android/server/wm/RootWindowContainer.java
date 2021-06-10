@@ -1859,7 +1859,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (focusedRootTask == null) {
             return null;
         }
-        final ActivityRecord resumedActivity = focusedRootTask.getResumedActivity();
+        final ActivityRecord resumedActivity = focusedRootTask.getTopResumedActivity();
         if (resumedActivity != null && resumedActivity.app != null) {
             return resumedActivity;
         }
@@ -1881,11 +1881,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // foreground.
         WindowProcessController fgApp = getItemFromRootTasks(rootTask -> {
             if (isTopDisplayFocusedRootTask(rootTask)) {
-                final ActivityRecord resumedActivity = rootTask.getResumedActivity();
+                final ActivityRecord resumedActivity = rootTask.getTopResumedActivity();
                 if (resumedActivity != null) {
                     return resumedActivity.app;
-                } else if (rootTask.getPausingActivity() != null) {
-                    return rootTask.getPausingActivity().app;
+                } else if (rootTask.getTopPausingActivity() != null) {
+                    return rootTask.getTopPausingActivity().app;
                 }
             }
             return null;
@@ -2377,7 +2377,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 if (displayShouldSleep) {
                     rootTask.goToSleepIfPossible(false /* shuttingDown */);
                 } else {
-                    rootTask.awakeFromSleepingLocked();
+                    rootTask.forAllLeafTaskFragments(
+                            taskFragment -> taskFragment.awakeFromSleeping(),
+                            true /* traverseTopToBottom */);
                     if (rootTask.isFocusedRootTaskOnDisplay()
                             && !mTaskSupervisor.getKeyguardController()
                             .isKeyguardOrAodShowing(display.mDisplayId)) {
@@ -2737,8 +2739,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (DEBUG_SWITCH) {
             Slog.v(TAG_SWITCH, "Destroying " + r + " in state " + r.getState()
-                    + " resumed=" + r.getTask().getResumedActivity() + " pausing="
-                    + r.getTask().getPausingActivity() + " for reason "
+                    + " resumed=" + r.getTask().getTopResumedActivity() + " pausing="
+                    + r.getTask().getTopPausingActivity() + " for reason "
                     + mDestroyAllActivitiesReason);
         }
 
@@ -3325,7 +3327,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (rootTask == null || !rootTask.hasActivity()) {
                 continue;
             }
-            final ActivityRecord resumedActivity = rootTask.getResumedActivity();
+            final ActivityRecord resumedActivity = rootTask.getTopResumedActivity();
             if (resumedActivity == null || !resumedActivity.idle) {
                 ProtoLog.d(WM_DEBUG_STATES, "allResumedActivitiesIdle: rootTask=%d %s "
                         + "not idle", rootTask.getRootTaskId(), resumedActivity);
@@ -3340,7 +3342,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     boolean allResumedActivitiesVisible() {
         boolean[] foundResumed = {false};
         final boolean foundInvisibleResumedActivity = forAllRootTasks(rootTask -> {
-            final ActivityRecord r = rootTask.getResumedActivity();
+            final ActivityRecord r = rootTask.getTopResumedActivity();
             if (r != null) {
                 if (!r.nowVisible) {
                     return true;
@@ -3358,7 +3360,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     boolean allPausedActivitiesComplete() {
         boolean[] pausing = {true};
         final boolean hasActivityNotCompleted = forAllLeafTasks(task -> {
-            final ActivityRecord r = task.getPausingActivity();
+            final ActivityRecord r = task.getTopPausingActivity();
             if (r != null && !r.isState(PAUSED, STOPPED, STOPPING, FINISHING)) {
                 ProtoLog.d(WM_DEBUG_STATES, "allPausedActivitiesComplete: "
                         + "r=%s state=%s", r, r.getState());
