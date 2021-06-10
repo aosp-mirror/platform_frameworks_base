@@ -488,7 +488,8 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     @Override
     public void setLayerType(int layerType, Paint paint) {
-        if (hasOverlappingRendering()) {
+        // Allow resetting the layerType to NONE regardless of overlappingRendering
+        if (layerType == LAYER_TYPE_NONE || hasOverlappingRendering()) {
             super.setLayerType(layerType, paint);
         }
     }
