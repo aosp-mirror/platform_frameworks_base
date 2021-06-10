@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Qaytadan urining"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Qaytadan urining"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Barcha funksiya va ma’lumotlar uchun qulfdan chiqaring"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Yuzni tanitib qulfni ochishga urinish miqdoridan oshib ketdi"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Yuz bilan ochishga urinish miqdoridan oshib ketdi"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM karta solinmagan"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Planshetingizda SIM karta yo‘q."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV qurilmangizda SIM karta topilmadi."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Qulfni ochish maydonini kengaytirish."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Qulfni silab ochish"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Grafik kalit bilan ochish."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Qulfni yuzni tanitib ochish"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Yuz bilan ochish."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin qulfini ochish."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM kartani PIN kod bilan ochish."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM kartani PUK kod bilan ochish."</string>
@@ -1596,7 +1596,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4 tadan 8 ta raqamgacha bo‘lgan PIN kodni kiriting."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK kod 8 ta raqam bo‘lishi shart."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"To‘g‘ri PUK kodni qayta kiriting. Qayta-qayta urinishlar SIM kartani butunlay o‘chirib qo‘yadi."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN-kod mos kelmadi"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN kod mos kelmadi"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Grafik kalit juda ko‘p marta chizildi"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"Qulfni ochish uchun Google hisobingiz bilan kiring."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Foydalanuvchi nomi (e-pochta)"</string>
