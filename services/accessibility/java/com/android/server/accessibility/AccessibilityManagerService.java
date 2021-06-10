@@ -3338,6 +3338,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 pw.println();
             }
             mA11yWindowManager.dump(fd, pw, args);
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.dump(fd, pw, args);
+            }
             pw.println("Global client list info:{");
             mGlobalClients.dump(pw, "    Client list ");
             pw.println("    Registered clients:{");
@@ -3585,7 +3588,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             synchronized (mLock) {
                 mDisplaysList.add(display);
                 if (mInputFilter != null) {
-                    mInputFilter.onDisplayChanged();
+                    mInputFilter.onDisplayAdded(display);
                 }
                 AccessibilityUserState userState = getCurrentUserStateLocked();
                 if (displayId != Display.DEFAULT_DISPLAY) {
@@ -3607,7 +3610,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     return;
                 }
                 if (mInputFilter != null) {
-                    mInputFilter.onDisplayChanged();
+                    mInputFilter.onDisplayRemoved(displayId);
                 }
                 AccessibilityUserState userState = getCurrentUserStateLocked();
                 if (displayId != Display.DEFAULT_DISPLAY) {
