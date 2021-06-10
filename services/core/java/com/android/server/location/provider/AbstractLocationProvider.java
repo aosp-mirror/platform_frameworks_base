@@ -305,6 +305,10 @@ public abstract class AbstractLocationProvider {
         setState(state -> state.withIdentity(identity));
     }
 
+    public final Set<String> getExtraAttributionTags() {
+        return mInternalState.get().state.extraAttributionTags;
+    }
+
     /**
      * Call this method to report a change in the provider's extra attribution tags.
      */
