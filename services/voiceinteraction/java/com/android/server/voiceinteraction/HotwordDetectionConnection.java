@@ -131,6 +131,17 @@ final class HotwordDetectionConnection {
             protected long getAutoDisconnectTimeoutMs() {
                 return -1;
             }
+
+            @Override
+            public void binderDied() {
+                super.binderDied();
+                Slog.w(TAG, "binderDied");
+                try {
+                    callback.onError(-1);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to report onError status: " + e);
+                }
+            }
         };
         mRemoteHotwordDetectionService.connect();
         if (callback == null) {
@@ -318,7 +329,7 @@ final class HotwordDetectionConnection {
                 if (DEBUG) {
                     Slog.d(TAG, "onDetected");
                 }
-                externalCallback.onKeyphraseDetected(recognitionEvent);
+                externalCallback.onKeyphraseDetected(recognitionEvent, result);
             }
 
             @Override
@@ -351,8 +362,7 @@ final class HotwordDetectionConnection {
                 if (DEBUG) {
                     Slog.d(TAG, "onDetected");
                 }
-                // TODO: Propagate the HotwordDetectedResult.
-                externalCallback.onKeyphraseDetected(recognitionEvent);
+                externalCallback.onKeyphraseDetected(recognitionEvent, result);
             }
 
             @Override
@@ -396,7 +406,7 @@ final class HotwordDetectionConnection {
                 mHotwordDetectionConnection.detectFromDspSource(
                         recognitionEvent, mExternalCallback);
             } else {
-                mExternalCallback.onKeyphraseDetected(recognitionEvent);
+                mExternalCallback.onKeyphraseDetected(recognitionEvent, null);
             }
         }
 

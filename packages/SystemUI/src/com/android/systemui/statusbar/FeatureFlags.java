@@ -65,16 +65,8 @@ public class FeatureFlags {
         return mFlagReader.isEnabled(R.bool.flag_monet);
     }
 
-    public boolean isQuickAccessWalletEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_wallet);
-    }
-
     public boolean isPMLiteEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_pm_lite);
-    }
-
-    public boolean isAlarmTileAvailable() {
-        return mFlagReader.isEnabled(R.bool.flag_alarm_tile);
     }
 
     public boolean isChargingRippleEnabled() {

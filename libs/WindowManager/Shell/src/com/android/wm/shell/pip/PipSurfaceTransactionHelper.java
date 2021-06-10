@@ -149,10 +149,10 @@ public class PipSurfaceTransactionHelper {
             // Shrink bounds (expand insets) in destination orientation.
             if (clockwise) {
                 positionX -= insets.top * scale;
-                positionY -= insets.left * scale;
+                positionY += insets.left * scale;
             } else {
                 positionX += insets.top * scale;
-                positionY += insets.left * scale;
+                positionY -= insets.left * scale;
             }
         }
         mTmpTransform.setScale(scale, scale);

@@ -254,6 +254,18 @@ public class DataManager {
         return null;
     }
 
+    ConversationInfo getConversationInfo(String packageName, int userId, String shortcutId) {
+        UserData userData = getUnlockedUserData(userId);
+        if (userData != null) {
+            PackageData packageData = userData.getPackageData(packageName);
+            // App may have been uninstalled.
+            if (packageData != null) {
+                return packageData.getConversationInfo(shortcutId);
+            }
+        }
+        return null;
+    }
+
     @Nullable
     private ConversationChannel getConversationChannel(String packageName, int userId,
             String shortcutId, ConversationInfo conversationInfo) {
@@ -277,7 +289,7 @@ public class DataManager {
         int uid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
         NotificationChannel parentChannel =
                 mNotificationManagerInternal.getNotificationChannel(packageName, uid,
-                        conversationInfo.getParentNotificationChannelId());
+                        conversationInfo.getNotificationChannelId());
         NotificationChannelGroup parentChannelGroup = null;
         if (parentChannel != null) {
             parentChannelGroup =
@@ -302,7 +314,7 @@ public class DataManager {
                 String shortcutId = conversationInfo.getShortcutId();
                 ConversationChannel channel = getConversationChannel(packageData.getPackageName(),
                         packageData.getUserId(), shortcutId, conversationInfo);
-                if (channel == null || channel.getParentNotificationChannel() == null) {
+                if (channel == null || channel.getNotificationChannel() == null) {
                     return;
                 }
                 conversationChannels.add(channel);
@@ -791,8 +803,8 @@ public class DataManager {
 
     private boolean isCachedRecentConversation(ConversationInfo conversationInfo) {
         return conversationInfo.isShortcutCachedForNotification()
-                && conversationInfo.getNotificationChannelId() == null
-                && conversationInfo.getParentNotificationChannelId() != null
+                && Objects.equals(conversationInfo.getNotificationChannelId(),
+                conversationInfo.getParentNotificationChannelId())
                 && conversationInfo.getLastEventTimestamp() > 0L;
     }
 
@@ -910,7 +922,7 @@ public class DataManager {
     }
 
     @VisibleForTesting
-    NotificationListenerService getNotificationListenerServiceForTesting(@UserIdInt int userId) {
+    NotificationListener getNotificationListenerServiceForTesting(@UserIdInt int userId) {
         return mNotificationListeners.get(userId);
     }
 
@@ -1132,7 +1144,7 @@ public class DataManager {
         }
 
         @Override
-        public void onNotificationPosted(StatusBarNotification sbn) {
+        public void onNotificationPosted(StatusBarNotification sbn, RankingMap map) {
             if (sbn.getUser().getIdentifier() != mUserId) {
                 return;
             }
@@ -1145,16 +1157,22 @@ public class DataManager {
             });
 
             if (packageData != null) {
+                Ranking rank = new Ranking();
+                map.getRanking(sbn.getKey(), rank);
                 ConversationInfo conversationInfo = packageData.getConversationInfo(shortcutId);
                 if (conversationInfo == null) {
                     return;
                 }
                 if (DEBUG) Log.d(TAG, "Last event from notification: " + sbn.getPostTime());
-                ConversationInfo updated = new ConversationInfo.Builder(conversationInfo)
+                ConversationInfo.Builder updated = new ConversationInfo.Builder(conversationInfo)
                         .setLastEventTimestamp(sbn.getPostTime())
-                        .setParentNotificationChannelId(sbn.getNotification().getChannelId())
-                        .build();
-                packageData.getConversationStore().addOrUpdate(updated);
+                        .setNotificationChannelId(rank.getChannel().getId());
+                if (!TextUtils.isEmpty(rank.getChannel().getParentChannelId())) {
+                    updated.setParentNotificationChannelId(rank.getChannel().getParentChannelId());
+                } else {
+                    updated.setParentNotificationChannelId(sbn.getNotification().getChannelId());
+                }
+                packageData.getConversationStore().addOrUpdate(updated.build());
 
                 EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
                         EventStore.CATEGORY_SHORTCUT_BASED, shortcutId);

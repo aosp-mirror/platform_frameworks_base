@@ -17462,14 +17462,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isUsbDataSignalingEnabled(String packageName) {
-        final CallerIdentity caller = getCallerIdentity(packageName);
-        Preconditions.checkCallAuthorization(
-                isDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller),
-                "USB data signaling can only be controlled by a device owner or "
-                        + "a profile owner on an organization-owned device.");
-
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(
+                    getCallerIdentity(packageName));
             return admin.mUsbDataSignalingEnabled;
         }
     }

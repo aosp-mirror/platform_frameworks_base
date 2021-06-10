@@ -52,6 +52,7 @@ struct R {
       StyleFive = 0x7f020004u,
       StyleSix = 0x7f020005u,
       StyleSeven = 0x7f020006u,
+      StyleDayNight = 0x7f020007u,
     };
   };
 };

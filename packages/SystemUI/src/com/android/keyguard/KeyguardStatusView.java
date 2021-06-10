@@ -20,17 +20,10 @@ import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
-import android.os.RemoteException;
-import android.os.UserHandle;
-import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
-import android.widget.TextView;
 
 import androidx.core.graphics.ColorUtils;
 
@@ -45,26 +38,18 @@ import java.util.Set;
 /**
  * View consisting of:
  * - keyguard clock
- * - logout button (on certain managed devices)
- * - owner information (if set)
  * - media player (split shade mode only)
  */
 public class KeyguardStatusView extends GridLayout {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardStatusView";
-    private static final int MARQUEE_DELAY_MS = 2000;
 
     private final LockPatternUtils mLockPatternUtils;
     private final IActivityManager mIActivityManager;
 
     private ViewGroup mStatusViewContainer;
-    private TextView mLogoutView;
     private KeyguardClockSwitch mClockView;
-    private TextView mOwnerInfo;
-    private boolean mCanShowOwnerInfo = true; // by default, try to show the owner information here
     private KeyguardSliceView mKeyguardSlice;
-    private Runnable mPendingMarqueeStart;
-    private Handler mHandler;
     private View mMediaHostContainer;
 
     private float mDarkAmount = 0;
@@ -91,63 +76,16 @@ public class KeyguardStatusView extends GridLayout {
         super(context, attrs, defStyle);
         mIActivityManager = ActivityManager.getService();
         mLockPatternUtils = new LockPatternUtils(getContext());
-        mHandler = new Handler();
-        onDensityOrFontScaleChanged();
-    }
-
-    void setEnableMarquee(boolean enabled) {
-        if (DEBUG) Log.v(TAG, "Schedule setEnableMarquee: " + (enabled ? "Enable" : "Disable"));
-        if (enabled) {
-            if (mPendingMarqueeStart == null) {
-                mPendingMarqueeStart = () -> {
-                    setEnableMarqueeImpl(true);
-                    mPendingMarqueeStart = null;
-                };
-                mHandler.postDelayed(mPendingMarqueeStart, MARQUEE_DELAY_MS);
-            }
-        } else {
-            if (mPendingMarqueeStart != null) {
-                mHandler.removeCallbacks(mPendingMarqueeStart);
-                mPendingMarqueeStart = null;
-            }
-            setEnableMarqueeImpl(false);
-        }
-    }
-
-    private void setEnableMarqueeImpl(boolean enabled) {
-        if (DEBUG) Log.v(TAG, (enabled ? "Enable" : "Disable") + " transport text marquee");
-        if (mOwnerInfo != null) mOwnerInfo.setSelected(enabled);
-    }
-
-    void setCanShowOwnerInfo(boolean canShowOwnerInfo) {
-        mCanShowOwnerInfo = canShowOwnerInfo;
-        mOwnerInfo = findViewById(R.id.owner_info);
-        if (mOwnerInfo != null) {
-            if (mCanShowOwnerInfo) {
-                mOwnerInfo.setVisibility(VISIBLE);
-                updateOwnerInfo();
-            } else {
-                mOwnerInfo.setVisibility(GONE);
-                mOwnerInfo = null;
-            }
-        }
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mStatusViewContainer = findViewById(R.id.status_view_container);
-        mLogoutView = findViewById(R.id.logout);
-        if (mLogoutView != null) {
-            mLogoutView.setOnClickListener(this::onLogoutClicked);
-        }
 
         mClockView = findViewById(R.id.keyguard_clock_container);
         if (KeyguardClockAccessibilityDelegate.isNeeded(mContext)) {
             mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
-        }
-        if (mCanShowOwnerInfo) {
-            mOwnerInfo = findViewById(R.id.owner_info);
         }
 
         mKeyguardSlice = findViewById(R.id.keyguard_status_area);
@@ -158,7 +96,6 @@ public class KeyguardStatusView extends GridLayout {
 
         mMediaHostContainer = findViewById(R.id.status_view_media_container);
 
-        updateOwnerInfo();
         updateDark();
     }
 
@@ -173,60 +110,6 @@ public class KeyguardStatusView extends GridLayout {
         mShowingHeader = hasHeader;
     }
 
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        layoutOwnerInfo();
-    }
-
-    int getLogoutButtonHeight() {
-        if (mLogoutView == null) {
-            return 0;
-        }
-        return mLogoutView.getVisibility() == VISIBLE ? mLogoutView.getHeight() : 0;
-    }
-
-    int getOwnerInfoHeight() {
-        if (mOwnerInfo == null) {
-            return 0;
-        }
-        return mOwnerInfo.getVisibility() == VISIBLE ? mOwnerInfo.getHeight() : 0;
-    }
-
-    void updateLogoutView(boolean shouldShowLogout) {
-        if (mLogoutView == null) {
-            return;
-        }
-        mLogoutView.setVisibility(shouldShowLogout ? VISIBLE : GONE);
-        // Logout button will stay in language of user 0 if we don't set that manually.
-        mLogoutView.setText(mContext.getResources().getString(
-                com.android.internal.R.string.global_action_logout));
-    }
-
-    void onDensityOrFontScaleChanged() {
-        if (mOwnerInfo != null) {
-            mOwnerInfo.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                    getResources().getDimensionPixelSize(
-                            com.android.systemui.R.dimen.widget_label_font_size));
-            loadBottomMargin();
-        }
-    }
-
-    void updateOwnerInfo() {
-        if (mOwnerInfo == null) return;
-        String info = mLockPatternUtils.getDeviceOwnerInfo();
-        if (info == null) {
-            // Use the current user owner information if enabled.
-            final boolean ownerInfoEnabled = mLockPatternUtils.isOwnerInfoEnabled(
-                    KeyguardUpdateMonitor.getCurrentUser());
-            if (ownerInfoEnabled) {
-                info = mLockPatternUtils.getOwnerInfo(KeyguardUpdateMonitor.getCurrentUser());
-            }
-        }
-        mOwnerInfo.setText(info);
-        updateDark();
-    }
-
     void setDarkAmount(float darkAmount) {
         if (mDarkAmount == darkAmount) {
             return;
@@ -238,17 +121,6 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     void updateDark() {
-        boolean dark = mDarkAmount == 1;
-        if (mLogoutView != null) {
-            mLogoutView.setAlpha(dark ? 0 : 1);
-        }
-
-        if (mOwnerInfo != null) {
-            boolean hasText = !TextUtils.isEmpty(mOwnerInfo.getText());
-            mOwnerInfo.setVisibility(hasText ? VISIBLE : GONE);
-            layoutOwnerInfo();
-        }
-
         final int blendedTextColor = ColorUtils.blendARGB(mTextColor, Color.WHITE, mDarkAmount);
         mKeyguardSlice.setDarkAmount(mDarkAmount);
         mClockView.setTextColor(blendedTextColor);
@@ -277,13 +149,8 @@ public class KeyguardStatusView extends GridLayout {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusView:");
-        pw.println("  mOwnerInfo: " + (mOwnerInfo == null
-                ? "null" : mOwnerInfo.getVisibility() == VISIBLE));
         pw.println("  mDarkAmount: " + mDarkAmount);
         pw.println("  mTextColor: " + Integer.toHexString(mTextColor));
-        if (mLogoutView != null) {
-            pw.println("  logout visible: " + (mLogoutView.getVisibility() == VISIBLE));
-        }
         if (mClockView != null) {
             mClockView.dump(fd, pw, args);
         }
@@ -296,29 +163,5 @@ public class KeyguardStatusView extends GridLayout {
         mIconTopMargin = getResources().getDimensionPixelSize(R.dimen.widget_vertical_padding);
         mIconTopMarginWithHeader = getResources().getDimensionPixelSize(
                 R.dimen.widget_vertical_padding_with_header);
-    }
-
-    private void layoutOwnerInfo() {
-        if (mOwnerInfo != null && mOwnerInfo.getVisibility() != GONE) {
-            // Animate owner info during wake-up transition
-            mOwnerInfo.setAlpha(1f - mDarkAmount);
-
-            float ratio = mDarkAmount;
-            // Calculate how much of it we should crop in order to have a smooth transition
-            int collapsed = mOwnerInfo.getTop() - mOwnerInfo.getPaddingTop();
-            int expanded = mOwnerInfo.getBottom() + mOwnerInfo.getPaddingBottom();
-            int toRemove = (int) ((expanded - collapsed) * ratio);
-            setBottom(getMeasuredHeight() - toRemove);
-        }
-    }
-
-    private void onLogoutClicked(View view) {
-        int currentUserId = KeyguardUpdateMonitor.getCurrentUser();
-        try {
-            mIActivityManager.switchUser(UserHandle.USER_SYSTEM);
-            mIActivityManager.stopUser(currentUserId, true /*force*/, null);
-        } catch (RemoteException re) {
-            Log.e(TAG, "Failed to logout user", re);
-        }
     }
 }

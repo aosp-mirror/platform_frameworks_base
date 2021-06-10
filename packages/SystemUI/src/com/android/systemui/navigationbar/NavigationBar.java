@@ -1447,10 +1447,14 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private void updateAssistantEntrypoints() {
         mAssistantAvailable = mAssistManagerLazy.get()
                 .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
+        boolean longPressDefault = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
         mLongPressHomeEnabled = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, 1) != 0;
+                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0) != 0;
+        boolean gestureDefault = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_assistTouchGestureEnabledDefault);
         mAssistantTouchGestureEnabled = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED, 1) != 0;
+                Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED, gestureDefault ? 1 : 0) != 0;
         if (mOverviewProxyService.getProxy() != null) {
             try {
                 mOverviewProxyService.getProxy().onAssistantAvailable(mAssistantAvailable
