@@ -429,8 +429,19 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onUserAdded_appliesTheme_ifNotManagedProfile() {
+        reset(mDeviceProvisionedController);
+        when(mUserManager.isManagedProfile(anyInt())).thenReturn(false);
+        mBroadcastReceiver.getValue().onReceive(null,
+                new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED));
+        verify(mThemeOverlayApplier)
+                .applyCurrentUserOverlays(any(), any(), anyInt(), any());
+    }
+
+    @Test
     public void onProfileAdded_ignoresUntilSetupComplete() {
         reset(mDeviceProvisionedController);
+        when(mUserManager.isManagedProfile(anyInt())).thenReturn(true);
         mBroadcastReceiver.getValue().onReceive(null,
                 new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED));
         verify(mThemeOverlayApplier, never())
