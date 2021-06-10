@@ -745,7 +745,7 @@
     <string name="inline_undo" msgid="9026953267645116526">"Zhbëj"</string>
     <string name="demote" msgid="6225813324237153980">"Shëno se ky njoftim nuk është një bisedë"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"Bashkëbisedim i rëndësishëm"</string>
-    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Nuk është bashkëbisedim i rëndësishëm"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Nuk është bisedë e rëndësishme"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"Në heshtje"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"Po sinjalizon"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Shfaq flluskën"</string>

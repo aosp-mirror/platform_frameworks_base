@@ -203,7 +203,7 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN nustatymai šiam naudotojui nepasiekiami"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Įrenginio kaip modemo naudojimo nustatymai šiam naudotojui nepasiekiami"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Prieigos taško pavadinimo nustatymai šiam naudotojui nepasiekiami"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"USB perkrova"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"USB derinimas"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Derinimo režimas, kai prijungtas USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Panaikinti USB derinimo prieigos teises"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Belaidžio ryšio derin."</string>

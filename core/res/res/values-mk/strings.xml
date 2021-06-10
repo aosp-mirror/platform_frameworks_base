@@ -327,7 +327,7 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Може да допрете, повлечете, штипнете и да користите други движења."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Движења за отпечатоци"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може да сними движења што се направени на сензорот за отпечатоци на уредот."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Правење слика од екранот"</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Зачувување слика од екранот"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може да направи слика од екранот."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"оневозможи или измени статусна лента"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дозволува апликацијата да ја оневозможи статусната лента или да додава или отстранува системски икони."</string>

@@ -94,7 +94,7 @@
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS ମେସେଜ୍‌"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"ଭଏସମେଲ୍‍ ମେସେଜ୍‍"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"ୱାଇ-ଫାଇ କଲିଙ୍ଗ"</string>
-    <string name="notification_channel_sim" msgid="5098802350325677490">"SIM ଷ୍ଟାଟସ୍"</string>
+    <string name="notification_channel_sim" msgid="5098802350325677490">"SIMର ସ୍ଥିତି"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"ଉଚ୍ଚ ପ୍ରାଥମିକତା SIM ସ୍ଥିତି"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"ପୀଆର୍‌ ଅନୁରୋଧ କରିଥିବା TTY ମୋଡ୍‍ FULL ଅଟେ"</string>
     <string name="peerTtyModeHco" msgid="5626377160840915617">"ପୀଅର୍‌ ଅନୁରୋଧ କରିଥିବା TTY ମୋଡ୍‍ HCO ଅଟେ"</string>

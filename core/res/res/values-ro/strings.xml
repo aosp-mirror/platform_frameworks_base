@@ -318,17 +318,17 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"inițieze și să gestioneze apeluri telefonice"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Senzori corporali"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acceseze datele de la senzori despre semnele vitale"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Analizează conținutul ferestrei"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Analizeze conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspectează conținutul unei ferestre cu care interacționați."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activează funcția Explorați prin atingere"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activeze funcția Explorați prin atingere"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Elementele atinse vor fi rostite cu voce tare, iar ecranul poate fi explorat utilizând gesturi."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Remarcă textul pe care îl introduceți"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Remarce textul pe care îl introduceți"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Include date personale, cum ar fi numere ale cardurilor de credit sau parole."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Controlează mărirea pe afișaj"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controlează nivelul de zoom și poziționarea afișajului."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Folosește gesturi"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Poate atinge, glisa, ciupi sau folosi alte gesturi."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gesturi ce implică amprente"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Redea gesturi ce implică amprente"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Poate reda gesturile făcute pe senzorul de amprentă al dispozitivului."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Faceți o captură de ecran"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Poate face o captură de ecran."</string>

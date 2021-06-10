@@ -269,7 +269,7 @@
     <string name="notification_hidden_text" msgid="2835519769868187223">"Uusi ilmoitus"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Virtuaalinen näppäimistö"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Fyysinen näppäimistö"</string>
-    <string name="notification_channel_security" msgid="8516754650348238057">"Tietosuoja"</string>
+    <string name="notification_channel_security" msgid="8516754650348238057">"Turvallisuus"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Autotila"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"Tilin tila"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"Kehittäjien viestit"</string>
