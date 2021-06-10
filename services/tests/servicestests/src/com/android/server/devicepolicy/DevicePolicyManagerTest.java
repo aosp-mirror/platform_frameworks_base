@@ -15,6 +15,9 @@
  */
 package com.android.server.devicepolicy;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.OP_ACTIVATE_VPN;
 import static android.app.Notification.EXTRA_TEXT;
 import static android.app.Notification.EXTRA_TITLE;
 import static android.app.admin.DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE;
@@ -7434,6 +7437,101 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setAsProfileOwner(admin2);
 
         assertThrows(SecurityException.class, () -> dpm.setRecommendedGlobalProxy(admin1, null));
+    }
+
+    @Test
+    public void testSetAlwaysOnVpnPackage_clearsAdminVpn() throws Exception {
+        setDeviceOwner();
+
+        when(getServices().vpnManager
+                .setAlwaysOnVpnPackageForUser(anyInt(), any(), anyBoolean(), any()))
+                .thenReturn(true);
+
+        // Set VPN package to admin package.
+        dpm.setAlwaysOnVpnPackage(admin1, admin1.getPackageName(), false, null);
+
+        verify(getServices().vpnManager).setAlwaysOnVpnPackageForUser(
+                UserHandle.USER_SYSTEM, admin1.getPackageName(), false, null);
+
+        // Clear VPN package.
+        dpm.setAlwaysOnVpnPackage(admin1, null, false, null);
+
+        // Change should be propagated to VpnManager
+        verify(getServices().vpnManager).setAlwaysOnVpnPackageForUser(
+                UserHandle.USER_SYSTEM, null, false, null);
+        // The package should lose authorization to start VPN.
+        verify(getServices().appOpsManager).setMode(OP_ACTIVATE_VPN,
+                DpmMockContext.CALLER_SYSTEM_USER_UID, admin1.getPackageName(), MODE_DEFAULT);
+    }
+
+    @Test
+    public void testSetAlwaysOnVpnPackage_doesntKillUserVpn() throws Exception {
+        setDeviceOwner();
+
+        when(getServices().vpnManager
+                .setAlwaysOnVpnPackageForUser(anyInt(), any(), anyBoolean(), any()))
+                .thenReturn(true);
+
+        // this time it shouldn't go into VpnManager anymore.
+        dpm.setAlwaysOnVpnPackage(admin1, null, false, null);
+
+        verifyNoMoreInteractions(getServices().vpnManager);
+        verifyNoMoreInteractions(getServices().appOpsManager);
+    }
+
+    @Test
+    public void testDisallowConfigVpn_clearsUserVpn() throws Exception {
+        final String userVpnPackage = "org.some.vpn.servcie";
+        final int userVpnUid = 20374;
+
+        setDeviceOwner();
+
+        setupVpnAuthorization(userVpnPackage, userVpnUid);
+
+        simulateRestrictionAdded(UserManager.DISALLOW_CONFIG_VPN);
+
+        verify(getServices().vpnManager).setAlwaysOnVpnPackageForUser(
+                UserHandle.USER_SYSTEM, null, false, null);
+        verify(getServices().appOpsManager).setMode(OP_ACTIVATE_VPN,
+                userVpnUid, userVpnPackage, MODE_DEFAULT);
+    }
+
+    @Test
+    public void testDisallowConfigVpn_doesntKillAdminVpn() throws Exception {
+        setDeviceOwner();
+
+        when(getServices().vpnManager
+                .setAlwaysOnVpnPackageForUser(anyInt(), any(), anyBoolean(), any()))
+                .thenReturn(true);
+
+        // Set VPN package to admin package.
+        dpm.setAlwaysOnVpnPackage(admin1, admin1.getPackageName(), false, null);
+        setupVpnAuthorization(admin1.getPackageName(), DpmMockContext.CALLER_SYSTEM_USER_UID);
+        clearInvocations(getServices().vpnManager);
+
+        simulateRestrictionAdded(UserManager.DISALLOW_CONFIG_VPN);
+
+        // Admin-set package should remain always-on and should retain its authorization.
+        verifyNoMoreInteractions(getServices().vpnManager);
+        verify(getServices().appOpsManager, never()).setMode(OP_ACTIVATE_VPN,
+                DpmMockContext.CALLER_SYSTEM_USER_UID, admin1.getPackageName(), MODE_DEFAULT);
+    }
+
+    private void setupVpnAuthorization(String userVpnPackage, int userVpnUid) {
+        final AppOpsManager.PackageOps vpnOp = new AppOpsManager.PackageOps(userVpnPackage,
+                userVpnUid, List.of(new AppOpsManager.OpEntry(
+                OP_ACTIVATE_VPN, MODE_ALLOWED, Collections.emptyMap())));
+        when(getServices().appOpsManager.getPackagesForOps(any(int[].class)))
+                .thenReturn(List.of(vpnOp));
+    }
+
+    private void simulateRestrictionAdded(String restriction) {
+        RestrictionsListener listener = new RestrictionsListener(
+                mServiceContext, getServices().userManagerInternal, dpms);
+
+        final Bundle newRestrictions = new Bundle();
+        newRestrictions.putBoolean(restriction, true);
+        listener.onUserRestrictionsChanged(UserHandle.USER_SYSTEM, newRestrictions, new Bundle());
     }
 
     private void setUserUnlocked(int userHandle, boolean unlocked) {
