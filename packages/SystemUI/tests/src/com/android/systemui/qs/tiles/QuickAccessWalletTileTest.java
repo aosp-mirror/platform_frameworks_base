@@ -155,6 +155,9 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
                 mPackageManager,
                 mSecureSettings,
                 mController);
+
+        mTile.initialize();
+        mTestableLooper.processAllMessages();
     }
 
     @Test
