@@ -330,18 +330,18 @@ public class RippleDrawable extends LayerDrawable {
     private void setRippleActive(boolean active) {
         if (mRippleActive != active) {
             mRippleActive = active;
-        }
-        if (mState.mRippleStyle == STYLE_SOLID) {
-            if (active) {
-                tryRippleEnter();
+            if (mState.mRippleStyle == STYLE_SOLID) {
+                if (active) {
+                    tryRippleEnter();
+                } else {
+                    tryRippleExit();
+                }
             } else {
-                tryRippleExit();
-            }
-        } else {
-            if (active) {
-                startPatternedAnimation();
-            } else {
-                exitPatternedAnimation();
+                if (active) {
+                    startPatternedAnimation();
+                } else {
+                    exitPatternedAnimation();
+                }
             }
         }
     }
