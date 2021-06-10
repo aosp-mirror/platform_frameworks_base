@@ -1282,7 +1282,7 @@
     <dimen name="qs_media_action_spacing">4dp</dimen>
     <dimen name="qs_media_action_top">8dp</dimen>
     <dimen name="qs_seamless_height">24dp</dimen>
-    <dimen name="qs_seamless_icon_size">16dp</dimen>
+    <dimen name="qs_seamless_icon_size">12dp</dimen>
     <dimen name="qs_seamless_fallback_icon_size">@dimen/qs_seamless_icon_size</dimen>
     <dimen name="qs_seamless_fallback_margin">20dp</dimen>
     <dimen name="qs_footer_horizontal_margin">22dp</dimen>
@@ -1292,7 +1292,7 @@
     <dimen name="qs_media_disabled_seekbar_vertical_padding">36dp</dimen>
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
-    <dimen name="qs_aa_media_rec_album_size_collapsed">66dp</dimen>
+    <dimen name="qs_aa_media_rec_album_size_collapsed">72dp</dimen>
     <dimen name="qs_aa_media_rec_album_size_expanded">80dp</dimen>
     <dimen name="qs_aa_media_rec_album_margin">8dp</dimen>
     <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>

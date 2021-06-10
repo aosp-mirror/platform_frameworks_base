@@ -127,7 +127,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="@dimen/qs_media_padding"
         android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginEnd="@dimen/qs_media_padding"
         android:id="@+id/remove_text"
@@ -150,7 +150,6 @@
         android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginEnd="@dimen/qs_media_info_spacing"
         android:layout_marginBottom="@dimen/qs_media_padding"
-        android:layout_marginTop="6dp"
         app:layout_constrainedWidth="true"
         app:layout_constraintWidth_min="48dp"
         app:layout_constraintHeight_min="48dp"
@@ -164,6 +163,7 @@
             android:id="@+id/settings_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center|bottom"
             style="@style/MediaPlayer.OutlineButton"
             android:text="@string/controls_media_settings_button" />
     </FrameLayout>
@@ -176,7 +176,6 @@
         android:layout_marginStart="@dimen/qs_media_info_spacing"
         android:layout_marginEnd="@dimen/qs_media_info_spacing"
         android:layout_marginBottom="@dimen/qs_media_padding"
-        android:layout_marginTop="6dp"
         app:layout_constrainedWidth="true"
         app:layout_constraintWidth_min="48dp"
         app:layout_constraintHeight_min="48dp"
@@ -188,6 +187,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center|bottom"
             style="@style/MediaPlayer.OutlineButton"
             android:text="@string/cancel" />
     </FrameLayout>
@@ -200,7 +200,6 @@
         android:layout_marginStart="@dimen/qs_media_info_spacing"
         android:layout_marginEnd="@dimen/qs_media_padding"
         android:layout_marginBottom="@dimen/qs_media_padding"
-        android:layout_marginTop="6dp"
         app:layout_constrainedWidth="true"
         app:layout_constraintWidth_min="48dp"
         app:layout_constraintHeight_min="48dp"
@@ -212,6 +211,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center|bottom"
             style="@style/MediaPlayer.OutlineButton"
             android:text="@string/controls_media_dismiss_button"
         />
