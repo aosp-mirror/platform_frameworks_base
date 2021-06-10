@@ -719,7 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Әңгімелер бөлімінің жоғарғы жағында тұрады, қалқыма хабар түрінде шығады, құлыптаулы экранда профиль суретін көрсетеді."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Параметрлер"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маңызды"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> әңгімелесу функцияларын қолдамайды."</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> әңгіме функцияларын қолдамайды."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Жақындағы қалқыма хабарлар жоқ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Соңғы және жабылған қалқыма хабарлар осы жерде көрсетіледі."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Бұл хабарландыруларды өзгерту мүмкін емес."</string>
@@ -801,7 +801,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Жақындағылар"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Артқа"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Хабарландырулар"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Пернелер тіркесімдері"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Перне тіркесімдері"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Пернетақта форматын ауыстыру"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Қолданбалар"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Көмекші"</string>

@@ -42,7 +42,7 @@
     <string name="serviceErased" msgid="997354043770513494">"Behar bezala ezabatu da."</string>
     <string name="passwordIncorrect" msgid="917087532676155877">"Pasahitz okerra."</string>
     <string name="mmiComplete" msgid="6341884570892520140">"MMI osatu da."</string>
-    <string name="badPin" msgid="888372071306274355">"Idatzi duzun PIN kode zaharra ez da zuzena."</string>
+    <string name="badPin" msgid="888372071306274355">"Idatzi duzun PIN zaharra ez da zuzena."</string>
     <string name="badPuk" msgid="4232069163733147376">"Idatzi duzun PUK kode zaharra ez da zuzena. Saiatu berriro."</string>
     <string name="mismatchPin" msgid="2929611853228707473">"Idatzi dituzun PIN kodeak ez datoz bat."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Idatzi 4 eta 8 zenbaki bitarteko PIN bat."</string>
@@ -299,7 +299,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"atzitu gailuaren kokapena"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"atzitu egutegia"</string>
-    <string name="permgrouplab_sms" msgid="795737735126084874">"SMS mezuak"</string>
+    <string name="permgrouplab_sms" msgid="795737735126084874">"SMSak"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"bidali eta ikusi SMS mezuak"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"Fitxategiak eta multimedia-edukia"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"atzitu gailuko argazkiak, multimedia-edukia eta fitxategiak"</string>
@@ -600,7 +600,7 @@
     <string name="face_error_timeout" msgid="522924647742024699">"Saiatu berriro aurpegiaren bidez desblokeatzen."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Ezin dira gorde aurpegiaren datu berriak. Ezabatu zaharrak."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Utzi da aurpegiaren bidezko eragiketa."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Erabiltzaileak bertan behera utzi du aurpegiaren bidez desblokeatzea."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Erabiltzaileak aurpegiaren bidez desblokeatzeko aukera utzi du"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Saiakera gehiegi egin dituzu. Saiatu berriro geroago."</string>
     <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Saiakera gehiegi egin dira. Aurpegiaren bidez desblokeatzeko eginbidea desgaitu egin da."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ezin da egiaztatu aurpegia. Saiatu berriro."</string>
@@ -815,9 +815,9 @@
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"Beste bat"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"Ez da kontaktua ikusteko aplikaziorik aurkitu."</string>
     <string name="keyguard_password_enter_pin_code" msgid="6401406801060956153">"Idatzi PIN kodea"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"Idatzi PUK kodea eta PIN kode berria"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"Idatzi PUKa eta PIN berria"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="2825313071899938305">"PUK kodea"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"PIN kode berria"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"PIN berria"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"Sakatu pasahitza idazteko"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"Idatzi desblokeatzeko pasahitza"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Idatzi desblokeatzeko PIN kodea"</string>
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Saiatu berriro"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Saiatu berriro"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desblokeatu eginbide eta datu guztiak erabiltzeko"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Aurpegiaren bidez desblokeatzeko saiakera muga gainditu da"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Gainditu da aurpegiaren bidez desblokeatzeko saiakera-muga"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Ez dago SIM txartelik"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Ez dago SIM txartelik tabletan."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Ez dago SIM txartelik Android TV gailuan."</string>
@@ -854,7 +854,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"Larrialdi-deiak soilik"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Sarea blokeatuta dago"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM txartela PUK bidez blokeatuta dago."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Ikusi erabiltzailearen gida edo jarri bezeroarentzako laguntza-zerbitzuarekin harremanetan."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Ikusi erabiltzailearentzako gida edo jarri bezeroarentzako laguntza-zerbitzuarekin harremanetan."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM txartela blokeatuta dago."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM txartela desblokeatzen…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%2$d</xliff:g> segundo barru."</string>
@@ -907,7 +907,7 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Ereduaren bidez desblokeatzea."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Aurpegiaren bidez desblokeatzeko eginbidea."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN kodearen bidez desblokeatzea."</string>
-    <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM txartela desblokeatzeko PIN kodea."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIMa desblokeatzeko PINa."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM txartela desblokeatzeko PUK kodea."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"Pasahitzaren bidez desblokeatzea."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"Eredua marrazteko eremua."</string>
@@ -1263,7 +1263,7 @@
     <string name="select_character" msgid="3352797107930786979">"Txertatu karakterea"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"SMS mezuak bidaltzen"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; SMS asko ari da bidaltzen. Mezuak bidaltzen jarrai dezan onartu nahi duzu?"</string>
-    <string name="sms_control_yes" msgid="4858845109269524622">"Baimendu"</string>
+    <string name="sms_control_yes" msgid="4858845109269524622">"Eman baimena"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Ukatu"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioak mezu bat bidali nahi du &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; helbidera."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"Baliteke horrek mugikorreko kontuan "<b>"gastuak eragitea"</b>"."</string>
@@ -1409,7 +1409,7 @@
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Aplikazio hauetako bat edo gehiago kontua orain eta etorkizunean atzitzeko baimena eskatzen ari dira."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Eskaera onartu nahi duzu?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Sarbide-eskaera"</string>
-    <string name="allow" msgid="6195617008611933762">"Baimendu"</string>
+    <string name="allow" msgid="6195617008611933762">"Eman baimena"</string>
     <string name="deny" msgid="6632259981847676572">"Ukatu"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Baimena eskatu da"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Baimena eskatu da \n<xliff:g id="ACCOUNT">%s</xliff:g> konturako."</string>
@@ -1430,7 +1430,7 @@
     <string name="vpn_text_long" msgid="278540576806169831">"<xliff:g id="SESSION">%s</xliff:g> saiora konektatuta. Sakatu sarea kudeatzeko."</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Beti aktibatuta dagoen VPNa konektatzen…"</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Beti aktibatuta dagoen VPNa konektatu da"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Beti aktibatuta dagoen VPN sarea deskonektatuta dago"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Beti aktibatuta dagoen VPNa deskonektatuta dago"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"Ezin izan da konektatu beti aktibatuta dagoen VPN sarera"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Aldatu sarearen edo VPN sarearen ezarpenak"</string>
     <string name="upload_file" msgid="8651942222301634271">"Aukeratu fitxategia"</string>
@@ -1592,7 +1592,7 @@
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Idatzi erabili nahi duzun PIN kodea"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Berretsi erabili nahi duzun PIN kodea"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM txartela desblokeatzen…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN kode okerra."</string>
+    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN okerra."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Idatzi 4 eta 8 zenbaki arteko PINa."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK kodeak 8 zenbaki izan behar ditu."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betiko desgaituko da SIMa."</string>
@@ -1663,7 +1663,7 @@
     <string name="user_switched" msgid="7249833311585228097">"Erabiltzailea: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"\"<xliff:g id="NAME">%1$s</xliff:g>\" erabiltzailera aldatzen…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailearen saioa amaitzen…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"Jabe"</string>
+    <string name="owner_name" msgid="8713560351570795743">"\"Jabea\""</string>
     <string name="error_message_title" msgid="4082495589294631966">"Errorea"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Administratzaileak ez du eman aldaketa egiteko baimena"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Ez da ekintza gauza dezakeen aplikaziorik aurkitu"</string>
@@ -1785,7 +1785,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Laneko <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"Laneko 2. <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"Laneko 3. <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Eskatu PIN kodea aingura kendu aurretik"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Eskatu PINa aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Eskatu desblokeatzeko eredua aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Eskatu pasahitza aingura kendu aurretik"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Administratzaileak instalatu du"</string>
@@ -2069,7 +2069,7 @@
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Ez dago eduki honekin bateragarria den aplikazio pertsonalik"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Ez dago eduki hau ireki dezakeen aplikazio pertsonalik"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIMaren sarearen bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIMaren sareko azpimultzoaren bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIMaren sareko azpimultzoaren bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Enpresaren SIMaren bidez desblokeatzeko PIN kodea"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"SIMaren zerbitzu-hornitzailearen bidez desblokeatzeko PIN kodea"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"SIMaren bidez desblokeatzeko PIN kodea"</string>
@@ -2078,9 +2078,9 @@
     <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"Idatzi PUK kodea"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIMaren 1 motako sarearen bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIMaren 2 motako sarearen bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"HRPD sarearen bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIMaren 1 motako sarearen bidez desblokeatzeko PINa"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIMaren 2 motako sarearen bidez desblokeatzeko PINa"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"HRPD sarearen bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"Enpresaren RUIMaren bidez desblokeatzeko PIN kodea"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"RUIMaren zerbitzu-hornitzailearen bidez desblokeatzeko PIN kodea"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"RUIMaren bidez desblokeatzeko PIN kodea"</string>
@@ -2090,11 +2090,11 @@
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"Idatzi PUK kodea"</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"SPNaren bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"SPNaren bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"Zerbitzu-hornitzailearen PLMN sare nagusi baliokidearen bidez desblokeatzeko PIN kodea"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"ICCIDaren bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPIaren bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"Sareko azpimultzoaren zerbitzu-hornitzailearen bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPIaren bidez desblokeatzeko PINa"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"Sareko azpimultzoaren zerbitzu-hornitzailearen bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"SIMaren sarearen bidez desblokeatzeko eskatzen…"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"SIMaren sareko azpimultzoaren bidez desblokeatzeko eskatzen…"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"SIMaren zerbitzu-hornitzailearen bidez desblokeatzeko eskatzen…"</string>
