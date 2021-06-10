@@ -240,11 +240,14 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_STARTED.equals(intent.getAction())
-                    || Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction())) {
-                if (!mDeviceProvisionedController.isCurrentUserSetup()) {
+            boolean newWorkProfile = Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction());
+            boolean userStarted = Intent.ACTION_USER_STARTED.equals(intent.getAction());
+            boolean isManagedProfile = mUserManager.isManagedProfile(
+                    intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+            if (userStarted || newWorkProfile) {
+                if (!mDeviceProvisionedController.isCurrentUserSetup() && isManagedProfile) {
                     Log.i(TAG, "User setup not finished when " + intent.getAction()
-                            + " was received. Deferring...");
+                            + " was received. Deferring... Managed profile? " + isManagedProfile);
                     return;
                 }
                 if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
