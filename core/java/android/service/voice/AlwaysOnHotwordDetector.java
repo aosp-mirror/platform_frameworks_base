@@ -354,6 +354,13 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                     null);
         }
 
+        EventPayload(boolean triggerAvailable, boolean captureAvailable,
+                AudioFormat audioFormat, int captureSession, byte[] data,
+                HotwordDetectedResult hotwordDetectedResult) {
+            this(triggerAvailable, captureAvailable, audioFormat, captureSession, data,
+                    hotwordDetectedResult, null);
+        }
+
         EventPayload(AudioFormat audioFormat, HotwordDetectedResult hotwordDetectedResult) {
             this(false, false, audioFormat, -1, null, hotwordDetectedResult, null);
         }
@@ -1149,7 +1156,8 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
 
         @Override
-        public void onKeyphraseDetected(KeyphraseRecognitionEvent event) {
+        public void onKeyphraseDetected(
+                KeyphraseRecognitionEvent event, HotwordDetectedResult result) {
             if (DBG) {
                 Slog.d(TAG, "onDetected(" + event + ")");
             } else {
@@ -1157,7 +1165,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             }
             Message.obtain(mHandler, MSG_HOTWORD_DETECTED,
                     new EventPayload(event.triggerInData, event.captureAvailable,
-                            event.captureFormat, event.captureSession, event.data))
+                            event.captureFormat, event.captureSession, event.data, result))
                     .sendToTarget();
         }
         @Override

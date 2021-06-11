@@ -44,8 +44,9 @@ import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.TimeUtils;
@@ -60,7 +61,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -149,12 +149,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @Nullable
     private final LocalLog mFlushHistory;
-
-    /**
-     * If the event in the buffer is of type {@link TYPE_VIEW_TEXT_CHANGED}, this value
-     * indicates whether the event has composing span or not.
-     */
-    private final Map<AutofillId, Boolean> mLastComposingSpan = new ArrayMap<>();
 
     /**
      * Binder object used to update the session state.
@@ -352,40 +346,34 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             //    2.1 either last or current text is empty: add.
             //    2.2 last event doesn't have composing span: add.
             // Otherwise, merge.
-
             final CharSequence text = event.getText();
             final boolean textHasComposingSpan = event.getTextHasComposingSpan();
-
-            if (textHasComposingSpan && !mLastComposingSpan.isEmpty()) {
-                final Boolean lastEventHasComposingSpan = mLastComposingSpan.get(event.getId());
-                if (lastEventHasComposingSpan != null && lastEventHasComposingSpan.booleanValue()) {
-                    ContentCaptureEvent lastEvent = null;
-                    for (int index = mEvents.size() - 1; index >= 0; index--) {
-                        final ContentCaptureEvent tmpEvent = mEvents.get(index);
-                        if (event.getId().equals(tmpEvent.getId())) {
-                            lastEvent = tmpEvent;
-                            break;
-                        }
+            if (textHasComposingSpan) {
+                ContentCaptureEvent lastEvent = null;
+                for (int index = mEvents.size() - 1; index >= 0; index--) {
+                    final ContentCaptureEvent tmpEvent = mEvents.get(index);
+                    if (event.getId().equals(tmpEvent.getId())) {
+                        lastEvent = tmpEvent;
+                        break;
                     }
-                    if (lastEvent != null) {
-                        final CharSequence lastText = lastEvent.getText();
-                        final boolean bothNonEmpty = !TextUtils.isEmpty(lastText)
-                                && !TextUtils.isEmpty(text);
-                        boolean equalContent = TextUtils.equals(lastText, text);
-                        if (equalContent) {
-                            addEvent = false;
-                        } else if (bothNonEmpty && lastEventHasComposingSpan) {
-                            lastEvent.mergeEvent(event);
-                            addEvent = false;
-                        }
-                        if (!addEvent && sVerbose) {
-                            Log.v(TAG, "Buffering VIEW_TEXT_CHANGED event, updated text="
-                                    + getSanitizedString(text));
-                        }
+                }
+                if (lastEvent != null && lastEvent.getTextHasComposingSpan()) {
+                    final CharSequence lastText = lastEvent.getText();
+                    final boolean bothNonEmpty = !TextUtils.isEmpty(lastText)
+                            && !TextUtils.isEmpty(text);
+                    boolean equalContent = TextUtils.equals(lastText, text);
+                    if (equalContent) {
+                        addEvent = false;
+                    } else if (bothNonEmpty) {
+                        lastEvent.mergeEvent(event);
+                        addEvent = false;
+                    }
+                    if (!addEvent && sVerbose) {
+                        Log.v(TAG, "Buffering VIEW_TEXT_CHANGED event, updated text="
+                                + getSanitizedString(text));
                     }
                 }
             }
-            mLastComposingSpan.put(event.getId(), textHasComposingSpan);
         }
 
         if (!mEvents.isEmpty() && eventType == TYPE_VIEW_DISAPPEARED) {
@@ -586,7 +574,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 ? Collections.EMPTY_LIST
                 : new ArrayList<>(mEvents);
         mEvents.clear();
-        mLastComposingSpan.clear();
         return new ParceledListSlice<>(events);
     }
 
@@ -717,13 +704,23 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         // Since the same CharSequence instance may be reused in the TextView, we need to make
         // a copy of its content so that its value will not be changed by subsequent updates
         // in the TextView.
-        final String eventText = text == null ? null : text.toString();
+        final CharSequence eventText = stringOrSpannedStringWithoutNoCopySpans(text);
         final boolean textHasComposingSpan =
                 text instanceof Spannable && BaseInputConnection.getComposingSpanStart(
                         (Spannable) text) >= 0;
         mHandler.post(() -> sendEvent(
                 new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED)
                         .setAutofillId(id).setText(eventText, textHasComposingSpan)));
+    }
+
+    private CharSequence stringOrSpannedStringWithoutNoCopySpans(CharSequence source) {
+        if (source == null) {
+            return null;
+        } else if (source instanceof Spanned) {
+            return new SpannableString(source, /* ignoreNoCopySpan= */ true);
+        } else {
+            return source.toString();
+        }
     }
 
     /** Public because is also used by ViewRootImpl */

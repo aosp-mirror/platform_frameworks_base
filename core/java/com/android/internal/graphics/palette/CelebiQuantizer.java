@@ -19,26 +19,32 @@ package com.android.internal.graphics.palette;
 import java.util.List;
 
 /**
- * An implementation of Celebi's WSM quantizer, or, a Kmeans quantizer that starts with centroids
- * from a Wu quantizer to ensure 100% reproducible and quality results, and has some optimizations
- * to the Kmeans algorithm.
- *
+ * An implementation of Celebi's quantization method.
  * See Celebi 2011, “Improving the Performance of K-Means for Color Quantization”
+ *
+ * First, Wu's quantizer runs. The results are used as starting points for a subsequent Kmeans
+ * run. Using Wu's quantizer ensures 100% reproducible quantization results, because the starting
+ * centroids are always the same. It also ensures high quality results, Wu is a box-cutting
+ * quantization algorithm, much like medican color cut. It minimizes variance, much like Kmeans.
+ * Wu is shown to be the highest quality box-cutting quantization algorithm.
+ *
+ * Second, a Kmeans quantizer tweaked for performance is run. Celebi calls this a weighted
+ * square means quantizer, or WSMeans. Optimizations include operating on a map of image pixels
+ * rather than all image pixels, and avoiding excess color distance calculations by using a
+ * matrix and geometrical properties to know when there won't be any cluster closer to a pixel.
  */
 public class CelebiQuantizer implements Quantizer {
     private List<Palette.Swatch> mSwatches;
 
-    public CelebiQuantizer() { }
+    public CelebiQuantizer() {
+    }
 
     @Override
     public void quantize(int[] pixels, int maxColors) {
-        WuQuantizer wu = new WuQuantizer(pixels, maxColors);
+        WuQuantizer wu = new WuQuantizer();
         wu.quantize(pixels, maxColors);
-        List<Palette.Swatch> wuSwatches = wu.getQuantizedColors();
-        LABCentroid labCentroidProvider = new LABCentroid();
-        WSMeansQuantizer kmeans =
-                new WSMeansQuantizer(WSMeansQuantizer.createStartingCentroids(labCentroidProvider,
-                        wuSwatches), labCentroidProvider, pixels, maxColors);
+        WSMeansQuantizer kmeans = new WSMeansQuantizer(wu.getColors(), new LABPointProvider(),
+                wu.inputPixelToCount());
         kmeans.quantize(pixels, maxColors);
         mSwatches = kmeans.getQuantizedColors();
     }

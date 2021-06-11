@@ -341,6 +341,19 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    /**
+     * Listener for the battery stats reset.
+     */
+    public interface BatteryResetListener {
+
+        /**
+         * Callback invoked immediately prior to resetting battery stats.
+         */
+        void prepareForBatteryStatsReset();
+    }
+
+    private BatteryResetListener mBatteryResetListener;
+
     public interface BatteryCallback {
         public void batteryNeedsCpuUpdate();
         public void batteryPowerChanged(boolean onBattery);
@@ -10738,6 +10751,10 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    PowerProfile getPowerProfile() {
+        return mPowerProfile;
+    }
+
     /**
      * Starts tracking CPU time-in-state for threads of the system server process,
      * keeping a separate account of threads receiving incoming binder calls.
@@ -11186,6 +11203,10 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeCounter.reset(false, elapsedRealtimeUs);
     }
 
+    public void setBatteryResetListener(BatteryResetListener batteryResetListener) {
+        mBatteryResetListener = batteryResetListener;
+    }
+
     public void resetAllStatsCmdLocked() {
         final long mSecUptime = mClocks.uptimeMillis();
         long uptimeUs = mSecUptime * 1000;
@@ -11221,6 +11242,10 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private void resetAllStatsLocked(long uptimeMillis, long elapsedRealtimeMillis) {
+        if (mBatteryResetListener != null) {
+            mBatteryResetListener.prepareForBatteryStatsReset();
+        }
+
         final long uptimeUs = uptimeMillis * 1000;
         final long elapsedRealtimeUs = elapsedRealtimeMillis * 1000;
         mStartCount = 0;
