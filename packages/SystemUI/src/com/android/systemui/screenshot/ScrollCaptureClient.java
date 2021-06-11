@@ -405,6 +405,10 @@ public class ScrollCaptureClient {
             return new Rect(mWindowBounds);
         }
 
+        public Rect getBoundsInWindow() {
+            return new Rect(mBoundsInWindow);
+        }
+
         @Override
         public int getMaxTiles() {
             return mMaxTiles;
