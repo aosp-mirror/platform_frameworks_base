@@ -5033,7 +5033,7 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_CAR_DOCK = "android.intent.category.CAR_DOCK";
     /**
-     * An activity to run when device is inserted into a car dock.
+     * An activity to run when device is inserted into a desk dock.
      * Used with {@link #ACTION_MAIN} to launch an activity.  For more
      * information, see {@link android.app.UiModeManager}.
      */
