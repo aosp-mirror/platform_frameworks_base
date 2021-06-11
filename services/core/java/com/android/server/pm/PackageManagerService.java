@@ -25550,14 +25550,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void deleteOatArtifactsOfPackage(String packageName) {
+    long deleteOatArtifactsOfPackage(String packageName) {
         final AndroidPackage pkg;
         final PackageSetting pkgSetting;
         synchronized (mLock) {
             pkg = mPackages.get(packageName);
             pkgSetting = mSettings.getPackageLPr(packageName);
         }
-        mDexManager.deleteOptimizedFiles(ArtUtils.createArtPackageInfo(pkg, pkgSetting));
+        return mDexManager.deleteOptimizedFiles(ArtUtils.createArtPackageInfo(pkg, pkgSetting));
     }
 
     Set<String> getUnusedPackages(long downgradeTimeThresholdMillis) {
