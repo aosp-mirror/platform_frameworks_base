@@ -487,7 +487,8 @@ final class HistoricalRegistry {
 
     void incrementOpAccessedCount(int op, int uid, @NonNull String packageName,
             @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags,
-            long accessTime) {
+            long accessTime, @AppOpsManager.AttributionFlags int attributionFlags,
+            int attributionChainId) {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
@@ -499,7 +500,7 @@ final class HistoricalRegistry {
                         attributionTag, uidState, flags, 1);
 
                 mDiscreteRegistry.recordDiscreteAccess(uid, packageName, op, attributionTag,
-                        flags, uidState, accessTime, -1);
+                        flags, uidState, accessTime, -1, attributionFlags, attributionChainId);
             }
         }
     }
@@ -521,7 +522,8 @@ final class HistoricalRegistry {
 
     void increaseOpAccessDuration(int op, int uid, @NonNull String packageName,
             @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags,
-            long eventStartTime, long increment) {
+            long eventStartTime, long increment,
+            @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId) {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
@@ -532,7 +534,8 @@ final class HistoricalRegistry {
                         System.currentTimeMillis()).increaseAccessDuration(op, uid, packageName,
                         attributionTag, uidState, flags, increment);
                 mDiscreteRegistry.recordDiscreteAccess(uid, packageName, op, attributionTag,
-                        flags, uidState, eventStartTime, increment);
+                        flags, uidState, eventStartTime, increment, attributionFlags,
+                        attributionChainId);
             }
         }
     }

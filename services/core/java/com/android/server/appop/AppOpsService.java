@@ -848,7 +848,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             return mAttributionFlags;
         }
 
-        /** @return attributoin chiang id for the access */
+        /** @return attribution chain id for the access */
         public int getAttributionChainId() {
             return mAttributionChainId;
         }
@@ -912,7 +912,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     proxyAttributionTag, uidState, flags);
 
             mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid, parent.packageName,
-                    tag, uidState, flags, accessTime);
+                    tag, uidState, flags, accessTime, AppOpsManager.ATTRIBUTION_FLAGS_NONE,
+                    AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
         }
 
         /**
@@ -1053,9 +1054,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             event.numUnfinishedStarts++;
 
             if (isStarted) {
-                // TODO: Consider storing the attribution chain flags and id
                 mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
-                        parent.packageName, tag, uidState, flags, startTime);
+                        parent.packageName, tag, uidState, flags, startTime, attributionFlags,
+                        attributionChainId);
             }
         }
 
@@ -1112,7 +1113,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
                         parent.packageName, tag, event.getUidState(),
-                        event.getFlags(), finishedEvent.getNoteTime(), finishedEvent.getDuration());
+                        event.getFlags(), finishedEvent.getNoteTime(), finishedEvent.getDuration(),
+                        event.getAttributionFlags(), event.getAttributionChainId());
 
                 if (!isPausing) {
                     mInProgressStartOpEventPool.release(event);
@@ -1215,7 +1217,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 event.mStartElapsedTime = SystemClock.elapsedRealtime();
                 event.mStartTime = startTime;
                 mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
-                        parent.packageName, tag, event.mUidState, event.mFlags, startTime);
+                        parent.packageName, tag, event.mUidState, event.mFlags, startTime,
+                        event.getAttributionFlags(), event.getAttributionChainId());
                 if (shouldSendActive) {
                     scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid, parent.packageName,
                             tag, true, event.getAttributionFlags(), event.getAttributionChainId());
