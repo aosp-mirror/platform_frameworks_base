@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="1946296620328354129">"ເຊື່ອງ (ຫຼີກເວັ້ນແອັບໃນພື້ນທີ່ຕັດອອກ)"</string>
+    <string name="display_cutout_emulation_overlay" msgid="3814493834951357513">"ສະແດງພາບແອັບຢູ່ທາງລຸ່ມພື້ນທີ່ຮອຍເສັ້ນ"</string>
 </resources>
