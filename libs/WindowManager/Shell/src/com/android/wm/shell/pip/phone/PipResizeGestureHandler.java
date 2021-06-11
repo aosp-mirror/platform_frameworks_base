@@ -235,15 +235,20 @@ public class PipResizeGestureHandler {
 
     @VisibleForTesting
     void onInputEvent(InputEvent ev) {
+        if (!mEnableDragCornerResize && !mEnablePinchResize) {
+            // No need to handle anything if neither form of resizing is enabled.
+            return;
+        }
+
         // Don't allow resize when PiP is stashed.
         if (mPipBoundsState.isStashed()) {
             return;
         }
 
         if (ev instanceof MotionEvent) {
-            if (mOngoingPinchToResize) {
+            if (mEnablePinchResize && mOngoingPinchToResize) {
                 onPinchResize((MotionEvent) ev);
-            } else {
+            } else if (mEnableDragCornerResize) {
                 onDragCornerResize((MotionEvent) ev);
             }
         }
@@ -318,8 +323,8 @@ public class PipResizeGestureHandler {
                 case MotionEvent.ACTION_POINTER_DOWN:
                     if (mEnablePinchResize && ev.getPointerCount() == 2) {
                         onPinchResize(ev);
-                        mOngoingPinchToResize = true;
-                        return true;
+                        mOngoingPinchToResize = mAllowGesture;
+                        return mAllowGesture;
                     }
                     break;
 
