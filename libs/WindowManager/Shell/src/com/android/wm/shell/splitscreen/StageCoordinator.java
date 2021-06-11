@@ -610,7 +610,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void onFoldedStateChanged(boolean folded) {
         if (folded && mMainStage.isActive()) {
-            exitSplitScreen();
+            exitSplitScreen(mMainStage);
         }
     }
 
