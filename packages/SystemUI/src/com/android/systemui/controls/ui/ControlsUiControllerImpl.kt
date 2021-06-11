@@ -422,8 +422,12 @@ class ControlsUiControllerImpl @Inject constructor (
         // add spacers if necessary to keep control size consistent
         val mod = selectedStructure.controls.size % maxColumns
         var spacersToAdd = if (mod == 0) 0 else maxColumns - mod
+        val margin = context.resources.getDimensionPixelSize(R.dimen.control_spacing)
         while (spacersToAdd > 0) {
-            lastRow.addView(Space(context), LinearLayout.LayoutParams(0, 0, 1f))
+            val lp = LinearLayout.LayoutParams(0, 0, 1f).apply {
+                setMarginStart(margin)
+            }
+            lastRow.addView(Space(context), lp)
             spacersToAdd--
         }
     }

@@ -1533,7 +1533,7 @@ public class DisplayContentTests extends WindowTestsBase {
         unblockDisplayRotation(mDisplayContent);
         final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
         app.setVisible(false);
-        app.setState(Task.ActivityState.RESUMED, "test");
+        app.setState(ActivityRecord.State.RESUMED, "test");
         mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_OPEN);
         mDisplayContent.mOpeningApps.add(app);
         final int newOrientation = getRotatedOrientation(mDisplayContent);

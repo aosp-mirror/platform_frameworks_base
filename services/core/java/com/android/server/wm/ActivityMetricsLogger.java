@@ -745,7 +745,7 @@ class ActivityMetricsLogger {
             Slog.i(TAG, "notifyVisibilityChanged " + r + " visible=" + r.mVisibleRequested
                     + " state=" + r.getState() + " finishing=" + r.finishing);
         }
-        if (r.isState(Task.ActivityState.RESUMED) && r.mDisplayContent.isSleeping()) {
+        if (r.isState(ActivityRecord.State.RESUMED) && r.mDisplayContent.isSleeping()) {
             // The activity may be launching while keyguard is locked. The keyguard may be dismissed
             // after the activity finished relayout, so skip the visibility check to avoid aborting
             // the tracking of launch event.

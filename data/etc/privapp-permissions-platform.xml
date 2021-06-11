@@ -490,6 +490,7 @@ applications that come with the platform
         <permission name="android.permission.BRIGHTNESS_SLIDER_USAGE" />
         <permission name="android.permission.ACCESS_AMBIENT_LIGHT_STATS" />
         <permission name="android.permission.CONFIGURE_DISPLAY_BRIGHTNESS" />
+        <permission name="android.permission.GET_TOP_ACTIVITY_INFO" />
         <permission name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER" />
         <permission name="android.permission.SET_MEDIA_KEY_LISTENER" />
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />

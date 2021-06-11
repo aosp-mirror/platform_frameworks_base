@@ -34,6 +34,7 @@ import static com.android.server.wm.ConfigurationContainerProto.MERGED_OVERRIDE_
 import static com.android.server.wm.ConfigurationContainerProto.OVERRIDE_CONFIGURATION;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -111,6 +112,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * This method should be used for getting settings applied in each particular level of the
      * hierarchy.
      */
+    @NonNull
     public Configuration getConfiguration() {
         return mFullConfiguration;
     }
@@ -170,11 +172,13 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /** Returns requested override configuration applied to this configuration container. */
+    @NonNull
     public Configuration getRequestedOverrideConfiguration() {
         return mRequestedOverrideConfiguration;
     }
 
     /** Returns the resolved override configuration. */
+    @NonNull
     Configuration getResolvedOverrideConfiguration() {
         return mResolvedOverrideConfiguration;
     }
@@ -203,6 +207,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * Get merged override configuration from the top of the hierarchy down to this particular
      * instance. This should be reported to client as override config.
      */
+    @NonNull
     public Configuration getMergedOverrideConfiguration() {
         return mMergedOverrideConfiguration;
     }

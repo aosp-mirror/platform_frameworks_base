@@ -3799,11 +3799,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return true;
         }
 
-        // Retrying commit.
-        if (mIncrementalFileStorages != null) {
-            return false;
-        }
-
         final List<InstallationFileParcel> addedFiles = new ArrayList<>();
         final List<String> removedFiles = new ArrayList<>();
 
@@ -3957,18 +3952,24 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         (pkgInfo != null && pkgInfo.applicationInfo != null) ? new File(
                                 pkgInfo.applicationInfo.getCodePath()).getParentFile() : null;
 
-                mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext, stageDir,
-                        inheritedDir, params, statusListener, healthCheckParams, healthListener,
-                        addedFiles, perUidReadTimeouts,
-                        new IPackageLoadingProgressCallback.Stub() {
-                            @Override
-                            public void onPackageLoadingProgressChanged(float progress) {
-                                synchronized (mProgressLock) {
-                                    mIncrementalProgress = progress;
-                                    computeProgressLocked(true);
+                if (mIncrementalFileStorages == null) {
+                    mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext,
+                            stageDir, inheritedDir, params, statusListener, healthCheckParams,
+                            healthListener, addedFiles, perUidReadTimeouts,
+                            new IPackageLoadingProgressCallback.Stub() {
+                                @Override
+                                public void onPackageLoadingProgressChanged(float progress) {
+                                    synchronized (mProgressLock) {
+                                        mIncrementalProgress = progress;
+                                        computeProgressLocked(true);
+                                    }
                                 }
-                            }
-                        });
+                            });
+                } else {
+                    // Retrying commit.
+                    mIncrementalFileStorages.startLoading(params, statusListener, healthCheckParams,
+                            healthListener, perUidReadTimeouts);
+                }
                 return false;
             } catch (IOException e) {
                 throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),

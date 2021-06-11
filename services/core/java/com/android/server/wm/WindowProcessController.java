@@ -25,6 +25,13 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerService.MY_PID;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
+import static com.android.server.wm.ActivityRecord.State.DESTROYING;
+import static com.android.server.wm.ActivityRecord.State.PAUSED;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STARTED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
@@ -32,13 +39,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.wm.Task.ActivityState.DESTROYED;
-import static com.android.server.wm.Task.ActivityState.DESTROYING;
-import static com.android.server.wm.Task.ActivityState.PAUSED;
-import static com.android.server.wm.Task.ActivityState.PAUSING;
-import static com.android.server.wm.Task.ActivityState.RESUMED;
-import static com.android.server.wm.Task.ActivityState.STARTED;
-import static com.android.server.wm.Task.ActivityState.STOPPING;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -989,7 +989,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // Since there could be more than one activities in a process record, we don't need to
         // compute the OomAdj with each of them, just need to find out the activity with the
         // "best" state, the order would be visible, pausing, stopping...
-        Task.ActivityState bestInvisibleState = DESTROYED;
+        ActivityRecord.State bestInvisibleState = DESTROYED;
         boolean allStoppingFinishing = true;
         boolean visible = false;
         int minTaskLayer = Integer.MAX_VALUE;
