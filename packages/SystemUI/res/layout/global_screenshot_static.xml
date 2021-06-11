@@ -122,4 +122,12 @@
             android:layout_margin="@dimen/screenshot_dismiss_button_margin"
             android:src="@drawable/screenshot_cancel"/>
     </FrameLayout>
+    <ImageView
+        android:id="@+id/screenshot_scrollable_preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="matrix"
+        app:layout_constraintStart_toStartOf="@id/global_screenshot_preview"
+        app:layout_constraintTop_toTopOf="@id/global_screenshot_preview"
+        android:elevation="@dimen/screenshot_preview_elevation"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
