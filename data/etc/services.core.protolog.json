@@ -1627,6 +1627,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-248761393": {
+      "message": "startPausing: taskFrag =%s mResumedActivity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
     "-240296576": {
       "message": "handleAppTransitionReady: displayId=%d appTransition={%s} openingApps=[%s] closingApps=[%s] transit=%s",
       "level": "VERBOSE",
@@ -3348,12 +3354,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "1814259538": {
-      "message": "pauseBackTasks: taskFrag=%s mResumedActivity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
     },
     "1822314934": {
       "message": "Expected target rootTask=%s to restored behind rootTask=%s but it is behind rootTask=%s",

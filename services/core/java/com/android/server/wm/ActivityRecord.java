@@ -1182,7 +1182,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
             }
         }
-        pw.print(prefix); pw.print(full ? "  * " : "    "); pw.print(label);
+        pw.print(prefix); pw.print(full ? "* " : "    "); pw.print(label);
         pw.print(" #"); pw.print(index); pw.print(": ");
         pw.println(r);
         if (full) {
@@ -3058,12 +3058,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Tell window manager to prepare for this one to be removed.
                 setVisibility(false);
 
-                if (task.getTopPausingActivity() == null) {
+                if (getTaskFragment().getPausingActivity() == null) {
                     ProtoLog.v(WM_DEBUG_STATES, "Finish needs to pause: %s", this);
                     if (DEBUG_USER_LEAVING) {
                         Slog.v(TAG_USER_LEAVING, "finish() => pause with userLeaving=false");
                     }
-                    task.startPausing(false /* userLeaving */, false /* uiSleeping */,
+                    getTaskFragment().startPausing(false /* userLeaving */, false /* uiSleeping */,
                             null /* resuming */, "finish");
                 }
 
@@ -5406,7 +5406,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!task.hasChild(this)) {
             throw new IllegalStateException("Activity not found in its task");
         }
-        return task.topRunningActivity() == this;
+        return getTaskFragment().topRunningActivity() == this;
     }
 
     void handleAlreadyVisible() {
