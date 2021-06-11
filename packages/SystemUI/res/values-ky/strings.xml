@@ -94,10 +94,10 @@
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Жаздырып баштайсызбы?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Жаздыруу учурунда Android системасы экраныңызда көрүнүп турган жана түзмөктө ойноп жаткан бардык купуя маалыматты жаздырып алат. Буга сырсөздөр, төлөм маалыматы, сүрөттөр, билдирүүлөр жана аудио файлдар кирет."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио жаздыруу"</string>
-    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Түзмөктүн аудиосу"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Түзмөктөгү аудиолор"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Музыка, чалуулар жана шыңгырлар сыяктуу түзмөгүңүздөгү добуштар"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Микрофон"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Түзмөктүн аудиосу жана микрофон"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Түзмөктөгү аудиолор жана микрофон"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Баштадык"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Экран жаздырылууда"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Экран жана аудио жаздырылууда"</string>
@@ -124,7 +124,7 @@
     <string name="accessibility_menu" msgid="2701163794470513040">"Меню"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Атайын мүмкүнчүлүктөр"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Экранды буруу"</string>
-    <string name="accessibility_recent" msgid="901641734769533575">"Көз жүгүртүү"</string>
+    <string name="accessibility_recent" msgid="901641734769533575">"Назар"</string>
     <string name="accessibility_search_light" msgid="524741790416076988">"Издөө"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Камера"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Телефон"</string>
@@ -261,7 +261,7 @@
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Тез тууралоолор."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Кулпуланган экран."</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"Жөндөөлөр"</string>
-    <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"Көз жүгүртүү."</string>
+    <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"Назар"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Жумуштун кулпуланган экраны"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Жабуу"</string>
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
@@ -435,7 +435,7 @@
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Түзмөк"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Башка колдонмого которулуу үчүн өйдө сүрүңүз"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Колдонмолорду тез которуштуруу үчүн, оңго сүйрөңүз"</string>
-    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Сереп салууну өчүрүү/күйгүзүү"</string>
+    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Назар режимин өчүрүү/күйгүзүү"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Кубатталды"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Кубатталууда"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> толгонго чейин"</string>
@@ -593,10 +593,10 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"өчүрүү"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Аудио түзмөктү которуштуруу"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Колдонмо кадалды"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн, \"Артка\" жана \"Карап чыгуу\" баскычтарын басып, кармап туруңуз."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн \"Артка\" жана \"Назар\" баскычтарын басып, кармап туруңуз."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн, \"Артка\" жана \"Башкы бет\" баскычтарын басып, кармап туруңуз."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн өйдө сүрүп, коё бербей басып туруңуз."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн, \"Карап чыгуу\" баскычын басып, кармап туруңуз."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн \"Назар\" баскычын басып, кармап туруңуз."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн, \"Башкы бет\" баскычын басып, кармап туруңуз."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Жеке маалыматтар көрүнүп калышы мүмкүн (байланыштар жана электрондук каттардын мазмуну сыяктуу)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Кадалган колдонмо башка колдонмолорду ача алат."</string>
@@ -647,7 +647,7 @@
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Түзмөк кубатталбай турганда, батареянын деңгээли статус тилкесинде көрүнүп турат"</string>
     <string name="quick_settings" msgid="6211774484997470203">"Ыкчам жөндөөлөр"</string>
     <string name="status_bar" msgid="4357390266055077437">"Абал тилкеси"</string>
-    <string name="overview" msgid="3522318590458536816">"Көз жүгүртүү"</string>
+    <string name="overview" msgid="3522318590458536816">"Назар"</string>
     <string name="demo_mode" msgid="263484519766901593">"Тутум интерфейсинин демо режими"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Демо режимин иштетүү"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Демо режимин көрсөтүү"</string>
@@ -736,8 +736,8 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Бул колдонмо экрандагы башка терезелердин үстүнөн көрсөтүлүп, микрофонду жана камераны колдонууда."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Жөндөөлөр"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ЖАРАЙТ"</string>
-    <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн эскертмени көзөмөлдөө функциялары ачылды"</string>
-    <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн эскертмени көзөмөлдөө функциялары жабылды"</string>
+    <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн эскертмени башкаруу элементтери ачылды"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн эскертмени башкаруу элементтери жабылды"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Бул каналдан келген эскертмелерге уруксат берүү"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"Дагы жөндөөлөр"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Ыңгайлаштыруу"</string>
@@ -1028,11 +1028,11 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"Түзмөктү башкаруу элементтери"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Түзмөктөрүңүздү башкаруу элементтерин кошосуз"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Түзмөктү башкаруу элементтерин жөндөө"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Көзөмөлдөргө өтүү үчүн, кубат баскычын басып туруңуз"</string>
+    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Башкаруу элементтерине өтүү үчүн кубат баскычын басып туруңуз"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Башкаруу элементтери кошула турган колдонмону тандоо"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> көзөмөл кошулду.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> көзөмөл кошулду.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> башкаруу элементи кошулду.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> башкаруу элементи кошулду.</item>
     </plurals>
     <string name="controls_removed" msgid="3731789252222856959">"Өчүрүлдү"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Сүйүктүүлөргө кошулду"</string>
@@ -1047,8 +1047,8 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Бардык башкаруу элементтери өчүрүлдү"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өзгөртүүлөр сакталган жок"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Башка колдонмолорду көрүү"</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Көзөмөлдөр жүктөлгөн жок. <xliff:g id="APP">%s</xliff:g> колдонмосуна өтүп, колдонмонун жөндөөлөрү өзгөрбөгөнүн текшериңиз."</string>
-    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Шайкеш көзөмөлдөр жеткиликсиз"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Башкаруу элементтери жүктөлгөн жок. <xliff:g id="APP">%s</xliff:g> колдонмосуна өтүп, колдонмонун жөндөөлөрү өзгөрбөгөнүн текшериңиз."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Шайкеш башкаруу элементтери жеткиликсиз"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Башка"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Түзмөктү башкаруу элементтерине кошуу"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Кошуу"</string>

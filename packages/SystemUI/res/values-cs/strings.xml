@@ -517,7 +517,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Spravovat"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historie"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nové"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Ticho"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tiché"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Oznámení"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzace"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vymazat všechna tichá oznámení"</string>
@@ -720,7 +720,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Žádný zvuk ani vibrace"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Žádný zvuk ani vibrace a zobrazuje se níže v sekci konverzací"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Vyzvání nebo vibruje podle nastavení telefonu"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu. Konverzace z aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> ve výchozím nastavení bublají."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Vyzvání nebo vibruje podle nastavení telefonu. Konverzace z aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> mají ve výchozím nastavení podobu bublin."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Přitahuje pozornost pomocí plovoucí zkratky k tomuto obsahu."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Najdete ji v horní části sekce konverzací jako plovoucí bublinu a na obrazovce uzamčení zobrazuje profilovou fotku"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
