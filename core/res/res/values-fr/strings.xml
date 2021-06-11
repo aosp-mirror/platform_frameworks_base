@@ -209,8 +209,8 @@
     <string name="factory_reset_message" msgid="2657049595153992213">"Impossible d\'utiliser l\'application d\'administration. Les données de votre appareil vont maintenant être effacées.\n\nSi vous avez des questions, contactez l\'administrateur de votre organisation."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Impression désactivée par <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activez votre profil pro"</string>
-    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vos applications personnelles seront bloquées jusqu\'à ce que vous activiez votre profil professionnel"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Vos applications personnelles seront bloquées le <xliff:g id="DATE">%1$s</xliff:g> à <xliff:g id="TIME">%2$s</xliff:g>. Votre administrateur informatique ne vous autorise pas à désactiver votre profil professionnel pendant plus de <xliff:g id="NUMBER">%3$d</xliff:g> jours."</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vos applis perso sont bloquées tant que vous n\'avez pas activé votre profil pro"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Vos applis perso seront bloquées le <xliff:g id="DATE">%1$s</xliff:g> à <xliff:g id="TIME">%2$s</xliff:g>. Votre administrateur ne permet pas que votre profil pro reste désactivé pendant plus de <xliff:g id="NUMBER">%3$d</xliff:g> jours."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activer"</string>
     <string name="me" msgid="6207584824693813140">"Moi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Options de la tablette"</string>
@@ -1870,7 +1870,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation des données, l\'Économiseur de données empêche certaines applis d\'envoyer ou de recevoir des données en arrière-plan. Les applis que vous utiliserez pourront toujours accéder aux données, mais le feront moins fréquemment. Par exemple, les images pourront ne pas s\'afficher tant que vous n\'aurez pas appuyé pas dessus."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'économiseur de données ?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'Économiseur de données ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activer"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">Pendant %1$d minute (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -2071,7 +2071,7 @@
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> souhaite afficher des éléments de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifier"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibreur pour les appels et les notifications"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Sonnerie désactivée pour les appels et les notifications"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Sons désactivés pour les appels et les notifications"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modifications du système"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne pas déranger"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nouveau : Le mode Ne pas déranger masque les notifications"</string>
@@ -2158,7 +2158,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Impossible de partager ce contenu avec des applis personnelles"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Impossible d\'ouvrir ce contenu avec des applis personnelles"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profil professionnel en pause"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Appuyer pour activer"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Appuyez pour l\'activer"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Aucune appli professionnelle"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Aucune appli personnelle"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Ouvrir dans <xliff:g id="APP">%s</xliff:g> avec le profil personnel ?"</string>
