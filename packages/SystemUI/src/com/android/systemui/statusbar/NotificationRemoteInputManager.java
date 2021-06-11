@@ -221,12 +221,10 @@ public class NotificationRemoteInputManager implements Dumpable {
                 buttonIndex = actionGroup.indexOfChild(view);
             }
             final int count = mEntryManager.getActiveNotificationsCount();
-            final int rank = mEntryManager
-                    .getActiveNotificationUnfiltered(key).getRanking().getRank();
+            final int rank = entry.getRanking().getRank();
 
             NotificationVisibility.NotificationLocation location =
-                    NotificationLogger.getNotificationLocation(
-                            mEntryManager.getActiveNotificationUnfiltered(key));
+                    NotificationLogger.getNotificationLocation(entry);
             final NotificationVisibility nv =
                     NotificationVisibility.obtain(key, rank, count, true, location);
             mClickNotifier.onNotificationActionClick(key, buttonIndex, action, nv, false);
