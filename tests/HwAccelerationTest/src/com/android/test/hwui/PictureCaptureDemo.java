@@ -34,13 +34,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class PictureCaptureDemo extends Activity {
     @Override
@@ -77,6 +78,12 @@ public class PictureCaptureDemo extends Activity {
         iv2.setImageBitmap(Bitmap.createBitmap(picture, 100, 100, Bitmap.Config.HARDWARE));
         inner.addView(iv2, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 
+        TextView hello = new TextView(this);
+        hello.setText("I'm on a layer!");
+        hello.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        inner.addView(hello,
+                new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+
         layout.addView(inner,
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         // For testing with a functor in the tree
@@ -84,11 +91,13 @@ public class PictureCaptureDemo extends Activity {
         wv.setWebViewClient(new WebViewClient());
         wv.setWebChromeClient(new WebChromeClient());
         wv.loadUrl("https://google.com");
-        layout.addView(wv, new LayoutParams(LayoutParams.MATCH_PARENT, 400));
+        LayoutParams wvParams = new LayoutParams(LayoutParams.MATCH_PARENT, 400);
+        wvParams.bottomMargin = 50;
+        layout.addView(wv, wvParams);
 
         SurfaceView mySurfaceView = new SurfaceView(this);
         layout.addView(mySurfaceView,
-                new LayoutParams(LayoutParams.MATCH_PARENT, 600));
+                new LayoutParams(LayoutParams.MATCH_PARENT, 600, 1f));
 
         setContentView(layout);
 
@@ -98,22 +107,29 @@ public class PictureCaptureDemo extends Activity {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 final Random rand = new Random();
+                OutputStream renderingStream = new ByteArrayOutputStream() {
+                    @Override
+                    public void flush() throws IOException {
+                        Picture picture = Picture.createFromStream(
+                                new ByteArrayInputStream(buf, 0, count));
+                        Canvas canvas = holder.lockCanvas();
+                        if (canvas != null && picture != null) {
+                            canvas.drawPicture(picture);
+                            holder.unlockCanvasAndPost(canvas);
+                        }
+                        reset();
+                    }
+                };
+
                 mStopCapture = ViewDebug.startRenderingCommandsCapture(mySurfaceView,
-                        mCaptureThread, (picture) -> {
+                        Executors.newSingleThreadExecutor(), () -> {
                             if (rand.nextInt(20) == 0) {
                                 try {
                                     Thread.sleep(100);
                                 } catch (InterruptedException e) {
                                 }
                             }
-                            Canvas canvas = holder.lockCanvas();
-                            if (canvas == null) {
-                                return false;
-                            }
-                            canvas.drawPicture(picture);
-                            holder.unlockCanvasAndPost(canvas);
-                            picture.close();
-                            return true;
+                            return renderingStream;
                         });
             }
 
@@ -133,21 +149,5 @@ public class PictureCaptureDemo extends Activity {
                 }
             }
         });
-    }
-
-    ExecutorService mCaptureThread = Executors.newSingleThreadExecutor();
-    ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-
-    Picture deepCopy(Picture src) {
-        try {
-            PipedInputStream inputStream = new PipedInputStream();
-            PipedOutputStream outputStream = new PipedOutputStream(inputStream);
-            Future<Picture> future = mExecutor.submit(() -> Picture.createFromStream(inputStream));
-            src.writeToStream(outputStream);
-            outputStream.close();
-            return future.get();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
     }
 }
