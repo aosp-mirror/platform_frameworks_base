@@ -5399,6 +5399,8 @@ package android.media.audiopolicy {
     field public static final int MIX_STATE_DISABLED = -1; // 0xffffffff
     field public static final int MIX_STATE_IDLE = 0; // 0x0
     field public static final int MIX_STATE_MIXING = 1; // 0x1
+    field public static final int MIX_TYPE_PLAYERS = 0; // 0x0
+    field public static final int MIX_TYPE_RECORDERS = 1; // 0x1
     field public static final int ROUTE_FLAG_LOOP_BACK = 2; // 0x2
     field public static final int ROUTE_FLAG_RENDER = 1; // 0x1
   }
@@ -5412,6 +5414,7 @@ package android.media.audiopolicy {
   }
 
   public class AudioMixingRule {
+    method public int getTargetMixType();
     field public static final int RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET = 2; // 0x2
     field public static final int RULE_MATCH_ATTRIBUTE_USAGE = 1; // 0x1
     field public static final int RULE_MATCH_UID = 4; // 0x4
@@ -5426,6 +5429,7 @@ package android.media.audiopolicy {
     method public android.media.audiopolicy.AudioMixingRule build();
     method public android.media.audiopolicy.AudioMixingRule.Builder excludeMixRule(int, Object) throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioMixingRule.Builder excludeRule(android.media.AudioAttributes, int) throws java.lang.IllegalArgumentException;
+    method @NonNull public android.media.audiopolicy.AudioMixingRule.Builder setTargetMixType(int);
   }
 
   public class AudioPolicy {
