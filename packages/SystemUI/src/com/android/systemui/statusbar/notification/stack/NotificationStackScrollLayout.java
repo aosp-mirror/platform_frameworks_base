@@ -475,6 +475,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Are we launching a notification right now
      */
     private boolean mLaunchingNotification;
+
+    /**
+     * Do notifications dismiss with normal transitioning
+     */
+    private boolean mDismissUsingRowTranslationX = true;
     private NotificationEntry mTopHeadsUpEntry;
     private long mNumHeadsUp;
     private NotificationStackScrollLayoutController.TouchHandler mTouchHandler;
@@ -528,7 +533,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSectionsManager = notificationSectionsManager;
         mFeatureFlags = featureFlags;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
-        mShouldUseSplitNotificationShade = shouldUseSplitNotificationShade(mFeatureFlags, res);
+        updateSplitNotificationShade();
         mSectionsManager.initialize(this, LayoutInflater.from(context));
         mSections = mSectionsManager.createSectionsForBuckets();
 
@@ -1600,8 +1605,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Resources res = getResources();
-        mShouldUseSplitNotificationShade = shouldUseSplitNotificationShade(mFeatureFlags, res);
-        updateUseRoundedRectClipping();
+        updateSplitNotificationShade();
         mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
         float densityScale = res.getDisplayMetrics().density;
         mSwipeHelper.setDensityScale(densityScale);
@@ -2528,8 +2532,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateScrollStateForRemovedChild(child);
         boolean animationGenerated = generateRemoveAnimation(child);
         if (animationGenerated) {
-            if (!mSwipedOutViews.contains(child)
-                    || Math.abs(child.getTranslation()) != child.getWidth()) {
+            if (!mSwipedOutViews.contains(child) || !isFullySwipedOut(child)) {
                 container.addTransientView(child, 0);
                 child.setTransientContainer(container);
             }
@@ -2539,6 +2542,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateAnimationState(false, child);
 
         focusNextViewIfFocused(child);
+    }
+
+    /**
+     * Has this view been fully swiped out such that it's not visible anymore.
+     */
+    public boolean isFullySwipedOut(ExpandableView child) {
+        return Math.abs(child.getTranslation()) >= Math.abs(getTotalTranslationLength(child));
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -2759,7 +2769,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateAnimationState(child);
         updateChronometerForChild(child);
         if (child instanceof ExpandableNotificationRow) {
-            ((ExpandableNotificationRow) child).setDismissRtl(mDismissRtl);
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            row.setDismissRtl(mDismissRtl);
+            row.setDismissUsingRowTranslationX(mDismissUsingRowTranslationX);
+
         }
     }
 
@@ -3033,7 +3046,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     removedTranslation = row.getTranslationWhenRemoved();
                     ignoreChildren = false;
                 }
-                childWasSwipedOut |= Math.abs(row.getTranslation()) == row.getWidth();
+                childWasSwipedOut |= isFullySwipedOut(row);
             } else if (child instanceof MediaHeaderView) {
                 childWasSwipedOut = true;
             }
@@ -3041,11 +3054,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 Rect clipBounds = child.getClipBounds();
                 childWasSwipedOut = clipBounds != null && clipBounds.height() == 0;
 
-                if (childWasSwipedOut && child instanceof ExpandableView) {
+                if (childWasSwipedOut) {
                     // Clean up any potential transient views if the child has already been swiped
                     // out, as we won't be animating it further (due to its height already being
                     // clipped to 0.
-                    ViewGroup transientContainer = ((ExpandableView) child).getTransientContainer();
+                    ViewGroup transientContainer = child.getTransientContainer();
                     if (transientContainer != null) {
                         transientContainer.removeTransientView(child);
                     }
@@ -4051,7 +4064,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 expandableView.setFakeShadowIntensity(
                         diff / FakeShadowView.SHADOW_SIBLING_TRESHOLD,
                         previous.getOutlineAlpha(), (int) yLocation,
-                        previous.getOutlineTranslation());
+                        (int) (previous.getOutlineTranslation() + previous.getTranslation()));
             }
             previous = expandableView;
         }
@@ -4636,6 +4649,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mStatusBarState = statusBarState;
         mAmbientState.setStatusBarState(statusBarState);
         updateSpeedBumpIndex();
+        updateDismissBehavior();
     }
 
     void onStatePostChange(boolean fromShadeLocked) {
@@ -5224,6 +5238,32 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
+    private void updateSplitNotificationShade() {
+        boolean split = shouldUseSplitNotificationShade(mFeatureFlags, getResources());
+        if (split != mShouldUseSplitNotificationShade) {
+            mShouldUseSplitNotificationShade = split;
+            updateDismissBehavior();
+            updateUseRoundedRectClipping();
+        }
+    }
+
+    private void updateDismissBehavior() {
+        // On the split keyguard, dismissing with clipping without a visual boundary looks odd,
+        // so let's use the content dismiss behavior instead.
+        boolean dismissUsingRowTranslationX = !mShouldUseSplitNotificationShade
+                || mStatusBarState != StatusBarState.KEYGUARD;
+        if (mDismissUsingRowTranslationX != dismissUsingRowTranslationX) {
+            mDismissUsingRowTranslationX = dismissUsingRowTranslationX;
+            for (int i = 0; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                if (child instanceof ExpandableNotificationRow) {
+                    ((ExpandableNotificationRow) child).setDismissUsingRowTranslationX(
+                            dismissUsingRowTranslationX);
+                }
+            }
+        }
+    }
+
     /**
      * Set if we're launching a notification right now.
      */
@@ -5256,6 +5296,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             canvas.clipPath(mRoundedClipPath);
         }
         super.dispatchDraw(canvas);
+    }
+
+    /**
+     * Calculate the total translation needed when dismissing.
+     */
+    public float getTotalTranslationLength(View animView) {
+        if (!mDismissUsingRowTranslationX) {
+            return animView.getMeasuredWidth();
+        }
+        float notificationWidth = animView.getMeasuredWidth();
+        int containerWidth = getMeasuredWidth();
+        float padding = (containerWidth - notificationWidth) / 2.0f;
+        return containerWidth - padding;
     }
 
     /**
