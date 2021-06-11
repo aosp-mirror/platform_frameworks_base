@@ -128,7 +128,7 @@
         android:id="@+id/transition"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/save"
+        app:layout_constraintTop_toTopOf="@id/preview"
         app:layout_constraintStart_toStartOf="parent"
         android:scaleType="centerCrop"
         android:visibility="invisible"
