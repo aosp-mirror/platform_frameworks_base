@@ -277,7 +277,7 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.ACCESSIBILITY_BUTTON_MODE,
                 new InclusiveIntegerRangeValidator(
                         Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR,
-                        Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU));
+                        Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE));
         VALIDATORS.put(Secure.ACCESSIBILITY_FLOATING_MENU_SIZE,
                 new DiscreteValueValidator(new String[] {"0", "1"}));
         VALIDATORS.put(Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
