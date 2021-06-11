@@ -567,11 +567,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Hatz-markaren ikonoa"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"kudeatu aurpegiaren bidez desblokeatzeko hardwarea"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"kudeatu aurpegi bidez desblokeatzeko hardwarea"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Aurpegi-txantiloiak gehitu eta ezabatzeko metodoei dei egitea baimentzen dio aplikazioari."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"erabili aurpegiaren bidez desblokeatzeko hardwarea"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Autentifikaziorako aurpegiaren bidez desblokeatzeko hardwarea erabiltzeko baimena ematen die aplikazioei"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Aurpegiaren bidez desblokeatzeko eginbidea"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"erabili aurpegi bidez desblokeatzeko hardwarea"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Autentifikaziorako aurpegi bidez desblokeatzeko hardwarea erabiltzeko baimena ematen die aplikazioei"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Aurpegi bidez desblokeatzeko eginbidea"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Erregistratu aurpegia berriro"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Ezagutzea hobetzeko, erregistratu aurpegia berriro"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Ezin izan dira bildu argazkiaren datu zehatzak. Saiatu berriro."</string>
@@ -600,12 +600,12 @@
     <string name="face_error_timeout" msgid="522924647742024699">"Saiatu berriro aurpegiaren bidez desblokeatzen."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Ezin dira gorde aurpegiaren datu berriak. Ezabatu zaharrak."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Utzi da aurpegiaren bidezko eragiketa."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Erabiltzaileak aurpegiaren bidez desblokeatzeko aukera utzi du"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Erabiltzaileak aurpegi bidez desblokeatzeko aukera utzi du"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Saiakera gehiegi egin dituzu. Saiatu berriro geroago."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Saiakera gehiegi egin dira. Aurpegiaren bidez desblokeatzeko eginbidea desgaitu egin da."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Saiakera gehiegi egin dira. Aurpegi bidez desblokeatzeko eginbidea desgaitu egin da."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ezin da egiaztatu aurpegia. Saiatu berriro."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ez duzu konfiguratu aurpegiaren bidez desblokeatzeko eginbidea."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Gailu honek ez du onartzen aurpegiaren bidez desblokeatzea."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ez duzu konfiguratu aurpegi bidez desblokeatzeko eginbidea."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Gailu honek ez du onartzen aurpegi bidez desblokeatzea."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sentsorea aldi baterako desgaitu da."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> aurpegia"</string>
   <string-array name="face_error_vendor">
@@ -835,7 +835,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Saiatu berriro"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Saiatu berriro"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desblokeatu eginbide eta datu guztiak erabiltzeko"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Gainditu da aurpegiaren bidez desblokeatzeko saiakera-muga"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Gainditu da aurpegi bidez desblokeatzeko saiakera-muga"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Ez dago SIM txartelik"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Ez dago SIM txartelik tabletan."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Ez dago SIM txartelik Android TV gailuan."</string>
@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Zabaldu desblokeatzeko eremua."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Hatza lerratuta desblokeatzea."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Ereduaren bidez desblokeatzea."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Aurpegiaren bidez desblokeatzeko eginbidea."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Aurpegi bidez desblokeatzeko eginbidea."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN kodearen bidez desblokeatzea."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIMa desblokeatzeko PINa."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM txartela desblokeatzeko PUK kodea."</string>

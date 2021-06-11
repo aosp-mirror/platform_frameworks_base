@@ -1795,7 +1795,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Per allargar la durada de la bateria, la funció Estalvi de bateria:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\".\n\n"<annotation id="url">"Més informació"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Per allargar la durada de la bateria, la funció Estalvi de bateria:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar l\'Economitzador de dades?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Vols activar l\'Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Durant %1$d minuts (fins a les <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
