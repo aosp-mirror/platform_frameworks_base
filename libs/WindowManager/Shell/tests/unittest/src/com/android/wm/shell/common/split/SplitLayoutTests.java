@@ -72,7 +72,6 @@ public class SplitLayoutTests extends ShellTestCase {
     @UiThreadTest
     public void testUpdateConfiguration() {
         final Configuration config = getConfiguration();
-        mSplitLayout.init();
 
         // Verify it returns true if new config won't affect split layout.
         assertThat(mSplitLayout.updateConfiguration(config)).isFalse();
