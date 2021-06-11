@@ -1869,7 +1869,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions a la xarxa."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions a la xarxa."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar l\'Economitzador de dades?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Vols activar l\'Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Durant %1$d minuts (fins a les <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
