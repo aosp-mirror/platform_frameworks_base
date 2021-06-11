@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="1946296620328354129">"Itago (iwasan ang mga app sa rehiyon ng cutout)"</string>
+    <string name="display_cutout_emulation_overlay" msgid="3814493834951357513">"I-render ang mga app sa ibaba ng lugar ng cutout"</string>
 </resources>
