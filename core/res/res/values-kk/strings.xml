@@ -238,7 +238,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Экранды құлыптау"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Өшіру"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Қуат"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Қайта қосу"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Өшіріп қосу"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Төтенше жағдай"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Вирус туралы хабарлау"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Сеансты аяқтау"</string>
@@ -426,7 +426,7 @@
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"болжалды орналасқан жер туралы ақпаратқа тек ашық экранда кіру"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Бұл қолданба пайдаланылып жатқанда, ол Локация қызметтерінен болжалды геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған Локация қызметтері қосулы тұруы керек."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"геодеректерді фондық режимде пайдалану"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Бұл қолданба пайдаланылмайтын кезде де, ол геодеректі кез келген уақытта пайдалана алады."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Бұл қолданба кез келген уақытта (пайдаланылмайтын кезде де) локацияны  пайдалана алады."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"аудио параметрлерін өзгерту"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Қолданбаға дыбыс қаттылығы және аудио шығыс үндеткішін таңдау сияқты жаһандық аудио параметрлерін өзгерту мүмкіндігін береді."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"аудио жазу"</string>
@@ -922,7 +922,7 @@
     <string name="factorytest_failed" msgid="3190979160945298006">"Зауыт тесті орындалмады."</string>
     <string name="factorytest_not_system" msgid="5658160199925519869">"ЗАУЫТ_TEСТІ әрекетінің қолдауы жүйеде/қолданбада орнатылған жинақтар үшін ғана ұсынылған."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"ЗАУЫТ_TEСТІ әрекетін жабдықтайтын жинақ табылмады."</string>
-    <string name="factorytest_reboot" msgid="2050147445567257365">"Қайта қосу"</string>
+    <string name="factorytest_reboot" msgid="2050147445567257365">"Өшіріп қосу"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" парағында былай делінген:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"Жылжуды растау"</string>
@@ -1183,7 +1183,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Үнемі көрсету"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы сіздің Android OЖ-бен үйлеспейді және дұрыс жұмыс істемеуі ықтимал. Қолданбаның жаңартылған нұсқасы қолжетімді болуы мүмкін."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Үнемі көрсету"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Жаңа нұсқасының бар-жоғын тексеру"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Жаңарту бар-жоғын тексеру"</string>
     <string name="smv_application" msgid="3775183542777792638">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасы (<xliff:g id="PROCESS">%2$s</xliff:g> процесі) өзі қолданған StrictMode саясатын бұзды."</string>
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> үрдісі өздігінен күшіне енген ҚатаңРежим ережесін бұзды."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Телефон жаңартылуда…"</string>
@@ -1756,7 +1756,7 @@
     <string name="reason_unknown" msgid="5599739807581133337">"белгісіз"</string>
     <string name="reason_service_unavailable" msgid="5288405248063804713">"Принтер қызметі қосылмаған"</string>
     <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g> қызметі орнатылды"</string>
-    <string name="print_service_installed_message" msgid="7005672469916968131">"Қосу үшін түрту"</string>
+    <string name="print_service_installed_message" msgid="7005672469916968131">"Қосу үшін түртіңіз"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Әкімшінің PIN кодын енгізіңіз"</string>
     <string name="restr_pin_enter_pin" msgid="373139384161304555">"PIN енгізу"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"Дұрыс емес"</string>
@@ -1892,7 +1892,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Қолданба қолжетімді емес"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> қазір қолжетімді емес."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Қолданба Android жүйесінің ескі нұсқасына арналған және дұрыс жұмыс істемеуі мүмкін. Жаңартылған нұсқаны тексеріңіз немесе әзірлеушіге хабарласыңыз."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Жаңа нұсқасының бар-жоғын тексеру"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Жаңарту бар-жоғын тексеру"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Сізде жаңа хабарлар бар"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Көру үшін SMS қолданбасын ашыңыз"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Кейбір функциялар істемеуі мүмкін."</string>
