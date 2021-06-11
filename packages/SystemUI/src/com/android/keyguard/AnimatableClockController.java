@@ -127,8 +127,10 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         @Override
         public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
                 boolean isStrongBiometric) {
+            // Strong auth will force the bouncer regardless of a successful face auth
             if (biometricSourceType == BiometricSourceType.FACE
-                    && mBypassController.canBypass()) {
+                    && mBypassController.canBypass()
+                    && !mKeyguardUpdateMonitor.userNeedsStrongAuth()) {
                 mView.animateDisappear();
             }
         }

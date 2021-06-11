@@ -24,7 +24,6 @@ import android.content.res.Resources;
 import android.util.MathUtils;
 
 import com.android.keyguard.KeyguardStatusView;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
@@ -153,8 +152,6 @@ public class KeyguardClockPositionAlgorithm {
      */
     private int mUnlockedStackScrollerPadding;
 
-    private int mLockScreenMode;
-
     private boolean mIsSplitShade;
 
     /**
@@ -228,13 +225,6 @@ public class KeyguardClockPositionAlgorithm {
         }
     }
 
-    /**
-     * Update lock screen mode for testing different layouts
-     */
-    public void onLockScreenModeChanged(int mode) {
-        mLockScreenMode = mode;
-    }
-
     public float getMinStackScrollerPadding() {
         return mBypassEnabled ? mUnlockedStackScrollerPadding
                 : mMinTopMargin + mKeyguardStatusHeight + mClockNotificationsMargin;
@@ -245,11 +235,7 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private int getExpandedPreferredClockY() {
-        if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
-            return mMinTopMargin + mUserSwitchHeight;
-        }
-        return (mHasCustomClock && (!mHasVisibleNotifs || mBypassEnabled)) ? mClockPreferredY
-                : getExpandedClockPosition();
+        return mMinTopMargin + mUserSwitchHeight;
     }
 
     /**
@@ -278,29 +264,20 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private int getClockY(float panelExpansion, float darkAmount) {
-        // Dark: Align the bottom edge of the clock at about half of the screen:
-        float clockYDark = (mHasCustomClock ? mClockPreferredY : getMaxClockY())
-                + burnInPreventionOffsetY();
-        clockYDark = MathUtils.max(0, clockYDark);
-
         float clockYRegular = getExpandedPreferredClockY();
         float clockYBouncer = -mKeyguardStatusHeight;
 
         // Move clock up while collapsing the shade
         float shadeExpansion = Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(panelExpansion);
         float clockY = MathUtils.lerp(clockYBouncer, clockYRegular, shadeExpansion);
-        clockYDark = MathUtils.lerp(clockYBouncer, clockYDark, shadeExpansion);
 
-        darkAmount = mBypassEnabled && !mHasCustomClock ? 1.0f : darkAmount;
-
-        if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
-            // This will keep the clock at the top but out of the cutout area
-            float shift = 0;
-            if (clockY - mBurnInPreventionOffsetYLargeClock < mCutoutTopInset) {
-                shift = mCutoutTopInset - (clockY - mBurnInPreventionOffsetYLargeClock);
-            }
-            clockYDark = clockY + burnInPreventionOffsetY() + shift;
+        // This will keep the clock at the top but out of the cutout area
+        float shift = 0;
+        if (clockY - mBurnInPreventionOffsetYLargeClock < mCutoutTopInset) {
+            shift = mCutoutTopInset - (clockY - mBurnInPreventionOffsetYLargeClock);
         }
+        float clockYDark = clockY + burnInPreventionOffsetY() + shift;
+
         return (int) (MathUtils.lerp(clockY, clockYDark, darkAmount) + mOverStretchAmount);
     }
 
@@ -333,19 +310,12 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private float burnInPreventionOffsetY() {
-        int offset = mBurnInPreventionOffsetY;
-        if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
-            offset = mBurnInPreventionOffsetYLargeClock;
-        }
+        int offset = mBurnInPreventionOffsetYLargeClock;
 
         return getBurnInOffset(offset * 2, false /* xAxis */) - offset;
     }
 
     private float burnInPreventionOffsetX() {
-        if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
-            return getBurnInOffset(mBurnInPreventionOffsetX * 2, true /* xAxis */)
-                    - mBurnInPreventionOffsetX;
-        }
         return getBurnInOffset(mBurnInPreventionOffsetX, true /* xAxis */);
     }
 
