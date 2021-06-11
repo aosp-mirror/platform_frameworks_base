@@ -42,19 +42,14 @@ public class NotificationBackgroundView extends View {
     private int mActualHeight;
     private int mClipBottomAmount;
     private int mTintColor;
-    private float[] mCornerRadii = new float[8];
+    private final float[] mCornerRadii = new float[8];
     private boolean mBottomIsRounded;
-    private boolean mLastInSection;
-    private boolean mFirstInSection;
     private int mBackgroundTop;
     private boolean mBottomAmountClips = true;
     private boolean mExpandAnimationRunning;
     private float mActualWidth;
     private int mDrawableAlpha = 255;
     private boolean mIsPressedAllowed;
-
-    private boolean mTopAmountRounded;
-    private float mDistanceToTopRoundness;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -89,15 +84,6 @@ public class NotificationBackgroundView extends View {
             if (mExpandAnimationRunning) {
                 left = (int) ((getWidth() - mActualWidth) / 2.0f);
                 right = (int) (left + mActualWidth);
-            }
-            if (mTopAmountRounded) {
-                int clipTop = (int) (mClipTopAmount - mDistanceToTopRoundness);
-                if (clipTop >= 0 || !mFirstInSection) {
-                    top += clipTop;
-                }
-                if (clipTop >= 0 && !mLastInSection) {
-                    bottom += clipTop;
-                }
             }
             drawable.setBounds(left, top, right, bottom);
             drawable.draw(canvas);
@@ -180,14 +166,6 @@ public class NotificationBackgroundView extends View {
         invalidate();
     }
 
-    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
-        if (distanceToTopRoundness != mDistanceToTopRoundness) {
-            mTopAmountRounded = distanceToTopRoundness >= 0;
-            mDistanceToTopRoundness = distanceToTopRoundness;
-            invalidate();
-        }
-    }
-
     @Override
     public boolean hasOverlappingRendering() {
 
@@ -244,18 +222,6 @@ public class NotificationBackgroundView extends View {
             mBottomAmountClips = clips;
             invalidate();
         }
-    }
-
-    /** Sets whether this background belongs to the last notification in a section. */
-    public void setLastInSection(boolean lastInSection) {
-        mLastInSection = lastInSection;
-        invalidate();
-    }
-
-    /** Sets whether this background belongs to the first notification in a section. */
-    public void setFirstInSection(boolean firstInSection) {
-        mFirstInSection = firstInSection;
-        invalidate();
     }
 
     private void updateBackgroundRadii() {

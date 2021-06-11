@@ -158,7 +158,7 @@ public class StackScrollAlgorithm {
             AmbientState ambientState) {
         float drawStart = ambientState.isOnKeyguard() ? 0
                 : ambientState.getStackY() - ambientState.getScrollY();
-        float clipStart = ambientState.getNotificationScrimTop();
+        float clipStart = 0;
         int childCount = algorithmState.visibleChildren.size();
         boolean firstHeadsUp = true;
         for (int i = 0; i < childCount; i++) {
