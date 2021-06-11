@@ -63,7 +63,7 @@
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Ne pas afficher la conversation dans une bulle"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chatter en utilisant des bulles"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Les nouvelles conversations s\'affichent sous forme d\'icônes flottantes ou bulles. Appuyez sur la bulle pour l\'ouvrir. Faites-la glisser pour la déplacer."</string>
-    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Contrôler les paramètres des bulles"</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Contrôlez les bulles à tout moment"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Appuyez sur \"Gérer\" pour désactiver les bulles de cette application"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Aucune bulle récente"</string>
