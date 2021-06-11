@@ -54,6 +54,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.DisplayCutout;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -348,12 +349,35 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotPreview.setImageDrawable(createScreenDrawable(mResources, bitmap, screenInsets));
     }
 
-    void updateOrientation(boolean portrait) {
-        mOrientationPortrait = portrait;
+    void updateDisplayCutoutMargins(DisplayCutout cutout) {
+        int orientation = mContext.getResources().getConfiguration().orientation;
+        mOrientationPortrait = (orientation == ORIENTATION_PORTRAIT);
+        FrameLayout.LayoutParams p =
+                (FrameLayout.LayoutParams) mScreenshotStatic.getLayoutParams();
+        if (cutout == null) {
+            p.setMargins(0, 0, 0, 0);
+        } else {
+            Insets waterfall = cutout.getWaterfallInsets();
+            if (mOrientationPortrait) {
+                p.setMargins(waterfall.left, Math.max(cutout.getSafeInsetTop(), waterfall.top),
+                        waterfall.right, Math.max(cutout.getSafeInsetBottom(), waterfall.bottom));
+            } else {
+                p.setMargins(Math.max(cutout.getSafeInsetLeft(), waterfall.left), waterfall.top,
+                        Math.max(cutout.getSafeInsetRight(), waterfall.right), waterfall.bottom);
+            }
+        }
+        mScreenshotStatic.setLayoutParams(p);
+        mScreenshotStatic.requestLayout();
+    }
+
+    void updateOrientation(DisplayCutout cutout) {
+        int orientation = mContext.getResources().getConfiguration().orientation;
+        mOrientationPortrait = (orientation == ORIENTATION_PORTRAIT);
+        updateDisplayCutoutMargins(cutout);
         int screenshotFixedSize =
                 mContext.getResources().getDimensionPixelSize(R.dimen.global_screenshot_x_scale);
         ViewGroup.LayoutParams params = mScreenshotPreview.getLayoutParams();
-        if (portrait) {
+        if (mOrientationPortrait) {
             params.width = screenshotFixedSize;
             params.height = LayoutParams.WRAP_CONTENT;
             mScreenshotPreview.setScaleType(ImageView.ScaleType.FIT_START);
@@ -362,6 +386,7 @@ public class ScreenshotView extends FrameLayout implements
             params.height = screenshotFixedSize;
             mScreenshotPreview.setScaleType(ImageView.ScaleType.FIT_END);
         }
+
         mScreenshotPreview.setLayoutParams(params);
     }
 
