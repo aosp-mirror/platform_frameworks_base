@@ -259,7 +259,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         notifyActivityLaunching(mTopActivity.intent);
         notifyActivityLaunched(START_SUCCESS, mTopActivity);
         doReturn(true).when(mTopActivity.mDisplayContent).isSleeping();
-        mTopActivity.setState(Task.ActivityState.RESUMED, "test");
+        mTopActivity.setState(ActivityRecord.State.RESUMED, "test");
         mTopActivity.setVisibility(false);
         waitHandlerIdle(mAtm.mH);
         // Not cancel immediately because in one of real cases, the keyguard may be going away or

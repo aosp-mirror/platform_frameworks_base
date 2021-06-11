@@ -37,8 +37,8 @@ import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
-import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;

@@ -98,7 +98,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     final ComponentName mHotwordDetectionComponentName;
     boolean mBound = false;
     IVoiceInteractionService mService;
-    HotwordDetectionConnection mHotwordDetectionConnection;
+    volatile HotwordDetectionConnection mHotwordDetectionConnection;
 
     VoiceInteractionSessionConnection mActiveSession;
     int mDisabledShowContext;
@@ -447,8 +447,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
         if (mHotwordDetectionConnection == null) {
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
-                    mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false,
-                    options, sharedMemory, callback);
+                    mInfo.getServiceInfo().applicationInfo.uid, mHotwordDetectionComponentName,
+                    mUser, /* bindInstantServiceAllowed= */ false, options, sharedMemory, callback);
         } else {
             mHotwordDetectionConnection.updateStateLocked(options, sharedMemory);
         }

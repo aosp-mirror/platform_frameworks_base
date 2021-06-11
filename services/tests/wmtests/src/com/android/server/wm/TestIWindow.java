@@ -53,12 +53,12 @@ public class TestIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void insetsChanged(InsetsState insetsState) throws RemoteException {
+    public void insetsChanged(InsetsState insetsState, boolean willMove, boolean willResize) {
     }
 
     @Override
-    public void insetsControlChanged(InsetsState insetsState, InsetsSourceControl[] activeControls)
-            throws RemoteException {
+    public void insetsControlChanged(InsetsState insetsState,
+            InsetsSourceControl[] activeControls, boolean willMove, boolean willResize) {
     }
 
     @Override
