@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.graphics.GraphicsProtos.dumpPointProto;
+import static android.hardware.display.DisplayManager.SWITCHING_TYPE_NONE;
 import static android.hardware.input.InputManager.BLOCK_UNTRUSTED_TOUCHES;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
@@ -5448,12 +5449,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     mFrameRateSelectionPriority);
         }
 
-        final float refreshRate = refreshRatePolicy.getPreferredRefreshRate(this);
-        if (mAppPreferredFrameRate != refreshRate) {
-            mAppPreferredFrameRate = refreshRate;
-            getPendingTransaction().setFrameRate(
-                    mSurfaceControl, mAppPreferredFrameRate,
-                    Surface.FRAME_RATE_COMPATIBILITY_EXACT, Surface.CHANGE_FRAME_RATE_ALWAYS);
+        // If refresh rate switching is disabled there is no point to set the frame rate on the
+        // surface as the refresh rate will be limited by display manager to a single value
+        // and SurfaceFlinger wouldn't be able to change it anyways.
+        if (mWmService.mDisplayManagerInternal.getRefreshRateSwitchingType()
+                != SWITCHING_TYPE_NONE) {
+            final float refreshRate = refreshRatePolicy.getPreferredRefreshRate(this);
+            if (mAppPreferredFrameRate != refreshRate) {
+                mAppPreferredFrameRate = refreshRate;
+                getPendingTransaction().setFrameRate(
+                        mSurfaceControl, mAppPreferredFrameRate,
+                        Surface.FRAME_RATE_COMPATIBILITY_EXACT, Surface.CHANGE_FRAME_RATE_ALWAYS);
+            }
         }
     }
 
