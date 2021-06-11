@@ -194,7 +194,7 @@
     <string name="location_changed_notification_title" msgid="3620158742816699316">"एपहरूले तपाईंको स्थान प्रयोग गर्न सक्छन्"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"थप जानकारी प्राप्त गर्न आफ्ना IT प्रशासकसँग सम्पर्क गर्नुहोस्"</string>
     <string name="country_detector" msgid="7023275114706088854">"देश पत्ता लगाउने सुविधा"</string>
-    <string name="location_service" msgid="2439187616018455546">"स्थानसम्बन्धी सेवा"</string>
+    <string name="location_service" msgid="2439187616018455546">"लोकेसन सर्भिस"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"सेन्सरको सूचनासम्बन्धी सेवा"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ट्वाइलाइट सेवा"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"तपाईंको यन्त्र मेटिनेछ"</string>
@@ -861,7 +861,7 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"तपाईंले गलत तरिकाले आफ्नो पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नुभयो। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"तपाईँले गलत तरिकाले तपाईँको PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नु भएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"तपाईँले तपाईँको अनलक प्याटर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। पछि <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल कोसिसहरू, तपाईँको Google साइन इन प्रयोग गरी तपाईँको ट्याब्लेट अनलक गर्न भनिने छ।\n\n  <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा फरि प्रयास गर्नुहोस्।"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"तपाईंले आफ्नो अनलक शैली <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले कोर्नुभएको छ। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> प्रयासहरू असफल भएपछि तपाईंलाई आफ्नो Google खाता मार्फत साइन इन गरेर आफ्नो Android टिभी यन्त्र अनलक गर्न अनुरोध गरिनेछ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डपछि फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"तपाईंले आफ्नो अनलक शैली <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले कोर्नुभएको छ। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> प्रयासहरू असफल भएपछि तपाईंलाई आफ्नो Google खाता मार्फत साइन इन गरेर आफ्नो Android टिभी डिभाइस अनलक गर्न अनुरोध गरिनेछ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डपछि फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"तपाईँले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले तपाईँको अनलक ढाँचालाई कोर्नु भएको छ। पछि <xliff:g id="NUMBER_1">%2$d</xliff:g> अरू धेरै असफल कोसिसहरूपछि, तपाईँलाई तपाईँको फोन Google साइन इन प्रयोग गरेर अनलक गर्नको लागि सोधिने छ। \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा पुनः प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"तपाईँले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक ट्याब्लेटलाई अनलक गर्नको लागि गलत तरिकाले कोशिस गर्नुभएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> अरू धेरै असफल कोसिसहरूपछि, ट्याब्लेट फ्याट्रि पूर्वनिर्धारितमा रिसेट हुने छ र सबै प्रयोगकर्ता डेटा हराउने छन्।"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"तपाईंले आफ्नो Android टिभी यन्त्र <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले अनलक गर्ने प्रयास गर्नुभएको छ। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> प्रयासहरू असफल भएपछि तपाईंको Android टिभी यन्त्रलाई रिसेट गरेर डिफल्ट फ्याक्ट्री सेटिङ लागू गरिने छ र प्रयोगकर्ताको सम्पूर्ण डेटा गुम्ने छ।"</string>
@@ -1333,7 +1333,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"भाषा र लेआउट चयन गर्न ट्याप गर्नुहोस्"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"अरू एपमाथि देखाउनुहोस्"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"अरू एपमाथि देखाइयोस्"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> अन्य एपहरूमा देखिँदैछ"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> अन्य एपहरूमा देखिँदैछ"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"तपाईं <xliff:g id="NAME">%s</xliff:g> ले यो विशेषता प्रयोग नगरेको चाहनुहुन्न भने सेटिङहरू खोली यसलाई निष्क्रिय पार्न ट्याप गर्नुहोस्।"</string>
@@ -1615,7 +1615,7 @@
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"तपाईंले आफ्नो Android टिभी यन्त्र <xliff:g id="NUMBER">%d</xliff:g> पटक गलत तरिकाले अनलक गर्ने प्रयास गर्नुभएको छ। अब तपाईंको Android टिभी यन्त्रलाई रिसेट गरेर डिफल्ट फ्याक्ट्री सेटिङ लागू गरिनेछ।"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"तपाईंले गलत तरिकाले फोन <xliff:g id="NUMBER">%d</xliff:g> पटक अनलक गर्ने प्रयत्न गर्नुभयो। अब फोन फ्याक्ट्रि पूर्वनिर्धारितमा रिसेट हुने छ।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"तपाईंले गलत तरिकाले आफ्नो अनलक प्याटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक कोर्नुभयो। <xliff:g id="NUMBER_1">%2$d</xliff:g> विफल प्रयत्नहरू पछि, तपाईंलाई आफ्नो ट्याब्लेट इमेल खाता प्रयोग गरेर अनलक गर्न सोधिने छ।\n\n फेरि प्रयास गर्नुहोस् <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डहरूमा।"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"तपाईंले आफ्नो अनलक शैली <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले कोर्नुभएको छ। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> प्रयासहरू असफल भएपछि तपाईंलाई आफ्नो इमेल खाता प्रयोग गरेर आफ्नो Android टिभी यन्त्र अनलक गर्न अनुरोध गरिनेछ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डपछि फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"तपाईंले आफ्नो अनलक शैली <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले कोर्नुभएको छ। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> प्रयासहरू असफल भएपछि तपाईंलाई आफ्नो इमेल खाता प्रयोग गरेर आफ्नो Android टिभी डिभाइस अनलक गर्न अनुरोध गरिनेछ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डपछि फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"तपाईँले आफ्नो अनलक प्याटर्न गलत रूपमा <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक तान्नु भएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> धेरै असफल प्रयासहरूपछि, तपाईँलाई एउटा इमेल खाताको प्रयोग गरेर तपाईँको फोन अनलक गर्न सोधिने छ।\n\n फेरि <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा प्रयास गर्नुहोस्।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"हटाउनुहोस्"</string>
@@ -1892,7 +1892,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"एप उपलब्ध छैन"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> अहिले उपलब्ध छैन।"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"यो एप Android को पुरानो संस्करणका लागि बनाइएको हुनाले यसले सही ढङ्गले काम नगर्न सक्छ। अद्यावधिकहरू उपलब्ध छन् वा छैनन् भनी जाँच गरी हेर्नुहोस् वा यसको विकासकर्तालाई सम्पर्क गर्नुहोस्।"</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"अद्यावधिक उपलब्ध छ वा छैन भनी जाँच गर्नुहोस्"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"अपडेट उपलब्ध छ वा छैन जाँच्नुहोस्"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"तपाईंलाई नयाँ सन्देश आएको छ"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"हेर्नका लागि SMS एप खोल्नुहोस्"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"केही सुविधा राम्ररी नचल्न सक्छन्"</string>

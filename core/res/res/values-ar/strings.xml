@@ -1887,7 +1887,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"‏لإطالة عمر البطارية، تعمل ميزة \"توفير شحن البطارية\" على:\n·تفعيل \"المظهر الداكن\"\n إيقاف أو حظر النشاط في الخلفية وبعض التأثيرات المرئية والميزات الأخرى، مثل \"Ok Google\"\n\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"‏لإطالة عمر البطارية، تعمل ميزة \"توفير شحن البطارية\" على:\n\n• تفعيل \"المظهر الداكن\"\n• إيقاف أو حظر النشاط في الخلفية وبعض التأثيرات المرئية والميزات الأخرى، مثل \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيقات المتاحة لديك الآن استخدام البيانات، ولكن لا يمكنها الإكثار من ذلك. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"هل تريد تفعيل توفير البيانات؟"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"هل تريد تفعيل ميزة \"توفير البيانات\"؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"تفعيل"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="zero">‏لمدة أقل من دقيقة (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -2116,8 +2116,8 @@
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"تم العثور على تطبيق ضار"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"يريد تطبيق <xliff:g id="APP_0">%1$s</xliff:g> عرض شرائح تطبيق <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"تعديل"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"سيهتز الهاتف عند تلقّي المكالمات والإشعارات"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"سيتم كتم صوت الهاتف عند تلقي المكالمات والإشعارات"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"سيهتز الهاتف عند تلقّي المكالمات والإشعارات."</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"سيتم كتم صوت الهاتف عند تلقي المكالمات والإشعارات."</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"تغييرات النظام"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"عدم الإزعاج"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"جديد: يؤدي تفعيل ميزة \"عدم الإزعاج\" إلى إخفاء الإشعارات."</string>

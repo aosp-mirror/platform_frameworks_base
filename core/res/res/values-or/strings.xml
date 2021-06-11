@@ -215,7 +215,7 @@
     <string name="power_off" msgid="4111692782492232778">"ପାୱାର୍ ବନ୍ଦ"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"ରିଙ୍ଗର୍‍ ଅଫ୍‍ ଅଛି"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"ରିଙ୍ଗର୍‍ କମ୍ପନ"</string>
-    <string name="silent_mode_ring" msgid="6039011004781526678">"ରିଙ୍ଗର୍‍ ଅନ୍‍ ଅଛି"</string>
+    <string name="silent_mode_ring" msgid="6039011004781526678">"ରିଙ୍ଗର୍‍ ଚାଲୁ ଅଛି"</string>
     <string name="reboot_to_update_title" msgid="2125818841916373708">"Android ସିଷ୍ଟମ୍‍ ଅପଡେଟ୍‍"</string>
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"ଅପଡେଟ୍‍ କରିବାକୁ ପ୍ରସ୍ତୁତ କରାଯାଉଛି…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"ଅପଡେଟ୍‍ ପ୍ୟାକେଜ୍‍ ପ୍ରୋସେସ୍‍ କରାଯାଉଛି…"</string>
@@ -257,7 +257,7 @@
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ବଗ୍ ରିପୋର୍ଟ ସହ ସ୍କ୍ରିନସଟ୍ ନେବାରେ ବିଫଳ ହୋଇଛି"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ସାଇଲେଣ୍ଟ ମୋଡ୍"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ସାଉଣ୍ଡ ଅଫ୍ ଅଛି"</string>
-    <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ସାଉଣ୍ଡ ଅନ୍ ଅଛି"</string>
+    <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ସାଉଣ୍ଡ ଚାଲୁ ଅଛି"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍ ଅନ୍ ଅଛି"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍ ଅଫ୍ ଅଛି"</string>
@@ -881,7 +881,7 @@
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"ଆପଣଙ୍କର ଯୁଜରନେମ୍‌ କିମ୍ୱା ପାସୱାର୍ଡ ଭୁଲି ଯାଇଛନ୍ତି କି?\n"<b>"google.com/accounts/recovery"</b>" ଭିଜିଟ୍‍ କରନ୍ତୁ।"</string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"ଯାଞ୍ଚ କରାଯାଉଛି…"</string>
     <string name="lockscreen_unlock_label" msgid="4648257878373307582">"ଅନଲକ୍‌"</string>
-    <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"ସାଉଣ୍ଡ ଅନ୍ ଅଛି"</string>
+    <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"ସାଉଣ୍ଡ ଚାଲୁ ଅଛି"</string>
     <string name="lockscreen_sound_off_label" msgid="2331496559245450053">"ସାଉଣ୍ଡ ଅଫ୍ ଅଛି"</string>
     <string name="lockscreen_access_pattern_start" msgid="3778502525702613399">"ପାଟର୍ନ ଆରମ୍ଭ ହେଲା"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="7493849102641167049">"ପାଟର୍ନ ଖାଲି କରାଗଲା"</string>
@@ -979,7 +979,7 @@
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"ସ୍ପେସ୍‍"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"ଏଣ୍ଟର୍"</string>
-    <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ଡିଲିଟ୍‍"</string>
+    <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ଡିଲିଟ୍‌ କରନ୍ତୁ"</string>
     <string name="search_go" msgid="2141477624421347086">"Search"</string>
     <string name="search_hint" msgid="455364685740251925">"ସର୍ଚ୍ଚ…"</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"Search"</string>
@@ -2056,7 +2056,7 @@
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ଭ୍ୟୁ"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହା ସେୟାର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କୁ ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲରେ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହି ବିଷୟବସ୍ତୁକୁ ସେୟାର୍ କରିବାକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହି ଆପ୍ ଖୋଲାଯାଇ ପାରିବ ନାହିଁ"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"ୱାର୍କ୍ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହି ଆପ୍ ଖୋଲାଯାଇ ପାରିବ ନାହିଁ"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କୁ ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲରେ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହି ବିଷୟବସ୍ତୁ ଖୋଲିବାକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହା ସେୟାର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କୁ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲରେ ଆପଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଏହି ବିଷୟବସ୍ତୁ ସେୟାର୍ କରିବାକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ"</string>
