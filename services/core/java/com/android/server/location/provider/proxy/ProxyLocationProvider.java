@@ -17,6 +17,7 @@
 package com.android.server.location.provider.proxy;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+import static com.android.server.location.LocationManagerService.TAG;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -32,6 +33,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.FgThread;
@@ -44,6 +46,7 @@ import com.android.server.servicewatcher.ServiceWatcher.ServiceListener;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -78,6 +81,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider implements
 
     final Context mContext;
     final ServiceWatcher mServiceWatcher;
+    final String mName;
 
     @GuardedBy("mLock")
     final ArrayList<Runnable> mFlushListeners = new ArrayList<>(0);
@@ -101,6 +105,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider implements
         mServiceWatcher = ServiceWatcher.create(context, provider,
                 new CurrentUserServiceSupplier(context, action, enableOverlayResId,
                         nonOverlayPackageResId), this);
+        mName = provider;
 
         mProxy = null;
         mRequest = ProviderRequest.EMPTY_REQUEST;
@@ -249,6 +254,8 @@ public class ProxyLocationProvider extends AbstractLocationProvider implements
                     String tagsStr = mBoundServiceInfo.getMetadata().getString(EXTRA_LOCATION_TAGS);
                     if (!TextUtils.isEmpty(tagsStr)) {
                         attributionTags = tagsStr.split(LOCATION_TAGS_SEPARATOR);
+                        Log.i(TAG, mName + " provider loaded extra attribution tags: "
+                                + Arrays.toString(attributionTags));
                     }
                 }
                 ArraySet<String> extraAttributionTags = new ArraySet<>(attributionTags);

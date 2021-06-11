@@ -18,8 +18,6 @@ package com.android.server.devicepolicy;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 
-import static com.android.server.devicepolicy.DevicePolicyManagerService.LOG_TAG;
-
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -142,9 +140,21 @@ public final class PersonalAppsSuspensionHelper {
     }
 
     private List<String> getAccessibilityServices() {
-        final List<AccessibilityServiceInfo> accessibilityServiceInfos =
-                getAccessibilityManagerForUser(mContext.getUserId())
-                        .getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK);
+        final List<AccessibilityServiceInfo> accessibilityServiceInfos;
+        // Not using AccessibilityManager.getInstance because that guesses
+        // at the user you require based on callingUid and caches for a given
+        // process.
+        final IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
+        final IAccessibilityManager service = iBinder == null
+                ? null : IAccessibilityManager.Stub.asInterface(iBinder);
+        final AccessibilityManager am =
+                new AccessibilityManager(mContext, service, mContext.getUserId());
+        try {
+            accessibilityServiceInfos = am.getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK);
+        } finally {
+            am.removeClient();
+        }
+
         final List<String> result = new ArrayList<>();
         for (final AccessibilityServiceInfo serviceInfo : accessibilityServiceInfos) {
             final ComponentName componentName =
@@ -192,12 +202,6 @@ public final class PersonalAppsSuspensionHelper {
         return resolveInfos != null && !resolveInfos.isEmpty();
     }
 
-    private AccessibilityManager getAccessibilityManagerForUser(int userId) {
-        final IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
-        final IAccessibilityManager service =
-                iBinder == null ? null : IAccessibilityManager.Stub.asInterface(iBinder);
-        return new AccessibilityManager(mContext, service, userId);
-    }
 
     void dump(IndentingPrintWriter pw) {
         pw.println("PersonalAppsSuspensionHelper");
