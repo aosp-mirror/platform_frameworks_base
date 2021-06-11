@@ -390,6 +390,17 @@ int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
     }
 }
 
+int RenderProxy::copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap) {
+    RenderThread& thread = RenderThread::getInstance();
+    if (gettid() == thread.getTid()) {
+        // TODO: fix everything that hits this. We should never be triggering a readback ourselves.
+        return (int)thread.readback().copyImageInto(image, bitmap);
+    } else {
+        return thread.queue().runSync(
+                [&]() -> int { return (int)thread.readback().copyImageInto(image, bitmap); });
+    }
+}
+
 void RenderProxy::disableVsync() {
     Properties::disableVsync = true;
 }
