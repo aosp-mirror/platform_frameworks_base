@@ -16,7 +16,6 @@
 
 package com.android.systemui.screenshot;
 
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
@@ -289,6 +288,7 @@ public class ScreenshotController {
         mWindowLayoutParams.setTitle("ScreenshotAnimation");
         mWindowLayoutParams.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        mWindowLayoutParams.setFitInsetsTypes(0);
         // This is needed to let touches pass through outside the touchable areas
         mWindowLayoutParams.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
@@ -402,11 +402,6 @@ public class ScreenshotController {
             Log.d(TAG, "reloadAssets()");
         }
 
-        // respect the display cutout in landscape (since we'd otherwise overlap) but not portrait
-        int orientation = mContext.getResources().getConfiguration().orientation;
-        mWindowLayoutParams.setFitInsetsTypes(
-                orientation == ORIENTATION_PORTRAIT ? 0 : WindowInsets.Type.displayCutout());
-
         // Inflate the screenshot layout
         mScreenshotView = (ScreenshotView)
                 LayoutInflater.from(mContext).inflate(R.layout.global_screenshot, null);
@@ -494,17 +489,6 @@ public class ScreenshotController {
         saveScreenshot(screenshot, finisher, screenRect, Insets.NONE, true);
     }
 
-    private void updateDisplayCutout() {
-        // respect the display cutout in landscape (since we'd otherwise overlap) but not portrait
-        int orientation = mContext.getResources().getConfiguration().orientation;
-        mWindowLayoutParams.setFitInsetsTypes(
-                orientation == ORIENTATION_PORTRAIT ? 0 : WindowInsets.Type.displayCutout());
-        final View decorView = mWindow.peekDecorView();
-        if (decorView != null && decorView.isAttachedToWindow()) {
-            mWindowManager.updateViewLayout(decorView, mWindowLayoutParams);
-        }
-    }
-
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
             Insets screenInsets, boolean showFlash) {
         if (mAccessibilityManager.isEnabled()) {
@@ -528,8 +512,8 @@ public class ScreenshotController {
             mScreenshotView.reset();
         }
 
-        int orientation = mContext.getResources().getConfiguration().orientation;
-        mScreenshotView.updateOrientation(orientation == ORIENTATION_PORTRAIT);
+        mScreenshotView.updateOrientation(mWindowManager.getCurrentWindowMetrics()
+                .getWindowInsets().getDisplayCutout());
 
         mScreenBitmap = screenshot;
 
@@ -563,7 +547,9 @@ public class ScreenshotController {
                             // Delay scroll capture eval a bit to allow the underlying activity
                             // to set up in the new orientation.
                             mScreenshotHandler.postDelayed(this::requestScrollCapture, 150);
-                            updateDisplayCutout();
+                            mScreenshotView.updateDisplayCutoutMargins(
+                                    mWindowManager.getCurrentWindowMetrics().getWindowInsets()
+                                        .getDisplayCutout());
                         }
                     });
         });
