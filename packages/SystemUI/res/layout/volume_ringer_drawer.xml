@@ -59,7 +59,7 @@
                 android:id="@+id/volume_drawer_vibrate"
                 android:layout_width="@dimen/volume_ringer_drawer_item_size"
                 android:layout_height="@dimen/volume_ringer_drawer_item_size"
-                android:description="@string/volume_ringer_hint_vibrate"
+                android:contentDescription="@string/volume_ringer_hint_vibrate"
                 android:gravity="center">
 
                 <ImageView
@@ -76,7 +76,7 @@
                 android:id="@+id/volume_drawer_mute"
                 android:layout_width="@dimen/volume_ringer_drawer_item_size"
                 android:layout_height="@dimen/volume_ringer_drawer_item_size"
-                android:description="@string/volume_ringer_hint_mute"
+                android:contentDescription="@string/volume_ringer_hint_mute"
                 android:gravity="center">
 
                 <ImageView
@@ -93,7 +93,7 @@
                 android:id="@+id/volume_drawer_normal"
                 android:layout_width="@dimen/volume_ringer_drawer_item_size"
                 android:layout_height="@dimen/volume_ringer_drawer_item_size"
-                android:description="@string/volume_ringer_hint_unmute"
+                android:contentDescription="@string/volume_ringer_hint_unmute"
                 android:gravity="center">
 
                 <ImageView
@@ -117,7 +117,7 @@
         android:layout_width="@dimen/volume_ringer_drawer_item_size"
         android:layout_height="@dimen/volume_ringer_drawer_item_size"
         android:layout_gravity="bottom|right"
-        android:description="@string/volume_ringer_change"
+        android:contentDescription="@string/volume_ringer_change"
         android:background="@drawable/volume_drawer_selection_bg">
 
         <ImageView
