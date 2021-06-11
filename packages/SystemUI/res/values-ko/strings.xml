@@ -412,7 +412,7 @@
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"야간 조명"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"일몰에"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"일출까지"</string>
-    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>에"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>에 켜짐"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g>에 꺼짐"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"어두운 테마"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"절전 모드"</string>
@@ -666,6 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"이더넷"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"알람"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"설정하여 휴대전화로 더욱 빠르고 안전하게 구매하세요."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"모두 표시"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"잠금 해제하여 결제"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"설정되지 않음"</string>
@@ -1084,7 +1085,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"닫기"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"다시 시작"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"설정"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g>에서 <xliff:g id="ARTIST_NAME">%2$s</xliff:g>의 <xliff:g id="SONG_NAME">%1$s</xliff:g> 재생 중"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"재생"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> 열기"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g>에서 <xliff:g id="ARTIST_NAME">%2$s</xliff:g>의 <xliff:g id="SONG_NAME">%1$s</xliff:g> 재생"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g>에서 <xliff:g id="SONG_NAME">%1$s</xliff:g> 재생"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"비활성. 앱을 확인하세요."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"오류 발생, 다시 시도 중…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"찾을 수 없음"</string>

@@ -117,7 +117,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"إلغاء"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"مشاركة"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"تمّ إلغاء تسجيل الشاشة."</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"تم حفظ تسجيل الشاشة."</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"تم حفظ تسجيل الشاشة"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"انقر لعرض التسجيل."</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"حدث خطأ أثناء حذف تسجيل الشاشة."</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"تعذّر الحصول على أذونات."</string>
@@ -621,7 +621,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"يؤدي هذا الإجراء إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. لإلغاء تثبيت الشاشة على هذا التطبيق، اسحب بسرعة للأعلى مع إبقاء الإصبع على الشاشة."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"نظرة عامة\" لإزالة التثبيت."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"الشاشة الرئيسية\" لإزالة التثبيت."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"يمكن الوصول إلى البيانات الشخصية (مثلاً جهات الاتصال ومحتوى الرسائل الإلكترونية)"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"يمكن الوصول إلى البيانات الشخصية (مثلاً جهات الاتصال ومحتوى الرسائل الإلكترونية)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"عند تثبيت الشاشة على تطبيق معيّن، سيظل بإمكان التطبيق فتح تطبيقات أخرى."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"لإلغاء تثبيت الشاشة على هذا التطبيق، المس مع الاستمرار زرّي \"الرجوع\" و\"لمحة عامة\" (رمز المربّع)."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"لإلغاء تثبيت الشاشة على هذا التطبيق، المس مع الاستمرار زرّي \"الرجوع\" و\"الشاشة الرئيسية\"."</string>
@@ -678,6 +678,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"إيثرنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"المنبّه"</string>
     <string name="wallet_title" msgid="5369767670735827105">"المحفظة"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"يمكنك إعداد طريقة دفع لإجراء عمليات شراء بسرعة وأمان أكبر باستخدام هاتفك."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"عرض الكل"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"فتح القفل للدفع"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"لم يتم الإعداد."</string>
@@ -744,7 +745,7 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"تلقائي"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"بدون صوت أو اهتزاز"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في موضع أسفل في قسم المحادثات"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف. تظهر المحادثات من <xliff:g id="APP_NAME">%1$s</xliff:g> كفقاعات تلقائيًا."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"يلفِت هذا الإشعار انتباهك لهذا المحتوى باستخدام اختصار عائم."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"السماح للنظام بتحديد ما إذا يجب اهتزاز الجهاز أو إصدار رنين عند تلقّي هذا الإشعار"</string>
@@ -1108,7 +1109,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"إغلاق"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"استئناف التشغيل"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"الإعدادات"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"يتم تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> للفنان <xliff:g id="ARTIST_NAME">%2$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"تشغيل"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"فتح <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> للفنان <xliff:g id="ARTIST_NAME">%2$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"حدث خطأ، جارٍ إعادة المحاولة…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"لم يتم العثور عليه."</string>

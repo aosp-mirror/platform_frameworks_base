@@ -666,6 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Get set up to make faster, more secure purchases with your phone"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Show all"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Unlock to pay"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Not set up"</string>
@@ -1084,7 +1085,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Dismiss"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Resume"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Settings"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> by <xliff:g id="ARTIST_NAME">%2$s</xliff:g> is playing from <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Play"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Open <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Play <xliff:g id="SONG_NAME">%1$s</xliff:g> by <xliff:g id="ARTIST_NAME">%2$s</xliff:g> from <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Play <xliff:g id="SONG_NAME">%1$s</xliff:g> from <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactive, check app"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Error, retrying…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Not found"</string>
