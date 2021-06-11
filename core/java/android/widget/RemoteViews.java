@@ -814,7 +814,9 @@ public class RemoteViews implements Parcelable, Filter {
                 // The PendingIntent template is stored in the view's tag.
                 OnItemClickListener listener = (parent, view, position, id) -> {
                     RemoteResponse response = findRemoteResponseTag(view);
-                    response.handleViewInteraction(view, handler);
+                    if (response != null) {
+                        response.handleViewInteraction(view, handler);
+                    }
                 };
                 av.setOnItemClickListener(listener);
                 av.setTag(pendingIntentTemplate);
