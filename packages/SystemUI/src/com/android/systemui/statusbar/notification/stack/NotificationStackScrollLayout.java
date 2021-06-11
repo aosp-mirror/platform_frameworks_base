@@ -40,6 +40,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -453,6 +454,27 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationStackScrollLayoutController mController;
 
     private boolean mKeyguardMediaControllorVisible;
+
+    /**
+     * The clip path used to clip the view in a rounded way.
+     */
+    private final Path mRoundedClipPath = new Path();
+
+    /**
+     * Should we use rounded rect clipping right now
+     */
+    private boolean mShouldUseRoundedRectClipping = false;
+
+    private int mRoundedRectClippingLeft;
+    private int mRoundedRectClippingTop;
+    private int mRoundedRectClippingBottom;
+    private int mRoundedRectClippingRight;
+    private float[] mBgCornerRadii = new float[8];
+
+    /**
+     * Are we launching a notification right now
+     */
+    private boolean mLaunchingNotification;
     private NotificationEntry mTopHeadsUpEntry;
     private long mNumHeadsUp;
     private NotificationStackScrollLayoutController.TouchHandler mTouchHandler;
@@ -1017,30 +1039,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void onPreDrawDuringAnimation() {
         mShelf.updateAppearance();
-        updateClippingToTopRoundedCorner();
         if (!mNeedsAnimation && !mChildrenUpdateRequested) {
             updateBackground();
-        }
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private void updateClippingToTopRoundedCorner() {
-        Float clipStart = mAmbientState.getNotificationScrimTop();
-        Float clipEnd = clipStart + mCornerRadius;
-        boolean first = true;
-        for (int i = 0; i < getChildCount(); i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
-            if (child.getVisibility() == GONE) {
-                continue;
-            }
-            float start = child.getTranslationY();
-            float end = start + child.getActualHeight();
-            boolean clip = clipStart > start && clipStart < end
-                    || clipEnd >= start && clipEnd <= end;
-            clip &= !(first && mScrollAdapter.isScrolledToTop());
-            child.setDistanceToTopRoundness(clip ? Math.max(start - clipStart, 0)
-                    : ExpandableView.NO_ROUNDNESS);
-            first = false;
         }
     }
 
@@ -1601,6 +1601,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         super.onConfigurationChanged(newConfig);
         Resources res = getResources();
         mShouldUseSplitNotificationShade = shouldUseSplitNotificationShade(mFeatureFlags, res);
+        updateUseRoundedRectClipping();
         mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
         float densityScale = res.getDisplayMetrics().density;
         mSwipeHelper.setDensityScale(densityScale);
@@ -2818,6 +2819,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void applyExpandAnimationParams(ExpandAnimationParameters params) {
         mAmbientState.setExpandAnimationTopChange(params == null ? 0 : params.getTopChange());
+
+        // Disable clipping for launches
+        setLaunchingNotification(params != null);
         requestChildrenUpdate();
     }
 
@@ -2901,7 +2905,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mAnimationEvents.clear();
             updateBackground();
             updateViewShadows();
-            updateClippingToTopRoundedCorner();
         } else {
             applyCurrentState();
         }
@@ -3795,6 +3798,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             updateNotificationAnimationStates();
             updateChronometers();
             requestChildrenUpdate();
+            updateUseRoundedRectClipping();
         }
     }
 
@@ -4015,7 +4019,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         setAnimationRunning(false);
         updateBackground();
         updateViewShadows();
-        updateClippingToTopRoundedCorner();
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -4550,6 +4553,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setQsExpansionFraction(float qsExpansionFraction) {
         mQsExpansionFraction = qsExpansionFraction;
+        updateUseRoundedRectClipping();
 
         // If notifications are scrolled,
         // clear out scrollY by the time we push notifications offscreen
@@ -5189,6 +5193,69 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     public void setOnScrollListener(Consumer<Integer> listener) {
         mScrollListener = listener;
+    }
+
+    /**
+     * Set rounded rect clipping bounds on this view.
+     */
+    public void setRoundedClippingBounds(int left, int top, int right, int bottom, int topRadius,
+            int bottomRadius) {
+        if (mRoundedRectClippingLeft == left && mRoundedRectClippingRight == right
+                && mRoundedRectClippingBottom == bottom && mRoundedRectClippingTop == top
+                && mBgCornerRadii[0] == topRadius && mBgCornerRadii[5] == bottomRadius) {
+            return;
+        }
+        mRoundedRectClippingLeft = left;
+        mRoundedRectClippingTop = top;
+        mRoundedRectClippingBottom = bottom;
+        mRoundedRectClippingRight = right;
+        mBgCornerRadii[0] = topRadius;
+        mBgCornerRadii[1] = topRadius;
+        mBgCornerRadii[2] = topRadius;
+        mBgCornerRadii[3] = topRadius;
+        mBgCornerRadii[4] = bottomRadius;
+        mBgCornerRadii[5] = bottomRadius;
+        mBgCornerRadii[6] = bottomRadius;
+        mBgCornerRadii[7] = bottomRadius;
+        mRoundedClipPath.reset();
+        mRoundedClipPath.addRoundRect(left, top, right, bottom, mBgCornerRadii, Path.Direction.CW);
+        if (mShouldUseRoundedRectClipping) {
+            invalidate();
+        }
+    }
+
+    /**
+     * Set if we're launching a notification right now.
+     */
+    private void setLaunchingNotification(boolean launching) {
+        if (launching == mLaunchingNotification) {
+            return;
+        }
+        mLaunchingNotification = launching;
+        updateUseRoundedRectClipping();
+    }
+
+    /**
+     * Should we use rounded rect clipping
+     */
+    private void updateUseRoundedRectClipping() {
+        // We don't want to clip notifications when QS is expanded, because incoming heads up on
+        // the bottom would be clipped otherwise
+        boolean qsAllowsClipping = mQsExpansionFraction < 0.5f || mShouldUseSplitNotificationShade;
+        boolean clip = !mLaunchingNotification && mIsExpanded && qsAllowsClipping;
+        if (clip != mShouldUseRoundedRectClipping) {
+            mShouldUseRoundedRectClipping = clip;
+            invalidate();
+        }
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        if (mShouldUseRoundedRectClipping) {
+            // Let's clip rounded.
+            canvas.clipPath(mRoundedClipPath);
+        }
+        super.dispatchDraw(canvas);
     }
 
     /**
