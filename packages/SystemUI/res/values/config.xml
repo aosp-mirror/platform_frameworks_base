@@ -449,6 +449,9 @@
     <!-- Adjust the theme on fully custom and decorated custom view notifications -->
     <bool name="config_adjustThemeOnNotificationCustomViews">false</bool>
 
+    <!-- Notifications are sized to match the width of two (of 4) qs tiles in landscape. -->
+    <bool name="config_skinnyNotifsInLandscape">true</bool>
+
     <!-- If true, enable the advance anti-falsing classifier on the lockscreen. On some devices it
          does not work well, particularly with noisy touchscreens. Note that disabling it may
          increase the rate of unintentional unlocks. -->

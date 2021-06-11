@@ -109,6 +109,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.leak.RotationUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -419,6 +420,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         animateScroll();
     };
     private int mCornerRadius;
+    private int mMinimumPaddings;
+    private int mQsTilePadding;
+    private boolean mSkinnyNotifsInLandscape;
     private int mSidePaddings;
     private final Rect mBackgroundAnimationRect = new Rect();
     private ArrayList<BiConsumer<Float, Float>> mExpandedHeightListeners = new ArrayList<>();
@@ -851,12 +855,30 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 R.dimen.min_top_overscroll_to_qs);
         mStatusBarHeight = res.getDimensionPixelSize(R.dimen.status_bar_height);
         mBottomMargin = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
-        mSidePaddings = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
+        mMinimumPaddings = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
+        mQsTilePadding = res.getDimensionPixelOffset(R.dimen.qs_tile_margin_horizontal);
+        mSkinnyNotifsInLandscape = res.getBoolean(R.bool.config_skinnyNotifsInLandscape);
+        mSidePaddings = mMinimumPaddings;  // Updated in onMeasure by updateSidePadding()
         mMinInteractionHeight = res.getDimensionPixelSize(
                 R.dimen.notification_min_interaction_height);
         mCornerRadius = res.getDimensionPixelSize(R.dimen.notification_corner_radius);
         mHeadsUpInset = mStatusBarHeight + res.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
+    }
+
+    void updateSidePadding(int viewWidth) {
+        if (viewWidth == 0 || !mSkinnyNotifsInLandscape) {
+            mSidePaddings = mMinimumPaddings;
+            return;
+        }
+        // Portrait is easy, just use the dimen for paddings
+        if (RotationUtils.getRotation(mContext) == RotationUtils.ROTATION_NONE) {
+            mSidePaddings = mMinimumPaddings;
+            return;
+        }
+        final int innerWidth = viewWidth - mMinimumPaddings * 2;
+        final int qsTileWidth = (innerWidth - mQsTilePadding * 3) / 4;
+        mSidePaddings = mMinimumPaddings + qsTileWidth + mQsTilePadding;
     }
 
     void updateCornerRadius() {
@@ -919,6 +941,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         int width = MeasureSpec.getSize(widthMeasureSpec);
+        updateSidePadding(width);
         int childWidthSpec = MeasureSpec.makeMeasureSpec(width - mSidePaddings * 2,
                 MeasureSpec.getMode(widthMeasureSpec));
         // Don't constrain the height of the children so we know how big they'd like to be
@@ -2069,7 +2092,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateContentHeight() {
-        final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mSidePaddings;
+        final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mMinimumPaddings;
         int height = (int) scrimTopPadding;
         float previousPaddingRequest = mPaddingBetweenElements;
         int numShownItems = 0;
