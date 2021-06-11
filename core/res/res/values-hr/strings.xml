@@ -2191,7 +2191,7 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Taj se sadržaj ne može otvoriti pomoću poslovnih aplikacija"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Taj se sadržaj ne može dijeliti pomoću osobnih aplikacija"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Taj se sadržaj ne može otvoriti pomoću osobnih aplikacija"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Poslovni je profil pauziran"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Poslovni profil je pauziran"</string>
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Dodirnite da biste uključili"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Poslovne aplikacije nisu dostupne"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Osobne aplikacije nisu dostupne"</string>

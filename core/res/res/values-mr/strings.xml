@@ -1240,7 +1240,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"नेहमी दर्शवा"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे Android OS च्या विसंगत आवृत्तीसाठी तयार केले होते आणि ते अनपेक्षित पद्धतीने काम करू शकते. ॲपची अपडेट केलेली आवृत्ती उपलब्ध असू शकते."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"नेहमी दर्शवा"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"अपडेट आहे का ते तपासा"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"अपडेटसाठी तपासा"</string>
     <string name="smv_application" msgid="3775183542777792638">"अ‍ॅप <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ने तिच्या स्वयं-लागू केलेल्या StrictMode धोरणाचे उल्लंघन केले आहे."</string>
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> प्रक्रियेने तिच्या स्वतः-लागू केलेल्या StrictMode धोरणाचे उल्लंघन केले."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"फोन अपडेट होत आहे…"</string>
@@ -1977,7 +1977,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"ॲप उपलब्ध नाही"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता उपलब्ध नाही."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"हे अ‍ॅप Android च्या जुन्या आवृत्ती साठी तयार करण्यात आले होते आणि योग्यरितीने कार्य करू शकणार नाही. अपडेट आहेत का ते तपासून पाहा, किंवा डेव्हलपरशी संपर्क साधण्याचा प्रयत्न करा."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"अपडेट आहे का ते तपासा"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"अपडेटसाठी तपासा"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"आपल्याकडे नवीन मेसेज आहेत"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"पाहण्‍यासाठी SMS अ‍ॅप उघडा"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"काही कार्यक्षमता मर्यादित असू शकतात"</string>
@@ -2118,8 +2118,8 @@
     <string name="mime_type_document_ext" msgid="2398002765046677311">"<xliff:g id="EXTENSION">%1$s</xliff:g> दस्तऐवज"</string>
     <string name="mime_type_spreadsheet" msgid="8188407519131275838">"स्प्रेडशीट"</string>
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> स्प्रेडशीट"</string>
-    <string name="mime_type_presentation" msgid="1145384236788242075">"सादरीकरण"</string>
-    <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> सादरीकरण"</string>
+    <string name="mime_type_presentation" msgid="1145384236788242075">"प्रेझेंटेशन"</string>
+    <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> प्रेझेंटेशन"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"विमान मोड दरम्यान ब्लूटूथ सुरू राहील"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"लोड होत आहे"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
