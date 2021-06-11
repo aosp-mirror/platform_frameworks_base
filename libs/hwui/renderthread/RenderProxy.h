@@ -136,6 +136,7 @@ public:
     static void prepareToDraw(Bitmap& bitmap);
 
     static int copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap);
+    static int copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap);
 
     static void disableVsync();
 
