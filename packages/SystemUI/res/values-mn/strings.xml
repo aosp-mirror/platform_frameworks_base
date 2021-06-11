@@ -606,18 +606,18 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Аппыг бэхэлсэн"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Таныг тогтоосныг болиулах хүртэл үүнийг харуулна. Тогтоосныг болиулахын тулд Буцах, Тоймыг дараад хүлээнэ үү."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Таныг тогтоосныг болиулах хүртэл үүнийг харуулсан хэвээр байна. Тогтоосныг болиулахын тулд Буцах, Нүүр хуудас товчлуурыг дараад хүлээнэ үү."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Та тогтоосныг болиулах хүртэл үүнийг харуулсан хэвээр байна. Тогтоосныг болиулахын тулд дээш удаан шударна уу."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Та бэхэлснийг болиулах хүртэл үүнийг харуулсан хэвээр байна. Бэхэлснийг болиулахын тулд дээш удаан шударна уу."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Таныг тогтоосныг болиулах хүртэл харагдах болно. Тогтоосныг болиулахын тулд Буцах товчлуурыг дараад, хүлээнэ үү."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Таныг тогтоосныг болиулах хүртэл үүнийг харуулсан хэвээр байна. Тогтоосныг болиулахын тулд Нүүр хуудас товчлуурыг дараад хүлээнэ үү."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Хувийн мэдээлэлд хандах боломжтой байж магадгүй (харилцагчид, имэйлийн контент зэрэг)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Тогтоосон апп бусад аппыг нээж магадгүй."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Бэхэлсэн апп бусад аппыг нээж магадгүй."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Энэ аппыг тогтоосныг болиулахын тулд Буцах, Тойм товчлуурыг дараад хүлээнэ үү"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Энэ аппыг тогтоосныг болиулахын тулд Буцах, Нүүр хуудасны товчлуурыг дараад хүлээнэ үү"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Энэ аппыг тогтоосныг болиулахын тулд дээш шударч барина уу"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Энэ аппыг бэхэлснийг болиулахын тулд дээш шударч барина уу"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Ойлголоо"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Үгүй"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Аппыг бэхэлсэн"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Аппыг тогтоосныг болиулсан"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Аппыг бэхэлснийг болиулсан"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>-ийг нуух уу?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Тохируулгын хэсэгт үүнийг асаахад энэ дахин харагдана."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Нуух"</string>
@@ -666,6 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Этернет"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Сэрүүлэг"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Түрийвч"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Утсаараа илүү хурдан, аюулгүй худалдан авалт хийхийн тулд тохируулгыг авна уу"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Бүгдийг харуулах"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Төлөхийн тулд түгжээг тайлна уу"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Тохируулаагүй"</string>
@@ -1084,7 +1085,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Хаах"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Үргэлжлүүлэх"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Тохиргоо"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> дээр тоглуулж буй <xliff:g id="ARTIST_NAME">%2$s</xliff:g>-н <xliff:g id="SONG_NAME">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Тоглуулах"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g>-г нээх"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g>-н <xliff:g id="SONG_NAME">%1$s</xliff:g>-г <xliff:g id="APP_LABEL">%3$s</xliff:g> дээр тоглуулах"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g>-г <xliff:g id="APP_LABEL">%2$s</xliff:g> дээр тоглуулах"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Идэвхгүй байна, аппыг шалгана уу"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Алдаа, дахин оролдож байна…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Олдсонгүй"</string>
