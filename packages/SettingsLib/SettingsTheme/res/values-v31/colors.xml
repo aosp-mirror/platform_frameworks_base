@@ -37,4 +37,6 @@
     <color name="settingslib_dialog_background">@android:color/system_neutral1_800</color>
     <!-- Dialog error color. -->
     <color name="settingslib_dialog_colorError">#d93025</color> <!-- Red 600 -->
+
+    <color name="settingslib_colorSurfaceVariant">@android:color/system_neutral2_100</color>
 </resources>

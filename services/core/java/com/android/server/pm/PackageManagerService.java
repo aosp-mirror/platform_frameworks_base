@@ -23607,11 +23607,6 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new IllegalArgumentException("Must specify a component");
         }
 
-        boolean componentExists = mComponentResolver.componentExists(componentName);
-        if (!componentExists) {
-            throw new IllegalArgumentException("Component " + componentName + " not found");
-        }
-
         int callingUid = Binder.getCallingUid();
 
         String componentPkgName = componentName.getPackageName();
@@ -23641,6 +23636,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     || (!pkg.isSystem() && !pkgSetting.getPkgState().isUpdatedSystemApp())) {
                 throw new SecurityException(
                         "Changing the label is not allowed for " + componentName);
+            }
+
+            if (!mComponentResolver.componentExists(componentName)) {
+                throw new IllegalArgumentException("Component " + componentName + " not found");
             }
 
             if (!pkgSetting.overrideNonLocalizedLabelAndIcon(componentName, nonLocalizedLabel,

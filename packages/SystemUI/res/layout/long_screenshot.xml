@@ -86,7 +86,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:handleThickness="@dimen/screenshot_crop_handle_thickness"
-        app:handleColor="?androidprv:attr/colorAccentSecondary"
+        app:handleColor="?androidprv:attr/colorAccentPrimary"
         app:scrimColor="@color/screenshot_crop_scrim"
         tools:background="?android:colorBackground"
         tools:minHeight="100dp"
