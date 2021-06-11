@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="1946296620328354129">"Ezkutatu (saihestu aplikazioak agertzea pantailaren mozketa-eremuan)"</string>
+    <string name="display_cutout_emulation_overlay" msgid="3814493834951357513">"Errendatu mozketa-eremutik kanpo geratzen diren aplikazioak"</string>
 </resources>
