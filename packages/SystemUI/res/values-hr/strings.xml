@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dopusti"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje pogrešaka putem USB-a nije dopušteno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutačno prijavljen na ovaj uređaj ne može uključiti otklanjanje pogrešaka putem USB-a. Da biste upotrebljavali tu značajku, prijeđite na primarnog korisnika."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Želite li dopustiti bežično otklanjanje pogrešaka na ovoj mreži?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Dopustiti bežično otklanjanje pogrešaka na ovoj mreži?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Naziv mreže (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fija (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Uvijek dopusti na ovoj mreži"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Dopusti"</string>
@@ -1103,7 +1103,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Odabrano uređaja: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (nije povezano)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Povezivanje nije bilo moguće. Pokušajte ponovo."</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Upari novi uređaj"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Uparite novi uređaj"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem s očitavanjem mjerača baterije"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
 </resources>

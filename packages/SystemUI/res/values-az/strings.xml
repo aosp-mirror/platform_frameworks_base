@@ -61,7 +61,7 @@
     <string name="usb_debugging_message" msgid="5794616114463921773">"Kompüterin RSA barmaq izi: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Bu kompüterdən həmişə icazə verilsin"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"İcazə verin"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB debaq prosesinə icazə verilmir"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB ilə sazlama qadağandır"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Hazırda bu cihaza daxil olmuş istifadəçi USB sazlama prosesini aktiv edə bilməz. Bu funksiyadan istifadə etmək üçün əsas istifadəçi hesaba daxil olmalıdır."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Bu şəbəkədə WiFi sazlamasına icazə verilsin?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Şəbəkə Adı (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi Ünvanı (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
@@ -353,7 +353,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Qulaqlıq"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Giriş"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Eşitmə Aparatı"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Eşitmə cihazları"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Aktiv edilir..."</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Parlaqlıq"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Avtodönüş"</string>
@@ -647,7 +647,7 @@
     <string name="quick_settings" msgid="6211774484997470203">"Sürətli Ayarlar"</string>
     <string name="status_bar" msgid="4357390266055077437">"Status paneli"</string>
     <string name="overview" msgid="3522318590458536816">"İcmal"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Sistem İİ demo rejimi"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Sistem interfeysi: demorejim"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Demo rejimini aktiv edin"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Demo rejimini göstərin"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>

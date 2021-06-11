@@ -483,7 +483,7 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Comezar de novo"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Si, continuar"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"Usuario convidado"</string>
-    <string name="guest_notification_text" msgid="4202692942089571351">"Para eliminar aplicacións e datos, quita o usuario invitado"</string>
+    <string name="guest_notification_text" msgid="4202692942089571351">"Para eliminar aplicacións e datos, quita o usuario convidado"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"QUITAR CONVIDADO"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Pechar sesión do usuario"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Pechar sesión do usuario actual"</string>

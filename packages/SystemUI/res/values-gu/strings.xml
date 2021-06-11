@@ -392,7 +392,7 @@
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"રંગ સુધારણા મોડ"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"વધુ સેટિંગ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"થઈ ગયું"</string>
-    <string name="quick_settings_connected" msgid="3873605509184830379">"કનેક્ટ થયેલ"</string>
+    <string name="quick_settings_connected" msgid="3873605509184830379">"કનેક્ટ થયેલું"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"કનેક્ટ કરેલ, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"કનેક્ટ કરી રહ્યું છે..."</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"ટિથરિંગ"</string>
