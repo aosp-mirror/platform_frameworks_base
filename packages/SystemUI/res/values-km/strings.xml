@@ -666,6 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"អ៊ីសឺរណិត"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ម៉ោងរោទ៍"</string>
     <string name="wallet_title" msgid="5369767670735827105">"កាបូប"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"ធ្វើការ​រៀបចំ ដើម្បី​ធ្វើការទិញ​កាន់តែលឿន​ជាងមុន សុវត្ថិភាព​ជាងមុន ដោយ​ប្រើ​ទូរសព្ទ​របស់អ្នក"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"បង្ហាញ​ទាំងអស់"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ដោះសោដើម្បីបង់ប្រាក់"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"មិន​បាន​រៀបចំទេ"</string>
@@ -1084,7 +1085,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ច្រាន​ចោល"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"បន្ត"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ការកំណត់"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ច្រៀងដោយ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> កំពុងចាក់ពី <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ចាក់"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"បើក <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"ចាក់ <xliff:g id="SONG_NAME">%1$s</xliff:g> ច្រៀងដោយ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> ពី <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"ចាក់ <xliff:g id="SONG_NAME">%1$s</xliff:g> ពី <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"អសកម្ម ពិនិត្យមើល​កម្មវិធី"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"បញ្ហា កំពុងព្យាយាម​ម្ដងទៀត…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"រកមិន​ឃើញទេ"</string>

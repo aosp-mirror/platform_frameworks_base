@@ -666,6 +666,8 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Eternet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarmi"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <!-- no translation found for wallet_empty_state_label (7776761245237530394) -->
+    <skip />
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Shfaqi të gjitha"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Shkyçe për të paguar"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nuk është konfiguruar"</string>
@@ -745,7 +747,7 @@
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Shfaqet në krye të njoftimeve të bisedës, shfaqet si fotografia e profilit në ekranin e kyçjes dhe ndërpret modalitetin \"Mos shqetëso\""</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Shfaqet në krye të njoftimeve të bisedës dhe si fotografia e profilit në ekranin e kyçjes, shfaqet si flluskë dhe ndërpret modalitetin \"Mos shqetëso\""</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cilësimet"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Përparësia"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Me përparësi"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mbështet veçoritë e bisedës"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Këto njoftime nuk mund të modifikohen."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ky grup njoftimesh nuk mund të konfigurohet këtu"</string>
@@ -1084,7 +1086,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Hiq"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Vazhdo"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Cilësimet"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> nga <xliff:g id="ARTIST_NAME">%2$s</xliff:g> po luhet nga <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Luaj"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Hap <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Luaj <xliff:g id="SONG_NAME">%1$s</xliff:g> nga <xliff:g id="ARTIST_NAME">%2$s</xliff:g> nga <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Luaj <xliff:g id="SONG_NAME">%1$s</xliff:g> nga <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Joaktive, kontrollo aplikacionin"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Gabim, po provohet përsëri"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nuk u gjet"</string>

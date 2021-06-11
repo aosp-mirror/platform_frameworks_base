@@ -669,6 +669,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Novčanik"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Postavite aplikaciju za brže i sigurnije kupovine putem telefona"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži sve"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Otključaj za plaćanje"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nije postavljeno"</string>
@@ -748,7 +749,7 @@
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Prikazuje se na vrhu obavještenja u razgovorima i kao slika profila na zaključanom ekranu, prekida funkciju Ne ometaj"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikazuje se na vrhu obavještenja u razgovorima i kao slika profila na zaključanom ekranu, izgleda kao oblačić, prekida funkciju Ne ometaj"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Postavke"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetni"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava funkcije razgovora"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ta obavještenja se ne mogu izmijeniti."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ovu grupu obavještenja nije moguće konfigurirati ovdje"</string>
@@ -1090,7 +1091,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Odbaci"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nastavi"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Postavke"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Pjesma <xliff:g id="SONG_NAME">%1$s</xliff:g> izvođača <xliff:g id="ARTIST_NAME">%2$s</xliff:g> se reproducira pomoću aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Pokrenite"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Otvorite aplikaciju <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Reproducirajte pjesmu <xliff:g id="SONG_NAME">%1$s</xliff:g> izvođača <xliff:g id="ARTIST_NAME">%2$s</xliff:g> pomoću aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Reproducirajte pjesmu <xliff:g id="SONG_NAME">%1$s</xliff:g> pomoću aplikacije <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, vidite aplikaciju"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Greška, ponovni pokušaj…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>
