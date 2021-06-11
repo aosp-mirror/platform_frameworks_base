@@ -19,5 +19,5 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="rectangle">
     <solid android:color="?androidprv:attr/colorSurface"/>
-    <corners android:radius="20dp"/>
+    <corners android:radius="24dp"/>
 </shape>
