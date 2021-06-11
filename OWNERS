@@ -1,23 +1,23 @@
 # This top-level list should remain narrowly defined as team leads; individual
 # teams are strongly encouraged to define narrower OWNERS files at deeper
 # levels within the source tree; see OWNERS.md for more details
-akulian@google.com
-dsandler@android.com
-dsandler@google.com
-hackbod@android.com
-hackbod@google.com
-jjaggi@google.com
-jsharkey@android.com
-jsharkey@google.com
-lorenzo@google.com
-michaelwr@google.com
-nandana@google.com
-narayan@google.com
-ogunwale@google.com
-roosa@google.com
-svetoslavganov@android.com
-svetoslavganov@google.com
-yamasani@google.com
+akulian@google.com #{LAST_RESORT_SUGGESTION}
+dsandler@android.com #{LAST_RESORT_SUGGESTION}
+dsandler@google.com #{LAST_RESORT_SUGGESTION}
+hackbod@android.com #{LAST_RESORT_SUGGESTION}
+hackbod@google.com #{LAST_RESORT_SUGGESTION}
+jjaggi@google.com #{LAST_RESORT_SUGGESTION}
+jsharkey@android.com #{LAST_RESORT_SUGGESTION}
+jsharkey@google.com #{LAST_RESORT_SUGGESTION}
+lorenzo@google.com #{LAST_RESORT_SUGGESTION}
+michaelwr@google.com #{LAST_RESORT_SUGGESTION}
+nandana@google.com #{LAST_RESORT_SUGGESTION}
+narayan@google.com #{LAST_RESORT_SUGGESTION}
+ogunwale@google.com #{LAST_RESORT_SUGGESTION}
+roosa@google.com #{LAST_RESORT_SUGGESTION}
+svetoslavganov@android.com #{LAST_RESORT_SUGGESTION}
+svetoslavganov@google.com #{LAST_RESORT_SUGGESTION}
+yamasani@google.com #{LAST_RESORT_SUGGESTION}
 
 # API changes are already covered by API-Review+1 (http://mdb/android-api-council)
 # via https://android.git.corp.google.com/All-Projects/+/refs/meta/config/rules.pl.
