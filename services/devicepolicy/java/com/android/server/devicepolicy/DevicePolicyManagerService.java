@@ -6832,7 +6832,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void wipeDataWithReason(int flags, String wipeReasonForUser,
             boolean calledOnParentInstance) {
-        if (!mHasFeature) {
+        if (!mHasFeature && !hasCallingOrSelfPermission(permission.MASTER_CLEAR)) {
             return;
         }
         final CallerIdentity caller = getCallerIdentity();
