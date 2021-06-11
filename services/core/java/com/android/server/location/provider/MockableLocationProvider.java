@@ -32,6 +32,7 @@ import com.android.internal.util.Preconditions;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * Represents a location provider that may switch between a mock implementation and a real
@@ -295,6 +296,10 @@ public class MockableLocationProvider extends AbstractLocationProvider {
             CallerIdentity identity = getIdentity();
             if (identity != null) {
                 pw.println("identity=" + identity);
+            }
+            Set<String> extraAttributionTags = getExtraAttributionTags();
+            if (!extraAttributionTags.isEmpty()) {
+                pw.println("extra attribution tags=" + extraAttributionTags);
             }
             ProviderProperties properties = getProperties();
             if (properties != null) {

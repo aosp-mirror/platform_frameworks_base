@@ -317,11 +317,11 @@ public class SystemWindows {
         public void locationInParentDisplayChanged(Point offset) {}
 
         @Override
-        public void insetsChanged(InsetsState insetsState) {}
+        public void insetsChanged(InsetsState insetsState, boolean willMove, boolean willResize) {}
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls) {}
+                InsetsSourceControl[] activeControls, boolean willMove, boolean willResize) {}
 
         @Override
         public void showInsets(int types, boolean fromIme) {}

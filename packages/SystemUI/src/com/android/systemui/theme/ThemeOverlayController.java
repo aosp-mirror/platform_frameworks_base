@@ -240,11 +240,14 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_STARTED.equals(intent.getAction())
-                    || Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction())) {
-                if (!mDeviceProvisionedController.isCurrentUserSetup()) {
+            boolean newWorkProfile = Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction());
+            boolean userStarted = Intent.ACTION_USER_STARTED.equals(intent.getAction());
+            boolean isManagedProfile = mUserManager.isManagedProfile(
+                    intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+            if (userStarted || newWorkProfile) {
+                if (!mDeviceProvisionedController.isCurrentUserSetup() && isManagedProfile) {
                     Log.i(TAG, "User setup not finished when " + intent.getAction()
-                            + " was received. Deferring...");
+                            + " was received. Deferring... Managed profile? " + isManagedProfile);
                     return;
                 }
                 if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
@@ -326,17 +329,22 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         Runnable updateColors = () -> {
             WallpaperColors systemColor = mWallpaperManager.getWallpaperColors(
                     getLatestWallpaperType());
-            mMainExecutor.execute(() -> {
+            Runnable applyColors = () -> {
                 if (DEBUG) Log.d(TAG, "Boot colors: " + systemColor);
                 mCurrentColors = systemColor;
                 reevaluateSystemTheme(false /* forceReload */);
-            });
+            };
+            if (mDeviceProvisionedController.isCurrentUserSetup()) {
+                mMainExecutor.execute(applyColors);
+            } else {
+                applyColors.run();
+            }
         };
 
         // Whenever we're going directly to setup wizard, we need to process colors synchronously,
         // otherwise we'll see some jank when the activity is recreated.
         if (!mDeviceProvisionedController.isCurrentUserSetup()) {
-            mMainExecutor.execute(updateColors);
+            updateColors.run();
         } else {
             mBgExecutor.execute(updateColors);
         }
