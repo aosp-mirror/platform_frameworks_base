@@ -14,6 +14,9 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.R;
@@ -22,6 +25,8 @@ import com.android.systemui.plugins.ClockPlugin;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.TimeZone;
 
@@ -36,6 +41,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private static final long CLOCK_OUT_MILLIS = 150;
     private static final long CLOCK_IN_MILLIS = 200;
     private static final long SMARTSPACE_MOVE_MILLIS = 350;
+
+    @IntDef({LARGE, SMALL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ClockSize { }
+
+    public static final int LARGE = 0;
+    public static final int SMALL = 1;
 
     /**
      * Optional/alternative clock injected via plugin.
@@ -64,13 +76,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private float mDarkAmount;
 
     /**
-     * Boolean value indicating if notifications are visible on lock screen. Use null to signify
-     * it is uninitialized.
+     * Indicates which clock is currently displayed - should be one of {@link ClockSize}.
+     * Use null to signify it is uninitialized.
      */
-    private Boolean mHasVisibleNotifications = null;
+    @ClockSize private Integer mDisplayedClockSize = null;
 
-    private AnimatorSet mClockInAnim = null;
-    private AnimatorSet mClockOutAnim = null;
+    @VisibleForTesting AnimatorSet mClockInAnim = null;
+    @VisibleForTesting AnimatorSet mClockOutAnim = null;
     private ObjectAnimator mSmartspaceAnim = null;
 
     /**
@@ -260,19 +272,17 @@ public class KeyguardClockSwitch extends RelativeLayout {
     }
 
     /**
-     * Based upon whether notifications are showing or not, display/hide the large clock and
-     * the smaller version.
+     * Display the desired clock and hide the other one
+     *
+     * @return true if desired clock appeared and false if it was already visible
      */
-    boolean willSwitchToLargeClock(boolean hasVisibleNotifications) {
-        if (mHasVisibleNotifications != null
-                && hasVisibleNotifications == mHasVisibleNotifications) {
+    boolean switchToClock(@ClockSize int clockSize) {
+        if (mDisplayedClockSize != null && clockSize == mDisplayedClockSize) {
             return false;
         }
-        boolean useLargeClock = !hasVisibleNotifications;
-        animateClockChange(useLargeClock);
-
-        mHasVisibleNotifications = hasVisibleNotifications;
-        return useLargeClock;
+        animateClockChange(clockSize == LARGE);
+        mDisplayedClockSize = clockSize;
+        return true;
     }
 
     public Paint getPaint() {
