@@ -2542,7 +2542,9 @@ public class NotificationPanelViewController extends PanelViewController {
                 break;
             case FLING_HIDE:
             default:
-                mQs.closeDetail();
+                if (mQs != null) {
+                    mQs.closeDetail();
+                }
                 target = 0;
         }
         if (target == mQsExpansionHeight) {
@@ -4290,7 +4292,8 @@ public class NotificationPanelViewController extends PanelViewController {
     /**
      * Reconfigures the shade to show the AOD UI (clock, smartspace, etc). This is called by the
      * screen off animation controller in order to animate in AOD without "actually" fully switching
-     * to the KEYGUARD state.
+     * to the KEYGUARD state, which is a heavy transition that causes jank as 10+ files react to the
+     * change.
      */
     public void showAodUi() {
         setDozing(true /* dozing */, false /* animate */, null);

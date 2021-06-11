@@ -6845,6 +6845,10 @@ public class DevicePolicyManager {
      * <p> Enabling lockdown via {@code lockdownEnabled} argument carries the risk that any failure
      * of the VPN provider could break networking for all apps. This method clears any lockdown
      * allowlist set by {@link #setAlwaysOnVpnPackage(ComponentName, String, boolean, Set)}.
+     * <p> Starting from {@link android.os.Build.VERSION_CODES#S API 31} calling this method with
+     * {@code vpnPackage} set to {@code null} only removes the existing configuration if it was
+     * previously created by this admin. To remove VPN configuration created by the user use
+     * {@link UserManager#DISALLOW_CONFIG_VPN}.
      *
      * @param vpnPackage The package name for an installed VPN app on the device, or {@code null} to
      *        remove an existing always-on VPN configuration.
@@ -13876,8 +13880,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of an organization-owned managed profile to return
-     * whether USB data signaling is currently enabled by the admin.
+     * Returns whether USB data signaling is currently enabled by the admin. Callable by any app.
      *
      * @return {@code true} if USB data signaling is enabled, {@code false} otherwise.
      */
