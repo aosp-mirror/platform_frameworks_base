@@ -423,7 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏NFC غیرفعال است"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC فعال است"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ضبط کردن صفحه‌نمایش"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ضبط صفحه‌نمایش"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"شروع"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"توقف"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"میکروفون دستگاه لغو انسداد شود؟"</string>
@@ -604,7 +604,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"غیرفعال کردن"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"تغییر دستگاه خروجی"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"برنامه سنجاق شده است"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که سنجاق را برندارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی پین آن را برندارید قابل‌مشاهده است. برای برداشتن سنجاق، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «نمای کلی» را لمس کنید و نگه‌دارید."</string>
@@ -666,6 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"اترنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"زنگ"</string>
     <string name="wallet_title" msgid="5369767670735827105">"کیف‌پول"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"برای خرید سریع‌تر و امن‌تر با تلفن، راه‌اندازی کنید"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"نمایش همه"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"باز کردن قفل برای پرداخت"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"تنظیم‌نشده"</string>
@@ -1084,7 +1085,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"رد کردن"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ازسرگیری"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"تنظیمات"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> از <xliff:g id="ARTIST_NAME">%2$s</xliff:g> ازطریق <xliff:g id="APP_LABEL">%3$s</xliff:g> پخش می‌شود"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"پخش"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"باز کردن <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g> از <xliff:g id="ARTIST_NAME">%2$s</xliff:g> را ازطریق <xliff:g id="APP_LABEL">%3$s</xliff:g> پخش کنید"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> را ازطریق <xliff:g id="APP_LABEL">%2$s</xliff:g> پخش کنید"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غیرفعال، برنامه را بررسی کنید"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"خطا، درحال تلاش مجدد…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"پیدا نشد"</string>

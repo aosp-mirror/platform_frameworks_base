@@ -254,12 +254,6 @@ public class NotificationPanelViewController extends PanelViewController {
             new KeyguardUpdateMonitorCallback() {
 
                 @Override
-                public void onLockScreenModeChanged(int mode) {
-                    mLockScreenMode = mode;
-                    mClockPositionAlgorithm.onLockScreenModeChanged(mode);
-                }
-
-                @Override
                 public void onBiometricAuthenticated(int userId,
                         BiometricSourceType biometricSourceType,
                         boolean isStrongBiometric) {
@@ -594,7 +588,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private final Executor mUiExecutor;
     private final SecureSettings mSecureSettings;
 
-    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
     private KeyguardMediaController mKeyguardMediaController;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
@@ -1242,7 +1235,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateClockAppearance() {
         int totalHeight = mView.getHeight();
         int bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
-        int clockPreferredY = mKeyguardStatusViewController.getClockPreferredY(totalHeight);
         int userSwitcherPreferredY = mStatusBarHeaderHeightKeyguard;
         boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
         final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
@@ -1261,12 +1253,9 @@ public class NotificationPanelViewController extends PanelViewController {
                 mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
                 expandedFraction,
                 totalHeight,
-                mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1
-                        ? mKeyguardStatusViewController.getHeight()
-                        : (int) (mKeyguardStatusViewController.getHeight()
-                                - mShelfHeight / 2.0f - mDarkIconSize / 2.0f),
+                mKeyguardStatusViewController.getHeight(),
                 userIconHeight,
-                clockPreferredY, userSwitcherPreferredY, hasCustomClock(),
+                userSwitcherPreferredY, hasCustomClock(),
                 hasVisibleNotifications, darkamount, mOverStretchAmount,
                 bypassEnabled, getUnlockedStackScrollerPadding(),
                 computeQsExpansionFraction(),

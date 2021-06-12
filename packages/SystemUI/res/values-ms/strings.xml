@@ -666,6 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Penggera"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Buat persediaan untuk membuat pembelian yang lebih pantas dan selamat dengan telefon anda"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Tunjukkan semua"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Buka kunci untuk membayar"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Tidak disediakan"</string>
@@ -889,7 +890,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Kod kunci kanan"</string>
     <string name="left_icon" msgid="5036278531966897006">"Ikon kiri"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ikon kanan"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tahan dan seret untuk menambah jubin"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tahan dan seret untuk menambahkan jubin"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tahan dan seret untuk mengatur semula jubin"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Seret ke sini untuk mengalih keluar"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Anda memerlukan sekurang-kurangnya <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> jubin"</string>
@@ -1084,7 +1085,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Tolak"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Sambung semula"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Tetapan"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> oleh <xliff:g id="ARTIST_NAME">%2$s</xliff:g> dimainkan daripada <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Main"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Buka <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Mainkan <xliff:g id="SONG_NAME">%1$s</xliff:g> oleh <xliff:g id="ARTIST_NAME">%2$s</xliff:g> daripada <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Mainkan <xliff:g id="SONG_NAME">%1$s</xliff:g> daripada <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Tidak aktif, semak apl"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Ralat, mencuba semula…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Tidak ditemukan"</string>

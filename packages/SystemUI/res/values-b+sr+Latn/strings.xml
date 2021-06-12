@@ -669,6 +669,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Eternet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Novčanik"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Obavite konfigurisanje da biste mogli brže i sigurnije da kupujete pomoću telefona"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži sve"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Otključaj radi plaćanja"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nije podešeno"</string>
@@ -1011,7 +1012,7 @@
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" i "</string>
     <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Koristi <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Nedavno koristio <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Nedavno koristio/la <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(posao)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonski poziv"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(preko: <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
@@ -1090,7 +1091,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Odbaci"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nastavi"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Podešavanja"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> izvođača <xliff:g id="ARTIST_NAME">%2$s</xliff:g> se pušta iz aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Pusti"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Otvorite <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Pustite <xliff:g id="SONG_NAME">%1$s</xliff:g> izvođača <xliff:g id="ARTIST_NAME">%2$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Pustite <xliff:g id="SONG_NAME">%1$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno. Vidite aplikaciju"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Greška, pokušava se ponovo…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>
