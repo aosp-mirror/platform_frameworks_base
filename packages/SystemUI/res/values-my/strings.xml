@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"စနစ်၏UI"</string>
+    <string name="app_label" msgid="4811759950673118541">"စနစ်၏ UI"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"ရှင်းရန်"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"အကြောင်းကြားချက်များ မရှိ"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"လက်ရှိအသုံးပြုမှု"</string>
@@ -117,7 +117,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"မလုပ်တော့"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"မျှဝေရန်"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ဖန်သားပြင် ရိုက်ကူးမှု ပယ်ဖျက်လိုက်ပါပြီ"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"ဖန်သားပြင် ရိုက်ကူးမှုကို သိမ်းပြီးပါပြီ"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"စကရင်ရိုက်ကူးမှု သိမ်းပြီးပြီ"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ကြည့်ရှုရန် တို့ပါ"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"ဖန်သားပြင် ရိုက်ကူးမှု ဖျက်ရာတွင် အမှားအယွင်းရှိနေသည်"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"ခွင့်ပြုချက် မရယူနိုင်ပါ"</string>
@@ -423,7 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ကို ပိတ်ထားသည်"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ကို ဖွင့်ထားသည်"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ဖန်သားပြင် ရိုက်ကူးရန်"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"စကရင် ရိုက်ကူးရန်"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"စတင်ရန်"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ရပ်ရန်"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"စက်၏မိုက်ခရိုဖုန်းကို ပြန်ဖွင့်မလား။"</string>
@@ -666,6 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"အီသာနက်"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"နှိုးစက်"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"သင့်ဖုန်းဖြင့် ပိုမိုမြန်ဆန်၊ ပိုမိုစိတ်ချရသော ဝယ်ယူမှုများ ပြုလုပ်ရန် စတင်သတ်မှတ်ပါ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"အားလုံးပြရန်"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ငွေပေးချေရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"စနစ် ထည့်သွင်းမထားပါ"</string>
@@ -1084,7 +1085,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ပယ်ရန်"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ဆက်လုပ်ရန်"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ဆက်တင်များ"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> ၏ <xliff:g id="SONG_NAME">%1$s</xliff:g> ကို <xliff:g id="APP_LABEL">%3$s</xliff:g> တွင် ဖွင့်ထားသည်"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ဖွင့်ခြင်း"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ကို ဖွင့်ပါ"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> ၏ <xliff:g id="SONG_NAME">%1$s</xliff:g> ကို <xliff:g id="APP_LABEL">%3$s</xliff:g> တွင် ဖွင့်ပါ"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ကို <xliff:g id="APP_LABEL">%2$s</xliff:g> တွင် ဖွင့်ပါ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ရပ်နေသည်၊ အက်ပ်ကို စစ်ဆေးပါ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"မှားသွားသည်၊ ပြန်စမ်းနေသည်…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"မတွေ့ပါ"</string>
