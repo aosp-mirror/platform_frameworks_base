@@ -93,8 +93,8 @@ public:
      */
     float computeStretchedPositionY(float normalizedY) const;
 
-    sk_sp<SkShader> getShader(float width, float height,
-                              const sk_sp<SkImage>& snapshotImage) const;
+    sk_sp<SkShader> getShader(float width, float height, const sk_sp<SkImage>& snapshotImage,
+                              const SkMatrix* matrix) const;
 
     float maxStretchAmountX = 0;
     float maxStretchAmountY = 0;
