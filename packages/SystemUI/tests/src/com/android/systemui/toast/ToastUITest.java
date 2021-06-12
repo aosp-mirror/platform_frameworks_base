@@ -84,6 +84,7 @@ public class ToastUITest extends SysuiTestCase {
     private static final String PACKAGE_NAME_1 = "com.example1.test";
     private static final Binder TOKEN_1 = new Binder();
     private static final Binder WINDOW_TOKEN_1 = new Binder();
+    private static final int USER_ID = 1;
 
     private static final int UID_2 = 10256;
     private static final String PACKAGE_NAME_2 = "com.example2.test";
@@ -224,6 +225,14 @@ public class ToastUITest extends SysuiTestCase {
                 AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
         assertThat(event.getClassName()).isEqualTo(Toast.class.getName());
         assertThat(event.getPackageName()).isEqualTo(PACKAGE_NAME_1);
+    }
+
+    @Test
+    public void testShowToast_accessibilityManagerClientIsRemoved() throws Exception {
+        when(mContextSpy.getUserId()).thenReturn(USER_ID);
+        mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
+                null);
+        verify(mAccessibilityManager).removeClient(any(), eq(USER_ID));
     }
 
     @Test

@@ -1406,8 +1406,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Polnjenje akumulatorja v povezani napravi. Dotaknite se za več možnosti."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Zaznana je analogna dodatna zvočna oprema"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Priključena naprava ni združljiva s tem telefonom. Dotaknite se za več informacij."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Iskanje napak prek USB je povezano"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Dotaknite se, če želite izklop. odpravlj. napak prek USB-ja"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Iskanje napak prek USB-ja je povezano"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Dotaknite se, če želite izklopiti odpravljanje napak prek USB-ja."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Izberite, če želite onemogočiti iskanje in odpravljanje napak prek vrat USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Povezava za brezžično odpravljanje napak je vzpostavljena"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Dotaknite se, če želite izklopiti brezžično odpravljanje napak."</string>
@@ -2226,7 +2226,7 @@
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Te vsebine ni mogoče odpreti z osebnimi aplikacijami."</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Delovni profil je začasno zaustavljen"</string>
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Dotaknite se za vklop"</string>
-    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nobena delovna aplikacija"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nobena delovna aplikacija ni na voljo"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nobena osebna aplikacija"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Želite odpreti v aplikaciji <xliff:g id="APP">%s</xliff:g> v osebnem profilu?"</string>
     <string name="miniresolver_open_in_work" msgid="152208044699347924">"Želite odpreti v aplikaciji <xliff:g id="APP">%s</xliff:g> v delovnem profilu?"</string>

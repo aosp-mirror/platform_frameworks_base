@@ -94,6 +94,7 @@ public final class DisplayManagerGlobal {
 
     // Guarded by mLock
     private boolean mDispatchNativeCallbacks = false;
+    private float mNativeCallbackReportedRefreshRate;
     private final Object mLock = new Object();
 
     @UnsupportedAppUsage
@@ -404,10 +405,11 @@ public final class DisplayManagerGlobal {
                     // We can likely save a binder hop if we attach the refresh rate onto the
                     // listener.
                     DisplayInfo display = getDisplayInfoLocked(displayId);
-                    if (display != null) {
-                        float refreshRate = display.getRefreshRate();
+                    if (display != null
+                            && mNativeCallbackReportedRefreshRate != display.getRefreshRate()) {
+                        mNativeCallbackReportedRefreshRate = display.getRefreshRate();
                         // Signal native callbacks if we ever set a refresh rate.
-                        nSignalNativeCallbacks(refreshRate);
+                        nSignalNativeCallbacks(mNativeCallbackReportedRefreshRate);
                     }
                 }
             }
@@ -1055,8 +1057,8 @@ public final class DisplayManagerGlobal {
             if (display != null) {
                 // We need to tell AChoreographer instances the current refresh rate so that apps
                 // can get it for free once a callback first registers.
-                float refreshRate = display.getRefreshRate();
-                nSignalNativeCallbacks(refreshRate);
+                mNativeCallbackReportedRefreshRate = display.getRefreshRate();
+                nSignalNativeCallbacks(mNativeCallbackReportedRefreshRate);
             }
         }
     }

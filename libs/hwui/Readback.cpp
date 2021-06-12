@@ -275,6 +275,14 @@ CopyResult Readback::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBitmap
     return copyResult;
 }
 
+CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap) {
+    Rect srcRect;
+    Matrix4 transform;
+    transform.loadScale(1, -1, 1);
+    transform.translate(0, -1);
+    return copyImageInto(image, transform, srcRect, bitmap);
+}
+
 CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTransform,
                                    const Rect& srcRect, SkBitmap* bitmap) {
     ATRACE_CALL();

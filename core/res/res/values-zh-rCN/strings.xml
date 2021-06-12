@@ -1866,8 +1866,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由您的管理员删除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"确定"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5444908404021316250) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"在省电模式下，系统会启用深色主题，并限制或关闭后台活动、某些视觉效果、特定功能和部分网络连接。"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"在省电模式下，系统会启用深色主题，并限制或关闭后台活动、某些视觉效果、特定功能和部分网络连接。"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"为了减少流量消耗，流量节省程序会阻止某些应用在后台收发数据。您当前使用的应用可以收发数据，但频率可能会降低。举例而言，这可能意味着图片只有在您点按之后才会显示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要开启流量节省程序吗？"</string>

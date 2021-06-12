@@ -70,7 +70,7 @@
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Соңғы және жабылған қалқыма хабарлар осы жерде көрсетіледі."</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Көпіршік"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Басқару"</string>
-    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Қалқымалы анықтама өшірілді."</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Қалқыма хабар жабылды."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Бұл қолданбаны қайта қосып, толық экранға өту үшін түртіңіз."</string>
     <string name="got_it" msgid="4428750913636945527">"Түсінікті"</string>
 </resources>

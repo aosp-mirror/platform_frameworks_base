@@ -425,27 +425,38 @@ Frame VulkanManager::dequeueNextBuffer(VulkanSurface* surface) {
                 semaphoreInfo.flags = 0;
                 VkSemaphore semaphore;
                 VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
-                LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err, "Failed to create import semaphore, err: %d",
-                                    err);
+                if (err != VK_SUCCESS) {
+                    ALOGE("Failed to create import semaphore, err: %d", err);
+                    close(fence_clone);
+                    sync_wait(bufferInfo->dequeue_fence, -1 /* forever */);
+                } else {
+                    VkImportSemaphoreFdInfoKHR importInfo;
+                    importInfo.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
+                    importInfo.pNext = nullptr;
+                    importInfo.semaphore = semaphore;
+                    importInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
+                    importInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+                    importInfo.fd = fence_clone;
 
-                VkImportSemaphoreFdInfoKHR importInfo;
-                importInfo.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
-                importInfo.pNext = nullptr;
-                importInfo.semaphore = semaphore;
-                importInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
-                importInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
-                importInfo.fd = fence_clone;
-
-                err = mImportSemaphoreFdKHR(mDevice, &importInfo);
-                LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err, "Failed to import semaphore, err: %d", err);
-
-                GrBackendSemaphore backendSemaphore;
-                backendSemaphore.initVulkan(semaphore);
-                bufferInfo->skSurface->wait(1, &backendSemaphore);
-                // The following flush blocks the GPU immediately instead of waiting for other
-                // drawing ops. It seems dequeue_fence is not respected otherwise.
-                // TODO: remove the flush after finding why backendSemaphore is not working.
-                bufferInfo->skSurface->flushAndSubmit();
+                    err = mImportSemaphoreFdKHR(mDevice, &importInfo);
+                    if (err != VK_SUCCESS) {
+                        ALOGE("Failed to import semaphore, err: %d", err);
+                        mDestroySemaphore(mDevice, semaphore, nullptr);
+                        close(fence_clone);
+                        sync_wait(bufferInfo->dequeue_fence, -1 /* forever */);
+                    } else {
+                        GrBackendSemaphore backendSemaphore;
+                        backendSemaphore.initVulkan(semaphore);
+                        // Skia will take ownership of the VkSemaphore and delete it once the wait
+                        // has finished. The VkSemaphore also owns the imported fd, so it will
+                        // close the fd when it is deleted.
+                        bufferInfo->skSurface->wait(1, &backendSemaphore);
+                        // The following flush blocks the GPU immediately instead of waiting for
+                        // other drawing ops. It seems dequeue_fence is not respected otherwise.
+                        // TODO: remove the flush after finding why backendSemaphore is not working.
+                        bufferInfo->skSurface->flushAndSubmit();
+                    }
+                }
             }
         }
     }
@@ -621,6 +632,7 @@ status_t VulkanManager::fenceWait(int fence, GrDirectContext* grContext) {
     VkSemaphore semaphore;
     VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
     if (VK_SUCCESS != err) {
+        close(fenceFd);
         ALOGE("Failed to create import semaphore, err: %d", err);
         return UNKNOWN_ERROR;
     }
@@ -635,6 +647,7 @@ status_t VulkanManager::fenceWait(int fence, GrDirectContext* grContext) {
     err = mImportSemaphoreFdKHR(mDevice, &importInfo);
     if (VK_SUCCESS != err) {
         mDestroySemaphore(mDevice, semaphore, nullptr);
+        close(fenceFd);
         ALOGE("Failed to import semaphore, err: %d", err);
         return UNKNOWN_ERROR;
     }
@@ -642,7 +655,8 @@ status_t VulkanManager::fenceWait(int fence, GrDirectContext* grContext) {
     GrBackendSemaphore beSemaphore;
     beSemaphore.initVulkan(semaphore);
 
-    // Skia takes ownership of the semaphore and will delete it once the wait has finished.
+    // Skia will take ownership of the VkSemaphore and delete it once the wait has finished. The
+    // VkSemaphore also owns the imported fd, so it will close the fd when it is deleted.
     grContext->wait(1, &beSemaphore);
     grContext->flushAndSubmit();
 
