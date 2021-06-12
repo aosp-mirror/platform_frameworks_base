@@ -345,6 +345,16 @@ public:
         return mSkiaLayer.get() ? mSkiaLayer->layerSurface.get() : nullptr;
     }
 
+    struct SnapshotResult {
+        sk_sp<SkImage> snapshot;
+        SkIRect outSubset;
+        SkIPoint outOffset;
+    };
+
+    std::optional<SnapshotResult> updateSnapshotIfRequired(GrRecordingContext* context,
+                                            const SkImageFilter* imageFilter,
+                                            const SkIRect& clipBounds);
+
     skiapipeline::SkiaLayer* getSkiaLayer() const { return mSkiaLayer.get(); }
 
     /**
@@ -374,6 +384,22 @@ private:
      * when it has been set to draw as a LayerType::RenderLayer.
      */
     std::unique_ptr<skiapipeline::SkiaLayer> mSkiaLayer;
+
+    /**
+     * SkImageFilter used to create the mSnapshotResult
+     */
+    sk_sp<SkImageFilter> mTargetImageFilter;
+
+    /**
+     * Clip bounds used to create the mSnapshotResult
+     */
+    SkIRect mImageFilterClipBounds;
+
+    /**
+     * Result of the most recent snapshot with additional metadata used to
+     * determine how to draw the contents
+     */
+    SnapshotResult mSnapshotResult;
 
     struct ClippedOutlineCache {
         // keys
