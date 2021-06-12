@@ -36,11 +36,10 @@ import android.window.TaskSnapshot;
 
 import androidx.annotation.BinderThread;
 
+import com.android.internal.util.function.TriConsumer;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
-
-import java.util.function.BiConsumer;
 
 /**
  * Implementation to draw the starting window to an application, and remove the starting window
@@ -68,7 +67,7 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     private final StartingSurfaceDrawer mStartingSurfaceDrawer;
     private final StartingWindowTypeAlgorithm mStartingWindowTypeAlgorithm;
 
-    private BiConsumer<Integer, Integer> mTaskLaunchingCallback;
+    private TriConsumer<Integer, Integer, Integer> mTaskLaunchingCallback;
     private final StartingSurfaceImpl mImpl = new StartingSurfaceImpl();
     private final Context mContext;
     private final ShellExecutor mSplashScreenExecutor;
@@ -103,7 +102,7 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
      *
      * @param listener The callback when need a starting window.
      */
-    void setStartingWindowListener(BiConsumer<Integer, Integer> listener) {
+    void setStartingWindowListener(TriConsumer<Integer, Integer, Integer> listener) {
         mTaskLaunchingCallback = listener;
     }
 
@@ -121,9 +120,6 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
             final int suggestionType = mStartingWindowTypeAlgorithm.getSuggestedWindowType(
                     windowInfo);
             final RunningTaskInfo runningTaskInfo = windowInfo.taskInfo;
-            if (mTaskLaunchingCallback != null && shouldSendToListener(suggestionType)) {
-                mTaskLaunchingCallback.accept(runningTaskInfo.taskId, suggestionType);
-            }
             if (suggestionType == STARTING_WINDOW_TYPE_SPLASH_SCREEN) {
                 mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, appToken,
                         false /* emptyView */);
@@ -136,6 +132,11 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
                         snapshot);
             } else /* suggestionType == STARTING_WINDOW_TYPE_NONE */ {
                 // Don't add a staring window.
+            }
+            if (mTaskLaunchingCallback != null && shouldSendToListener(suggestionType)) {
+                int taskId = runningTaskInfo.taskId;
+                int color = mStartingSurfaceDrawer.getStartingWindowBackgroundColorForTask(taskId);
+                mTaskLaunchingCallback.accept(taskId, suggestionType, color);
             }
 
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -181,7 +182,7 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     private static class IStartingWindowImpl extends IStartingWindow.Stub {
         private StartingWindowController mController;
         private IStartingWindowListener mListener;
-        private final BiConsumer<Integer, Integer> mStartingWindowListener =
+        private final TriConsumer<Integer, Integer, Integer> mStartingWindowListener =
                 this::notifyIStartingWindowListener;
         private final IBinder.DeathRecipient mListenerDeathRecipient =
                 new IBinder.DeathRecipient() {
@@ -230,13 +231,14 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
                     });
         }
 
-        private void notifyIStartingWindowListener(int taskId, int supportedType) {
+        private void notifyIStartingWindowListener(int taskId, int supportedType,
+                int startingWindowBackgroundColor) {
             if (mListener == null) {
                 return;
             }
 
             try {
-                mListener.onTaskLaunching(taskId, supportedType);
+                mListener.onTaskLaunching(taskId, supportedType, startingWindowBackgroundColor);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to notify task launching", e);
             }
