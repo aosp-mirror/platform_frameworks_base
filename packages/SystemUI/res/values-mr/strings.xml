@@ -666,6 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"इथरनेट"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"तुमचा फोन वापरून जलदरीत्या, अधिक सुरक्षित खरेदी करण्यासाठी सेट करा"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"सर्व दाखवा"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"पैसे देण्यासाठी अनलॉक करा"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"सेट केलेले नाही"</string>
@@ -1084,7 +1085,15 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"डिसमिस करा"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"पुन्हा सुरू करा"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिंग्ज"</string>
+    <!-- no translation found for controls_media_playing_item_description (4531853311504359098) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"प्ले करणे"</string>
+    <!-- no translation found for controls_media_smartspace_rec_description (4136242327044070732) -->
+    <skip />
+    <!-- no translation found for controls_media_smartspace_rec_item_description (2189271793070870883) -->
+    <skip />
+    <!-- no translation found for controls_media_smartspace_rec_item_no_artist_description (8703614798636591077) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय, ॲप तपासा"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"एरर, पुन्हा प्रयत्न करत आहे…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"आढळले नाही"</string>
