@@ -21,6 +21,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <ImageView
+        android:id="@+id/screenshot_scrolling_scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+    <ImageView
         android:id="@+id/global_screenshot_actions_background"
         android:layout_height="@dimen/screenshot_bg_protection_height"
         android:layout_width="match_parent"
