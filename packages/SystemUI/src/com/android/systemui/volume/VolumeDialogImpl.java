@@ -932,6 +932,13 @@ public class VolumeDialogImpl implements VolumeDialog,
                     .start();
         }
 
+        // When the ringer drawer is open, tapping the currently selected ringer will set the ringer
+        // to the current ringer mode. Change the content description to that, instead of the 'tap
+        // to change ringer mode' default.
+        mSelectedRingerContainer.setContentDescription(
+                mContext.getString(getStringDescriptionResourceForRingerMode(
+                        mState.ringerModeInternal)));
+
         mIsRingerDrawerOpen = true;
     }
 
@@ -975,6 +982,11 @@ public class VolumeDialogImpl implements VolumeDialog,
                 .translationX(0f)
                 .translationY(0f)
                 .start();
+
+        // When the drawer is closed, tapping the selected ringer drawer will open it, allowing the
+        // user to change the ringer.
+        mSelectedRingerContainer.setContentDescription(
+                mContext.getString(R.string.volume_ringer_change));
 
         mIsRingerDrawerOpen = false;
     }
@@ -1464,20 +1476,8 @@ public class VolumeDialogImpl implements VolumeDialog,
     }
 
     private void addAccessibilityDescription(View view, int currState, String hintLabel) {
-        int currStateResId;
-        switch (currState) {
-            case RINGER_MODE_SILENT:
-                currStateResId = R.string.volume_ringer_status_silent;
-                break;
-            case RINGER_MODE_VIBRATE:
-                currStateResId = R.string.volume_ringer_status_vibrate;
-                break;
-            case RINGER_MODE_NORMAL:
-            default:
-                currStateResId = R.string.volume_ringer_status_normal;
-        }
-
-        view.setContentDescription(mContext.getString(currStateResId));
+        view.setContentDescription(
+                mContext.getString(getStringDescriptionResourceForRingerMode(currState)));
         view.setAccessibilityDelegate(new AccessibilityDelegate() {
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
@@ -1485,6 +1485,18 @@ public class VolumeDialogImpl implements VolumeDialog,
                                 AccessibilityNodeInfo.ACTION_CLICK, hintLabel));
             }
         });
+    }
+
+    private int getStringDescriptionResourceForRingerMode(int mode) {
+        switch (mode) {
+            case RINGER_MODE_SILENT:
+                return R.string.volume_ringer_status_silent;
+            case RINGER_MODE_VIBRATE:
+                return R.string.volume_ringer_status_vibrate;
+            case RINGER_MODE_NORMAL:
+            default:
+                return R.string.volume_ringer_status_normal;
+        }
     }
 
     /**
