@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"Interf sist"</string>
+    <string name="app_label" msgid="4811759950673118541">"Interface do sistema"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"Limpar"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"Sem notificações"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"Em andamento"</string>

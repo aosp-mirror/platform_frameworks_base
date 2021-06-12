@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"စနစ်၏UI"</string>
+    <string name="app_label" msgid="4811759950673118541">"စနစ်၏ UI"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"ရှင်းရန်"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"အကြောင်းကြားချက်များ မရှိ"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"လက်ရှိအသုံးပြုမှု"</string>
@@ -428,7 +428,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ကို ပိတ်ထားသည်"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ကို ဖွင့်ထားသည်"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ဖန်သားပြင် မှတ်တမ်းတင်ရန်"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"စကရင် ရိုက်ကူးရန်"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"စတင်ရန်"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ရပ်ရန်"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"စက်"</string>

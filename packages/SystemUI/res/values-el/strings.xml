@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Να επιτρέπεται"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Δεν επιτρέπεται ο εντοπισμός σφαλμάτων USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Ο χρήστης που είναι συνδεδεμένος αυτήν τη στιγμή σε αυτήν τη συσκευή δεν μπορεί να ενεργοποιήσει τον εντοπισμό σφαλμάτων USB. Για να χρησιμοποιήσετε αυτήν τη λειτουργία, κάντε εναλλαγή στον κύριο χρήστη."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Να επιτρέπεται ο ασύρματος εντοπισμός σφαλμάτων σε αυτό το δίκτυο;"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Να επιτρέπεται ασύρματος εντοπ. σφαλ. στο δίκτυο;"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Όνομα δικτύου (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nΔιεύθυνση Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Να επιτρέπεται πάντα σε αυτό το δίκτυο"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Να επιτρέπεται"</string>

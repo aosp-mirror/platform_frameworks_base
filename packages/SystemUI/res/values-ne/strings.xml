@@ -1035,10 +1035,10 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"म्याग्निफिकेसन विन्डो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"म्याग्निफिकेसन विन्डोका नियन्त्रणहरू"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"डिभाइस नियन्त्रण गर्ने विजेटहरू"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"आफ्ना कनेक्ट गरिएका यन्त्रका लागि नियन्त्रण सुविधाहरू थप्नुहोस्"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"आफ्ना कनेक्ट गरिएका यन्त्रका लागि कन्ट्रोल थप्नुहोस्"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिभाइस नियन्त्रण गर्ने विजेटहरू सेटअप गर्नुहोस्"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"आफ्ना नियन्त्रणहरूमाथि पहुँच राख्न पावर बटन थिचिराख्नुहोस्"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"नियन्त्रणहरू थप्नु पर्ने एप छान्नुहोस्"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"कन्ट्रोल थप्नु पर्ने एप छान्नुहोस्"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> वटा नियन्त्र थपियो।</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> नियन्त्र थपियो</item>
@@ -1052,8 +1052,8 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g>ले निर्देश गर्ने ठाउँमा सार्नुहोस्"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"नियन्त्रणहरू"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पावर मेनुबाट प्रयोग गर्न चाहेका नियन्त्रण सुविधाहरू छान्नुहोस्"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियन्त्रणहरूको क्रम मिलाउन तिनलाई थिचेर ड्र्याग गर्नुहोस्"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"सबै नियन्त्रणहरू हटाइए"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"कन्ट्रोललाई होल्ड एण्ड ड्र्याग गरी कन्ट्रोलको क्रम मिलाउनुहोस्"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"सबै कन्ट्रोल हटाइए"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"परिवर्तनहरू सुरक्षित गरिएका छैनन्"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"अन्य एपहरू हेर्नुहोस्"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"नियन्त्रण सुविधाहरू लोड गर्न सकिएन। <xliff:g id="APP">%s</xliff:g> एपका सेटिङ परिवर्तन गरिएका छैनन् भन्ने कुरा सुनिश्चित गर्न उक्त एप जाँच्नुहोस्।"</string>
@@ -1089,8 +1089,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"त्रुटि भयो, फेरि प्रयास गर्नु…"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"कार्य हुँदै छ"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नयाँ नियन्त्रण सुविधाहरू हेर्न पावर बटन थिचिराख्नुहोस्"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"नियन्त्रण सुविधाहरू थप्नुहोस्"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"नियन्त्रण सुविधाहरू सम्पादन गर्नु…"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"कन्ट्रोल थप्नुहोस्"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"कन्ट्रोल सम्पादन गर्नुहोस्"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"आउटपुट यन्त्रहरू थप्नुहोस्"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"समूह"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"१ यन्त्र चयन गरियो"</string>

@@ -1051,7 +1051,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"お気に入りから削除"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ポジション <xliff:g id="NUMBER">%d</xliff:g> に移動"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源ボタンメニューからアクセスするコントロールを選択"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源ボタンメニューからアクセスするコントロールを選択します"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"変更が保存されていません"</string>

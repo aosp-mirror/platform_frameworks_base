@@ -109,7 +109,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"لغو"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"هم‌رسانی"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ضبط صفحه‌نمایش لغو شد"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"ضبط صفحه‌نمایش ذخیره شد، برای مشاهده ضربه بزنید"</string>
+    <string name="screenrecord_save_message" msgid="490522052388998226">"ضبط صفحه ذخیره شد، برای مشاهده ضربه بزنید"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"خطا در حذف فایل ضبط صفحه‌نمایش"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"مجوزها دریافت نشدند"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"خطا هنگام شروع ضبط صفحه‌نمایش"</string>
@@ -428,7 +428,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏NFC غیرفعال است"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC فعال است"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ضبط کردن صفحه‌نمایش"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ضبط صفحه‌نمایش"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"شروع"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"توقف"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"دستگاه"</string>
@@ -592,7 +592,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"غیرفعال کردن"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"تغییر دستگاه خروجی"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"برنامه سنجاق شده است"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که سنجاق را برندارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی پین آن را برندارید قابل‌مشاهده است. برای برداشتن سنجاق، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «نمای کلی» را لمس کنید و نگه‌دارید."</string>
