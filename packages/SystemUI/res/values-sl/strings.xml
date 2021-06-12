@@ -672,6 +672,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Opozorilo"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Denarnica"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nastavite možnost hitrejšega in varnejšega plačevanja s telefonom."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži vse"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Odklenite za plačevanje"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Ni nastavljeno"</string>
@@ -736,7 +737,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Tiho"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Privzeto"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Samodejno"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brez zvočnega opozarjanja ali vibriranja"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brez zvočnega opozarjanja ali vibriranja."</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brez zvočnega opozarjanja ali vibriranja, prikaz nižje v razdelku Pogovor."</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona. Pogovori v aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> so privzeto prikazani v oblačkih."</string>
@@ -747,7 +748,7 @@
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stanje:&lt;/b&gt; Uvrščeno višje"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stanje:&lt;/b&gt; Uvrščeno nižje"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Prikaz na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu."</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Prikaz na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavitve"</string>
@@ -1067,7 +1068,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"odstranitev iz priljubljenih"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Premakni na položaj <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrolniki"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Izbira kontrolnikov, dostopnih v hitrih nastavitvah"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Izberite kontrolnike, do katerih želite imeti dostop v hitrih nastavitvah."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite in povlecite, da prerazporedite kontrolnike."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Vsi kontrolniki so bili odstranjeni."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Spremembe niso shranjene"</string>
@@ -1096,7 +1097,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Opusti"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nadaljuj"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Nastavitve"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Skladba <xliff:g id="SONG_NAME">%1$s</xliff:g> izvajalca <xliff:g id="ARTIST_NAME">%2$s</xliff:g> se predvaja iz aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Predvajaj"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Odpri aplikacijo <xliff:g id="APP_LABEL">%1$s</xliff:g>."</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Predvajaj skladbo <xliff:g id="SONG_NAME">%1$s</xliff:g> izvajalca <xliff:g id="ARTIST_NAME">%2$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Predvajaj skladbo <xliff:g id="SONG_NAME">%1$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%2$s</xliff:g>."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, poglejte aplikacijo"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Napaka, vnovični poskus …"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ni mogoče najti"</string>
@@ -1107,8 +1112,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Napaka, poskusite znova"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"V teku"</string>
     <string name="controls_added_tooltip" msgid="5866098408470111984">"Za ogled novih kontrolnikov odprite hitre nastavitve."</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj kontrolnike"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Uredi kontrolnike"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Dodajte kontrolnike"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Uredite kontrolnike"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Dodajanje izhodov"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Skupina"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Izbrana je ena naprava"</string>
