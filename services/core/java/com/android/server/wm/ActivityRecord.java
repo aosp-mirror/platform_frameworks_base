@@ -5270,7 +5270,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
                     && !isState(STARTED, STOPPING, STOPPED, PAUSED);
-            if (deferHidingClient && pictureInPictureArgs.isAutoEnterEnabled()) {
+            if (!mAtmService.getTransitionController().isShellTransitionsEnabled()
+                    && deferHidingClient && pictureInPictureArgs.isAutoEnterEnabled()) {
                 // Go ahead and just put the activity in pip if it supports auto-pip.
                 mAtmService.enterPictureInPictureMode(this, pictureInPictureArgs);
                 return;
