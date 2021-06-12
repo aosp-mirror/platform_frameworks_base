@@ -1559,4 +1559,7 @@
     <!-- The padding between the icon and the text. -->
     <dimen name="ongoing_call_chip_icon_text_padding">4dp</dimen>
     <dimen name="ongoing_call_chip_corner_radius">28dp</dimen>
+
+    <!-- Signal icon in internet dialog -->
+    <dimen name="signal_strength_icon_size">24dp</dimen>
 </resources>

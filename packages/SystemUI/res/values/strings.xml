@@ -2978,4 +2978,37 @@
 
     <!-- Content description for a chip in the status bar showing that the user is currently on a phone call. [CHAR LIMIT=NONE] -->
     <string name="ongoing_phone_call_content_description">Ongoing phone call</string>
+
+    <!-- Provider Model: Title of the airplane mode in the internet dialog. [CHAR LIMIT=50] -->
+    <string name="airplane_mode">Airplane mode</string>
+    <!-- Provider Model: Default title of the mobile network in the mobile layout. [CHAR LIMIT=50] -->
+    <string name="mobile_data_settings_title">Mobile data</string>
+    <!-- Provider Model: Summary text separator for preferences including a short description
+         (eg. "Connected / 5G"). [CHAR LIMIT=50] -->
+    <string name="preference_summary_default_combination"><xliff:g id="state" example="Connected">%1$s</xliff:g> / <xliff:g id="networkMode" example="LTE">%2$s</xliff:g></string>
+    <!-- Provider Model:
+         Summary indicating that a SIM has an active mobile data connection [CHAR LIMIT=50] -->
+    <string name="mobile_data_connection_active">Connected</string>
+    <!-- Provider Model:
+     Summary indicating that a SIM has no mobile data connection [CHAR LIMIT=50] -->
+    <string name="mobile_data_off_summary">Internet won\u0027t auto\u2011connect</string>
+    <!-- Provider Model:
+     Summary indicating that a active SIM and no network available [CHAR LIMIT=50] -->
+    <string name="mobile_data_no_connection">No connection</string>
+    <!-- Provider Model: Summary indicating that no other networks available [CHAR LIMIT=50] -->
+    <string name="non_carrier_network_unavailable">No other networks available</string>
+    <!-- Provider Model: Summary indicating that no networks available [CHAR LIMIT=50] -->
+    <string name="all_network_unavailable">No networks available</string>
+    <!-- Provider Model: Panel title text for turning on the Wi-Fi networks. [CHAR LIMIT=40] -->
+    <string name="turn_on_wifi">Wi\u2011Fi</string>
+    <!-- Provider Model: Title for detail page of wifi network [CHAR LIMIT=30] -->
+    <string name="pref_title_network_details" msgid="7329759534269363308">"Network details"</string>
+    <!-- Provider Model: Panel subtitle for tapping a network to connect to internet. [CHAR LIMIT=60] -->
+    <string name="tap_a_network_to_connect">Tap a network to connect</string>
+    <!-- Provider Model: Wi-Fi settings. text displayed when Wi-Fi is on and network list is empty [CHAR LIMIT=50]-->
+    <string name="wifi_empty_list_wifi_on">Searching for networks\u2026</string>
+    <!-- Provider Model: Failure notification for connect -->
+    <string name="wifi_failed_connect_message">Failed to connect to network</string>
+    <!-- Provider Model: Title to see all the networks [CHAR LIMIT=50] -->
+    <string name="see_all_networks">See all</string>
 </resources>
