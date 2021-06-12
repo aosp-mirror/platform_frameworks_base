@@ -833,10 +833,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void onMovementBoundsChanged(Rect destinationBoundsOut, boolean fromRotation,
             boolean fromImeAdjustment, boolean fromShelfAdjustment,
             WindowContainerTransaction wct) {
-        // note that this can be called when swiping pip to home is happening. For instance,
-        // swiping an app in landscape to portrait home. skip this entirely if that's the case.
-        if (mInSwipePipToHomeTransition && fromRotation) {
-            if (DEBUG) Log.d(TAG, "skip onMovementBoundsChanged due to swipe-pip-to-home");
+        // note that this can be called when swipe-to-home or fixed-rotation is happening.
+        // Skip this entirely if that's the case.
+        if ((mInSwipePipToHomeTransition || mWaitForFixedRotation) && fromRotation) {
+            if (DEBUG) {
+                Log.d(TAG, "Skip onMovementBoundsChanged on rotation change"
+                        + " mInSwipePipToHomeTransition=" + mInSwipePipToHomeTransition
+                        + " mWaitForFixedRotation=" + mWaitForFixedRotation);
+            }
             return;
         }
         final PipAnimationController.PipTransitionAnimator animator =
