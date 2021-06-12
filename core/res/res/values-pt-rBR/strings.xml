@@ -1368,7 +1368,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Acessório de áudio analógico detectado"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"O dispositivo anexo não é compatível com esse smartphone. Toque para saber mais."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuração USB conectada"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toque para desativar a depuração USB."</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toque para desativar a depuração USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Selecione para desativar a depuração USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Depuração por Wi-Fi conectada"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toque para desativar a depuração por Wi-Fi"</string>
@@ -1870,7 +1870,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"A Economia de bateria ativa o tema escuro e limita ou desativa atividades em segundo plano, alguns efeitos visuais, recursos específicos e algumas conexões de rede."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"A Economia de bateria ativa o tema escuro e limita ou desativa atividades em segundo plano, alguns efeitos visuais, recursos específicos e algumas conexões de rede."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode fazer com que imagens não sejam exibidas até que você toque nelas."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar \"Economia de dados\"?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar a Economia de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">Por %1$d minutos (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

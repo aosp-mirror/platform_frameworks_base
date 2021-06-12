@@ -3250,6 +3250,11 @@ public final class DisplayManagerService extends SystemService {
             mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
                     .ignoreProximitySensorUntilChanged();
         }
+
+        @Override
+        public int getRefreshRateSwitchingType() {
+            return getRefreshRateSwitchingTypeInternal();
+        }
     }
 
     class DesiredDisplayModeSpecsObserver

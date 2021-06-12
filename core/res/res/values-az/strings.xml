@@ -1565,7 +1565,7 @@
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Kilidi açmaq üçün vurun."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Evə naviqasiya et"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Yuxarı gedin"</string>
-    <string name="action_menu_overflow_description" msgid="4579536843510088170">"Digər variantlar"</string>
+    <string name="action_menu_overflow_description" msgid="4579536843510088170">"Digər seçimlər"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Daxili paylaşılan yaddaş"</string>
@@ -1712,11 +1712,11 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Rəng İnversiyası"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Rəng korreksiyası"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Birəlli rejim"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Əlavə qaraltma"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Əlavə tündləşmə"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Səs səviyyəsi düymələrinə basıb saxlayın. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktiv edildi."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Səs səviyyəsi düymələrinə basılaraq saxlanıb. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> deaktiv edilib."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> istifadə etmək üçün hər iki səs düyməsini üç saniyə basıb saxlayın"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Əlçatımlılıq düyməsinə toxunduqda istifadə edəcəyiniz funksiyanı seçin:"</string>
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Xüsusi imkanlar düyməsinə toxunanda istədiyiniz funksiyanı seçin:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Əlçatımlılıq jesti (iki barmağınızla ekranın aşağısından yuxarı doğru sürüşdürün) ilə istifadə edəcəyiniz funksiyanı seçin:"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Əlçatımlılıq jesti (üç barmağınızla ekranın aşağısından yuxarı doğru sürüşdürün) ilə istifadə edəcəyiniz funksiyanı seçin:"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Funksiyalar arasında keçid etmək üçün əlçatımlılıq düyməsinə toxunub saxlayın."</string>
@@ -1938,7 +1938,7 @@
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"USB Peripheral Port"</string>
-    <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"Daha çox seçim"</string>
+    <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"Digər seçimlər"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"Yüklənməni qapadın"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"Böyüdün"</string>
     <string name="close_button_text" msgid="10603510034455258">"Qapadın"</string>
@@ -2006,7 +2006,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"Məhsuldarlıq"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"Əlçatımlılıq"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Cihaz yaddaşı"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB sazlama"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB ilə sazlama"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"saat"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"dəqiqə"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"Vaxtı ayarlayın"</string>
@@ -2278,7 +2278,7 @@
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Yeni böyütmə ayarları"</string>
-    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"İndi ekranınızın bir hissəsini böyüdə bilərsiniz"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"İndi ekran hissəsini böyütmək olar"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Ayarlarda aktiv edin"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Qapadın"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Cihaz mikrofonunu blokdan çıxarın"</string>

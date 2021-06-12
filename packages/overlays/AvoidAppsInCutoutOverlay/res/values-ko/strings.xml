@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="1946296620328354129">"숨기기(컷아웃 영역에 앱을 표시하지 않음)"</string>
+    <string name="display_cutout_emulation_overlay" msgid="3814493834951357513">"컷아웃 영역 아래에 앱 렌더링"</string>
 </resources>

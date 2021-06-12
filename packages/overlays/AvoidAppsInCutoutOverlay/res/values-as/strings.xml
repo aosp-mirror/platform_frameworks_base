@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="1946296620328354129">"লুকুৱাওক (কাটআউট অংশৰ এপ্ বাদ দিয়ক)"</string>
+    <string name="display_cutout_emulation_overlay" msgid="3814493834951357513">"এপ্‌সমূহ কাটআউট অঞ্চলৰ তলত দেখুৱাওক"</string>
 </resources>

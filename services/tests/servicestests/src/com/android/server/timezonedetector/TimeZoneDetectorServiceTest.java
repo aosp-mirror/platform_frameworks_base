@@ -97,7 +97,7 @@ public class TimeZoneDetectorServiceTest {
 
         try {
             mTimeZoneDetectorService.getCapabilitiesAndConfig();
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
@@ -129,7 +129,7 @@ public class TimeZoneDetectorServiceTest {
         ITimeZoneDetectorListener mockListener = mock(ITimeZoneDetectorListener.class);
         try {
             mTimeZoneDetectorService.addListener(mockListener);
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
@@ -235,7 +235,7 @@ public class TimeZoneDetectorServiceTest {
 
         try {
             mTimeZoneDetectorService.suggestGeolocationTimeZone(timeZoneSuggestion);
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingOrSelfPermission(
                     eq(android.Manifest.permission.SET_TIME_ZONE),
@@ -268,7 +268,7 @@ public class TimeZoneDetectorServiceTest {
 
         try {
             mTimeZoneDetectorService.suggestManualTimeZone(timeZoneSuggestion);
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingOrSelfPermission(
                     eq(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE),
@@ -301,7 +301,7 @@ public class TimeZoneDetectorServiceTest {
 
         try {
             mTimeZoneDetectorService.suggestTelephonyTimeZone(timeZoneSuggestion);
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE),
@@ -317,7 +317,7 @@ public class TimeZoneDetectorServiceTest {
 
         try {
             mTimeZoneDetectorService.suggestTelephonyTimeZone(timeZoneSuggestion);
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE),
