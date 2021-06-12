@@ -83,6 +83,7 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
+import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -184,6 +185,25 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @Nullable
     private ActivityRecord mResumedActivity = null;
 
+    /**
+     * This TaskFragment was created by an organizer which has the following implementations.
+     * <ul>
+     *     <li>The TaskFragment won't be removed when it is empty. Removal has to be an explicit
+     *     request from the organizer.</li>
+     *     <li>If this fragment is a Task object then unlike other non-root tasks, it's direct
+     *     children are visible to the organizer for ordering purposes.</li>
+     *     <li>A TaskFragment can be created by {@link android.window.TaskFragmentOrganizer}, and
+     *     a Task can be created by {@link android.window.TaskOrganizer}.</li>
+     * </ul>
+     */
+    @VisibleForTesting
+    boolean mCreatedByOrganizer;
+
+    /** Organizer that organizing this TaskFragment. */
+    // TODO(b/190433129) set the value when creating TaskFragment from WCT.
+    @Nullable
+    private ITaskFragmentOrganizer mTaskFragmentOrganizer;
+
     /** Client assigned unique token for this TaskFragment if this is created by an organizer. */
     // TODO(b/190433129) set the value when creating TaskFragment from WCT.
     @Nullable
@@ -245,12 +265,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
-    TaskFragment(ActivityTaskManagerService atmService) {
+    TaskFragment(ActivityTaskManagerService atmService, boolean createdByOrganizer) {
         super(atmService.mWindowManager);
 
         mAtmService = atmService;
         mTaskSupervisor = atmService.mTaskSupervisor;
         mRootWindowContainer = mAtmService.mRootWindowContainer;
+        mCreatedByOrganizer = createdByOrganizer;
     }
 
     void setAdjacentTaskFragment(TaskFragment taskFragment) {
