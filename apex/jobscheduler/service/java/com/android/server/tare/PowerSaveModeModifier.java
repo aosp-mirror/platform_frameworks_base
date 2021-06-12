@@ -20,26 +20,27 @@ import android.annotation.NonNull;
 import android.os.PowerManager;
 import android.util.IndentingPrintWriter;
 
-/** Multiplier that makes things more expensive in adaptive and full battery saver are active. */
-class PowerSaveModeMultiplier extends Multiplier {
+/** Modifier that makes things more expensive in adaptive and full battery saver are active. */
+class PowerSaveModeModifier extends Modifier {
     private final InternalResourceService mIrs;
     private final PowerManager mPowerManager;
 
-    PowerSaveModeMultiplier(@NonNull InternalResourceService irs) {
-        super(true, false);
+    PowerSaveModeModifier(@NonNull InternalResourceService irs) {
+        super();
         mIrs = irs;
         mPowerManager = irs.getContext().getSystemService(PowerManager.class);
     }
 
-    double getCurrentMultiplier() {
+    @Override
+    long getModifiedCostToProduce(long ctp) {
         if (mPowerManager.isPowerSaveMode()) {
-            return 1.5;
+            return (long) (1.5 * ctp);
         }
         // TODO: get adaptive power save mode
         if (mPowerManager.isPowerSaveMode()) {
-            return 1.25;
+            return (long) (1.25 * ctp);
         }
-        return 1;
+        return ctp;
     }
 
     @Override

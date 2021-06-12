@@ -16,6 +16,12 @@
 
 package com.android.server.tare;
 
+import static com.android.server.tare.Modifier.COST_MODIFIER_CHARGING;
+import static com.android.server.tare.Modifier.COST_MODIFIER_DEVICE_IDLE;
+import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
+import static com.android.server.tare.Modifier.COST_MODIFIER_PROCESS_STATE;
+import static com.android.server.tare.Modifier.NUM_COST_MODIFIERS;
+
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -62,7 +68,7 @@ public abstract class EconomicPolicy {
         /**
          * The base price to perform this action. If this is
          * less than the {@link #costToProduce}, then the system should not perform
-         * the action unless a multiplier lowers the cost to produce.
+         * the action unless a modifier lowers the cost to produce.
          */
         public final long basePrice;
 
@@ -91,11 +97,22 @@ public abstract class EconomicPolicy {
         }
     }
 
+    private static final Modifier[] COST_MODIFIER_BY_INDEX = new Modifier[NUM_COST_MODIFIERS];
+
     EconomicPolicy(@NonNull InternalResourceService irs) {
+        for (int mId : getCostModifiers()) {
+            initModifier(mId, irs);
+        }
     }
 
     @CallSuper
     void onSystemServicesReady() {
+        for (int i = 0; i < NUM_COST_MODIFIERS; ++i) {
+            final Modifier modifier = COST_MODIFIER_BY_INDEX[i];
+            if (modifier != null) {
+                modifier.onSystemServicesReady();
+            }
+        }
     }
 
     /**
@@ -117,6 +134,10 @@ public abstract class EconomicPolicy {
      */
     abstract long getMaxSatiatedCirculation();
 
+    /** Return the set of modifiers that should apply to this policy's costs. */
+    @NonNull
+    abstract int[] getCostModifiers();
+
     @Nullable
     abstract Action getAction(@NonNull String actionName);
 
@@ -124,5 +145,89 @@ public abstract class EconomicPolicy {
     abstract Reward getReward(@NonNull String rewardName);
 
     void dump(IndentingPrintWriter pw) {
+    }
+
+    final long getCostOfAction(@NonNull String actionName, int userId, @NonNull String pkgName) {
+        final Action action = getAction(actionName);
+        if (action == null) {
+            return 0;
+        }
+        long ctp = action.costToProduce;
+        long price = action.basePrice;
+        final int[] costModifiers = getCostModifiers();
+        boolean useProcessStatePriceDeterminant = false;
+        for (int costModifier : costModifiers) {
+            if (costModifier == COST_MODIFIER_PROCESS_STATE) {
+                useProcessStatePriceDeterminant = true;
+            } else {
+                final Modifier modifier = getModifier(costModifier);
+                ctp = modifier.getModifiedCostToProduce(ctp);
+                price = modifier.getModifiedPrice(price);
+            }
+        }
+        // ProcessStateModifier needs to be done last.
+        if (useProcessStatePriceDeterminant) {
+            ProcessStateModifier processStateModifier =
+                    (ProcessStateModifier) getModifier(COST_MODIFIER_PROCESS_STATE);
+            price = processStateModifier.getModifiedPrice(userId, pkgName, ctp, price);
+        }
+        return price;
+    }
+
+    private static void initModifier(@Modifier.CostModifier final int modifierId,
+            @NonNull InternalResourceService irs) {
+        if (modifierId < 0 || modifierId >= COST_MODIFIER_BY_INDEX.length) {
+            throw new IllegalArgumentException("Invalid modifier id " + modifierId);
+        }
+        Modifier modifier = COST_MODIFIER_BY_INDEX[modifierId];
+        if (modifier == null) {
+            switch (modifierId) {
+                case COST_MODIFIER_CHARGING:
+                    modifier = new ChargingModifier(irs);
+                    break;
+                case COST_MODIFIER_DEVICE_IDLE:
+                    modifier = new DeviceIdleModifier(irs);
+                    break;
+                case COST_MODIFIER_POWER_SAVE_MODE:
+                    modifier = new PowerSaveModeModifier(irs);
+                    break;
+                case COST_MODIFIER_PROCESS_STATE:
+                    modifier = new ProcessStateModifier(irs);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid modifier id " + modifierId);
+            }
+            COST_MODIFIER_BY_INDEX[modifierId] = modifier;
+        }
+    }
+
+    @NonNull
+    private static Modifier getModifier(@Modifier.CostModifier final int modifierId) {
+        if (modifierId < 0 || modifierId >= COST_MODIFIER_BY_INDEX.length) {
+            throw new IllegalArgumentException("Invalid modifier id " + modifierId);
+        }
+        final Modifier modifier = COST_MODIFIER_BY_INDEX[modifierId];
+        if (modifier == null) {
+            throw new IllegalStateException(
+                    "Modifier #" + modifierId + " was never initialized");
+        }
+        return modifier;
+    }
+
+    protected static void dumpActiveModifiers(IndentingPrintWriter pw) {
+        for (int i = 0; i < NUM_COST_MODIFIERS; ++i) {
+            pw.print("Modifier ");
+            pw.println(i);
+            pw.increaseIndent();
+
+            Modifier modifier = COST_MODIFIER_BY_INDEX[i];
+            if (modifier != null) {
+                modifier.dump(pw);
+            } else {
+                pw.println("NOT ACTIVE");
+            }
+
+            pw.decreaseIndent();
+        }
     }
 }

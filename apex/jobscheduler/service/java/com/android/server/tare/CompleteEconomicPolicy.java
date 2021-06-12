@@ -20,6 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
+
+import libcore.util.EmptyArray;
 
 
 /** Combines all enabled policies into one. */
@@ -29,6 +32,7 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     private final ArrayMap<String, Action> mActions = new ArrayMap<>();
     /** Lazily populated set of rewards covered by this policy. */
     private final ArrayMap<String, Reward> mRewards = new ArrayMap<>();
+    private final int[] mCostModifiers;
     private final long mMaxSatiatedBalance;
     private final long mMaxSatiatedCirculation;
 
@@ -36,6 +40,18 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
         super(irs);
         mEnabledEconomicPolicies.add(new AlarmManagerEconomicPolicy(irs));
         mEnabledEconomicPolicies.add(new JobSchedulerEconomicPolicy(irs));
+
+        ArraySet<Integer> costModifiers = new ArraySet<>();
+        for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
+            final int[] sm = mEnabledEconomicPolicies.valueAt(i).getCostModifiers();
+            for (int s : sm) {
+                costModifiers.add(s);
+            }
+        }
+        mCostModifiers = new int[costModifiers.size()];
+        for (int i = 0; i < costModifiers.size(); ++i) {
+            mCostModifiers[i] = costModifiers.valueAt(i);
+        }
 
         long max = 0;
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
@@ -67,6 +83,12 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     @Override
     public long getMaxSatiatedCirculation() {
         return mMaxSatiatedCirculation;
+    }
+
+    @NonNull
+    @Override
+    public int[] getCostModifiers() {
+        return mCostModifiers == null ? EmptyArray.INT : mCostModifiers;
     }
 
     @Nullable
@@ -113,5 +135,10 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
                 ? new Reward(rewardName, instantReward, ongoingReward, maxReward) : null;
         mRewards.put(rewardName, reward);
         return reward;
+    }
+
+    @Override
+    void dump(IndentingPrintWriter pw) {
+        dumpActiveModifiers(pw);
     }
 }

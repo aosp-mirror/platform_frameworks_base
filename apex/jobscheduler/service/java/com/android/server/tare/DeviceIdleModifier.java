@@ -25,9 +25,9 @@ import android.os.PowerManager;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 
-/** Multiplier that makes things more expensive in light and deep doze. */
-class DeviceIdleMultiplier extends Multiplier {
-    private static final String TAG = "TARE-" + DeviceIdleMultiplier.class.getSimpleName();
+/** Modifier that makes things more expensive in light and deep doze. */
+class DeviceIdleModifier extends Modifier {
+    private static final String TAG = "TARE-" + DeviceIdleModifier.class.getSimpleName();
     private static final boolean DEBUG = InternalResourceService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
@@ -35,22 +35,23 @@ class DeviceIdleMultiplier extends Multiplier {
     private final PowerManager mPowerManager;
     private final DeviceIdleTracker mDeviceIdleTracker;
 
-    DeviceIdleMultiplier(@NonNull InternalResourceService irs) {
-        super(true, false);
+    DeviceIdleModifier(@NonNull InternalResourceService irs) {
+        super();
         mIrs = irs;
         mPowerManager = irs.getContext().getSystemService(PowerManager.class);
         mDeviceIdleTracker = new DeviceIdleTracker();
         mDeviceIdleTracker.startTracking(irs.getContext());
     }
 
-    double getCurrentMultiplier() {
+    @Override
+    long getModifiedCostToProduce(long ctp) {
         if (mDeviceIdleTracker.mDeviceIdle) {
-            return 1.2;
+            return (long) (1.2 * ctp);
         }
         if (mDeviceIdleTracker.mDeviceLightIdle) {
-            return 1.1;
+            return (long) (1.1 * ctp);
         }
-        return 1;
+        return ctp;
     }
 
     @Override
