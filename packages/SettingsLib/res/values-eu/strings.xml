@@ -239,7 +239,7 @@
     <string name="keep_screen_on" msgid="1187161672348797558">"Mantendu aktibo"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Pantaila ez da ezarriko inoiz inaktibo kargatu bitartean"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Gaitu Bluetooth HCI miatze-erregistroa"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Hauteman Bluetooth paketeak (aktibatu edo desaktibatu Bluetooth-a ezarpena aldatu ostean)."</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Hauteman Bluetooth paketeak (aktibatu edo desaktibatu Bluetooth-a ezarpena aldatu ostean)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM desblokeoa"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Onartu abiarazlea desblokeatzea"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM desblokeoa onartu nahi duzu?"</string>
@@ -283,7 +283,7 @@
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Ezin izan da konektatu"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Erakutsi hari gabe bistaratzeko ziurtagiriaren aukerak"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Erakutsi datu gehiago wifi-sareetan saioa hastean. Erakutsi sarearen identifikatzailea eta seinalearen indarra wifi-sareen hautatzailean."</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Bateria gutxiago kontsumituko da, eta sarearen errendimendua hobetuko."</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Bateria gutxiago kontsumituko da, eta sarearen errendimendua hobetuko"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Modu hau gaituta dagoenean, baliteke gailuaren MAC helbidea aldatzea MAC helbideak ausaz antolatzeko aukera gaituta daukan sare batera konektatzen den bakoitzean."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sare neurtua"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Neurtu gabeko sarea"</string>
@@ -307,7 +307,7 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Aurretik baimendutako ordenagailu guztiei USB bidezko arazketarako sarbidea baliogabetu nahi diezu?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Baimendu garapenerako ezarpenak?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Ezarpen hauek garapen-xedeetarako pentsatu dira soilik. Baliteke ezarpenen eraginez gailua matxuratzea edo funtzionamendu okerra izatea."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Egiaztatu USBko aplikazioak"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Egiaztatu USB bidezko aplik."</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Egiaztatu ADB/ADT bidez instalatutako aplikazioak portaera kaltegarriak atzemateko"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth bidezko gailuak izenik gabe (MAC helbideak soilik) erakutsiko dira"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Bluetooth bidezko bolumen absolutuaren eginbidea desgaitu egiten du urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo ezin bada kontrolatu"</string>
@@ -331,7 +331,7 @@
     <string name="media_category" msgid="8122076702526144053">"Multimedia-edukia"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Kontrola"</string>
     <string name="strict_mode" msgid="889864762140862437">"Modu zorrotza gaituta"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Egin distira hari nagusian eragiketa luzeak egitean"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Distirarazi hari nagusian eragiketa luzeak egitean"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Erakuslearen kokapena"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Ukipen-datuak erakusteko pantaila-gainjartzea"</string>
     <string name="show_touches" msgid="8437666942161289025">"Erakutsi sakatutakoa"</string>
@@ -456,8 +456,8 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"Beteta"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Administratzaileak kontrolatzen du"</string>
     <string name="disabled" msgid="8017887509554714950">"Desgaituta"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Baimena dauka"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"Ez dauka baimenik"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Baimenduta"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"Baimendu gabe"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Instalatu aplikazio ezezagunak"</string>
     <string name="home" msgid="973834627243661438">"Ezarpenen hasierako pantaila"</string>
   <string-array name="battery_labels">

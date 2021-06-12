@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"စနစ်၏UI"</string>
+    <string name="app_label" msgid="4811759950673118541">"စနစ်၏ UI"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"ရှင်းရန်"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"အကြောင်းကြားချက်များ မရှိ"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"လက်ရှိအသုံးပြုမှု"</string>
@@ -429,7 +429,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ကို ပိတ်ထားသည်"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ကို ဖွင့်ထားသည်"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ဖန်သားပြင် မှတ်တမ်းတင်ရန်"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"စကရင် ရိုက်ကူးရန်"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"စတင်ရန်"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ရပ်ရန်"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"စက်"</string>
@@ -1020,7 +1020,7 @@
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"လော့ခ်မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံကို ပြရန်"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"အက်ပ်အပေါ်တွင် မျောနေသောပူ‌ဖောင်းကွက်အဖြစ် ပေါ်မည်"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'မနှောင့်ယှက်ရ\' ကို ကြားဖြတ်ခြင်း"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Ok"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ရပါပြီ"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ဆက်တင်များ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ဝင်းဒိုး ထပ်ပိုးလွှာ ချဲ့ခြင်း"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ဝင်းဒိုး ချဲ့ခြင်း"</string>
@@ -1080,5 +1080,5 @@
     <string name="controls_in_progress" msgid="4421080500238215939">"ဆောင်ရွက်နေသည်"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"ထိန်းချုပ်မှုအသစ်များ ကြည့်ရန် ဖွင့်ပိတ်ခလုတ်ကို ဖိထားပါ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"ထိန်းချုပ်မှုများ ထည့်ရန်"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"ထိန်းချုပ်မှုများ တည်းဖြတ်ရန်"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"ထိန်းချုပ်မှုများ ပြင်ရန်"</string>
 </resources>

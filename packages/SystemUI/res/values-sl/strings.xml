@@ -717,7 +717,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Tiho"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Privzeto"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Mehurček"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brez zvočnega opozarjanja ali vibriranja"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brez zvočnega opozarjanja ali vibriranja."</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brez zvočnega opozarjanja ali vibriranja, prikaz nižje v razdelku Pogovor."</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona. Pogovori v aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> so privzeto prikazani v oblačkih."</string>
@@ -1091,6 +1091,6 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Napaka, poskusite znova"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"V teku"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Za ogled novih kontrolnikov pridržite gumb za vklop"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj kontrolnike"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Uredi kontrolnike"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Dodajte kontrolnike"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Uredite kontrolnike"</string>
 </resources>

@@ -319,7 +319,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"чтение и запись телефонных звонков"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"осуществлять вызовы и управлять ими"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Датчики на теле"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Нательные датчики"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"доступ к данным датчиков о состоянии организма"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Получать содержимое окна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Анализировать содержимое активного окна."</string>

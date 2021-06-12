@@ -336,7 +336,7 @@
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"Statusleiste ein-/ausblenden"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Ermöglicht der App, die Statusleiste ein- oder auszublenden"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Verknüpfungen installieren"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Ermöglicht einer App das Hinzufügen von Verknüpfungen zum Startbildschirm ohne Eingriff des Nutzers"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"ohne Zutun des Nutzers Verknüpfungen zum Startbildschirm hinzufügen."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"Verknüpfungen deinstallieren"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Ermöglicht einer App das Entfernen von Verknüpfungen vom Startbildschirm ohne Eingriff des Nutzers"</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"Ausgehende Anrufe umleiten"</string>

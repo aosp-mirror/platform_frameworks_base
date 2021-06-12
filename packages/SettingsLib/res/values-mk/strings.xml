@@ -456,7 +456,7 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"Полна"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Контролирано од администраторот"</string>
     <string name="disabled" msgid="8017887509554714950">"Оневозможено"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Дозволено"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Со дозвола"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Без дозвола"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Непознати апликации"</string>
     <string name="home" msgid="973834627243661438">"Почетна страница за поставки"</string>

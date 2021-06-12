@@ -496,7 +496,7 @@
     <string name="cancel" msgid="5665114069455378395">"Cancelar"</string>
     <string name="okay" msgid="949938843324579502">"Ok"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ativar"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ativar o \"Não perturbe\""</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ativar o Não perturbe"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nunca"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Somente prioridade"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

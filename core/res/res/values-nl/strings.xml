@@ -1307,7 +1307,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analoog audioaccessoire gedetecteerd"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Het aangesloten apparaat werkt niet met deze telefoon. Tik voor meer informatie."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB-foutopsporing verbonden"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Tik om USB-foutopsporing uit te zetten."</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Tik om USB-foutopsporing uit te zetten"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Selecteer deze optie om USB-foutopsporing uit te zetten."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Draadloze foutopsporing verbonden"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Tik om draadloze foutopsporing uit te zetten"</string>
@@ -1794,7 +1794,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Batterijbesparing doet het volgende om de batterijduur te verlengen:\n\n•Het donkere thema aanzetten\n•Achtergrondactiviteit, bepaalde visuele effecten en andere functies (zoals \'Hey Google\') uitzetten of beperken\n\n"<annotation id="url">"Meer informatie"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"Batterijbesparing doet het volgende om de batterijduur te verlengen:\n\n•Het donkere thema aanzetten\n•Achtergrondactiviteit, bepaalde visuele effecten en andere functies (zoals \'Hey Google\') uitzetten of beperken"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens sturen of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet weergegeven totdat je erop tikt."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens sturen of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet getoond totdat je erop tikt."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Databesparing aanzetten?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aanzetten"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
