@@ -239,7 +239,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"పవర్ ఆఫ్ చేయి"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"పవర్"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"రీస్టార్ట్ చేయి"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"అత్యవసరం"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"ఎమర్జెన్సీ"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"బగ్ నివేదిక"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"సెషన్‌ను ముగించు"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"స్క్రీన్‌షాట్"</string>

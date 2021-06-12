@@ -242,7 +242,7 @@
     <item msgid="1212561935004167943">"हाइलाइट परीक्षण चित्र कोर्ने आदेशहरू हरियोमा"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="634406443901014984">"बन्द"</item>
+    <item msgid="634406443901014984">"अफ छ"</item>
     <item msgid="1288760936356000927">"स्क्रिनमा बारको रूपमा"</item>
     <item msgid="5023908510820531131">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> मा"</item>
   </string-array>
