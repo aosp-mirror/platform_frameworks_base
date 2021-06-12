@@ -724,7 +724,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"מעוררת תשומת לב באמצעות קיצור דרך צף לתוכן הזה."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"מוצגת בחלק העליון של קטע התראות השיחה, מופיעה בבועה צפה, תוצג תמונת פרופיל במסך הנעילה"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"הגדרות"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"עדיפות"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"בעדיפות גבוהה"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא תומכת בתכונות השיחה"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"אין בועות מהזמן האחרון"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"בועות אחרונות ובועות שנסגרו יופיעו כאן"</string>
@@ -865,8 +865,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"קוד מפתח ימני"</string>
     <string name="left_icon" msgid="5036278531966897006">"סמל שמאלי"</string>
     <string name="right_icon" msgid="1103955040645237425">"סמל ימני"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"יש ללחוץ ולגרור כדי להוסיף אריחים"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"יש ללחוץ ולגרור כדי לסדר מחדש את האריחים"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"יש ללחוץ ולגרור כדי להוסיף כרטיסי מידע"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"יש ללחוץ ולגרור כדי לסדר מחדש את כרטיסי המידע"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"אפשר לגרור לכאן כדי להסיר"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"יש צורך ב-<xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> אריחים לפחות"</string>
     <string name="qs_edit" msgid="5583565172803472437">"עריכה"</string>

@@ -610,7 +610,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"يؤدي هذا الإجراء إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. لإلغاء تثبيت الشاشة على هذا التطبيق، اسحب بسرعة للأعلى مع إبقاء الإصبع على الشاشة."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"نظرة عامة\" لإزالة التثبيت."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"الشاشة الرئيسية\" لإزالة التثبيت."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"يمكن الوصول إلى البيانات الشخصية (مثلاً جهات الاتصال ومحتوى الرسائل الإلكترونية)"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"يمكن الوصول إلى البيانات الشخصية (مثلاً جهات الاتصال ومحتوى الرسائل الإلكترونية)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"عند تثبيت الشاشة على تطبيق معيّن، سيظل بإمكان التطبيق فتح تطبيقات أخرى."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"لإلغاء تثبيت الشاشة على هذا التطبيق، المس مع الاستمرار زرّي \"الرجوع\" و\"لمحة عامة\" (رمز المربّع)."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"لإلغاء تثبيت الشاشة على هذا التطبيق، المس مع الاستمرار زرّي \"الرجوع\" و\"الشاشة الرئيسية\"."</string>
@@ -725,7 +725,7 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"فقاعة"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"بدون صوت أو اهتزاز"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في موضع أسفل في قسم المحادثات"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف. تظهر المحادثات من <xliff:g id="APP_NAME">%1$s</xliff:g> كفقاعات تلقائيًا."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"يلفِت هذا الإشعار انتباهك لهذا المحتوى باستخدام اختصار عائم."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"تظهر في أعلى قسم المحادثات وتظهر كفقاعة عائمة وتعرض صورة الملف الشخصي على شاشة القفل"</string>

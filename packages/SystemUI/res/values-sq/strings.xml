@@ -718,7 +718,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mban vëmendjen tënde me një shkurtore pluskuese te kjo përmbajtje."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Shfaqet në krye të seksionit të bisedës dhe shfaqet si flluskë pluskuese, shfaq fotografinë e profilit në ekranin e kyçjes"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cilësimet"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Përparësia"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Me përparësi"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mbështet veçoritë e bisedës"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nuk ka flluska të fundit"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Flluskat e fundit dhe flluskat e hequra do të shfaqen këtu"</string>

@@ -99,10 +99,10 @@
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micro"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Appareil et micro"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Démarrer"</string>
-    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Enregistrement de l\'écran"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Enregistrement de l\'écran…"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Enregistrement de l\'écran et de l\'audio…"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Afficher les points touchés sur l\'écran"</string>
-    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Appuyez ici pour arrêter"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Appuyez pour arrêter"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Arrêter"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Pause"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Reprendre"</string>
@@ -1005,9 +1005,9 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Déplacer en bas à droite"</string>
     <string name="bubble_dismiss_text" msgid="1314082410868930066">"Fermer la bulle"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ne pas afficher la conversation dans une bulle"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatter en utilisant des bulles"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatter via des bulles"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Les nouvelles conversations s\'affichent sous forme d\'icônes flottantes ou bulles. Appuyez sur la bulle pour l\'ouvrir. Faites-la glisser pour la déplacer."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Contrôler les paramètres des bulles"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Contrôlez les bulles à tout moment"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Appuyez sur \"Gérer\" pour désactiver les bulles de cette application"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"Paramètres <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>

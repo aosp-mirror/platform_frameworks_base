@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"ส่วนติดต่อผู้ใช้ของระบบ"</string>
+    <string name="app_label" msgid="4811759950673118541">"อินเทอร์เฟซผู้ใช้ของระบบ"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"ล้างข้อมูล"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"ไม่มีการแจ้งเตือน"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"ดำเนินอยู่"</string>
