@@ -1235,7 +1235,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateClockAppearance() {
         int totalHeight = mView.getHeight();
         int bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
-        int clockPreferredY = mKeyguardStatusViewController.getClockPreferredY(totalHeight);
         int userSwitcherPreferredY = mStatusBarHeaderHeightKeyguard;
         boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
         final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
@@ -1256,7 +1255,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 totalHeight,
                 mKeyguardStatusViewController.getHeight(),
                 userIconHeight,
-                clockPreferredY, userSwitcherPreferredY, hasCustomClock(),
+                userSwitcherPreferredY, hasCustomClock(),
                 hasVisibleNotifications, darkamount, mOverStretchAmount,
                 bypassEnabled, getUnlockedStackScrollerPadding(),
                 computeQsExpansionFraction(),

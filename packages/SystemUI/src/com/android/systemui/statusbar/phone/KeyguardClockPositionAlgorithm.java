@@ -63,11 +63,6 @@ public class KeyguardClockPositionAlgorithm {
     private int mUserSwitchHeight;
 
     /**
-     * Preferred Y position of clock.
-     */
-    private int mClockPreferredY;
-
-    /**
      * Preferred Y position of user avatar used by the multi-user switcher.
      */
     private int mUserSwitchPreferredY;
@@ -176,8 +171,8 @@ public class KeyguardClockPositionAlgorithm {
      */
     public void setup(int keyguardStatusBarHeaderHeight, int maxShadeBottom,
             int notificationStackHeight, float panelExpansion, int parentHeight,
-            int keyguardStatusHeight, int userSwitchHeight, int clockPreferredY,
-            int userSwitchPreferredY, boolean hasCustomClock, boolean hasVisibleNotifs, float dark,
+            int keyguardStatusHeight, int userSwitchHeight, int userSwitchPreferredY,
+            boolean hasCustomClock, boolean hasVisibleNotifs, float dark,
             float overStrechAmount, boolean bypassEnabled, int unlockedStackScrollerPadding,
             float qsExpansion, int cutoutTopInset, boolean isSplitShade) {
         mMinTopMargin = keyguardStatusBarHeaderHeight + Math.max(mContainerTopPadding,
@@ -188,7 +183,6 @@ public class KeyguardClockPositionAlgorithm {
         mHeight = parentHeight;
         mKeyguardStatusHeight = keyguardStatusHeight;
         mUserSwitchHeight = userSwitchHeight;
-        mClockPreferredY = clockPreferredY;
         mUserSwitchPreferredY = userSwitchPreferredY;
         mHasCustomClock = hasCustomClock;
         mHasVisibleNotifs = hasVisibleNotifs;
