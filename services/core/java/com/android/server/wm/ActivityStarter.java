@@ -1603,7 +1603,7 @@ class ActivityStarter {
                             mTargetTask, remoteTransition);
                 } else if (started) {
                     // Make the collecting transition wait until this request is ready.
-                    mService.getTransitionController().setReady(false);
+                    mService.getTransitionController().setReady(r, false);
                 }
             }
         }

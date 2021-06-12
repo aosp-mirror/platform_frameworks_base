@@ -132,7 +132,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private TransitionInfo.AnimationOptions mOverrideOptions;
 
     private @TransitionState int mState = STATE_COLLECTING;
-    private boolean mReadyCalled = false;
+    private final ReadyTracker mReadyTracker = new ReadyTracker();
 
     // TODO(b/188595497): remove when not needed.
     /** @see RecentsAnimationController#mNavigationBarAttachedToApp */
@@ -169,9 +169,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mState = STATE_STARTED;
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Starting Transition %d",
                 mSyncId);
-        if (mReadyCalled) {
-            setReady();
-        }
+        applyReady();
     }
 
     /**
@@ -186,6 +184,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         for (WindowContainer curr = wc.getParent(); curr != null && !mChanges.containsKey(curr);
                 curr = curr.getParent()) {
             mChanges.put(curr, new ChangeInfo(curr));
+            if (isReadyGroup(curr)) {
+                mReadyTracker.addGroup(curr);
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, " Creating Ready-group for"
+                                + " Transition %d with root=%s", mSyncId, curr);
+            }
         }
         if (mParticipants.contains(wc)) return;
         mSyncEngine.addToSyncSet(mSyncId, wc);
@@ -236,21 +239,33 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      * all participants have finished drawing, the transition can still collect participants.
      *
      * If this is called before the transition is started, it will be deferred until start.
+     *
+     * @param wc A reference point to determine which ready-group to update. For now, each display
+     *           has its own ready-group, so this is used to look-up which display to mark ready.
+     *           The transition will wait for all groups to be ready.
      */
-    void setReady(boolean ready) {
+    void setReady(WindowContainer wc, boolean ready) {
         if (mSyncId < 0) return;
-        if (mState < STATE_STARTED) {
-            mReadyCalled = ready;
-            return;
-        }
+        mReadyTracker.setReadyFrom(wc, ready);
+        applyReady();
+    }
+
+    private void applyReady() {
+        if (mState < STATE_STARTED) return;
+        final boolean ready = mReadyTracker.allReady();
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                 "Set transition ready=%b %d", ready, mSyncId);
         mSyncEngine.setReady(mSyncId, ready);
     }
 
-    /** @see #setReady . This calls with parameter true. */
-    void setReady() {
-        setReady(true);
+    /**
+     * Sets all possible ready groups to ready.
+     * @see ReadyTracker#setAllReady.
+     */
+    void setAllReady() {
+        if (mSyncId < 0) return;
+        mReadyTracker.setAllReady();
+        applyReady();
     }
 
     /**
@@ -881,6 +896,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     /**
+     * A ready group is defined by a root window-container where all transitioning windows under
+     * it are expected to animate together as a group. At the moment, this treats each display as
+     * a ready-group to match the existing legacy transition behavior.
+     */
+    private static boolean isReadyGroup(WindowContainer wc) {
+        return wc instanceof DisplayContent;
+    }
+
+    /**
      * Construct a TransitionInfo object from a set of targets and changes. Also populates the
      * root surface.
      */
@@ -1080,6 +1104,97 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 mChildren = new ArraySet<>();
             }
             mChildren.addAll(wcs);
+        }
+    }
+
+    /**
+     * The transition sync mechanism has 2 parts:
+     *   1. Whether all WM operations for a particular transition are "ready" (eg. did the app
+     *      launch or stop or get a new configuration?).
+     *   2. Whether all the windows involved have finished drawing their final-state content.
+     *
+     * A transition animation can play once both parts are complete. This ready-tracker keeps track
+     * of part (1). Currently, WM code assumes that "readiness" (part 1) is grouped. This means that
+     * even if the WM operations in one group are ready, the whole transition itself may not be
+     * ready if there are WM operations still pending in another group. This class helps keep track
+     * of readiness across the multiple groups. Currently, we assume that each display is a group
+     * since that is how it has been until now.
+     */
+    private static class ReadyTracker {
+        private final ArrayMap<WindowContainer, Boolean> mReadyGroups = new ArrayMap<>();
+
+        /**
+         * Ensures that this doesn't report as allReady before it has been used. This is needed
+         * in very niche cases where a transition is a no-op (nothing has been collected) but we
+         * still want to be marked ready (via. setAllReady).
+         */
+        private boolean mUsed = false;
+
+        /**
+         * If true, this overrides all ready groups and reports ready. Used by shell-initiated
+         * transitions via {@link #setAllReady()}.
+         */
+        private boolean mReadyOverride = false;
+
+        /**
+         * Adds a ready-group. Any setReady calls in this subtree will be tracked together. For
+         * now these are only DisplayContents.
+         */
+        void addGroup(WindowContainer wc) {
+            if (mReadyGroups.containsKey(wc)) {
+                Slog.e(TAG, "Trying to add a ready-group twice: " + wc);
+                return;
+            }
+            mReadyGroups.put(wc, false);
+        }
+
+        /**
+         * Sets a group's ready state.
+         * @param wc Any container within a group's subtree. Used to identify the ready-group.
+         */
+        void setReadyFrom(WindowContainer wc, boolean ready) {
+            mUsed = true;
+            WindowContainer current = wc;
+            while (current != null) {
+                if (isReadyGroup(current)) {
+                    mReadyGroups.put(current, ready);
+                    ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, " Setting Ready-group to"
+                            + " %b. group=%s from %s", ready, current, wc);
+                    break;
+                }
+                current = current.getParent();
+            }
+        }
+
+        /** Marks this as ready regardless of individual groups. */
+        void setAllReady() {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, " Setting allReady override");
+            mUsed = true;
+            mReadyOverride = true;
+        }
+
+        /** @return true if all tracked subtrees are ready. */
+        boolean allReady() {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, " allReady query: used=%b "
+                    + "override=%b states=[%s]", mUsed, mReadyOverride, groupsToString());
+            if (!mUsed) return false;
+            if (mReadyOverride) return true;
+            for (int i = mReadyGroups.size() - 1; i >= 0; --i) {
+                final WindowContainer wc = mReadyGroups.keyAt(i);
+                if (!wc.isAttached() || !wc.isVisibleRequested()) continue;
+                if (!mReadyGroups.valueAt(i)) return false;
+            }
+            return true;
+        }
+
+        private String groupsToString() {
+            StringBuilder b = new StringBuilder();
+            for (int i = 0; i < mReadyGroups.size(); ++i) {
+                if (i != 0) b.append(',');
+                b.append(mReadyGroups.keyAt(i)).append(':')
+                        .append(mReadyGroups.valueAt(i));
+            }
+            return b.toString();
         }
     }
 }
