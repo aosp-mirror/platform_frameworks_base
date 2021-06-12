@@ -4460,7 +4460,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
-        updateLightRevealScrimVisibility();
         Trace.endSection();
     }
 
@@ -4892,11 +4891,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void updateLightRevealScrimVisibility() {
         if (mLightRevealScrim == null) {
             // status bar may not be inflated yet
-            return;
-        }
-
-        if (mDozeServiceHost.isPulsing()) {
-            mLightRevealScrim.setVisibility(View.GONE);
             return;
         }
 

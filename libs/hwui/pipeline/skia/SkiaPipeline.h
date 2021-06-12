@@ -80,6 +80,8 @@ protected:
     SkColorType mSurfaceColorType;
     sk_sp<SkColorSpace> mSurfaceColorSpace;
 
+    bool isCapturingSkp() const { return mCaptureMode != CaptureMode::None; }
+
 private:
     void renderFrameImpl(const SkRect& clip,
                          const std::vector<sp<RenderNode>>& nodes, bool opaque,

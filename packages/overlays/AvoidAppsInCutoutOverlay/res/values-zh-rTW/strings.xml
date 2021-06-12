@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="1946296620328354129">"隱藏 (避免在螢幕凹口顯示應用程式的內容)"</string>
+    <string name="display_cutout_emulation_overlay" msgid="3814493834951357513">"在螢幕凹口底下顯示應用程式畫面"</string>
 </resources>

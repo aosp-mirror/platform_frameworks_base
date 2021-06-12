@@ -2186,10 +2186,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return false;
         }
 
-        if (!ri.activityInfo.isEnabled()) {
-            return false;
-        }
-
         ComponentName componentName = new ComponentName(ri.activityInfo.packageName,
                 ri.activityInfo.name);
         ProviderId providerId = new ProviderId(ri.activityInfo.applicationInfo.uid, componentName);
