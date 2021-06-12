@@ -76,7 +76,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mDozeParameters = dozeParameters;
         mKeyguardStateController = keyguardStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
-                dozeParameters, unlockedScreenOffAnimationController);
+                dozeParameters, unlockedScreenOffAnimationController, /* animateYPos= */ true);
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mSmartspaceTransitionController = smartspaceTransitionController;
 
@@ -184,16 +184,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      */
     public float getClockTextSize() {
         return mKeyguardClockSwitchController.getClockTextSize();
-    }
-
-    /**
-     * Returns the preferred Y position of the clock.
-     *
-     * @param totalHeight The height available to position the clock.
-     * @return Y position of clock.
-     */
-    public int getClockPreferredY(int totalHeight) {
-        return mKeyguardClockSwitchController.getClockPreferredY(totalHeight);
     }
 
     /**

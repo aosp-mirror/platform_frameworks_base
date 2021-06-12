@@ -669,6 +669,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Novčanik"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Postavite aplikaciju za bržu i sigurniju kupnju telefonom"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži sve"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Otključajte da biste platili"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nije postavljeno"</string>
@@ -1090,7 +1091,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Odbaci"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nastavi"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Postavke"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g>, <xliff:g id="ARTIST_NAME">%2$s</xliff:g> reproducira se putem aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Reprodukcija"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Otvori <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Pustite <xliff:g id="SONG_NAME">%1$s</xliff:g>, <xliff:g id="ARTIST_NAME">%2$s</xliff:g> putem aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Pustite <xliff:g id="SONG_NAME">%1$s</xliff:g> putem aplikacije <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, provjerite aplik."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Pogreška, pokušavamo ponovo…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>
@@ -1109,7 +1114,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Odabrano uređaja: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (nije povezano)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Povezivanje nije bilo moguće. Pokušajte ponovo."</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Upari novi uređaj"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Uparite novi uređaj"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Broj međuverzije"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Broj međuverzije kopiran je u međuspremnik."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvoreni razgovor"</string>

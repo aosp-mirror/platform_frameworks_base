@@ -666,6 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Bliv klar til at foretage hurtigere og mere sikre køb med din telefon"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Vis alle"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Lås op for at betale"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Ikke konfigureret"</string>
@@ -1055,7 +1056,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"fjern fra favoritter"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Flyt til position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Betjeningselementer"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Vælg, hvilke indstillinger du vil have adgang til i kvikmenuen"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Vælg, hvilke styringselementer du vil have adgang til i kvikmenuen"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Flyt et felt ved at holde det nede og trække"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle styringselementerne blev fjernet"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ændringerne blev ikke gemt"</string>
@@ -1084,7 +1085,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Luk"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Genoptag"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Indstillinger"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> af <xliff:g id="ARTIST_NAME">%2$s</xliff:g> afspilles via <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Afspil"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Åbn <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Afspil <xliff:g id="SONG_NAME">%1$s</xliff:g> af <xliff:g id="ARTIST_NAME">%2$s</xliff:g> via <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Afspil <xliff:g id="SONG_NAME">%1$s</xliff:g> via <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv. Tjek appen"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Fejl. Prøver igen…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ikke fundet"</string>
