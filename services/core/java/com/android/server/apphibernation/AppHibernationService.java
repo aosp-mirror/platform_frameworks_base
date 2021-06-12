@@ -97,7 +97,9 @@ public final class AppHibernationService extends SystemService {
             PackageManager.MATCH_DIRECT_BOOT_AWARE
                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                     | PackageManager.MATCH_UNINSTALLED_PACKAGES
-                    | PackageManager.MATCH_DISABLED_COMPONENTS;
+                    | PackageManager.MATCH_DISABLED_COMPONENTS
+                    | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                    | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS;
 
     /**
      * Lock for accessing any in-memory hibernation state

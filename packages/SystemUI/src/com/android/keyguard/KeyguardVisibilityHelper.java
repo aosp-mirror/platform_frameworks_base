@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.StatusBarState;
@@ -40,6 +41,7 @@ public class KeyguardVisibilityHelper {
     private final KeyguardStateController mKeyguardStateController;
     private final DozeParameters mDozeParameters;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private boolean mAnimateYPos;
     private boolean mKeyguardViewVisibilityAnimating;
     private boolean mLastOccludedState = false;
     private final AnimationProperties mAnimationProperties = new AnimationProperties();
@@ -47,11 +49,13 @@ public class KeyguardVisibilityHelper {
     public KeyguardVisibilityHelper(View view,
             KeyguardStateController keyguardStateController,
             DozeParameters dozeParameters,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            boolean animateYPos) {
         mView = view;
         mKeyguardStateController = keyguardStateController;
         mDozeParameters = dozeParameters;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mAnimateYPos = animateYPos;
     }
 
     public boolean isVisibilityAnimating() {
@@ -98,23 +102,25 @@ public class KeyguardVisibilityHelper {
         } else if (statusBarState == KEYGUARD) {
             if (keyguardFadingAway) {
                 mKeyguardViewVisibilityAnimating = true;
-                float target = mView.getY() - mView.getHeight() * 0.05f;
-                int delay = 0;
-                int duration = 125;
-                // We animate the Y properly separately using the PropertyAnimator, as the panel
-                // view als needs to update the end position.
-                mAnimationProperties.setDuration(duration).setDelay(delay);
-                PropertyAnimator.cancelAnimation(mView, AnimatableProperty.Y);
-                PropertyAnimator.setProperty(mView, AnimatableProperty.Y, target,
-                        mAnimationProperties,
-                        true /* animate */);
-                mView.animate()
+                ViewPropertyAnimator animator = mView.animate()
                         .alpha(0)
                         .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
-                        .setDuration(duration)
-                        .setStartDelay(delay)
-                        .withEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable)
-                        .start();
+                        .withEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable);
+                if (mAnimateYPos) {
+                    float target = mView.getY() - mView.getHeight() * 0.05f;
+                    int delay = 0;
+                    int duration = 125;
+                    // We animate the Y property separately using the PropertyAnimator, as the panel
+                    // view also needs to update the end position.
+                    mAnimationProperties.setDuration(duration).setDelay(delay);
+                    PropertyAnimator.cancelAnimation(mView, AnimatableProperty.Y);
+                    PropertyAnimator.setProperty(mView, AnimatableProperty.Y, target,
+                            mAnimationProperties,
+                            true /* animate */);
+                    animator.setDuration(duration)
+                            .setStartDelay(delay);
+                }
+                animator.start();
             } else if (mLastOccludedState && !isOccluded) {
                 // An activity was displayed over the lock screen, and has now gone away
                 mView.setVisibility(View.VISIBLE);
