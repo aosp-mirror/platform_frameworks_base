@@ -32,6 +32,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.SystemProperties;
@@ -324,6 +325,12 @@ public class StartingSurfaceDrawer {
             // on external storage that has been unmounted.
             Slog.w(TAG, "failed creating starting window at taskId: " + taskId, e);
         }
+    }
+
+    int getStartingWindowBackgroundColorForTask(int taskId) {
+        StartingWindowRecord startingWindowRecord = mStartingWindowRecords.get(taskId);
+        if (startingWindowRecord == null || startingWindowRecord.mContentView == null) return 0;
+        return ((ColorDrawable) startingWindowRecord.mContentView.getBackground()).getColor();
     }
 
     private static class SplashScreenViewSupplier implements Supplier<SplashScreenView> {
