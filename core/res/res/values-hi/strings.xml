@@ -941,7 +941,7 @@
     <string name="autofill_province" msgid="3676846437741893159">"प्रांत"</string>
     <string name="autofill_postal_code" msgid="7034789388968295591">"डाक कोड"</string>
     <string name="autofill_state" msgid="3341725337190434069">"राज्य"</string>
-    <string name="autofill_zip_code" msgid="1315503730274962450">"ज़िप कोड"</string>
+    <string name="autofill_zip_code" msgid="1315503730274962450">"पिन कोड"</string>
     <string name="autofill_county" msgid="7781382735643492173">"काउंटी"</string>
     <string name="autofill_island" msgid="5367139008536593734">"द्वीप"</string>
     <string name="autofill_district" msgid="6428712062213557327">"जिला"</string>
