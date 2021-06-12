@@ -62,6 +62,7 @@
         android:paddingHorizontal="48dp"
         android:paddingTop="8dp"
         android:paddingBottom="42dp"
+        android:alpha="0"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
         app:layout_constraintTop_toBottomOf="@id/save"
@@ -71,6 +72,16 @@
         tools:background="?android:colorBackground"
         tools:minHeight="100dp"
         tools:minWidth="100dp" />
+
+    <ImageView
+        android:id="@+id/enter_transition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="matrix"
+        app:layout_constraintTop_toTopOf="@id/preview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:transitionName="screenshot_preview_image"/>
 
     <com.android.systemui.screenshot.CropView
         android:id="@+id/crop_view"
@@ -86,7 +97,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:handleThickness="@dimen/screenshot_crop_handle_thickness"
-        app:handleColor="?androidprv:attr/colorAccentSecondary"
+        app:handleColor="?androidprv:attr/colorAccentPrimary"
         app:scrimColor="@color/screenshot_crop_scrim"
         tools:background="?android:colorBackground"
         tools:minHeight="100dp"
@@ -128,7 +139,7 @@
         android:id="@+id/transition"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/save"
+        app:layout_constraintTop_toTopOf="@id/preview"
         app:layout_constraintStart_toStartOf="parent"
         android:scaleType="centerCrop"
         android:visibility="invisible"

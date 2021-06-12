@@ -172,13 +172,12 @@ public final class SplitLayout {
             affectsLayout = true;
         }
 
-        if (mInitialized && affectsLayout) {
+        if (mInitialized) {
             release();
             init();
-            return true;
         }
 
-        return false;
+        return affectsLayout;
     }
 
     /** Updates recording bounds of divider window and both of the splits. */

@@ -602,14 +602,15 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     public void onDisplayAreaInfoChanged(DisplayAreaInfo displayAreaInfo) {
         mDisplayAreaInfo = displayAreaInfo;
         if (mSplitLayout != null
-                && mSplitLayout.updateConfiguration(mDisplayAreaInfo.configuration)) {
+                && mSplitLayout.updateConfiguration(mDisplayAreaInfo.configuration)
+                && mMainStage.isActive()) {
             onBoundsChanged(mSplitLayout);
         }
     }
 
     private void onFoldedStateChanged(boolean folded) {
         if (folded && mMainStage.isActive()) {
-            exitSplitScreen();
+            exitSplitScreen(mMainStage);
         }
     }
 

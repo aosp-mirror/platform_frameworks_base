@@ -18,6 +18,7 @@ package com.android.server;
 
 import static android.Manifest.permission.DUMP;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_INACTIVE;
@@ -36,6 +37,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -73,6 +75,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.net.module.util.LocationPermissionChecker;
+import com.android.net.module.util.PermissionUtils;
 import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
@@ -739,9 +742,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             @NonNull IVcnUnderlyingNetworkPolicyListener listener) {
         requireNonNull(listener, "listener was null");
 
-        mContext.enforceCallingOrSelfPermission(
+        PermissionUtils.enforceAnyPermissionOf(
+                mContext,
                 android.Manifest.permission.NETWORK_FACTORY,
-                "Must have permission NETWORK_FACTORY to register a policy listener");
+                android.Manifest.permission.MANAGE_TEST_NETWORKS);
 
         Binder.withCleanCallingIdentity(() -> {
             PolicyListenerBinderDeath listenerBinderDeath = new PolicyListenerBinderDeath(listener);
@@ -766,9 +770,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             @NonNull IVcnUnderlyingNetworkPolicyListener listener) {
         requireNonNull(listener, "listener was null");
 
-        mContext.enforceCallingOrSelfPermission(
+        PermissionUtils.enforceAnyPermissionOf(
+                mContext,
                 android.Manifest.permission.NETWORK_FACTORY,
-                "Must have permission NETWORK_FACTORY to unregister a policy listener");
+                android.Manifest.permission.MANAGE_TEST_NETWORKS);
 
         Binder.withCleanCallingIdentity(() -> {
             synchronized (mLock) {
@@ -819,10 +824,20 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         requireNonNull(networkCapabilities, "networkCapabilities was null");
         requireNonNull(linkProperties, "linkProperties was null");
 
-        mContext.enforceCallingOrSelfPermission(
+        PermissionUtils.enforceAnyPermissionOf(
+                mContext,
                 android.Manifest.permission.NETWORK_FACTORY,
-                "Must have permission NETWORK_FACTORY or be the SystemServer to get underlying"
-                        + " Network policies");
+                android.Manifest.permission.MANAGE_TEST_NETWORKS);
+
+        final boolean isUsingManageTestNetworks =
+                mContext.checkCallingOrSelfPermission(android.Manifest.permission.NETWORK_FACTORY)
+                        != PackageManager.PERMISSION_GRANTED;
+
+        if (isUsingManageTestNetworks && !networkCapabilities.hasTransport(TRANSPORT_TEST)) {
+            throw new IllegalStateException(
+                    "NetworkCapabilities must be for Test Network if using permission"
+                            + " MANAGE_TEST_NETWORKS");
+        }
 
         return Binder.withCleanCallingIdentity(() -> {
             // Defensive copy in case this call is in-process and the given NetworkCapabilities

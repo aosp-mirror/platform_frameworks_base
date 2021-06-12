@@ -342,7 +342,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"कान की मशीन"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ब्लूटूथ चालू हो रहा है…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"स्क्रीन की रोशनी"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"अपने-आप घूमना"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"स्क्रीन का अपने-आप दिशा बदलना"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"स्क्रीन का अपने-आप दिशा बदलना (ऑटो-रोटेट)"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> मोड"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"घुमाना लॉक किया गया"</string>
@@ -666,6 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ईथरनेट"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
     <string name="wallet_title" msgid="5369767670735827105">"वॉलेट"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"फ़ोन पर तेज़ी से और सुरक्षित तरीके से खरीदारी करने के लिए सेट अप करें"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"सभी दिखाएं"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"पैसे चुकाने के लिए, डिवाइस अनलॉक करें"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"सेट अप नहीं किया गया है"</string>
@@ -1084,7 +1085,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"खारिज करें"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"फिर से शुरू करें"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिंग"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> पर, <xliff:g id="ARTIST_NAME">%2$s</xliff:g> का <xliff:g id="SONG_NAME">%1$s</xliff:g> चल रहा है"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"चलाएं"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> खोलें"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> पर, <xliff:g id="ARTIST_NAME">%2$s</xliff:g> का <xliff:g id="SONG_NAME">%1$s</xliff:g> चलाएं"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> पर, <xliff:g id="SONG_NAME">%1$s</xliff:g> चलाएं"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"काम नहीं कर रहा, ऐप जांचें"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"कोई गड़बड़ी हुई, फिर से कोशिश की जा रही है…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"कंट्रोल नहीं है"</string>
@@ -1110,7 +1115,7 @@
     <string name="select_conversation_title" msgid="6716364118095089519">"बातचीत विजेट"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"किसी बातचीत को होम स्क्रीन पर जोड़ने के लिए, उस बातचीत पर टैप करें"</string>
     <string name="no_conversations_text" msgid="7362374212649891057">"नए मैसेज आने पर यहां देखें"</string>
-    <string name="priority_conversations" msgid="3967482288896653039">"अहम बातचीत"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"प्राथमिकता वाली बातचीत"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"हाल ही में की गई बातचीत"</string>
     <string name="okay" msgid="6490552955618608554">"ठीक है"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> दिन पहले"</string>

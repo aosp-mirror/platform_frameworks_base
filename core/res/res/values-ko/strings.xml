@@ -2158,7 +2158,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"이 콘텐츠는 개인 앱을 통해 공유할 수 없습니다."</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"이 콘텐츠는 개인 앱으로 열 수 없습니다."</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"직장 프로필이 일시중지됨"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"탭하여 사용"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"탭하여 사용 설정"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"직장 앱 없음"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"개인 앱 없음"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"개인 프로필의 <xliff:g id="APP">%s</xliff:g>에서 여시겠습니까?"</string>
