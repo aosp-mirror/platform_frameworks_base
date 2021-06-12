@@ -187,16 +187,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
-     * Returns the preferred Y position of the clock.
-     *
-     * @param totalHeight The height available to position the clock.
-     * @return Y position of clock.
-     */
-    public int getClockPreferredY(int totalHeight) {
-        return mKeyguardClockSwitchController.getClockPreferredY(totalHeight);
-    }
-
-    /**
      * Get the height of the keyguard status view.
      */
     public int getHeight() {
