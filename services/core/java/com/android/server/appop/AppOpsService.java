@@ -667,9 +667,27 @@ public class AppOpsService extends IAppOpsService.Stub {
         /** Lazily populated cache of attributionTags of this package */
         final @NonNull ArraySet<String> knownAttributionTags = new ArraySet<>();
 
+        /**
+         * Lazily populated cache of <b>valid</b> attributionTags of this package, a set smaller
+         * than or equal to {@link #knownAttributionTags}.
+         */
+        final @NonNull ArraySet<String> validAttributionTags = new ArraySet<>();
+
         Ops(String _packageName, UidState _uidState) {
             packageName = _packageName;
             uidState = _uidState;
+        }
+    }
+
+    /** Returned from {@link #verifyAndGetBypass(int, String, String, String, boolean)}. */
+    private static final class PackageVerificationResult {
+
+        final RestrictionBypass bypass;
+        final boolean isAttributionTagValid;
+
+        PackageVerificationResult(RestrictionBypass bypass, boolean isAttributionTagValid) {
+            this.bypass = bypass;
+            this.isAttributionTagValid = isAttributionTagValid;
         }
     }
 
@@ -2225,7 +2243,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             return Collections.emptyList();
         }
         synchronized (this) {
-            Ops pkgOps = getOpsLocked(uid, resolvedPackageName, null, null, false /* edit */);
+            Ops pkgOps = getOpsLocked(uid, resolvedPackageName, null, false, null,
+                    /* edit */ false);
             if (pkgOps == null) {
                 return null;
             }
@@ -2387,7 +2406,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         op.removeAttributionsWithNoTime();
 
         if (op.mAttributions.isEmpty()) {
-            Ops ops = getOpsLocked(uid, packageName, null, null, false /* edit */);
+            Ops ops = getOpsLocked(uid, packageName, null, false, null, /* edit */ false);
             if (ops != null) {
                 ops.remove(op.op);
                 if (ops.size() <= 0) {
@@ -2697,9 +2716,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         ArraySet<ModeCallback> repCbs = null;
         code = AppOpsManager.opToSwitch(code);
 
-        RestrictionBypass bypass;
+        PackageVerificationResult pvr;
         try {
-            bypass = verifyAndGetBypass(uid, packageName, null);
+            pvr = verifyAndGetBypass(uid, packageName, null);
         } catch (SecurityException e) {
             Slog.e(TAG, "Cannot setMode", e);
             return;
@@ -2708,7 +2727,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         int previousMode = MODE_DEFAULT;
         synchronized (this) {
             UidState uidState = getUidStateLocked(uid, false);
-            Op op = getOpLocked(code, uid, packageName, null, bypass, true);
+            Op op = getOpLocked(code, uid, packageName, null, false, pvr.bypass, /* edit */ true);
             if (op != null) {
                 if (op.mode != mode) {
                     previousMode = op.mode;
@@ -3148,9 +3167,9 @@ public class AppOpsService extends IAppOpsService.Stub {
      */
     private @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName,
             @Nullable String attributionTag, boolean raw) {
-        RestrictionBypass bypass;
+        PackageVerificationResult pvr;
         try {
-            bypass = verifyAndGetBypass(uid, packageName, null);
+            pvr = verifyAndGetBypass(uid, packageName, null);
         } catch (SecurityException e) {
             Slog.e(TAG, "checkOperation", e);
             return AppOpsManager.opToDefaultMode(code);
@@ -3160,7 +3179,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             return AppOpsManager.MODE_IGNORED;
         }
         synchronized (this) {
-            if (isOpRestrictedLocked(uid, code, packageName, attributionTag, bypass)) {
+            if (isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             code = AppOpsManager.opToSwitch(code);
@@ -3170,7 +3189,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final int rawMode = uidState.opModes.get(code);
                 return raw ? rawMode : uidState.evalMode(code, rawMode);
             }
-            Op op = getOpLocked(code, uid, packageName, null, bypass, false);
+            Op op = getOpLocked(code, uid, packageName, null, false, pvr.bypass, /* edit */ false);
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
             }
@@ -3341,16 +3360,16 @@ public class AppOpsService extends IAppOpsService.Stub {
             @Nullable String proxyAttributionTag, @OpFlags int flags,
             boolean shouldCollectAsyncNotedOp, @Nullable String message,
             boolean shouldCollectMessage) {
-        RestrictionBypass bypass;
+        PackageVerificationResult pvr;
         try {
             boolean isLocOrActivity = code == AppOpsManager.OP_FINE_LOCATION
                     || code == AppOpsManager.OP_FINE_LOCATION_SOURCE
                     || code == AppOpsManager.OP_ACTIVITY_RECOGNITION
                     || code == AppOpsManager.OP_ACTIVITY_RECOGNITION_SOURCE;
-            bypass = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName,
+            pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName,
                     isLocOrActivity);
             boolean wasNull = attributionTag == null;
-            if (bypass != null && bypass.getIsAttributionTagNotFound()) {
+            if (!pvr.isAttributionTagValid) {
                 attributionTag = null;
             }
             if (attributionTag == null && isLocOrActivity
@@ -3365,8 +3384,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         synchronized (this) {
-            final Ops ops = getOpsLocked(uid, packageName, attributionTag, bypass,
-                    true /* edit */);
+            final Ops ops = getOpsLocked(uid, packageName, attributionTag,
+                    pvr.isAttributionTagValid, pvr.bypass, /* edit */ true);
             if (ops == null) {
                 scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                         AppOpsManager.MODE_IGNORED);
@@ -3386,7 +3405,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             final int switchCode = AppOpsManager.opToSwitch(code);
             final UidState uidState = ops.uidState;
-            if (isOpRestrictedLocked(uid, code, packageName, attributionTag, bypass)) {
+            if (isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass)) {
                 attributedOp.rejected(uidState.state, flags);
                 scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                         AppOpsManager.MODE_IGNORED);
@@ -3862,15 +3881,15 @@ public class AppOpsService extends IAppOpsService.Stub {
             boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, @Nullable String message,
             boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
             int attributionChainId, boolean dryRun) {
-        RestrictionBypass bypass;
+        PackageVerificationResult pvr;
         try {
             boolean isLocOrActivity = code == AppOpsManager.OP_FINE_LOCATION
                     || code == AppOpsManager.OP_FINE_LOCATION_SOURCE
                     || code == AppOpsManager.OP_ACTIVITY_RECOGNITION
                     || code == AppOpsManager.OP_ACTIVITY_RECOGNITION_SOURCE;
-            bypass = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName,
+            pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName,
                     isLocOrActivity);
-            if (bypass != null && bypass.getIsAttributionTagNotFound()) {
+            if (!pvr.isAttributionTagValid) {
                 attributionTag = null;
             }
             if (attributionTag == null && isLocOrActivity
@@ -3886,7 +3905,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         boolean isRestricted = false;
         synchronized (this) {
-            final Ops ops = getOpsLocked(uid, packageName, attributionTag, bypass, true /* edit */);
+            final Ops ops = getOpsLocked(uid, packageName, attributionTag,
+                    pvr.isAttributionTagValid, pvr.bypass, /* edit */ true);
             if (ops == null) {
                 if (!dryRun) {
                     scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
@@ -3901,7 +3921,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             final Op op = getOpLocked(ops, code, uid, true);
             final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
             final UidState uidState = ops.uidState;
-            isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag, bypass);
+            isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass);
             final int switchCode = AppOpsManager.opToSwitch(code);
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
@@ -4033,10 +4053,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private void finishOperationUnchecked(IBinder clientId, int code, int uid, String packageName,
             String attributionTag) {
-        RestrictionBypass bypass;
+        PackageVerificationResult pvr;
         try {
-            bypass = verifyAndGetBypass(uid, packageName, attributionTag);
-            if (bypass != null && bypass.getIsAttributionTagNotFound()) {
+            pvr = verifyAndGetBypass(uid, packageName, attributionTag);
+            if (!pvr.isAttributionTagValid) {
                 attributionTag = null;
             }
         } catch (SecurityException e) {
@@ -4045,7 +4065,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         synchronized (this) {
-            Op op = getOpLocked(code, uid, packageName, attributionTag, bypass, true);
+            Op op = getOpLocked(code, uid, packageName, attributionTag, pvr.isAttributionTagValid,
+                    pvr.bypass, /* edit */ true);
             if (op == null) {
                 Slog.e(TAG, "Operation not found: uid=" + uid + " pkg=" + packageName + "("
                         + attributionTag + ") op=" + AppOpsManager.opToName(code));
@@ -4427,32 +4448,35 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     /**
-     * @see verifyAndGetBypass(int, String, String, String)
+     * @see #verifyAndGetBypass(int, String, String, String, boolean)
      */
-    private @Nullable RestrictionBypass verifyAndGetBypass(int uid, String packageName,
+    private @NonNull PackageVerificationResult verifyAndGetBypass(int uid, String packageName,
             @Nullable String attributionTag) {
         return verifyAndGetBypass(uid, packageName, attributionTag, null, false);
     }
 
     /**
      * Verify that package belongs to uid and return the {@link RestrictionBypass bypass
-     * description} for the package.
+     * description} for the package, along with a boolean indicating whether the attribution tag is
+     * valid.
      *
      * @param uid The uid the package belongs to
      * @param packageName The package the might belong to the uid
      * @param attributionTag attribution tag or {@code null} if no need to verify
      * @param proxyPackageName The proxy package, from which the attribution tag is to be pulled
      *
-     * @return {@code true} iff the package is privileged
+     * @return PackageVerificationResult containing {@link RestrictionBypass} and whether the
+     *         attribution tag is valid
      */
-    private @Nullable RestrictionBypass verifyAndGetBypass(int uid, String packageName,
+    private @NonNull PackageVerificationResult verifyAndGetBypass(int uid, String packageName,
             @Nullable String attributionTag, @Nullable String proxyPackageName, boolean extraLog) {
         if (uid == Process.ROOT_UID) {
             // For backwards compatibility, don't check package name for root UID.
-            return null;
+            return new PackageVerificationResult(null,
+                    /* isAttributionTagValid */ true);
         }
 
-        // Do not check if uid/packageName/attributionTag is already known
+        // Do not check if uid/packageName/attributionTag is already known.
         synchronized (this) {
             UidState uidState = mUidStates.get(uid);
             if (uidState != null && uidState.pkgOps != null) {
@@ -4460,14 +4484,13 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 if (ops != null && (attributionTag == null || ops.knownAttributionTags.contains(
                         attributionTag)) && ops.bypass != null) {
-                    return ops.bypass;
+                    return new PackageVerificationResult(ops.bypass,
+                            ops.validAttributionTags.contains(attributionTag));
                 }
             }
         }
 
         int callingUid = Binder.getCallingUid();
-        int userId = UserHandle.getUserId(uid);
-        RestrictionBypass bypass = null;
 
         // Allow any attribution tag for resolvable uids
         int pkgUid = resolveUid(packageName);
@@ -4479,12 +4502,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                 throw new SecurityException("Specified package " + packageName + " under uid "
                         +  UserHandle.getAppId(uid) + otherUidMessage);
             }
-            return RestrictionBypass.UNRESTRICTED;
+            return new PackageVerificationResult(RestrictionBypass.UNRESTRICTED,
+                    /* isAttributionTagValid */ true);
         }
+
+        int userId = UserHandle.getUserId(uid);
+        RestrictionBypass bypass = null;
+        boolean isAttributionTagValid = false;
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            boolean isAttributionTagValid = false;
             PackageManagerInternal pmInt = LocalServices.getService(PackageManagerInternal.class);
             AndroidPackage pkg = pmInt.getPackage(packageName);
             if (pkg != null) {
@@ -4509,15 +4536,15 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (!isAttributionTagValid) {
                 AndroidPackage proxyPkg = proxyPackageName != null
                         ? pmInt.getPackage(proxyPackageName) : null;
-                boolean foundInProxy = isAttributionInPackage(proxyPkg, attributionTag);
+                // Re-check in proxy.
+                isAttributionTagValid = isAttributionInPackage(proxyPkg, attributionTag);
                 String msg;
-                if (pkg != null && foundInProxy) {
+                if (pkg != null && isAttributionTagValid) {
                     msg = "attributionTag " + attributionTag + " declared in manifest of the proxy"
                             + " package " + proxyPackageName + ", this is not advised";
                 } else if (pkg != null) {
                     msg = "attributionTag " + attributionTag + " not declared in manifest of "
                             + packageName;
-                    bypass.setIsAttributionTagNotFound(true);
                 } else {
                     msg = "package " + packageName + " not found, can't check for "
                             + "attributionTag " + attributionTag;
@@ -4528,7 +4555,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                             SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE, packageName,
                             userId) && mPlatformCompat.isChangeEnabledByUid(
                                     SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE,
-                            callingUid) && !foundInProxy) {
+                            callingUid) && !isAttributionTagValid) {
                         Slog.e(TAG, msg);
                     } else {
                         Slog.e(TAG, msg);
@@ -4546,7 +4573,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     + otherUidMessage);
         }
 
-        return bypass;
+        return new PackageVerificationResult(bypass, isAttributionTagValid);
     }
 
     private boolean isAttributionInPackage(@Nullable AndroidPackage pkg,
@@ -4574,13 +4601,14 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @param uid The uid the package belongs to
      * @param packageName The name of the package
      * @param attributionTag attribution tag
+     * @param isAttributionTagValid whether the given attribution tag is valid
      * @param bypass When to bypass certain op restrictions (can be null if edit == false)
      * @param edit If an ops does not exist, create the ops?
 
      * @return The ops
      */
     private Ops getOpsLocked(int uid, String packageName, @Nullable String attributionTag,
-            @Nullable RestrictionBypass bypass, boolean edit) {
+            boolean isAttributionTagValid, @Nullable RestrictionBypass bypass, boolean edit) {
         UidState uidState = getUidStateLocked(uid, edit);
         if (uidState == null) {
             return null;
@@ -4609,6 +4637,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             if (attributionTag != null) {
                 ops.knownAttributionTags.add(attributionTag);
+                if (isAttributionTagValid) {
+                    ops.validAttributionTags.add(attributionTag);
+                } else {
+                    ops.validAttributionTags.remove(attributionTag);
+                }
             }
         }
 
@@ -4638,14 +4671,17 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @param uid The uid the of the package
      * @param packageName The package name for which to get the state for
      * @param attributionTag The attribution tag
+     * @param isAttributionTagValid Whether the given attribution tag is valid
      * @param bypass When to bypass certain op restrictions (can be null if edit == false)
      * @param edit Iff {@code true} create the {@link Op} object if not yet created
      *
      * @return The {@link Op state} of the op
      */
     private @Nullable Op getOpLocked(int code, int uid, @NonNull String packageName,
-            @Nullable String attributionTag, @Nullable RestrictionBypass bypass, boolean edit) {
-        Ops ops = getOpsLocked(uid, packageName, attributionTag, bypass, edit);
+            @Nullable String attributionTag, boolean isAttributionTagValid,
+            @Nullable RestrictionBypass bypass, boolean edit) {
+        Ops ops = getOpsLocked(uid, packageName, attributionTag, isAttributionTagValid, bypass,
+                edit);
         if (ops == null) {
             return null;
         }
@@ -6510,7 +6546,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         // TODO moltmann: Allow to check for attribution op activeness
         synchronized (AppOpsService.this) {
-            Ops pkgOps = getOpsLocked(uid, resolvedPackageName, null, null, false);
+            Ops pkgOps = getOpsLocked(uid, resolvedPackageName, null, false, null, false);
             if (pkgOps == null) {
                 return false;
             }
