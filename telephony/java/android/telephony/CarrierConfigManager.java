@@ -33,6 +33,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.service.carrier.CarrierService;
 import android.telecom.TelecomManager;
+import android.telephony.data.DataCallResponse;
 import android.telephony.gba.TlsParams;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.telephony.ims.ImsReasonInfo;
@@ -1050,6 +1051,21 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG =
             "carrier_data_call_apn_retry_after_disconnect_long";
+
+    /**
+     * The maximum times for telephony to retry data setup on the same APN requested by
+     * network through the data setup response retry timer
+     * {@link DataCallResponse#getRetryDurationMillis()}. This is to prevent that network keeps
+     * asking device to retry data setup forever and causes power consumption issue. For infinite
+     * retring same APN, configure this as 2147483647 (i.e. {@link Integer#MAX_VALUE}).
+     *
+     * Note if network does not suggest any retry timer, frameworks uses the retry configuration
+     * from {@link #KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS}, and the maximum retry times could
+     * be configured there.
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_CALL_RETRY_NETWORK_REQUESTED_MAX_COUNT_INT =
+            "carrier_data_call_retry_network_requested_max_count_int";
 
     /**
      * Data call setup permanent failure causes by the carrier
@@ -5148,6 +5164,7 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG, 10000);
+        sDefaults.putInt(KEY_CARRIER_DATA_CALL_RETRY_NETWORK_REQUESTED_MAX_COUNT_INT, 3);
         sDefaults.putString(KEY_CARRIER_ERI_FILE_NAME_STRING, "eri.xml");
         sDefaults.putInt(KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT, 7200);
         sDefaults.putStringArray(KEY_CARRIER_METERED_APN_TYPES_STRINGS,

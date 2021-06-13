@@ -33,9 +33,12 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -226,6 +229,27 @@ public abstract class RecognitionService extends Service {
     protected abstract void onStopListening(Callback listener);
 
     @Override
+    public Context createContext(@NonNull ContextParams contextParams) {
+        if (contextParams.getNextAttributionSource() != null) {
+            if (mHandler.getLooper().equals(Looper.myLooper())) {
+                handleAttributionContextCreation(contextParams.getNextAttributionSource());
+            } else {
+                mHandler.sendMessage(
+                        PooledLambda.obtainMessage(this::handleAttributionContextCreation,
+                                contextParams.getNextAttributionSource()));
+            }
+        }
+        return super.createContext(contextParams);
+    }
+
+    private void handleAttributionContextCreation(@NonNull AttributionSource attributionSource) {
+        if (mCurrentCallback != null
+                && mCurrentCallback.mCallingAttributionSource.equals(attributionSource)) {
+            mCurrentCallback.mAttributionContextCreated = true;
+        }
+    }
+
+    @Override
     public final IBinder onBind(final Intent intent) {
         if (DBG) Log.d(TAG, "onBind, intent=" + intent);
         return mBinder;
@@ -249,6 +273,7 @@ public abstract class RecognitionService extends Service {
         private final IRecognitionListener mListener;
         private final @NonNull AttributionSource mCallingAttributionSource;
         private @Nullable Context mAttributionContext;
+        private boolean mAttributionContextCreated;
 
         private Callback(IRecognitionListener listener,
                 @NonNull AttributionSource attributionSource) {
@@ -421,7 +446,7 @@ public abstract class RecognitionService extends Service {
     }
 
     private boolean checkPermissionAndStartDataDelivery() {
-        if (isPerformingDataDelivery()) {
+        if (mCurrentCallback.mAttributionContextCreated) {
             return true;
         }
         if (PermissionChecker.checkPermissionAndStartDataDelivery(
@@ -440,14 +465,5 @@ public abstract class RecognitionService extends Service {
             PermissionChecker.finishDataDelivery(RecognitionService.this, op,
                     mCurrentCallback.getAttributionContextForCaller().getAttributionSource());
         }
-    }
-
-    @SuppressWarnings("ConstantCondition")
-    private boolean isPerformingDataDelivery() {
-        final int op = AppOpsManager.permissionToOpCode(Manifest.permission.RECORD_AUDIO);
-        final AppOpsManager appOpsManager = getSystemService(AppOpsManager.class);
-        return appOpsManager.isProxying(op, getAttributionTag(),
-                mCurrentCallback.getCallingAttributionSource().getUid(),
-                mCurrentCallback.getCallingAttributionSource().getPackageName());
     }
 }

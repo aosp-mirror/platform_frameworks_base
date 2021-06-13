@@ -33,9 +33,9 @@ import com.android.server.LocalServices;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-/** Multiplier that makes things more cheaper based on an app's process state. */
-class ProcessStateMultiplier extends Multiplier {
-    private static final String TAG = "TARE-" + ProcessStateMultiplier.class.getSimpleName();
+/** Modifier that makes things more cheaper based on an app's process state. */
+class ProcessStateModifier extends Modifier {
+    private static final String TAG = "TARE-" + ProcessStateModifier.class.getSimpleName();
 
     private static final int PROC_STATE_BUCKET_NONE = 0;
     private static final int PROC_STATE_BUCKET_TOP = 1;
@@ -102,8 +102,8 @@ class ProcessStateMultiplier extends Multiplier {
         }
     };
 
-    ProcessStateMultiplier(@NonNull InternalResourceService irs) {
-        super(false, true);
+    ProcessStateModifier(@NonNull InternalResourceService irs) {
+        super();
         mIrs = irs;
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
     }
@@ -145,11 +145,6 @@ class ProcessStateMultiplier extends Multiplier {
             default:
                 return price;
         }
-    }
-
-    @Override
-    double getCurrentMultiplier() {
-        return 1;
     }
 
     @Override

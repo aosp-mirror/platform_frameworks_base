@@ -171,17 +171,14 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) const {
     displayList->mProjectedOutline = nullptr;
 }
 
-static bool layerNeedsPaint(const sk_sp<SkImage>& snapshotImage, const LayerProperties& properties,
-                            float alphaMultiplier, SkPaint* paint) {
+static bool layerNeedsPaint(const LayerProperties& properties, float alphaMultiplier,
+                            SkPaint* paint) {
     if (alphaMultiplier < 1.0f || properties.alpha() < 255 ||
         properties.xferMode() != SkBlendMode::kSrcOver || properties.getColorFilter() != nullptr ||
-        properties.getImageFilter() != nullptr || properties.getStretchEffect().requiresLayer()) {
+        properties.getStretchEffect().requiresLayer()) {
         paint->setAlpha(properties.alpha() * alphaMultiplier);
         paint->setBlendMode(properties.xferMode());
         paint->setColorFilter(sk_ref_sp(properties.getColorFilter()));
-
-        sk_sp<SkImageFilter> imageFilter = sk_ref_sp(properties.getImageFilter());
-        paint->setImageFilter(std::move(imageFilter));
         return true;
     }
     return false;
@@ -223,6 +220,9 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
     // TODO should we let the bound of the drawable do this for us?
     const SkRect bounds = SkRect::MakeWH(properties.getWidth(), properties.getHeight());
     bool quickRejected = properties.getClipToBounds() && canvas->quickReject(bounds);
+    auto clipBounds = canvas->getLocalClipBounds();
+    SkIRect srcBounds = SkIRect::MakeWH(bounds.width(), bounds.height());
+    SkIPoint offset = SkIPoint::Make(0.0f, 0.0f);
     if (!quickRejected) {
         SkiaDisplayList* displayList = renderNode->getDisplayList().asSkiaDl();
         const LayerProperties& layerProperties = properties.layerProperties();
@@ -230,8 +230,19 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
         if (renderNode->getLayerSurface() && mComposeLayer) {
             SkASSERT(properties.effectiveLayerType() == LayerType::RenderLayer);
             SkPaint paint;
-            sk_sp<SkImage> snapshotImage = renderNode->getLayerSurface()->makeImageSnapshot();
-            layerNeedsPaint(snapshotImage, layerProperties, alphaMultiplier, &paint);
+            layerNeedsPaint(layerProperties, alphaMultiplier, &paint);
+            const auto snapshotResult = renderNode->updateSnapshotIfRequired(
+                canvas->recordingContext(),
+                layerProperties.getImageFilter(),
+                clipBounds.roundOut()
+            );
+            sk_sp<SkImage> snapshotImage = snapshotResult->snapshot;
+            srcBounds = snapshotResult->outSubset;
+            offset = snapshotResult->outOffset;
+            const auto dstBounds = SkIRect::MakeXYWH(offset.x(),
+                                                     offset.y(),
+                                                     srcBounds.width(),
+                                                     srcBounds.height());
             SkSamplingOptions sampling(SkFilterMode::kLinear);
 
             // surfaces for layers are created on LAYER_SIZE boundaries (which are >= layer size) so
@@ -257,7 +268,8 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                     TransformCanvas transformCanvas(canvas, SkBlendMode::kClear);
                     displayList->draw(&transformCanvas);
                 }
-                canvas->drawImageRect(snapshotImage, bounds, bounds, sampling, &paint,
+                canvas->drawImageRect(snapshotImage, SkRect::Make(srcBounds),
+                                      SkRect::Make(dstBounds), sampling, &paint,
                                       SkCanvas::kStrict_SrcRectConstraint);
             } else {
                 // If we do have stretch effects and have hole punches,
@@ -265,6 +277,16 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                 // get the corresponding hole punches.
                 // Then apply the stretch to the mask and draw the mask to
                 // the destination
+                // Also if the stretchy container has an ImageFilter applied
+                // to it (i.e. blur) we need to take into account the offset
+                // that will be generated with this result. Ex blurs will "grow"
+                // the source image by the blur radius so we need to translate
+                // the shader by the same amount to render in the same location
+                SkMatrix matrix;
+                matrix.setTranslate(
+                    offset.x() - srcBounds.left(),
+                    offset.y() - srcBounds.top()
+                );
                 if (renderNode->hasHolePunches()) {
                     GrRecordingContext* context = canvas->recordingContext();
                     StretchMask& stretchMask = renderNode->getStretchMask();
@@ -275,11 +297,10 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                                      canvas);
                 }
 
-                sk_sp<SkShader> stretchShader = stretch.getShader(bounds.width(),
-                                                                  bounds.height(),
-                                                                  snapshotImage);
+                sk_sp<SkShader> stretchShader =
+                        stretch.getShader(bounds.width(), bounds.height(), snapshotImage, &matrix);
                 paint.setShader(stretchShader);
-                canvas->drawRect(bounds, paint);
+                canvas->drawRect(SkRect::Make(dstBounds), paint);
             }
 
             if (!renderNode->getSkiaLayer()->hasRenderedSinceRepaint) {

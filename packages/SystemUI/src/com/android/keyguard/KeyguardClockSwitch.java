@@ -288,20 +288,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
     }
 
     /**
-     * Returns the preferred Y position of the clock.
-     *
-     * @param totalHeight Height of the parent container.
-     * @return preferred Y position.
-     */
-    int getPreferredY(int totalHeight) {
-        if (mClockPlugin != null) {
-            return mClockPlugin.getPreferredY(totalHeight);
-        } else {
-            return totalHeight / 2;
-        }
-    }
-
-    /**
      * Refresh the time of the clock, due to either time tick broadcast or doze time tick alarm.
      */
     public void refresh() {

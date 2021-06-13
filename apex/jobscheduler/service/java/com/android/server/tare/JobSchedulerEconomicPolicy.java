@@ -16,6 +16,9 @@
 
 package com.android.server.tare;
 
+import static com.android.server.tare.Modifier.COST_MODIFIER_CHARGING;
+import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
+import static com.android.server.tare.Modifier.COST_MODIFIER_PROCESS_STATE;
 import static com.android.server.tare.TareUtils.arcToNarc;
 
 import android.annotation.NonNull;
@@ -38,6 +41,12 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     public static final String ACTION_JOB_MIN_START = "JOB_MIN_START";
     public static final String ACTION_JOB_MIN_RUNNING = "JOB_MIN_RUNNING";
     public static final String ACTION_JOB_TIMEOUT = "JOB_TIMEOUT";
+
+    private static final int[] COST_MODIFIERS = new int[]{
+            COST_MODIFIER_CHARGING,
+            COST_MODIFIER_POWER_SAVE_MODE,
+            COST_MODIFIER_PROCESS_STATE
+    };
 
     private final ArrayMap<String, Action> mActions = new ArrayMap<>();
     private final ArrayMap<String, Reward> mRewards = new ArrayMap<>();
@@ -62,6 +71,12 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     @Override
     long getMaxSatiatedCirculation() {
         return arcToNarc(691200);
+    }
+
+    @NonNull
+    @Override
+    int[] getCostModifiers() {
+        return COST_MODIFIERS;
     }
 
     @Nullable
