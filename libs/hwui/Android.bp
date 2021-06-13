@@ -87,8 +87,8 @@ cc_defaults {
             cflags: [
                 "-Wno-unused-variable",
             ],
-        }
-    }
+        },
+    },
 }
 
 cc_defaults {
@@ -108,7 +108,6 @@ cc_defaults {
             shared_libs: [
                 "liblog",
                 "libcutils",
-                "libstatslog",
                 "libutils",
                 "libEGL",
                 "libGLESv1_CM",
@@ -122,12 +121,13 @@ cc_defaults {
                 "libandroidfw",
                 "libcrypto",
                 "libsync",
-                "libstatspull",
-                "libstatssocket",
             ],
             static_libs: [
                 "libEGL_blobCache",
                 "libprotoutil",
+                "libstatslog_hwui",
+                "libstatspull_lazy",
+                "libstatssocket_lazy",
             ],
         },
         host: {
@@ -135,8 +135,8 @@ cc_defaults {
                 "libandroidfw",
                 "libutils",
             ],
-        }
-    }
+        },
+    },
 }
 
 cc_defaults {
@@ -220,7 +220,7 @@ filegroup {
     srcs: [
         "apex/java/**/*.java",
     ],
-    path: "apex/java"
+    path: "apex/java",
 }
 
 // ------------------------
@@ -238,7 +238,7 @@ cc_library_headers {
         windows: {
             enabled: true,
         },
-    }
+    },
 }
 
 cc_defaults {
@@ -263,7 +263,7 @@ cc_defaults {
         "apex/android_region.cpp",
     ],
 
-    header_libs: [ "android_graphics_apex_headers" ],
+    header_libs: ["android_graphics_apex_headers"],
 
     target: {
         android: {
@@ -278,7 +278,7 @@ cc_defaults {
             srcs: [
                 "apex/LayoutlibLoader.cpp",
             ],
-        }
+        },
     },
 }
 
@@ -297,7 +297,7 @@ cc_library_headers {
         windows: {
             enabled: true,
         },
-    }
+    },
 }
 
 cc_defaults {
@@ -370,7 +370,7 @@ cc_defaults {
         "jni/text/TextShaper.cpp",
     ],
 
-    header_libs: [ "android_graphics_jni_headers" ],
+    header_libs: ["android_graphics_jni_headers"],
 
     include_dirs: [
         "external/skia/include/private",
@@ -391,7 +391,10 @@ cc_defaults {
         "libjpeg",
     ],
 
-    static_libs: ["libnativehelper_lazy", "libziparchive_for_incfs"],
+    static_libs: [
+        "libnativehelper_lazy",
+        "libziparchive_for_incfs",
+    ],
 
     target: {
         android: {
@@ -417,13 +420,13 @@ cc_defaults {
                 "libmediandk",
                 "libnativedisplay",
                 "libnativewindow",
-                "libstatspull",
-                "libstatssocket",
                 "libpdfium",
             ],
             static_libs: [
                 "libgif",
-                "libstatslog",
+                "libstatslog_hwui",
+                "libstatspull_lazy",
+                "libstatssocket_lazy",
             ],
         },
         host: {
@@ -434,8 +437,39 @@ cc_defaults {
             static_libs: [
                 "libandroidfw",
             ],
-        }
+        },
     },
+}
+
+cc_library_static {
+    name: "libstatslog_hwui",
+    generated_sources: ["statslog_hwui.cpp"],
+    generated_headers: ["statslog_hwui.h"],
+    export_generated_headers: ["statslog_hwui.h"],
+    static_libs: [
+        "libstatssocket_lazy",
+        "libstatspull_lazy",
+    ],
+}
+
+genrule {
+    name: "statslog_hwui.h",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --header $(genDir)/statslog_hwui.h --module hwui" +
+        " --namespace android,uirenderer,stats",
+    out: [
+        "statslog_hwui.h",
+    ],
+}
+
+genrule {
+    name: "statslog_hwui.cpp",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --cpp $(genDir)/statslog_hwui.cpp --module hwui" +
+        " --namespace android,uirenderer,stats --importHeader statslog_hwui.h",
+    out: [
+        "statslog_hwui.cpp",
+    ],
 }
 
 // ------------------------
@@ -449,8 +483,8 @@ cc_library_headers {
     export_include_dirs: [
         ".",
     ],
-    header_libs: [ "android_graphics_jni_headers" ],
-    export_header_lib_headers: [ "android_graphics_jni_headers" ],
+    header_libs: ["android_graphics_jni_headers"],
+    export_header_lib_headers: ["android_graphics_jni_headers"],
 }
 
 cc_defaults {
@@ -514,7 +548,7 @@ cc_defaults {
 
     target: {
         android: {
-            header_libs: ["libandroid_headers_private" ],
+            header_libs: ["libandroid_headers_private"],
 
             srcs: [
                 "hwui/AnimatedImageThread.cpp",
@@ -572,8 +606,8 @@ cc_defaults {
             export_static_lib_headers: [
                 "libarect",
             ],
-        }
-    }
+        },
+    },
 }
 
 cc_library {
@@ -589,7 +623,7 @@ cc_library {
     target: {
         android: {
             version_script: "libhwui.map.txt",
-        }
+        },
     },
 }
 
@@ -608,10 +642,10 @@ cc_defaults {
     target: {
         android: {
             shared_libs: [
-	        "libgui",
-	        "libui",
-	    ],
-	}
+                "libgui",
+                "libui",
+            ],
+        },
     },
     srcs: [
         "tests/common/scenes/*.cpp",
@@ -732,5 +766,5 @@ phony {
     required: [
         "hwuimicro",
         "hwuimacro",
-    ]
+    ],
 }
