@@ -1287,25 +1287,10 @@
     <!-- Title for the setting screen for controlling apps that can schedule alarms [CHAR LIMIT=30] -->
     <string name="alarms_and_reminders_title">Alarms &amp; reminders</string>
     <!-- Description that appears below the alarms_and_reminders switch [CHAR LIMIT=NONE] -->
-    <string name="alarms_and_reminders_footer_title" product="default">
-        Allow this app to set alarms and schedule other actions.
-        This app may be used when you\u2019re not using your phone, which may use more battery.
-        If this permission is off, this app may not function normally,
-        and its alarms won\u2019t work as scheduled.
-    </string>
-    <!-- Description that appears below the alarms_and_reminders switch [CHAR LIMIT=NONE] -->
-    <string name="alarms_and_reminders_footer_title" product="tablet">
-        Allow this app to set alarms and schedule other actions.
-        This app may be used when you\u2019re not using your tablet, which may use more battery.
-        If this permission is off, this app may not function normally,
-        and its alarms won\u2019t work as scheduled.
-    </string>
-    <!-- Description that appears below the alarms_and_reminders switch [CHAR LIMIT=NONE] -->
-    <string name="alarms_and_reminders_footer_title" product="device">
-        Allow this app to set alarms and schedule other actions.
-        This app may be used when you\u2019re not using your device, which may use more battery.
-        If this permission is off, this app may not function normally,
-        and its alarms won\u2019t work as scheduled.
+    <string name="alarms_and_reminders_footer_title">
+        Allow this app to set alarms and schedule time-sensitive actions.
+        This lets the app run in the background, which may use more battery.\n\nIf this permission
+        is off, existing alarms and time-based events scheduled by this app won\u2019t work.
     </string>
     <!-- Keywords for setting screen for controlling apps that can schedule alarms [CHAR LIMIT=100] -->
     <string name="keywords_alarms_and_reminders">schedule, alarm, reminder, clock</string>
