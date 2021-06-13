@@ -533,16 +533,16 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                 resources.getDimensionPixelSize(R.dimen.navigation_edge_panel_height),
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
+        layoutParams.accessibilityTitle = mContext.getString(R.string.nav_bar_edge_panel);
+        layoutParams.windowAnimations = 0;
         layoutParams.privateFlags |=
                 WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         layoutParams.setTitle(TAG + mContext.getDisplayId());
-        layoutParams.accessibilityTitle = mContext.getString(R.string.nav_bar_edge_panel);
-        layoutParams.windowAnimations = 0;
         layoutParams.setFitInsetsTypes(0 /* types */);
+        layoutParams.setTrustedOverlay();
         return layoutParams;
     }
 
