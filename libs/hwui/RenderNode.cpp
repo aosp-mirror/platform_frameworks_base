@@ -306,11 +306,17 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
         info.damageAccumulator->popTransform();
         syncProperties();
 
-        const StretchEffect& stagingStretch =
-            mProperties.layerProperties().getStretchEffect();
+        auto& layerProperties = mProperties.layerProperties();
+        const StretchEffect& stagingStretch = layerProperties.getStretchEffect();
         if (stagingStretch.isEmpty()) {
             mStretchMask.clear();
         }
+
+        if (layerProperties.getImageFilter() == nullptr) {
+            mSnapshotResult.snapshot = nullptr;
+            mTargetImageFilter = nullptr;
+        }
+
         // We could try to be clever and only re-damage if the matrix changed.
         // However, we don't need to worry about that. The cost of over-damaging
         // here is only going to be a single additional map rect of this node
@@ -319,6 +325,44 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
         info.damageAccumulator->pushTransform(this);
         damageSelf(info);
     }
+}
+
+std::optional<RenderNode::SnapshotResult> RenderNode::updateSnapshotIfRequired(
+    GrRecordingContext* context,
+    const SkImageFilter* imageFilter,
+    const SkIRect& clipBounds
+) {
+    auto* layerSurface = getLayerSurface();
+    if (layerSurface == nullptr) {
+        return std::nullopt;
+    }
+
+    sk_sp<SkImage> snapshot = layerSurface->makeImageSnapshot();
+    const auto subset = SkIRect::MakeWH(properties().getWidth(),
+                                        properties().getHeight());
+    // If we don't have an ImageFilter just return the snapshot
+    if (imageFilter == nullptr) {
+        mSnapshotResult.snapshot = snapshot;
+        mSnapshotResult.outSubset = subset;
+        mSnapshotResult.outOffset = SkIPoint::Make(0.0f, 0.0f);
+        mImageFilterClipBounds = clipBounds;
+        mTargetImageFilter = nullptr;
+    } else if (mSnapshotResult.snapshot == nullptr ||
+        imageFilter != mTargetImageFilter.get() ||
+        mImageFilterClipBounds != clipBounds) {
+        // Otherwise create a new snapshot with the given filter and snapshot
+        mSnapshotResult.snapshot =
+                snapshot->makeWithFilter(context,
+                                         imageFilter,
+                                         subset,
+                                         clipBounds,
+                                         &mSnapshotResult.outSubset,
+                                         &mSnapshotResult.outOffset);
+        mTargetImageFilter = sk_ref_sp(imageFilter);
+        mImageFilterClipBounds = clipBounds;
+    }
+
+    return mSnapshotResult;
 }
 
 void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
@@ -411,6 +455,8 @@ void RenderNode::destroyLayers() {
     if (hasLayer()) {
         this->setLayerSurface(nullptr);
     }
+    mSnapshotResult.snapshot = nullptr;
+    mTargetImageFilter = nullptr;
     if (mDisplayList) {
         mDisplayList.updateChildren([](RenderNode* child) { child->destroyLayers(); });
     }
