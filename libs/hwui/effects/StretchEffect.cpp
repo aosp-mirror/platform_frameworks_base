@@ -188,7 +188,8 @@ static const float ZERO = 0.f;
 static const float INTERPOLATION_STRENGTH_VALUE = 0.7f;
 
 sk_sp<SkShader> StretchEffect::getShader(float width, float height,
-                                         const sk_sp<SkImage>& snapshotImage) const {
+                                         const sk_sp<SkImage>& snapshotImage,
+                                         const SkMatrix* matrix) const {
     if (isEmpty()) {
         return nullptr;
     }
@@ -206,8 +207,9 @@ sk_sp<SkShader> StretchEffect::getShader(float width, float height,
         mBuilder = std::make_unique<SkRuntimeShaderBuilder>(getStretchEffect());
     }
 
-    mBuilder->child("uContentTexture") = snapshotImage->makeShader(
-            SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions(SkFilterMode::kLinear));
+    mBuilder->child("uContentTexture") =
+            snapshotImage->makeShader(SkTileMode::kClamp, SkTileMode::kClamp,
+                                      SkSamplingOptions(SkFilterMode::kLinear), matrix);
     mBuilder->uniform("uInterpolationStrength").set(&INTERPOLATION_STRENGTH_VALUE, 1);
     mBuilder->uniform("uStretchAffectedDistX").set(&width, 1);
     mBuilder->uniform("uStretchAffectedDistY").set(&height, 1);

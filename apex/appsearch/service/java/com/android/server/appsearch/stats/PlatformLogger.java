@@ -170,7 +170,7 @@ public final class PlatformLogger implements AppSearchLogger {
     }
 
     @Override
-    public void logStats(@androidx.annotation.NonNull RemoveStats stats) throws AppSearchException {
+    public void logStats(@NonNull RemoveStats stats) throws AppSearchException {
         // TODO(b/173532925): Log stats
     }
 
