@@ -42,6 +42,7 @@
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioProfile.h"
 #include "android_media_MicrophoneInfo.h"
+#include "android_util_Binder.h"
 
 // ----------------------------------------------------------------------------
 
@@ -848,6 +849,11 @@ static jint
 android_media_AudioSystem_checkAudioFlinger(JNIEnv *env, jobject clazz)
 {
     return (jint) check_AudioSystem_Command(AudioSystem::checkAudioFlinger());
+}
+
+static void android_media_AudioSystem_setAudioFlingerBinder(JNIEnv *env, jobject clazz,
+                                                            jobject audioFlinger) {
+    AudioSystem::setAudioFlingerBinder(android::ibinderForJavaObject(env, audioFlinger));
 }
 
 static void convertAudioGainConfigToNative(JNIEnv *env,
@@ -2728,6 +2734,8 @@ static const JNINativeMethod gMethods[] =
          {"getOutputLatency", "(I)I", (void *)android_media_AudioSystem_getOutputLatency},
          {"setLowRamDevice", "(ZJ)I", (void *)android_media_AudioSystem_setLowRamDevice},
          {"checkAudioFlinger", "()I", (void *)android_media_AudioSystem_checkAudioFlinger},
+         {"setAudioFlingerBinder", "(Landroid/os/IBinder;)V",
+          (void *)android_media_AudioSystem_setAudioFlingerBinder},
          {"listAudioPorts", "(Ljava/util/ArrayList;[I)I",
           (void *)android_media_AudioSystem_listAudioPorts},
          {"createAudioPatch",
