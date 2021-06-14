@@ -362,7 +362,9 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mStackScrollerOverscrolling;
     private boolean mQsExpansionFromOverscroll;
     private float mLastOverscroll;
-    private boolean mQsExpansionEnabled = true;
+    private boolean mQsExpansionEnabledPolicy = true;
+    private boolean mQsExpansionEnabledAmbient = true;
+    private boolean mQsExpansionEnabled = mQsExpansionEnabledPolicy && mQsExpansionEnabledAmbient;
     private ValueAnimator mQsExpansionAnimator;
     private FlingAnimationUtils mFlingAnimationUtils;
     private int mStatusBarMinHeight;
@@ -1427,10 +1429,16 @@ public class NotificationPanelViewController extends PanelViewController {
         mAnimateNextPositionUpdate = true;
     }
 
-    public void setQsExpansionEnabled(boolean qsExpansionEnabled) {
-        mQsExpansionEnabled = qsExpansionEnabled;
+    private void setQsExpansionEnabled() {
+        mQsExpansionEnabled = mQsExpansionEnabledPolicy && mQsExpansionEnabledAmbient;
+        Log.d(TAG, "Set qsExpansionEnabled: " + mQsExpansionEnabled);
         if (mQs == null) return;
-        mQs.setHeaderClickable(qsExpansionEnabled);
+        mQs.setHeaderClickable(mQsExpansionEnabled);
+    }
+
+    public void setQsExpansionEnabledPolicy(boolean qsExpansionEnabledPolicy) {
+        mQsExpansionEnabledPolicy = qsExpansionEnabledPolicy;
+        setQsExpansionEnabled();
     }
 
     @Override
@@ -2182,17 +2190,19 @@ public class NotificationPanelViewController extends PanelViewController {
     private void onNotificationScrolled(int newScrollPosition) {
         // Since this is an overscroller, sometimes the scrollY can be temporarily negative
         // (when overscrollng on the top and flinging). Let's
-        updateQSExpansionEnabled();
+        updateQSExpansionEnabledAmbient();
     }
 
     @Override
     public void setIsShadeOpening(boolean opening) {
         mAmbientState.setIsShadeOpening(opening);
-        updateQSExpansionEnabled();
+        updateQSExpansionEnabledAmbient();
     }
 
-    private void updateQSExpansionEnabled() {
-        setQsExpansionEnabled(mAmbientState.getScrollY() <= 0 && !mAmbientState.isShadeOpening());
+    private void updateQSExpansionEnabledAmbient() {
+        mQsExpansionEnabledAmbient =
+                mAmbientState.getScrollY() <= 0 && !mAmbientState.isShadeOpening();
+        setQsExpansionEnabled();
     }
 
     /**
