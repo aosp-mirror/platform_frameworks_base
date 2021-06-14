@@ -38,7 +38,6 @@ import android.hardware.hdmi.HdmiRecordSources;
 import android.hardware.hdmi.HdmiTimerRecordSources;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager.TvInputCallback;
@@ -407,6 +406,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return info.getLogicalAddress();
         }
         return Constants.ADDR_INVALID;
+    }
+
+    @Override
+    protected int findAudioReceiverAddress() {
+        return Constants.ADDR_AUDIO_SYSTEM;
     }
 
     @Override
@@ -925,10 +929,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         synchronized (mLock) {
             mSystemAudioMute = mute;
             mSystemAudioVolume = volume;
-            int maxVolume = mService.getAudioManager().getStreamMaxVolume(
-                    AudioManager.STREAM_MUSIC);
-            mService.setAudioStatus(mute,
-                    VolumeControlAction.scaleToCustomVolume(volume, maxVolume));
             displayOsd(HdmiControlManager.OSD_MESSAGE_AVR_VOLUME_CHANGED,
                     mute ? HdmiControlManager.AVR_VOLUME_MUTED : volume);
         }
