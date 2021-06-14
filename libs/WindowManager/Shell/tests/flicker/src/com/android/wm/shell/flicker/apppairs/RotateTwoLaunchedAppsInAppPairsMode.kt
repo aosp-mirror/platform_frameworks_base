@@ -27,9 +27,9 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.wm.shell.flicker.appPairsDividerIsVisible
-import com.android.wm.shell.flicker.appPairsPrimaryBoundsIsVisible
-import com.android.wm.shell.flicker.appPairsSecondaryBoundsIsVisible
+import com.android.wm.shell.flicker.appPairsDividerIsVisibleAtEnd
+import com.android.wm.shell.flicker.appPairsPrimaryBoundsIsVisibleAtEnd
+import com.android.wm.shell.flicker.appPairsSecondaryBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
@@ -73,26 +73,26 @@ class RotateTwoLaunchedAppsInAppPairsMode(
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
-            isVisible(primaryApp.defaultWindowName)
-                .isVisible(secondaryApp.defaultWindowName)
+            isVisible(primaryApp.component)
+                .isVisible(secondaryApp.component)
         }
     }
 
     @Presubmit
     @Test
-    fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()
+    fun appPairsDividerIsVisibleAtEnd() = testSpec.appPairsDividerIsVisibleAtEnd()
 
     @Postsubmit
     @Test
-    fun appPairsPrimaryBoundsIsVisible() =
-        testSpec.appPairsPrimaryBoundsIsVisible(testSpec.config.endRotation,
-            primaryApp.defaultWindowName)
+    fun appPairsPrimaryBoundsIsVisibleAtEnd() =
+        testSpec.appPairsPrimaryBoundsIsVisibleAtEnd(testSpec.config.endRotation,
+            primaryApp.component)
 
     @Postsubmit
     @Test
-    fun appPairsSecondaryBoundsIsVisible() =
-        testSpec.appPairsSecondaryBoundsIsVisible(testSpec.config.endRotation,
-            secondaryApp.defaultWindowName)
+    fun appPairsSecondaryBoundsIsVisibleAtEnd() =
+        testSpec.appPairsSecondaryBoundsIsVisibleAtEnd(testSpec.config.endRotation,
+            secondaryApp.component)
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

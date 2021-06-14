@@ -28,7 +28,7 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.startRotation
-import com.android.wm.shell.flicker.IME_WINDOW_NAME
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.helpers.ImeAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -88,7 +88,7 @@ class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     fun pipInVisibleBounds() {
         testSpec.assertWm {
             val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
-            coversAtMost(displayBounds, pipApp.defaultWindowName)
+            coversAtMost(displayBounds, pipApp.component)
         }
     }
 
@@ -99,7 +99,7 @@ class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Test
     fun pipIsAboveAppWindow() {
         testSpec.assertWmTag(TAG_IME_VISIBLE) {
-            isAboveWindow(IME_WINDOW_NAME, pipApp.defaultWindowName)
+            isAboveWindow(WindowManagerStateHelper.IME_COMPONENT, pipApp.component)
         }
     }
 

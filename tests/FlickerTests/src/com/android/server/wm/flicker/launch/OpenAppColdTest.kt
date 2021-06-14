@@ -65,9 +65,8 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
 
     @Postsubmit
     @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
 
     @Postsubmit
     @Test

@@ -22,26 +22,32 @@ import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.launcherReplacesAppWindowAsTopWindow
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.flicker.launcherLayerReplacesApp
-import com.android.server.wm.flicker.launcherWindowBecomesVisible
+import com.android.server.wm.flicker.replacesLayer
 import org.junit.Test
 
+/**
+ * Base test class for transitions that close an app back to the launcher screen
+ */
 abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
+
+    /**
+     * Specification of the test transition to execute
+     */
     protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit = {
         setup {
             eachRun {
@@ -117,25 +123,33 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
 
     @Presubmit
     @Test
-    open fun noUncoveredRegions() {
-        testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
+    open fun entireScreenCovered() {
+        testSpec.entireScreenCovered(testSpec.config.startRotation, Surface.ROTATION_0)
     }
 
     @Presubmit
     @Test
     open fun launcherReplacesAppWindowAsTopWindow() {
-        testSpec.launcherReplacesAppWindowAsTopWindow(testApp)
+        testSpec.assertWm {
+            this.isAppWindowOnTop(testApp.component)
+                    .then()
+                    .isAppWindowOnTop(LAUNCHER_COMPONENT)
+        }
     }
 
     @Presubmit
     @Test
     open fun launcherWindowBecomesVisible() {
-        testSpec.launcherWindowBecomesVisible()
+        testSpec.assertWm {
+            this.isAppWindowInvisible(LAUNCHER_COMPONENT)
+                    .then()
+                    .isAppWindowOnTop(LAUNCHER_COMPONENT)
+        }
     }
 
     @Presubmit
     @Test
     open fun launcherLayerReplacesApp() {
-        testSpec.launcherLayerReplacesApp(testApp)
+        testSpec.replacesLayer(testApp.component, LAUNCHER_COMPONENT)
     }
 }

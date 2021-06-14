@@ -16,97 +16,100 @@
 
 package com.android.wm.shell.flicker
 
+import android.content.ComponentName
 import android.graphics.Region
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.traces.layers.getVisibleBounds
 
-fun FlickerTestParameter.appPairsDividerIsVisible() {
+fun FlickerTestParameter.appPairsDividerIsVisibleAtEnd() {
     assertLayersEnd {
-        this.isVisible(APP_PAIR_SPLIT_DIVIDER)
+        this.isVisible(APP_PAIR_SPLIT_DIVIDER_COMPONENT)
     }
 }
 
-fun FlickerTestParameter.appPairsDividerIsInvisible() {
+fun FlickerTestParameter.appPairsDividerIsInvisibleAtEnd() {
     assertLayersEnd {
-        this.notContains(APP_PAIR_SPLIT_DIVIDER)
+        this.notContains(APP_PAIR_SPLIT_DIVIDER_COMPONENT)
     }
 }
 
 fun FlickerTestParameter.appPairsDividerBecomesVisible() {
     assertLayers {
-        this.isInvisible(DOCKED_STACK_DIVIDER)
+        this.isInvisible(DOCKED_STACK_DIVIDER_COMPONENT)
             .then()
-            .isVisible(DOCKED_STACK_DIVIDER)
+            .isVisible(DOCKED_STACK_DIVIDER_COMPONENT)
     }
 }
 
-fun FlickerTestParameter.dockedStackDividerIsVisible() {
+fun FlickerTestParameter.dockedStackDividerIsVisibleAtEnd() {
     assertLayersEnd {
-        this.isVisible(DOCKED_STACK_DIVIDER)
+        this.isVisible(DOCKED_STACK_DIVIDER_COMPONENT)
     }
 }
 
 fun FlickerTestParameter.dockedStackDividerBecomesVisible() {
     assertLayers {
-        this.isInvisible(DOCKED_STACK_DIVIDER)
+        this.isInvisible(DOCKED_STACK_DIVIDER_COMPONENT)
             .then()
-            .isVisible(DOCKED_STACK_DIVIDER)
+            .isVisible(DOCKED_STACK_DIVIDER_COMPONENT)
     }
 }
 
 fun FlickerTestParameter.dockedStackDividerBecomesInvisible() {
     assertLayers {
-        this.isVisible(DOCKED_STACK_DIVIDER)
+        this.isVisible(DOCKED_STACK_DIVIDER_COMPONENT)
             .then()
-            .isInvisible(DOCKED_STACK_DIVIDER)
+            .isInvisible(DOCKED_STACK_DIVIDER_COMPONENT)
     }
 }
 
-fun FlickerTestParameter.dockedStackDividerIsInvisible() {
+fun FlickerTestParameter.dockedStackDividerNotExistsAtEnd() {
     assertLayersEnd {
-        this.notContains(DOCKED_STACK_DIVIDER)
+        this.notContains(DOCKED_STACK_DIVIDER_COMPONENT)
     }
 }
 
-fun FlickerTestParameter.appPairsPrimaryBoundsIsVisible(rotation: Int, primaryLayerName: String) {
+fun FlickerTestParameter.appPairsPrimaryBoundsIsVisibleAtEnd(
+    rotation: Int,
+    primaryComponent: ComponentName
+) {
     assertLayersEnd {
-        val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
-        visibleRegion(primaryLayerName)
+        val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
+        visibleRegion(primaryComponent)
             .coversExactly(getPrimaryRegion(dividerRegion, rotation))
     }
 }
 
-fun FlickerTestParameter.dockedStackPrimaryBoundsIsVisible(
+fun FlickerTestParameter.dockedStackPrimaryBoundsIsVisibleAtEnd(
     rotation: Int,
-    primaryLayerName: String
+    primaryComponent: ComponentName
 ) {
     assertLayersEnd {
-        val dividerRegion = entry.getVisibleBounds(DOCKED_STACK_DIVIDER)
-        visibleRegion(primaryLayerName)
+        val dividerRegion = layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region
+        visibleRegion(primaryComponent)
             .coversExactly(getPrimaryRegion(dividerRegion, rotation))
     }
 }
 
-fun FlickerTestParameter.appPairsSecondaryBoundsIsVisible(
+fun FlickerTestParameter.appPairsSecondaryBoundsIsVisibleAtEnd(
     rotation: Int,
-    secondaryLayerName: String
+    secondaryComponent: ComponentName
 ) {
     assertLayersEnd {
-        val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
-        visibleRegion(secondaryLayerName)
+        val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
+        visibleRegion(secondaryComponent)
             .coversExactly(getSecondaryRegion(dividerRegion, rotation))
     }
 }
 
-fun FlickerTestParameter.dockedStackSecondaryBoundsIsVisible(
+fun FlickerTestParameter.dockedStackSecondaryBoundsIsVisibleAtEnd(
     rotation: Int,
-    secondaryLayerName: String
+    secondaryComponent: ComponentName
 ) {
     assertLayersEnd {
-        val dividerRegion = entry.getVisibleBounds(DOCKED_STACK_DIVIDER)
-        visibleRegion(secondaryLayerName)
+        val dividerRegion = layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region
+        visibleRegion(secondaryComponent)
             .coversExactly(getSecondaryRegion(dividerRegion, rotation))
     }
 }

@@ -23,9 +23,9 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.startRotation
 import org.junit.FixMethodOrder
@@ -73,9 +73,11 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Test
     fun appReplacesPipWindow() {
         testSpec.assertWm {
-            this.showsAppWindow(PIP_WINDOW_TITLE)
+            this.invoke("hasPipWindow") { it.isPinned(pipApp.component) }
+                .isAppWindowOnTop(pipApp.component)
                 .then()
-                .showsAppWindowOnTop(pipApp.launcherName)
+                .invoke("hasNotPipWindow") { it.isNotPinned(pipApp.component) }
+                .isAppWindowOnTop(pipApp.component)
         }
     }
 
@@ -83,9 +85,11 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Test
     fun appReplacesPipLayer() {
         testSpec.assertLayers {
-            this.isVisible(PIP_WINDOW_TITLE)
+            this.isVisible(pipApp.component)
+                .isVisible(LAUNCHER_COMPONENT)
                 .then()
-                .isVisible(pipApp.launcherName)
+                .isVisible(pipApp.component)
+                .isInvisible(LAUNCHER_COMPONENT)
         }
     }
 
@@ -93,22 +97,26 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Test
     fun testAppCoversFullScreen() {
         testSpec.assertLayersStart {
-            visibleRegion(pipApp.defaultWindowName).coversExactly(displayBounds)
+            visibleRegion(pipApp.component).coversExactly(displayBounds)
         }
     }
 
     @FlakyTest(bugId = 151179149)
     @Test
-    fun focusChanges() = testSpec.focusChanges("NexusLauncherActivity",
-        pipApp.launcherName, "NexusLauncherActivity")
+    fun focusChanges() {
+        testSpec.assertEventLog {
+            this.focusChanges("NexusLauncherActivity",
+                    pipApp.launcherName, "NexusLauncherActivity")
+        }
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                    repetitions = 5)
+                    .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
+                            repetitions = 5)
         }
     }
 }

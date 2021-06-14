@@ -28,6 +28,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.launchSplitScreen
@@ -37,14 +38,13 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.flicker.traces.layers.getVisibleBounds
-import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER
+import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.helpers.SimpleAppHelper
+import com.android.wm.shell.flicker.testapp.Components
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -110,7 +110,7 @@ class ResizeLegacySplitScreen(
     @Test
     fun topAppWindowIsAlwaysVisible() {
         testSpec.assertWm {
-            this.showsAppWindow(sSimpleActivity)
+            this.isAppWindowVisible(Components.SimpleActivity.COMPONENT)
         }
     }
 
@@ -118,7 +118,7 @@ class ResizeLegacySplitScreen(
     @Test
     fun bottomAppWindowIsAlwaysVisible() {
         testSpec.assertWm {
-            this.showsAppWindow(sImeActivity)
+            this.isAppWindowVisible(Components.ImeActivity.COMPONENT)
         }
     }
 
@@ -129,7 +129,7 @@ class ResizeLegacySplitScreen(
     fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
     @Test
-    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.endRotation)
+    fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.endRotation)
 
     @Test
     fun navBarLayerRotatesAndScales() =
@@ -142,21 +142,21 @@ class ResizeLegacySplitScreen(
     @Test
     fun topAppLayerIsAlwaysVisible() {
         testSpec.assertLayers {
-            this.isVisible(sSimpleActivity)
+            this.isVisible(Components.SimpleActivity.COMPONENT)
         }
     }
 
     @Test
     fun bottomAppLayerIsAlwaysVisible() {
         testSpec.assertLayers {
-            this.isVisible(sImeActivity)
+            this.isVisible(Components.ImeActivity.COMPONENT)
         }
     }
 
     @Test
     fun dividerLayerIsAlwaysVisible() {
         testSpec.assertLayers {
-            this.isVisible(DOCKED_STACK_DIVIDER)
+            this.isVisible(DOCKED_STACK_DIVIDER_COMPONENT)
         }
     }
 
@@ -166,7 +166,7 @@ class ResizeLegacySplitScreen(
         testSpec.assertLayersStart {
             val displayBounds = WindowUtils.displayBounds
             val dividerBounds =
-                entry.getVisibleBounds(DOCKED_STACK_DIVIDER).bounds
+                layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region.bounds
 
             val topAppBounds = Region(0, 0, dividerBounds.right,
                 dividerBounds.top + WindowUtils.dockedStackDividerInset)
@@ -174,8 +174,8 @@ class ResizeLegacySplitScreen(
                 dividerBounds.bottom - WindowUtils.dockedStackDividerInset,
                 displayBounds.right,
                 displayBounds.bottom - WindowUtils.navigationBarHeight)
-            visibleRegion("SimpleActivity").coversExactly(topAppBounds)
-            visibleRegion("ImeActivity").coversExactly(bottomAppBounds)
+            visibleRegion(Components.SimpleActivity.COMPONENT).coversExactly(topAppBounds)
+            visibleRegion(Components.ImeActivity.COMPONENT).coversExactly(bottomAppBounds)
         }
     }
 
@@ -185,7 +185,7 @@ class ResizeLegacySplitScreen(
         testSpec.assertLayersStart {
             val displayBounds = WindowUtils.displayBounds
             val dividerBounds =
-                entry.getVisibleBounds(DOCKED_STACK_DIVIDER).bounds
+                layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region.bounds
 
             val topAppBounds = Region(0, 0, dividerBounds.right,
                 dividerBounds.top + WindowUtils.dockedStackDividerInset)
@@ -194,8 +194,8 @@ class ResizeLegacySplitScreen(
                 displayBounds.right,
                 displayBounds.bottom - WindowUtils.navigationBarHeight)
 
-            visibleRegion(sSimpleActivity).coversExactly(topAppBounds)
-            visibleRegion(sImeActivity).coversExactly(bottomAppBounds)
+            visibleRegion(Components.SimpleActivity.COMPONENT).coversExactly(topAppBounds)
+            visibleRegion(Components.ImeActivity.COMPONENT).coversExactly(bottomAppBounds)
         }
     }
 
@@ -207,8 +207,6 @@ class ResizeLegacySplitScreen(
     }
 
     companion object {
-        private const val sSimpleActivity = "SimpleActivity"
-        private const val sImeActivity = "ImeActivity"
         private val startRatio = Rational(1, 3)
         private val stopRatio = Rational(2, 3)
 

@@ -16,4 +16,4 @@
 
 package com.android.wm.shell.flicker.pip
 
-internal const val PIP_WINDOW_TITLE = "PipMenuActivity"
+internal const val PIP_WINDOW_COMPONENT = "PipMenuActivity"

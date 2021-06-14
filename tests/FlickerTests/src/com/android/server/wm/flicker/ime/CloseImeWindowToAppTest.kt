@@ -31,7 +31,7 @@ import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
@@ -90,15 +90,20 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
-            this.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE,
-                WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-                WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME))
+            this.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(
+                WindowManagerStateHelper.IME_COMPONENT,
+                WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
+                WindowManagerStateHelper.SNAPSHOT_COMPONENT))
         }
     }
 
     @Presubmit
     @Test
-    fun imeAppWindowIsAlwaysVisible() = testSpec.imeAppWindowIsAlwaysVisible(testApp)
+    fun imeAppWindowIsAlwaysVisible() {
+        testSpec.assertWm {
+            this.isAppWindowOnTop(testApp.component)
+        }
+    }
 
     @Presubmit
     @Test
@@ -110,7 +115,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation)
+    fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.startRotation)
 
     @Presubmit
     @Test
@@ -146,7 +151,11 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun imeAppLayerIsAlwaysVisible() = testSpec.imeAppLayerIsAlwaysVisible(testApp)
+    fun imeAppLayerIsAlwaysVisible() {
+        testSpec.assertLayers {
+            this.isVisible(testApp.component)
+        }
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

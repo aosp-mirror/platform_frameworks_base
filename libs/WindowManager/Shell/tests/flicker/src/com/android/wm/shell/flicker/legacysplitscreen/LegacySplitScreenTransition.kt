@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.app.Instrumentation
+import android.content.ComponentName
 import android.content.Context
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
@@ -46,8 +47,9 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
     protected val splitScreenApp = SplitScreenHelper.getPrimary(instrumentation)
     protected val secondaryApp = SplitScreenHelper.getSecondary(instrumentation)
     protected val nonResizeableApp = SplitScreenHelper.getNonResizeable(instrumentation)
-    protected val LAUNCHER_PACKAGE_NAME = LauncherStrategyFactory.getInstance(instrumentation)
-        .launcherStrategy.supportedLauncherPackage
+    protected val LAUNCHER_COMPONENT = ComponentName("",
+            LauncherStrategyFactory.getInstance(instrumentation)
+                    .launcherStrategy.supportedLauncherPackage)
     private var prevDevEnableNonResizableMultiWindow = 0
 
     @Before
@@ -70,8 +72,9 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
      *
      * b/182720234
      */
-    open val ignoredWindows: List<String> = listOf(WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-        WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+    open val ignoredWindows: List<ComponentName> = listOf(
+        WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
+        WindowManagerStateHelper.SNAPSHOT_COMPONENT)
 
     protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
@@ -138,9 +141,9 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
     }
 
     companion object {
-        internal const val LIVE_WALLPAPER_PACKAGE_NAME =
-            "com.breel.wallpapers18.soundviz.wallpaper.variations.SoundVizWallpaperV2"
-        internal const val LETTERBOX_NAME = "Letterbox"
-        internal const val TOAST_NAME = "Toast"
+        internal val LIVE_WALLPAPER_COMPONENT = ComponentName("",
+            "com.breel.wallpapers18.soundviz.wallpaper.variations.SoundVizWallpaperV2")
+        internal val LETTERBOX_COMPONENT = ComponentName("", "Letterbox")
+        internal val TOAST_COMPONENT = ComponentName("", "Toast")
     }
 }

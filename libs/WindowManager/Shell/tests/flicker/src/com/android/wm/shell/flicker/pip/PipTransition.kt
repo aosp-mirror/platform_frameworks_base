@@ -25,6 +25,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
@@ -32,7 +33,6 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.server.wm.flicker.startRotation
@@ -188,6 +188,6 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    open fun noUncoveredRegions() =
-        testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
+    open fun entireScreenCovered() =
+        testSpec.entireScreenCovered(testSpec.config.startRotation, Surface.ROTATION_0)
 }

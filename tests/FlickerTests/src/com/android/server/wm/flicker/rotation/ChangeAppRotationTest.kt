@@ -30,6 +30,7 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.ROTATION_COMPONENT
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,11 +70,11 @@ class ChangeAppRotationTest(
     @Test
     fun screenshotLayerBecomesInvisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp.getPackage())
+            this.isVisible(testApp.component)
                 .then()
-                .isVisible(SCREENSHOT_LAYER)
+                .isVisible(ROTATION_COMPONENT)
                 .then()
-                .isVisible(testApp.getPackage())
+                .isVisible(testApp.component)
         }
     }
 
@@ -121,8 +122,6 @@ class ChangeAppRotationTest(
     }
 
     companion object {
-        private const val SCREENSHOT_LAYER = "RotationLayer"
-
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {

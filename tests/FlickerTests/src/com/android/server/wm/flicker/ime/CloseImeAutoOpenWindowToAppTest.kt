@@ -29,15 +29,16 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -105,7 +106,7 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
     @Test
     fun imeAppWindowIsAlwaysVisible() {
         testSpec.assertWm {
-            this.showsAppWindowOnTop(testApp.getPackage())
+            this.isAppWindowOnTop(testApp.component)
         }
     }
 
@@ -119,13 +120,13 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
 
     @Postsubmit
     @Test
-    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation)
+    fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.startRotation)
 
     @Presubmit
     @Test
     fun imeLayerVisibleStart() {
         testSpec.assertLayersStart {
-            this.isVisible(IME_LAYER_TITLE)
+            this.isVisible(WindowManagerStateHelper.IME_COMPONENT)
         }
     }
 
@@ -133,7 +134,7 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
     @Test
     fun imeLayerInvisibleEnd() {
         testSpec.assertLayersEnd {
-            this.isInvisible(IME_LAYER_TITLE)
+            this.isInvisible(WindowManagerStateHelper.IME_COMPONENT)
         }
     }
 
@@ -145,7 +146,7 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
     @Test
     fun imeAppLayerIsAlwaysVisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp.getPackage())
+            this.isVisible(testApp.component)
         }
     }
 

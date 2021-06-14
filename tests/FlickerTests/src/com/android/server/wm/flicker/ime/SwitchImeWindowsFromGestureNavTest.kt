@@ -17,11 +17,12 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
+import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
+import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -35,8 +36,7 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.NAV_BAR_LAYER_NAME
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.STATUS_BAR_LAYER_NAME
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -93,7 +93,7 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
 
                 wmHelper.waitForFullScreenApp(testApp.component)
                 wmHelper.waitForAppTransitionIdle()
-                createTag(Companion.TAG_IME_INVISIBLE)
+                createTag(TAG_IME_INVISIBLE)
             }
             transitions {
                 // [Step2]: Swipe left to back to imeTestApp task
@@ -106,51 +106,52 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
     }
 
     @Test
-    fun imeAppWindowAlwaysVisible() {
+    fun imeAppWindowVisibility() {
+        val component = ComponentName(imeTestApp.`package`, "")
         testSpec.assertWm {
-            this.showsAppWindowOnTop(testApp.getPackage())
+            this.isAppWindowOnTop(component)
                     .then()
-                    .showsAppWindow(testApp.getPackage())
+                    .isAppWindowVisible(component, ignoreActivity = true)
         }
     }
 
     @Test
     fun navBarLayerIsVisibleAroundSwitching() {
         testSpec.assertLayersStart {
-            isVisible(NAV_BAR_LAYER_NAME)
+            isVisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
         }
         testSpec.assertLayersEnd {
-            isVisible(NAV_BAR_LAYER_NAME)
+            isVisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
         }
     }
 
     @Test
     fun statusBarLayerIsVisibleAroundSwitching() {
         testSpec.assertLayersStart {
-            isVisible(STATUS_BAR_LAYER_NAME)
+            isVisible(WindowManagerStateHelper.STATUS_BAR_COMPONENT)
         }
         testSpec.assertLayersEnd {
-            isVisible(STATUS_BAR_LAYER_NAME)
+            isVisible(WindowManagerStateHelper.STATUS_BAR_COMPONENT)
         }
     }
 
     @Test
     fun imeLayerIsVisibleWhenSwitchingToImeApp() {
         testSpec.assertLayersStart {
-            isVisible(IME_WINDOW_TITLE)
+            isVisible(WindowManagerStateHelper.IME_COMPONENT)
         }
         testSpec.assertLayersTag(TAG_IME_VISIBLE) {
-            isVisible(IME_WINDOW_TITLE)
+            isVisible(WindowManagerStateHelper.IME_COMPONENT)
         }
         testSpec.assertLayersEnd {
-            isVisible(IME_WINDOW_TITLE)
+            isVisible(WindowManagerStateHelper.IME_COMPONENT)
         }
     }
 
     @Test
     fun imeLayerIsInvisibleWhenSwitchingToTestApp() {
         testSpec.assertLayersTag(TAG_IME_INVISIBLE) {
-            isInvisible(IME_WINDOW_TITLE)
+            isInvisible(WindowManagerStateHelper.IME_COMPONENT)
         }
     }
 
@@ -169,7 +170,8 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
                             repetitions = 3,
                             supportedNavigationModes = listOf(
                                     WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                            )
+                            ),
+                            supportedRotations = listOf(Surface.ROTATION_0)
                     )
         }
 

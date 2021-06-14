@@ -31,8 +31,7 @@ import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.appWindowAlwaysVisibleOnTop
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
@@ -93,7 +92,11 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun appWindowAlwaysVisibleOnTop() = testSpec.appWindowAlwaysVisibleOnTop(testApp.`package`)
+    fun appWindowAlwaysVisibleOnTop() {
+        testSpec.assertWm {
+            this.isAppWindowOnTop(testApp.component)
+        }
+    }
 
     @Presubmit
     @Test
@@ -105,7 +108,7 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation)
+    fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.startRotation)
 
     @Presubmit
     @Test
@@ -115,7 +118,7 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun layerAlwaysVisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp.`package`)
+            this.isVisible(testApp.component)
         }
     }
 

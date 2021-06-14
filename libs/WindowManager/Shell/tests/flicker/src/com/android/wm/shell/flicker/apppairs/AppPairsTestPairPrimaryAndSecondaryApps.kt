@@ -25,9 +25,8 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.traces.layers.getVisibleBounds
-import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER
-import com.android.wm.shell.flicker.appPairsDividerIsVisible
+import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER_COMPONENT
+import com.android.wm.shell.flicker.appPairsDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
 import org.junit.FixMethodOrder
@@ -73,14 +72,14 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
 
     @Presubmit
     @Test
-    fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()
+    fun appPairsDividerIsVisibleAtEnd() = testSpec.appPairsDividerIsVisibleAtEnd()
 
     @Presubmit
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
-            isVisible(primaryApp.defaultWindowName)
-            isVisible(secondaryApp.defaultWindowName)
+            isVisible(primaryApp.component)
+            isVisible(secondaryApp.component)
         }
     }
 
@@ -88,10 +87,10 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
     @Test
     fun appsEndingBounds() {
         testSpec.assertLayersEnd {
-            val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
-            visibleRegion(primaryApp.defaultWindowName)
+            val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
+            visibleRegion(primaryApp.component)
                 .coversExactly(appPairsHelper.getPrimaryBounds(dividerRegion))
-            visibleRegion(secondaryApp.defaultWindowName)
+            visibleRegion(secondaryApp.component)
                 .coversExactly(appPairsHelper.getSecondaryBounds(dividerRegion))
         }
     }

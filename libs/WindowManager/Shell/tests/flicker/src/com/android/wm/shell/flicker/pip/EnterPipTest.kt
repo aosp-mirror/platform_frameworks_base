@@ -52,7 +52,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
 
     @Postsubmit
     @Test
-    override fun noUncoveredRegions() = super.noUncoveredRegions()
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     @Postsubmit
     @Test
@@ -66,7 +66,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Test
     fun pipAppWindowAlwaysVisible() {
         testSpec.assertWm {
-            this.showsAppWindow(pipApp.defaultWindowName)
+            this.isAppWindowVisible(pipApp.component)
         }
     }
 
@@ -74,7 +74,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Test
     fun pipLayerBecomesVisible() {
         testSpec.assertLayers {
-            this.isVisible(pipApp.windowName)
+            this.isVisible(pipApp.component)
         }
     }
 

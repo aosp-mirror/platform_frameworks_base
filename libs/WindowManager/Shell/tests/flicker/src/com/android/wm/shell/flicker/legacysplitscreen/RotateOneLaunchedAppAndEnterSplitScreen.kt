@@ -25,7 +25,6 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
-import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.launchSplitScreen
@@ -35,8 +34,8 @@ import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.wm.shell.flicker.dockedStackDividerIsVisible
-import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
+import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
+import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -67,13 +66,13 @@ class RotateOneLaunchedAppAndEnterSplitScreen(
 
     @Presubmit
     @Test
-    fun dockedStackDividerIsVisible() = testSpec.dockedStackDividerIsVisible()
+    fun dockedStackDividerIsVisibleAtEnd() = testSpec.dockedStackDividerIsVisibleAtEnd()
 
     @Presubmit
     @Test
-    fun dockedStackPrimaryBoundsIsVisible() =
-        testSpec.dockedStackPrimaryBoundsIsVisible(testSpec.config.startRotation,
-            splitScreenApp.defaultWindowName)
+    fun dockedStackPrimaryBoundsIsVisibleAtEnd() =
+        testSpec.dockedStackPrimaryBoundsIsVisibleAtEnd(testSpec.config.startRotation,
+            splitScreenApp.component)
 
     @Postsubmit
     @Test
@@ -97,8 +96,13 @@ class RotateOneLaunchedAppAndEnterSplitScreen(
 
     @FlakyTest
     @Test
-    fun appWindowBecomesVisible() =
-        testSpec.appWindowBecomesVisible(splitScreenApp.defaultWindowName)
+    fun appWindowBecomesVisible() {
+        testSpec.assertWm {
+            this.isAppWindowInvisible(splitScreenApp.component)
+                    .then()
+                    .isAppWindowVisible(splitScreenApp.component)
+        }
+    }
 
     @Postsubmit
     @Test

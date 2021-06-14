@@ -27,10 +27,10 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
@@ -76,7 +76,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
 
     @Postsubmit
     @Test
-    override fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation,
+    override fun entireScreenCovered() = testSpec.entireScreenCovered(testSpec.config.startRotation,
         testSpec.config.endRotation, allStates = false)
 
     @Postsubmit
@@ -103,8 +103,8 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Test
     fun appLayerRotates_StartingBounds() {
         testSpec.assertLayersStart {
-            visibleRegion(fixedApp.defaultWindowName).coversExactly(startingBounds)
-            visibleRegion(pipApp.defaultWindowName).coversAtMost(startingBounds)
+            visibleRegion(fixedApp.component).coversExactly(startingBounds)
+            visibleRegion(pipApp.component).coversAtMost(startingBounds)
         }
     }
 
@@ -112,8 +112,8 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Test
     fun appLayerRotates_EndingBounds() {
         testSpec.assertLayersEnd {
-            visibleRegion(fixedApp.defaultWindowName).coversExactly(endingBounds)
-            visibleRegion(pipApp.defaultWindowName).coversAtMost(endingBounds)
+            visibleRegion(fixedApp.component).coversExactly(endingBounds)
+            visibleRegion(pipApp.component).coversAtMost(endingBounds)
         }
     }
 

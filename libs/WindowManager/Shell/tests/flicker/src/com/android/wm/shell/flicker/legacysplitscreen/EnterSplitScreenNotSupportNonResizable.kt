@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.content.ComponentName
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
@@ -27,7 +28,7 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.canSplitScreen
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
+import com.android.wm.shell.flicker.dockedStackDividerNotExistsAtEnd
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setSupportsNonResizableMultiWindow
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
@@ -71,12 +72,12 @@ class EnterSplitScreenNotSupportNonResizable(
             }
         }
 
-    override val ignoredWindows: List<String>
-        get() = listOf(LAUNCHER_PACKAGE_NAME,
-            WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME,
-            nonResizeableApp.defaultWindowName,
-            splitScreenApp.defaultWindowName)
+    override val ignoredWindows: List<ComponentName>
+        get() = listOf(LAUNCHER_COMPONENT,
+            WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
+            WindowManagerStateHelper.SNAPSHOT_COMPONENT,
+            nonResizeableApp.component,
+            splitScreenApp.component)
 
     @Before
     override fun setup() {
@@ -92,7 +93,7 @@ class EnterSplitScreenNotSupportNonResizable(
 
     @Presubmit
     @Test
-    fun dockedStackDividerIsInvisible() = testSpec.dockedStackDividerIsInvisible()
+    fun dockedStackDividerNotExistsAtEnd() = testSpec.dockedStackDividerNotExistsAtEnd()
 
     @Postsubmit
     @Test

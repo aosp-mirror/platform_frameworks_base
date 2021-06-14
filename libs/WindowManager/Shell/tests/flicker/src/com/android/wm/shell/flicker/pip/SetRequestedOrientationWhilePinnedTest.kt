@@ -102,7 +102,7 @@ class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipWindowInsideDisplay() {
         testSpec.assertWmStart {
-            frameRegion(pipApp.defaultWindowName).coversAtMost(startingBounds)
+            frameRegion(pipApp.component).coversAtMost(startingBounds)
         }
     }
 
@@ -110,7 +110,7 @@ class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipAppShowsOnTop() {
         testSpec.assertWmEnd {
-            showsAppWindowOnTop(pipApp.defaultWindowName)
+            isAppWindowOnTop(pipApp.component)
         }
     }
 
@@ -118,28 +118,28 @@ class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipLayerInsideDisplay() {
         testSpec.assertLayersStart {
-            visibleRegion(pipApp.defaultWindowName).coversAtMost(startingBounds)
+            visibleRegion(pipApp.component).coversAtMost(startingBounds)
         }
     }
 
     @Presubmit
     @Test
     fun pipAlwaysVisible() = testSpec.assertWm {
-        this.showsAppWindow(pipApp.windowName)
+        this.isAppWindowVisible(pipApp.component)
     }
 
     @Presubmit
     @Test
     fun pipAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {
-            visibleRegion(pipApp.defaultWindowName).coversExactly(endingBounds)
+            visibleRegion(pipApp.component).coversExactly(endingBounds)
         }
     }
 
     @FlakyTest
     @Test
-    override fun noUncoveredRegions() {
-        super.noUncoveredRegions()
+    override fun entireScreenCovered() {
+        super.entireScreenCovered()
     }
 
     companion object {

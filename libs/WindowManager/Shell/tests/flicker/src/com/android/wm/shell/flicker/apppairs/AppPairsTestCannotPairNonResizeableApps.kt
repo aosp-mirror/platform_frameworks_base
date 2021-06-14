@@ -25,7 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.wm.shell.flicker.appPairsDividerIsInvisible
+import com.android.wm.shell.flicker.appPairsDividerIsInvisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setSupportsNonResizableMultiWindow
@@ -91,7 +91,7 @@ class AppPairsTestCannotPairNonResizeableApps(
 
     @Presubmit
     @Test
-    fun appPairsDividerIsInvisible() = testSpec.appPairsDividerIsInvisible()
+    fun appPairsDividerIsInvisibleAtEnd() = testSpec.appPairsDividerIsInvisibleAtEnd()
 
     @Presubmit
     @Test
@@ -101,8 +101,8 @@ class AppPairsTestCannotPairNonResizeableApps(
             "Non resizeable app not initialized"
         }
         testSpec.assertWmEnd {
-            isVisible(nonResizeableApp.defaultWindowName)
-            isInvisible(primaryApp.defaultWindowName)
+            isVisible(nonResizeableApp.component)
+            isInvisible(primaryApp.component)
         }
     }
 

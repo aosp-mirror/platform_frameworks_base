@@ -94,7 +94,7 @@ class SeamlessAppRotationTest(
     @Test
     fun appLayerAlwaysVisible() {
         testSpec.assertLayers {
-            isVisible(testApp.`package`)
+            isVisible(testApp.component)
         }
     }
 
@@ -102,9 +102,9 @@ class SeamlessAppRotationTest(
     @Test
     fun appLayerRotates() {
         testSpec.assertLayers {
-            this.coversExactly(startingPos, testApp.`package`)
+            this.coversExactly(startingPos, testApp.component)
                 .then()
-                .coversExactly(endingPos, testApp.`package`)
+                .coversExactly(endingPos, testApp.component)
         }
     }
 
@@ -112,7 +112,7 @@ class SeamlessAppRotationTest(
     @Test
     fun statusBarWindowIsAlwaysInvisible() {
         testSpec.assertWm {
-            this.hidesAboveAppWindow(WindowManagerStateHelper.STATUS_BAR_WINDOW_NAME)
+            this.isAboveAppWindowInvisible(WindowManagerStateHelper.STATUS_BAR_COMPONENT)
         }
     }
 
@@ -120,7 +120,7 @@ class SeamlessAppRotationTest(
     @Test
     fun statusBarLayerIsAlwaysInvisible() {
         testSpec.assertLayers {
-            this.isInvisible(WindowManagerStateHelper.STATUS_BAR_LAYER_NAME)
+            this.isInvisible(WindowManagerStateHelper.STATUS_BAR_COMPONENT)
         }
     }
 
@@ -144,9 +144,7 @@ class SeamlessAppRotationTest(
 
     @FlakyTest
     @Test
-    override fun navBarLayerRotatesAndScales() {
-        super.navBarLayerRotatesAndScales()
-    }
+    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
     companion object {
         private val testFactory = FlickerTestParameterFactory.getInstance()

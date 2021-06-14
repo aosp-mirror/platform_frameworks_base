@@ -83,7 +83,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun pipWindowInsideDisplayBounds() {
         testSpec.assertWm {
-            coversAtMost(displayBounds, pipApp.defaultWindowName)
+            coversAtMost(displayBounds, pipApp.component)
         }
     }
 
@@ -91,9 +91,9 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
-            isVisible(testApp.defaultWindowName)
-            isVisible(imeApp.defaultWindowName)
-            noWindowsOverlap(testApp.defaultWindowName, imeApp.defaultWindowName)
+            isVisible(testApp.component)
+            isVisible(imeApp.component)
+            noWindowsOverlap(testApp.component, imeApp.component)
         }
     }
 
@@ -101,7 +101,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun pipLayerInsideDisplayBounds() {
         testSpec.assertLayers {
-            coversAtMost(displayBounds, pipApp.defaultWindowName)
+            coversAtMost(displayBounds, pipApp.component)
         }
     }
 
@@ -109,8 +109,8 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun bothAppLayersVisible() {
         testSpec.assertLayersEnd {
-            visibleRegion(testApp.defaultWindowName).coversAtMost(displayBounds)
-            visibleRegion(imeApp.defaultWindowName).coversAtMost(displayBounds)
+            visibleRegion(testApp.component).coversAtMost(displayBounds)
+            visibleRegion(imeApp.component).coversAtMost(displayBounds)
         }
     }
 
@@ -132,7 +132,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
 
     @FlakyTest(bugId = 161435597)
     @Test
-    override fun noUncoveredRegions() = super.noUncoveredRegions()
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         const val TEST_REPETITIONS = 2
