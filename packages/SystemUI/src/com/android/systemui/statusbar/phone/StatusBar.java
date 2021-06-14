@@ -252,8 +252,7 @@ import dagger.Lazy;
 /** */
 public class StatusBar extends SystemUI implements
         ActivityStarter,
-        StatusBarStateController.StateListener,
-        LifecycleOwner, BatteryController.BatteryStateChangeCallback,
+        LifecycleOwner,
         ActivityLaunchAnimator.Callback {
     public static final boolean MULTIUSER_DEBUG = false;
 
@@ -842,6 +841,84 @@ public class StatusBar extends SystemUI implements
             }
         }
     };
+
+    private StatusBarStateController.StateListener mStateListener =
+            new StatusBarStateController.StateListener() {
+        @Override
+        public void onStatePreChange(int oldState, int newState) {
+            // If we're visible and switched to SHADE_LOCKED (the user dragged
+            // down on the lockscreen), clear notification LED, vibration,
+            // ringing.
+            // Other transitions are covered in handleVisibleToUserChanged().
+            if (mVisible && (newState == StatusBarState.SHADE_LOCKED
+                    || mStatusBarStateController.goingToFullShade())) {
+                clearNotificationEffects();
+            }
+            if (newState == StatusBarState.KEYGUARD) {
+                mRemoteInputManager.onPanelCollapsed();
+                maybeEscalateHeadsUp();
+            }
+        }
+
+        @Override
+        public void onStateChanged(int newState) {
+            mState = newState;
+            updateReportRejectedTouchVisibility();
+            mDozeServiceHost.updateDozing();
+            updateTheme();
+            mNavigationBarController.touchAutoDim(mDisplayId);
+            Trace.beginSection("StatusBar#updateKeyguardState");
+            if (mState == StatusBarState.KEYGUARD && mStatusBarView != null) {
+                mStatusBarView.removePendingHideExpandedRunnables();
+            }
+            updateDozingState();
+            checkBarModes();
+            updateScrimController();
+            mPresenter.updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
+            updateKeyguardState();
+            Trace.endSection();
+        }
+
+        @Override
+        public void onDozeAmountChanged(float linear, float eased) {
+            if (mFeatureFlags.useNewLockscreenAnimations()
+                    && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
+                mLightRevealScrim.setRevealAmount(1f - linear);
+            }
+        }
+
+        @Override
+        public void onDozingChanged(boolean isDozing) {
+            Trace.beginSection("StatusBar#updateDozing");
+            mDozing = isDozing;
+
+            // Collapse the notification panel if open
+            boolean dozingAnimated = mDozeServiceHost.getDozingRequested()
+                    && mDozeParameters.shouldControlScreenOff();
+            mNotificationPanelViewController.resetViews(dozingAnimated);
+
+            updateQsExpansionEnabled();
+            mKeyguardViewMediator.setDozing(mDozing);
+
+            mNotificationsController.requestNotificationUpdate("onDozingChanged");
+            updateDozingState();
+            mDozeServiceHost.updateDozing();
+            updateScrimController();
+            updateReportRejectedTouchVisibility();
+            Trace.endSection();
+        }
+    };
+
+    private final BatteryController.BatteryStateChangeCallback mBatteryStateChangeCallback =
+            new BatteryController.BatteryStateChangeCallback() {
+                @Override
+                public void onPowerSaveChanged(boolean isPowerSave) {
+                    mHandler.post(mCheckBarModes);
+                    if (mDozeServiceHost != null) {
+                        mDozeServiceHost.firePowerSaveChanged(isPowerSave);
+                    }
+                }
+            };
     /**
      * Public constructor for StatusBar.
      *
@@ -1058,7 +1135,7 @@ public class StatusBar extends SystemUI implements
         mKeyguardIndicationController.init();
 
         mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
-        mStatusBarStateController.addCallback(this,
+        mStatusBarStateController.addCallback(mStateListener,
                 SysuiStatusBarStateController.RANK_STATUS_BAR);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
@@ -1174,7 +1251,7 @@ public class StatusBar extends SystemUI implements
 
         mConfigurationController.addCallback(mConfigurationListener);
 
-        mBatteryController.observe(mLifecycle, this);
+        mBatteryController.observe(mLifecycle, mBatteryStateChangeCallback);
         mLifecycle.setCurrentState(RESUMED);
 
         // set the initial view visibility
@@ -1540,19 +1617,6 @@ public class StatusBar extends SystemUI implements
     @Override
     public Lifecycle getLifecycle() {
         return mLifecycle;
-    }
-
-    @Override
-    public void onPowerSaveChanged(boolean isPowerSave) {
-        mHandler.post(mCheckBarModes);
-        if (mDozeServiceHost != null) {
-            mDozeServiceHost.firePowerSaveChanged(isPowerSave);
-        }
-    }
-
-    @Override
-    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-        // noop
     }
 
     @VisibleForTesting
@@ -3515,69 +3579,7 @@ public class StatusBar extends SystemUI implements
         mNotificationPanelViewController.collapseWithDuration(duration);
     }
 
-    @Override
-    public void onStatePreChange(int oldState, int newState) {
-        // If we're visible and switched to SHADE_LOCKED (the user dragged
-        // down on the lockscreen), clear notification LED, vibration,
-        // ringing.
-        // Other transitions are covered in handleVisibleToUserChanged().
-        if (mVisible && (newState == StatusBarState.SHADE_LOCKED
-                || mStatusBarStateController.goingToFullShade())) {
-            clearNotificationEffects();
-        }
-        if (newState == StatusBarState.KEYGUARD) {
-            mRemoteInputManager.onPanelCollapsed();
-            maybeEscalateHeadsUp();
-        }
-    }
 
-    @Override
-    public void onStateChanged(int newState) {
-        mState = newState;
-        updateReportRejectedTouchVisibility();
-        mDozeServiceHost.updateDozing();
-        updateTheme();
-        mNavigationBarController.touchAutoDim(mDisplayId);
-        Trace.beginSection("StatusBar#updateKeyguardState");
-        if (mState == StatusBarState.KEYGUARD && mStatusBarView != null) {
-            mStatusBarView.removePendingHideExpandedRunnables();
-        }
-        updateDozingState();
-        checkBarModes();
-        updateScrimController();
-        mPresenter.updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
-        updateKeyguardState();
-        Trace.endSection();
-    }
-
-    @Override
-    public void onDozeAmountChanged(float linear, float eased) {
-        if (mFeatureFlags.useNewLockscreenAnimations()
-                && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
-            mLightRevealScrim.setRevealAmount(1f - linear);
-        }
-    }
-
-    @Override
-    public void onDozingChanged(boolean isDozing) {
-        Trace.beginSection("StatusBar#updateDozing");
-        mDozing = isDozing;
-
-        // Collapse the notification panel if open
-        boolean dozingAnimated = mDozeServiceHost.getDozingRequested()
-                && mDozeParameters.shouldControlScreenOff();
-        mNotificationPanelViewController.resetViews(dozingAnimated);
-
-        updateQsExpansionEnabled();
-        mKeyguardViewMediator.setDozing(mDozing);
-
-        mNotificationsController.requestNotificationUpdate("onDozingChanged");
-        updateDozingState();
-        mDozeServiceHost.updateDozing();
-        updateScrimController();
-        updateReportRejectedTouchVisibility();
-        Trace.endSection();
-    }
 
     /**
      * Updates the light reveal effect to reflect the reason we're waking or sleeping (for example,

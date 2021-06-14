@@ -754,15 +754,6 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
-    @RunWithLooper(setAsMainLooper = true)
-    public void testUpdateKeyguardState_DoesNotCrash() {
-        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
-        when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(
-                new SparseArray<>());
-        mStatusBar.onStateChanged(StatusBarState.SHADE);
-    }
-
-    @Test
     public void testFingerprintNotification_UpdatesScrims() {
         mStatusBar.notifyBiometricAuthModeChanged();
         verify(mScrimController).transitionTo(any(), any());
