@@ -50,11 +50,14 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.Choreographer;
+import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -65,6 +68,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
+import android.view.WindowManager;
+import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnimationUtils;
@@ -79,6 +84,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
+import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import java.util.ArrayList;
@@ -94,6 +100,9 @@ public class ScreenshotView extends FrameLayout implements
         void onUserInteraction();
 
         void onDismiss();
+
+        /** DOWN motion event was observed outside of the touchable areas of this view. */
+        void onTouchOutside();
     }
 
     private static final String TAG = logTag(ScreenshotView.class);
@@ -124,8 +133,6 @@ public class ScreenshotView extends FrameLayout implements
     private final AccessibilityManager mAccessibilityManager;
 
     private int mNavMode;
-    private int mLeftInset;
-    private int mRightInset;
     private boolean mOrientationPortrait;
     private boolean mDirectionLTR;
 
@@ -152,6 +159,7 @@ public class ScreenshotView extends FrameLayout implements
     private boolean mPendingSharedTransition;
     private GestureDetector mSwipeDetector;
     private SwipeDismissHandler mSwipeDismissHandler;
+    private InputMonitorCompat mInputMonitor;
 
     private final ArrayList<ScreenshotActionChip> mSmartChips = new ArrayList<>();
     private PendingInteraction mPendingInteraction;
@@ -209,6 +217,17 @@ public class ScreenshotView extends FrameLayout implements
                 });
         mSwipeDetector.setIsLongpressEnabled(false);
         mSwipeDismissHandler = new SwipeDismissHandler();
+        addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+                startInputListening();
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+                stopInputListening();
+            }
+        });
     }
 
     public void hideScrollChip() {
@@ -238,6 +257,10 @@ public class ScreenshotView extends FrameLayout implements
     @Override // ViewTreeObserver.OnComputeInternalInsetsListener
     public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
         inoutInfo.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+        inoutInfo.touchableRegion.set(getTouchRegion());
+    }
+
+    private Region getTouchRegion() {
         Region touchRegion = new Region();
 
         final Rect tmpRect = new Rect();
@@ -251,15 +274,41 @@ public class ScreenshotView extends FrameLayout implements
         touchRegion.op(tmpRect, Region.Op.UNION);
 
         if (QuickStepContract.isGesturalMode(mNavMode)) {
+            final WindowManager wm = mContext.getSystemService(WindowManager.class);
+            final WindowMetrics windowMetrics = wm.getCurrentWindowMetrics();
+            final Insets gestureInsets = windowMetrics.getWindowInsets().getInsets(
+                    WindowInsets.Type.systemGestures());
             // Receive touches in gesture insets such that they don't cause TOUCH_OUTSIDE
-            Rect inset = new Rect(0, 0, mLeftInset, mDisplayMetrics.heightPixels);
+            Rect inset = new Rect(0, 0, gestureInsets.left, mDisplayMetrics.heightPixels);
             touchRegion.op(inset, Region.Op.UNION);
-            inset.set(mDisplayMetrics.widthPixels - mRightInset, 0, mDisplayMetrics.widthPixels,
-                    mDisplayMetrics.heightPixels);
+            inset.set(mDisplayMetrics.widthPixels - gestureInsets.right, 0,
+                    mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels);
             touchRegion.op(inset, Region.Op.UNION);
         }
+        return touchRegion;
+    }
 
-        inoutInfo.touchableRegion.set(touchRegion);
+    private void startInputListening() {
+        stopInputListening();
+        mInputMonitor = new InputMonitorCompat("Screenshot", Display.DEFAULT_DISPLAY);
+        mInputMonitor.getInputReceiver(Looper.getMainLooper(), Choreographer.getInstance(),
+                ev -> {
+                    if (ev instanceof MotionEvent) {
+                        MotionEvent event = (MotionEvent) ev;
+                        if (event.getActionMasked() == MotionEvent.ACTION_DOWN
+                                && !getTouchRegion().contains(
+                                (int) event.getRawX(), (int) event.getRawY())) {
+                            mCallbacks.onTouchOutside();
+                        }
+                    }
+                });
+    }
+
+    private void stopInputListening() {
+        if (mInputMonitor != null) {
+            mInputMonitor.dispose();
+            mInputMonitor = null;
+        }
     }
 
     @Override // ViewGroup
@@ -315,17 +364,6 @@ public class ScreenshotView extends FrameLayout implements
                 getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT;
         mDirectionLTR =
                 getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_LTR;
-
-        setOnApplyWindowInsetsListener((v, insets) -> {
-            if (QuickStepContract.isGesturalMode(mNavMode)) {
-                Insets gestureInsets = insets.getInsets(WindowInsets.Type.systemGestures());
-                mLeftInset = gestureInsets.left;
-                mRightInset = gestureInsets.right;
-            } else {
-                mLeftInset = mRightInset = 0;
-            }
-            return ScreenshotView.this.onApplyWindowInsets(insets);
-        });
 
         // Get focus so that the key events go to the layout.
         setFocusableInTouchMode(true);
