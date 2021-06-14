@@ -155,6 +155,7 @@ public class UiTranslationController {
                 destroyTranslators();
                 runForEachView((view, callback) -> {
                     callback.onClearTranslation(view);
+                    view.clearViewTranslationResponse();
                     if (view.hasTranslationTransientState()) {
                         view.setHasTransientState(false);
                         view.setHasTranslationTransientState(false);
