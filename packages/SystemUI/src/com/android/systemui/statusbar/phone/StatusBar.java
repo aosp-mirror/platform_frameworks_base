@@ -3521,10 +3521,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void fadeKeyguardWhilePulsing() {
         mNotificationPanelViewController.fadeOut(0, FADE_KEYGUARD_DURATION_PULSING,
                 ()-> {
-                hideKeyguard();
                 if (shouldShowCircleReveal()) {
                     startCircleReveal();
                 }
+                hideKeyguard();
                 mStatusBarKeyguardViewManager.onKeyguardFadedAway();
             }).start();
     }
@@ -3882,9 +3882,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateQsExpansionEnabled();
         mKeyguardViewMediator.setDozing(mDozing);
 
-        if (!isDozing && shouldShowCircleReveal()) {
-            startCircleReveal();
-        } else if ((isDozing && mWakefulnessLifecycle.getLastSleepReason()
+        if ((isDozing && mWakefulnessLifecycle.getLastSleepReason()
                 == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON)
                 || (!isDozing && mWakefulnessLifecycle.getLastWakeReason()
                 == PowerManager.WAKE_REASON_POWER_BUTTON)) {
@@ -4897,7 +4895,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mFeatureFlags.useNewLockscreenAnimations()
                 && (mDozeParameters.getAlwaysOn() || mDozeParameters.isQuickPickupEnabled())) {
             mLightRevealScrim.setVisibility(View.VISIBLE);
-            mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
         } else {
             mLightRevealScrim.setVisibility(View.GONE);
         }
