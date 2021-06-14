@@ -240,8 +240,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private float mMLResults;
 
     // For debugging
-    private ArrayDeque<String> mPredictionLog = new ArrayDeque<>();
-    private ArrayDeque<String> mGestureLog = new ArrayDeque<>();
+    private LogArray mPredictionLog = new LogArray(MAX_NUM_LOGGED_PREDICTIONS);
+    private LogArray mGestureLogInsideInsets = new LogArray(MAX_NUM_LOGGED_GESTURES);
+    private LogArray mGestureLogOutsideInsets = new LogArray(MAX_NUM_LOGGED_GESTURES);
 
     private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
 
@@ -620,7 +621,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         return mMLResults >= mMLModelThreshold ? 1 : 0;
     }
 
-    private boolean isWithinTouchRegion(int x, int y) {
+    private boolean isWithinInsets(int x, int y) {
         // Disallow if we are in the bottom gesture area
         if (y >= (mDisplaySize.y - mBottomGestureHeight)) {
             return false;
@@ -633,7 +634,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                 && x < (mDisplaySize.x - 2 * (mEdgeWidthRight + mRightInset))) {
             return false;
         }
+        return true;
+    }
 
+    private boolean isWithinTouchRegion(int x, int y) {
         // If the point is inside the PiP or Nav bar overlay excluded bounds, then ignore the back
         // gesture
         if (mPipExcludedBounds.contains(x, y) || mNavBarOverlayExcludedBounds.contains(x, y)) {
@@ -663,14 +667,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         }
 
         // For debugging purposes
-        if (mPredictionLog.size() >= MAX_NUM_LOGGED_PREDICTIONS) {
-            mPredictionLog.removeFirst();
-        }
-        mPredictionLog.addLast(String.format("Prediction [%d,%d,%d,%d,%f,%d]",
+        mPredictionLog.log(String.format("Prediction [%d,%d,%d,%d,%f,%d]",
                 System.currentTimeMillis(), x, y, app, mMLResults, withinRange ? 1 : 0));
-        if (DEBUG_MISSING_GESTURE) {
-            Log.d(DEBUG_MISSING_GESTURE_TAG, mPredictionLog.peekLast());
-        }
 
         // Always allow if the user is in a transient sticky immersive state
         if (mIsNavBarShownTransiently) {
@@ -743,7 +741,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             mMLResults = 0;
             mLogGesture = false;
             mInRejectedExclusion = false;
-            mAllowGesture = !mDisabledForQuickstep && mIsBackGestureAllowed
+            boolean isWithinInsets = isWithinInsets((int) ev.getX(), (int) ev.getY());
+            mAllowGesture = !mDisabledForQuickstep && mIsBackGestureAllowed && isWithinInsets
                     && !mGestureBlockingActivityRunning
                     && !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
@@ -757,18 +756,13 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                 mThresholdCrossed = false;
             }
 
-            // For debugging purposes
-            if (mGestureLog.size() >= MAX_NUM_LOGGED_GESTURES) {
-                mGestureLog.removeFirst();
-            }
-            mGestureLog.addLast(String.format(
+            // For debugging purposes, only log edge points
+            (isWithinInsets ? mGestureLogInsideInsets : mGestureLogOutsideInsets).log(String.format(
                     "Gesture [%d,alw=%B,%B,%B,%B,disp=%s,wl=%d,il=%d,wr=%d,ir=%d,excl=%s]",
-                    System.currentTimeMillis(), mAllowGesture, mIsOnLeftEdge, mIsBackGestureAllowed,
+                    System.currentTimeMillis(), mAllowGesture, mIsOnLeftEdge,
+                    mIsBackGestureAllowed,
                     QuickStepContract.isBackGestureDisabled(mSysUiFlags), mDisplaySize,
                     mEdgeWidthLeft, mLeftInset, mEdgeWidthRight, mRightInset, mExcludeRegion));
-            if (DEBUG_MISSING_GESTURE) {
-                Log.d(DEBUG_MISSING_GESTURE_TAG, mGestureLog.peekLast());
-            }
         } else if (mAllowGesture || mLogGesture) {
             if (!mThresholdCrossed) {
                 mEndPoint.x = (int) ev.getX();
@@ -895,7 +889,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         pw.println("  mUseMLModel=" + mUseMLModel);
         pw.println("  mDisabledForQuickstep=" + mDisabledForQuickstep);
         pw.println("  mStartingQuickstepRotation=" + mStartingQuickstepRotation);
-        pw.println("  mInRejectedExclusion" + mInRejectedExclusion);
+        pw.println("  mInRejectedExclusion=" + mInRejectedExclusion);
         pw.println("  mExcludeRegion=" + mExcludeRegion);
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);
         pw.println("  mPipExcludedBounds=" + mPipExcludedBounds);
@@ -909,7 +903,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         pw.println("  mTouchSlop=" + mTouchSlop);
         pw.println("  mBottomGestureHeight=" + mBottomGestureHeight);
         pw.println("  mPredictionLog=" + String.join("\n", mPredictionLog));
-        pw.println("  mGestureLog=" + String.join("\n", mGestureLog));
+        pw.println("  mGestureLogInsideInsets=" + String.join("\n", mGestureLogInsideInsets));
+        pw.println("  mGestureLogOutsideInsets=" + String.join("\n", mGestureLogOutsideInsets));
         pw.println("  mEdgeBackPlugin=" + mEdgeBackPlugin);
     }
 
@@ -931,5 +926,24 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             proto.edgeBackGestureHandler = new EdgeBackGestureHandlerProto();
         }
         proto.edgeBackGestureHandler.allowGesture = mAllowGesture;
+    }
+
+
+    private static class LogArray extends ArrayDeque<String> {
+        private final int mLength;
+
+        LogArray(int length) {
+            mLength = length;
+        }
+
+        void log(String message) {
+            if (size() >= mLength) {
+                removeFirst();
+            }
+            addLast(message);
+            if (DEBUG_MISSING_GESTURE) {
+                Log.d(DEBUG_MISSING_GESTURE_TAG, message);
+            }
+        }
     }
 }
