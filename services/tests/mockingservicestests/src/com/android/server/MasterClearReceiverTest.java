@@ -24,19 +24,25 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.when;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Looper;
 import android.os.RecoverySystem;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
-import android.view.WindowManager;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -68,7 +74,13 @@ public final class MasterClearReceiverTest {
         @Override
         public Object getSystemService(String name) {
             Log.v(TAG, "getSystemService(): " + name);
-            return name.equals(Context.STORAGE_SERVICE) ? mSm : super.getSystemService(name);
+            if (name.equals(Context.STORAGE_SERVICE)) {
+                return mSm;
+            }
+            if (name.equals(Context.USER_SERVICE)) {
+                return mUserManager;
+            }
+            return super.getSystemService(name);
         }
     };
 
@@ -85,15 +97,17 @@ public final class MasterClearReceiverTest {
     private StorageManager mSm;
 
     @Mock
-    private WindowManager mWm;
+    private UserManager mUserManager;
 
     @Before
     public void startSession() {
         mSession = mockitoSession()
                 .initMocks(this)
                 .mockStatic(RecoverySystem.class)
+                .mockStatic(UserManager.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
+        setPendingResultForUser(UserHandle.myUserId());
     }
 
     @After
@@ -148,6 +162,32 @@ public final class MasterClearReceiverTest {
         verifyWipeExternalData();
     }
 
+    @Test
+    public void testNonSystemUser() throws Exception {
+        expectWipeNonSystemUser();
+
+        Intent intent = new Intent(Intent.ACTION_FACTORY_RESET);
+        setPendingResultForUser(/* userId= */ 10);
+        mReceiver.onReceive(mContext, intent);
+
+        verifyNoRebootWipeUserData();
+        verifyNoWipeExternalData();
+        verifyWipeNonSystemUser();
+    }
+
+    @Test
+    public void testHeadlessSystemUser() throws Exception {
+        expectNoWipeExternalData();
+        expectRebootWipeUserData();
+        expectHeadlessSystemUserMode();
+
+        Intent intent = new Intent(Intent.ACTION_FACTORY_RESET);
+        setPendingResultForUser(/* userId= */ 10);
+        mReceiver.onReceive(mContext, intent);
+
+        verifyRebootWipeUserData();
+        verifyNoWipeExternalData();
+    }
 
     private void expectNoWipeExternalData() {
         // This is a trick to simplify how the order of methods are called: as wipeAdoptableDisks()
@@ -185,6 +225,18 @@ public final class MasterClearReceiverTest {
         }).when(mSm).wipeAdoptableDisks();
     }
 
+    private void expectWipeNonSystemUser() {
+        when(mUserManager.removeUserOrSetEphemeral(anyInt(), anyBoolean()))
+                .thenReturn(UserManager.REMOVE_RESULT_REMOVED);
+    }
+
+    private void expectHeadlessSystemUserMode() {
+        doAnswer((inv) -> {
+            Log.i(TAG, inv.toString());
+            return true;
+        }).when(() -> UserManager.isHeadlessSystemUserMode());
+    }
+
     private void verifyRebootWipeUserData() throws Exception  {
         verifyRebootWipeUserData(/* shutdown= */ false, /* reason= */ null, /* force= */ false,
                 /* wipeEuicc= */ false);
@@ -200,11 +252,33 @@ public final class MasterClearReceiverTest {
                 eq(force), eq(wipeEuicc)));
     }
 
+    private void verifyNoRebootWipeUserData() {
+        verify(()-> RecoverySystem.rebootWipeUserData(
+                any(), anyBoolean(), anyString(), anyBoolean(), anyBoolean()), never());
+    }
+
     private void verifyWipeExternalData() {
         verify(mSm).wipeAdoptableDisks();
     }
 
     private void verifyNoWipeExternalData() {
         verify(mSm, never()).wipeAdoptableDisks();
+    }
+
+    private void verifyWipeNonSystemUser() {
+        verify(mUserManager).removeUserOrSetEphemeral(anyInt(), anyBoolean());
+    }
+
+    private void setPendingResultForUser(int userId) {
+        mReceiver.setPendingResult(new BroadcastReceiver.PendingResult(
+                Activity.RESULT_OK,
+                "resultData",
+                /* resultExtras= */ null,
+                BroadcastReceiver.PendingResult.TYPE_UNREGISTERED,
+                /* ordered= */ true,
+                /* sticky= */ false,
+                /* token= */ null,
+                userId,
+                /* flags= */ 0));
     }
 }
