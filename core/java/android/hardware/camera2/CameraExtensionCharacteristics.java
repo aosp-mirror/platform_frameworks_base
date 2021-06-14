@@ -693,20 +693,42 @@ public final class CameraExtensionCharacteristics {
                 throw new IllegalArgumentException("Unsupported extension");
             }
 
+            android.hardware.camera2.extension.Size sz =
+                    new android.hardware.camera2.extension.Size();
+            sz.width = captureOutputSize.getWidth();
+            sz.height = captureOutputSize.getHeight();
             if (areAdvancedExtensionsSupported()) {
                 IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
                 extender.init(mCameraId);
-                android.hardware.camera2.extension.Size sz =
-                        new android.hardware.camera2.extension.Size();
-                sz.width = captureOutputSize.getWidth();
-                sz.height = captureOutputSize.getHeight();
                 LatencyRange latencyRange = extender.getEstimatedCaptureLatencyRange(mCameraId,
                         sz, format);
                 if (latencyRange != null) {
                     return new Range(latencyRange.min, latencyRange.max);
                 }
-            }
-        } catch (RemoteException e) {
+            } else {
+                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                        initializeExtension(extension);
+                extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                if ((format == ImageFormat.YUV_420_888) &&
+                        (extenders.second.getCaptureProcessor() == null) ){
+                    // Extensions that don't implement any capture processor are limited to
+                    // JPEG only!
+                    return null;
+                }
+                if ((format == ImageFormat.JPEG) &&
+                        (extenders.second.getCaptureProcessor() != null)) {
+                    // The framework will perform the additional encoding pass on the
+                    // processed YUV_420 buffers. Latency in this case is very device
+                    // specific and cannot be estimated accurately enough.
+                    return  null;
+                }
+
+                LatencyRange latencyRange = extenders.second.getEstimatedCaptureLatencyRange(sz);
+                if (latencyRange != null) {
+                    return new Range(latencyRange.min, latencyRange.max);
+                }
+        }
+    } catch (RemoteException e) {
             Log.e(TAG, "Failed to query the extension capture latency! Extension service does"
                     + " not respond!");
         } finally {
