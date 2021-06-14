@@ -2096,13 +2096,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             return true;
         }
 
-        // If we are locked, only animate if remote unlock animations are enabled and we can dismiss
-        // the lock screen without challenging the user. We also don't animate non-activity
-        // launches as they can break the animation.
+        // If we are locked, only animate if remote unlock animations are enabled. We also don't
+        // animate non-activity launches as they can break the animation.
         // TODO(b/184121838): Support non activity launches on the lockscreen.
-        return isActivityIntent
-                && KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation
-                && mKeyguardStateController.canDismissLockScreen();
+        return isActivityIntent && KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation;
     }
 
     @Override
@@ -2112,12 +2109,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void hideKeyguardWithAnimation(IRemoteAnimationRunner runner) {
-        if (!mKeyguardStateController.canDismissLockScreen()) {
-            Log.wtf(TAG,
-                    "Unable to hide keyguard with animation as the keyguard can't be dismissed");
-            return;
-        }
-
         // We post to the main thread for 2 reasons:
         //   1. KeyguardViewMediator is not thread-safe.
         //   2. To ensure that ViewMediatorCallback#keyguardDonePending is called before
