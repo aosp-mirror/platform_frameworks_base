@@ -2213,10 +2213,16 @@ public class NotificationPanelViewController extends PanelViewController {
         int right = 0;
 
         final int qsPanelBottomY = calculateQsBottomPosition(computeQsExpansionFraction());
-        final boolean visible = (computeQsExpansionFraction() > 0 || qsPanelBottomY > 0)
-                && !mShouldUseSplitNotificationShade;
+        final boolean quickSettingsVisible = computeQsExpansionFraction() > 0 || qsPanelBottomY > 0;
 
-        if (!mShouldUseSplitNotificationShade) {
+        if (mShouldUseSplitNotificationShade && quickSettingsVisible) {
+            mAmbientState.setNotificationScrimTop(mSplitShadeNotificationsTopPadding);
+
+            top = Math.max(0, Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding));
+            bottom = mNotificationStackScrollLayoutController.getHeight();
+            left = mNotificationStackScrollLayoutController.getLeft();
+            right = mNotificationStackScrollLayoutController.getRight();
+        } else {
             if (mTransitioningToFullShadeProgress > 0.0f) {
                 // If we're transitioning, let's use the actual value. The else case
                 // can be wrong during transitions when waiting for the keyguard to unlock
@@ -2231,16 +2237,11 @@ public class NotificationPanelViewController extends PanelViewController {
             // notification bounds should take full screen width regardless of insets
             left = 0;
             right = getView().getRight() + mDisplayRightInset;
-        } else if (qsPanelBottomY > 0) { // so bounds are empty on lockscreen
-            mAmbientState.setNotificationScrimTop(mSplitShadeNotificationsTopPadding);
-            top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
-            bottom = mNotificationStackScrollLayoutController.getHeight();
-            left = mNotificationStackScrollLayoutController.getLeft();
-            right = mNotificationStackScrollLayoutController.getRight();
         }
         // top should never be lower than bottom, otherwise it will be invisible.
         top = Math.min(top, bottom);
-        applyQSClippingBounds(left, top, right, bottom, visible);
+        applyQSClippingBounds(left, top, right, bottom,
+                quickSettingsVisible && !mShouldUseSplitNotificationShade);
     }
 
     private void applyQSClippingBounds(int left, int top, int right, int bottom,
