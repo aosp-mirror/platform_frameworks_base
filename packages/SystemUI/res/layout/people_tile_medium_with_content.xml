@@ -70,7 +70,7 @@
                     <TextView
                         android:id="@+id/subtext"
                         android:text="@string/empty_user_name"
-                        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp"
                         android:paddingBottom="8dp"
@@ -90,7 +90,7 @@
                     <TextView
                         android:id="@+id/text_content"
                         android:text="@string/empty_status"
-                        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
                         android:textColor="?android:attr/textColorPrimary"
                         android:textSize="@dimen/content_text_size_for_medium"
                         android:layout_width="match_parent"
@@ -114,9 +114,9 @@
                     android:layout_gravity="start|center_vertical"
                     android:gravity="start|center_vertical"
                     android:text="@string/empty_user_name"
-                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
                     android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="@dimen/name_text_size_for_content"
+                    android:textSize="@dimen/name_text_size_for_medium_content"
                     android:singleLine="true"
                     android:ellipsize="end"
                     android:paddingEnd="8dp"
@@ -129,10 +129,9 @@
                 <TextView
                     android:id="@+id/messages_count"
                     android:gravity="end"
-                    android:layout_weight="1"
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp"
-                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
                     android:textColor="?androidprv:attr/textColorOnAccent"
                     android:background="@drawable/people_space_messages_count_background"
                     android:textSize="14sp"
@@ -144,7 +143,7 @@
                     />
                 <ImageView
                     android:id="@+id/predefined_icon"
-                    android:tint="?android:attr/textColorTertiary"
+                    android:tint="?android:attr/textColorSecondary"
                     android:gravity="end|center_vertical"
                     android:layout_width="@dimen/regular_predefined_icon"
                     android:layout_height="@dimen/regular_predefined_icon" />

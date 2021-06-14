@@ -282,13 +282,18 @@ public class PeopleTileViewHelper {
     }
 
     private void setMaxLines(RemoteViews views, boolean showSender) {
-        int nameHeight = getLineHeightFromResource(R.dimen.name_text_size_for_content);
+        int textSizeResId;
+        int nameHeight;
+        if (mLayoutSize == LAYOUT_LARGE) {
+            textSizeResId = R.dimen.content_text_size_for_large;
+            nameHeight = getLineHeightFromResource(R.dimen.name_text_size_for_large_content);
+        } else {
+            textSizeResId = R.dimen.content_text_size_for_medium;
+            nameHeight = getLineHeightFromResource(R.dimen.name_text_size_for_medium_content);
+        }
         boolean isStatusLayout =
                 views.getLayoutId() == R.layout.people_tile_large_with_status_content;
         int contentHeight = getContentHeightForLayout(nameHeight, isStatusLayout);
-        int textSizeResId = mLayoutSize == LAYOUT_LARGE
-                ? R.dimen.content_text_size_for_large
-                : R.dimen.content_text_size_for_medium;
         int lineHeight = getLineHeightFromResource(textSizeResId);
         int maxAdaptiveLines = Math.floorDiv(contentHeight, lineHeight);
         int maxLines = Math.max(MIN_CONTENT_MAX_LINES, maxAdaptiveLines);
@@ -349,7 +354,7 @@ public class PeopleTileViewHelper {
             int spaceAvailableForPadding =
                     mHeight - (getSizeInDp(R.dimen.avatar_size_for_medium)
                             + 4 + getLineHeightFromResource(
-                            R.dimen.name_text_size_for_content));
+                            R.dimen.name_text_size_for_medium_content));
             if (DEBUG) {
                 Log.d(TAG, "Medium view for mWidth: " + mWidth + " mHeight: " + mHeight
                         + " with padding space: " + spaceAvailableForPadding);
