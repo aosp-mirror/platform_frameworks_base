@@ -248,7 +248,7 @@ import dagger.Lazy;
 /** */
 public class StatusBar extends SystemUI implements
         ActivityStarter,
-        ColorExtractor.OnColorsChangedListener, ConfigurationListener,
+        ConfigurationListener,
         StatusBarStateController.StateListener,
         LifecycleOwner, BatteryController.BatteryStateChangeCallback,
         ActivityLaunchAnimator.Callback {
@@ -774,6 +774,9 @@ public class StatusBar extends SystemUI implements
     private final ActivityIntentHelper mActivityIntentHelper;
     private NotificationStackScrollLayoutController mStackScrollerController;
 
+    private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
+            (extractor, which) -> updateTheme();
+
     /**
      * Public constructor for StatusBar.
      *
@@ -981,7 +984,7 @@ public class StatusBar extends SystemUI implements
 
         mKeyguardIndicationController.init();
 
-        mColorExtractor.addOnColorsChangedListener(this);
+        mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
         mStatusBarStateController.addCallback(this,
                 SysuiStatusBarStateController.RANK_STATUS_BAR);
 
@@ -1895,11 +1898,6 @@ public class StatusBar extends SystemUI implements
 
     public boolean hideStatusBarIconsWhenExpanded() {
         return mNotificationPanelViewController.hideStatusBarIconsWhenExpanded();
-    }
-
-    @Override
-    public void onColorsChanged(ColorExtractor extractor, int which) {
-        updateTheme();
     }
 
     @Nullable
