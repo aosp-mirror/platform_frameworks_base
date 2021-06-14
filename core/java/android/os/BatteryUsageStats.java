@@ -110,6 +110,8 @@ public final class BatteryUsageStats implements Parcelable {
     static final String XML_ATTR_TIME_IN_FOREGROUND = "time_in_foreground";
     static final String XML_ATTR_TIME_IN_BACKGROUND = "time_in_background";
 
+    private static final int STATSD_PULL_ATOM_MAX_BYTES = 45000;
+
     private final int mDischargePercentage;
     private final double mBatteryCapacityMah;
     private final long mStatsStartTimestampMs;
@@ -400,30 +402,60 @@ public final class BatteryUsageStats implements Parcelable {
 
     /** Returns a proto (as used for atoms.proto) corresponding to this BatteryUsageStats. */
     public byte[] getStatsProto() {
+        // ProtoOutputStream.getRawSize() returns the buffer size before compaction.
+        // BatteryUsageStats contains a lot of integers, so compaction of integers to
+        // varint reduces the size of the proto buffer by as much as 50%.
+        int maxRawSize = (int) (STATSD_PULL_ATOM_MAX_BYTES * 1.75);
+        // Limit the number of attempts in order to prevent an infinite loop
+        for (int i = 0; i < 3; i++) {
+            final ProtoOutputStream proto = new ProtoOutputStream();
+            writeStatsProto(proto, maxRawSize);
+
+            final int rawSize = proto.getRawSize();
+            final byte[] protoOutput = proto.getBytes();
+
+            if (protoOutput.length <= STATSD_PULL_ATOM_MAX_BYTES) {
+                return protoOutput;
+            }
+
+            // Adjust maxRawSize proportionately and try again.
+            maxRawSize =
+                    (int) ((long) STATSD_PULL_ATOM_MAX_BYTES * rawSize / protoOutput.length - 1024);
+        }
+
+        // Fallback: if we have failed to generate a proto smaller than STATSD_PULL_ATOM_MAX_BYTES,
+        // just generate a proto with the _rawSize_ of STATSD_PULL_ATOM_MAX_BYTES, which is
+        // guaranteed to produce a compacted proto (significantly) smaller than
+        // STATSD_PULL_ATOM_MAX_BYTES.
+        final ProtoOutputStream proto = new ProtoOutputStream();
+        writeStatsProto(proto, STATSD_PULL_ATOM_MAX_BYTES);
+        return proto.getBytes();
+    }
+
+    @NonNull
+    private void writeStatsProto(ProtoOutputStream proto, int maxRawSize) {
         final BatteryConsumer deviceBatteryConsumer = getAggregateBatteryConsumer(
                 AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
 
-        final ProtoOutputStream proto = new ProtoOutputStream();
         proto.write(BatteryUsageStatsAtomsProto.SESSION_START_MILLIS, getStatsStartTimestamp());
         proto.write(BatteryUsageStatsAtomsProto.SESSION_END_MILLIS, getStatsEndTimestamp());
         proto.write(BatteryUsageStatsAtomsProto.SESSION_DURATION_MILLIS, getStatsDuration());
-        deviceBatteryConsumer.writeStatsProto(proto,
-                BatteryUsageStatsAtomsProto.DEVICE_BATTERY_CONSUMER);
-        writeUidBatteryConsumersProto(proto);
         proto.write(BatteryUsageStatsAtomsProto.SESSION_DISCHARGE_PERCENTAGE,
                 getDischargePercentage());
-        return proto.getBytes();
+        deviceBatteryConsumer.writeStatsProto(proto,
+                BatteryUsageStatsAtomsProto.DEVICE_BATTERY_CONSUMER);
+        writeUidBatteryConsumersProto(proto, maxRawSize);
     }
 
     /**
      * Writes the UidBatteryConsumers data, held by this BatteryUsageStats, to the proto (as used
      * for atoms.proto).
      */
-    private void writeUidBatteryConsumersProto(ProtoOutputStream proto) {
+    private void writeUidBatteryConsumersProto(ProtoOutputStream proto, int maxRawSize) {
         final List<UidBatteryConsumer> consumers = getUidBatteryConsumers();
+        // Order consumers by descending weight (a combination of consumed power and usage time)
+        consumers.sort(Comparator.comparingDouble(this::getUidBatteryConsumerWeight).reversed());
 
-        // TODO(b/189225426): Sort the list by power consumption. If during the for,
-        //                    proto.getRawSize() > 45kb, truncate the remainder of the list.
         final int size = consumers.size();
         for (int i = 0; i < size; i++) {
             final UidBatteryConsumer consumer = consumers.get(i);
@@ -451,7 +483,33 @@ public final class BatteryUsageStats implements Parcelable {
                     BatteryUsageStatsAtomsProto.UidBatteryConsumer.TIME_IN_BACKGROUND_MILLIS,
                     bgMs);
             proto.end(token);
+
+            if (proto.getRawSize() >= maxRawSize) {
+                break;
+            }
         }
+    }
+
+    private static final double WEIGHT_CONSUMED_POWER = 1;
+    // Weight one hour in foreground the same as 100 mAh of power drain
+    private static final double WEIGHT_FOREGROUND_STATE = 100.0 / (1 * 60 * 60 * 1000);
+    // Weight one hour in background the same as 300 mAh of power drain
+    private static final double WEIGHT_BACKGROUND_STATE = 300.0 / (1 * 60 * 60 * 1000);
+
+    /**
+     * Computes the weight associated with a UidBatteryConsumer, which is used for sorting.
+     * We want applications with the largest consumed power as well as applications
+     * with the highest usage time to be included in the statsd atom.
+     */
+    private double getUidBatteryConsumerWeight(UidBatteryConsumer uidBatteryConsumer) {
+        final double consumedPower = uidBatteryConsumer.getConsumedPower();
+        final long timeInForeground =
+                uidBatteryConsumer.getTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND);
+        final long timeInBackground =
+                uidBatteryConsumer.getTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND);
+        return consumedPower * WEIGHT_CONSUMED_POWER
+                + timeInForeground * WEIGHT_FOREGROUND_STATE
+                + timeInBackground * WEIGHT_BACKGROUND_STATE;
     }
 
     /**
