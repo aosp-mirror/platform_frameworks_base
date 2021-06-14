@@ -800,7 +800,8 @@ public class AppTransitionController {
     }
 
     private void handleNonAppWindowsInTransition(@TransitionOldType int transit, int flags) {
-        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY) {
+        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
+                && !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation) {
             if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0
                     && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) == 0
                     && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) == 0) {
@@ -812,8 +813,9 @@ public class AppTransitionController {
                 }
             }
         }
-        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER) {
+        if ((transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
+                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER)
+                && !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation) {
             mDisplayContent.startKeyguardExitOnNonAppWindows(
                     transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0,

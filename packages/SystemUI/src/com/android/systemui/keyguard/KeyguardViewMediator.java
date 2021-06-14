@@ -2180,7 +2180,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             IRemoteAnimationRunner runner = mKeyguardExitAnimationRunner;
             mKeyguardExitAnimationRunner = null;
 
-            if (KeyguardService.sEnableRemoteKeyguardAnimation && runner != null
+            if (KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation && runner != null
                     && finishedCallback != null) {
                 // Wrap finishedCallback to clean up the keyguard state once the animation is done.
                 IRemoteAnimationFinishedCallback callback =
@@ -2211,7 +2211,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
             // When remaining on the shade, there's no need to do a fancy remote animation,
             // it will dismiss the panel in that case.
-            } else if (KeyguardService.sEnableRemoteKeyguardAnimation
+            } else if (KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation
                     && !mStatusBarStateController.leaveOpenOnKeyguardHide()
                     && apps != null && apps.length > 0) {
                 mSurfaceBehindRemoteAnimationFinishedCallback = finishedCallback;
@@ -2315,15 +2315,15 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     }
 
     /**
-     * Called if the keyguard exit animation has been cancelled and we should return to the
+     * Called if the keyguard exit animation has been cancelled and we should dismiss to the
      * keyguard.
      *
-     * This can happen due to the system cancelling the RemoteAnimation (due to a timeout), or the
-     * user cancelling the unlock swipe gesture.
+     * This can happen due to the system cancelling the RemoteAnimation (due to a timeout, a new
+     * app transition before finishing the current RemoteAnimation).
      */
     private void handleCancelKeyguardExitAnimation() {
-        hideSurfaceBehindKeyguard();
-        mKeyguardUnlockAnimationControllerLazy.get().notifyCancelKeyguardExitAnimation();
+        showSurfaceBehindKeyguard();
+        onKeyguardExitRemoteAnimationFinished(true /* cancelled */);
     }
 
     /**
@@ -2332,8 +2332,10 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
      * This will call {@link #mSurfaceBehindRemoteAnimationFinishedCallback} to let WM know that
      * we're done with the RemoteAnimation, actually hide the keyguard, and clean up state related
      * to the keyguard exit animation.
+     *
+     * @param cancelled {@code true} if the animation was cancelled before it finishes.
      */
-    public void onKeyguardExitRemoteAnimationFinished() {
+    public void onKeyguardExitRemoteAnimationFinished(boolean cancelled) {
         if (!mSurfaceBehindRemoteAnimationRunning && !mSurfaceBehindRemoteAnimationRequested) {
             return;
         }
@@ -2347,7 +2349,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             mKeyguardUnlockAnimationControllerLazy.get().hideKeyguardViewAfterRemoteAnimation();
         }
 
-        finishSurfaceBehindRemoteAnimation();
+        finishSurfaceBehindRemoteAnimation(cancelled);
         mSurfaceBehindRemoteAnimationRequested = false;
         mKeyguardUnlockAnimationControllerLazy.get().notifyFinishedKeyguardExitAnimation();
         InteractionJankMonitor.getInstance().end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
@@ -2389,12 +2391,14 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     }
 
     /** If it's running, finishes the RemoteAnimation on the surface behind the keyguard. */
-    public void finishSurfaceBehindRemoteAnimation() {
+    public void finishSurfaceBehindRemoteAnimation(boolean cancelled) {
         mSurfaceBehindRemoteAnimationRunning = false;
 
         if (mSurfaceBehindRemoteAnimationFinishedCallback != null) {
             try {
-                mSurfaceBehindRemoteAnimationFinishedCallback.onAnimationFinished();
+                if (!cancelled) {
+                    mSurfaceBehindRemoteAnimationFinishedCallback.onAnimationFinished();
+                }
                 mSurfaceBehindRemoteAnimationFinishedCallback = null;
             } catch (RemoteException e) {
                 e.printStackTrace();
@@ -2638,10 +2642,10 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     }
 
     /**
-     * Cancel the keyguard exit animation, usually because we were swiping to unlock and the swipe
-     * gesture was cancelled.
+     * Cancel the keyguard exit animation, usually because we were swiping to unlock but WM starts
+     * a new remote animation before finishing the keyguard exit animation.
      *
-     * This will re-show the keyguard and animate out the app/launcher surface behind the keyguard.
+     * This will dismiss the keyguard.
      */
     public void cancelKeyguardExitAnimation() {
         Trace.beginSection("KeyguardViewMediator#cancelKeyguardExitAnimation");
