@@ -14309,7 +14309,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private boolean checkExcessivePowerUsageLPr(final long uptimeSince, boolean doCpuKills,
             final long cputimeUsed, final String processName, final String description,
             final int cpuLimit, final ProcessRecord app) {
-        if (DEBUG_POWER) {
+        if (DEBUG_POWER && (uptimeSince > 0)) {
             StringBuilder sb = new StringBuilder(128);
             sb.append("CPU for ");
             sb.append(description);

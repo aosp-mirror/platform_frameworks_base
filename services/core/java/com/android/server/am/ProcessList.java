@@ -4289,8 +4289,8 @@ public final class ProcessList {
 
                 if (state.getSetProcState() >= ActivityManager.PROCESS_STATE_SERVICE) {
                     long lastCpuTime = r.mProfile.mLastCpuTime.get();
-                    if (lastCpuTime != 0) {
-                        long uptimeSince = curUptime - service.mLastPowerCheckUptime;
+                    long uptimeSince = curUptime - service.mLastPowerCheckUptime;
+                    if (lastCpuTime != 0 && uptimeSince > 0) {
                         long timeUsed = r.mProfile.mCurCpuTime.get() - lastCpuTime;
                         long cpuTimeToken = proto.start(ProcessOomProto.Detail.SERVICE_RUN_TIME);
                         proto.write(ProcessOomProto.Detail.CpuRunTime.OVER_MS, uptimeSince);
@@ -4427,7 +4427,7 @@ public final class ProcessList {
 
                 if (state.getSetProcState() >= ActivityManager.PROCESS_STATE_SERVICE) {
                     long lastCpuTime = r.mProfile.mLastCpuTime.get();
-                    if (lastCpuTime != 0) {
+                    if (lastCpuTime != 0 && uptimeSince > 0) {
                         long timeUsed = r.mProfile.mCurCpuTime.get() - lastCpuTime;
                         pw.print(prefix);
                         pw.print("    ");
