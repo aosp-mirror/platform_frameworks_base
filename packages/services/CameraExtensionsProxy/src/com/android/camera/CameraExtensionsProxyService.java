@@ -119,19 +119,31 @@ public class CameraExtensionsProxyService extends Service {
     private static final String CAMERA_EXTENSION_VERSION_NAME =
             "androidx.camera.extensions.impl.ExtensionVersionImpl";
     private static final String LATEST_VERSION = "1.2.0";
-    private static final String LEGACY_VERSION_PREFIX = "1.1";
+    private static final String NON_INIT_VERSION_PREFIX = "1.0";
     private static final String ADVANCED_VERSION_PREFIX = "1.2";
     private static final String[] SUPPORTED_VERSION_PREFIXES = {ADVANCED_VERSION_PREFIX,
-            LEGACY_VERSION_PREFIX, "1.0."};
+            "1.1", NON_INIT_VERSION_PREFIX};
     private static final boolean EXTENSIONS_PRESENT = checkForExtensions();
     private static final String EXTENSIONS_VERSION = EXTENSIONS_PRESENT ?
             (new ExtensionVersionImpl()).checkApiVersion(LATEST_VERSION) : null;
-    private static final boolean LEGACY_VERSION_SUPPORTED =
-            EXTENSIONS_PRESENT && EXTENSIONS_VERSION.startsWith(LEGACY_VERSION_PREFIX);
-    private static final boolean ADVANCED_VERSION_SUPPORTED =
-            EXTENSIONS_PRESENT && EXTENSIONS_VERSION.startsWith(ADVANCED_VERSION_PREFIX);
+    private static final boolean ADVANCED_API_SUPPORTED = checkForAdvancedAPI();
+    private static final boolean INIT_API_SUPPORTED = EXTENSIONS_PRESENT &&
+            (!EXTENSIONS_VERSION.startsWith(NON_INIT_VERSION_PREFIX));
 
     private HashMap<String, CameraCharacteristics> mCharacteristicsHashMap = new HashMap<>();
+
+    private static boolean checkForAdvancedAPI() {
+        if (EXTENSIONS_PRESENT && EXTENSIONS_VERSION.startsWith(ADVANCED_VERSION_PREFIX)) {
+            try {
+                return (new ExtensionVersionImpl()).isAdvancedExtenderImplemented();
+            } catch (NoSuchMethodError e) {
+                // This could happen in case device specific extension implementations are using an
+                // older extension API but incorrectly set the extension version.
+            }
+        }
+
+        return false;
+    }
 
     private static boolean checkForExtensions() {
         try {
@@ -265,7 +277,7 @@ public class CameraExtensionsProxyService extends Service {
 
         public long registerClient(Context ctx) {
             synchronized (mLock) {
-                if (LEGACY_VERSION_SUPPORTED) {
+                if (INIT_API_SUPPORTED) {
                     if (mActiveClients.isEmpty()) {
                         InitializerFuture status = new InitializerFuture();
                         InitializerImpl.init(EXTENSIONS_VERSION, ctx, new InitializeHandler(status),
@@ -299,7 +311,7 @@ public class CameraExtensionsProxyService extends Service {
         public void unregisterClient(long clientId) {
             synchronized (mLock) {
                 if (mActiveClients.remove(clientId) && mActiveClients.isEmpty() &&
-                        LEGACY_VERSION_SUPPORTED) {
+                        INIT_API_SUPPORTED) {
                     InitializerFuture status = new InitializerFuture();
                     InitializerImpl.deinit(new ReleaseHandler(status),
                             new HandlerExecutor(mHandler));
@@ -528,7 +540,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public boolean advancedExtensionsSupported() {
-            return ADVANCED_VERSION_SUPPORTED;
+            return ADVANCED_API_SUPPORTED;
         }
 
         @Override
@@ -819,10 +831,11 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
-        public void onNextImageAvailable(OutputConfigId outputConfigId, ParcelImage img) {
+        public void onNextImageAvailable(OutputConfigId outputConfigId, ParcelImage img,
+                String physicalCameraId) {
             if (mImageProcessor != null) {
                 mImageProcessor.onNextImageAvailable(outputConfigId.id, img.timestamp,
-                        new ImageReferenceImpl(img));
+                        new ImageReferenceImpl(img), physicalCameraId);
             }
         }
     }
@@ -1072,9 +1085,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void init(String cameraId, CameraMetadataNative chars) {
-            if (LEGACY_VERSION_SUPPORTED) {
-                mPreviewExtender.init(cameraId, new CameraCharacteristics(chars));
-            }
+            mPreviewExtender.init(cameraId, new CameraCharacteristics(chars));
         }
 
         @Override
@@ -1136,7 +1147,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public List<SizeList> getSupportedResolutions() {
-            if (LEGACY_VERSION_SUPPORTED) {
+            if (INIT_API_SUPPORTED) {
                 List<Pair<Integer, android.util.Size[]>> sizes =
                         mPreviewExtender.getSupportedResolutions();
                 if ((sizes != null) && !sizes.isEmpty()) {
@@ -1182,9 +1193,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void init(String cameraId, CameraMetadataNative chars) {
-            if (LEGACY_VERSION_SUPPORTED) {
-                mImageExtender.init(cameraId, new CameraCharacteristics(chars));
-            }
+            mImageExtender.init(cameraId, new CameraCharacteristics(chars));
         }
 
         @Override
@@ -1228,11 +1237,28 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public List<SizeList> getSupportedResolutions() {
-            if (LEGACY_VERSION_SUPPORTED) {
+            if (INIT_API_SUPPORTED) {
                 List<Pair<Integer, android.util.Size[]>> sizes =
                         mImageExtender.getSupportedResolutions();
                 if ((sizes != null) && !sizes.isEmpty()) {
                     return initializeParcelable(sizes);
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public LatencyRange getEstimatedCaptureLatencyRange(
+                android.hardware.camera2.extension.Size outputSize) {
+            if (EXTENSIONS_VERSION.startsWith(ADVANCED_VERSION_PREFIX)) {
+                Size sz = new Size(outputSize.width, outputSize.height);
+                Range<Long> latencyRange = mImageExtender.getEstimatedCaptureLatencyRange(sz);
+                if (latencyRange != null) {
+                    LatencyRange ret = new LatencyRange();
+                    ret.min = latencyRange.getLower();
+                    ret.max = latencyRange.getUpper();
+                    return ret;
                 }
             }
 
