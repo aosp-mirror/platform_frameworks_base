@@ -40,6 +40,9 @@ import android.util.Pair;
 import androidx.annotation.Nullable;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.Until;
 
 import com.android.compatibility.common.util.StreamUtil;
 import com.android.compatibility.common.util.SystemUtil;
@@ -101,6 +104,9 @@ public class UpdatableSystemFontTest {
             EMOJI_RENDERING_TEST_APP_ID + "/.EmojiRenderingTestActivity";
     private static final long ACTIVITY_TIMEOUT_MILLIS = SECONDS.toMillis(10);
 
+    private static final String GET_AVAILABLE_FONTS_TEST_ACTIVITY =
+            EMOJI_RENDERING_TEST_APP_ID + "/.GetAvailableFontsTestActivity";
+
     private static final Pattern PATTERN_FONT_FILES = Pattern.compile("\\.(ttf|otf|ttc|otc)$");
     private static final Pattern PATTERN_TMP_FILES = Pattern.compile("^/data/local/tmp/");
     private static final Pattern PATTERN_DATA_FONT_FILES = Pattern.compile("^/data/fonts/files/");
@@ -109,6 +115,7 @@ public class UpdatableSystemFontTest {
 
     private String mKeyId;
     private FontManager mFontManager;
+    private UiDevice mUiDevice;
 
     @Before
     public void setUp() throws Exception {
@@ -120,6 +127,7 @@ public class UpdatableSystemFontTest {
         mKeyId = insertCert(CERT_PATH);
         mFontManager = context.getSystemService(FontManager.class);
         expectCommandToSucceed("cmd font clear");
+        mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
     }
 
     @After
@@ -285,6 +293,19 @@ public class UpdatableSystemFontTest {
         }
         List<String> openFiles = getOpenFiles("system_server");
         assertThat(countMatch(openFiles, patternEmojiVPlus1)).isEqualTo(0);
+    }
+
+    @Test
+    public void getAvailableFonts() throws Exception {
+        String fontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
+        startActivity(EMOJI_RENDERING_TEST_APP_ID, GET_AVAILABLE_FONTS_TEST_ACTIVITY);
+        // GET_AVAILABLE_FONTS_TEST_ACTIVITY shows the NotoColorEmoji path it got.
+        mUiDevice.wait(
+                Until.findObject(By.pkg(EMOJI_RENDERING_TEST_APP_ID).text(fontPath)),
+                ACTIVITY_TIMEOUT_MILLIS);
+        // The font file should not be opened just by querying the path using
+        // SystemFont.getAvailableFonts().
+        assertThat(isFileOpenedBy(fontPath, EMOJI_RENDERING_TEST_APP_ID)).isFalse();
     }
 
     private static String insertCert(String certPath) throws Exception {
