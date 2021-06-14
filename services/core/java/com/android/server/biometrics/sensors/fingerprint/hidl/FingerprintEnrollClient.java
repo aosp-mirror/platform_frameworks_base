@@ -72,6 +72,12 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
         }
     }
 
+    @NonNull
+    @Override
+    protected Callback wrapCallbackForStart(@NonNull Callback callback) {
+        return new CompositeCallback(createALSCallback(), callback);
+    }
+
     @Override
     protected boolean hasReachedEnrollmentLimit() {
         final int limit = getContext().getResources().getInteger(
