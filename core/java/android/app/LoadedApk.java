@@ -932,6 +932,21 @@ public final class LoadedApk {
 
         boolean registerAppInfoToArt = false;
         if (mDefaultClassLoader == null) {
+            // Setup the dex reporter to notify package manager
+            // of any relevant dex loads. The idle maintenance job will use the information
+            // reported to optimize the loaded dex files.
+            // Note that we only need one global reporter per app.
+            // Make sure we do this before creating the main app classloader for the first time
+            // so that we can capture the complete application startup.
+            //
+            // We should not do this in a zygote context (where mActivityThread will be null),
+            // thus we'll guard against it.
+            // Also, the system server reporter (SystemServerDexLoadReporter) is already registered
+            // when system server starts, so we don't need to do it here again.
+            if (mActivityThread != null && !ActivityThread.isSystem()) {
+                BaseDexClassLoader.setReporter(DexLoadReporter.getInstance());
+            }
+
             // Temporarily disable logging of disk reads on the Looper thread
             // as this is early and necessary.
             StrictMode.ThreadPolicy oldPolicy = allowThreadDiskReads();
@@ -1047,14 +1062,6 @@ public final class LoadedApk {
     }
 
     private void registerAppInfoToArt() {
-        // Setup the dex reporter to notify package manager
-        // of any relevant dex loads. The idle maintenance job will use the information
-        // reported to optimize the loaded dex files.
-        // Note that we only need one global reporter per app.
-        // Make sure we do this before invoking app code for the first time so that we
-        // can capture the complete application startup.
-        BaseDexClassLoader.setReporter(DexLoadReporter.getInstance());
-
         // Only set up profile support if the loaded apk has the same uid as the
         // current process.
         // Currently, we do not support profiling across different apps.
