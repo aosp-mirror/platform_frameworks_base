@@ -18,6 +18,7 @@ package com.android.settingslib.enterprise;
 
 import static java.util.Objects.requireNonNull;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -42,9 +43,10 @@ public abstract class ActionDisabledLearnMoreButtonLauncher {
         requireNonNull(enforcedAdmin, "enforcedAdmin cannot be null");
 
         // The "Learn more" button appears only if the restriction is enforced by an admin in the
-        // same profile group. Otherwise the admin package and its policies are not accessible to
-        // the current user.
-        if (isSameProfileGroup(context, enforcementAdminUserId)) {
+        // same profile group or by the device owner. Otherwise the admin package and its policies
+        // are not accessible to the current user.
+        if (isSameProfileGroup(context, enforcementAdminUserId)
+                || isEnforcedByDeviceOwnerOnSystemUserMode(context, enforcementAdminUserId)) {
             setLearnMoreButton(() -> showAdminPolicies(context, enforcedAdmin));
         }
     }
@@ -88,6 +90,15 @@ public abstract class ActionDisabledLearnMoreButtonLauncher {
         UserManager um = context.getSystemService(UserManager.class);
 
         return um.isSameProfileGroup(enforcementAdminUserId, um.getUserHandle());
+    }
+
+    private boolean isEnforcedByDeviceOwnerOnSystemUserMode(
+            Context context, int enforcementAdminUserId) {
+        if (enforcementAdminUserId != UserHandle.USER_SYSTEM) {
+            return false;
+        }
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        return enforcementAdminUserId == dpm.getDeviceOwnerUserId();
     }
 
     /**
