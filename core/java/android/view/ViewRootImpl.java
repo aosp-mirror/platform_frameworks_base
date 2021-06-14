@@ -1410,8 +1410,6 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE || hasSurfaceInsets;
                 mAttachInfo.mThreadedRenderer = ThreadedRenderer.create(mContext, translucent,
                         attrs.getTitle().toString());
-                addASurfaceTransactionCallback();
-                mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
                 updateColorModeIfNeeded(attrs.getColorMode());
                 updateForceDarkMode();
                 if (mAttachInfo.mThreadedRenderer != null) {
@@ -1420,6 +1418,8 @@ public final class ViewRootImpl implements ViewParent,
                     if (mHardwareRendererObserver != null) {
                         mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
                     }
+                    addASurfaceTransactionCallback();
+                    mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
                 }
             }
         }
