@@ -104,7 +104,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private static final int MAX_NUM_LOGGED_GESTURES = 10;
 
     // Temporary log until b/176302696 is resolved
-    static final boolean DEBUG_MISSING_GESTURE = true;
+    static final boolean DEBUG_MISSING_GESTURE = false;
     static final String DEBUG_MISSING_GESTURE_TAG = "NoBackGesture";
 
     private static final boolean ENABLE_PER_WINDOW_INPUT_ROTATION =
