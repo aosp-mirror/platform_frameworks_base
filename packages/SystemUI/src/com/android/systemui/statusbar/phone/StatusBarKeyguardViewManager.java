@@ -447,7 +447,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
             mAfterKeyguardGoneAction = r;
             mKeyguardGoneCancelAction = cancelAction;
+
+            // If there is an an alternate auth interceptor (like the UDFPS), show that one instead
+            // of the bouncer.
             if (mAlternateAuthInterceptor != null) {
+                if (!afterKeyguardGone) {
+                    mBouncer.setDismissAction(mAfterKeyguardGoneAction, mKeyguardGoneCancelAction);
+                    mAfterKeyguardGoneAction = null;
+                    mKeyguardGoneCancelAction = null;
+                }
+
                 if (mAlternateAuthInterceptor.showAlternateAuthBouncer()) {
                     mStatusBar.updateScrimController();
                 }
@@ -615,6 +624,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (mBouncer.isShowing()) {
             mBouncer.startPreHideAnimation(finishRunnable);
             mStatusBar.onBouncerPreHideAnimation();
+
+            // startPreHideAnimation() will change the visibility of the bouncer, so we have to
+            // make sure to update its state.
+            updateStates();
         } else if (finishRunnable != null) {
             finishRunnable.run();
         }
