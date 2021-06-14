@@ -83,6 +83,7 @@ import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -128,6 +129,8 @@ import java.util.List;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class NotificationPanelViewTest extends SysuiTestCase {
+
+    private static final int NOTIFICATION_SCRIM_TOP_PADDING_IN_SPLIT_SHADE = 50;
 
     @Mock
     private StatusBar mStatusBar;
@@ -290,6 +293,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mResources.getDisplayMetrics()).thenReturn(mDisplayMetrics);
         mDisplayMetrics.density = 100;
         when(mResources.getBoolean(R.bool.config_enableNotificationShadeDrag)).thenReturn(true);
+        when(mResources.getDimensionPixelSize(R.dimen.notifications_top_padding_split_shade))
+                .thenReturn(NOTIFICATION_SCRIM_TOP_PADDING_IN_SPLIT_SHADE);
         when(mResources.getDimensionPixelSize(R.dimen.qs_panel_width)).thenReturn(400);
         when(mResources.getDimensionPixelSize(R.dimen.notification_panel_width)).thenReturn(400);
         when(mView.getContext()).thenReturn(getContext());
@@ -664,6 +669,21 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         listener.onDoubleTapRequired();
 
         verify(mTapAgainViewController).show();
+    }
+
+    @Test
+    public void testNotificationClipping_isAlignedWithNotificationScrimInSplitShade() {
+        mStatusBarStateController.setState(SHADE);
+        QS qs = mock(QS.class);
+        when(qs.getHeader()).thenReturn(mock(View.class));
+        mNotificationPanelViewController.mQs = qs;
+        enableSplitShade();
+
+        // hacky way to refresh notification scrim top with non-zero qsPanelBottom value
+        mNotificationPanelViewController.setTransitionToFullShadeAmount(200, false, 0);
+
+        verify(mAmbientState)
+                .setNotificationScrimTop(NOTIFICATION_SCRIM_TOP_PADDING_IN_SPLIT_SHADE);
     }
 
     private FalsingManager.FalsingTapListener getFalsingTapListener() {
