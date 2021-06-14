@@ -2910,6 +2910,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " for the display " + displayId + " that does not exist.");
                 return;
             }
+            remoteAnimationAdapter.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
             displayContent.mAppTransition.overridePendingAppTransitionRemote(
                     remoteAnimationAdapter);
         }
