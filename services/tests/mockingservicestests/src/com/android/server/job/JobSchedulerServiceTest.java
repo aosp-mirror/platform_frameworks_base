@@ -90,11 +90,6 @@ public class JobSchedulerServiceTest {
             super(context);
             mAppStateTracker = mock(AppStateTrackerImpl.class);
         }
-
-        @Override
-        public boolean isChainedAttributionEnabled() {
-            return false;
-        }
     }
 
     @Before
