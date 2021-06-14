@@ -571,7 +571,9 @@ public class SystemSensorManager extends SensorManager {
         }
 
         int sensorHandle = (sensor == null) ? -1 : sensor.getHandle();
-        if (rate > CAPPED_SAMPLING_RATE_LEVEL
+        if (sensor != null
+                && isSensorInCappedSet(sensor.getType())
+                && rate > CAPPED_SAMPLING_RATE_LEVEL
                 && mIsPackageDebuggable
                 && !mHasHighSamplingRateSensorsPermission
                 && Compatibility.isChangeEnabled(CHANGE_ID_SAMPLING_RATE_SENSORS_PERMISSION)) {
@@ -782,7 +784,8 @@ public class SystemSensorManager extends SensorManager {
                 Sensor sensor, int rateUs, int maxBatchReportLatencyUs) {
             if (mNativeSensorEventQueue == 0) throw new NullPointerException();
             if (sensor == null) throw new NullPointerException();
-            if (rateUs < CAPPED_SAMPLING_PERIOD_US
+            if (mManager.isSensorInCappedSet(sensor.getType())
+                    && rateUs < CAPPED_SAMPLING_PERIOD_US
                     && mManager.mIsPackageDebuggable
                     && !mManager.mHasHighSamplingRateSensorsPermission
                     && Compatibility.isChangeEnabled(CHANGE_ID_SAMPLING_RATE_SENSORS_PERMISSION)) {
@@ -1014,5 +1017,21 @@ public class SystemSensorManager extends SensorManager {
         return nativeSetOperationParameter(
                 mNativeInstance, handle,
                 parameter.type, parameter.floatValues, parameter.intValues) == 0;
+    }
+
+    /**
+     * Checks if a sensor should be capped according to HIGH_SAMPLING_RATE_SENSORS
+     * permission.
+     *
+     * This needs to be kept in sync with the list defined on the native side
+     * in frameworks/native/services/sensorservice/SensorService.cpp
+     */
+    private boolean isSensorInCappedSet(int sensorType) {
+        return (sensorType == Sensor.TYPE_ACCELEROMETER
+                || sensorType == Sensor.TYPE_ACCELEROMETER_UNCALIBRATED
+                || sensorType == Sensor.TYPE_GYROSCOPE
+                || sensorType == Sensor.TYPE_GYROSCOPE_UNCALIBRATED
+                || sensorType == Sensor.TYPE_MAGNETIC_FIELD
+                || sensorType == Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED);
     }
 }
