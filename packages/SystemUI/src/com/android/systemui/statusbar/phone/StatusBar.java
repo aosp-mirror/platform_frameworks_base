@@ -2101,7 +2101,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // launches as they can break the animation.
         // TODO(b/184121838): Support non activity launches on the lockscreen.
         return isActivityIntent
-                && KeyguardService.sEnableRemoteKeyguardAnimation
+                && KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation
                 && mKeyguardStateController.canDismissLockScreen();
     }
 
