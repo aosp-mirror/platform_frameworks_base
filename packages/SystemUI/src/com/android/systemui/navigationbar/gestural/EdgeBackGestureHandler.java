@@ -147,6 +147,16 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                 mPackageName = "_UNKNOWN";
             }
         }
+
+        @Override
+        public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
+            mIsInPipMode = true;
+        }
+
+        @Override
+        public void onActivityUnpinned() {
+            mIsInPipMode = false;
+        }
     };
 
     private DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
@@ -220,6 +230,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private boolean mIsNavBarShownTransiently;
     private boolean mIsBackGestureAllowed;
     private boolean mGestureBlockingActivityRunning;
+    private boolean mIsInPipMode;
 
     private InputMonitor mInputMonitor;
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
@@ -636,7 +647,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
 
         // If the point is inside the PiP or Nav bar overlay excluded bounds, then ignore the back
         // gesture
-        if (mPipExcludedBounds.contains(x, y) || mNavBarOverlayExcludedBounds.contains(x, y)) {
+        final boolean isInsidePip = mIsInPipMode && mPipExcludedBounds.contains(x, y);
+        if (isInsidePip || mNavBarOverlayExcludedBounds.contains(x, y)) {
             return false;
         }
 
@@ -898,6 +910,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         pw.println("  mInRejectedExclusion" + mInRejectedExclusion);
         pw.println("  mExcludeRegion=" + mExcludeRegion);
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);
+        pw.println("  mIsInPipMode=" + mIsInPipMode);
         pw.println("  mPipExcludedBounds=" + mPipExcludedBounds);
         pw.println("  mNavBarOverlayExcludedBounds=" + mNavBarOverlayExcludedBounds);
         pw.println("  mEdgeWidthLeft=" + mEdgeWidthLeft);
