@@ -437,10 +437,10 @@ class MediaDataManager(
      * connection session.
      */
     fun dismissSmartspaceRecommendation(key: String, delay: Long) {
-        Log.d(TAG, "Dismissing Smartspace media target")
         if (smartspaceMediaData.targetId != key) {
             return
         }
+        Log.d(TAG, "Dismissing Smartspace media target")
         if (smartspaceMediaData.isActive) {
             smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
                 targetId = smartspaceMediaData.targetId)
