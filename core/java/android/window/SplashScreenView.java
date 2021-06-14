@@ -85,7 +85,6 @@ public final class SplashScreenView extends FrameLayout {
                     | FLAG_TRANSLUCENT_NAVIGATION | FLAG_TRANSLUCENT_STATUS;
 
     private boolean mNotCopyable;
-    private boolean mRevealAnimationSupported = true;
     private int mInitBackgroundColor;
     private int mInitIconBackgroundColor;
     private View mIconView;
@@ -350,25 +349,6 @@ public final class SplashScreenView extends FrameLayout {
      */
     public boolean isCopyable() {
         return !mNotCopyable;
-    }
-
-    /**
-     * If set to true, indicates to the system that this view can be dismissed by playing the
-     * Reveal animation.
-     * <p>
-     * If the exit animation is handled by the client, the animation won't be played anyway.
-     * @hide
-     */
-    public void setRevealAnimationSupported(boolean support) {
-        mRevealAnimationSupported = support;
-    }
-
-    /**
-     * Whether this view support reveal animation.
-     * @hide
-     */
-    public boolean isRevealAnimationSupported() {
-        return mRevealAnimationSupported;
     }
 
     /**
