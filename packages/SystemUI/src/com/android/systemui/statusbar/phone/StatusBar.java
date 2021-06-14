@@ -252,7 +252,6 @@ import dagger.Lazy;
 /** */
 public class StatusBar extends SystemUI implements
         ActivityStarter,
-        ConfigurationListener,
         StatusBarStateController.StateListener,
         LifecycleOwner, BatteryController.BatteryStateChangeCallback,
         ActivityLaunchAnimator.Callback {
@@ -787,6 +786,62 @@ public class StatusBar extends SystemUI implements
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
 
+    private final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            updateResources();
+            updateDisplaySize(); // populates mDisplayMetrics
+
+            if (DEBUG) {
+                Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
+            }
+
+            mViewHierarchyManager.updateRowStates();
+            mScreenPinningRequest.onConfigurationChanged();
+        }
+
+        @Override
+        public void onDensityOrFontScaleChanged() {
+            // TODO: Remove this.
+            if (mBrightnessMirrorController != null) {
+                mBrightnessMirrorController.onDensityOrFontScaleChanged();
+            }
+            // TODO: Bring these out of StatusBar.
+            mUserInfoControllerImpl.onDensityOrFontScaleChanged();
+            mUserSwitcherController.onDensityOrFontScaleChanged();
+            mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
+            mHeadsUpManager.onDensityOrFontScaleChanged();
+        }
+
+        @Override
+        public void onThemeChanged() {
+            if (mStatusBarKeyguardViewManager != null) {
+                mStatusBarKeyguardViewManager.onThemeChanged();
+            }
+            if (mAmbientIndicationContainer instanceof AutoReinflateContainer) {
+                ((AutoReinflateContainer) mAmbientIndicationContainer).inflateLayout();
+            }
+            mNotificationIconAreaController.onThemeChanged();
+        }
+
+        @Override
+        public void onOverlayChanged() {
+            if (mBrightnessMirrorController != null) {
+                mBrightnessMirrorController.onOverlayChanged();
+            }
+            // We need the new R.id.keyguard_indication_area before recreating
+            // mKeyguardIndicationController
+            mNotificationPanelViewController.onThemeChanged();
+            onThemeChanged();
+        }
+
+        @Override
+        public void onUiModeChanged() {
+            if (mBrightnessMirrorController != null) {
+                mBrightnessMirrorController.onUiModeChanged();
+            }
+        }
+    };
     /**
      * Public constructor for StatusBar.
      *
@@ -1117,7 +1172,7 @@ public class StatusBar extends SystemUI implements
                 mAmbientIndicationContainer);
         mDozeParameters.addCallback(this::updateLightRevealScrimVisibility);
 
-        mConfigurationController.addCallback(this);
+        mConfigurationController.addCallback(mConfigurationListener);
 
         mBatteryController.observe(mLifecycle, this);
         mLifecycle.setCurrentState(RESUMED);
@@ -1629,48 +1684,6 @@ public class StatusBar extends SystemUI implements
     private void inflateShelf() {
         mNotificationShelfController = mSuperStatusBarViewFactory
                 .getNotificationShelfController(mStackScroller);
-    }
-
-    @Override
-    public void onDensityOrFontScaleChanged() {
-        // TODO: Remove this.
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.onDensityOrFontScaleChanged();
-        }
-        // TODO: Bring these out of StatusBar.
-        mUserInfoControllerImpl.onDensityOrFontScaleChanged();
-        mUserSwitcherController.onDensityOrFontScaleChanged();
-        mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
-        mHeadsUpManager.onDensityOrFontScaleChanged();
-    }
-
-    @Override
-    public void onThemeChanged() {
-        if (mStatusBarKeyguardViewManager != null) {
-            mStatusBarKeyguardViewManager.onThemeChanged();
-        }
-        if (mAmbientIndicationContainer instanceof AutoReinflateContainer) {
-            ((AutoReinflateContainer) mAmbientIndicationContainer).inflateLayout();
-        }
-        mNotificationIconAreaController.onThemeChanged();
-    }
-
-    @Override
-    public void onOverlayChanged() {
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.onOverlayChanged();
-        }
-        // We need the new R.id.keyguard_indication_area before recreating
-        // mKeyguardIndicationController
-        mNotificationPanelViewController.onThemeChanged();
-        onThemeChanged();
-    }
-
-    @Override
-    public void onUiModeChanged() {
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.onUiModeChanged();
-        }
     }
 
     private void inflateStatusBarWindow() {
@@ -2882,20 +2895,6 @@ public class StatusBar extends SystemUI implements
             action.onDismiss();
         }
     }
-
-    @Override
-    public void onConfigChanged(Configuration newConfig) {
-        updateResources();
-        updateDisplaySize(); // populates mDisplayMetrics
-
-        if (DEBUG) {
-            Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
-        }
-
-        mViewHierarchyManager.updateRowStates();
-        mScreenPinningRequest.onConfigurationChanged();
-    }
-
     /**
      * Notify the shade controller that the current user changed
      *
