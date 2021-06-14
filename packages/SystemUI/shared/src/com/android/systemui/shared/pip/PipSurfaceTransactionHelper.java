@@ -85,9 +85,7 @@ public class PipSurfaceTransactionHelper {
         final float left = destinationBounds.left - insets.left * scale;
         final float top = destinationBounds.top - insets.top * scale;
         mTmpTransform.setScale(scale, scale);
-        final Rect cornerRadiusRect = new Rect(destinationBounds);
-        cornerRadiusRect.inset(insets);
-        final float cornerRadius = getScaledCornerRadius(sourceBounds, cornerRadiusRect);
+        final float cornerRadius = getScaledCornerRadius(mTmpDestinationRect, destinationBounds);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
                 .setWindowCrop(leash, mTmpDestinationRect)
                 .setPosition(leash, left, top)
@@ -110,15 +108,23 @@ public class PipSurfaceTransactionHelper {
                 : (float) destinationBounds.height() / sourceBounds.height();
         mTmpTransform.setRotate(degree, 0, 0);
         mTmpTransform.postScale(scale, scale);
-        final Rect cornerRadiusRect = new Rect(destinationBounds);
-        cornerRadiusRect.inset(insets);
-        final float cornerRadius = getScaledCornerRadius(sourceBounds, cornerRadiusRect);
+        final float cornerRadius = getScaledCornerRadius(mTmpDestinationRect, destinationBounds);
+        // adjust the positions, take account also the insets
+        final float adjustedPositionX, adjustedPositionY;
+        if (degree < 0) {
+            adjustedPositionX = positionX + insets.top * scale;
+            adjustedPositionY = positionY + insets.left * scale;
+        } else {
+            adjustedPositionX = positionX - insets.top * scale;
+            adjustedPositionY = positionY - insets.left * scale;
+        }
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
                 .setWindowCrop(leash, mTmpDestinationRect)
-                .setPosition(leash, positionX, positionY)
+                .setPosition(leash, adjustedPositionX, adjustedPositionY)
                 .setCornerRadius(leash, cornerRadius);
         return new PictureInPictureSurfaceTransaction(
-                positionX, positionY, mTmpFloat9, degree, cornerRadius, mTmpDestinationRect);
+                adjustedPositionX, adjustedPositionY,
+                mTmpFloat9, degree, cornerRadius, mTmpDestinationRect);
     }
 
     /** @return the round corner radius scaled by given from and to bounds */
