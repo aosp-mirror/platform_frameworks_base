@@ -106,11 +106,25 @@
                     android:scaleType="centerInside" />
             </com.android.systemui.statusbar.phone.MultiUserSwitch>
 
+            <com.android.systemui.statusbar.AlphaOptimizedImageView
+                android:id="@+id/pm_lite"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/qs_footer_action_button_size"
+                android:layout_marginEnd="@dimen/qs_tile_margin_horizontal"
+                android:layout_weight="1"
+                android:background="@drawable/qs_footer_action_chip_background"
+                android:clickable="true"
+                android:clipToPadding="false"
+                android:focusable="true"
+                android:padding="@dimen/qs_footer_icon_padding"
+                android:src="@*android:drawable/ic_lock_power_off"
+                android:contentDescription="@string/accessibility_quick_settings_power_menu"
+                android:tint="?android:attr/textColorPrimary" />
+
             <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
                 android:id="@+id/settings_button_container"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/qs_footer_action_button_size"
-                android:layout_marginEnd="@dimen/qs_tile_margin_horizontal"
                 android:background="@drawable/qs_footer_action_chip_background"
                 android:layout_weight="1"
                 android:clipChildren="false"
@@ -139,20 +153,6 @@
                     android:visibility="invisible" />
 
             </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
-
-            <com.android.systemui.statusbar.AlphaOptimizedImageView
-                android:id="@+id/pm_lite"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/qs_footer_action_button_size"
-                android:layout_weight="1"
-                android:background="@drawable/qs_footer_action_chip_background"
-                android:clickable="true"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:padding="@dimen/qs_footer_icon_padding"
-                android:src="@*android:drawable/ic_lock_power_off"
-                android:contentDescription="@string/accessibility_quick_settings_power_menu"
-                android:tint="?android:attr/textColorPrimary" />
 
         </LinearLayout>
     </LinearLayout>
