@@ -3895,6 +3895,11 @@
     <!-- Description of an application permission that lets it ask user to ignore battery optimizations for that app-->
     <string name="permdesc_requestIgnoreBatteryOptimizations">Allows an app to ask for permission to ignore battery optimizations for that app.</string>
 
+    <!-- Title of an application permission that lets query all other packages. [CHAR LIMIT=NONE] -->
+    <string name="permlab_queryAllPackages">query all packages</string>
+    <!-- Description of an application permission that lets it query all other packages. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_queryAllPackages">Allows an app to see all installed packages.</string>
+
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Tap twice for zoom control</string>
 
