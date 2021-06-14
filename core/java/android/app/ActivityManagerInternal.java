@@ -254,6 +254,9 @@ public abstract class ActivityManagerInternal {
     /** Returns the current user id. */
     public abstract int getCurrentUserId();
 
+    /** Returns the currently started user ids. */
+    public abstract int[] getStartedUserIds();
+
     /** Returns true if the user is running. */
     public abstract boolean isUserRunning(@UserIdInt int userId, int flags);
 
