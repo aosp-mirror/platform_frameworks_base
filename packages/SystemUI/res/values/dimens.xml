@@ -1456,7 +1456,8 @@
     <dimen name="max_people_avatar_size_for_large_content">64dp</dimen>
     <dimen name="max_people_avatar_size">108dp</dimen>
     <dimen name="name_text_size_for_small">14sp</dimen>
-    <dimen name="name_text_size_for_content">12sp</dimen>
+    <dimen name="name_text_size_for_medium_content">12sp</dimen>
+    <dimen name="name_text_size_for_large_content">14sp</dimen>
     <dimen name="empty_name_text_size_for_medium">12sp</dimen>
     <dimen name="max_name_text_size_for_medium">14sp</dimen>
     <dimen name="medium_height_for_max_name_text_size">104dp</dimen>
