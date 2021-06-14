@@ -61,7 +61,6 @@ import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.ScrollCaptureResponse;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -415,18 +414,12 @@ public class ScreenshotController {
             public void onDismiss() {
                 finishDismiss();
             }
-        });
 
-        // TODO(159460485): Remove this when focus is handled properly in the system
-        mScreenshotView.setOnTouchListener((v, event) -> {
-            if (event.getActionMasked() == MotionEvent.ACTION_OUTSIDE) {
-                if (DEBUG_INPUT) {
-                    Log.d(TAG, "onTouch: ACTION_OUTSIDE");
-                }
-                // Once the user touches outside, stop listening for input
+            @Override
+            public void onTouchOutside() {
+                // TODO(159460485): Remove this when focus is handled properly in the system
                 setWindowFocusable(false);
             }
-            return false;
         });
 
         mScreenshotView.setOnKeyListener((v, keyCode, event) -> {
