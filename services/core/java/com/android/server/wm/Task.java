@@ -6053,7 +6053,8 @@ class Task extends TaskFragment {
 
     /** Returns true if a removal action is still being deferred. */
     boolean handleCompleteDeferredRemoval() {
-        if (isAnimating(TRANSITION | CHILDREN)) {
+        if (isAnimating(TRANSITION | CHILDREN)
+                || mAtmService.getTransitionController().inTransition(this)) {
             return true;
         }
 

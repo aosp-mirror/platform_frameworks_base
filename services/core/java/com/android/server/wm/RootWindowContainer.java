@@ -71,7 +71,6 @@ import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
-import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RootWindowContainerProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
@@ -817,8 +816,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         // Initialize state of exiting tokens.
-        final int numDisplays = mChildren.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+        for (int displayNdx = 0; displayNdx < mChildren.size(); ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
             displayContent.setExitingTokensHasVisible(false);
         }
@@ -867,7 +865,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             recentsAnimationController.checkAnimationReady(defaultDisplay.mWallpaperController);
         }
 
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+        for (int displayNdx = 0; displayNdx < mChildren.size(); ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
             if (displayContent.mWallpaperMayChange) {
                 if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Wallpaper may change!  Adjusting");
@@ -929,12 +927,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         // Time to remove any exiting tokens?
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+        for (int displayNdx = mChildren.size() - 1; displayNdx >= 0; --displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
             displayContent.removeExistingTokensIfPossible();
         }
 
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+        for (int displayNdx = 0; displayNdx < mChildren.size(); ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
             if (displayContent.pendingLayoutChanges != 0) {
                 displayContent.setLayoutNeeded();
