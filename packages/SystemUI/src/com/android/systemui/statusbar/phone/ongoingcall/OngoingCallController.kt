@@ -25,6 +25,7 @@ import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.widget.Chronometer
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
@@ -179,7 +180,10 @@ class OngoingCallController @Inject constructor(
                 logger.logChipClicked()
                 activityStarter.postStartActivityDismissingKeyguard(
                         currentCallNotificationInfo.intent, 0,
-                        ActivityLaunchAnimator.Controller.fromView(backgroundView))
+                        ActivityLaunchAnimator.Controller.fromView(
+                                backgroundView,
+                                InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP)
+                )
             }
 
             setUpUidObserver(currentCallNotificationInfo)
