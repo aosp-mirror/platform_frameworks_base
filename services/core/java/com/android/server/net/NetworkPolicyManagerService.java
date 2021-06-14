@@ -211,6 +211,7 @@ import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
+import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
@@ -5743,12 +5744,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override
-        public void onTempPowerSaveWhitelistChange(int appId, boolean added) {
+        public void onTempPowerSaveWhitelistChange(int appId, boolean added,
+                @ReasonCode int reasonCode, @Nullable String reason) {
             synchronized (mUidRulesFirstLock) {
                 if (!mSystemReady) {
                     return;
                 }
-                mLogger.tempPowerSaveWlChanged(appId, added);
+                mLogger.tempPowerSaveWlChanged(appId, added, reasonCode, reason);
                 if (added) {
                     mPowerSaveTempWhitelistAppIds.put(appId, true);
                 } else {
