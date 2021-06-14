@@ -24,26 +24,31 @@ import static com.android.server.tare.TareUtils.arcToNarc;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.ArrayMap;
+import android.util.SparseArray;
 
 /**
  * Policy defining pricing information and daily ARC requirements and suggestions for
  * AlarmManager.
  */
 public class AlarmManagerEconomicPolicy extends EconomicPolicy {
-    public static final String ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE =
-            "ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE";
-    public static final String ACTION_ALARM_WAKEUP_EXACT = "ALARM_WAKEUP_EXACT";
-    public static final String ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE =
-            "ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE";
-    public static final String ACTION_ALARM_WAKEUP_INEXACT = "ALARM_WAKEUP_INEXACT";
-    public static final String ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE =
-            "ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE";
-    public static final String ACTION_ALARM_NONWAKEUP_EXACT = "ALARM_NONWAKEUP_EXACT";
-    public static final String ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE =
-            "ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE";
-    public static final String ACTION_ALARM_NONWAKEUP_INEXACT = "ALARM_NONWAKEUP_INEXACT";
-    public static final String ACTION_ALARM_CLOCK = "ALARM_CLOCK";
+    public static final int ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE =
+            TYPE_ACTION | POLICY_AM | 0;
+    public static final int ACTION_ALARM_WAKEUP_EXACT =
+            TYPE_ACTION | POLICY_AM | 1;
+    public static final int ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE =
+            TYPE_ACTION | POLICY_AM | 2;
+    public static final int ACTION_ALARM_WAKEUP_INEXACT =
+            TYPE_ACTION | POLICY_AM | 3;
+    public static final int ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE =
+            TYPE_ACTION | POLICY_AM | 4;
+    public static final int ACTION_ALARM_NONWAKEUP_EXACT =
+            TYPE_ACTION | POLICY_AM | 5;
+    public static final int ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE =
+            TYPE_ACTION | POLICY_AM | 6;
+    public static final int ACTION_ALARM_NONWAKEUP_INEXACT =
+            TYPE_ACTION | POLICY_AM | 7;
+    public static final int ACTION_ALARM_CLOCK =
+            TYPE_ACTION | POLICY_AM | 8;
 
     private static final int[] COST_MODIFIERS = new int[]{
             COST_MODIFIER_CHARGING,
@@ -52,8 +57,8 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
             COST_MODIFIER_PROCESS_STATE
     };
 
-    private final ArrayMap<String, Action> mActions = new ArrayMap<>();
-    private final ArrayMap<String, Reward> mRewards = new ArrayMap<>();
+    private final SparseArray<Action> mActions = new SparseArray<>();
+    private final SparseArray<Reward> mRewards = new SparseArray<>();
 
     AlarmManagerEconomicPolicy(InternalResourceService irs) {
         super(irs);
@@ -86,14 +91,14 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
 
     @Nullable
     @Override
-    Action getAction(@NonNull String actionName) {
-        return mActions.get(actionName);
+    Action getAction(@AppAction int actionId) {
+        return mActions.get(actionId);
     }
 
     @Nullable
     @Override
-    Reward getReward(@NonNull String rewardName) {
-        return mRewards.get(rewardName);
+    Reward getReward(@UtilityReward int rewardId) {
+        return mRewards.get(rewardId);
     }
 
     private void loadActions() {

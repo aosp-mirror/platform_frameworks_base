@@ -23,9 +23,9 @@ import static com.android.server.tare.Modifier.COST_MODIFIER_PROCESS_STATE;
 import static com.android.server.tare.Modifier.NUM_COST_MODIFIERS;
 
 import android.annotation.CallSuper;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.StringDef;
 import android.util.IndentingPrintWriter;
 
 import java.lang.annotation.Retention;
@@ -40,14 +40,65 @@ import java.lang.annotation.RetentionPolicy;
 public abstract class EconomicPolicy {
     private static final String TAG = "TARE-" + EconomicPolicy.class.getSimpleName();
 
-    // fixme ensure actions and rewards never use the same strings
-    static final String REWARD_TOP_ACTIVITY = "REWARD_TOP_ACTIVITY";
-    static final String REWARD_NOTIFICATION_SEEN = "REWARD_NOTIFICATION_SEEN";
-    static final String REWARD_NOTIFICATION_INTERACTION = "REWARD_NOTIFICATION_INTERACTION";
-    static final String REWARD_WIDGET_INTERACTION = "REWARD_WIDGET_INTERACTION";
-    static final String REWARD_OTHER_USER_INTERACTION = "REWARD_OTHER_USER_INTERACTION";
+    private static final int SHIFT_TYPE = 30;
+    static final int MASK_TYPE = 0b11 << SHIFT_TYPE;
+    static final int TYPE_REGULATION = 0 << SHIFT_TYPE;
+    static final int TYPE_ACTION = 1 << SHIFT_TYPE;
+    static final int TYPE_REWARD = 2 << SHIFT_TYPE;
 
-    @StringDef({
+    private static final int SHIFT_POLICY = 29;
+    static final int MASK_POLICY = 0b1 << SHIFT_POLICY;
+    static final int POLICY_AM = 0 << SHIFT_POLICY;
+    static final int POLICY_JS = 1 << SHIFT_POLICY;
+
+    static final int MASK_EVENT = ~0 - (0b111 << SHIFT_POLICY);
+
+    static final int REGULATION_BASIC_INCOME = TYPE_REGULATION | 0;
+    static final int REGULATION_BIRTHRIGHT = TYPE_REGULATION | 1;
+    static final int REGULATION_TAX = TYPE_REGULATION | 2;
+
+    static final int REWARD_NOTIFICATION_SEEN = TYPE_REWARD | 0;
+    static final int REWARD_NOTIFICATION_INTERACTION = TYPE_REWARD | 1;
+    static final int REWARD_TOP_ACTIVITY = TYPE_REWARD | 2;
+    static final int REWARD_WIDGET_INTERACTION = TYPE_REWARD | 3;
+    static final int REWARD_OTHER_USER_INTERACTION = TYPE_REWARD | 4;
+
+    @IntDef({
+            AlarmManagerEconomicPolicy.ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE,
+            AlarmManagerEconomicPolicy.ACTION_ALARM_WAKEUP_EXACT,
+            AlarmManagerEconomicPolicy.ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE,
+            AlarmManagerEconomicPolicy.ACTION_ALARM_WAKEUP_INEXACT,
+            AlarmManagerEconomicPolicy.ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE,
+            AlarmManagerEconomicPolicy.ACTION_ALARM_NONWAKEUP_EXACT,
+            AlarmManagerEconomicPolicy.ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE,
+            AlarmManagerEconomicPolicy.ACTION_ALARM_NONWAKEUP_INEXACT,
+            AlarmManagerEconomicPolicy.ACTION_ALARM_CLOCK,
+            JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START,
+            JobSchedulerEconomicPolicy.ACTION_JOB_MAX_RUNNING,
+            JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_START,
+            JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_RUNNING,
+            JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_START,
+            JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING,
+            JobSchedulerEconomicPolicy.ACTION_JOB_LOW_START,
+            JobSchedulerEconomicPolicy.ACTION_JOB_LOW_RUNNING,
+            JobSchedulerEconomicPolicy.ACTION_JOB_MIN_START,
+            JobSchedulerEconomicPolicy.ACTION_JOB_MIN_RUNNING,
+            JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AppAction {
+    }
+
+    @IntDef({
+            TYPE_ACTION,
+            TYPE_REGULATION,
+            TYPE_REWARD,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EventType {
+    }
+
+    @IntDef({
             REWARD_TOP_ACTIVITY,
             REWARD_NOTIFICATION_SEEN,
             REWARD_NOTIFICATION_INTERACTION,
@@ -59,8 +110,8 @@ public abstract class EconomicPolicy {
     }
 
     static class Action {
-        @NonNull
-        public final String name;
+        /** Unique id (including across policies) for this action. */
+        public final int id;
         /**
          * How many ARCs the system says it takes to perform this action.
          */
@@ -72,25 +123,25 @@ public abstract class EconomicPolicy {
          */
         public final long basePrice;
 
-        Action(@NonNull String name, long costToProduce, long basePrice) {
-            this.name = name;
+        Action(int id, long costToProduce, long basePrice) {
+            this.id = id;
             this.costToProduce = costToProduce;
             this.basePrice = basePrice;
         }
     }
 
     static class Reward {
-        @NonNull
+        /** Unique id (including across policies) for this reward. */
         @UtilityReward
-        public final String name;
+        public final int id;
         public final long instantReward;
         /** Reward credited per second of ongoing activity. */
         public final long ongoingRewardPerSecond;
         /** The maximum amount an app can earn from this reward within a 24 hour period. */
         public final long maxDailyReward;
 
-        Reward(@NonNull String name, long instantReward, long ongoingReward, long maxDailyReward) {
-            this.name = name;
+        Reward(int id, long instantReward, long ongoingReward, long maxDailyReward) {
+            this.id = id;
             this.instantReward = instantReward;
             this.ongoingRewardPerSecond = ongoingReward;
             this.maxDailyReward = maxDailyReward;
@@ -139,16 +190,16 @@ public abstract class EconomicPolicy {
     abstract int[] getCostModifiers();
 
     @Nullable
-    abstract Action getAction(@NonNull String actionName);
+    abstract Action getAction(@AppAction int actionId);
 
     @Nullable
-    abstract Reward getReward(@NonNull String rewardName);
+    abstract Reward getReward(@UtilityReward int rewardId);
 
     void dump(IndentingPrintWriter pw) {
     }
 
-    final long getCostOfAction(@NonNull String actionName, int userId, @NonNull String pkgName) {
-        final Action action = getAction(actionName);
+    final long getCostOfAction(int actionId, int userId, @NonNull String pkgName) {
+        final Action action = getAction(actionId);
         if (action == null) {
             return 0;
         }
@@ -212,6 +263,111 @@ public abstract class EconomicPolicy {
                     "Modifier #" + modifierId + " was never initialized");
         }
         return modifier;
+    }
+
+    @EventType
+    static int getEventType(int eventId) {
+        return eventId & MASK_TYPE;
+    }
+
+    @NonNull
+    static String eventToString(int eventId) {
+        switch (eventId & MASK_TYPE) {
+            case TYPE_ACTION:
+                return actionToString(eventId);
+
+            case TYPE_REGULATION:
+                return regulationToString(eventId);
+
+            case TYPE_REWARD:
+                return rewardToString(eventId);
+
+            default:
+                return "UNKNOWN_EVENT:" + Integer.toHexString(eventId);
+        }
+    }
+
+    @NonNull
+    static String actionToString(int eventId) {
+        switch (eventId & MASK_POLICY) {
+            case POLICY_AM:
+                switch (eventId) {
+                    case AlarmManagerEconomicPolicy.ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE:
+                        return "ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE";
+                    case AlarmManagerEconomicPolicy.ACTION_ALARM_WAKEUP_EXACT:
+                        return "ALARM_WAKEUP_EXACT";
+                    case AlarmManagerEconomicPolicy.ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE:
+                        return "ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE";
+                    case AlarmManagerEconomicPolicy.ACTION_ALARM_WAKEUP_INEXACT:
+                        return "ALARM_WAKEUP_INEXACT";
+                    case AlarmManagerEconomicPolicy.ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE:
+                        return "ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE";
+                    case AlarmManagerEconomicPolicy.ACTION_ALARM_NONWAKEUP_EXACT:
+                        return "ALARM_NONWAKEUP_EXACT";
+                    case AlarmManagerEconomicPolicy.ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE:
+                        return "ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE";
+                    case AlarmManagerEconomicPolicy.ACTION_ALARM_NONWAKEUP_INEXACT:
+                        return "ALARM_NONWAKEUP_INEXACT";
+                    case AlarmManagerEconomicPolicy.ACTION_ALARM_CLOCK:
+                        return "ALARM_CLOCK";
+                }
+            case POLICY_JS:
+                switch (eventId) {
+                    case JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START:
+                        return "JOB_MAX_START";
+                    case JobSchedulerEconomicPolicy.ACTION_JOB_MAX_RUNNING:
+                        return "JOB_MAX_RUNNING";
+                    case JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_START:
+                        return "JOB_HIGH_START";
+                    case JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_RUNNING:
+                        return "JOB_HIGH_RUNNING";
+                    case JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_START:
+                        return "JOB_DEFAULT_START";
+                    case JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING:
+                        return "JOB_DEFAULT_RUNNING";
+                    case JobSchedulerEconomicPolicy.ACTION_JOB_LOW_START:
+                        return "JOB_LOW_START";
+                    case JobSchedulerEconomicPolicy.ACTION_JOB_LOW_RUNNING:
+                        return "JOB_LOW_RUNNING";
+                    case JobSchedulerEconomicPolicy.ACTION_JOB_MIN_START:
+                        return "JOB_MIN_START";
+                    case JobSchedulerEconomicPolicy.ACTION_JOB_MIN_RUNNING:
+                        return "JOB_MIN_RUNNING";
+                    case JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT:
+                        return "JOB_TIMEOUT";
+                }
+        }
+        return "UNKNOWN_ACTION:" + Integer.toHexString(eventId);
+    }
+
+    @NonNull
+    static String regulationToString(int eventId) {
+        switch (eventId) {
+            case REGULATION_BASIC_INCOME:
+                return "BASIC_INCOME";
+            case REGULATION_BIRTHRIGHT:
+                return "BIRTHRIGHT";
+            case REGULATION_TAX:
+                return "TAX";
+        }
+        return "UNKNOWN_REGULATION:" + Integer.toHexString(eventId);
+    }
+
+    @NonNull
+    static String rewardToString(int eventId) {
+        switch (eventId) {
+            case REWARD_TOP_ACTIVITY:
+                return "REWARD_TOP_ACTIVITY";
+            case REWARD_NOTIFICATION_SEEN:
+                return "REWARD_NOTIFICATION_SEEN";
+            case REWARD_NOTIFICATION_INTERACTION:
+                return "REWARD_NOTIFICATION_INTERACTION";
+            case REWARD_WIDGET_INTERACTION:
+                return "REWARD_WIDGET_INTERACTION";
+            case REWARD_OTHER_USER_INTERACTION:
+                return "REWARD_OTHER_USER_INTERACTION";
+        }
+        return "UNKNOWN_REWARD:" + Integer.toHexString(eventId);
     }
 
     protected static void dumpActiveModifiers(IndentingPrintWriter pw) {

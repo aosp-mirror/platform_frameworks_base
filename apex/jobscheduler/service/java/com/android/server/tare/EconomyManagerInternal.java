@@ -29,8 +29,8 @@ interface EconomyManagerInternal {
     interface BalanceChangeListener {
         /**
          * Called when an app runs out of funds.
-         * {@link #noteOngoingEventStopped(int, String, String, String)} must still be called to formally
-         * end the action.
+         * {@link #noteOngoingEventStopped(int, String, int, String)} must still be called to
+         * formally end the action.
          */
         void onBankruptcy(int userId, @NonNull String pkgName);
 
@@ -61,20 +61,20 @@ interface EconomyManagerInternal {
      *
      * @param tag An optional tag that can be used to differentiate the same event for the same app.
      */
-    void noteInstantaneousEvent(int userId, @NonNull String pkgName, @NonNull String event,
+    void noteInstantaneousEvent(int userId, @NonNull String pkgName, int eventId,
             @Nullable String tag);
 
     /**
      * Note that a long-running event is starting. The event must be specified in one of the
      * EconomicPolicies. You must always call
-     * {@link #noteOngoingEventStopped(int, String, String, String)} to end the event. Ongoing
+     * {@link #noteOngoingEventStopped(int, String, int, String)} to end the event. Ongoing
      * events will be separated and grouped by event-tag combinations. There must be an equal
      * number of start() and stop() calls for the same event-tag combination in order for the
      * tracking to finally stop (ie. ongoing events are ref-counted).
      *
      * @param tag An optional tag that can be used to differentiate the same event for the same app.
      */
-    void noteOngoingEventStarted(int userId, @NonNull String pkgName, @NonNull String event,
+    void noteOngoingEventStarted(int userId, @NonNull String pkgName, int eventId,
             @Nullable String tag);
 
     /**
@@ -85,6 +85,6 @@ interface EconomyManagerInternal {
      *
      * @param tag An optional tag that can be used to differentiate the same event for the same app.
      */
-    void noteOngoingEventStopped(int userId, @NonNull String pkgName, @NonNull String event,
+    void noteOngoingEventStopped(int userId, @NonNull String pkgName, int eventId,
             @Nullable String tag);
 }

@@ -374,18 +374,18 @@ public class InternalResourceService extends SystemService {
         }
 
         @Override
-        public void noteInstantaneousEvent(int userId, @NonNull String pkgName,
-                @NonNull String event, @Nullable String tag) {
+        public void noteInstantaneousEvent(int userId, @NonNull String pkgName, int eventId,
+                @Nullable String tag) {
         }
 
         @Override
-        public void noteOngoingEventStarted(int userId, @NonNull String pkgName,
-                @NonNull String event, @Nullable String tag) {
+        public void noteOngoingEventStarted(int userId, @NonNull String pkgName, int eventId,
+                @Nullable String tag) {
         }
 
         @Override
-        public void noteOngoingEventStopped(int userId, @NonNull String pkgName,
-                @NonNull String event, @Nullable String tag) {
+        public void noteOngoingEventStopped(int userId, @NonNull String pkgName, int eventId,
+                @Nullable String tag) {
         }
     }
 }
