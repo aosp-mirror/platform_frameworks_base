@@ -252,8 +252,7 @@ import dagger.Lazy;
 /** */
 public class StatusBar extends SystemUI implements
         ActivityStarter,
-        LifecycleOwner,
-        ActivityLaunchAnimator.Callback {
+        LifecycleOwner {
     public static final boolean MULTIUSER_DEBUG = false;
 
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -919,6 +918,40 @@ public class StatusBar extends SystemUI implements
                     }
                 }
             };
+
+    private final ActivityLaunchAnimator.Callback mKeyguardHandler =
+            new ActivityLaunchAnimator.Callback() {
+        @Override
+        public boolean isOnKeyguard() {
+            return mKeyguardStateController.isShowing();
+        }
+
+        @Override
+        public void hideKeyguardWithAnimation(IRemoteAnimationRunner runner) {
+            // We post to the main thread for 2 reasons:
+            //   1. KeyguardViewMediator is not thread-safe.
+            //   2. To ensure that ViewMediatorCallback#keyguardDonePending is called before
+            //      ViewMediatorCallback#readyForKeyguardDone. The wrong order could occur when
+            //      doing dismissKeyguardThenExecute { hideKeyguardWithAnimation(runner) }.
+            mMainThreadHandler.post(() -> mKeyguardViewMediator.hideWithAnimation(runner));
+        }
+
+        @Override
+        public void setBlursDisabledForAppLaunch(boolean disabled) {
+            mKeyguardViewMediator.setBlursDisabledForAppLaunch(disabled);
+        }
+
+        @Override
+        public int getBackgroundColor(TaskInfo task) {
+            if (!mStartingSurfaceOptional.isPresent()) {
+                Log.w(TAG, "No starting surface, defaulting to SystemBGColor");
+                return SplashscreenContentDrawer.getSystemBGColor();
+            }
+
+            return mStartingSurfaceOptional.get().getBackgroundColor(task);
+        }
+    };
+
     /**
      * Public constructor for StatusBar.
      *
@@ -1634,7 +1667,7 @@ public class StatusBar extends SystemUI implements
 
     private void setUpPresenter() {
         // Set up the initial notification state.
-        mActivityLaunchAnimator = new ActivityLaunchAnimator(this, mContext);
+        mActivityLaunchAnimator = new ActivityLaunchAnimator(mKeyguardHandler, mContext);
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
                 mStackScrollerController.getNotificationListContainer(),
@@ -2131,36 +2164,6 @@ public class StatusBar extends SystemUI implements
         // animate non-activity launches as they can break the animation.
         // TODO(b/184121838): Support non activity launches on the lockscreen.
         return isActivityIntent && KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation;
-    }
-
-    @Override
-    public boolean isOnKeyguard() {
-        return mKeyguardStateController.isShowing();
-    }
-
-    @Override
-    public void hideKeyguardWithAnimation(IRemoteAnimationRunner runner) {
-        // We post to the main thread for 2 reasons:
-        //   1. KeyguardViewMediator is not thread-safe.
-        //   2. To ensure that ViewMediatorCallback#keyguardDonePending is called before
-        //      ViewMediatorCallback#readyForKeyguardDone. The wrong order could occur when doing
-        //      dismissKeyguardThenExecute { hideKeyguardWithAnimation(runner) }.
-        mMainThreadHandler.post(() -> mKeyguardViewMediator.hideWithAnimation(runner));
-    }
-
-    @Override
-    public void setBlursDisabledForAppLaunch(boolean disabled) {
-        mKeyguardViewMediator.setBlursDisabledForAppLaunch(disabled);
-    }
-
-    @Override
-    public int getBackgroundColor(TaskInfo task) {
-        if (!mStartingSurfaceOptional.isPresent()) {
-            Log.w(TAG, "No starting surface, defaulting to SystemBGColor");
-            return SplashscreenContentDrawer.getSystemBGColor();
-        }
-
-        return mStartingSurfaceOptional.get().getBackgroundColor(task);
     }
 
     public boolean isDeviceInVrMode() {
