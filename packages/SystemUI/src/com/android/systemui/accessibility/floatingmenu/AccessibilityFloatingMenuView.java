@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.util.MathUtils.constrain;
 import static android.util.MathUtils.sq;
 import static android.view.WindowInsets.Type.ime;
@@ -200,6 +201,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
         mListView = listView;
         mWindowManager = context.getSystemService(WindowManager.class);
+        mLastConfiguration = new Configuration(getResources().getConfiguration());
         mAdapter = new AccessibilityTargetAdapter(mTargets);
         mUiHandler = createUiHandler();
         mPosition = position;
@@ -243,7 +245,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
             }
         });
 
-        mLastConfiguration = new Configuration(getResources().getConfiguration());
 
         initListView();
         updateStrokeWith(getResources().getConfiguration().uiMode, mAlignment);
@@ -567,8 +568,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         final int currentX = (int) event.getX();
         final int currentY = (int) event.getY();
 
+        final int marginStartEnd = getMarginStartEndWith(mLastConfiguration);
         final Rect touchDelegateBounds =
-                new Rect(mMargin, mMargin, mMargin + getLayoutWidth(), mMargin + getLayoutHeight());
+                new Rect(marginStartEnd, mMargin, marginStartEnd + getLayoutWidth(),
+                        mMargin + getLayoutHeight());
         if (action == MotionEvent.ACTION_DOWN
                 && touchDelegateBounds.contains(currentX, currentY)) {
             mIsDownInEnlargedTouchArea = true;
@@ -682,15 +685,13 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mListView.setLayoutManager(layoutManager);
         mListView.addOnItemTouchListener(this);
         mListView.animate().setInterpolator(new OvershootInterpolator());
-        updateListView();
+        updateListViewWith(mLastConfiguration);
 
         addView(mListView);
     }
 
-    private void updateListView() {
-        final LayoutParams layoutParams = (FrameLayout.LayoutParams) mListView.getLayoutParams();
-        layoutParams.setMargins(mMargin, mMargin, mMargin, mMargin);
-        mListView.setLayoutParams(layoutParams);
+    private void updateListViewWith(Configuration configuration) {
+        updateMarginWith(configuration);
 
         final int elevation =
                 getResources().getDimensionPixelSize(R.dimen.accessibility_floating_menu_elevation);
@@ -719,13 +720,15 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        mLastConfiguration.setTo(newConfig);
+
         final int diff = newConfig.diff(mLastConfiguration);
         if ((diff & ActivityInfo.CONFIG_LOCALE) != 0) {
             updateAccessibilityTitle(mCurrentLayoutParams);
         }
 
         updateDimensions();
-        updateListView();
+        updateListViewWith(newConfig);
         updateItemViewWith(mSizeType);
         updateColor();
         updateStrokeWith(newConfig.uiMode, mAlignment);
@@ -733,8 +736,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         updateRadiusWith(mSizeType, mRadiusType, mTargets.size());
         updateScrollModeWith(hasExceededMaxLayoutHeight());
         setSystemGestureExclusion();
-
-        mLastConfiguration.setTo(newConfig);
     }
 
     @VisibleForTesting
@@ -756,11 +757,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     private int getMinWindowX() {
-        return -mMargin;
+        return -getMarginStartEndWith(mLastConfiguration);
     }
 
     private int getMaxWindowX() {
-        return mScreenWidth - mMargin - getLayoutWidth();
+        return mScreenWidth - getMarginStartEndWith(mLastConfiguration) - getLayoutWidth();
     }
 
     private int getMaxWindowY() {
@@ -803,6 +804,15 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         final int layoutBottomY = mCurrentLayoutParams.y + getWindowHeight();
 
         return layoutBottomY > imeY ? (layoutBottomY - imeY) : 0;
+    }
+
+    private void updateMarginWith(Configuration configuration) {
+        // Avoid overlapping with system bars under landscape mode, update the margins of the menu
+        // to align the edge of system bars.
+        final int marginStartEnd = getMarginStartEndWith(configuration);
+        final LayoutParams layoutParams = (FrameLayout.LayoutParams) mListView.getLayoutParams();
+        layoutParams.setMargins(marginStartEnd, mMargin, marginStartEnd, mMargin);
+        mListView.setLayoutParams(layoutParams);
     }
 
     private void updateOffsetWith(@ShapeType int shapeType, @Alignment int side) {
@@ -896,6 +906,12 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         return (mPadding + mIconHeight) * mTargets.size() + mPadding;
     }
 
+    private int getMarginStartEndWith(Configuration configuration) {
+        return configuration != null
+                && configuration.orientation == ORIENTATION_PORTRAIT
+                ? mMargin : 0;
+    }
+
     private @DimenRes int getRadiusResId(@SizeType int sizeType, int itemCount) {
         return sizeType == SizeType.SMALL
                 ? getSmallSizeResIdWith(itemCount)
@@ -932,7 +948,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     private int getWindowWidth() {
-        return mMargin * 2 + getLayoutWidth();
+        return getMarginStartEndWith(mLastConfiguration) * 2 + getLayoutWidth();
     }
 
     private int getWindowHeight() {
