@@ -425,13 +425,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final Rect mBackgroundAnimationRect = new Rect();
     private ArrayList<BiConsumer<Float, Float>> mExpandedHeightListeners = new ArrayList<>();
     private int mHeadsUpInset;
+
+    /**
+     * The position of the scroll boundary relative to this view. This is where the notifications
+     * stop scrolling and will start to clip instead.
+     */
+    private int mQsScrollBoundaryPosition;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final Rect mTmpRect = new Rect();
     private DismissListener mDismissListener;
     private DismissAllAnimationListener mDismissAllAnimationListener;
     private NotificationRemoteInputManager mRemoteInputManager;
     private ShadeController mShadeController;
-    private Runnable mOnStackYChanged;
+    private Consumer<Boolean> mOnStackYChanged;
 
     protected boolean mClearAllEnabled;
 
@@ -470,6 +476,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mRoundedRectClippingBottom;
     private int mRoundedRectClippingRight;
     private float[] mBgCornerRadii = new float[8];
+
+    /**
+     * Whether stackY should be animated in case the view is getting shorter than the scroll
+     * position and this scrolling will lead to the top scroll inset getting smaller.
+     */
+    private boolean mAnimateStackYForContentHeightChange = false;
 
     /**
      * Are we launching a notification right now
@@ -889,6 +901,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mCornerRadius = res.getDimensionPixelSize(R.dimen.notification_corner_radius);
         mHeadsUpInset = mStatusBarHeight + res.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
+        mQsScrollBoundaryPosition = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.quick_qs_offset_height);
     }
 
     void updateCornerRadius() {
@@ -988,6 +1002,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateFirstAndLastBackgroundViews();
         updateAlgorithmLayoutMinHeight();
         updateOwnTranslationZ();
+
+        // Once the layout has finished, we don't need to animate any scrolling clampings anymore.
+        mAnimateStackYForContentHeightChange = false;
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -1122,7 +1139,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void clampScrollPosition() {
         int scrollRange = getScrollRange();
         if (scrollRange < mOwnScrollY) {
-            setOwnScrollY(scrollRange);
+            boolean animateStackY = false;
+            if (scrollRange < getScrollAmountToScrollBoundary()
+                    && mAnimateStackYForContentHeightChange) {
+                // if the scroll boundary updates the position of the stack,
+                animateStackY = true;
+            }
+            setOwnScrollY(scrollRange, animateStackY);
         }
     }
 
@@ -1151,6 +1174,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Apply expansion fraction to the y position and height of the notifications panel.
      */
     private void updateStackPosition() {
+        updateStackPosition(false /* listenerNeedsAnimation */);
+    }
+
+    /**
+     * Apply expansion fraction to the y position and height of the notifications panel.
+     * @param listenerNeedsAnimation does the listener need to animate?
+     */
+    private void updateStackPosition(boolean listenerNeedsAnimation) {
         // Consider interpolating from an mExpansionStartY for use on lockscreen and AOD
         float endTopPosition = mTopPadding + mExtraTopInsetForFullShadeTransition
                 + mAmbientState.getOverExpansion();
@@ -1158,7 +1189,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         final float stackY = MathUtils.lerp(0, endTopPosition, fraction);
         mAmbientState.setStackY(stackY);
         if (mOnStackYChanged != null) {
-            mOnStackYChanged.run();
+            mOnStackYChanged.accept(listenerNeedsAnimation);
         }
         if (mQsExpansionFraction <= 0) {
             final float stackEndHeight = Math.max(0f,
@@ -1170,7 +1201,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    void setOnStackYChanged(Runnable onStackYChanged) {
+    /**
+     * Add a listener when the StackY changes. The argument signifies whether an animation is
+     * needed.
+     */
+    void setOnStackYChanged(Consumer<Boolean> onStackYChanged) {
         mOnStackYChanged = onStackYChanged;
     }
 
@@ -2670,15 +2705,25 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         final int startingPosition = getPositionInLinearLayout(removedChild);
         final int childHeight = getIntrinsicHeight(removedChild) + mPaddingBetweenElements;
         final int endPosition = startingPosition + childHeight;
-        if (endPosition <= mOwnScrollY) {
+        final int scrollBoundaryStart = getScrollAmountToScrollBoundary();
+        mAnimateStackYForContentHeightChange = true;
+        // This is reset onLayout
+        if (endPosition <= mOwnScrollY - scrollBoundaryStart) {
             // This child is fully scrolled of the top, so we have to deduct its height from the
             // scrollPosition
             setOwnScrollY(mOwnScrollY - childHeight);
-        } else if (startingPosition < mOwnScrollY) {
+        } else if (startingPosition < mOwnScrollY - scrollBoundaryStart) {
             // This child is currently being scrolled into, set the scroll position to the
             // start of this child
-            setOwnScrollY(startingPosition);
+            setOwnScrollY(startingPosition + scrollBoundaryStart);
         }
+    }
+
+    /**
+     * @return the amount of scrolling needed to start clipping notifications.
+     */
+    private int getScrollAmountToScrollBoundary() {
+        return mTopPadding - mQsScrollBoundaryPosition;
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -3832,6 +3877,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     void onChildHeightChanged(ExpandableView view, boolean needsAnimation) {
+        boolean previouslyNeededAnimation = mAnimateStackYForContentHeightChange;
+        if (needsAnimation) {
+            mAnimateStackYForContentHeightChange = true;
+        }
         updateContentHeight();
         updateScrollPositionOnExpandInBottom(view);
         clampScrollPosition();
@@ -3852,6 +3901,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             requestAnimationOnViewResize(row);
         }
         requestChildrenUpdate();
+        mAnimateStackYForContentHeightChange = previouslyNeededAnimation;
     }
 
     void onChildHeightReset(ExpandableView view) {
@@ -4577,13 +4627,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void setOwnScrollY(int ownScrollY) {
+        setOwnScrollY(ownScrollY, false /* animateScrollChangeListener */);
+    }
+
+    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
+    private void setOwnScrollY(int ownScrollY, boolean animateStackYChangeListener) {
         if (ownScrollY != mOwnScrollY) {
             // We still want to call the normal scrolled changed for accessibility reasons
             onScrollChanged(mScrollX, ownScrollY, mScrollX, mOwnScrollY);
             mOwnScrollY = ownScrollY;
             mAmbientState.setScrollY(mOwnScrollY);
             updateOnScrollChange();
-            updateStackPosition();
+            updateStackPosition(animateStackYChangeListener);
         }
     }
 

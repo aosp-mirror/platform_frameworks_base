@@ -1023,7 +1023,7 @@ public class NotificationStackScrollLayoutController {
         mView.setQsExpansionFraction(expansionFraction);
     }
 
-    public void setOnStackYChanged(Runnable onStackYChanged) {
+    public void setOnStackYChanged(Consumer<Boolean> onStackYChanged) {
         mView.setOnStackYChanged(onStackYChanged);
     }
 
