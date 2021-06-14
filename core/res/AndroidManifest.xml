@@ -5660,6 +5660,8 @@
     <!-- Allows query of any normal app on the device, regardless of manifest declarations.
         <p>Protection level: normal -->
     <permission android:name="android.permission.QUERY_ALL_PACKAGES"
+                android:label="@string/permlab_queryAllPackages"
+                android:description="@string/permdesc_queryAllPackages"
                 android:protectionLevel="normal" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
 
