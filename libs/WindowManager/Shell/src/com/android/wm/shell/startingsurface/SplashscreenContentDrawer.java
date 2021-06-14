@@ -407,7 +407,6 @@ public class SplashscreenContentDrawer {
             }
             if (mEmptyView) {
                 splashScreenView.setNotCopyable();
-                splashScreenView.setRevealAnimationSupported(false);
             }
             splashScreenView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                 @Override
