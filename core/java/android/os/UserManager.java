@@ -1320,6 +1320,24 @@ public class UserManager {
             "disallow_camera_toggle";
 
     /**
+     * This is really not a user restriction in the normal sense. This can't be set to a user,
+     * via UserManager nor via DevicePolicyManager. This is not even set in UserSettingsUtils.
+     * This is defined here purely for convenience within the settings app.
+     *
+     * TODO(b/191306258): Refactor the Settings app to remove the need for this field, and delete it
+     *
+     * Specifies whether biometrics are available to the user. This is used internally only,
+     * as a means of communications between biometric settings and
+     * {@link com.android.settingslib.enterprise.ActionDisabledByAdminControllerFactory}.
+     *
+     * @see {@link android.hardware.biometrics.ParentalControlsUtilsInternal}
+     * @see {@link com.android.settings.biometrics.ParentalControlsUtils}
+     *
+     * @hide
+     */
+    public static final String DISALLOW_BIOMETRIC = "disallow_biometric";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *
@@ -1413,6 +1431,7 @@ public class UserManager {
             DISALLOW_MICROPHONE_TOGGLE,
             DISALLOW_CAMERA_TOGGLE,
             KEY_RESTRICTIONS_PENDING,
+            DISALLOW_BIOMETRIC,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}
