@@ -98,7 +98,8 @@ public final class MediaMetricsManagerService extends SystemService {
         private String getSessionIdInternal(int userId) {
             byte[] byteId = new byte[16]; // 128 bits
             mSecureRandom.nextBytes(byteId);
-            String id = Base64.encodeToString(byteId, Base64.DEFAULT);
+            String id = Base64.encodeToString(
+                    byteId, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
             return id;
         }
 

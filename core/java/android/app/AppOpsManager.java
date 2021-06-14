@@ -3105,22 +3105,9 @@ public class AppOpsManager {
          */
         public boolean isRecordAudioRestrictionExcept;
 
-        /**
-         * Is attribution tag not null and not contained in the package attributions
-         */
-        public boolean isAttributionTagNotFound = false;
-
         public RestrictionBypass(boolean isPrivileged, boolean isRecordAudioRestrictionExcept) {
             this.isPrivileged = isPrivileged;
             this.isRecordAudioRestrictionExcept = isRecordAudioRestrictionExcept;
-        }
-
-        public void setIsAttributionTagNotFound(boolean isAttributionTagNotFound) {
-            this.isAttributionTagNotFound = isAttributionTagNotFound;
-        }
-
-        public boolean getIsAttributionTagNotFound() {
-            return this.isAttributionTagNotFound;
         }
 
         public static RestrictionBypass UNRESTRICTED = new RestrictionBypass(true, true);
