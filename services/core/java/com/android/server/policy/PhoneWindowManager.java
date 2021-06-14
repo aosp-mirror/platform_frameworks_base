@@ -1181,6 +1181,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (FactoryTest.isLongPressOnPowerOffEnabled()) {
             return LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
         }
+
+        // If the config indicates the assistant behavior but the device isn't yet provisioned, show
+        // global actions instead.
+        if (mLongPressOnPowerBehavior == LONG_PRESS_POWER_ASSISTANT && !isDeviceProvisioned()) {
+            return LONG_PRESS_POWER_GLOBAL_ACTIONS;
+        }
+
         return mLongPressOnPowerBehavior;
     }
 
