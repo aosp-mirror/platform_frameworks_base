@@ -556,6 +556,49 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void disableClipQsScrimWithoutStateTransition_updatesTintAndAlpha() {
+        mScrimController.setClipsQsScrim(true);
+        mScrimController.transitionTo(ScrimState.BOUNCER);
+
+        mScrimController.setClipsQsScrim(false);
+
+        finishAnimationsImmediately();
+        // Front scrim should be transparent
+        // Back scrim should be visible without tint
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, OPAQUE));
+        assertScrimTinted(Map.of(
+                mScrimInFront, false,
+                mScrimBehind, false,
+                mNotificationsScrim, false
+        ));
+    }
+
+    @Test
+    public void enableClipQsScrimWithoutStateTransition_updatesTintAndAlpha() {
+        mScrimController.setClipsQsScrim(false);
+        mScrimController.transitionTo(ScrimState.BOUNCER);
+
+        mScrimController.setClipsQsScrim(true);
+
+        finishAnimationsImmediately();
+        // Front scrim should be transparent
+        // Back scrim should be clipping QS
+        // Notif scrim should be visible without tint
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, OPAQUE,
+                mScrimBehind, OPAQUE));
+        assertScrimTinted(Map.of(
+                mScrimInFront, false,
+                mScrimBehind, true,
+                mNotificationsScrim, false
+        ));
+    }
+
+    @Test
     public void transitionToBouncer() {
         mScrimController.transitionTo(ScrimState.BOUNCER_SCRIMMED);
         finishAnimationsImmediately();
