@@ -47,7 +47,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * Responsible for handling app's ARC count based on events, ensuring ARCs are credited when
  * appropriate, and reclaiming ARCs at the right times. The IRS deals with the high level details
- * while the {@link Teller} deals with the nitty-gritty details.
+ * while the {@link Agent} deals with the nitty-gritty details.
  *
  * Note on locking: Any function with the suffix 'Locked' needs to lock on {@link #mLock}.
  *
@@ -63,6 +63,9 @@ public class InternalResourceService extends SystemService {
     private final Handler mHandler;
     private final BatteryManagerInternal mBatteryManagerInternal;
     private final PackageManager mPackageManager;
+
+    private final CompleteEconomicPolicy mCompleteEconomicPolicy;
+    private final Agent mAgent;
 
     private final CopyOnWriteArraySet<BalanceChangeListener> mBalanceChangeListeners =
             new CopyOnWriteArraySet<>();
@@ -147,6 +150,8 @@ public class InternalResourceService extends SystemService {
         mHandler = new IrsHandler(TareHandlerThread.get().getLooper());
         mBatteryManagerInternal = LocalServices.getService(BatteryManagerInternal.class);
         mPackageManager = context.getPackageManager();
+        mCompleteEconomicPolicy = new CompleteEconomicPolicy(this);
+        mAgent = new Agent(this, mCompleteEconomicPolicy);
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_LEVEL_CHANGED);
@@ -169,6 +174,22 @@ public class InternalResourceService extends SystemService {
 
     }
 
+    @Override
+    public void onBootPhase(int phase) {
+        if (PHASE_SYSTEM_SERVICES_READY == phase) {
+            synchronized (mLock) {
+                mCurrentBatteryLevel = getCurrentBatteryLevel();
+                // TODO: base on if we have anything persisted
+                final boolean isFirstSetup = true;
+                if (isFirstSetup) {
+                    mHandler.post(this::setupEconomy);
+                } else {
+                    mIsSetup = true;
+                }
+            }
+        }
+    }
+
     @NonNull
     Object getLock() {
         return mLock;
@@ -179,6 +200,17 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             return mPkgCache;
         }
+    }
+
+    @GuardedBy("mLock")
+    long getMaxCirculationLocked() {
+        return mCurrentBatteryLevel * mCompleteEconomicPolicy.getMaxSatiatedCirculation() / 100;
+    }
+
+    @GuardedBy("mLock")
+    long getMinBalanceLocked(final int userId, @NonNull final String pkgName) {
+        return mCurrentBatteryLevel * mCompleteEconomicPolicy.getMinSatiatedBalance(userId, pkgName)
+                / 100;
     }
 
     @Nullable
@@ -200,6 +232,9 @@ public class InternalResourceService extends SystemService {
     void onBatteryLevelChanged() {
         synchronized (mLock) {
             final int newBatteryLevel = getCurrentBatteryLevel();
+            if (newBatteryLevel > mCurrentBatteryLevel) {
+                mAgent.distributeBasicIncomeLocked(mCurrentBatteryLevel);
+            }
             mCurrentBatteryLevel = newBatteryLevel;
         }
     }
@@ -219,6 +254,8 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             mPkgCache.add(packageInfo);
             mUidToPackageCache.add(uid, pkgName);
+            // TODO: only do this when the user first launches the app (app leaves stopped state)
+            mAgent.grantBirthrightLocked(userId, pkgName);
         }
     }
 
@@ -240,6 +277,7 @@ public class InternalResourceService extends SystemService {
                     break;
                 }
             }
+            mAgent.onPackageRemovedLocked(userId, pkgName);
         }
     }
 
@@ -249,6 +287,7 @@ public class InternalResourceService extends SystemService {
     void onUserAdded(final int userId) {
         synchronized (mLock) {
             loadInstalledPackageListLocked();
+            mAgent.grantBirthrightsLocked(userId);
         }
     }
 
@@ -265,6 +304,7 @@ public class InternalResourceService extends SystemService {
                 }
             }
             loadInstalledPackageListLocked();
+            mAgent.onUserRemovedLocked(userId, removedPkgs);
         }
     }
 
@@ -286,6 +326,7 @@ public class InternalResourceService extends SystemService {
     private void setupEconomy() {
         synchronized (mLock) {
             loadInstalledPackageListLocked();
+            mAgent.grantBirthrightsLocked();
             mIsSetup = true;
         }
     }
@@ -319,10 +360,12 @@ public class InternalResourceService extends SystemService {
 
         @Override
         public void registerBalanceChangeListener(@NonNull BalanceChangeListener listener) {
+            mBalanceChangeListeners.add(listener);
         }
 
         @Override
         public void unregisterBalanceChangeListener(@NonNull BalanceChangeListener listener) {
+            mBalanceChangeListeners.remove(listener);
         }
 
         @Override
