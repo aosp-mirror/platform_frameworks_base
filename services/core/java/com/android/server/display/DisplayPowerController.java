@@ -941,6 +941,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final boolean mustNotify;
         final int previousPolicy;
         boolean mustInitialize = false;
+        boolean shouldSaveBrightnessInfo = true;
         int brightnessAdjustmentFlags = 0;
         mBrightnessReasonTemp.set(null);
         synchronized (mLock) {
@@ -1071,6 +1072,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (state == Display.STATE_OFF) {
             brightnessState = PowerManager.BRIGHTNESS_OFF_FLOAT;
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_SCREEN_OFF);
+            shouldSaveBrightnessInfo = false;
         }
 
         // Always use the VR brightness when in the VR state.
@@ -1197,6 +1199,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 && Display.isDozeState(state)) {
             brightnessState = mScreenBrightnessDozeConfig;
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);
+            shouldSaveBrightnessInfo = false;
         }
 
         // Apply manual brightness.
@@ -1213,7 +1216,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // Save out the brightness info now that the brightness state for this iteration has been
         // finalized and before we send out notifications about the brightness changing.
-        saveBrightnessInfo(brightnessState);
+        if (shouldSaveBrightnessInfo) {
+            saveBrightnessInfo(brightnessState);
+
+        }
 
         if (updateScreenBrightnessSetting) {
             // Tell the rest of the system about the new brightness in case we had to change it
