@@ -3594,11 +3594,6 @@ public class NotificationPanelViewController extends PanelViewController {
      * security view of the bouncer.
      */
     public void onBouncerPreHideAnimation() {
-        mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
-                mBarState,
-                true /* keyguardFadingAway */,
-                false /* goingToFullShade */,
-                mBarState);
         if (mKeyguardQsUserSwitchController != null) {
             mKeyguardQsUserSwitchController.setKeyguardQsUserSwitchVisibility(
                     mBarState,

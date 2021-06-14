@@ -1655,7 +1655,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
      * Hide the keyguard and let {@code runner} handle the animation.
      *
      * This method should typically be called after {@link ViewMediatorCallback#keyguardDonePending}
-     * was called, when we are ready to hide the keyguard.
+     * was called, when we are ready to hide the keyguard. It will do nothing if we were not
+     * expecting the keyguard to go away when called.
      */
     public void hideWithAnimation(IRemoteAnimationRunner runner) {
         if (!mKeyguardDonePending) {
@@ -2022,6 +2023,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             }
 
             mHiding = false;
+            mKeyguardExitAnimationRunner = null;
             mWakeAndUnlocking = false;
             mPendingLock = false;
             setShowingLocked(true);
@@ -2157,6 +2159,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 return;
             }
             mHiding = false;
+            IRemoteAnimationRunner runner = mKeyguardExitAnimationRunner;
+            mKeyguardExitAnimationRunner = null;
 
             if (mWakeAndUnlocking && mDrawnCallback != null) {
 
@@ -2177,9 +2181,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             LatencyTracker.getInstance(mContext)
                     .onActionEnd(LatencyTracker.ACTION_LOCKSCREEN_UNLOCK);
 
-            IRemoteAnimationRunner runner = mKeyguardExitAnimationRunner;
-            mKeyguardExitAnimationRunner = null;
-
             if (KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation && runner != null
                     && finishedCallback != null) {
                 // Wrap finishedCallback to clean up the keyguard state once the animation is done.
@@ -2187,7 +2188,11 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                         new IRemoteAnimationFinishedCallback() {
                             @Override
                             public void onAnimationFinished() throws RemoteException {
-                                finishedCallback.onAnimationFinished();
+                                try {
+                                    finishedCallback.onAnimationFinished();
+                                } catch (RemoteException e) {
+                                    Slog.w(TAG, "Failed to call onAnimationFinished", e);
+                                }
                                 onKeyguardExitFinished();
                                 mKeyguardViewControllerLazy.get().hide(0 /* startTime */,
                                         0 /* fadeoutDuration */);
