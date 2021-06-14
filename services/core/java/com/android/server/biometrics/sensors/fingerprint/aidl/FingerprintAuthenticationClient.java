@@ -70,6 +70,12 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         mUdfpsOverlayController = udfpsOverlayController;
     }
 
+    @NonNull
+    @Override
+    protected Callback wrapCallbackForStart(@NonNull Callback callback) {
+        return new CompositeCallback(createALSCallback(), callback);
+    }
+
     @Override
     public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
