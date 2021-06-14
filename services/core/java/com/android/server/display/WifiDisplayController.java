@@ -550,6 +550,11 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
     private void disconnect() {
         mDesiredDevice = null;
+        mWifiP2pManager = null;
+        if (null != mWifiP2pChannel) {
+            mWifiP2pChannel.close();
+            mWifiP2pChannel = null;
+        }
         updateConnection();
     }
 
