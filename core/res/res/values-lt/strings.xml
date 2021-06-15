@@ -1498,6 +1498,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Programai leidžiama pateikti užklausą dėl paketų ištrynimo."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"prašyti nepaisyti akumuliatoriaus optimizavimo nustatymų"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Programai leidžiama prašyti leidimo nepaisyti tai programai skirto akumuliatoriaus optimizavimo nustatymų."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Bakstelėkite du kartus, kad valdytumėte mastelio keitimą"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Nepavyko pridėti."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Pradėti"</string>
@@ -2215,7 +2219,7 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Pokalbis"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Grupės pokalbis"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Asmeninė"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Asmeninis"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Darbo"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Asmeninė peržiūra"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Darbo peržiūra"</string>
