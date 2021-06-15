@@ -119,7 +119,7 @@ public final class CompatChanges {
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(overrides);
         try {
-            platformCompat.setOverridesOnReleaseBuilds(config, packageName);
+            platformCompat.putOverridesOnReleaseBuilds(config, packageName);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

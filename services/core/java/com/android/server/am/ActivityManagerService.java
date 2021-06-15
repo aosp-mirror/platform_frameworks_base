@@ -5996,13 +5996,23 @@ public class ActivityManagerService extends IActivityManager.Stub
     public final ContentProviderHolder getContentProvider(
             IApplicationThread caller, String callingPackage, String name, int userId,
             boolean stable) {
-        return mCpHelper.getContentProvider(caller, callingPackage, name, userId, stable);
+        traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "getContentProvider: ", name);
+        try {
+            return mCpHelper.getContentProvider(caller, callingPackage, name, userId, stable);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     @Override
     public ContentProviderHolder getContentProviderExternal(
             String name, int userId, IBinder token, String tag) {
-        return mCpHelper.getContentProviderExternal(name, userId, token, tag);
+        traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "getContentProviderExternal: ", name);
+        try {
+            return mCpHelper.getContentProviderExternal(name, userId, token, tag);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     /**
@@ -6017,18 +6027,57 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Deprecated
     @Override
     public void removeContentProviderExternal(String name, IBinder token) {
-        removeContentProviderExternalAsUser(name, token, UserHandle.getCallingUserId());
+        traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "removeContentProviderExternal: ", name);
+        try {
+            removeContentProviderExternalAsUser(name, token, UserHandle.getCallingUserId());
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     @Override
     public void removeContentProviderExternalAsUser(String name, IBinder token, int userId) {
-        mCpHelper.removeContentProviderExternalAsUser(name, token, userId);
+        traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "removeContentProviderExternalAsUser: ", name);
+        try {
+            mCpHelper.removeContentProviderExternalAsUser(name, token, userId);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     @Override
     public final void publishContentProviders(IApplicationThread caller,
             List<ContentProviderHolder> providers) {
-        mCpHelper.publishContentProviders(caller, providers);
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            final int maxLength = 256;
+            final StringBuilder sb = new StringBuilder(maxLength);
+            sb.append("publishContentProviders: ");
+            if (providers != null) {
+                boolean first = true;
+                for (int i = 0, size = providers.size(); i < size; i++) {
+                    final ContentProviderHolder holder = providers.get(i);
+                    if (holder != null && holder.info != null && holder.info.authority != null) {
+                        final int len = holder.info.authority.length();
+                        if (sb.length() + len > maxLength) {
+                            sb.append("[[TRUNCATED]]");
+                            break;
+                        }
+                        if (!first) {
+                            sb.append(';');
+                        } else {
+                            first = false;
+                        }
+                        sb.append(holder.info.authority);
+                    }
+                }
+            }
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, sb.toString());
+        }
+        try {
+            mCpHelper.publishContentProviders(caller, providers);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     @Override
@@ -7075,53 +7124,60 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (Binder.getCallingUid() != SYSTEM_UID) {
             throw new SecurityException("killPids only available to the system");
         }
-        String reason = (pReason == null) ? "Unknown" : pReason;
+        final String reason = (pReason == null) ? "Unknown" : pReason;
         // XXX Note: don't acquire main activity lock here, because the window
         // manager calls in with its locks held.
 
         boolean killed = false;
-        synchronized (this) {
-            synchronized (mProcLock) {
-                synchronized (mPidsSelfLocked) {
-                    int worstType = 0;
-                    for (int i = 0; i < pids.length; i++) {
-                        ProcessRecord proc = mPidsSelfLocked.get(pids[i]);
-                        if (proc != null) {
-                            int type = proc.mState.getSetAdj();
-                            if (type > worstType) {
-                                worstType = type;
-                            }
-                        }
-                    }
-
-                    // If the worst oom_adj is somewhere in the cached proc LRU range,
-                    // then constrain it so we will kill all cached procs.
-                    if (worstType < ProcessList.CACHED_APP_MAX_ADJ
-                            && worstType > ProcessList.CACHED_APP_MIN_ADJ) {
-                        worstType = ProcessList.CACHED_APP_MIN_ADJ;
-                    }
-
-                    // If this is not a secure call, don't let it kill processes that
-                    // are important.
-                    if (!secure && worstType < ProcessList.SERVICE_ADJ) {
-                        worstType = ProcessList.SERVICE_ADJ;
-                    }
-
-                    Slog.w(TAG, "Killing processes " + reason + " at adjustment " + worstType);
-                    for (int i = 0; i < pids.length; i++) {
-                        ProcessRecord proc = mPidsSelfLocked.get(pids[i]);
-                        if (proc == null) {
-                            continue;
-                        }
-                        int adj = proc.mState.getSetAdj();
-                        if (adj >= worstType && !proc.isKilledByAm()) {
-                            proc.killLocked(reason, ApplicationExitInfo.REASON_OTHER,
-                                    ApplicationExitInfo.SUBREASON_KILL_PID, true);
-                            killed = true;
-                        }
+        final ArrayList<ProcessRecord> killCandidates = new ArrayList<>();
+        synchronized (mPidsSelfLocked) {
+            int worstType = 0;
+            for (int i = 0; i < pids.length; i++) {
+                ProcessRecord proc = mPidsSelfLocked.get(pids[i]);
+                if (proc != null) {
+                    int type = proc.mState.getSetAdj();
+                    if (type > worstType) {
+                        worstType = type;
                     }
                 }
             }
+
+            // If the worst oom_adj is somewhere in the cached proc LRU range,
+            // then constrain it so we will kill all cached procs.
+            if (worstType < ProcessList.CACHED_APP_MAX_ADJ
+                    && worstType > ProcessList.CACHED_APP_MIN_ADJ) {
+                worstType = ProcessList.CACHED_APP_MIN_ADJ;
+            }
+
+            // If this is not a secure call, don't let it kill processes that
+            // are important.
+            if (!secure && worstType < ProcessList.SERVICE_ADJ) {
+                worstType = ProcessList.SERVICE_ADJ;
+            }
+
+            Slog.w(TAG, "Killing processes " + reason + " at adjustment " + worstType);
+            for (int i = 0; i < pids.length; i++) {
+                ProcessRecord proc = mPidsSelfLocked.get(pids[i]);
+                if (proc == null) {
+                    continue;
+                }
+                int adj = proc.mState.getSetAdj();
+                if (adj >= worstType && !proc.isKilledByAm()) {
+                    killCandidates.add(proc);
+                    killed = true;
+                }
+            }
+        }
+        if (!killCandidates.isEmpty()) {
+            mHandler.post(() -> {
+                synchronized (ActivityManagerService.this) {
+                    for (int i = 0, size = killCandidates.size(); i < size; i++) {
+                        killCandidates.get(i).killLocked(reason,
+                                ApplicationExitInfo.REASON_OTHER,
+                                ApplicationExitInfo.SUBREASON_KILL_PID, true);
+                    }
+                }
+            });
         }
         return killed;
     }
@@ -14260,7 +14316,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private boolean checkExcessivePowerUsageLPr(final long uptimeSince, boolean doCpuKills,
             final long cputimeUsed, final String processName, final String description,
             final int cpuLimit, final ProcessRecord app) {
-        if (DEBUG_POWER) {
+        if (DEBUG_POWER && (uptimeSince > 0)) {
             StringBuilder sb = new StringBuilder(128);
             sb.append("CPU for ");
             sb.append(description);
@@ -15300,6 +15356,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public int[] getStartedUserIds() {
+            return mUserController.getStartedUserArray();
+        }
+
+        @Override
         public void setPendingIntentAllowBgActivityStarts(IIntentSender target,
                 IBinder allowlistToken, int flags) {
             if (!(target instanceof PendingIntentRecord)) {
@@ -16178,6 +16239,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         public PendingIntent getPendingIntentActivityAsApp(
                 int requestCode, @NonNull Intent intent, int flags, Bundle options,
                 String ownerPkg, int ownerUid) {
+            return getPendingIntentActivityAsApp(requestCode, new Intent[] { intent }, flags,
+                    options, ownerPkg, ownerUid);
+        }
+
+        @Override
+        public PendingIntent getPendingIntentActivityAsApp(
+                int requestCode, @NonNull Intent[] intents, int flags, Bundle options,
+                String ownerPkg, int ownerUid) {
             // system callers must explicitly set mutability state
             final boolean flagImmutableSet = (flags & PendingIntent.FLAG_IMMUTABLE) != 0;
             final boolean flagMutableSet = (flags & PendingIntent.FLAG_MUTABLE) != 0;
@@ -16187,15 +16256,21 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final Context context = ActivityManagerService.this.mContext;
-            String resolvedType = intent.resolveTypeIfNeeded(context.getContentResolver());
-            intent.migrateExtraStreamToClipData(context);
-            intent.prepareToLeaveProcess(context);
+            final ContentResolver resolver = context.getContentResolver();
+            final int len = intents.length;
+            final String[] resolvedTypes = new String[len];
+            for (int i = 0; i < len; i++) {
+                final Intent intent = intents[i];
+                resolvedTypes[i] = intent.resolveTypeIfNeeded(resolver);
+                intent.migrateExtraStreamToClipData(context);
+                intent.prepareToLeaveProcess(context);
+            }
             IIntentSender target =
                     ActivityManagerService.this.getIntentSenderWithFeatureAsApp(
                             INTENT_SENDER_ACTIVITY, ownerPkg,
                             context.getAttributionTag(), null, null, requestCode,
-                            new Intent[] { intent },
-                            resolvedType != null ? new String[] { resolvedType } : null,
+                            intents,
+                            resolvedTypes,
                             flags, options, UserHandle.getUserId(ownerUid), ownerUid);
             return target != null ? new PendingIntent(target) : null;
         }
@@ -17092,6 +17167,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized (this) {
             SystemClock.sleep(durationMs);
+        }
+    }
+
+    static void traceBegin(long traceTag, String methodName, String subInfo) {
+        if (Trace.isTagEnabled(traceTag)) {
+            Trace.traceBegin(traceTag, methodName + subInfo);
         }
     }
 }

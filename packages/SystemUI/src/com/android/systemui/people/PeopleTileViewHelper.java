@@ -282,13 +282,18 @@ public class PeopleTileViewHelper {
     }
 
     private void setMaxLines(RemoteViews views, boolean showSender) {
-        int nameHeight = getLineHeightFromResource(R.dimen.name_text_size_for_content);
+        int textSizeResId;
+        int nameHeight;
+        if (mLayoutSize == LAYOUT_LARGE) {
+            textSizeResId = R.dimen.content_text_size_for_large;
+            nameHeight = getLineHeightFromResource(R.dimen.name_text_size_for_large_content);
+        } else {
+            textSizeResId = R.dimen.content_text_size_for_medium;
+            nameHeight = getLineHeightFromResource(R.dimen.name_text_size_for_medium_content);
+        }
         boolean isStatusLayout =
                 views.getLayoutId() == R.layout.people_tile_large_with_status_content;
         int contentHeight = getContentHeightForLayout(nameHeight, isStatusLayout);
-        int textSizeResId = mLayoutSize == LAYOUT_LARGE
-                ? R.dimen.content_text_size_for_large
-                : R.dimen.content_text_size_for_medium;
         int lineHeight = getLineHeightFromResource(textSizeResId);
         int maxAdaptiveLines = Math.floorDiv(contentHeight, lineHeight);
         int maxLines = Math.max(MIN_CONTENT_MAX_LINES, maxAdaptiveLines);
@@ -348,8 +353,8 @@ public class PeopleTileViewHelper {
         if (mWidth >= getSizeInDp(R.dimen.required_width_for_medium)) {
             int spaceAvailableForPadding =
                     mHeight - (getSizeInDp(R.dimen.avatar_size_for_medium)
-                            + getLineHeightFromResource(
-                            R.dimen.name_text_size_for_content));
+                            + 4 + getLineHeightFromResource(
+                            R.dimen.name_text_size_for_medium_content));
             if (DEBUG) {
                 Log.d(TAG, "Medium view for mWidth: " + mWidth + " mHeight: " + mHeight
                         + " with padding space: " + spaceAvailableForPadding);
@@ -558,9 +563,6 @@ public class PeopleTileViewHelper {
         }
         views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
         views.setTextViewText(R.id.text_content, statusText);
-        if (mLayoutSize == LAYOUT_LARGE) {
-            views.setInt(R.id.content, "setGravity", Gravity.BOTTOM);
-        }
 
         Icon statusIcon = status.getIcon();
         if (statusIcon != null) {
@@ -570,6 +572,7 @@ public class PeopleTileViewHelper {
             // Show 1-line subtext on large layout with status images.
             if (mLayoutSize == LAYOUT_LARGE) {
                 if (DEBUG) Log.d(TAG, "Remove name for large");
+                views.setInt(R.id.content, "setGravity", Gravity.BOTTOM);
                 views.setViewVisibility(R.id.name, View.GONE);
                 views.setColorAttr(R.id.text_content, "setTextColor",
                         android.R.attr.textColorPrimary);
@@ -830,6 +833,8 @@ public class PeopleTileViewHelper {
             views.setViewPadding(R.id.name, 0, 0, 0,
                     mContext.getResources().getDimensionPixelSize(
                             R.dimen.below_name_text_padding));
+            // All large layouts besides missed calls & statuses with images, have gravity top.
+            views.setInt(R.id.content, "setGravity", Gravity.TOP);
         }
 
         // For all layouts except Missed Calls, ensure predefined icon is regular sized.

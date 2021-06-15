@@ -83,9 +83,13 @@ public class KeyguardBouncer {
     private final Runnable mRemoveViewRunnable = this::removeView;
     private final KeyguardBypassController mKeyguardBypassController;
     private KeyguardHostViewController mKeyguardViewController;
+    private final List<KeyguardResetCallback> mResetCallbacks = new ArrayList<>();
     private final Runnable mResetRunnable = ()-> {
         if (mKeyguardViewController != null) {
             mKeyguardViewController.resetSecurityContainer();
+            for (KeyguardResetCallback callback : mResetCallbacks) {
+                callback.onKeyguardReset();
+            }
         }
     };
 
@@ -284,8 +288,17 @@ public class KeyguardBouncer {
 
     public void showWithDismissAction(OnDismissAction r, Runnable cancelAction) {
         ensureView();
-        mKeyguardViewController.setOnDismissAction(r, cancelAction);
+        setDismissAction(r, cancelAction);
         show(false /* resetSecuritySelection */);
+    }
+
+    /**
+     * Set the actions to run when the keyguard is dismissed or when the dismiss is cancelled. Those
+     * actions will still be run even if this bouncer is not shown, for instance when authenticating
+     * with an alternate authenticator like the UDFPS.
+     */
+    public void setDismissAction(OnDismissAction r, Runnable cancelAction) {
+        mKeyguardViewController.setOnDismissAction(r, cancelAction);
     }
 
     public void hide(boolean destroyView) {
@@ -573,6 +586,14 @@ public class KeyguardBouncer {
         }
     }
 
+    public void addKeyguardResetCallback(KeyguardResetCallback callback) {
+        mResetCallbacks.add(callback);
+    }
+
+    public void removeKeyguardResetCallback(KeyguardResetCallback callback) {
+        mResetCallbacks.remove(callback);
+    }
+
     public interface BouncerExpansionCallback {
         void onFullyShown();
         void onStartingToHide();
@@ -591,6 +612,10 @@ public class KeyguardBouncer {
          * view's visibility can be {@link View.INVISIBLE}.
          */
         default void onVisibilityChanged(boolean isVisible) {}
+    }
+
+    public interface KeyguardResetCallback {
+        void onKeyguardReset();
     }
 
     /** Create a {@link KeyguardBouncer} once a container and bouncer callback are available. */

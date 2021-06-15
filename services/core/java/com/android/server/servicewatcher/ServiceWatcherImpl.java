@@ -135,6 +135,7 @@ class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements 
 
         if (forceRebind || !Objects.equals(mServiceConnection.getBoundServiceInfo(),
                 newBoundServiceInfo)) {
+            Log.i(TAG, "[" + mTag + "] chose new implementation " + newBoundServiceInfo);
             MyServiceConnection oldServiceConnection = mServiceConnection;
             MyServiceConnection newServiceConnection = new MyServiceConnection(newBoundServiceInfo);
             mServiceConnection = newServiceConnection;
@@ -196,7 +197,9 @@ class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements 
                 return;
             }
 
-            Log.i(TAG, "[" + mTag + "] binding to " + mBoundServiceInfo);
+            if (D) {
+                Log.d(TAG, "[" + mTag + "] binding to " + mBoundServiceInfo);
+            }
 
             Intent bindIntent = new Intent(mBoundServiceInfo.getAction()).setComponent(
                     mBoundServiceInfo.getComponentName());
@@ -255,9 +258,7 @@ class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements 
             Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
             Preconditions.checkState(mBinder == null);
 
-            if (D) {
-                Log.d(TAG, "[" + mTag + "] connected to " + component.toShortString());
-            }
+            Log.i(TAG, "[" + mTag + "] connected to " + component.toShortString());
 
             mBinder = binder;
 
@@ -280,9 +281,7 @@ class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements 
                 return;
             }
 
-            if (D) {
-                Log.d(TAG, "[" + mTag + "] disconnected from " + mBoundServiceInfo);
-            }
+            Log.i(TAG, "[" + mTag + "] disconnected from " + mBoundServiceInfo);
 
             mBinder = null;
             if (mServiceListener != null) {
@@ -294,9 +293,11 @@ class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements 
         public final void onBindingDied(ComponentName component) {
             Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
-            Log.i(TAG, "[" + mTag + "] " + mBoundServiceInfo + " died");
+            Log.w(TAG, "[" + mTag + "] " + mBoundServiceInfo + " died");
 
-            onServiceChanged(true);
+            // introduce a small delay to prevent spamming binding over and over, since the likely
+            // cause of a binding dying is some package event that may take time to recover from
+            mHandler.postDelayed(() -> onServiceChanged(true), 500);
         }
 
         @Override

@@ -18,12 +18,14 @@ package com.android.keyguard
 
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.graphics.Typeface
 import android.testing.AndroidTestingRunner
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -139,5 +141,42 @@ class TextAnimatorTest : SysuiTestCase() {
         // Verify animationEnd callback has been invoked and removed.
         verify(animationEndCallback).run()
         verify(valueAnimator).removeListener(eq(captor.value))
+    }
+
+    @Test
+    fun testCacheTypeface() {
+        val layout = makeLayout("Hello, World", PAINT)
+        val valueAnimator = mock(ValueAnimator::class.java)
+        val textInterpolator = mock(TextInterpolator::class.java)
+        val paint = TextPaint().apply {
+            typeface = Typeface.createFromFile("/system/fonts/Roboto-Regular.ttf")
+        }
+        `when`(textInterpolator.targetPaint).thenReturn(paint)
+
+        val textAnimator = TextAnimator(layout, {}).apply {
+            this.textInterpolator = textInterpolator
+            this.animator = valueAnimator
+        }
+
+        textAnimator.setTextStyle(
+                weight = 400,
+                animate = true
+        )
+
+        val prevTypeface = paint.typeface
+
+        textAnimator.setTextStyle(
+                weight = 700,
+                animate = true
+        )
+
+        assertThat(paint.typeface).isNotSameInstanceAs(prevTypeface)
+
+        textAnimator.setTextStyle(
+                weight = 400,
+                animate = true
+        )
+
+        assertThat(paint.typeface).isSameInstanceAs(prevTypeface)
     }
 }

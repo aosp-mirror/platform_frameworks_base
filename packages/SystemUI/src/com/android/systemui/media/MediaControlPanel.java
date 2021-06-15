@@ -36,6 +36,7 @@ import android.media.session.PlaybackState;
 import android.text.Layout;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -45,7 +46,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.constraintlayout.widget.ConstraintSet;
 
-import com.android.settingslib.Utils;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -542,7 +542,10 @@ public class MediaControlPanel {
                 mContext.getString(R.string.controls_media_smartspace_rec_description, appLabel));
 
         List<ImageView> mediaCoverItems = mRecommendationViewHolder.getMediaCoverItems();
+        List<ViewGroup> mediaCoverContainers = mRecommendationViewHolder.getMediaCoverContainers();
         List<Integer> mediaCoverItemsResIds = mRecommendationViewHolder.getMediaCoverItemsResIds();
+        List<Integer> mediaCoverContainersResIds =
+                mRecommendationViewHolder.getMediaCoverContainersResIds();
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
         ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         int mediaRecommendationNum = Math.min(mediaRecommendationList.size(),
@@ -561,7 +564,8 @@ public class MediaControlPanel {
             mediaCoverImageView.setImageIcon(recommendation.getIcon());
 
             // Set up the media item's click listener if applicable.
-            setSmartspaceRecItemOnClickListener(mediaCoverImageView, recommendation);
+            ViewGroup mediaCoverContainer = mediaCoverContainers.get(uiComponentIndex);
+            setSmartspaceRecItemOnClickListener(mediaCoverContainer, recommendation);
 
             // Set up the accessibility label for the media item.
             String artistName = recommendation.getExtras()
@@ -581,12 +585,18 @@ public class MediaControlPanel {
             if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
                 setVisibleAndAlpha(collapsedSet,
                         mediaCoverItemsResIds.get(uiComponentIndex), true);
+                setVisibleAndAlpha(collapsedSet,
+                        mediaCoverContainersResIds.get(uiComponentIndex), true);
             } else {
                 setVisibleAndAlpha(collapsedSet,
                         mediaCoverItemsResIds.get(uiComponentIndex), false);
+                setVisibleAndAlpha(collapsedSet,
+                        mediaCoverContainersResIds.get(uiComponentIndex), false);
             }
             setVisibleAndAlpha(expandedSet,
                     mediaCoverItemsResIds.get(uiComponentIndex), true);
+            setVisibleAndAlpha(expandedSet,
+                    mediaCoverContainersResIds.get(uiComponentIndex), true);
 
             uiComponentIndex++;
         }

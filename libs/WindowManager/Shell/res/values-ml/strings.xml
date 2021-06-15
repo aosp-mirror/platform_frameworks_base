@@ -68,9 +68,9 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"മനസ്സിലായി"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"അടുത്തിടെയുള്ള ബബിളുകൾ ഒന്നുമില്ല"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"അടുത്തിടെയുള്ള ബബിളുകൾ, ഡിസ്മിസ് ചെയ്ത ബബിളുകൾ എന്നിവ ഇവിടെ ദൃശ്യമാവും"</string>
-    <string name="notification_bubble_title" msgid="6082910224488253378">"ബബ്ൾ"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"ബബിൾ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"മാനേജ് ചെയ്യുക"</string>
-    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ബബ്ൾ ഡിസ്മിസ് ചെയ്തു."</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ബബിൾ ഡിസ്മിസ് ചെയ്തു."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"ഈ ആപ്പ് റീസ്‌റ്റാർട്ട് ചെയ്‌ത് പൂർണ്ണ സ്ക്രീനിലേക്ക് മാറാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="got_it" msgid="4428750913636945527">"മനസ്സിലായി"</string>
 </resources>

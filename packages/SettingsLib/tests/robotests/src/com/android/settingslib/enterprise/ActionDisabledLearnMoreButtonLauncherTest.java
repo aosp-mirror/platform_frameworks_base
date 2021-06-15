@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -62,6 +63,9 @@ public final class ActionDisabledLearnMoreButtonLauncherTest {
     private Context mContext;
 
     @Mock
+    private DevicePolicyManager mDevicePolicyManager;
+
+    @Mock
     private UserManager mUserManager;
 
     @Spy
@@ -77,6 +81,7 @@ public final class ActionDisabledLearnMoreButtonLauncherTest {
     public void setUp() {
         when(mContext.getUserId()).thenReturn(CONTEXT_USER_ID);
         when(mUserManager.getUserHandle()).thenReturn(CONTEXT_USER_ID);
+        when(mContext.getSystemService(DevicePolicyManager.class)).thenReturn(mDevicePolicyManager);
         when(mContext.getSystemService(UserManager.class)).thenReturn(mUserManager);
     }
 
@@ -95,8 +100,9 @@ public final class ActionDisabledLearnMoreButtonLauncherTest {
     }
 
     @Test
-    public void testSetupLearnMoreButtonToShowAdminPolicies_differentProfileGroup() {
+    public void testSetupLearnMoreButtonToShowAdminPolicies_differentProfileGroup_noDeviceOwner() {
         mockDifferentProfileGroup();
+        mockEnforcementAdminIsNotDeviceOwner();
 
         mLauncher.setupLearnMoreButtonToShowAdminPolicies(mContext, ENFORCEMENT_ADMIN_USER_ID,
                 ENFORCED_ADMIN);
@@ -105,8 +111,34 @@ public final class ActionDisabledLearnMoreButtonLauncherTest {
     }
 
     @Test
-    public void testSetupLearnMoreButtonToShowAdminPolicies_sameProfileGroup_noComponent() {
+    public void testSetupLearnMoreButtonToShowAdminPolicies_differentGroup_noSystemDeviceOwner() {
+        mockDifferentProfileGroup();
+        mockDeviceOwner(ENFORCEMENT_ADMIN_USER_ID);
+
+        mLauncher.setupLearnMoreButtonToShowAdminPolicies(mContext, ENFORCEMENT_ADMIN_USER_ID,
+                ENFORCED_ADMIN);
+
+        verify(mLauncher, never()).setLearnMoreButton(any());
+    }
+
+    @Test
+    public void testSetupLearnMoreButtonToShowAdminPolicies_differentGroup_systemDeviceOwner() {
+        mockDifferentProfileGroup();
+        mockDeviceOwner(UserHandle.USER_SYSTEM);
+
+        mLauncher.setupLearnMoreButtonToShowAdminPolicies(mContext, UserHandle.USER_SYSTEM,
+                ENFORCED_ADMIN_WITHOUT_COMPONENT);
+        tapLearnMore();
+
+        verify(mLauncher, never()).launchShowAdminPolicies(any(), any(), any());
+        verify(mLauncher).launchShowAdminSettings(mContext);
+        verifyFinishSelf();
+    }
+
+    @Test
+    public void testSetupLearnMoreButtonToShowAdminPolicies_sameProfileGroup_noDeviceOwner() {
         mockSameProfileGroup();
+        mockEnforcementAdminIsNotDeviceOwner();
 
         mLauncher.setupLearnMoreButtonToShowAdminPolicies(mContext, ENFORCEMENT_ADMIN_USER_ID,
                 ENFORCED_ADMIN_WITHOUT_COMPONENT);
@@ -118,8 +150,23 @@ public final class ActionDisabledLearnMoreButtonLauncherTest {
     }
 
     @Test
-    public void testSetupLearnMoreButtonToShowAdminPolicies_sameProfileGroup_withComponent() {
+    public void testSetupLearnMoreButtonToShowAdminPolicies_sameProfileGroup_noSystemDeviceOwner() {
         mockSameProfileGroup();
+        mockDeviceOwner(ENFORCEMENT_ADMIN_USER_ID);
+
+        mLauncher.setupLearnMoreButtonToShowAdminPolicies(mContext, ENFORCEMENT_ADMIN_USER_ID,
+                ENFORCED_ADMIN_WITHOUT_COMPONENT);
+        tapLearnMore();
+
+        verify(mLauncher, never()).launchShowAdminPolicies(any(), any(), any());
+        verify(mLauncher).launchShowAdminSettings(mContext);
+        verifyFinishSelf();
+    }
+
+    @Test
+    public void testSetupLearnMoreButtonToShowAdminPolicies_showsLearnMoreButton_withComponent() {
+        mockSameProfileGroup();
+        mockEnforcementAdminIsNotDeviceOwner();
 
         mLauncher.setupLearnMoreButtonToShowAdminPolicies(mContext, ENFORCEMENT_ADMIN_USER_ID,
                 ENFORCED_ADMIN);
@@ -162,6 +209,14 @@ public final class ActionDisabledLearnMoreButtonLauncherTest {
     private void mockSameProfileGroup() {
         when(mUserManager.isSameProfileGroup(ENFORCEMENT_ADMIN_USER_ID, CONTEXT_USER_ID))
                 .thenReturn(true);
+    }
+
+    private void mockEnforcementAdminIsNotDeviceOwner() {
+        when(mDevicePolicyManager.getDeviceOwnerUserId()).thenReturn(ENFORCEMENT_ADMIN_USER_ID + 1);
+    }
+
+    private void mockDeviceOwner(int userId) {
+        when(mDevicePolicyManager.getDeviceOwnerUserId()).thenReturn(userId);
     }
 
     private void tapLearnMore() {

@@ -1236,7 +1236,7 @@
 
     <!--  Blur radius on status bar window and power menu  -->
     <dimen name="min_window_blur_radius">1px</dimen>
-    <dimen name="max_window_blur_radius">150px</dimen>
+    <dimen name="max_window_blur_radius">72px</dimen>
 
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>
@@ -1282,7 +1282,7 @@
     <dimen name="qs_media_action_spacing">4dp</dimen>
     <dimen name="qs_media_action_top">8dp</dimen>
     <dimen name="qs_seamless_height">24dp</dimen>
-    <dimen name="qs_seamless_icon_size">16dp</dimen>
+    <dimen name="qs_seamless_icon_size">12dp</dimen>
     <dimen name="qs_seamless_fallback_icon_size">@dimen/qs_seamless_icon_size</dimen>
     <dimen name="qs_seamless_fallback_margin">20dp</dimen>
     <dimen name="qs_footer_horizontal_margin">22dp</dimen>
@@ -1292,7 +1292,7 @@
     <dimen name="qs_media_disabled_seekbar_vertical_padding">36dp</dimen>
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
-    <dimen name="qs_aa_media_rec_album_size_collapsed">66dp</dimen>
+    <dimen name="qs_aa_media_rec_album_size_collapsed">72dp</dimen>
     <dimen name="qs_aa_media_rec_album_size_expanded">80dp</dimen>
     <dimen name="qs_aa_media_rec_album_margin">8dp</dimen>
     <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>
@@ -1456,7 +1456,8 @@
     <dimen name="max_people_avatar_size_for_large_content">64dp</dimen>
     <dimen name="max_people_avatar_size">108dp</dimen>
     <dimen name="name_text_size_for_small">14sp</dimen>
-    <dimen name="name_text_size_for_content">12sp</dimen>
+    <dimen name="name_text_size_for_medium_content">12sp</dimen>
+    <dimen name="name_text_size_for_large_content">14sp</dimen>
     <dimen name="empty_name_text_size_for_medium">12sp</dimen>
     <dimen name="max_name_text_size_for_medium">14sp</dimen>
     <dimen name="medium_height_for_max_name_text_size">104dp</dimen>

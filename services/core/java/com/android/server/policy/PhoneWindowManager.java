@@ -1181,6 +1181,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (FactoryTest.isLongPressOnPowerOffEnabled()) {
             return LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
         }
+
+        // If the config indicates the assistant behavior but the device isn't yet provisioned, show
+        // global actions instead.
+        if (mLongPressOnPowerBehavior == LONG_PRESS_POWER_ASSISTANT && !isDeviceProvisioned()) {
+            return LONG_PRESS_POWER_GLOBAL_ACTIONS;
+        }
+
         return mLongPressOnPowerBehavior;
     }
 
@@ -3044,7 +3051,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int handleStartTransitionForKeyguardLw(boolean keyguardGoingAway, long duration) {
         final int res = applyKeyguardOcclusionChange();
         if (res != 0) return res;
-        if (!WindowManagerService.sEnableRemoteKeyguardAnimation && keyguardGoingAway) {
+        if (!WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation && keyguardGoingAway) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
             startKeyguardExitAnimation(SystemClock.uptimeMillis(), duration);
         }

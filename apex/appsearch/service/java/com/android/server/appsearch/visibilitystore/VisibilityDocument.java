@@ -16,10 +16,9 @@
 package com.android.server.appsearch.visibilitystore;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
-
-import androidx.annotation.Nullable;
 
 /** Holds the visibility settings that apply to a package's databases. */
 class VisibilityDocument extends GenericDocument {

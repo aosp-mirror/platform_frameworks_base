@@ -17,7 +17,6 @@
 package com.android.keyguard;
 
 import android.graphics.Rect;
-import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
@@ -77,7 +76,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mDozeParameters = dozeParameters;
         mKeyguardStateController = keyguardStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
-                dozeParameters, unlockedScreenOffAnimationController);
+                dozeParameters, unlockedScreenOffAnimationController, /* animateYPos= */ true);
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mSmartspaceTransitionController = smartspaceTransitionController;
 
@@ -97,8 +96,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     @Override
     public void onInit() {
         mKeyguardClockSwitchController.init();
-        mView.setEnableMarquee(mKeyguardUpdateMonitor.isDeviceInteractive());
-        mView.updateLogoutView(shouldShowLogout());
     }
 
     @Override
@@ -140,20 +137,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      */
     public boolean hasCustomClock() {
         return mKeyguardClockSwitchController.hasCustomClock();
-    }
-
-    /**
-     * Get the height of the logout button.
-     */
-    public int getLogoutButtonHeight() {
-        return mView.getLogoutButtonHeight();
-    }
-
-    /**
-     * Get the height of the owner information view.
-     */
-    public int getOwnerInfoHeight() {
-        return mView.getOwnerInfoHeight();
     }
 
     /**
@@ -204,16 +187,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
-     * Returns the preferred Y position of the clock.
-     *
-     * @param totalHeight The height available to position the clock.
-     * @return Y position of clock.
-     */
-    public int getClockPreferredY(int totalHeight) {
-        return mKeyguardClockSwitchController.getClockPreferredY(totalHeight);
-    }
-
-    /**
      * Get the height of the keyguard status view.
      */
     public int getHeight() {
@@ -254,11 +227,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mKeyguardClockSwitchController.refresh();
     }
 
-    private boolean shouldShowLogout() {
-        return mKeyguardUpdateMonitor.isLogoutEnabled()
-                && KeyguardUpdateMonitor.getCurrentUser() != UserHandle.USER_SYSTEM;
-    }
-
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
         @Override
@@ -269,7 +237,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         @Override
         public void onDensityOrFontScaleChanged() {
             mKeyguardClockSwitchController.onDensityOrFontScaleChanged();
-            mView.onDensityOrFontScaleChanged();
         }
     };
 
@@ -277,8 +244,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         @Override
         public void onLockScreenModeChanged(int mode) {
             mKeyguardSliceViewController.updateLockScreenMode(mode);
-            mView.setCanShowOwnerInfo(false);
-            mView.updateLogoutView(false);
         }
 
         @Override
@@ -301,31 +266,12 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             if (showing) {
                 if (DEBUG) Slog.v(TAG, "refresh statusview showing:" + showing);
                 refreshTime();
-                mView.updateOwnerInfo();
-                mView.updateLogoutView(shouldShowLogout());
             }
-        }
-
-        @Override
-        public void onStartedWakingUp() {
-            mView.setEnableMarquee(true);
-        }
-
-        @Override
-        public void onFinishedGoingToSleep(int why) {
-            mView.setEnableMarquee(false);
         }
 
         @Override
         public void onUserSwitchComplete(int userId) {
             mKeyguardClockSwitchController.refreshFormat();
-            mView.updateOwnerInfo();
-            mView.updateLogoutView(shouldShowLogout());
-        }
-
-        @Override
-        public void onLogoutEnabledChanged() {
-            mView.updateLogoutView(shouldShowLogout());
         }
     };
 

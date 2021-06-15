@@ -1458,6 +1458,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ಪ್ಯಾಕೇಜ್‌ಗಳನ್ನು ಅಳಿಸುವುದಕ್ಕಾಗಿ ವಿನಂತಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ಬ್ಯಾಟರಿ ಆಪ್ಟಿಮೈಸೇಶನ್‌ಗಳನ್ನು ಕಡೆಗಣಿಸಲು ಕೇಳಿ"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಬ್ಯಾಟರಿ ಆಪ್ಟಿಮೈಸೇಶನ್‌ಗಳನ್ನು ಕಡೆಗಣಿಸುವುದಕ್ಕೆ ಅನುಮತಿಯನ್ನು ಕೇಳಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ಝೂಮ್‌ ನಿಯಂತ್ರಿಸಲು ಎರಡು ಬಾರಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ವಿಜೆಟ್ ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ಹೋಗು"</string>
@@ -1866,8 +1870,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಪ್‌ಡೇಟ್ ಮಾಡಲ್ಪಟ್ಟಿದೆ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಅಳಿಸಿದ್ದಾರೆ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ಸರಿ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ಬ್ಯಾಟರಿ ಸೇವರ್, ಡಾರ್ಕ್ ಥೀಮ್ ಅನ್ನು ಆನ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಚಟುವಟಿಕೆ, ಕೆಲವು ವಿಷುವಲ್ ಎಫೆಕ್ಟ್‌ಗಳು, ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳು ಮತ್ತು ಇತರ ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕಗಳನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ ಅಥವಾ ಆಫ್ ಮಾಡುತ್ತದೆ."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"ಬ್ಯಾಟರಿ ಸೇವರ್ ಡಾರ್ಕ್ ಥೀಮ್ ಅನ್ನು ಆನ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಚಟುವಟಿಕೆ, ಕೆಲವು ವಿಷುವಲ್ ಎಫೆಕ್ಟ್‌ಗಳು, ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳು ಮತ್ತು ಇತರ ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕಗಳನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ ಅಥವಾ ಆಫ್ ಮಾಡುತ್ತದೆ."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ಬ್ಯಾಟರಿ ಸೇವರ್, ಡಾರ್ಕ್ ಥೀಮ್ ಅನ್ನು ಆನ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಚಟುವಟಿಕೆ, ಕೆಲವು ವಿಷುವಲ್ ಎಫೆಕ್ಟ್‌ಗಳು, ಕೆಲವು ಫೀಚರ್‌ಗಳು ಮತ್ತು ಇತರ ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕಗಳನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ ಅಥವಾ ಆಫ್ ಮಾಡುತ್ತದೆ."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"ಬ್ಯಾಟರಿ ಸೇವರ್ ಡಾರ್ಕ್ ಥೀಮ್ ಅನ್ನು ಆನ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಚಟುವಟಿಕೆ, ಕೆಲವು ವಿಷುವಲ್ ಎಫೆಕ್ಟ್‌ಗಳು, ಕೆಲವು ಫೀಚರ್‌ಗಳು ಮತ್ತು ಇತರ ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕಗಳನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ ಅಥವಾ ಆಫ್ ಮಾಡುತ್ತದೆ."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ಡೇಟಾ ಬಳಕೆ ಕಡಿಮೆ ಮಾಡುವ ನಿಟ್ಟಿನಲ್ಲಿ, ಡೇಟಾ ಸೇವರ್ ಕೆಲವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಡೇಟಾ ಕಳುಹಿಸುವುದನ್ನು ಅಥವಾ ಸ್ವೀಕರಿಸುವುದನ್ನು ತಡೆಯುತ್ತದೆ. ನೀವು ಪ್ರಸ್ತುತ ಬಳಸುತ್ತಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು ಆದರೆ ಪದೇ ಪದೇ ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ. ಇದರರ್ಥ, ಉದಾಹರಣೆಗೆ, ನೀವು ಅವುಗಳನ್ನು ಟ್ಯಾಪ್ ಮಾಡುವವರೆಗೆ ಆ ಚಿತ್ರಗಳು ಕಾಣಿಸಿಕೊಳ್ಳುವುದಿಲ್ಲ."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ಡೇಟಾ ಸೇವರ್ ಆನ್ ಮಾಡಬೇಕೇ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ಆನ್‌ ಮಾಡಿ"</string>
@@ -1988,7 +1992,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> ಗೆ ಪಿನ್ ಮಾಡಿ"</string>
     <string name="unpin_target" msgid="3963318576590204447">"ಅನ್‌ಪಿನ್"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g> ಅನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಿ"</string>
-    <string name="app_info" msgid="6113278084877079851">"ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ"</string>
+    <string name="app_info" msgid="6113278084877079851">"ಆ್ಯಪ್ ಮಾಹಿತಿ"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"ಡೆಮೋ ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"ಸಾಧನ ಮರುಹೊಂದಿಸಲಾಗುತ್ತಿದೆ..."</string>

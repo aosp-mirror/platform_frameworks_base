@@ -666,6 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Дабыл"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Әмиян"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Телефоныңызбен бұрынғыдан да жылдам әрі қауіпсіз сатып алу үшін параметрлерді орнатыңыз."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Барлығын көрсету"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Төлеу үшін құлыпты ашу"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Реттелмеген"</string>
@@ -741,9 +742,9 @@
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Күйі:&lt;/b&gt; маңыздылық деңгейі көтерілген"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Күйі:&lt;/b&gt; маңыздылық деңгейі төмендетілген"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті ретінде көрсетіледі."</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті ретінде көрсетіледі, қалқымалы анықтама ретінде шығады."</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті болып көрсетіледі, қалқыма хабар түрінде шығады."</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті ретінде көрсетіледі, \"Мазаламау\" режимін тоқтатады."</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті ретінде көрсетіледі, қалқымалы анықтама ретінде шығады, \"Мазаламау\" режимін тоқтатады."</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті болып көрсетіледі, қалқыма хабар түрінде шығады, Мазаламау режимін тоқтатады."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Параметрлер"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маңызды"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> әңгіме функцияларын қолдамайды."</string>
@@ -1084,7 +1085,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Жабу"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Жалғастыру"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Параметрлер"</string>
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> қолданбасында <xliff:g id="ARTIST_NAME">%2$s</xliff:g> орындайтын \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" әні ойнатылуда."</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Ойнату"</string>
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> қолданбасын ашу"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> қолданбасында <xliff:g id="ARTIST_NAME">%2$s</xliff:g> орындайтын \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" әнін ойнату"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> қолданбасында \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" әнін ойнату"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Өшірулі. Қолданба тексеріңіз."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Қате, әрекет қайталануда…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Табылмады"</string>

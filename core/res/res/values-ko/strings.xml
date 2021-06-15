@@ -1458,6 +1458,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"애플리케이션이 패키지 삭제를 요청하도록 허용합니다."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"배터리 최적화를 무시하도록 요청"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"앱에서 배터리 최적화를 무시할 수 있는 권한을 요청할 수 있도록 허용합니다."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"확대/축소하려면 두 번 탭하세요."</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"위젯을 추가할 수 없습니다."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"이동"</string>
@@ -2157,7 +2161,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"이 콘텐츠는 개인 앱을 통해 공유할 수 없습니다."</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"이 콘텐츠는 개인 앱으로 열 수 없습니다."</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"직장 프로필이 일시중지됨"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"탭하여 사용"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"탭하여 사용 설정"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"직장 앱 없음"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"개인 앱 없음"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"개인 프로필의 <xliff:g id="APP">%s</xliff:g>에서 여시겠습니까?"</string>

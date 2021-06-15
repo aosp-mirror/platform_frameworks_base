@@ -9808,22 +9808,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void notifyAppearedOrDisappearedForContentCaptureIfNeeded(boolean appeared) {
         AttachInfo ai = mAttachInfo;
-        // Skip it while the view is being laided out for the first time
+        // Skip it while the view is being laid out for the first time
         if (ai != null && !ai.mReadyForContentCaptureUpdates) return;
-
-        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW,
-                    "notifyContentCapture(" + appeared + ") for " + getClass().getSimpleName());
-        }
-        try {
-            notifyAppearedOrDisappearedForContentCaptureIfNeededNoTrace(appeared);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-        }
-    }
-
-    private void notifyAppearedOrDisappearedForContentCaptureIfNeededNoTrace(boolean appeared) {
-        AttachInfo ai = mAttachInfo;
 
         // First check if context has client, so it saves a service lookup when it doesn't
         if (mContext.getContentCaptureOptions() == null) return;
@@ -30940,6 +30926,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void onViewTranslationResponse(@NonNull ViewTranslationResponse response) {
         mViewTranslationResponse = response;
+    }
+
+    /**
+     * Clears the ViewTranslationResponse stored by the default implementation of {@link
+     * #onViewTranslationResponse}.
+     *
+     * @hide
+     */
+    public void clearViewTranslationResponse() {
+        mViewTranslationResponse = null;
     }
 
     /**

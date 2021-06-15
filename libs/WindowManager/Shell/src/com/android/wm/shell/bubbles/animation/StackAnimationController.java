@@ -124,9 +124,6 @@ public class StackAnimationController extends
      */
     private Rect mAnimatingToBounds = new Rect();
 
-    /** Initial starting location for the stack. */
-    @Nullable private BubbleStackView.RelativeStackPosition mStackStartPosition;
-
     /** Whether or not the stack's start position has been set. */
     private boolean mStackMovedToStartPosition = false;
 
@@ -530,6 +527,11 @@ public class StackAnimationController extends
     /** Save the current IME height so that we know where the stack bounds should be. */
     public void setImeHeight(int imeHeight) {
         mImeHeight = imeHeight;
+    }
+
+    /** Returns the current IME height that the stack is offset by. */
+    public float getImeHeight() {
+        return mImeHeight;
     }
 
     /**

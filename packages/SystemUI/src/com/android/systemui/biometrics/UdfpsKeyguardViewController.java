@@ -355,10 +355,13 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
                 @Override
                 public void onBouncerVisibilityChanged() {
-                    mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
+                    mIsBouncerVisible = mKeyguardViewManager.isBouncerShowing();
                     if (!mIsBouncerVisible) {
                         mInputBouncerHiddenAmount = 1f;
+                    } else if (mKeyguardViewManager.isBouncerShowing()) {
+                        mInputBouncerHiddenAmount = 0f;
                     }
+                    updateAlpha();
                     updatePauseAuth();
                 }
 

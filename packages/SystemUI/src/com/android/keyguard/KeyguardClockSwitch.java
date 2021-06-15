@@ -64,9 +64,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private float mDarkAmount;
 
     /**
-     * Boolean value indicating if notifications are visible on lock screen.
+     * Boolean value indicating if notifications are visible on lock screen. Use null to signify
+     * it is uninitialized.
      */
-    private boolean mHasVisibleNotifications = true;
+    private Boolean mHasVisibleNotifications = null;
 
     private AnimatorSet mClockInAnim = null;
     private AnimatorSet mClockOutAnim = null;
@@ -263,7 +264,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * the smaller version.
      */
     boolean willSwitchToLargeClock(boolean hasVisibleNotifications) {
-        if (hasVisibleNotifications == mHasVisibleNotifications) {
+        if (mHasVisibleNotifications != null
+                && hasVisibleNotifications == mHasVisibleNotifications) {
             return false;
         }
         boolean useLargeClock = !hasVisibleNotifications;
@@ -283,20 +285,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public float getTextSize() {
         return mClockView.getTextSize();
-    }
-
-    /**
-     * Returns the preferred Y position of the clock.
-     *
-     * @param totalHeight Height of the parent container.
-     * @return preferred Y position.
-     */
-    int getPreferredY(int totalHeight) {
-        if (mClockPlugin != null) {
-            return mClockPlugin.getPreferredY(totalHeight);
-        } else {
-            return totalHeight / 2;
-        }
     }
 
     /**

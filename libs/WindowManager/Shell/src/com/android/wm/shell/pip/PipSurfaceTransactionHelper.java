@@ -149,10 +149,10 @@ public class PipSurfaceTransactionHelper {
             // Shrink bounds (expand insets) in destination orientation.
             if (clockwise) {
                 positionX -= insets.top * scale;
-                positionY -= insets.left * scale;
+                positionY += insets.left * scale;
             } else {
                 positionX += insets.top * scale;
-                positionY += insets.left * scale;
+                positionY -= insets.left * scale;
             }
         }
         mTmpTransform.setScale(scale, scale);
@@ -182,6 +182,18 @@ public class PipSurfaceTransactionHelper {
     public PipSurfaceTransactionHelper round(SurfaceControl.Transaction tx, SurfaceControl leash,
             boolean applyCornerRadius) {
         tx.setCornerRadius(leash, applyCornerRadius ? mCornerRadius : 0);
+        return this;
+    }
+
+    /**
+     * Operates the round corner radius on a given transaction and leash, scaled by bounds
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
+     */
+    public PipSurfaceTransactionHelper round(SurfaceControl.Transaction tx, SurfaceControl leash,
+            Rect fromBounds, Rect toBounds) {
+        final float scale = (float) (Math.hypot(fromBounds.width(), fromBounds.height())
+                / Math.hypot(toBounds.width(), toBounds.height()));
+        tx.setCornerRadius(leash, mCornerRadius * scale);
         return this;
     }
 

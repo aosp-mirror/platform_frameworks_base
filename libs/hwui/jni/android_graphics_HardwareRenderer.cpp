@@ -23,6 +23,8 @@
 #include <Picture.h>
 #include <Properties.h>
 #include <RootRenderNode.h>
+#include <SkImagePriv.h>
+#include <SkSerialProcs.h>
 #include <dlfcn.h>
 #include <gui/TraceUtils.h>
 #include <inttypes.h>
@@ -35,6 +37,7 @@
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
 #include <renderthread/RenderThread.h>
+#include <src/image/SkImage_Base.h>
 #include <thread/CommonPool.h>
 #include <utils/Color.h>
 #include <utils/RefBase.h>
@@ -497,6 +500,108 @@ private:
     jobject mObject;
 };
 
+using TextureMap = std::unordered_map<uint32_t, sk_sp<SkImage>>;
+
+struct PictureCaptureState {
+    // Each frame we move from the active map to the previous map, essentially an LRU of 1 frame
+    // This avoids repeated readbacks of the same image, but avoids artificially extending the
+    // lifetime of any particular image.
+    TextureMap mActiveMap;
+    TextureMap mPreviousActiveMap;
+};
+
+// TODO: This & Multi-SKP & Single-SKP should all be de-duped into
+// a single "make a SkPicture serailizable-safe" utility somewhere
+class PictureWrapper : public Picture {
+public:
+    PictureWrapper(sk_sp<SkPicture>&& src, const std::shared_ptr<PictureCaptureState>& state)
+            : Picture(), mPicture(std::move(src)) {
+        ATRACE_NAME("Preparing SKP for capture");
+        // Move the active to previous active
+        state->mPreviousActiveMap = std::move(state->mActiveMap);
+        state->mActiveMap.clear();
+        SkSerialProcs tempProc;
+        tempProc.fImageCtx = state.get();
+        tempProc.fImageProc = collectNonTextureImagesProc;
+        auto ns = SkNullWStream();
+        mPicture->serialize(&ns, &tempProc);
+        state->mPreviousActiveMap.clear();
+
+        // Now snapshot a copy of the active map so this PictureWrapper becomes self-sufficient
+        mTextureMap = state->mActiveMap;
+    }
+
+    static sk_sp<SkImage> imageForCache(SkImage* img) {
+        const SkBitmap* bitmap = as_IB(img)->onPeekBitmap();
+        // This is a mutable bitmap pretending to be an immutable SkImage. As we're going to
+        // actually cross thread boundaries here, make a copy so it's immutable proper
+        if (bitmap && !bitmap->isImmutable()) {
+            ATRACE_NAME("Copying mutable bitmap");
+            return SkImage::MakeFromBitmap(*bitmap);
+        }
+        if (img->isTextureBacked()) {
+            ATRACE_NAME("Readback of texture image");
+            return img->makeNonTextureImage();
+        }
+        SkPixmap pm;
+        if (img->isLazyGenerated() && !img->peekPixels(&pm)) {
+            ATRACE_NAME("Readback of HW bitmap");
+            // This is a hardware bitmap probably
+            SkBitmap bm;
+            if (!bm.tryAllocPixels(img->imageInfo())) {
+                // Failed to allocate, just see what happens
+                return sk_ref_sp(img);
+            }
+            if (RenderProxy::copyImageInto(sk_ref_sp(img), &bm)) {
+                // Failed to readback
+                return sk_ref_sp(img);
+            }
+            bm.setImmutable();
+            return SkMakeImageFromRasterBitmap(bm, kNever_SkCopyPixelsMode);
+        }
+        return sk_ref_sp(img);
+    }
+
+    static sk_sp<SkData> collectNonTextureImagesProc(SkImage* img, void* ctx) {
+        PictureCaptureState* context = reinterpret_cast<PictureCaptureState*>(ctx);
+        const uint32_t originalId = img->uniqueID();
+        auto it = context->mActiveMap.find(originalId);
+        if (it == context->mActiveMap.end()) {
+            auto pit = context->mPreviousActiveMap.find(originalId);
+            if (pit == context->mPreviousActiveMap.end()) {
+                context->mActiveMap[originalId] = imageForCache(img);
+            } else {
+                context->mActiveMap[originalId] = pit->second;
+            }
+        }
+        return SkData::MakeEmpty();
+    }
+
+    static sk_sp<SkData> serializeImage(SkImage* img, void* ctx) {
+        PictureWrapper* context = reinterpret_cast<PictureWrapper*>(ctx);
+        const uint32_t id = img->uniqueID();
+        auto iter = context->mTextureMap.find(id);
+        if (iter != context->mTextureMap.end()) {
+            img = iter->second.get();
+        }
+        return img->encodeToData();
+    }
+
+    void serialize(SkWStream* stream) const override {
+        SkSerialProcs procs;
+        procs.fImageProc = serializeImage;
+        procs.fImageCtx = const_cast<PictureWrapper*>(this);
+        procs.fTypefaceProc = [](SkTypeface* tf, void* ctx) {
+            return tf->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
+        };
+        mPicture->serialize(stream, &procs);
+    }
+
+private:
+    sk_sp<SkPicture> mPicture;
+    TextureMap mTextureMap;
+};
+
 static void android_view_ThreadedRenderer_setPictureCapturedCallbackJNI(JNIEnv* env,
         jobject clazz, jlong proxyPtr, jobject pictureCallback) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -507,9 +612,11 @@ static void android_view_ThreadedRenderer_setPictureCapturedCallbackJNI(JNIEnv* 
         LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
         auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(vm,
                 env->NewGlobalRef(pictureCallback));
-        proxy->setPictureCapturedCallback([globalCallbackRef](sk_sp<SkPicture>&& picture) {
+        auto pictureState = std::make_shared<PictureCaptureState>();
+        proxy->setPictureCapturedCallback([globalCallbackRef,
+                                           pictureState](sk_sp<SkPicture>&& picture) {
             JNIEnv* env = getenv(globalCallbackRef->vm());
-            Picture* wrapper = new Picture{std::move(picture)};
+            Picture* wrapper = new PictureWrapper{std::move(picture), pictureState};
             env->CallStaticVoidMethod(gHardwareRenderer.clazz,
                     gHardwareRenderer.invokePictureCapturedCallback,
                     static_cast<jlong>(reinterpret_cast<intptr_t>(wrapper)),

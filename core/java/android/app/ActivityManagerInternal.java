@@ -254,6 +254,9 @@ public abstract class ActivityManagerInternal {
     /** Returns the current user id. */
     public abstract int getCurrentUserId();
 
+    /** Returns the currently started user ids. */
+    public abstract int[] getStartedUserIds();
+
     /** Returns true if the user is running. */
     public abstract boolean isUserRunning(@UserIdInt int userId, int flags);
 
@@ -601,6 +604,14 @@ public abstract class ActivityManagerInternal {
      */
     public abstract PendingIntent getPendingIntentActivityAsApp(
             int requestCode, @NonNull Intent intent, int flags, Bundle options,
+            String ownerPkgName, int ownerUid);
+
+    /**
+     * Effectively PendingIntent.getActivityForUser(), but the PendingIntent is
+     * owned by the given uid rather than by the caller (i.e. the system).
+     */
+    public abstract PendingIntent getPendingIntentActivityAsApp(
+            int requestCode, @NonNull Intent[] intents, int flags, Bundle options,
             String ownerPkgName, int ownerUid);
 
     /**

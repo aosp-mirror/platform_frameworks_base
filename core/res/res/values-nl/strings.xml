@@ -1458,6 +1458,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Hiermee kan een app verwijdering van pakketten aanvragen."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"vragen om batterijoptimalisatie te negeren"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Hiermee kan een app rechten vragen om batterijoptimalisatie voor die app te negeren."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Tik twee keer voor zoomregeling"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Kan widget niet toevoegen."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Ga"</string>
@@ -1868,7 +1872,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Met Batterijbesparing wordt het donkere thema aangezet en worden achtergrondactiviteit, bepaalde visuele effecten, bepaalde functies en sommige netwerkverbindingen beperkt of uitgezet."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Met Batterijbesparing wordt het donkere thema aangezet en worden achtergrondactiviteit, bepaalde visuele effecten, bepaalde functies en sommige netwerkverbindingen beperkt of uitgezet."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens sturen of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet weergegeven totdat je erop tikt."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens sturen of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet getoond totdat je erop tikt."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Databesparing aanzetten?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aanzetten"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

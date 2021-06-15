@@ -1458,6 +1458,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"აპლიკაციას შეეძლება პაკეტების წაშლის მოთხოვნა."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ბატარეის ოპტიმიზაციის იგნორირების მოთხოვნა"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"საშუალებას მისცემს აპს, მოითხოვოს მასთან დაკავშირებული ბატარეის ოპტიმიზაციის იგნორირების ნებართვა."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"მასშტაბის ცვლილებისთვის შეეხეთ ორჯერ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ვერ დაემატა ვიჯეტი."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"გადასვლა"</string>

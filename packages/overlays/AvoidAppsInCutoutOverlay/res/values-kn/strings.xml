@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="1946296620328354129">"ಮರೆಮಾಡಿ (ಕಟ್‌ಔಟ್ ಪ್ರದೇಶದಲ್ಲಿ ಆ್ಯಪ್‌ಗಳನ್ನು ತೋರಿಸದಂತೆ ತಡೆಯಿರಿ)"</string>
+    <string name="display_cutout_emulation_overlay" msgid="3814493834951357513">"ಕಟೌಟ್ ಪ್ರದೇಶದ ಕೆಳಗಿನ ಆ್ಯಪ್‌ಗಳನ್ನು ರೆಂಡರ್ ಮಾಡಿ"</string>
 </resources>

@@ -158,7 +158,8 @@ AStatsManager_PullAtomCallbackReturn SurfaceFlingerPuller::parseLayerInfoPull(
                                       atom.total_jank_frames_sf_prediction_error(),
                                       atom.total_jank_frames_app_buffer_stuffing(),
                                       atom.display_refresh_rate_bucket(), atom.render_rate_bucket(),
-                                      frameRateVote.value(), appDeadlineMisses.value());
+                                      frameRateVote.value(), appDeadlineMisses.value(),
+                                      atom.game_mode());
     }
     return AStatsManager_PULL_SUCCESS;
 }

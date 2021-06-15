@@ -435,7 +435,8 @@ public class PipAnimationController {
                         SurfaceControl.Transaction tx, float fraction) {
                     final float alpha = getStartValue() * (1 - fraction) + getEndValue() * fraction;
                     setCurrentValue(alpha);
-                    getSurfaceTransactionHelper().alpha(tx, leash, alpha);
+                    getSurfaceTransactionHelper().alpha(tx, leash, alpha)
+                            .round(tx, leash, shouldApplyCornerRadius());
                     tx.apply();
                 }
 
@@ -526,16 +527,22 @@ public class PipAnimationController {
                     float angle = (1.0f - fraction) * startingAngle;
                     setCurrentValue(bounds);
                     if (inScaleTransition() || sourceHintRect == null) {
-
                         if (isOutPipDirection) {
                             getSurfaceTransactionHelper().scale(tx, leash, end, bounds);
                         } else {
-                            getSurfaceTransactionHelper().scale(tx, leash, base, bounds, angle);
+                            getSurfaceTransactionHelper().scale(tx, leash, base, bounds, angle)
+                                    .round(tx, leash, base, bounds);
                         }
                     } else {
                         final Rect insets = computeInsets(fraction);
                         getSurfaceTransactionHelper().scaleAndCrop(tx, leash,
                                 initialSourceValue, bounds, insets);
+                        if (shouldApplyCornerRadius()) {
+                            final Rect destinationBounds = new Rect(bounds);
+                            destinationBounds.inset(insets);
+                            getSurfaceTransactionHelper().round(tx, leash,
+                                    initialContainerRect, destinationBounds);
+                        }
                     }
                     if (!handlePipTransaction(leash, tx, bounds)) {
                         tx.apply();
@@ -564,9 +571,11 @@ public class PipAnimationController {
                         x = fraction * (end.left - start.left) + start.left;
                         y = fraction * (end.bottom - start.top) + start.top;
                     }
-                    getSurfaceTransactionHelper().rotateAndScaleWithCrop(tx, leash,
-                            initialContainerRect, bounds, insets, degree, x, y, isOutPipDirection,
-                            rotationDelta == ROTATION_270 /* clockwise */);
+                    getSurfaceTransactionHelper()
+                            .rotateAndScaleWithCrop(tx, leash, initialContainerRect, bounds,
+                                    insets, degree, x, y, isOutPipDirection,
+                                    rotationDelta == ROTATION_270 /* clockwise */)
+                            .round(tx, leash, initialContainerRect, bounds);
                     tx.apply();
                 }
 

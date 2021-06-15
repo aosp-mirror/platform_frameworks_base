@@ -184,6 +184,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mTaskOrganizer.applyTransaction(wct);
                 // The final task bounds will be applied by onFixedRotationFinished so that all
                 // coordinates are in new rotation.
+                mSurfaceTransactionHelper.round(tx, mLeash, isInPip());
                 mDeferredAnimEndTransaction = tx;
                 return;
             }
@@ -627,8 +628,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final Rect destinationBounds = mPipBoundsState.getBounds();
         final SurfaceControl swipeToHomeOverlay = mSwipePipToHomeOverlay;
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
-        mSurfaceTransactionHelper.resetScale(tx, mLeash, destinationBounds);
-        mSurfaceTransactionHelper.crop(tx, mLeash, destinationBounds);
+        mSurfaceTransactionHelper
+                .resetScale(tx, mLeash, destinationBounds)
+                .crop(tx, mLeash, destinationBounds)
+                .round(tx, mLeash, isInPip());
         // The animation is finished in the Launcher and here we directly apply the final touch.
         applyEnterPipSyncTransaction(destinationBounds, () -> {
             // Ensure menu's settled in its final bounds first.
@@ -830,10 +833,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void onMovementBoundsChanged(Rect destinationBoundsOut, boolean fromRotation,
             boolean fromImeAdjustment, boolean fromShelfAdjustment,
             WindowContainerTransaction wct) {
-        // note that this can be called when swiping pip to home is happening. For instance,
-        // swiping an app in landscape to portrait home. skip this entirely if that's the case.
-        if (mInSwipePipToHomeTransition && fromRotation) {
-            if (DEBUG) Log.d(TAG, "skip onMovementBoundsChanged due to swipe-pip-to-home");
+        // note that this can be called when swipe-to-home or fixed-rotation is happening.
+        // Skip this entirely if that's the case.
+        if ((mInSwipePipToHomeTransition || mWaitForFixedRotation) && fromRotation) {
+            if (DEBUG) {
+                Log.d(TAG, "Skip onMovementBoundsChanged on rotation change"
+                        + " mInSwipePipToHomeTransition=" + mInSwipePipToHomeTransition
+                        + " mWaitForFixedRotation=" + mWaitForFixedRotation);
+            }
             return;
         }
         final PipAnimationController.PipTransitionAnimator animator =
@@ -1041,7 +1048,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
-        mSurfaceTransactionHelper.scale(tx, mLeash, startBounds, toBounds, degrees);
+        mSurfaceTransactionHelper
+                .scale(tx, mLeash, startBounds, toBounds, degrees)
+                .round(tx, mLeash, startBounds, toBounds);
         if (mPipMenuController.isMenuVisible()) {
             mPipMenuController.movePipMenu(mLeash, tx, toBounds);
         } else {
@@ -1216,6 +1225,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // Just a resize in PIP
             taskBounds = destinationBounds;
         }
+        mSurfaceTransactionHelper.round(tx, mLeash, isInPip());
 
         wct.setBounds(mToken, taskBounds);
         wct.setBoundsChangeTransaction(mToken, tx);

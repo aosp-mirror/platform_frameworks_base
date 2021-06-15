@@ -42,6 +42,7 @@ import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.animation.UniqueObjectHostView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +97,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     private BrightnessMirrorController mBrightnessMirrorController;
     private LinearLayout mHorizontalLinearLayout;
-    private LinearLayout mHorizontalContentContainer;
+    protected LinearLayout mHorizontalContentContainer;
 
     // Only used with media
     private QSTileLayout mHorizontalTileLayout;
@@ -131,7 +132,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
             mHorizontalContentContainer = new RemeasuringLinearLayout(mContext);
             mHorizontalContentContainer.setOrientation(LinearLayout.VERTICAL);
-            mHorizontalContentContainer.setClipChildren(false);
+            mHorizontalContentContainer.setClipChildren(true);
             mHorizontalContentContainer.setClipToPadding(false);
 
             mHorizontalTileLayout = createHorizontalTileLayout();
@@ -384,12 +385,17 @@ public class QSPanel extends LinearLayout implements Tunable {
     private void switchSecurityFooter() {
         if (mSecurityFooter != null) {
             if (mContext.getResources().getConfiguration().orientation
-                    == Configuration.ORIENTATION_LANDSCAPE && mHeaderContainer != null
-                    && !mSecurityFooter.getParent().equals(mHeaderContainer)) {
+                    == Configuration.ORIENTATION_LANDSCAPE && mHeaderContainer != null) {
                 // Adding the security view to the header, that enables us to avoid scrolling
                 switchToParent(mSecurityFooter, mHeaderContainer, 0);
             } else {
-                switchToParent(mSecurityFooter, this, -1);
+                // Where should this go? If there's media, right before it. Otherwise, at the end.
+                View mediaView = findViewByPredicate(v -> v instanceof UniqueObjectHostView);
+                int index = -1;
+                if (mediaView != null) {
+                    index = indexOfChild(mediaView);
+                }
+                switchToParent(mSecurityFooter, this, index);
             }
         }
     }
