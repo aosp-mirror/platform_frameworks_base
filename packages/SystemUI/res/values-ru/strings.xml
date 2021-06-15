@@ -92,14 +92,14 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обработка записи с экрана…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущее уведомление для записи видео с экрана"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Начать запись?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Во время записи система Android может получить доступ к конфиденциальной информации, которая видна на экране или воспроизводится на устройстве, в том числе к паролям, сведениям о платежах, фотографиям, сообщениям и аудиозаписям."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"В записи может появиться конфиденциальная информация, которая видна на экране или воспроизводится на устройстве, например пароли, сведения о платежах, фотографии, сообщения и аудиозаписи."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Записывать аудио"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Звук с устройства"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук с вашего устройства, например музыка, звонки и рингтоны"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Микрофон"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Звук с устройства и микрофон"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Начать"</string>
-    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Идет запись видео с экрана."</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Идет запись видео с экрана"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Идет запись видео с экрана и звука"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Показывать прикосновения к экрану"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Нажмите, чтобы остановить"</string>
@@ -716,10 +716,10 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Без звука"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"По умолчанию"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Всплывающая подсказка"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звука или вибрации"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звука и вибрации"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звука или вибрации, появляется в нижней части списка разговоров"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Звонок или вибрация в зависимости от настроек телефона"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Звонок или вибрация в зависимости от настроек телефона. Разговоры из приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" по умолчанию появляются в виде всплывающего чата."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Звонок или вибрация в зависимости от настроек телефона. Разговоры из приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" по умолчанию появляются в виде всплывающего чата"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Привлекает ваше внимание к контенту с помощью плавающего ярлыка"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Появляется в верхней части списка разговоров и как всплывающий чат, фото профиля показывается на заблок. экране"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
@@ -864,8 +864,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Код клавиши \"Вправо\""</string>
     <string name="left_icon" msgid="5036278531966897006">"Значок \"Влево\""</string>
     <string name="right_icon" msgid="1103955040645237425">"Значок \"Вправо\""</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Перетащите нужные элементы"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Чтобы изменить порядок элементов, перетащите их"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Чтобы добавить элементы, перетащите их."</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Чтобы изменить порядок элементов, перетащите их."</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Чтобы удалить, перетащите сюда"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Должно остаться не менее <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> элементов"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Изменить"</string>

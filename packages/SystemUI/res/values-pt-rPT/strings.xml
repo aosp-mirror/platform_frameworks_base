@@ -356,7 +356,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Aparelhos auditivos"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"A ativar..."</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Brilho"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotação automática"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotação auto."</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rodar o ecrã automaticamente"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"Modo <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Rotação bloqueada"</string>
@@ -380,7 +380,7 @@
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi ligado"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Não estão disponíveis redes Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"A ativar..."</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Transm. do ecrã"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Transm. ecrã"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Transmissão"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Dispositivo sem nome"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Pronto para transmitir"</string>
@@ -420,7 +420,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Ativada à(s) <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Até à(s) <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tema escuro"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Poupança de bateria"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Poup. bateria"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Ativ. ao pôr do sol"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Até ao amanhecer"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Ativado à(s) <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -428,7 +428,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"O NFC está desativado"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"O NFC está ativado"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Gravação de ecrã"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Gravação ecrã"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Parar"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositivo"</string>
@@ -821,7 +821,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Abrir as definições"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Auscultadores ligados"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Auscultadores com microfone integrado ligados"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Poupança de dados"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Poup. dados"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Poupança de dados ativada"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Poupança de dados desativada"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Ativado"</string>

@@ -999,7 +999,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Keď batéria klesne pod <xliff:g id="PERCENTAGE">%d</xliff:g> %%, automaticky sa aktivujte Šetrič batérie."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Nastavenia"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Dobre"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"V7pis haldy SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> používa zoznam <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikácie používajú zoznam <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
