@@ -357,7 +357,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Eshitish apparatlari"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Yoqilmoqda…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Yorqinlik"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Avtomatik burilish"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Avto-burilish"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Ekranning avtomatik burilishi"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> rejimi"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Aylanmaydigan qilingan"</string>
@@ -429,7 +429,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC o‘chiq"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC yoniq"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekranni yozib olish"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekran yozuvi"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Boshlash"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Toʻxtatish"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Qurilma"</string>

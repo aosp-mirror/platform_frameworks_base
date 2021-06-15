@@ -655,8 +655,8 @@
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"İş profili"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Uçak modu"</string>
-    <string name="add_tile" msgid="6239678623873086686">"Blok ekle"</string>
-    <string name="broadcast_tile" msgid="5224010633596487481">"Yayın Bloku"</string>
+    <string name="add_tile" msgid="6239678623873086686">"Kutu ekle"</string>
+    <string name="broadcast_tile" msgid="5224010633596487481">"Yayın Kutusu"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"<xliff:g id="WHEN">%1$s</xliff:g> olarak ayarlanmış bir sonraki alarmınızdan önce bu işlevi kapatmazsanız alarmı duymayacaksınız"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g> olarak ayarlanmış bir sonraki alarmınızı duymayacaksınız"</string>
     <string name="alarm_template" msgid="2234991538018805736">"saat: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -855,10 +855,10 @@
     <string name="right_keycode" msgid="2480715509844798438">"Sağ tuş kodu"</string>
     <string name="left_icon" msgid="5036278531966897006">"Sol simge"</string>
     <string name="right_icon" msgid="1103955040645237425">"Sağ simge"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Blok eklemek için basılı tutup sürükleyin"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Blokları yeniden düzenlemek için basılı tutun ve sürükleyin"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Kutu eklemek için basılı tutup sürükleyin"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Kutuları yeniden düzenlemek için basılı tutun ve sürükleyin"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Kaldırmak için buraya sürükleyin"</string>
-    <string name="drag_to_remove_disabled" msgid="933046987838658850">"En az <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> blok gerekiyor"</string>
+    <string name="drag_to_remove_disabled" msgid="933046987838658850">"En az <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> kutu gerekiyor"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Düzenle"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Saat"</string>
   <string-array name="clock_options">

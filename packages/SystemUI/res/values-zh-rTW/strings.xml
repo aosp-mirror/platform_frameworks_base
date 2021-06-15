@@ -76,7 +76,7 @@
     <string name="learn_more" msgid="4690632085667273811">"瞭解詳情"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"放大為全螢幕"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"擷取螢幕畫面"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"螢幕截圖"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"傳送了一張圖片"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"正在儲存螢幕截圖…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"正在儲存螢幕截圖…"</string>
@@ -712,7 +712,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"預設"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"泡泡"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"不震動或發出聲音"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不震動或發出聲音，並調整排序到其他對話下方"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不震動或發出聲音，並顯示在對話區的下方"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"根據手機的設定響鈴或震動"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能會根據手機的設定響鈴或震動。根據預設，來自「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會以對話框形式顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"利用浮動式捷徑快速存取這項內容。"</string>
@@ -856,7 +856,7 @@
     <string name="left_icon" msgid="5036278531966897006">"向左圖示"</string>
     <string name="right_icon" msgid="1103955040645237425">"向右圖示"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住並拖曳即可新增設定方塊"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住並拖曳即可重新排列圖塊"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住並拖曳即可重新排列設定方塊"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"拖曳到這裡即可移除"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"你至少必須要有 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 個設定方塊"</string>
     <string name="qs_edit" msgid="5583565172803472437">"編輯"</string>
