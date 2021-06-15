@@ -71,6 +71,13 @@ public interface AppStandbyInternal {
 
     long getTimeSinceLastJobRun(String packageName, int userId);
 
+    /**
+     * Returns the time (in milliseconds) since the app was last interacted with by the user.
+     * This can be larger than the current elapsedRealtime, in case it happened before boot or
+     * a really large value if the app was never interacted with.
+     */
+    long getTimeSinceLastUsedByUser(String packageName, int userId);
+
     void onUserRemoved(int userId);
 
     void addListener(AppIdleStateChangeListener listener);

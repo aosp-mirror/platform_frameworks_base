@@ -21,6 +21,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import static com.android.server.tare.EconomicPolicy.REGULATION_BASIC_INCOME;
 import static com.android.server.tare.EconomicPolicy.REGULATION_BIRTHRIGHT;
+import static com.android.server.tare.EconomicPolicy.REGULATION_WEALTH_RECLAMATION;
 import static com.android.server.tare.EconomicPolicy.TYPE_ACTION;
 import static com.android.server.tare.EconomicPolicy.TYPE_REWARD;
 import static com.android.server.tare.EconomicPolicy.eventToString;
@@ -46,6 +47,7 @@ import android.util.SparseArrayMap;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.usage.AppStandbyInternal;
 
 import java.util.List;
 import java.util.Objects;
@@ -53,7 +55,7 @@ import java.util.PriorityQueue;
 
 /**
  * Other half of the IRS. The agent handles the nitty gritty details, interacting directly with
- * ledgers, carrying out specific events such as tax collection and granting initial balances or
+ * ledgers, carrying out specific events such as wealth reclamation, granting initial balances or
  * replenishing balances, and tracking ongoing events.
  */
 class Agent {
@@ -61,6 +63,11 @@ class Agent {
     private static final boolean DEBUG = InternalResourceService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
+    /**
+     * The minimum amount of time an app must not have been used by the user before we start
+     * regularly reclaiming ARCs from it.
+     */
+    private static final long MIN_UNUSED_TIME_MS = 3 * 24 * HOUR_IN_MILLIS;
     /**
      * The maximum amount of time we'll keep a transaction around for.
      * For now, only keep transactions we actually have a use for. We can increase it if we want
@@ -74,6 +81,8 @@ class Agent {
     private final CompleteEconomicPolicy mCompleteEconomicPolicy;
     private final Handler mHandler;
     private final InternalResourceService mIrs;
+
+    private final AppStandbyInternal mAppStandbyInternal;
 
     @GuardedBy("mLock")
     private final SparseArrayMap<String, Ledger> mLedgers = new SparseArrayMap<>();
@@ -97,6 +106,7 @@ class Agent {
         mIrs = irs;
         mCompleteEconomicPolicy = completeEconomicPolicy;
         mHandler = new AgentHandler(TareHandlerThread.get().getLooper());
+        mAppStandbyInternal = LocalServices.getService(AppStandbyInternal.class);
     }
 
     @GuardedBy("mLock")
@@ -195,6 +205,47 @@ class Agent {
             mIrs.postSolvencyChanged(userId, pkgName, true);
         } else if (originalBalance > 0 && newBalance <= 0) {
             mIrs.postSolvencyChanged(userId, pkgName, false);
+        }
+    }
+
+    /**
+     * Reclaim a percentage of unused ARCs from every app that hasn't been used recently. The
+     * reclamation will not reduce an app's balance below its minimum balance as dictated by the
+     * EconomicPolicy.
+     *
+     * @param percentage A value between 0 and 1 to indicate how much of the unused balance should
+     *                   be reclaimed.
+     */
+    @GuardedBy("mLock")
+    void reclaimUnusedAssetsLocked(double percentage) {
+        final List<PackageInfo> pkgs = mIrs.getInstalledPackages();
+        final long now = System.currentTimeMillis();
+        for (int i = 0; i < pkgs.size(); ++i) {
+            final int userId = UserHandle.getUserId(pkgs.get(i).applicationInfo.uid);
+            final String pkgName = pkgs.get(i).packageName;
+            final Ledger ledger = getLedgerLocked(userId, pkgName);
+            // AppStandby only counts elapsed time for things like this
+            // TODO: should we use clock time instead?
+            final long timeSinceLastUsedMs =
+                    mAppStandbyInternal.getTimeSinceLastUsedByUser(pkgName, userId);
+            if (timeSinceLastUsedMs >= MIN_UNUSED_TIME_MS) {
+                // Use a constant floor instead of the scaled floor from the IRS.
+                final long minBalance =
+                        mCompleteEconomicPolicy.getMinSatiatedBalance(userId, pkgName);
+                final long curBalance = ledger.getCurrentBalance();
+                long toReclaim = (long) (curBalance * percentage);
+                if (curBalance - toReclaim < minBalance) {
+                    toReclaim = curBalance - minBalance;
+                }
+                if (toReclaim > 0) {
+                    Slog.i(TAG, "Reclaiming unused wealth! Taking " + toReclaim
+                            + " from <" + userId + ">" + pkgName);
+
+                    recordTransactionLocked(userId, pkgName, ledger,
+                            new Ledger.Transaction(
+                                    now, now, REGULATION_WEALTH_RECLAMATION, null, -toReclaim));
+                }
+            }
         }
     }
 

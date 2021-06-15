@@ -1082,6 +1082,14 @@ public class AppStandbyController
     }
 
     @Override
+    public long getTimeSinceLastUsedByUser(String packageName, int userId) {
+        final long elapsedRealtime = mInjector.elapsedRealtime();
+        synchronized (mAppIdleLock) {
+            return mAppIdleHistory.getTimeSinceLastUsedByUser(packageName, userId, elapsedRealtime);
+        }
+    }
+
+    @Override
     public void onUserRemoved(int userId) {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.onUserRemoved(userId);
