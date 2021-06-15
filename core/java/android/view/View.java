@@ -6432,7 +6432,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     @Override
     public String toString() {
-        StringBuilder out = new StringBuilder(128);
+        StringBuilder out = new StringBuilder(256);
         out.append(getClass().getName());
         out.append('{');
         out.append(Integer.toHexString(System.identityHashCode(this)));
