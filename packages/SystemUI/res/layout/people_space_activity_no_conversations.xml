@@ -55,6 +55,7 @@
         android:background="@drawable/rounded_bg_full_large_radius"
         android:onClick="dismissActivity"
         android:text="@string/okay"
+        android:textColor="?android:attr/textColorPrimary"
         android:layout_marginBottom="60dp"
         android:layout_alignParentBottom="true" />
 
