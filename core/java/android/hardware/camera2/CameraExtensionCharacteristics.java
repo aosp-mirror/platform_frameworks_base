@@ -255,9 +255,9 @@ public final class CameraExtensionCharacteristics {
                         }
                     }
                 };
-                ctx.bindService(intent, mConnection, Context.BIND_AUTO_CREATE |
-                        Context.BIND_IMPORTANT | Context.BIND_ABOVE_CLIENT |
-                        Context.BIND_NOT_VISIBLE);
+                ctx.bindService(intent, Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT |
+                        Context.BIND_ABOVE_CLIENT | Context.BIND_NOT_VISIBLE,
+                        android.os.AsyncTask.THREAD_POOL_EXECUTOR, mConnection);
 
                 try {
                     mInitFuture.get(PROXY_SERVICE_DELAY_MS, TimeUnit.MILLISECONDS);
