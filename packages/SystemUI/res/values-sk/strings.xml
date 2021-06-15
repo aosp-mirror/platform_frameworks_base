@@ -117,7 +117,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Zrušiť"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Zdieľať"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Záznam obrazovky bol zrušený"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"Nahrávka obrazovky bola uložená"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Nahrávka bola uložená"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Zobrazte klepnutím"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Pri odstraňovaní záznamu obrazovky sa vyskytla chyba"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Nepodarilo sa získať povolenia"</string>
@@ -1011,7 +1011,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Keď batéria klesne pod <xliff:g id="PERCENTAGE">%d</xliff:g> %%, automaticky sa aktivujte Šetrič batérie."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Nastavenia"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Dobre"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"V7pis haldy SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> používa zoznam <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikácie používajú zoznam <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>

@@ -722,7 +722,7 @@
     <string name="inline_block_button" msgid="479892866568378793">"Blokeatu"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Jarraitu erakusten"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Minimizatu"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Soinurik gabe"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Isila"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Jarraitu isilik"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Alertak"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Jarraitu jakinarazpenak bidaltzen"</string>
@@ -1006,7 +1006,7 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikazio batzuk <xliff:g id="TYPES_LIST">%s</xliff:g> erabiltzen ari dira."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" eta "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> erabiltzen ari da"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> aplikazioak darabil"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> aplikazioak erabili du azkenaldian"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(lanekoa)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefono-deia"</string>
