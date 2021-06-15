@@ -1498,6 +1498,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Omogoča aplikaciji, da zahteva brisanje paketov."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"Dovoljenje za prezrtje optimizacij baterije"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Aplikaciji dovoljuje, da vpraša za dovoljenje, ali naj prezre optimizacije baterije."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Tapnite dvakrat za nadzor povečave/pomanjšave"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Pripomočka ni bilo mogoče dodati."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Pojdi"</string>
@@ -1914,7 +1918,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"V redu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Funkcija varčevanja z energijo baterije vklopi temno temo ter omeji ali izklopi dejavnost v ozadju, nekatere vizualne učinke, določene funkcije in nekatere omrežne povezave."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Funkcija varčevanja z energijo baterije vklopi temno temo ter omeji ali izklopi dejavnost v ozadju, nekatere vizualne učinke, določene funkcije in nekatere omrežne povezave."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko dostopa do podatkov, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vklop varčevanja s podatki?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Vklopi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2193,7 +2197,7 @@
       <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> in še <xliff:g id="COUNT_3">%d</xliff:g> datoteke</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> in še <xliff:g id="COUNT_3">%d</xliff:g> datotek</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ni priporočenih oseb za deljenje vsebine"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ni priporočenih oseb za deljenje vsebine."</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Seznam aplikacij"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ta aplikacija sicer nima dovoljenja za snemanje, vendar bi lahko zajemala zvok prek te naprave USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Začetni zaslon"</string>

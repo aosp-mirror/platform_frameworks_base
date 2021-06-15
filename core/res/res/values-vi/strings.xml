@@ -1458,6 +1458,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Cho phép ứng dụng yêu cầu xóa gói."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"hỏi để bỏ qua tối ưu hóa pin"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Cho phép ứng dụng hỏi quyền để bỏ qua tối ưu hóa pin cho ứng dụng đó."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Nhấn hai lần để kiểm soát thu phóng"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Không thể thêm tiện ích."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Đến"</string>
@@ -1575,7 +1579,7 @@
     <string name="storage_usb" msgid="2391213347883616886">"Bộ lưu trữ USB"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Chỉnh sửa"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Cảnh báo dữ liệu"</string>
-    <string name="data_usage_warning_body" msgid="1669325367188029454">"Bạn đã sử dụng <xliff:g id="APP">%s</xliff:g> dữ liệu"</string>
+    <string name="data_usage_warning_body" msgid="1669325367188029454">"Bạn đã dùng <xliff:g id="APP">%s</xliff:g> dữ liệu"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Đã đạt đến giới hạn dữ liệu di động"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Đã đạt tới g.hạn dữ liệu Wi-Fi"</string>
     <string name="data_usage_limit_body" msgid="3567699582000085710">"Đã tạm dừng dữ liệu đối với chu kỳ còn lại của bạn"</string>
