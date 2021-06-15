@@ -63,7 +63,7 @@
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"会話をバブルで表示しない"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"チャットでバブルを使う"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"新しい会話はフローティング アイコン（バブル）として表示されます。タップするとバブルが開きます。ドラッグしてバブルを移動できます。"</string>
-    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"いつでもバブルを管理"</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"バブルはいつでも管理可能"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"このアプリからのバブルを OFF にするには、[管理] をタップしてください"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"最近閉じたバブルはありません"</string>
