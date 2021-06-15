@@ -8206,6 +8206,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             setState(PAUSED, "relaunchActivityLocked");
         }
 
+        // The activity may be waiting for stop, but that is no longer appropriate for it.
+        mTaskSupervisor.mStoppingActivities.remove(this);
+
         configChangeFlags = 0;
         deferRelaunchUntilPaused = false;
         preserveWindowOnDeferredRelaunch = false;
