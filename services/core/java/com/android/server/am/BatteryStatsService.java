@@ -2524,6 +2524,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * @hide
      */
     public CellularBatteryStats getCellularBatteryStats() {
+        enforceCallingPermission();
         // Wait for the completion of pending works if there is any
         awaitCompletion();
         synchronized (mStats) {
@@ -2536,6 +2537,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * @hide
      */
     public WifiBatteryStats getWifiBatteryStats() {
+        enforceCallingPermission();
         // Wait for the completion of pending works if there is any
         awaitCompletion();
         synchronized (mStats) {
