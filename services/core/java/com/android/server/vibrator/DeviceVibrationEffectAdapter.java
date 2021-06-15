@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.content.Context;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 
@@ -26,17 +27,16 @@ import java.util.List;
 final class DeviceVibrationEffectAdapter
         implements VibrationEffectAdapters.EffectAdapter<VibratorInfo> {
 
-    /** Duration of each step created to simulate a ramp segment. */
-    private static final int RAMP_STEP_DURATION_MILLIS = 5;
-
     private final List<VibrationEffectAdapters.SegmentsAdapter<VibratorInfo>> mSegmentAdapters;
 
-    DeviceVibrationEffectAdapter() {
+    DeviceVibrationEffectAdapter(Context context) {
         mSegmentAdapters = Arrays.asList(
                 // TODO(b/167947076): add filter that removes unsupported primitives
                 // TODO(b/167947076): add filter that replaces unsupported prebaked with fallback
-                new RampToStepAdapter(RAMP_STEP_DURATION_MILLIS),
-                new StepToRampAdapter(),
+                new RampToStepAdapter(context.getResources().getInteger(
+                        com.android.internal.R.integer.config_vibrationWaveformRampStepDuration)),
+                new StepToRampAdapter(context.getResources().getInteger(
+                        com.android.internal.R.integer.config_vibrationWaveformRampDownDuration)),
                 new ClippingAmplitudeAndFrequencyAdapter()
         );
     }
