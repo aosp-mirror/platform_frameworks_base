@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ক্লিপ বাউণ্ড, মাৰ্জিন আদিসমূহ দেখুৱাওক"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"আৰটিএল চানেকিৰ দিশ বলেৰে সলনি কৰক"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"সকলো ভাষাৰ বাবে স্ক্ৰীণৰ চানেকিৰ দিশ RTLলৈ বলেৰে সলনি কৰক"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"ৱিণ্ড’ স্তৰত অস্পষ্ট কৰাৰ অনুমতি দিয়ক"</string>
     <string name="force_msaa" msgid="4081288296137775550">"বল ৪গুণ MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 এপত ৪গুণ MSAA সক্ষম কৰক"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"আয়তাকৃতিৰ নোহোৱা ক্লিপ প্ৰক্ৰিয়াসমূহ ডিবাগ কৰক"</string>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"এলাৰ্ম আৰু ৰিমাইণ্ডাৰ"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"এলাৰ্ম আৰু ৰিমাইণ্ডাৰ ছেট কৰাৰ অনুমতি দিয়ক"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"এলাৰ্ম আৰু ৰিমাইণ্ডাৰ"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"এই এপ্‌টোক এলাৰ্ম ছেট কৰিবলৈ আৰু অন্য কাৰ্যৰ সময়সূচী নিৰ্ধাৰণ কৰিবলৈ দিয়ক। এই এপ্‌টো আপুনি নিজৰ ফ’নটো ব্যৱহাৰ কৰি নথকাৰ সময়ত ব্যৱহাৰ কৰা হ’ব পাৰে, যি অধিক বেটাৰী খৰচ কৰিব পাৰে। যদি এই অনুমতিটো অফ কৰি ৰখা হয়, এই এপ্‌টোৱে স্বাভাৱিকভাৱে কাম নকৰিব পাৰে আৰু ইয়াৰ এলাৰ্মসমূহে নিৰ্ধাৰিত সময়সূচী অনুযায়ী কাম নকৰিব।"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"এই এপ্‌টোক এলাৰ্ম ছেট কৰিবলৈ আৰু অন্য কাৰ্যৰ সময়সূচী নিৰ্ধাৰণ কৰিবলৈ দিয়ক। এই এপ্‌টো আপুনি নিজৰ টেবলেটটো ব্যৱহাৰ কৰি নথকাৰ সময়ত ব্যৱহাৰ কৰা হ’ব পাৰে, যি অধিক বেটাৰী খৰচ কৰিব পাৰে। যদি এই অনুমতিটো অফ কৰি ৰখা হয়, এই এপ্‌টোৱে স্বাভাৱিকভাৱে কাম নকৰিব পাৰে আৰু ইয়াৰ এলাৰ্মসমূহে নিৰ্ধাৰিত সময়সূচী অনুযায়ী কাম নকৰিব।"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"এই এপ্‌টোক এলাৰ্ম ছেট কৰিবলৈ আৰু অন্য কাৰ্যৰ সময়সূচী নিৰ্ধাৰণ কৰিবলৈ দিয়ক। এই এপ্‌টো আপুনি নিজৰ ডিভাইচটো ব্যৱহাৰ কৰি নথকাৰ সময়ত ব্যৱহাৰ কৰা হ’ব পাৰে, যি অধিক বেটাৰী খৰচ কৰিব পাৰে। যদি এই অনুমতিটো অফ কৰি ৰখা হয়, এই এপ্‌টোৱে স্বাভাৱিকভাৱে কাম নকৰিব পাৰে আৰু ইয়াৰ এলাৰ্মসমূহে নিৰ্ধাৰিত সময়সূচী অনুযায়ী কাম নকৰিব।"</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"সময়সূচী, এলাৰ্ম, ৰিমাইণ্ডাৰ, ঘড়ী"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"অন কৰক"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"অসুবিধা নিদিব অন কৰক"</string>

@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Кесилген нерсенин чектери жана жээктери көрүнөт"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Интерфейсти чагылдыруу"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Интерфейстин элементтери бардык тилдерде оңдон солго карай жайгашат"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Терезенин деңгээлинде бүдөмүктөтүүгө уруксат берүү"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA иштетүү"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 колдонмолорунда 4x MSAA иштетилет"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Татаал формаларды кесүү операцияларынын мүчүлүштүктөрүн оңдоо"</string>
@@ -484,7 +483,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Эң чоң"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Ыңгайлаштырылган (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Меню"</string>
-    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Демо режиминде демейки жөндөөлөргө кайтаруу үчүн сырсөздү киргизиңиз"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Демо режиминде баштапкы абалга кайтаруу үчүн сырсөздү киргизиңиз"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Кийинки"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Сырсөз талап кылынат"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Жигердүү киргизүү ыкмалары"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ойготкучтар жана эстеткичтер"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Ойготкуч жана эстеткичтерди коюуга уруксат берүү"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Ойготкучтар жана эстеткичтер"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Бул колдонмого ойготкучтарды коюуга жана башка аракеттерди графикке киргизүүгө уруксат берүү. Бул колдонмо телефонуңуз колдонулбай турганда да иштей алат. Мында батареянын кубаты көбүрөөк керектелиши мүмкүн. Бул параметр өчүрүлгөн болсо, бул колдонмо жана анын ойготкучтары жакшы иштебеши мүмкүн."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Бул колдонмого ойготкучтарды коюуга жана башка аракеттерди графикке киргизүүгө уруксат берүү. Бул колдонмо планшетиңиз колдонулбай турганда да иштей алат. Мында батареянын кубаты көбүрөөк керектелиши мүмкүн. Бул параметр өчүрүлгөн болсо, бул колдонмо жана анын ойготкучтары жакшы иштебеши мүмкүн."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Бул колдонмого ойготкучтарды коюуга жана башка аракеттерди графикке киргизүүгө уруксат берүү. Бул колдонмо түзмөгүңүз колдонулбай турганда да иштей алат. Мында батареянын кубаты көбүрөөк керектелиши мүмкүн. Бул параметр өчүрүлгөн болсо, бул колдонмо жана анын ойготкучтары жакшы иштебеши мүмкүн."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Бул колдонмого ойготкучтарды коюуга жана башка аракеттерди графикке киргизүүгө уруксат берүү. Ушуну менен колдонмо фондо иштеп, батареяны көбүрөөк сарпташы мүмкүн.\n\nЭгер бул уруксат өчүрүлсө, колдонмодогу ойготкучтар жана графикке киргизилген башка аракеттер иштебейт."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"график, ойготкуч, эстеткич, саат"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Күйгүзүү"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"Тынчымды алба\" режимин күйгүзүү"</string>
