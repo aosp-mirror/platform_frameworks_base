@@ -71,6 +71,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
             "persist.debug.one_handed_offset_percentage";
     private static final String ONE_HANDED_MODE_GESTURAL_OVERLAY =
             "com.android.internal.systemui.onehanded.gestural";
+    private static final int OVERLAY_ENABLED_DELAY_MS = 250;
 
     static final String SUPPORT_ONE_HANDED_MODE = "ro.support_one_handed_mode";
 
@@ -493,9 +494,11 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         setOneHandedEnabled(enabled);
 
         // Also checks swipe to notification settings since they all need gesture overlay.
-        setEnabledGesturalOverlay(
+        // Enabled overlay package may affect the current animation(e.g:Settings switch),
+        // so we delay 250ms to enabled overlay after switch animation finish
+        mMainExecutor.executeDelayed(() -> setEnabledGesturalOverlay(
                 enabled || mOneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
-                        mContext.getContentResolver(), mUserId));
+                        mContext.getContentResolver(), mUserId)), OVERLAY_ENABLED_DELAY_MS);
     }
 
     @VisibleForTesting
