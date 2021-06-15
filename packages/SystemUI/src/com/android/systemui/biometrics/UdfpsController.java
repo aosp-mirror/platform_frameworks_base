@@ -378,6 +378,7 @@ public class UdfpsController implements DozeReceiver {
                 return true;
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_HOVER_ENTER:
+                Trace.beginSection("UdfpsController.onTouch.ACTION_DOWN");
                 // To simplify the lifecycle of the velocity tracker, make sure it's never null
                 // after ACTION_DOWN, and always null after ACTION_CANCEL or ACTION_UP.
                 if (mVelocityTracker == null) {
@@ -388,8 +389,7 @@ public class UdfpsController implements DozeReceiver {
                     mVelocityTracker.clear();
                 }
                 if (isWithinSensorArea(udfpsView, event.getX(), event.getY(), fromUdfpsView)) {
-                    Trace.beginAsyncSection(
-                            "UdfpsController#ACTION_DOWN", 1);
+                    Trace.beginAsyncSection("UdfpsController.e2e.onPointerDown", 0);
                     // The pointer that causes ACTION_DOWN is always at index 0.
                     // We need to persist its ID to track it during ACTION_MOVE that could include
                     // data for many other pointers because of multi-touch support.
@@ -397,10 +397,12 @@ public class UdfpsController implements DozeReceiver {
                     mVelocityTracker.addMovement(event);
                     handled = true;
                 }
+                Trace.endSection();
                 break;
 
             case MotionEvent.ACTION_MOVE:
             case MotionEvent.ACTION_HOVER_MOVE:
+                Trace.beginSection("UdfpsController.onTouch.ACTION_MOVE");
                 final int idx = mActivePointerId == -1
                         ? event.getPointerId(0)
                         : event.findPointerIndex(mActivePointerId);
@@ -466,11 +468,13 @@ public class UdfpsController implements DozeReceiver {
                         onFingerUp();
                     }
                 }
+                Trace.endSection();
                 break;
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_HOVER_EXIT:
+                Trace.beginSection("UdfpsController.onTouch.ACTION_UP");
                 mActivePointerId = -1;
                 if (mVelocityTracker != null) {
                     mVelocityTracker.recycle();
@@ -479,7 +483,7 @@ public class UdfpsController implements DozeReceiver {
                 Log.v(TAG, "onTouch | finger up");
                 onFingerUp();
                 mFalsingManager.isFalseTouch(UDFPS_AUTHENTICATION);
-
+                Trace.endSection();
                 break;
 
             default:
@@ -818,12 +822,11 @@ public class UdfpsController implements DozeReceiver {
             return;
         }
         mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
-        Trace.endAsyncSection(
-                "UdfpsController#ACTION_DOWN", 1);
-        Trace.beginAsyncSection("UdfpsController#startIllumination", 1);
+        Trace.endAsyncSection("UdfpsController.e2e.onPointerDown", 0);
+        Trace.beginAsyncSection("UdfpsController.e2e.startIllumination", 0);
         mView.startIllumination(() -> {
             mFingerprintManager.onUiReady(mSensorProps.sensorId);
-            Trace.endAsyncSection("UdfpsController#startIllumination", 1);
+            Trace.endAsyncSection("UdfpsController.e2e.startIllumination", 0);
         });
     }
 
