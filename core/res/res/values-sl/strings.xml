@@ -1840,7 +1840,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"V redu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Funkcija varčevanja z energijo baterije podaljša čas delovanja baterije tako:\n\n•Vklopi temno temo,\n•izklopi ali omeji izvajanje dejavnosti v ozadju, nekaterih vizualnih učinkov in drugih funkcij, kot je »Hey Google«.\n\n"<annotation id="url">"Več o tem"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"Funkcija varčevanja z energijo baterije podaljša čas delovanja baterije tako:\n\n•Vklopi temno temo,\n•izklopi ali omeji izvajanje dejavnosti v ozadju, nekaterih vizualnih učinkov in drugih funkcij, kot je »Hey Google«."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko dostopa do podatkov, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vklop varčevanja s podatki?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Vklopi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2097,7 +2097,7 @@
       <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> in še <xliff:g id="COUNT_3">%d</xliff:g> datoteke</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> in še <xliff:g id="COUNT_3">%d</xliff:g> datotek</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ni priporočenih oseb za deljenje vsebine"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ni priporočenih oseb za deljenje vsebine."</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Seznam aplikacij"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ta aplikacija sicer nima dovoljenja za snemanje, vendar bi lahko zajemala zvok prek te naprave USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Začetni zaslon"</string>

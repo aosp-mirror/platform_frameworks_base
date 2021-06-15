@@ -1794,7 +1794,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie „Hey Google“ werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie „Hey Google“ werden abgeschaltet oder eingeschränkt"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Auch werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1984,7 +1984,7 @@
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Schädliche App erkannt"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> möchte Teile von <xliff:g id="APP_2">%2$s</xliff:g> anzeigen"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Bearbeiten"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Anrufe und Benachrichtigungen per Vibrationsalarm"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Gerät vibriert bei Anrufen und Benachrichtigungen"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Anrufe und Benachrichtigungen stummgeschaltet"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Systemänderungen"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Bitte nicht stören"</string>
@@ -2034,7 +2034,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Diese App hat noch keine Berechtigung zum Aufnehmen erhalten, könnte aber Audioaufnahmen über dieses USB-Gerät machen."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Startseite"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Zurück"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Letzte Apps"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Kürzlich geöffnete Apps"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Benachrichtigungen"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Schnelleinstellungen"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Kleines Fenster für Akkustand"</string>

@@ -2029,7 +2029,7 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fil</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> filer</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Der er ingen anbefalede brugere at dele med"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Der er ingen anbefalede personer at dele med"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Liste over apps"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Denne app har ikke fået tilladelse til at optage, men optager muligvis lyd via denne USB-enhed."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Hjem"</string>
