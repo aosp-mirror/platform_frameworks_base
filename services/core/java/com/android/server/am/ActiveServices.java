@@ -1790,6 +1790,7 @@ public final class ActiveServices {
                         if (!r.fgRequired) {
                             final long delayMs = SystemClock.elapsedRealtime() - r.createRealTime;
                             if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
+                                resetFgsRestrictionLocked(r);
                                 setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
                                         r.appInfo.uid, r.intent.getIntent(), r, r.userId,false);
                                 final String temp = "startForegroundDelayMs:" + delayMs;
