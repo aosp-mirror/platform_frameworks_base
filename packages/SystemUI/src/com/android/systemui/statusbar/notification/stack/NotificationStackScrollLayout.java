@@ -4550,6 +4550,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setQsExpansionFraction(float qsExpansionFraction) {
         mQsExpansionFraction = qsExpansionFraction;
+
+        // If notifications are scrolled,
+        // clear out scrollY by the time we push notifications offscreen
+        if (mOwnScrollY > 0) {
+            setOwnScrollY((int) MathUtils.lerp(mOwnScrollY, 0, mQsExpansionFraction));
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
