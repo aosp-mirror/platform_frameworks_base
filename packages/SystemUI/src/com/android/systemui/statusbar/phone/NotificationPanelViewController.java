@@ -103,6 +103,7 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -110,6 +111,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.qs.QSDetailDisplayer;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -583,6 +585,11 @@ public class NotificationPanelViewController extends PanelViewController {
      * The alpha of the views which only show on the keyguard but not in shade / shade locked
      */
     private float mKeyguardOnlyContentAlpha = 1.0f;
+
+    /**
+     * Are we currently in gesture navigation
+     */
+    private boolean mIsGestureNavigation;
     private int mOldLayoutDirection;
     private NotificationShelfController mNotificationShelfController;
     private int mScrimCornerRadius;
@@ -671,6 +678,7 @@ public class NotificationPanelViewController extends PanelViewController {
             KeyguardMediaController keyguardMediaController,
             PrivacyDotViewController privacyDotViewController,
             TapAgainViewController tapAgainViewController,
+            NavigationModeController navigationModeController,
             FragmentService fragmentService,
             QuickAccessWalletController quickAccessWalletController,
             @Main Executor uiExecutor,
@@ -771,6 +779,9 @@ public class NotificationPanelViewController extends PanelViewController {
         mAuthController = authController;
         mLockIconViewController = lockIconViewController;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        int currentMode = navigationModeController.addListener(
+                mode -> mIsGestureNavigation = QuickStepContract.isGesturalMode(mode));
+        mIsGestureNavigation = QuickStepContract.isGesturalMode(currentMode);
 
         mView.setBackgroundColor(Color.TRANSPARENT);
         OnAttachStateChangeListener onAttachStateChangeListener = new OnAttachStateChangeListener();
@@ -1821,9 +1832,15 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private boolean isInQsArea(float x, float y) {
-        return (x >= mQsFrame.getX() && x <= mQsFrame.getX() + mQsFrame.getWidth()) && (
-                y <= mNotificationStackScrollLayoutController.getBottomMostNotificationBottom()
-                        || y <= mQs.getView().getY() + mQs.getView().getHeight());
+        if (x < mQsFrame.getX() || x > mQsFrame.getX() + mQsFrame.getWidth()) {
+            return false;
+        }
+        // Let's reject anything at the very bottom around the home handle in gesture nav
+        if (mIsGestureNavigation && y > mView.getHeight() - mNavigationBarBottomHeight) {
+            return false;
+        }
+        return y <= mNotificationStackScrollLayoutController.getBottomMostNotificationBottom()
+                        || y <= mQs.getView().getY() + mQs.getView().getHeight();
     }
 
     private boolean isOpenQsEvent(MotionEvent event) {

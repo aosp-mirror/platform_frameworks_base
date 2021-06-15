@@ -85,6 +85,7 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSDetailDisplayer;
@@ -264,6 +265,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private PrivacyDotViewController mPrivacyDotViewController;
     @Mock
+    private NavigationModeController mNavigationModeController;
+    @Mock
     private SecureSettings mSecureSettings;
     @Mock
     private TapAgainViewController mTapAgainViewController;
@@ -394,6 +397,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mKeyguardMediaController,
                 mPrivacyDotViewController,
                 mTapAgainViewController,
+                mNavigationModeController,
                 mFragmentService,
                 mQuickAccessWalletController,
                 new FakeExecutor(new FakeSystemClock()),
