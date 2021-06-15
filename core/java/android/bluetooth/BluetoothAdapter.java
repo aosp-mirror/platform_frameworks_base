@@ -17,6 +17,8 @@
 
 package android.bluetooth;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -61,8 +63,6 @@ import android.os.SynchronousResultReceiver;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Pair;
-
-import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -3314,8 +3314,8 @@ public final class BluetoothAdapter {
          */
         WrappedOobDataCallback(@NonNull OobDataCallback callback,
                 @NonNull @CallbackExecutor Executor executor) {
-            Preconditions.checkNotNull(callback);
-            Preconditions.checkNotNull(executor);
+            requireNonNull(callback);
+            requireNonNull(executor);
             mCallback = callback;
             mExecutor = executor;
         }
@@ -3385,7 +3385,7 @@ public final class BluetoothAdapter {
                 != BluetoothDevice.TRANSPORT_LE) {
             throw new IllegalArgumentException("Invalid transport '" + transport + "'!");
         }
-        Preconditions.checkNotNull(callback);
+        requireNonNull(callback);
         if (!isEnabled()) {
             Log.w(TAG, "generateLocalOobData(): Adapter isn't enabled!");
             callback.onError(BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED);
@@ -3522,7 +3522,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     public static boolean isAddressRandomStatic(@NonNull String address) {
-        Preconditions.checkNotNull(address);
+        requireNonNull(address);
         return checkBluetoothAddress(address)
                 && (Integer.parseInt(address.split(":")[5], 16) & 0b11) == 0b11;
     }
