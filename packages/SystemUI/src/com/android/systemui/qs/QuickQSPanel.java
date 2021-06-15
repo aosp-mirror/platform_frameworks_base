@@ -53,6 +53,14 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
+    void initialize() {
+        super.initialize();
+        if (mHorizontalContentContainer != null) {
+            mHorizontalContentContainer.setClipChildren(false);
+        }
+    }
+
+    @Override
     public TileLayout createRegularTileLayout() {
         return new QQSSideLabelTileLayout(mContext);
     }

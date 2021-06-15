@@ -236,13 +236,14 @@ public class DozeTriggersTest extends SysuiTestCase {
     public void testOnSensor_Fingerprint() {
         final int screenX = 100;
         final int screenY = 100;
+        final float misc = -1;
         final float minor = 2f;
         final float major = 3f;
         final int reason = DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS;
-        float[] rawValues = new float[]{screenX, screenY, minor, major};
+        float[] rawValues = new float[]{screenX, screenY, misc, major, minor};
         mTriggers.onSensor(reason, screenX, screenY, rawValues);
         verify(mHost).extendPulse(reason);
-        verify(mAuthController).onAodInterrupt(eq(screenX), eq(screenY), eq(minor), eq(major));
+        verify(mAuthController).onAodInterrupt(eq(screenX), eq(screenY), eq(major), eq(minor));
     }
 
     private void waitForSensorManager() {

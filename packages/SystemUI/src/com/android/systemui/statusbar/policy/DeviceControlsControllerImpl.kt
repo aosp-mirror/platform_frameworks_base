@@ -27,7 +27,6 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.QSTileHost.POSITION_AT_END
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.policy.DeviceControlsController.Callback
 import com.android.systemui.util.settings.SecureSettings
@@ -64,8 +63,8 @@ public class DeviceControlsControllerImpl @Inject constructor(
 
     companion object {
         private const val TAG = "DeviceControlsControllerImpl"
-        internal const val QS_PRIORITY_POSITION = 2
-        internal const val QS_DEFAULT_POSITION = POSITION_AT_END
+        internal const val QS_PRIORITY_POSITION = 3
+        internal const val QS_DEFAULT_POSITION = 7
 
         internal const val PREFS_CONTROLS_SEEDING_COMPLETED = "SeedingCompleted"
         internal const val PREFS_CONTROLS_FILE = "controls_prefs"

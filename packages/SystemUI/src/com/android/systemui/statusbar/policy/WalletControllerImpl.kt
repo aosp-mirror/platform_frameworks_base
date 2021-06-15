@@ -33,7 +33,7 @@ public class WalletControllerImpl @Inject constructor(
 
     companion object {
         private const val TAG = "WalletControllerImpl"
-        internal const val QS_PRIORITY_POSITION = 2
+        internal const val QS_PRIORITY_POSITION = 3
     }
 
     /**

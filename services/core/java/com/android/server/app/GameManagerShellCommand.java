@@ -16,6 +16,7 @@
 
 package com.android.server.app;
 
+import android.app.ActivityManager;
 import android.app.GameManager;
 import android.app.IGameManagerService;
 import android.compat.Compatibility;
@@ -127,9 +128,14 @@ public class GameManagerShellCommand extends ShellCommand {
                      *          <PACKAGE_NAME> <CONFIG_STRING>`
                      * see: {@link GameManagerServiceTests#mockDeviceConfigAll()}
                      */
+                    final String option = getNextOption();
+                    String userIdStr = null;
+                    if (option != null && option.equals("--user")) {
+                        userIdStr = getNextArgRequired();
+                    }
+
                     final String gameMode = getNextArgRequired();
                     final String packageName = getNextArgRequired();
-                    final String userIdStr = getNextArgRequired();
                     final IGameManagerService service = IGameManagerService.Stub.asInterface(
                             ServiceManager.getServiceOrThrow(Context.GAME_SERVICE));
                     boolean batteryModeSupported = false;
@@ -142,7 +148,8 @@ public class GameManagerShellCommand extends ShellCommand {
                             batteryModeSupported = true;
                         }
                     }
-                    int userId = Integer.parseInt(userIdStr);
+                    int userId = userIdStr != null ? Integer.parseInt(userIdStr)
+                            : ActivityManager.getCurrentUser();
                     switch (gameMode.toLowerCase()) {
                         case "1":
                         case "standard":
@@ -199,7 +206,8 @@ public class GameManagerShellCommand extends ShellCommand {
         pw.println("      Print this help text.");
         pw.println("  downscale [0.5|0.6|0.7|0.8|0.9|disable] <PACKAGE_NAME>");
         pw.println("      Force app to run at the specified scaling ratio.");
-        pw.println("  mode [1|2|3|standard|performance|battery] <PACKAGE_NAME> <USER_ID>");
+        pw.println("  mode [--user <USER_ID>] [1|2|3|standard|performance|battery] <PACKAGE_NAME>");
         pw.println("      Force app to run in the specified game mode, if supported.");
+        pw.println("      --user <USER_ID>: apply for the given user, the current user is used when unspecified.");
     }
 }

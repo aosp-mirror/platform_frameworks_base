@@ -560,8 +560,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     mSmartspaceTransitionController.createExternalInterface().asBinder());
 
             try {
-                Log.d(TAG_OPS + " b/182478748", "OverviewProxyService.onInitialize: curUser="
-                        + mCurrentBoundedUserId);
                 mOverviewProxy.onInitialize(params);
             } catch (RemoteException e) {
                 mCurrentBoundedUserId = -1;
@@ -646,7 +644,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         // Listen for nav bar mode changes
         mNavBarMode = navModeController.addListener(this);
-        Log.d(TAG_OPS + " b/182478748", "OverviewProxyService: mode=" + mNavBarMode);
 
         // Listen for launcher package changes
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
@@ -807,7 +804,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     mOverviewServiceConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     UserHandle.of(getCurrentUserId()));
-            Log.d(TAG_OPS + " b/182478748", "OverviewProxyService.connect: bound=" + mBound);
         } catch (SecurityException e) {
             Log.e(TAG_OPS, "Unable to bind because of security error", e);
         }
@@ -860,9 +856,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
     private void disconnectFromLauncherService() {
         if (mBound) {
-            Log.d(TAG_OPS + " b/182478748", "OverviewProxyService.disconnect: curUser="
-                    + mCurrentBoundedUserId);
-
             // Always unbind the service (ie. if called through onNullBinding or onBindingDied)
             mContext.unbindService(mOverviewServiceConnection);
             mBound = false;
@@ -993,14 +986,11 @@ public class OverviewProxyService extends CurrentUserTracker implements
         final int currentUser = ActivityManagerWrapper.getInstance().getCurrentUserId();
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,
                 MATCH_SYSTEM_ONLY, currentUser) != null;
-        Log.d(TAG_OPS + " b/182478748", "OverviewProxyService.updateEnabledState: curUser="
-                + currentUser + " enabled=" + mIsEnabled);
     }
 
     @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
-        Log.d(TAG_OPS + " b/182478748", "OverviewProxyService.onNavModeChanged: mode=" + mode);
     }
 
     @Override

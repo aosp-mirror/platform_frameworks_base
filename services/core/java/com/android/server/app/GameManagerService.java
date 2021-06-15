@@ -469,9 +469,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
-    private boolean isValidPackageName(String packageName) {
+    private boolean isValidPackageName(String packageName, int userId) {
         try {
-            return mPackageManager.getPackageUid(packageName, 0) == Binder.getCallingUid();
+            return mPackageManager.getPackageUidAsUser(packageName, userId)
+                    == Binder.getCallingUid();
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
             return false;
@@ -547,7 +548,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         // The least privileged case is a normal app performing a query, so check that first and
         // return a value if the package name is valid. Next, check if the caller has the necessary
         // permission and return a value. Do this check last, since it can throw an exception.
-        if (isValidPackageName(packageName)) {
+        if (isValidPackageName(packageName, userId)) {
             return getGameModeFromSettings(packageName, userId);
         }
 

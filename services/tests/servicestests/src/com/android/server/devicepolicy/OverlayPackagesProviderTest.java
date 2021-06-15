@@ -19,6 +19,9 @@ package com.android.server.devicepolicy;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
+import static android.app.admin.DevicePolicyManager.REQUIRED_APP_MANAGED_DEVICE;
+import static android.app.admin.DevicePolicyManager.REQUIRED_APP_MANAGED_PROFILE;
+import static android.app.admin.DevicePolicyManager.REQUIRED_APP_MANAGED_USER;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -31,13 +34,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ModuleInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.test.mock.MockPackageManager;
 import android.view.inputmethod.InputMethodInfo;
 
+import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -51,8 +58,10 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -76,6 +85,8 @@ public class OverlayPackagesProviderTest {
 
     private FakePackageManager mPackageManager;
     private String[] mSystemAppsWithLauncher;
+    private Set<String> mRegularMainlineModules = new HashSet<>();
+    private Map<String, String> mMainlineModuleToDeclaredMetadataMap = new HashMap<>();
     private OverlayPackagesProvider mHelper;
 
     @Before
@@ -168,7 +179,7 @@ public class OverlayPackagesProviderTest {
         setSystemAppsWithLauncher("app.a", "app.b");
         setSystemInputMethods("app.a");
 
-        verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_PROFILE, "app.a", "app.b");
+        verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_PROFILE, "app.b");
     }
 
     @Test
@@ -255,6 +266,93 @@ public class OverlayPackagesProviderTest {
     public void testNotRequiredAndDisallowedInResManagedProfileVendor() {
         verifyEmptyIntersection(R.array.vendor_required_apps_managed_profile,
                 R.array.vendor_disallowed_apps_managed_profile);
+    }
+
+    @Test
+    public void testGetNonRequiredApps_mainlineModules_managedProfile_works() {
+        setupApexModulesWithManagedProfile("package1");
+        setupRegularModulesWithManagedProfile("package2");
+        setSystemAppsWithLauncher("package1", "package2", "package3");
+
+        verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_PROFILE, "package3");
+    }
+
+    @Test
+    public void testGetNonRequiredApps_mainlineModules_managedDevice_works() {
+        setupApexModulesWithManagedDevice("package1");
+        setupRegularModulesWithManagedDevice("package2");
+        setSystemAppsWithLauncher("package1", "package2", "package3");
+
+        verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_DEVICE, "package3");
+    }
+
+    @Test
+    public void testGetNonRequiredApps_mainlineModules_managedUser_works() {
+        setupApexModulesWithManagedUser("package1");
+        setupRegularModulesWithManagedUser("package2");
+        setSystemAppsWithLauncher("package1", "package2", "package3");
+
+        verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_USER, "package3");
+    }
+
+    @Test
+    public void testGetNonRequiredApps_mainlineModules_noMetadata_works() {
+        setupApexModulesWithNoMetadata("package1");
+        setupRegularModulesWithNoMetadata("package2");
+        setSystemAppsWithLauncher("package1", "package2", "package3");
+
+        verifyAppsAreNonRequired(
+                ACTION_PROVISION_MANAGED_PROFILE, "package1", "package2", "package3");
+    }
+
+    private void setupRegularModulesWithManagedUser(String... regularModules) {
+        setupRegularModulesWithMetadata(regularModules, REQUIRED_APP_MANAGED_USER);
+    }
+
+    private void setupRegularModulesWithManagedDevice(String... regularModules) {
+        setupRegularModulesWithMetadata(regularModules, REQUIRED_APP_MANAGED_DEVICE);
+    }
+
+    private void setupRegularModulesWithManagedProfile(String... regularModules) {
+        setupRegularModulesWithMetadata(regularModules, REQUIRED_APP_MANAGED_PROFILE);
+    }
+
+    private void setupRegularModulesWithNoMetadata(String... regularModules) {
+        mRegularMainlineModules.addAll(Arrays.asList(regularModules));
+    }
+
+    private void setupRegularModulesWithMetadata(String[] regularModules, String metadataKey) {
+        for (String regularModule : regularModules) {
+            mRegularMainlineModules.add(regularModule);
+            mMainlineModuleToDeclaredMetadataMap.put(regularModule, metadataKey);
+        }
+    }
+
+    private void setupApexModulesWithManagedUser(String... apexPackageNames) {
+        setupApexModulesWithMetadata(apexPackageNames, REQUIRED_APP_MANAGED_USER);
+    }
+
+    private void setupApexModulesWithManagedDevice(String... apexPackageNames) {
+        setupApexModulesWithMetadata(apexPackageNames, REQUIRED_APP_MANAGED_DEVICE);
+    }
+
+    private void setupApexModulesWithManagedProfile(String... apexPackageNames) {
+        setupApexModulesWithMetadata(apexPackageNames, REQUIRED_APP_MANAGED_PROFILE);
+    }
+
+    private void setupApexModulesWithNoMetadata(String... apexPackageNames) {
+        for (String apexPackageName : apexPackageNames) {
+            when(mInjector.getActiveApexPackageNameContainingPackage(eq(apexPackageName)))
+                    .thenReturn("apex");
+        }
+    }
+
+    private void setupApexModulesWithMetadata(String[] apexPackageNames, String metadataKey) {
+        for (String apexPackageName : apexPackageNames) {
+            when(mInjector.getActiveApexPackageNameContainingPackage(eq(apexPackageName)))
+                    .thenReturn("apex");
+            mMainlineModuleToDeclaredMetadataMap.put(apexPackageName, metadataKey);
+        }
     }
 
     private ArrayList<String> getStringArrayInRealResources(int id) {
@@ -382,6 +480,30 @@ public class OverlayPackagesProviderTest {
                 result.add(ri);
             }
             return result;
+        }
+
+        @NonNull
+        @Override
+        public PackageInfo getPackageInfo(String packageName, int flags) {
+            final PackageInfo packageInfo = new PackageInfo();
+            final ApplicationInfo applicationInfo = new ApplicationInfo();
+            applicationInfo.metaData = new Bundle();
+            if (mMainlineModuleToDeclaredMetadataMap.containsKey(packageName)) {
+                applicationInfo.metaData.putBoolean(
+                        mMainlineModuleToDeclaredMetadataMap.get(packageName), true);
+            }
+            packageInfo.applicationInfo = applicationInfo;
+            return packageInfo;
+        }
+
+        @NonNull
+        @Override
+        public ModuleInfo getModuleInfo(@NonNull String packageName, int flags)
+                throws NameNotFoundException {
+            if (!mRegularMainlineModules.contains(packageName)) {
+                throw new NameNotFoundException("package does not exist");
+            }
+            return new ModuleInfo().setName(packageName);
         }
     }
 }

@@ -53,7 +53,7 @@
             <TextView
                 android:id="@+id/name"
                 android:text="@string/empty_user_name"
-                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
                 android:textColor="?android:attr/textColorPrimary"
                 android:textSize="@dimen/empty_name_text_size_for_medium"
                 android:maxLines="1"
@@ -64,7 +64,7 @@
                 android:id="@+id/last_interaction"
                 android:text="@string/empty_status"
                 android:textColor="?android:attr/textColorSecondary"
-                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
                 android:textSize="@dimen/content_text_size_for_medium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
