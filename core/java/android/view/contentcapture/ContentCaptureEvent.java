@@ -16,6 +16,7 @@
 package android.view.contentcapture;
 
 import static android.view.contentcapture.ContentCaptureHelper.getSanitizedString;
+import static android.view.contentcapture.ContentCaptureManager.DEBUG;
 import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
 
 import android.annotation.IntDef;
@@ -431,11 +432,13 @@ public final class ContentCaptureEvent implements Parcelable {
             string.append(", class=").append(className);
             string.append(", id=").append(mNode.getAutofillId());
             if (mNode.getText() != null) {
-                string.append(", text=").append(getSanitizedString(mNode.getText()));
+                string.append(", text=")
+                        .append(DEBUG ? mNode.getText() : getSanitizedString(mNode.getText()));
             }
         }
         if (mText != null) {
-            string.append(", text=").append(getSanitizedString(mText));
+            string.append(", text=")
+                    .append(DEBUG ? mText : getSanitizedString(mText));
         }
         if (mClientContext != null) {
             string.append(", context=").append(mClientContext);
