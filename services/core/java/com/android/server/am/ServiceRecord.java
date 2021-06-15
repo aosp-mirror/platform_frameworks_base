@@ -18,7 +18,7 @@ package com.android.server.am;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-import static android.os.PowerWhitelistManager.REASON_DENIED;
+import static android.os.PowerExemptionManager.REASON_DENIED;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -37,7 +37,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.PowerWhitelistManager;
+import android.os.PowerExemptionManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -153,6 +153,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // allow while-in-use permissions in foreground service or not.
     // while-in-use permissions in FGS started from background might be restricted.
     boolean mAllowWhileInUsePermissionInFgs;
+    // A copy of mAllowWhileInUsePermissionInFgs's value when the service is entering FGS state.
+    boolean mAllowWhileInUsePermissionInFgsAtEntering;
 
     // the most recent package that start/bind this service.
     String mRecentCallingPackage;
@@ -172,7 +174,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     // allow the service becomes foreground service? Service started from background may not be
     // allowed to become a foreground service.
-    @PowerWhitelistManager.ReasonCode int mAllowStartForeground = REASON_DENIED;
+    @PowerExemptionManager.ReasonCode int mAllowStartForeground = REASON_DENIED;
+    // A copy of mAllowStartForeground's value when the service is entering FGS state.
+    @PowerExemptionManager.ReasonCode int mAllowStartForegroundAtEntering = REASON_DENIED;
     // Debug info why mAllowStartForeground is allowed or denied.
     String mInfoAllowStartForeground;
     // Debug info if mAllowStartForeground is allowed because of a temp-allowlist.
