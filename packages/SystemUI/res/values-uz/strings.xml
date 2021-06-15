@@ -342,7 +342,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Eshitish apparatlari"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Yoqilmoqda…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Yorqinlik"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Avtomatik burilish"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Avto-burilish"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Ekranning avtomatik burilishi"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> rejimi"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Aylanmaydigan qilingan"</string>
@@ -408,7 +408,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> sarflandi"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Cheklov: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Ogohlantirish: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Ishga oid ilovalar"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Ish ilovalari"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Tungi rejim"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Kunbotarda yoqish"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Quyosh chiqqunicha"</string>
@@ -423,7 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC o‘chiq"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC yoniq"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Ekranni yozib olish"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Ekran yozuvi"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Boshlash"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Toʻxtatish"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Qurilma mikrofoni blokdan chiqarilsinmi?"</string>
@@ -666,8 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Signal"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <!-- no translation found for wallet_empty_state_label (7776761245237530394) -->
-    <skip />
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Telefonda tezroq va xavfsizroq xarid qilish uchun sozlang"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hammasi"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Toʻlov uchun qulfdan chiqarish"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Sozlanmagan"</string>

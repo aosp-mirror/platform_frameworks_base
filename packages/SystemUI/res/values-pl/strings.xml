@@ -102,7 +102,7 @@
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Rozpocząć nagrywanie?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Podczas nagrywania system Android może rejestrować wszelkie informacje poufne wyświetlane na ekranie lub odtwarzane na urządzeniu. Dotyczy to m.in. haseł, szczegółów płatności, zdjęć, wiadomości i odtwarzanych dźwięków."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nagraj dźwięk"</string>
-    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Dźwięki odtwarzane na urządzeniu"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Dźwięki z urządzenia"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Dźwięki odtwarzane na urządzeniu, na przykład muzyka, połączenia i dzwonki"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Mikrofon i dźwięki odtwarzane na urządzeniu"</string>
@@ -615,7 +615,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ekran będzie widoczny, dopóki go nie odepniesz. Przesuń palcem w górę i przytrzymaj, by odpiąć."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, kliknij i przytrzymaj Przegląd."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, naciśnij i przytrzymaj Ekran główny."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dane osobowe (np. kontakty czy treść e-maili) mogą być dostępne."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dostępne mogą być dane osobiste (np. kontakty czy treść e-maili)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Przypięta aplikacja może otwierać inne aplikacje."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Aby odpiąć tę aplikację, naciśnij i przytrzymaj przyciski Wstecz oraz Przegląd"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Aby odpiąć tę aplikację, naciśnij i przytrzymaj przyciski Wstecz oraz Ekran główny"</string>
