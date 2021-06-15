@@ -280,8 +280,8 @@
     <string name="notification_channel_security" msgid="8516754650348238057">"Sécurité"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Mode Voiture"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"État du compte"</string>
-    <string name="notification_channel_developer" msgid="1691059964407549150">"Messages des concepteurs"</string>
-    <string name="notification_channel_developer_important" msgid="7197281908918789589">"Messages importants à l\'intention des concepteurs"</string>
+    <string name="notification_channel_developer" msgid="1691059964407549150">"Messages des développeurs"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"Messages importants à l\'intention des développeurs"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"Mises à jour"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"État du réseau"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Alertes réseau"</string>
@@ -1272,7 +1272,7 @@
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"L\'empreinte de mémoire <xliff:g id="PROC">%1$s</xliff:g> est prête"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"L\'empreinte de mémoire a été recueillie. Touchez ici pour la partager."</string>
     <string name="dump_heap_title" msgid="4367128917229233901">"Partager l\'empreinte de mémoire?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"Le processus <xliff:g id="PROC">%1$s</xliff:g> a dépassé sa limite de mémoire de <xliff:g id="SIZE">%2$s</xliff:g>. Vous pouvez partager son empreinte de mémoire avec son concepteur. Attention : Cette empreinte peut contenir certains de vos renseignements personnels auxquels l\'application a accès."</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"Le processus <xliff:g id="PROC">%1$s</xliff:g> a dépassé sa limite de mémoire de <xliff:g id="SIZE">%2$s</xliff:g>. Vous pouvez partager son empreinte de mémoire avec son développeur. Attention : Cette empreinte peut contenir certains de vos renseignements personnels auxquels l\'application a accès."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"Le processus <xliff:g id="PROC">%1$s</xliff:g> a dépassé sa limite de mémoire de <xliff:g id="SIZE">%2$s</xliff:g>. Vous pouvez partager son empreinte de mémoire. Attention : Cette empreinte peut contenir des renseignements personnels auxquels le processus a accès, y compris du texte que vous avez entré."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Une empreinte de mémoire du processus lié à l\'application <xliff:g id="PROC">%1$s</xliff:g> peut être partagée. Attention : Cette empreinte peut contenir des renseignements personnels auxquels le processus a accès, y compris du texte que vous avez entré."</string>
     <string name="sendText" msgid="493003724401350724">"Sélectionner une action pour le texte"</string>
@@ -1459,6 +1459,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Permet à une application de demander la suppression de paquets."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"demander d\'ignorer les optimisations de la pile"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Permet à une application de demander la permission d\'ignorer les optimisations de la pile."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Appuyer deux fois pour régler le zoom"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Impossible d\'ajouter le widget."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Aller"</string>
@@ -1976,7 +1980,7 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activer"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'application n\'est pas accessible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas accessible pour le moment."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Cette application a été conçue pour une ancienne version d\'Android et pourrait ne pas fonctionner correctement. Essayez de vérifier les mises à jour ou communiquez avec son concepteur."</string>
+    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Cette application a été conçue pour une ancienne version d\'Android et pourrait ne pas fonctionner correctement. Essayez de vérifier les mises à jour ou communiquez avec son développeur."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Vérifier la présence de mises à jour"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Vous avez de nouveaux messages"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Ouvrez l\'application de messagerie texte pour l\'afficher"</string>
