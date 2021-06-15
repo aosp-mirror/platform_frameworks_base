@@ -1757,11 +1757,13 @@ public abstract class Connection extends Conferenceable {
         public abstract void onSetDeviceOrientation(int rotation);
 
         /**
-         * Sets camera zoom ratio.
+         * Sets the camera zoom ratio.
          * <p>
          * Sent from the {@link InCallService} via {@link InCallService.VideoCall#setZoom(float)}.
          *
-         * @param value The camera zoom ratio.
+         * @param value The camera zoom ratio; for the current camera, should be a value in the
+         * range defined by
+         * {@link android.hardware.camera2.CameraCharacteristics#CONTROL_ZOOM_RATIO_RANGE}.
          */
         public abstract void onSetZoom(float value);
 
