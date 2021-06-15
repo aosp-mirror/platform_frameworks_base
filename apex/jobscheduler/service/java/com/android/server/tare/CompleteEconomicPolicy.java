@@ -18,9 +18,9 @@ package com.android.server.tare;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
+import android.util.SparseArray;
 
 import libcore.util.EmptyArray;
 
@@ -29,9 +29,9 @@ import libcore.util.EmptyArray;
 public class CompleteEconomicPolicy extends EconomicPolicy {
     private final ArraySet<EconomicPolicy> mEnabledEconomicPolicies = new ArraySet<>();
     /** Lazily populated set of actions covered by this policy. */
-    private final ArrayMap<String, Action> mActions = new ArrayMap<>();
+    private final SparseArray<Action> mActions = new SparseArray<>();
     /** Lazily populated set of rewards covered by this policy. */
-    private final ArrayMap<String, Reward> mRewards = new ArrayMap<>();
+    private final SparseArray<Reward> mRewards = new SparseArray<>();
     private final int[] mCostModifiers;
     private final long mMaxSatiatedBalance;
     private final long mMaxSatiatedCirculation;
@@ -93,37 +93,37 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
 
     @Nullable
     @Override
-    public Action getAction(@NonNull String actionName) {
-        if (mActions.containsKey(actionName)) {
-            return mActions.get(actionName);
+    public Action getAction(@AppAction int actionId) {
+        if (mActions.contains(actionId)) {
+            return mActions.get(actionId);
         }
 
         long ctp = 0, price = 0;
         boolean exists = false;
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
-            Action a = mEnabledEconomicPolicies.valueAt(i).getAction(actionName);
+            Action a = mEnabledEconomicPolicies.valueAt(i).getAction(actionId);
             if (a != null) {
                 exists = true;
                 ctp += a.costToProduce;
                 price += a.basePrice;
             }
         }
-        final Action action = exists ? new Action(actionName, ctp, price) : null;
-        mActions.put(actionName, action);
+        final Action action = exists ? new Action(actionId, ctp, price) : null;
+        mActions.put(actionId, action);
         return action;
     }
 
     @Nullable
     @Override
-    public Reward getReward(@NonNull String rewardName) {
-        if (mRewards.containsKey(rewardName)) {
-            return mRewards.get(rewardName);
+    public Reward getReward(@UtilityReward int rewardId) {
+        if (mRewards.contains(rewardId)) {
+            return mRewards.get(rewardId);
         }
 
         long instantReward = 0, ongoingReward = 0, maxReward = 0;
         boolean exists = false;
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
-            Reward r = mEnabledEconomicPolicies.valueAt(i).getReward(rewardName);
+            Reward r = mEnabledEconomicPolicies.valueAt(i).getReward(rewardId);
             if (r != null) {
                 exists = true;
                 instantReward += r.instantReward;
@@ -132,8 +132,8 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
             }
         }
         final Reward reward = exists
-                ? new Reward(rewardName, instantReward, ongoingReward, maxReward) : null;
-        mRewards.put(rewardName, reward);
+                ? new Reward(rewardId, instantReward, ongoingReward, maxReward) : null;
+        mRewards.put(rewardId, reward);
         return reward;
     }
 
