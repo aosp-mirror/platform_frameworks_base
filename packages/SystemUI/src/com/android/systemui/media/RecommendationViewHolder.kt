@@ -40,6 +40,13 @@ class RecommendationViewHolder private constructor(itemView: View) {
         itemView.requireViewById(R.id.media_cover4),
         itemView.requireViewById(R.id.media_cover5),
         itemView.requireViewById(R.id.media_cover6))
+    val mediaCoverContainers = listOf<ViewGroup>(
+        itemView.requireViewById(R.id.media_cover1_container),
+        itemView.requireViewById(R.id.media_cover2_container),
+        itemView.requireViewById(R.id.media_cover3_container),
+        itemView.requireViewById(R.id.media_cover4_container),
+        itemView.requireViewById(R.id.media_cover5_container),
+        itemView.requireViewById(R.id.media_cover6_container))
     val mediaCoverItemsResIds = listOf<@IntegerRes Int>(
         R.id.media_cover1,
         R.id.media_cover2,
@@ -47,6 +54,13 @@ class RecommendationViewHolder private constructor(itemView: View) {
         R.id.media_cover4,
         R.id.media_cover5,
         R.id.media_cover6)
+    val mediaCoverContainersResIds = listOf<@IntegerRes Int>(
+        R.id.media_cover1_container,
+        R.id.media_cover2_container,
+        R.id.media_cover3_container,
+        R.id.media_cover4_container,
+        R.id.media_cover5_container,
+        R.id.media_cover6_container)
 
     // Settings/Guts screen
     val longPressText = itemView.requireViewById<TextView>(R.id.remove_text)
@@ -58,7 +72,7 @@ class RecommendationViewHolder private constructor(itemView: View) {
 
     init {
         (recommendations.background as IlluminationDrawable).let { background ->
-            mediaCoverItems.forEach { background.registerLightSource(it) }
+            mediaCoverContainers.forEach { background.registerLightSource(it) }
             background.registerLightSource(cancel)
             background.registerLightSource(dismiss)
             background.registerLightSource(dismissLabel)
@@ -100,7 +114,13 @@ class RecommendationViewHolder private constructor(itemView: View) {
             R.id.media_cover3,
             R.id.media_cover4,
             R.id.media_cover5,
-            R.id.media_cover6
+            R.id.media_cover6,
+            R.id.media_cover1_container,
+            R.id.media_cover2_container,
+            R.id.media_cover3_container,
+            R.id.media_cover4_container,
+            R.id.media_cover5_container,
+            R.id.media_cover6_container
         )
 
         // Res Ids for the components on the guts panel.

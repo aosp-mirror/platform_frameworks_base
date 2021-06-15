@@ -30929,6 +30929,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Clears the ViewTranslationResponse stored by the default implementation of {@link
+     * #onViewTranslationResponse}.
+     *
+     * @hide
+     */
+    public void clearViewTranslationResponse() {
+        mViewTranslationResponse = null;
+    }
+
+    /**
      * Called when the content from {@link View#onCreateVirtualViewTranslationRequests} had been
      * translated by the TranslationService.
      *

@@ -16067,7 +16067,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userHandle));
+        final int packageUid = mInjector.binderWithCleanCallingIdentity(() -> {
+            try {
+                return mInjector.getPackageManager().getPackageUidAsUser(packageName, userHandle);
+            } catch (NameNotFoundException e) {
+                Slogf.w(LOG_TAG, e,
+                        "Couldn't find package %s in user %d", packageName, userHandle);
+                return -1;
+            }
+        });
+        if (caller.getUid() != packageUid) {
+            Preconditions.checkCallAuthorization(
+                    hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS)
+                            || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS_FULL));
+        }
 
         synchronized (getLockObject()) {
             if (mInjector.settingsSecureGetIntForUser(

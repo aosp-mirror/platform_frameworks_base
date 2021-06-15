@@ -183,6 +183,7 @@ public class PeopleSpaceWidgetManager {
                 filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
                 filter.addAction(Intent.ACTION_USER_UNLOCKED);
                 mBroadcastDispatcher.registerReceiver(mBaseBroadcastReceiver, filter,
+
                         null /* executor */, UserHandle.ALL);
                 mRegisteredReceivers = true;
             }
@@ -235,6 +236,10 @@ public class PeopleSpaceWidgetManager {
      * Updates People Space widgets.
      */
     public void updateWidgets(int[] widgetIds) {
+        mBgExecutor.execute(() -> updateWidgetsInBackground(widgetIds));
+    }
+
+    private void updateWidgetsInBackground(int[] widgetIds) {
         try {
             if (DEBUG) Log.d(TAG, "updateWidgets called");
             if (widgetIds.length == 0) {
@@ -675,7 +680,7 @@ public class PeopleSpaceWidgetManager {
         if (icon != null) {
             updatedTile.setUserIcon(icon);
         }
-        if (DEBUG) Log.d(TAG, "Statuses: " + conversation.getStatuses().toString());
+        if (DEBUG) Log.d(TAG, "Statuses: " + conversation.getStatuses());
         NotificationChannel channel = conversation.getNotificationChannel();
         if (channel != null) {
             if (DEBUG) Log.d(TAG, "Important:" + channel.isImportantConversation());
@@ -1095,17 +1100,18 @@ public class PeopleSpaceWidgetManager {
                 NotificationManager.Policy.areAllVisualEffectsSuppressed(
                         policy.suppressedVisualEffects);
         int notificationPolicyState = 0;
+        // If the user sees notifications in DND, we do not need to evaluate the current DND
+        // state, just always show notifications.
+        if (!suppressVisualEffects) {
+            if (DEBUG) Log.d(TAG, "Visual effects not suppressed.");
+            return PeopleSpaceTile.SHOW_CONVERSATIONS;
+        }
         switch (mNotificationManager.getCurrentInterruptionFilter()) {
             case INTERRUPTION_FILTER_ALL:
                 if (DEBUG) Log.d(TAG, "All interruptions allowed");
                 return PeopleSpaceTile.SHOW_CONVERSATIONS;
             case INTERRUPTION_FILTER_PRIORITY:
                 if (policy.allowConversations()) {
-                    // If the user sees notifications in DND, show notifications in tiles in DND.
-                    if (!suppressVisualEffects) {
-                        if (DEBUG) Log.d(TAG, "Visual effects not suppressed.");
-                        return PeopleSpaceTile.SHOW_CONVERSATIONS;
-                    }
                     if (policy.priorityConversationSenders == CONVERSATION_SENDERS_ANYONE) {
                         if (DEBUG) Log.d(TAG, "All conversations allowed");
                         // We only show conversations, so we can show everything.
@@ -1140,11 +1146,6 @@ public class PeopleSpaceWidgetManager {
             case INTERRUPTION_FILTER_NONE:
             case INTERRUPTION_FILTER_ALARMS:
             default:
-                // If the user sees notifications in DND, show notifications in tiles in DND.
-                if (!suppressVisualEffects) {
-                    if (DEBUG) Log.d(TAG, "Visual effects not suppressed.");
-                    return PeopleSpaceTile.SHOW_CONVERSATIONS;
-                }
                 if (DEBUG) Log.d(TAG, "Block conversations");
                 return PeopleSpaceTile.BLOCK_CONVERSATIONS;
         }

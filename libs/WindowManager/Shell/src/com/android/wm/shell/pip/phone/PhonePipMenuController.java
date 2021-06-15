@@ -202,6 +202,7 @@ public class PhonePipMenuController implements PipMenuController {
         mSystemWindows.updateViewLayout(mPipMenuView,
                 getPipMenuLayoutParams(MENU_WINDOW_TITLE, destinationBounds.width(),
                         destinationBounds.height()));
+        updateMenuLayout(destinationBounds);
     }
 
     /**
