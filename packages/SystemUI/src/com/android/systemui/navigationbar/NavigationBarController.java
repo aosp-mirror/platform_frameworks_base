@@ -27,7 +27,6 @@ import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
@@ -235,27 +234,28 @@ public class NavigationBarController implements Callbacks,
         });
     }
 
-    /**
-     * @return {@code true} if navbar was added/removed, false otherwise
-     */
-    public boolean updateNavbarForTaskbar() {
-        if (!isThreeButtonTaskbarFlagEnabled()) {
-            return false;
+    /** @see #initializeTaskbarIfNecessary() */
+    private boolean updateNavbarForTaskbar() {
+        boolean taskbarShown = initializeTaskbarIfNecessary();
+        if (!taskbarShown && mNavigationBars.get(mContext.getDisplayId()) == null) {
+            createNavigationBar(mContext.getDisplay(), null, null);
         }
+        return taskbarShown;
+    }
 
-        if (mIsTablet && mNavMode == NAV_BAR_MODE_3BUTTON) {
+    /** @return {@code true} if taskbar is enabled, false otherwise */
+    private boolean initializeTaskbarIfNecessary() {
+        boolean isShowingTaskbar = mIsTablet && mNavMode == NAV_BAR_MODE_3BUTTON;
+        if (isShowingTaskbar) {
             // Remove navigation bar when taskbar is showing, currently only for 3 button mode
             removeNavigationBar(mContext.getDisplayId());
             mCommandQueue.addCallback(mTaskbarDelegate);
             mTaskbarDelegate.init(mContext.getDisplayId());
-        } else if (mNavigationBars.get(mContext.getDisplayId()) == null) {
-            // Add navigation bar after taskbar goes away
-            createNavigationBar(mContext.getDisplay(), null, null);
+        } else {
             mCommandQueue.removeCallback(mTaskbarDelegate);
             mTaskbarDelegate.destroy();
         }
-
-        return true;
+        return isShowingTaskbar;
     }
 
     @Override
@@ -302,7 +302,7 @@ public class NavigationBarController implements Callbacks,
      */
     public void createNavigationBars(final boolean includeDefaultDisplay,
             RegisterStatusBarResult result) {
-        if (updateNavbarForTaskbar()) {
+        if (initializeTaskbarIfNecessary()) {
             return;
         }
 
@@ -326,7 +326,7 @@ public class NavigationBarController implements Callbacks,
             return;
         }
 
-        if (isThreeButtonTaskbarEnabled()) {
+        if (mIsTablet && mNavMode == NAV_BAR_MODE_3BUTTON) {
             return;
         }
 
@@ -459,15 +459,6 @@ public class NavigationBarController implements Callbacks,
     @Nullable
     public NavigationBar getDefaultNavigationBar() {
         return mNavigationBars.get(DEFAULT_DISPLAY);
-    }
-
-    private boolean isThreeButtonTaskbarEnabled() {
-        return mIsTablet && mNavMode == NAV_BAR_MODE_3BUTTON &&
-                isThreeButtonTaskbarFlagEnabled();
-    }
-
-    private boolean isThreeButtonTaskbarFlagEnabled() {
-        return SystemProperties.getBoolean("persist.debug.taskbar_three_button", false);
     }
 
     private boolean isTablet(Configuration newConfig) {
