@@ -17,6 +17,7 @@
 package android.hardware.camera2;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
@@ -2922,10 +2923,10 @@ public abstract class CameraMetadata<TKey> {
      * respective color channel provided in
      * {@link CaptureRequest#SENSOR_TEST_PATTERN_DATA android.sensor.testPatternData}.</p>
      * <p>For example:</p>
-     * <pre><code>android.control.testPatternData = [0, 0xFFFFFFFF, 0xFFFFFFFF, 0]
+     * <pre><code>{@link CaptureRequest#SENSOR_TEST_PATTERN_DATA android.sensor.testPatternData} = [0, 0xFFFFFFFF, 0xFFFFFFFF, 0]
      * </code></pre>
      * <p>All green pixels are 100% green. All red/blue pixels are black.</p>
-     * <pre><code>android.control.testPatternData = [0xFFFFFFFF, 0, 0xFFFFFFFF, 0]
+     * <pre><code>{@link CaptureRequest#SENSOR_TEST_PATTERN_DATA android.sensor.testPatternData} = [0xFFFFFFFF, 0, 0xFFFFFFFF, 0]
      * </code></pre>
      * <p>All red pixels are 100% red. Only the odd green pixels
      * are 100% green. All blue pixels are 100% black.</p>
@@ -3000,6 +3001,20 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
      */
     public static final int SENSOR_TEST_PATTERN_MODE_PN9 = 4;
+
+    /**
+     * <p>All pixel data is replaced by 0% intensity (black) values.</p>
+     * <p>This test pattern is identical to SOLID_COLOR with a value of <code>[0, 0, 0, 0]</code> for
+     * {@link CaptureRequest#SENSOR_TEST_PATTERN_DATA android.sensor.testPatternData}.  It is recommended that devices implement full
+     * SOLID_COLOR support instead, but BLACK can be used to provide minimal support for a
+     * test pattern suitable for privacy use cases.</p>
+     *
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_DATA
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
+     * @hide
+     */
+    @TestApi
+    public static final int SENSOR_TEST_PATTERN_MODE_BLACK = 5;
 
     /**
      * <p>The first custom test pattern. All custom patterns that are
