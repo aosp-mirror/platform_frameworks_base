@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Додаток або адміністратор вашої організації не дозволяють робити знімки екрана"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Закрити знімок екрана"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Перегляд знімка екрана"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Відеозапис екрана"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Запис відео з екрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обробка записування екрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Сповіщення про сеанс запису екрана"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Почати запис?"</string>

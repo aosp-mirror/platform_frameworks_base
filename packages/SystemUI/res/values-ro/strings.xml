@@ -110,7 +110,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Trimiteți"</string>
     <string name="screenrecord_delete_label" msgid="1376347010553987058">"Ștergeți"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Înregistrarea ecranului a fost anulată"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Înregistrarea ecranului a fost salvată. Atingeți pentru vizualizare"</string>
+    <string name="screenrecord_save_message" msgid="490522052388998226">"S-a salvat înregistrarea ecranului. Atingeți pentru vizualizare"</string>
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"Înregistrarea ecranului a fost ștearsă."</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Eroare la ștergerea înregistrării ecranului"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Nu s-au obținut permisiunile"</string>

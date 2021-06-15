@@ -95,11 +95,11 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"रेकर्ड गर्दा, Android सिस्टमले तपाईंको स्क्रिनमा देखिने वा तपाईंको डिभाइसमा प्ले गरिने सबै संवेदनशील जानकारी रेकर्ड गर्न सक्छ। यो जानकारीमा पासवर्ड, भुक्तानीसम्बन्धी जानकारी, फोटो, सन्देश र अडियो समावेश हुन्छ।"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"अडियो रेकर्ड गरियोस्"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिभाइसको अडियो"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तपाईंको डिभाइसका सङ्गीत, कल र रिङटोन जस्ता आवाज"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तपाईंको डिभाइसका सङ्गीत, कल र रिङटोन जस्ता साउन्ड"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"माइक्रोफोन"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"डिभाइसको अडियो र माइक्रोफोनको आवाज"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"डिभाइस र माइक्रोफोनको अडियो"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"सुरु गर्नुहोस्"</string>
-    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"स्क्रिन रेकर्ड गर्दै"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"स्क्रिन रेकर्ड गरिँदै छ"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"स्क्रिन र अडियो रेकर्ड गरिँदै छ"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्पर्श गरिएका स्थानहरू देखाइयोस्"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"रोक्न ट्याप गर्नुहोस्"</string>
@@ -406,7 +406,7 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="3379631363952582758">"अधिसूचनाहरू"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"फ्ल्यासलाइट"</string>
-    <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"क्यामेरा प्रयोगमा छ"</string>
+    <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"क्यामेरा प्रयोग भइरहेको छ"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"मोबाइल डेटा"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"डेटाको प्रयोग"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"बाँकी डेटा"</string>
@@ -598,7 +598,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"तपाईंले यो एप अनपिन नगरेसम्म यो एप यहाँ देखिइरहने छ। अनपिन गर्न माथितिर स्वाइप गरी होल्ड गर्नुहोस्।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न परिदृश्य बटनलाई टच एण्ड होल्ड गर्नुहोस्।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न गृह नामक बटनलाई टच एण्ड होल्ड गर्नुहोस्।"</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"स्क्रिनमा व्यक्तिगत डेटा (जस्तै सम्पर्क ठेगाना र इमेलको सामग्री) देखिन सक्छ।"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"स्क्रिनमा सम्पर्क ठेगाना र इमेलको सामग्री जस्ता व्यक्तिगत जानकारी देखिन सक्छ।"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"पिन गरिएको एपले अन्य एप खोल्न सक्छ।"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"यो एप अनपनि गर्न पछाडि र विवरण नामक बटनहरूलाई टच एण्ड होल्ड गर्नुहोस्"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"यो एप अनपनि गर्न पछाडि र होम बटनलाई टच एण्ड होल्ड गर्नुहोस्"</string>

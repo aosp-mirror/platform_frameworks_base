@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Elaboraz. registraz. schermo"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifica costante per una sessione di registrazione dello schermo"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Avviare la registrazione?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la registrazione, il sistema Android può acquisire informazioni sensibili visibili sullo schermo o riprodotti sul tuo dispositivo, tra cui password, dati di pagamento, foto, messaggi e audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la registrazione, il sistema Android può acquisire informazioni sensibili visibili sullo schermo o riprodotte sul tuo dispositivo, tra cui password, dati di pagamento, foto, messaggi e audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Registra audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio del dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Suoni del dispositivo, come musica, chiamate e suonerie"</string>
@@ -110,7 +110,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Condividi"</string>
     <string name="screenrecord_delete_label" msgid="1376347010553987058">"CANC"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Registrazione dello schermo annullata"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Registrazione dello schermo salvata. Tocca per visualizzarla."</string>
+    <string name="screenrecord_save_message" msgid="490522052388998226">"Registrazione schermo salvata. Tocca per visualizzare."</string>
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"Registrazione dello schermo eliminata"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Errore durante l\'eliminazione della registrazione dello schermo"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Impossibile ottenere le autorizzazioni"</string>
@@ -634,7 +634,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"riattiva l\'audio"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrazione"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Controlli del volume %s"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Chiamate e notifiche faranno suonare il dispositivo (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"La suoneria sarà attiva per chiamate e notifiche (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="3938776561655668350">"Uscita contenuti multimediali"</string>
     <string name="output_calls_title" msgid="7085583034267889109">"Uscita telefonate"</string>
     <string name="output_none_found" msgid="5488087293120982770">"Nessun dispositivo trovato"</string>
@@ -1006,9 +1006,9 @@
     <string name="bubble_dismiss_text" msgid="1314082410868930066">"Ignora bolla"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Non mettere la conversazione nella bolla"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatta utilizzando le bolle"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Le nuove conversazioni vengono visualizzate come icone mobili o bolle. Tocca per aprire la bolla. Trascinala per spostarla."</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Le nuove conversazioni vengono mostrate come icone mobili o bolle. Tocca per aprire la bolla. Trascinala per spostarla."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controlla le bolle quando vuoi"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tocca Gestisci per disattivare le bolle dall\'app"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tocca Gestisci per disattivare le bolle di questa app"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"Impostazioni <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigazione del sistema aggiornata. Per apportare modifiche, usa le Impostazioni."</string>
