@@ -508,7 +508,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Fråga varje gång"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Tills du inaktiverar funktionen"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Nyss"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonens högtalare"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonhögtalare"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Det gick inte att ansluta. Stäng av enheten och slå på den igen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Ljudenhet med kabelanslutning"</string>
     <string name="help_label" msgid="3528360748637781274">"Hjälp och feedback"</string>

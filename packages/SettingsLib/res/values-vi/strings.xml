@@ -149,7 +149,7 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Chia sẻ Internet"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Chia sẻ Internet và điểm phát sóng di động"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Tất cả ứng dụng làm việc"</string>
-    <string name="user_guest" msgid="6939192779649870792">"Khách"</string>
+    <string name="user_guest" msgid="6939192779649870792">"Chế độ khách"</string>
     <string name="unknown" msgid="3544487229740637809">"Không xác định"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Người dùng: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Đã đặt một số ứng dụng chạy mặc định"</string>
