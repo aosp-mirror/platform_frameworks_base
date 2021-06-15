@@ -1985,7 +1985,7 @@
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」が「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示をリクエストしています"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編集"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"着信や通知をバイブレーションで知らせます"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"着信音と通知音をミュートします"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"着信音と通知音が鳴りません"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"システムの変更"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"サイレント モード"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"新機能: サイレント モードでは通知が非表示になります"</string>

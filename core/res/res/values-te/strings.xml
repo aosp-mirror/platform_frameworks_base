@@ -2062,7 +2062,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"మీ వ్యక్తిగత ప్రొఫైల్‌లోని యాప్‌లతో ఈ కంటెంట్‌ను మీరు షేర్ చేయడానికి మీ IT అడ్మిన్ అనుమతించరు"</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"దీనిని, వ్యక్తిగత యాప్‌లతో తెరవడం సాధ్యపడదు"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"మీ వ్యక్తిగత ప్రొఫైల్‌లోని యాప్‌లతో ఈ కంటెంట్‌ను మీరు తెరవడానికి మీ IT అడ్మిన్ అనుమతించరు"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"కార్యాలయ ప్రొఫైల్ పాజ్ చేయబడింది"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"వర్క్ ప్రొఫైల్ పాజ్ చేయబడింది"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"ఆన్ చేయి"</string>
     <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"కార్యాలయ యాప్‌లు ఏవీ ఈ కంటెంట్‌ను సపోర్ట్ చేయలేవు"</string>
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"కార్యాలయ యాప్‌లు ఏవీ ఈ కంటెంట్‌ను తెరవలేవు"</string>
