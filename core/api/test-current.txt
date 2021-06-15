@@ -2723,6 +2723,7 @@ package android.view {
   public final class InputDevice implements android.os.Parcelable {
     method @RequiresPermission("android.permission.DISABLE_INPUT_DEVICE") public void disable();
     method @RequiresPermission("android.permission.DISABLE_INPUT_DEVICE") public void enable();
+    field public static final int ACCESSIBILITY_DEVICE_ID = -2; // 0xfffffffe
   }
 
   public class KeyEvent extends android.view.InputEvent implements android.os.Parcelable {
