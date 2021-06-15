@@ -7130,53 +7130,60 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (Binder.getCallingUid() != SYSTEM_UID) {
             throw new SecurityException("killPids only available to the system");
         }
-        String reason = (pReason == null) ? "Unknown" : pReason;
+        final String reason = (pReason == null) ? "Unknown" : pReason;
         // XXX Note: don't acquire main activity lock here, because the window
         // manager calls in with its locks held.
 
         boolean killed = false;
-        synchronized (this) {
-            synchronized (mProcLock) {
-                synchronized (mPidsSelfLocked) {
-                    int worstType = 0;
-                    for (int i = 0; i < pids.length; i++) {
-                        ProcessRecord proc = mPidsSelfLocked.get(pids[i]);
-                        if (proc != null) {
-                            int type = proc.mState.getSetAdj();
-                            if (type > worstType) {
-                                worstType = type;
-                            }
-                        }
-                    }
-
-                    // If the worst oom_adj is somewhere in the cached proc LRU range,
-                    // then constrain it so we will kill all cached procs.
-                    if (worstType < ProcessList.CACHED_APP_MAX_ADJ
-                            && worstType > ProcessList.CACHED_APP_MIN_ADJ) {
-                        worstType = ProcessList.CACHED_APP_MIN_ADJ;
-                    }
-
-                    // If this is not a secure call, don't let it kill processes that
-                    // are important.
-                    if (!secure && worstType < ProcessList.SERVICE_ADJ) {
-                        worstType = ProcessList.SERVICE_ADJ;
-                    }
-
-                    Slog.w(TAG, "Killing processes " + reason + " at adjustment " + worstType);
-                    for (int i = 0; i < pids.length; i++) {
-                        ProcessRecord proc = mPidsSelfLocked.get(pids[i]);
-                        if (proc == null) {
-                            continue;
-                        }
-                        int adj = proc.mState.getSetAdj();
-                        if (adj >= worstType && !proc.isKilledByAm()) {
-                            proc.killLocked(reason, ApplicationExitInfo.REASON_OTHER,
-                                    ApplicationExitInfo.SUBREASON_KILL_PID, true);
-                            killed = true;
-                        }
+        final ArrayList<ProcessRecord> killCandidates = new ArrayList<>();
+        synchronized (mPidsSelfLocked) {
+            int worstType = 0;
+            for (int i = 0; i < pids.length; i++) {
+                ProcessRecord proc = mPidsSelfLocked.get(pids[i]);
+                if (proc != null) {
+                    int type = proc.mState.getSetAdj();
+                    if (type > worstType) {
+                        worstType = type;
                     }
                 }
             }
+
+            // If the worst oom_adj is somewhere in the cached proc LRU range,
+            // then constrain it so we will kill all cached procs.
+            if (worstType < ProcessList.CACHED_APP_MAX_ADJ
+                    && worstType > ProcessList.CACHED_APP_MIN_ADJ) {
+                worstType = ProcessList.CACHED_APP_MIN_ADJ;
+            }
+
+            // If this is not a secure call, don't let it kill processes that
+            // are important.
+            if (!secure && worstType < ProcessList.SERVICE_ADJ) {
+                worstType = ProcessList.SERVICE_ADJ;
+            }
+
+            Slog.w(TAG, "Killing processes " + reason + " at adjustment " + worstType);
+            for (int i = 0; i < pids.length; i++) {
+                ProcessRecord proc = mPidsSelfLocked.get(pids[i]);
+                if (proc == null) {
+                    continue;
+                }
+                int adj = proc.mState.getSetAdj();
+                if (adj >= worstType && !proc.isKilledByAm()) {
+                    killCandidates.add(proc);
+                    killed = true;
+                }
+            }
+        }
+        if (!killCandidates.isEmpty()) {
+            mHandler.post(() -> {
+                synchronized (ActivityManagerService.this) {
+                    for (int i = 0, size = killCandidates.size(); i < size; i++) {
+                        killCandidates.get(i).killLocked(reason,
+                                ApplicationExitInfo.REASON_OTHER,
+                                ApplicationExitInfo.SUBREASON_KILL_PID, true);
+                    }
+                }
+            });
         }
         return killed;
     }
