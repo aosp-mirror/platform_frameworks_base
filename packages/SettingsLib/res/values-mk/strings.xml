@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Прикажи граници на клип, маргини, итн."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Принудно користи RTL за насока"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Принудно постави насока на распоред на екранот во RTL за сите локални стандарди"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Дозволи замаглување прозорец"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Принудно користи 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Овозможи 4x MSAA за апликации OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Отстрани грешка на неправоаголни клип операции"</string>
@@ -506,11 +505,9 @@
     <string name="cancel" msgid="5665114069455378395">"Откажи"</string>
     <string name="okay" msgid="949938843324579502">"Во ред"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Аларми и потсетници"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Дозволете поставување аларми и потсетници"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Дозволи поставување аларми и потсетници"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Аларми и потсетници"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Дозволете ѝ на апликацијава да поставува аларми и да закажува други дејства. Апликацијава може да се користи кога не го користите телефонот, а тоа може да користи повеќе батерија. Ако дозволава е исклучена, апликацијава можеби нема да функционира нормално, а алармите нема да работат според закажаното."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Дозволете ѝ на апликацијава да поставува аларми и да закажува други дејства. Апликацијава може да се користи кога не го користите таблетот, а тоа може да користи повеќе батерија. Ако дозволава е исклучена, апликацијава можеби нема да функционира нормално, а алармите нема да работат според закажаното."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Дозволете ѝ на апликацијава да поставува аларми и да закажува други дејства. Апликацијава може да се користи кога не го користите уредот, а тоа може да користи повеќе батерија. Ако дозволава е исклучена, апликацијава можеби нема да функционира нормално, а алармите нема да работат според закажаното."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Дозволете ѝ на апликацијава да поставува аларми и да закажува дејства со временски рокови. Ова овозможува апликацијата да работи во заднина и така може повеќе да ја троши батеријата.\n\nАко дозволава е исклучена, нема да функционираат постојните аларми и настаните според време закажани од апликацијава."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"закажување, аларм, потсетник, часовник"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Вклучи"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Исклучување на „Не вознемирувај“"</string>
