@@ -701,7 +701,7 @@
     <string name="inline_block_button" msgid="479892866568378793">"Blokeatu"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Jarraitu erakusten"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Minimizatu"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Soinurik gabe"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Isila"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Jarraitu isilik"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Alertak"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Jarraitu jakinarazpenak bidaltzen"</string>

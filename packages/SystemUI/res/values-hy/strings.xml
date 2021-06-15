@@ -593,10 +593,10 @@
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Փոխել արտածման սարքը"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Հավելվածն ամրացված է"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Հետ և Համատեսք կոճակները:"</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև չապամրացնեք այն: Ապամրացնելու համար հպեք և պահեք «Հետ» և «Գլխավոր էկրան» կոճակները"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև որ չապամրացնեք այն: Ապամրացնելու համար մատը սահեցրեք վեր և պահեք։"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև չեղարկեք ամրացումը: Չեղարկելու համար հպեք և պահեք «Հետ» և «Գլխավոր էկրան» կոճակները"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Էկրանը կցուցադրվի, մինչև չեղարկեք ամրացումը: Չեղարկելու համար մատը սահեցրեք վեր և պահեք։"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Համատեսք կոճակը:"</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև որ չապամրացնեք այն: Ապամրացնելու համար հպեք և պահեք գլխավոր էկրանի կոճակը:"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Էկրանը կցուցադրվի, մինչև չեղարկեք ամրացումը: Չեղարկելու համար հպեք և պահեք գլխավոր էկրանի կոճակը:"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Ձեր անձնական տվյալները (օր․՝ կոնտակտները և նամակների բովանդակությունը) կարող են հասանելի դառնալ։"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Ամրացված հավելվածը կարող է այլ հավելվածներ գործարկել։"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Հավելվածն ապամրացնելու համար հպեք և պահեք «Հետ» և «Համատեսք» կոճակները"</string>

@@ -605,7 +605,7 @@
     <string name="screen_pinning_positive" msgid="3285785989665266984">"E kuptova"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Jo, faleminderit!"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacioni u gozhdua"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacioni i zhgozhduar"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacioni u zhgozhdua"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Të fshihet <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Do të rishfaqet herën tjetër kur ta aktivizoni te cilësimet."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Fshih"</string>

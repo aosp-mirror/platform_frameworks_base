@@ -388,7 +388,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi qoşulu deyil"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Parlaqlıq"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AVTO"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Rəngləri çevirin"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Rəng inversiyası"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Rəng korreksiyası rejimi"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Digər ayarlar"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Hazır"</string>
@@ -956,7 +956,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> işləyir"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Quraşdırılmadan açılan tətbiq."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Quraşdırılmadan açılan tətbiq. Ətraflı məlumat üçün klikləyin."</string>
-    <string name="app_info" msgid="5153758994129963243">"Tətbiq infosu"</string>
+    <string name="app_info" msgid="5153758994129963243">"Tətbiq haqqında"</string>
     <string name="go_to_web" msgid="636673528981366511">"Brauzerə daxil edin"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobil data"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -1034,7 +1034,7 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Böyütmə Üst-üstə Düşən Pəncərəsi"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Böyütmə Pəncərəsi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Böyütmə Pəncərəsi Kontrolları"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Cihaz idarəetmələri"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Cihaz kontrolları"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Qoşulmuş cihazlarınız üçün nizamlayıcılar əlavə edin"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Cihaz idarəetmələrini ayarlayın"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Nizamlayıcılara giriş üçün Yandırıb-söndürmə düyməsini basıb saxlayın"</string>
