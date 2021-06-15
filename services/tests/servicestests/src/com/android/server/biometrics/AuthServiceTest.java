@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
+import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_SUCCESS;
 
 import static junit.framework.Assert.assertEquals;
@@ -234,6 +236,27 @@ public class AuthServiceTest {
                 eq(mReceiver),
                 eq(TEST_OP_PACKAGE_NAME),
                 eq(promptInfo));
+        verify(mReceiver).onError(eq(TYPE_NONE), eq(BIOMETRIC_ERROR_CANCELED), anyInt());
+    }
+
+    @Test
+    public void testAuthenticate_missingRequiredParam() throws Exception {
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        final PromptInfo promptInfo = new PromptInfo();
+        final long sessionId = 0;
+        final int userId = 0;
+
+        mAuthService.mImpl.authenticate(
+                null /* token */,
+                sessionId,
+                userId,
+                mReceiver,
+                TEST_OP_PACKAGE_NAME,
+                promptInfo);
+        waitForIdle();
+        verify(mReceiver).onError(eq(TYPE_NONE), eq(BIOMETRIC_ERROR_CANCELED), anyInt());
     }
 
     @Test
@@ -258,7 +281,6 @@ public class AuthServiceTest {
                 eq(UserHandle.getCallingUserId()),
                 eq(authenticators));
     }
-
 
     @Test
     public void testHasEnrolledBiometrics_callsBiometricServiceHasEnrolledBiometrics() throws
