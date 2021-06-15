@@ -50,14 +50,5 @@
         android:background="@android:color/transparent"
         android:layout_gravity="center"
         android:visibility="gone"/>
-
-    <ImageView
-        android:id="@+id/video_play_button"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        android:src="@drawable/ic_gesture_play_button"/>
-
 </FrameLayout>
 
