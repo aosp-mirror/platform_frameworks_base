@@ -62,7 +62,7 @@
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Ignora bolla"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Non mettere la conversazione nella bolla"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chatta utilizzando le bolle"</string>
-    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Le nuove conversazioni vengono visualizzate come icone mobili o bolle. Tocca per aprire la bolla. Trascinala per spostarla."</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Le nuove conversazioni vengono mostrate come icone mobili o bolle. Tocca per aprire la bolla. Trascinala per spostarla."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Controlla le bolle quando vuoi"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tocca Gestisci per disattivare le bolle dall\'app"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
