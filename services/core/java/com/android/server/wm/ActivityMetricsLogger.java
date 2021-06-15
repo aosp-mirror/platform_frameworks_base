@@ -312,6 +312,12 @@ class ActivityMetricsLogger {
             }
         }
 
+        /** Returns {@code true} if the incoming activity can belong to this transition. */
+        boolean canCoalesce(ActivityRecord r) {
+            return mLastLaunchedActivity.mDisplayContent == r.mDisplayContent
+                    && mLastLaunchedActivity.getWindowingMode() == r.getWindowingMode();
+        }
+
         /** @return {@code true} if the activity matches a launched activity in this transition. */
         boolean contains(ActivityRecord r) {
             return r != null && (r == mLastLaunchedActivity || mPendingDrawActivities.contains(r));
@@ -604,8 +610,7 @@ class ActivityMetricsLogger {
             return;
         }
 
-        final DisplayContent targetDisplay = launchedActivity.mDisplayContent;
-        if (info != null && info.mLastLaunchedActivity.mDisplayContent == targetDisplay) {
+        if (info != null && info.canCoalesce(launchedActivity)) {
             // If we are already in an existing transition on the same display, only update the
             // activity name, but not the other attributes.
 
@@ -633,7 +638,7 @@ class ActivityMetricsLogger {
             // As abort for no process switch.
             launchObserverNotifyIntentFailed();
         }
-        if (targetDisplay.isSleeping()) {
+        if (launchedActivity.mDisplayContent.isSleeping()) {
             // It is unknown whether the activity can be drawn or not, e.g. ut depends on the
             // keyguard states and the attributes or flags set by the activity. If the activity
             // keeps invisible in the grace period, the tracker will be cancelled so it won't get
