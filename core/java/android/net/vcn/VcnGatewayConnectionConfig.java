@@ -83,7 +83,12 @@ public final class VcnGatewayConnectionConfig {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final int MIN_MTU_V6 = 1280;
 
-    private static final Set<Integer> ALLOWED_CAPABILITIES;
+    /**
+     * The set of allowed capabilities for exposed capabilities.
+     *
+     * @hide
+     */
+    public static final Set<Integer> ALLOWED_CAPABILITIES;
 
     static {
         Set<Integer> allowedCaps = new ArraySet<>();
