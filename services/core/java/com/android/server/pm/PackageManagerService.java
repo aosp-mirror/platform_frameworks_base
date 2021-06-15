@@ -348,6 +348,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
+import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
@@ -2612,39 +2613,43 @@ public class PackageManagerService extends IPackageManager.Stub
         PackageManagerService m = new PackageManagerService(injector, onlyCore, factoryTest);
         t.traceEnd(); // "create package manager"
 
-        injector.getCompatibility().registerListener(SELinuxMMAC.SELINUX_LATEST_CHANGES,
-                packageName -> {
-                    synchronized (m.mInstallLock) {
-                        final AndroidPackage pkg;
-                        final PackageSetting ps;
-                        final SharedUserSetting sharedUser;
-                        final String oldSeInfo;
-                        synchronized (m.mLock) {
-                            ps = m.mSettings.getPackageLPr(packageName);
-                            if (ps == null) {
-                                Slog.e(TAG, "Failed to find package setting " + packageName);
-                                return;
-                            }
-                            pkg = ps.pkg;
-                            sharedUser = ps.getSharedUser();
-                            oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
-                        }
-
-                        if (pkg == null) {
-                            Slog.e(TAG, "Failed to find package " + packageName);
-                            return;
-                        }
-                        final String newSeInfo = SELinuxMMAC.getSeInfo(pkg, sharedUser,
-                                m.mInjector.getCompatibility());
-
-                        if (!newSeInfo.equals(oldSeInfo)) {
-                            Slog.i(TAG, "Updating seInfo for package " + packageName + " from: "
-                                    + oldSeInfo + " to: " + newSeInfo);
-                            ps.getPkgState().setOverrideSeInfo(newSeInfo);
-                            m.prepareAppDataAfterInstallLIF(pkg);
-                        }
+        final CompatChange.ChangeListener selinuxChangeListener = packageName -> {
+            synchronized (m.mInstallLock) {
+                final AndroidPackage pkg;
+                final PackageSetting ps;
+                final SharedUserSetting sharedUser;
+                final String oldSeInfo;
+                synchronized (m.mLock) {
+                    ps = m.mSettings.getPackageLPr(packageName);
+                    if (ps == null) {
+                        Slog.e(TAG, "Failed to find package setting " + packageName);
+                        return;
                     }
-                });
+                    pkg = ps.pkg;
+                    sharedUser = ps.getSharedUser();
+                    oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
+                }
+
+                if (pkg == null) {
+                    Slog.e(TAG, "Failed to find package " + packageName);
+                    return;
+                }
+                final String newSeInfo = SELinuxMMAC.getSeInfo(pkg, sharedUser,
+                        m.mInjector.getCompatibility());
+
+                if (!newSeInfo.equals(oldSeInfo)) {
+                    Slog.i(TAG, "Updating seInfo for package " + packageName + " from: "
+                            + oldSeInfo + " to: " + newSeInfo);
+                    ps.getPkgState().setOverrideSeInfo(newSeInfo);
+                    m.prepareAppDataAfterInstallLIF(pkg);
+                }
+            }
+        };
+
+        injector.getCompatibility().registerListener(SELinuxMMAC.SELINUX_LATEST_CHANGES,
+                selinuxChangeListener);
+        injector.getCompatibility().registerListener(SELinuxMMAC.SELINUX_R_CHANGES,
+                selinuxChangeListener);
 
         m.installWhitelistedSystemPackages();
         ServiceManager.addService("package", m);
