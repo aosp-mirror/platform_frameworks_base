@@ -23,6 +23,8 @@ import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 import static androidx.constraintlayout.widget.ConstraintSet.START;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
+import static com.android.keyguard.KeyguardClockSwitch.LARGE;
+import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -1241,7 +1243,11 @@ public class NotificationPanelViewController extends PanelViewController {
         boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
         final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
                 .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
-        mKeyguardStatusViewController.setHasVisibleNotifications(hasVisibleNotifications);
+        if (hasVisibleNotifications && !mShouldUseSplitNotificationShade) {
+            mKeyguardStatusViewController.displayClock(SMALL);
+        } else {
+            mKeyguardStatusViewController.displayClock(LARGE);
+        }
         int userIconHeight = mKeyguardQsUserSwitchController != null
                 ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
         float expandedFraction =
