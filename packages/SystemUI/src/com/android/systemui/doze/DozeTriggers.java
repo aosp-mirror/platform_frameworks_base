@@ -307,7 +307,7 @@ public class DozeTriggers implements DozeMachine.Part {
                     // Since the gesture won't be received by the UDFPS view, manually inject an
                     // event.
                     mAuthController.onAodInterrupt((int) screenX, (int) screenY,
-                            rawValues[2] /* major */, rawValues[3] /* minor */);
+                            rawValues[3] /* major */, rawValues[4] /* minor */);
                 } else {
                     mDozeHost.extendPulse(pulseReason);
                 }

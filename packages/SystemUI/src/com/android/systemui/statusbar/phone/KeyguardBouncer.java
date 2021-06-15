@@ -288,8 +288,17 @@ public class KeyguardBouncer {
 
     public void showWithDismissAction(OnDismissAction r, Runnable cancelAction) {
         ensureView();
-        mKeyguardViewController.setOnDismissAction(r, cancelAction);
+        setDismissAction(r, cancelAction);
         show(false /* resetSecuritySelection */);
+    }
+
+    /**
+     * Set the actions to run when the keyguard is dismissed or when the dismiss is cancelled. Those
+     * actions will still be run even if this bouncer is not shown, for instance when authenticating
+     * with an alternate authenticator like the UDFPS.
+     */
+    public void setDismissAction(OnDismissAction r, Runnable cancelAction) {
+        mKeyguardViewController.setOnDismissAction(r, cancelAction);
     }
 
     public void hide(boolean destroyView) {

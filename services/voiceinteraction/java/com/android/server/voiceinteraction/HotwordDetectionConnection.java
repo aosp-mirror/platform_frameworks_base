@@ -156,8 +156,9 @@ final class HotwordDetectionConnection {
             updateStateLocked(options, sharedMemory);
             return;
         }
-        updateStateWithCallbackLocked(options, sharedMemory, callback);
+        updateAudioFlinger();
         updateContentCaptureManager();
+        updateStateWithCallbackLocked(options, sharedMemory, callback);
     }
 
     private void updateStateWithCallbackLocked(PersistableBundle options,
@@ -227,6 +228,15 @@ final class HotwordDetectionConnection {
                         // NOTE: so far we don't need to take any action.
                     }
                 });
+    }
+
+    private void updateAudioFlinger() {
+        // TODO: Consider using a proxy that limits the exposed API surface.
+        IBinder audioFlinger = ServiceManager.getService("media.audio_flinger");
+        if (audioFlinger == null) {
+            throw new IllegalStateException("Service media.audio_flinger wasn't found.");
+        }
+        mRemoteHotwordDetectionService.post(service -> service.updateAudioFlinger(audioFlinger));
     }
 
     private void updateContentCaptureManager() {

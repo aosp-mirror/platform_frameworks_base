@@ -63,65 +63,101 @@
         android:breakStrategy="balanced"
         android:hyphenationFrequency="none"/>
 
-    <ImageView
-        android:id="@+id/media_cover1"
+    <FrameLayout
+        android:id="@+id/media_cover1_container"
         android:layout_width="0dp"
         android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:adjustViewBounds="true"
-        android:background="@drawable/bg_smartspace_media_item"
-        style="@style/MediaPlayer.Album"
-        android:clipToOutline="true"
-        android:scaleType="centerCrop"/>
+        android:background="@drawable/qs_media_light_source">
+        <ImageView
+            android:id="@+id/media_cover1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_smartspace_media_item"
+            style="@style/MediaPlayer.Album"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"/>
+    </FrameLayout>
 
-    <ImageView
-        android:id="@+id/media_cover2"
+    <FrameLayout
+        android:id="@+id/media_cover2_container"
         android:layout_width="0dp"
         android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:adjustViewBounds="true"
-        android:background="@drawable/bg_smartspace_media_item"
-        style="@style/MediaPlayer.Album"
-        android:clipToOutline="true"
-        android:scaleType="centerCrop"/>
+        android:background="@drawable/qs_media_light_source">
+        <ImageView
+            android:id="@+id/media_cover2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_smartspace_media_item"
+            style="@style/MediaPlayer.Album"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"/>
+    </FrameLayout>
 
-    <ImageView
-        android:id="@+id/media_cover3"
+    <FrameLayout
+        android:id="@+id/media_cover3_container"
         android:layout_width="0dp"
         android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:adjustViewBounds="true"
-        android:background="@drawable/bg_smartspace_media_item"
-        style="@style/MediaPlayer.Album"
-        android:clipToOutline="true"
-        android:scaleType="centerCrop"/>
+        android:background="@drawable/qs_media_light_source">
+        <ImageView
+            android:id="@+id/media_cover3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_smartspace_media_item"
+            style="@style/MediaPlayer.Album"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"/>
+    </FrameLayout>
 
-    <ImageView
-        android:id="@+id/media_cover4"
+    <FrameLayout
+        android:id="@+id/media_cover4_container"
         android:layout_width="0dp"
         android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:adjustViewBounds="true"
-        android:background="@drawable/bg_smartspace_media_item"
-        style="@style/MediaPlayer.Album"
-        android:clipToOutline="true"
-        android:scaleType="centerCrop"/>
+        android:background="@drawable/qs_media_light_source">
+        <ImageView
+            android:id="@+id/media_cover4"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_smartspace_media_item"
+            style="@style/MediaPlayer.Album"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"/>
+    </FrameLayout>
 
-    <ImageView
-        android:id="@+id/media_cover5"
+    <FrameLayout
+        android:id="@+id/media_cover5_container"
         android:layout_width="0dp"
         android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:adjustViewBounds="true"
-        android:background="@drawable/bg_smartspace_media_item"
-        style="@style/MediaPlayer.Album"
-        android:clipToOutline="true"
-        android:scaleType="centerCrop"/>
+        android:background="@drawable/qs_media_light_source">
+        <ImageView
+            android:id="@+id/media_cover5"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_smartspace_media_item"
+            style="@style/MediaPlayer.Album"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"/>
+    </FrameLayout>
 
-    <ImageView
-        android:id="@+id/media_cover6"
+    <FrameLayout
+        android:id="@+id/media_cover6_container"
         android:layout_width="0dp"
         android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:adjustViewBounds="true"
-        android:background="@drawable/bg_smartspace_media_item"
-        style="@style/MediaPlayer.Album"
-        android:clipToOutline="true"
-        android:scaleType="centerCrop"/>
+        android:background="@drawable/qs_media_light_source">
+        <ImageView
+            android:id="@+id/media_cover6"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_smartspace_media_item"
+            style="@style/MediaPlayer.Album"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"/>
+    </FrameLayout>
 
     <!-- Long press menu -->
     <TextView

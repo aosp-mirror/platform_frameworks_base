@@ -27,6 +27,8 @@ import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
+import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.annotation.NonNull;
@@ -76,7 +78,6 @@ import java.util.List;
  */
 public class AuthService extends SystemService {
     private static final String TAG = "AuthService";
-    private static final boolean DEBUG = false;
     private static final String SETTING_HIDL_DISABLED =
             "com.android.server.biometrics.AuthService.hidlDisabled";
     private static final int DEFAULT_HIDL_DISABLED = 0;
@@ -208,7 +209,6 @@ public class AuthService extends SystemService {
         public void authenticate(IBinder token, long sessionId, int userId,
                 IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo)
                 throws RemoteException {
-
             // Only allow internal clients to authenticate with a different userId.
             final int callingUserId = UserHandle.getCallingUserId();
             final int callingUid = Binder.getCallingUid();
@@ -222,17 +222,18 @@ public class AuthService extends SystemService {
             }
 
             if (!checkAppOps(callingUid, opPackageName, "authenticate()")) {
-                Slog.e(TAG, "Denied by app ops: " + opPackageName);
-                return;
-            }
-
-            if (!Utils.isForeground(callingUid, callingPid)) {
-                Slog.e(TAG, "Caller is not foreground: " + opPackageName);
+                authenticateFastFail("Denied by app ops: " + opPackageName, receiver);
                 return;
             }
 
             if (token == null || receiver == null || opPackageName == null || promptInfo == null) {
-                Slog.e(TAG, "Unable to authenticate, one or more null arguments");
+                authenticateFastFail(
+                        "Unable to authenticate, one or more null arguments", receiver);
+                return;
+            }
+
+            if (!Utils.isForeground(callingUid, callingPid)) {
+                authenticateFastFail("Caller is not foreground: " + opPackageName, receiver);
                 return;
             }
 
@@ -254,6 +255,17 @@ public class AuthService extends SystemService {
                         token, sessionId, userId, receiver, opPackageName, promptInfo);
             } finally {
                 Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        private void authenticateFastFail(String message, IBiometricServiceReceiver receiver) {
+            // notify caller in cases where authentication is aborted before calling into
+            // IBiometricService without raising an exception
+            Slog.e(TAG, message);
+            try {
+                receiver.onError(TYPE_NONE, BIOMETRIC_ERROR_CANCELED, 0 /*vendorCode */);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "authenticateFastFail failed to notify caller", e);
             }
         }
 

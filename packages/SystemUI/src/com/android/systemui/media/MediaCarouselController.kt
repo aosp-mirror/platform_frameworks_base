@@ -171,7 +171,7 @@ class MediaCarouselController @Inject constructor(
         visualStabilityCallback = VisualStabilityManager.Callback {
             if (needsReordering) {
                 needsReordering = false
-                reorderAllPlayers()
+                reorderAllPlayers(previousVisiblePlayerKey = null)
             }
 
             keysNeedRemoval.forEach { removePlayer(it) }
@@ -285,7 +285,7 @@ class MediaCarouselController @Inject constructor(
         return mediaCarousel
     }
 
-    private fun reorderAllPlayers() {
+    private fun reorderAllPlayers(previousVisiblePlayerKey: MediaPlayerData.MediaSortKey?) {
         mediaContent.removeAllViews()
         for (mediaPlayer in MediaPlayerData.players()) {
             mediaPlayer.playerViewHolder?.let {
@@ -299,9 +299,16 @@ class MediaCarouselController @Inject constructor(
         // Automatically scroll to the active player if needed
         if (shouldScrollToActivePlayer) {
             shouldScrollToActivePlayer = false
-            val activeMediaIndex = MediaPlayerData.activeMediaIndex()
+            val activeMediaIndex = MediaPlayerData.firstActiveMediaIndex()
             if (activeMediaIndex != -1) {
-                mediaCarouselScrollHandler.scrollToActivePlayer(activeMediaIndex)
+                previousVisiblePlayerKey?.let {
+                    val previousVisibleIndex = MediaPlayerData.playerKeys()
+                        .indexOfFirst { key -> it == key }
+                    mediaCarouselScrollHandler
+                        .scrollToPlayer(previousVisibleIndex, activeMediaIndex)
+                } ?: {
+                    mediaCarouselScrollHandler.scrollToPlayer(destIndex = activeMediaIndex)
+                }
             }
         }
     }
@@ -310,6 +317,8 @@ class MediaCarouselController @Inject constructor(
     private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData): Boolean {
         val dataCopy = data.copy(backgroundColor = bgColor)
         val existingPlayer = MediaPlayerData.getMediaPlayer(key, oldKey)
+        val curVisibleMediaKey = MediaPlayerData.playerKeys()
+            .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
         if (existingPlayer == null) {
             var newPlayer = mediaControlPanelFactory.get()
             newPlayer.attachPlayer(
@@ -322,12 +331,12 @@ class MediaCarouselController @Inject constructor(
             newPlayer.setListening(currentlyExpanded)
             MediaPlayerData.addMediaPlayer(key, dataCopy, newPlayer)
             updatePlayerToState(newPlayer, noAnimation = true)
-            reorderAllPlayers()
+            reorderAllPlayers(curVisibleMediaKey)
         } else {
             existingPlayer.bindPlayer(dataCopy, key)
             MediaPlayerData.addMediaPlayer(key, dataCopy, existingPlayer)
             if (visualStabilityManager.isReorderingAllowed || shouldScrollToActivePlayer) {
-                reorderAllPlayers()
+                reorderAllPlayers(curVisibleMediaKey)
             } else {
                 needsReordering = true
             }
@@ -367,9 +376,11 @@ class MediaCarouselController @Inject constructor(
             ViewGroup.LayoutParams.WRAP_CONTENT)
         newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
         newRecs.bindRecommendation(data.copy(backgroundColor = bgColor))
+        val curVisibleMediaKey = MediaPlayerData.playerKeys()
+            .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
         MediaPlayerData.addMediaRecommendation(key, data, newRecs, shouldPrioritize)
         updatePlayerToState(newRecs, noAnimation = true)
-        reorderAllPlayers()
+        reorderAllPlayers(curVisibleMediaKey)
         updatePageIndicator()
         mediaCarousel.requiresRemeasuring = true
         // Check postcondition: mediaContent should have the same number of children as there are
@@ -719,9 +730,8 @@ internal object MediaPlayerData {
     )
 
     private val comparator =
-        compareByDescending<MediaSortKey>
-            { if (shouldPrioritizeSs) it.isSsMediaRec else !it.isSsMediaRec }
-            .thenByDescending { it.data.isPlaying }
+        compareByDescending<MediaSortKey> { it.data.isPlaying }
+            .thenByDescending { if (shouldPrioritizeSs) it.isSsMediaRec else !it.isSsMediaRec }
             .thenByDescending { it.data.isLocalSession }
             .thenByDescending { !it.data.resumption }
             .thenByDescending { it.updateTime }
@@ -771,8 +781,10 @@ internal object MediaPlayerData {
 
     fun players() = mediaPlayers.values
 
+    fun playerKeys() = mediaPlayers.keys
+
     /** Returns the index of the first non-timeout media. */
-    fun activeMediaIndex(): Int {
+    fun firstActiveMediaIndex(): Int {
         mediaPlayers.entries.forEachIndexed { index, e ->
             if (!e.key.isSsMediaRec && e.key.data.active) {
                 return index
@@ -790,8 +802,6 @@ internal object MediaPlayerData {
         }
         return null
     }
-
-    fun playerKeys() = mediaPlayers.keys
 
     @VisibleForTesting
     fun clear() {
