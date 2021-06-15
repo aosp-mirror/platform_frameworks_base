@@ -210,7 +210,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modo de depuración de erros ao conectarse á wifi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Produciuse un erro"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuración sen fíos"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e usar os dispositivos dispoñibles, activa a depuración sen fíos"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e usar os dispositivos dispoñibles, activa a depuración sen fíos."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Vincular o dispositivo cun código QR"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Vincula dispositivos novos mediante un escáner de códigos QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Vincular o dispositivo co código de vinculación"</string>

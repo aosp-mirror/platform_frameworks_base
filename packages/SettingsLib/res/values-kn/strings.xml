@@ -388,7 +388,7 @@
     <string name="loading_injected_setting_summary" msgid="8394446285689070348">"ಲೋಡ್ ಆಗುತ್ತಿದೆ…"</string>
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"ಸ್ಪಂದನಾತ್ಮಕ (ಡೀಫಾಲ್ಟ್)"</item>
-    <item msgid="9112200311983078311">"ಪ್ರಾಕೃತಿಕ"</item>
+    <item msgid="9112200311983078311">"ಸ್ವಾಭಾವಿಕ"</item>
     <item msgid="6564241960833766170">"ಪ್ರಮಾಣಿತ"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
@@ -457,8 +457,8 @@
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ನಿರ್ವಾಹಕರ ಮೂಲಕ ನಿಯಂತ್ರಿಸಲಾಗಿದೆ"</string>
     <string name="disabled" msgid="8017887509554714950">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ಅನುಮತಿಸಲಾಗಿದೆ"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"ಅಪರಿಚಿತ ಆ್ಯಪ್‍‍ಗಳನ್ನು ಸ್ಥಾಪಿಸಿ"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"ಅನುಮತಿ ಇಲ್ಲ"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"ಅಪರಿಚಿತ ಆ್ಯಪ್‍‍ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
     <string name="home" msgid="973834627243661438">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಮುಖಪುಟ"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

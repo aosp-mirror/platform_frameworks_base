@@ -210,7 +210,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi కనెక్ట్ అయి ఉన్నప్పుడు, డీబగ్ మోడ్‌లో ఉంచు"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ఎర్రర్"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"వైర్‌లెస్ డీబగ్గింగ్"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"అందుబాటులో వున్న పరికరాలను చూడటానికి, ఉపయోగించడానికి, వైర్‌లెస్ డీబగ్గింగ్‌ను ఆన్ చేయండి"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"అందుబాటులో ఉన్న పరికరాలను చూడటానికి, ఉపయోగించడానికి, వైర్‌లెస్ డీబగ్గింగ్‌ను ఆన్ చేయండి"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR కోడ్‌తో పరికరాన్ని పెయిర్ చేయండి"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR కోడ్ స్కానర్‌ను ఉపయోగించి కొత్త పరికరాలను పెయిర్ చేయండి"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"పెయిరింగ్ కోడ్‌తో పరికరాన్ని పెయిర్ చేయండి"</string>
@@ -225,7 +225,7 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"పరికరంతో పెయిర్ చేయండి"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi పెయిరింగ్ కోడ్"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"పెయిరింగ్ విఫలమైంది"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"పరికరం అదే నెట్‌వర్క్‌కు కనెక్ట్ అయి వుందో లేదో సరి చూసుకోండి."</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"పరికరం అదే నెట్‌వర్క్‌కు కనెక్ట్ చేయబడి ఉందని నిర్ధారించుకోండి."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR కోడ్‌ను స్కాన్ చేయడం ద్వారా Wi-Fiని ఉపయోగించి పరికరాన్ని పెయిర్ చెయ్యండి"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"పరికరం పెయిర్ చేయబడుతోంది…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"పరికరాన్ని పెయిర్ చేయడం విఫలమైంది. QR కోడ్ తప్పుగా ఉండడం గాని, లేదా పరికరం అదే నెట్‌వర్క్‌కు కనెక్ట్ అయి లేకపోవడం గాని జరిగింది."</string>
@@ -545,7 +545,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"ప్రొఫైల్ సమాచారం"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"మీరు పరిమితం చేయబడిన ప్రొఫైల్‌ను సృష్టించడానికి ముందు, మీ యాప్‌లు మరియు వ్యక్తిగత డేటాను రక్షించడానికి స్క్రీన్ లాక్‌ను సెటప్ చేయాల్సి ఉంటుంది."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"లాక్‌ను సెట్ చేయి"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>కు మార్చు"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>కు స్విచ్ చేయి"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"గెస్ట్‌ను జోడించండి"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"గెస్ట్‌ను తీసివేయండి"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"గెస్ట్"</string>

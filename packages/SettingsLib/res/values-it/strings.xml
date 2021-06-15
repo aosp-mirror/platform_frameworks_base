@@ -210,7 +210,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modalità debug in caso di connessione Wi-Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Errore"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Debug wireless"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Per trovare e utilizzare i dispositivi disponibili, attiva il debug wireless"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Per trovare e utilizzare i dispositivi disponibili, attiva il debug wireless."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Accoppia dispositivo con codice QR"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Accoppia i nuovi dispositivi utilizzando lo scanner di codici QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Accoppia dispositivo con codice di accoppiamento"</string>
