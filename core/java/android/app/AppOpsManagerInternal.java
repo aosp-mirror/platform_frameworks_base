@@ -16,9 +16,9 @@
 
 package android.app;
 
-import android.app.AppOpsManager.AttributionFlags;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager.AttributionFlags;
 import android.content.AttributionSource;
 import android.os.IBinder;
 import android.util.SparseArray;
@@ -193,4 +193,10 @@ public abstract class AppOpsManagerInternal {
      */
     public abstract void setModeFromPermissionPolicy(int code, int uid, @NonNull String packageName,
             int mode, @Nullable IAppOpsCallback callback);
+
+
+    /**
+     * Sets a global restriction on an op code.
+     */
+    public abstract void setGlobalRestriction(int code, boolean restricted, IBinder token);
 }
