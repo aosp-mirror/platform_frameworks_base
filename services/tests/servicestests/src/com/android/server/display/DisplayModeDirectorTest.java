@@ -854,7 +854,7 @@ public class DisplayModeDirectorTest {
                 createDirectorFromRefreshRateArray(new float[] {60.f, 90.f, 110.f}, 0);
         verify(mStatusBarMock, never()).setUdfpsHbmListener(any());
 
-        director.start(createMockSensorManager());
+        director.onBootCompleted();
         verify(mStatusBarMock).setUdfpsHbmListener(eq(director.getUdpfsObserver()));
     }
 
@@ -863,6 +863,7 @@ public class DisplayModeDirectorTest {
         DisplayModeDirector director =
                 createDirectorFromRefreshRateArray(new float[] {60.f, 90.f, 110.f}, 0);
         director.start(createMockSensorManager());
+        director.onBootCompleted();
         ArgumentCaptor<IUdfpsHbmListener> captor =
                 ArgumentCaptor.forClass(IUdfpsHbmListener.class);
         verify(mStatusBarMock).setUdfpsHbmListener(captor.capture());
