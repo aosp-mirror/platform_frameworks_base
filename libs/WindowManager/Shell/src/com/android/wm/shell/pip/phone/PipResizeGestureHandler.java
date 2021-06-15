@@ -536,8 +536,9 @@ public class PipResizeGestureHandler {
                 mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
                         PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE, callback);
             }
+            final float magnetRadiusPercent = (float) mLastResizeBounds.width() / mMinSize.x / 2.f;
             mPipDismissTargetHandler
-                    .setMagneticFieldRadiusPercent((float) mLastResizeBounds.width() / mMinSize.x);
+                    .setMagneticFieldRadiusPercent(magnetRadiusPercent);
             mPipUiEventLogger.log(
                     PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_RESIZE);
         } else {
