@@ -1029,7 +1029,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             if (isStarted && mInProgressEvents == null) {
                 mInProgressEvents = new ArrayMap<>(1);
-            } else if (mPausedInProgressEvents == null) {
+            } else if (!isStarted && mPausedInProgressEvents == null) {
                 mPausedInProgressEvents = new ArrayMap<>(1);
             }
             ArrayMap<IBinder, InProgressStartOpEvent> events = isStarted
@@ -1231,11 +1231,13 @@ public class AppOpsService extends IAppOpsService.Stub {
          */
         void onClientDeath(@NonNull IBinder clientId) {
             synchronized (AppOpsService.this) {
-                if (mInProgressEvents == null) {
+                if (mInProgressEvents == null && mPausedInProgressEvents == null) {
                     return;
                 }
 
-                InProgressStartOpEvent deadEvent = mInProgressEvents.get(clientId);
+                ArrayMap<IBinder, InProgressStartOpEvent> events = isPaused()
+                        ? mPausedInProgressEvents : mInProgressEvents;
+                InProgressStartOpEvent deadEvent = events.get(clientId);
                 if (deadEvent != null) {
                     deadEvent.numUnfinishedStarts = 1;
                 }
@@ -1250,14 +1252,18 @@ public class AppOpsService extends IAppOpsService.Stub {
          * @param newState The new state
          */
         public void onUidStateChanged(@AppOpsManager.UidState int newState) {
-            if (mInProgressEvents == null) {
+            if (mInProgressEvents == null && mPausedInProgressEvents == null) {
                 return;
             }
 
-            int numInProgressEvents = mInProgressEvents.size();
-            List<IBinder> binders = new ArrayList<>(mInProgressEvents.keySet());
+            boolean isRunning = isRunning();
+            ArrayMap<IBinder, AppOpsService.InProgressStartOpEvent> events =
+                    isRunning ? mInProgressEvents : mPausedInProgressEvents;
+
+            int numInProgressEvents = events.size();
+            List<IBinder> binders = new ArrayList<>(events.keySet());
             for (int i = 0; i < numInProgressEvents; i++) {
-                InProgressStartOpEvent event = mInProgressEvents.get(binders.get(i));
+                InProgressStartOpEvent event = events.get(binders.get(i));
 
                 if (event != null && event.getUidState() != newState) {
                     try {
@@ -1272,16 +1278,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                         // Call started() to add a new start event object and then add the
                         // previously removed unfinished start counts back
                         if (proxy != null) {
-                            started(event.getClientId(), proxy.getUid(), proxy.getPackageName(),
-                                    proxy.getAttributionTag(), newState, event.getFlags(), false,
+                            startedOrPaused(event.getClientId(), proxy.getUid(),
+                                    proxy.getPackageName(), proxy.getAttributionTag(), newState,
+                                    event.getFlags(), false, isRunning,
                                     event.getAttributionFlags(), event.getAttributionChainId());
                         } else {
-                            started(event.getClientId(), Process.INVALID_UID, null, null, newState,
-                                    OP_FLAG_SELF, false, event.getAttributionFlags(),
-                                    event.getAttributionChainId());
+                            startedOrPaused(event.getClientId(), Process.INVALID_UID, null, null,
+                                    newState, event.getFlags(), false, isRunning,
+                                    event.getAttributionFlags(), event.getAttributionChainId());
                         }
 
-                        InProgressStartOpEvent newEvent = mInProgressEvents.get(binders.get(i));
+                        InProgressStartOpEvent newEvent = events.get(binders.get(i));
                         if (newEvent != null) {
                             newEvent.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;
                         }
@@ -6494,9 +6501,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             int numAttrTags = op.mAttributions.size();
             for (int attrNum = 0; attrNum < numAttrTags; attrNum++) {
                 AttributedOp attrOp = op.mAttributions.valueAt(attrNum);
-                if (restricted) {
+                if (restricted && attrOp.isRunning()) {
                     attrOp.pause();
-                } else {
+                } else if (attrOp.isPaused()) {
                     attrOp.resume();
                 }
             }
