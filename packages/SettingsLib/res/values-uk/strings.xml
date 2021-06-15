@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Показувати межі роликів, поля тощо"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Макет письма справа наліво"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Застосовувати макет письма справа наліво для всіх мов"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Дозволити розмиття вікон"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Примус. запустити 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Увімкнути 4x MSAA в програмах OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Налагодити непрямокутну обрізку"</string>
@@ -510,9 +509,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будильники й нагадування"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Дозволити встановлювати будильники й нагадування"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Будильники й нагадування"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Дозвольте цьому додатку встановлювати будильники й планувати інші події. Цей додаток може працювати, коли ви не користуєтеся телефоном. Через це акумулятор може розряджатися швидше. Якщо цей дозвіл не надано, додаток не зможе працювати належно й будильники не спрацьовуватимуть за графіком."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Дозвольте цьому додатку встановлювати будильники й планувати інші події. Цей додаток може працювати, коли ви не користуєтеся планшетом. Через це акумулятор може розряджатися швидше. Якщо цей дозвіл не надано, додаток не зможе працювати належно й будильники не спрацьовуватимуть за графіком."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Дозвольте цьому додатку встановлювати будильники й планувати інші події. Цей додаток може працювати, коли ви не користуєтеся пристроєм. Через це акумулятор може розряджатися швидше. Якщо цей дозвіл не надано, додаток не зможе працювати належно й будильники не спрацьовуватимуть за графіком."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Дозволити цьому додатку налаштовувати будильники й створювати розклад дій. Додаток зможе працювати у фоновому режимі й використовувати більше заряду акумулятора.\n\nЯкщо вимкнути такий дозвіл, наявні будильники й дії, створені цим додатком, не працюватимуть."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"запланувати, будильник, нагадування, годинник"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Увімкнути"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Увімкнути режим \"Не турбувати\""</string>
@@ -527,7 +524,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Запитувати щоразу"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Доки не вимкнути"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Щойно"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Динамік телефона"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Динамік"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Цей телефон"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Не вдається підключитися. Перезавантажте пристрій."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Дротовий аудіопристрій"</string>
