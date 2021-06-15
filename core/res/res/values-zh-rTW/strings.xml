@@ -250,7 +250,7 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"緊急電話"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"錯誤報告"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"結束"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"擷取螢幕畫面"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"螢幕截圖"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"錯誤報告"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"這會收集你目前裝置狀態的相關資訊，以便透過電子郵件傳送。從錯誤報告開始建立到準備傳送的這段過程可能需要一點時間，敬請耐心等候。"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"互動式報告"</string>
@@ -1459,6 +1459,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"允許應用程式要求刪除套件。"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"要求忽略電池效能最佳化設定"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"允許應用程式要求權限，以便忽略針對該應用程式的電池效能最佳化設定。"</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"點兩下以進行縮放控制"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"無法新增小工具。"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"開始"</string>
@@ -2136,7 +2140,7 @@
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"快速設定"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"開啟電源對話方塊"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"螢幕鎖定"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"擷取螢幕畫面"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"螢幕截圖"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"螢幕上的無障礙捷徑"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"螢幕上的無障礙捷徑選擇器"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"無障礙捷徑"</string>

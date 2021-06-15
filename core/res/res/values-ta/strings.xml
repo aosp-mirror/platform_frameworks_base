@@ -1459,6 +1459,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"தொகுப்புகளை நீக்க கோர, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"பேட்டரி மேம்படுத்தல்களைப் புறக்கணிப்பதற்கான அனுமதியைக் கோரு"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"பயன்பாட்டிற்கான பேட்டரி மேம்படுத்தல்களைப் புறக்கணிப்பதற்கான அனுமதியைக் கோர, ஆப்ஸை அனுமதிக்கும்."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"அளவை மாற்றுவதற்கான கட்டுப்பாட்டிற்கு, இருமுறை தட்டவும்"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"விட்ஜெட்டைச் சேர்க்க முடியவில்லை."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"செல்"</string>

@@ -1459,6 +1459,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"パッケージの削除をリクエストすることをアプリに許可します。"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"電池の最適化を無視するかどうかの確認"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"電池の最適化の無視についてアプリが確認することを許可します。"</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ダブルタップでズームします"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ウィジェットを追加できませんでした。"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"移動"</string>
@@ -2071,7 +2075,7 @@
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」が「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示をリクエストしています"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編集"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"着信や通知をバイブレーションで知らせます"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"着信音と通知音をミュートします"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"着信音と通知音が鳴りません"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"システムの変更"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"サイレント モード"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"新機能: サイレント モードでは通知が非表示になります"</string>
