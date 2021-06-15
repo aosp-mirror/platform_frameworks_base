@@ -2420,17 +2420,16 @@ class Task extends TaskFragment {
 
         // Figure-out min/max possible position depending on if child can show for current user.
         int minPosition = (canShowChild) ? computeMinUserPosition(0, size) : 0;
-        int maxPosition = (canShowChild) ? size - 1 : computeMaxUserPosition(size - 1);
-        if (!hasChild(wc)) {
-            // Increase the maxPosition because children size will grow once wc is added.
-            ++maxPosition;
+        int maxPosition = minPosition;
+        if (size > 0) {
+            maxPosition = (canShowChild) ? size - 1 : computeMaxUserPosition(size - 1);
         }
 
         // Factor in always-on-top children in max possible position.
         if (!wc.isAlwaysOnTop()) {
             // We want to place all non-always-on-top containers below always-on-top ones.
             while (maxPosition > minPosition) {
-                if (!mChildren.get(maxPosition - 1).isAlwaysOnTop()) break;
+                if (!mChildren.get(maxPosition).isAlwaysOnTop()) break;
                 --maxPosition;
             }
         }
@@ -2441,6 +2440,12 @@ class Task extends TaskFragment {
         } else if (suggestedPosition == POSITION_TOP && maxPosition >= (size - 1)) {
             return POSITION_TOP;
         }
+
+        // Increase the maxPosition because children size will grow once wc is added.
+        if (!hasChild(wc)) {
+            ++maxPosition;
+        }
+
         // Reset position based on minimum/maximum possible positions.
         return Math.min(Math.max(suggestedPosition, minPosition), maxPosition);
     }
