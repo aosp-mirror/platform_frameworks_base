@@ -66,8 +66,8 @@ import java.util.Set;
  * @hide
  */
 public class VisibilityStore {
-    /** No-op user id that won't have any visibility settings. */
-    public static final int NO_OP_USER_ID = -1;
+    /** No-op uid that won't have any visibility settings. */
+    public static final int NO_OP_UID = -1;
 
     /** Version for the visibility schema */
     private static final int SCHEMA_VERSION = 0;
@@ -106,7 +106,7 @@ public class VisibilityStore {
      * @param userContext Context of the user that the call is being made as
      */
     public VisibilityStore(@NonNull AppSearchImpl appSearchImpl, @NonNull Context userContext) {
-        mAppSearchImpl = appSearchImpl;
+        mAppSearchImpl = Objects.requireNonNull(appSearchImpl);
         mUserContext = Objects.requireNonNull(userContext);
     }
 
