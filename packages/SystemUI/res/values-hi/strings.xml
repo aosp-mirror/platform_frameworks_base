@@ -666,7 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ईथरनेट"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
     <string name="wallet_title" msgid="5369767670735827105">"वॉलेट"</string>
-    <string name="wallet_empty_state_label" msgid="7776761245237530394">"फ़ोन पर तेज़ी से और सुरक्षित तरीके से खरीदारी करने के लिए सेट अप करें"</string>
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"फ़ोन के ज़रिए तेज़ी से और सुरक्षित तरीके से खरीदारी करने के लिए सेट अप करें"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"सभी दिखाएं"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"पैसे चुकाने के लिए, डिवाइस अनलॉक करें"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"सेट अप नहीं किया गया है"</string>
