@@ -41,14 +41,14 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:singleLine="true"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="@dimen/name_text_size_for_large" />
         <TextView
             android:id="@+id/last_interaction"
             android:text="@string/empty_status"
             android:textColor="?android:attr/textColorSecondary"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
             android:textSize="@dimen/content_text_size_for_large"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

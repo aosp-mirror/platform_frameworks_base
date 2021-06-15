@@ -104,7 +104,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private static final int MAX_NUM_LOGGED_GESTURES = 10;
 
     // Temporary log until b/176302696 is resolved
-    static final boolean DEBUG_MISSING_GESTURE = true;
+    static final boolean DEBUG_MISSING_GESTURE = false;
     static final String DEBUG_MISSING_GESTURE_TAG = "NoBackGesture";
 
     private static final boolean ENABLE_PER_WINDOW_INPUT_ROTATION =
@@ -146,6 +146,16 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             } else {
                 mPackageName = "_UNKNOWN";
             }
+        }
+
+        @Override
+        public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
+            mIsInPipMode = true;
+        }
+
+        @Override
+        public void onActivityUnpinned() {
+            mIsInPipMode = false;
         }
     };
 
@@ -220,6 +230,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private boolean mIsNavBarShownTransiently;
     private boolean mIsBackGestureAllowed;
     private boolean mGestureBlockingActivityRunning;
+    private boolean mIsInPipMode;
 
     private InputMonitor mInputMonitor;
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
@@ -533,16 +544,16 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                 resources.getDimensionPixelSize(R.dimen.navigation_edge_panel_height),
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
+        layoutParams.accessibilityTitle = mContext.getString(R.string.nav_bar_edge_panel);
+        layoutParams.windowAnimations = 0;
         layoutParams.privateFlags |=
                 WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         layoutParams.setTitle(TAG + mContext.getDisplayId());
-        layoutParams.accessibilityTitle = mContext.getString(R.string.nav_bar_edge_panel);
-        layoutParams.windowAnimations = 0;
         layoutParams.setFitInsetsTypes(0 /* types */);
+        layoutParams.setTrustedOverlay();
         return layoutParams;
     }
 
@@ -636,7 +647,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
 
         // If the point is inside the PiP or Nav bar overlay excluded bounds, then ignore the back
         // gesture
-        if (mPipExcludedBounds.contains(x, y) || mNavBarOverlayExcludedBounds.contains(x, y)) {
+        final boolean isInsidePip = mIsInPipMode && mPipExcludedBounds.contains(x, y);
+        if (isInsidePip || mNavBarOverlayExcludedBounds.contains(x, y)) {
             return false;
         }
 
@@ -898,6 +910,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         pw.println("  mInRejectedExclusion" + mInRejectedExclusion);
         pw.println("  mExcludeRegion=" + mExcludeRegion);
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);
+        pw.println("  mIsInPipMode=" + mIsInPipMode);
         pw.println("  mPipExcludedBounds=" + mPipExcludedBounds);
         pw.println("  mNavBarOverlayExcludedBounds=" + mNavBarOverlayExcludedBounds);
         pw.println("  mEdgeWidthLeft=" + mEdgeWidthLeft);

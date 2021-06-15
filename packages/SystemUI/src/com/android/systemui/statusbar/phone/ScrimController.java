@@ -359,21 +359,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mAnimateChange = state.getAnimateChange();
         mAnimationDuration = state.getAnimationDuration();
 
-        mInFrontTint = state.getFrontTint();
-        mBehindTint = state.getBehindTint();
-        mNotificationsTint = state.getNotifTint();
-        mBubbleTint = state.getBubbleTint();
-
-        mInFrontAlpha = state.getFrontAlpha();
-        mBehindAlpha = state.getBehindAlpha();
-        mBubbleAlpha = state.getBubbleAlpha();
-        mNotificationsAlpha = state.getNotifAlpha();
-        if (isNaN(mBehindAlpha) || isNaN(mInFrontAlpha) || isNaN(mNotificationsAlpha)) {
-            throw new IllegalStateException("Scrim opacity is NaN for state: " + state + ", front: "
-                    + mInFrontAlpha + ", back: " + mBehindAlpha + ", notif: "
-                    + mNotificationsAlpha);
-        }
-        applyStateToAlpha();
+        applyState();
 
         // Scrim might acquire focus when user is navigating with a D-pad or a keyboard.
         // We need to disable focus otherwise AOD would end up with a gray overlay.
@@ -637,12 +623,24 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
     }
 
-    private void applyStateToAlpha() {
+    private void applyState() {
+        mInFrontTint = mState.getFrontTint();
+        mBehindTint = mState.getBehindTint();
+        mNotificationsTint = mState.getNotifTint();
+        mBubbleTint = mState.getBubbleTint();
+
+        mInFrontAlpha = mState.getFrontAlpha();
+        mBehindAlpha = mState.getBehindAlpha();
+        mBubbleAlpha = mState.getBubbleAlpha();
+        mNotificationsAlpha = mState.getNotifAlpha();
+
+        assertAlphasValid();
+
         if (!mExpansionAffectsAlpha) {
             return;
         }
 
-        if (mState == ScrimState.UNLOCKED) {
+        if (mState == ScrimState.UNLOCKED || mState == ScrimState.BUBBLE_EXPANDED) {
             // Darken scrim as you pull down the shade when unlocked, unless the shade is expanding
             // because we're doing the screen off animation.
             if (!mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
@@ -657,12 +655,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 }
                 mInFrontAlpha = 0;
             }
-        } else if (mState == ScrimState.BUBBLE_EXPANDED) {
-            // Darken scrim as you pull down the shade when unlocked
-            float behindFraction = getInterpolatedFraction();
-            behindFraction = (float) Math.pow(behindFraction, 0.8f);
-            mBehindAlpha = behindFraction * mDefaultScrimAlpha;
-            mInFrontAlpha = 0;
         } else if (mState == ScrimState.KEYGUARD || mState == ScrimState.SHADE_LOCKED
                 || mState == ScrimState.PULSING) {
             Pair<Integer, Float> result = calculateBackStateForState(mState);
@@ -701,6 +693,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mBehindTint = behindTint;
             }
         }
+
+        assertAlphasValid();
+    }
+
+    private void assertAlphasValid() {
         if (isNaN(mBehindAlpha) || isNaN(mInFrontAlpha) || isNaN(mNotificationsAlpha)) {
             throw new IllegalStateException("Scrim opacity is NaN for state: " + mState
                     + ", front: " + mInFrontAlpha + ", back: " + mBehindAlpha + ", notif: "
@@ -740,7 +737,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
 
     private void applyAndDispatchState() {
-        applyStateToAlpha();
+        applyState();
         if (mUpdatePending) {
             return;
         }
@@ -1209,6 +1206,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         pw.println(" ScrimController: ");
         pw.print("  state: ");
         pw.println(mState);
+        pw.println("    mClipQsScrim = " + mState.mClipQsScrim);
 
         pw.print("  frontScrim:");
         pw.print(" viewAlpha=");

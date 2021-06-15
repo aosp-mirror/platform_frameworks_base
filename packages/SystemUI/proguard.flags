@@ -10,6 +10,11 @@
   public void setGlowScale(float);
 }
 
+-keep class com.android.systemui.settings.brightness.BrightnessSliderView {
+  public float getSliderScaleY();
+  public void setSliderScaleY(float);
+}
+
 -keep class com.android.systemui.recents.OverviewProxyRecentsImpl
 -keep class com.android.systemui.statusbar.car.CarStatusBar
 -keep class com.android.systemui.statusbar.phone.StatusBar

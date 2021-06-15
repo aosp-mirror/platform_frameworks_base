@@ -9458,6 +9458,7 @@ package android.bluetooth {
     field public static final int STATE_CONNECTING = 1; // 0x1
     field public static final int STATE_DISCONNECTED = 0; // 0x0
     field public static final int STATE_DISCONNECTING = 3; // 0x3
+    field public static final int VOLUME_CONTROL = 23; // 0x17
   }
 
   public static interface BluetoothProfile.ServiceListener {

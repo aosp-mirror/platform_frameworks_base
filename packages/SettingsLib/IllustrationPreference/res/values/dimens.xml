@@ -18,4 +18,7 @@
 <resources>
     <!-- Padding of illustration -->
     <dimen name="settingslib_illustration_padding">12dp</dimen>
+
+    <dimen name="settingslib_illustration_width">412dp</dimen>
+    <dimen name="settingslib_illustration_height">300dp</dimen>
 </resources>
