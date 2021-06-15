@@ -62,6 +62,10 @@ import java.util.Objects;
  * <p>The service should have an intent filter in place for the location provider it wishes to
  * implements. Defaults for some providers are specified as constants in this class.
  *
+ * <p>Location providers are identified by their UID / package name / attribution tag. Based on this
+ * identity, location providers may be given some special privileges (such as making special
+ * requests to other location providers).
+ *
  * @hide
  */
 @SystemApi
@@ -95,14 +99,14 @@ public abstract class LocationProviderBase {
     public static final String ACTION_FUSED_PROVIDER =
             "com.android.location.service.FusedLocationProvider";
 
-    private final String mTag;
-    private final @Nullable String mAttributionTag;
-    private final IBinder mBinder;
+    final String mTag;
+    final @Nullable String mAttributionTag;
+    final IBinder mBinder;
 
     // write locked on mBinder, read lock is optional depending on atomicity requirements
-    private @Nullable volatile ILocationProviderManager mManager;
-    private volatile ProviderProperties mProperties;
-    private volatile boolean mAllowed;
+    volatile @Nullable ILocationProviderManager mManager;
+    volatile ProviderProperties mProperties;
+    volatile boolean mAllowed;
 
     public LocationProviderBase(@NonNull Context context, @NonNull String tag,
             @NonNull ProviderProperties properties) {
