@@ -192,7 +192,6 @@ public class LongScreenshotActivity extends Activity {
         mLongScreenshot = longScreenshot;
         Drawable drawable = mLongScreenshot.getDrawable();
         mPreview.setImageDrawable(drawable);
-        mCropView.setVisibility(View.VISIBLE);
         mMagnifierView.setDrawable(mLongScreenshot.getDrawable(),
                 mLongScreenshot.getWidth(), mLongScreenshot.getHeight());
         // Original boundaries go from the image tile set's y=0 to y=pageSize, so
@@ -219,10 +218,12 @@ public class LongScreenshotActivity extends Activity {
                                         public void onTransitionEnd(Transition transition) {
                                             super.onTransitionEnd(transition);
                                             mPreview.animate().alpha(1f);
-                                            mCropView.animateBoundaryTo(
+                                            mCropView.setBoundaryPosition(
                                                     CropView.CropBoundary.TOP, topFraction);
-                                            mCropView.animateBoundaryTo(
+                                            mCropView.setBoundaryPosition(
                                                     CropView.CropBoundary.BOTTOM, bottomFraction);
+                                            mCropView.animateEntrance();
+                                            mCropView.setVisibility(View.VISIBLE);
                                             setButtonsEnabled(true);
                                             mEnterTransitionView.setVisibility(View.GONE);
                                         }
