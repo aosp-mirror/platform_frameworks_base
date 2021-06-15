@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Паказаць межы абрэзкі, палі і г. д."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Прымусовая раскладка справа налева"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Прымусовая раскладка экрана справа налева для ўсіх рэгіянальных налад"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Размываць на ўзроўні акна"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Прымусовае выкананне 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Уключыць 4x MSAA у праграмах з OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Адладка аперацый непрамавугольнага кліпа"</string>
@@ -510,9 +509,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будзільнікі і напаміны"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Дазволіць усталёўваць будзільнікі і напаміны"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Будзільнікі і напаміны"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Дазвольце гэтай праграме ўсталёўваць будзільнікі і задаваць расклад для дзеянняў. Праграма можа працаваць, калі вы не выкарыстоўваеце тэлефон, і ў выніку хутчэй разраджаць акумулятар. Калі гэты дазвол выключаны, праграма можа не працаваць належым чынам, а яе будзільнікі – не спрацоўваць як запланавана."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Дазвольце гэтай праграме ўсталёўваць будзільнікі і задаваць расклад для дзеянняў. Праграма можа працаваць, калі вы не выкарыстоўваеце планшэт, і ў выніку хутчэй разраджаць акумулятар. Калі гэты дазвол выключаны, праграма можа не працаваць належым чынам, а яе будзільнікі – не спрацоўваць як запланавана."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Дазвольце гэтай праграме ўсталёўваць будзільнікі і задаваць расклад для дзеянняў. Праграма можа працаваць, калі вы не выкарыстоўваеце прыладу, і ў выніку хутчэй разраджаць акумулятар. Калі гэты дазвол выключаны, праграма можа не працаваць належым чынам, а яе будзільнікі – не спрацоўваць як запланавана."</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"расклад, будзільнік, напамін, гадзіннік"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Уключыць"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Уключэнне рэжыму \"Не турбаваць\""</string>

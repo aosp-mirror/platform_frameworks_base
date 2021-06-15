@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"顯示剪輯範圍、邊界等"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"強制使用從右至左的版面配置方向"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"強制將所有語言代碼的畫面配置方向改為從右至左"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"允許視窗層級模糊處理"</string>
     <string name="force_msaa" msgid="4081288296137775550">"強制 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"在 OpenGL ES 2.0 應用程式中啟用 4x MSAA"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"對非矩形裁剪操作進行偵錯"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"鬧鐘和提醒"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"允許設定鬧鐘和提醒"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"鬧鐘和提醒"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"允許此應用程式設定鬧鐘並安排其他操作。此應用程式可能會在您未使用手機時執行，裝置或會較耗電。如果關閉此權限，此應用程式可能無法正常運作，已設定的鬧鐘亦不會在預定的時間響起。"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"允許此應用程式設定鬧鐘並安排其他操作。此應用程式可能會在您未使用平板電腦時執行，裝置或會較耗電。如果關閉此權限，此應用程式可能無法正常運作，已設定的鬧鐘亦不會在預定的時間響起。"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"允許此應用程式設定鬧鐘並安排其他操作。此應用程式可能會在您未使用裝置時執行，裝置或會較耗電。如果關閉此權限，此應用程式可能無法正常運作，已設定的鬧鐘亦不會在預定的時間響起。"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允許此應用程式設定鬧鐘及安排具時效性的操作。這讓應用程式在背景中執行，因此可能會較耗電。\n\n如果關閉此權限，此應用程式將不會在預定時間響起已設定的鬧鐘，亦不會就特定時間的活動傳送通知。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"日程表, 鬧鐘, 提醒, 時鐘"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"開啟"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"開啟「請勿騷擾」模式"</string>
