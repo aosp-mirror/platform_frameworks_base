@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Näytä leikkeiden rajat, marginaalit jne."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Pakota RTL-ulkoasun suunta"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Pakota kaikkien kielten näytön ulkoasun suunnaksi RTL"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Salli ikkunoiden sumennus"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Pakota 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Ota käyttöön 4x MSAA OpenGL ES 2.0 -sovelluksissa"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Korjaa ei-suorakulmaisten leiketoimintojen virheet"</string>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Herätykset ja muistutukset"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Salli herätysten ja muistutusten lisääminen"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Herätykset ja muistutukset"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Salli sovelluksen lisätä herätyksiä ja ajoittaa muita toimintoja. Sovellus voi olla käytössä, vaikka et käyttäisi puhelintasi, mikä voi kuluttaa enemmän virtaa. Ilman tätä lupaa sovellus ei välttämättä toimi normaalisti, eivätkä sen herätykset toimi aikataulun mukaisesti."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Salli sovelluksen lisätä herätyksiä ja ajoittaa muita toimintoja. Sovellus voi olla käytössä, vaikka et käyttäisi tablettiasi, mikä voi kuluttaa enemmän virtaa. Ilman tätä lupaa sovellus ei välttämättä toimi normaalisti, eivätkä sen herätykset toimi aikataulun mukaisesti."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Salli sovelluksen lisätä herätyksiä ja ajoittaa muita toimintoja. Sovellus voi olla käytössä, vaikka et käyttäisi laitettasi, mikä voi kuluttaa enemmän virtaa. Ilman tätä lupaa sovellus ei välttämättä toimi normaalisti, eivätkä sen herätykset toimi aikataulun mukaisesti."</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ajoitus, herätys, muistutus, kello"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ota käyttöön"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ota Älä häiritse ‑tila käyttöön"</string>
@@ -579,7 +577,7 @@
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Laitteesi on käynnistettävä uudelleen, jotta muutos tulee voimaan. Käynnistä uudelleen nyt tai peru."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Langalliset kuulokkeet"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Päällä"</string>
-    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Poissa päältä"</string>
+    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Ei käytössä"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Operaattorin verkko muuttuu"</string>
     <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
     <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>

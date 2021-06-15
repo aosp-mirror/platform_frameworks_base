@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Muestra límites de vídeo, márgenes, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forzar dirección de diseño RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Fuerza la dirección RTL para todos los idiomas"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Difuminar ventanas"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forzar MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Habilita MSAA 4x en aplicaciones de OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operaciones de recorte no rectangulares"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmas y recordatorios"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir la programación de alarmas y recordatorios"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmas y recordatorios"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Permite que esta aplicación programe alarmas y otras acciones. Puede que la aplicación siga funcionando aunque no estés usando el teléfono, lo que puede consumir más batería. Si este permiso está desactivado, es posible que esta aplicación no funcione correctamente y que las alarmas no se activen según estén programadas."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Permite que esta aplicación programe alarmas y otras acciones. Puede que la aplicación siga funcionando aunque no estés usando el tablet, lo que puede consumir más batería. Si este permiso está desactivado, es posible que esta aplicación no funcione correctamente y que las alarmas no se activen según estén programadas."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Permite que esta aplicación programe alarmas y otras acciones. Puede que la aplicación siga funcionando aunque no estés usando el dispositivo, lo que puede consumir más batería. Si este permiso está desactivado, es posible que esta aplicación no funcione correctamente y que las alarmas no se activen según estén programadas."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permite que esta aplicación programe alarmas y otras acciones de carácter temporal. Este permite sirve para que la aplicación siga activa en segundo plano, lo que puede usar más batería.\n\nSi este permiso está desactivados, no funcionarán las alarmas ni los eventos con carácter temporal programados por esta aplicación."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programar, alarma, recordatorio, reloj"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activar"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activar el modo No molestar"</string>

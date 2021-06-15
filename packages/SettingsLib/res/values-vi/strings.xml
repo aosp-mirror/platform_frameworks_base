@@ -150,7 +150,7 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Chia sẻ Internet"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Chia sẻ Internet và điểm phát sóng di động"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Tất cả ứng dụng làm việc"</string>
-    <string name="user_guest" msgid="6939192779649870792">"Khách"</string>
+    <string name="user_guest" msgid="6939192779649870792">"Chế độ khách"</string>
     <string name="unknown" msgid="3544487229740637809">"Không xác định"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Người dùng: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Đã đặt một số ứng dụng chạy mặc định"</string>
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Hiện viền của đoạn video, lề, v.v.."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Buộc hướng bố cục phải sang trái"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Buộc hướng bố cục màn hình phải sang trái cho tất cả ngôn ngữ"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Cho phép làm mờ cửa sổ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Bắt buộc 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Bật 4x MSAA trong ứng dụng OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Gỡ lỗi hoạt động của clip không phải là hình chữ nhật"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Chuông báo và lời nhắc"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Cho phép đặt chuông báo và lời nhắc"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Chuông báo và lời nhắc"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Cho phép ứng dụng này đặt chuông báo và lên lịch thực hiện các thao tác khác. Ứng dụng này có thể được sử dụng khi bạn đang không dùng điện thoại. Việc này có thể làm tiêu hao nhiều pin hơn. Nếu quyền này tắt, ứng dụng có thể hoạt động không bình thường và các chuông báo của ứng dụng sẽ không hoạt động đúng như theo lịch."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Cho phép ứng dụng này đặt chuông báo và lên lịch thực hiện các thao tác khác. Ứng dụng này có thể được sử dụng khi bạn đang không dùng máy tính bảng. Việc này có thể làm tiêu hao nhiều pin hơn. Nếu quyền này tắt, ứng dụng có thể hoạt động không bình thường và các chuông báo của ứng dụng sẽ không hoạt động đúng như theo lịch."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Cho phép ứng dụng này đặt chuông báo và lên lịch thực hiện các thao tác khác. Ứng dụng này có thể được sử dụng khi bạn đang không dùng thiết bị. Việc này có thể làm tiêu hao nhiều pin hơn. Nếu quyền này tắt, ứng dụng có thể hoạt động không bình thường và các chuông báo của ứng dụng sẽ không hoạt động đúng như theo lịch."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Cho phép ứng dụng này đặt chuông báo và lên lịch các hành động cần chính xác về thời gian. Tùy chọn này cho phép ứng dụng chạy ở chế độ nền và có thể làm tiêu hao nhiều pin.\n\nNếu không cấp quyền này, các chuông báo và sự kiện theo thời gian do ứng dụng này lên lịch sẽ không hoạt động."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"lịch biểu, chuông báo, lời nhắc, đồng hồ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Bật"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Bật chế độ Không làm phiền"</string>

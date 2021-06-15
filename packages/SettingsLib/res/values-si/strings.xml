@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ක්ලිප් සීමා, මායිම්, ආදිය පෙන්වන්න."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"බල RTL පිරිසැලසුම් දිශාව"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"සියලු පෙදෙසි සඳහා RTL වෙත බල තිර පිරිසැලසුම"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"කවුළු මට්. බොඳ කි. ඉඩ දෙ."</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA බල කරන්න"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 යෙදුම්හි 4x MSAA සබල කරන්න"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"සෘජුකෝණාස්‍ර-නොවන ක්ලිප් මෙහෙයුම් නිදොස් කරන්න"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"එලාම සහ සිහිකැඳවීම්"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"එලාම සහ සිහිකැඳවීම් සැකසීමට ඉඩ දෙන්න"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"එලාම සහ සිහිකැඳවීම්"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"එලාම සැකසීමට සහ වෙනත් ක්‍රියා කාල සටහන්ගත කිරීමට මෙම යෙදුමට ඉඩ දෙන්න. ඔබ ඔබගේ දුරකථනය භාවිත නොකරන විට මෙම යෙදුම භාවිත කළ හැකිය, එය බැටරිය වැඩියෙන් භාවිත කළ හැකිය. මෙම අවසරය ක්‍රියාවිරහිත නම්, මෙම යෙදුම සාමාන්‍ය ආකාරයට ක්‍රියා නොකළ හැකි අතර, එහි එලාම කාල සටහන්ගත කර ඇති පරිදි ක්‍රියා නොකරනු ඇත."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"එලාම සැකසීමට සහ වෙනත් ක්‍රියා කාල සටහන්ගත කිරීමට මෙම යෙදුමට ඉඩ දෙන්න. ඔබ ඔබගේ ටැබ්ලටය භාවිත නොකරන විට මෙම යෙදුම භාවිත කළ හැකිය, එය බැටරිය වැඩියෙන් භාවිත කළ හැකිය. මෙම අවසරය ක්‍රියාවිරහිත නම්, මෙම යෙදුම සාමාන්‍ය ආකාරයට ක්‍රියා නොකළ හැකි අතර, එහි එලාම කාල සටහන්ගත කර ඇති පරිදි ක්‍රියා නොකරනු ඇත."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"එලාම සැකසීමට සහ වෙනත් ක්‍රියා කාල සටහන්ගත කිරීමට මෙම යෙදුමට ඉඩ දෙන්න. ඔබ ඔබගේ උපාංගය භාවිත නොකරන විට මෙම යෙදුම භාවිත කළ හැකිය, එය බැටරිය වැඩියෙන් භාවිත කළ හැකිය. මෙම අවසරය ක්‍රියාවිරහිත නම්, මෙම යෙදුම සාමාන්‍ය ආකාරයට ක්‍රියා නොකළ හැකි අතර, එහි එලාම කාල සටහන්ගත කර ඇති පරිදි ක්‍රියා නොකරනු ඇත."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"එලාම සැකසීමට සහ කාල සංවේදී ක්‍රියා කාලසටහන්ගත කිරීමට මෙම යෙදුමට ඉඩ දෙන්න. මෙය පසුබිමේ ධාවනය වීමට යෙදුමට ඉඩ දෙයි, එය වැඩි බැටරිය වැඩියෙන් භාවිත කළ හැකිය.\n\nමෙම අවසරය ක්‍රියාවිරහිත නම්, මෙම යෙදුම මඟින් සැලසුම් කර ඇති තිබෙන එලාම සහ වේලාව පදනම් කර ගත් සිදුවීම් ක්‍රියා නොකරනු ඇත."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"කාල සටහන, එලාමය, සිහිකැඳවීම, ඔරලෝසුව"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ක්‍රියාත්මක කරන්න"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"බාධා නොකරන්න ක්‍රියාත්මක කරන්න"</string>

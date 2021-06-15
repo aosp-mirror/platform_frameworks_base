@@ -211,7 +211,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modo de depuración de erros ao conectarse á wifi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Produciuse un erro"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuración sen fíos"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e usar os dispositivos dispoñibles, activa a depuración sen fíos"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e usar os dispositivos dispoñibles, activa a depuración sen fíos."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Vincular o dispositivo cun código QR"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Vincula dispositivos novos mediante un escáner de códigos QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Vincular o dispositivo co código de vinculación"</string>
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra os límites dos clips, as marxes etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forzar dirección do deseño RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forza a dirección de pantalla a RTL (dereita a esquerda) para todas as configuración rexionais"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Permitir desenfoque ventá"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forzar MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activa MSAA 4x en aplicacións OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar accións recorte non rectangulares"</string>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmas e recordatorios"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir axuste de alarmas e recordatorios"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmas e recordatorios"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Permite que esta aplicación defina alarmas e planifique outras accións. Pode usarse cando non utilices o teléfono, o cal consome máis batería. Se este permiso está desactivado, é posible que a aplicación non funcione con normalidade e que as alarmas non se activen segundo o planificado."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Permite que esta aplicación defina alarmas e planifique outras accións. Pode usarse cando non utilices a tableta, o cal consome máis batería. Se este permiso está desactivado, é posible que a aplicación non funcione con normalidade e que as alarmas non se activen segundo o planificado."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Permite que esta aplicación defina alarmas e planifique outras accións. Pode usarse cando non utilices o dispositivo, o cal consome máis batería. Se este permiso está desactivado, é posible que a aplicación non funcione con normalidade e que as alarmas non se activen segundo o planificado."</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"planificar, alarma, recordatorio, reloxo"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activar"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activar modo Non molestar"</string>
