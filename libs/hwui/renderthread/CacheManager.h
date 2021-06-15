@@ -23,6 +23,7 @@
 #include <SkSurface.h>
 #include <utils/String8.h>
 #include <vector>
+#include "utils/TimeUtils.h"
 
 namespace android {
 
@@ -52,6 +53,8 @@ public:
     size_t getCacheSize() const { return mMaxResourceBytes; }
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }
     void onFrameCompleted();
+
+    void performDeferredCleanup(nsecs_t cleanupOlderThanMillis);
 
 private:
     friend class RenderThread;
