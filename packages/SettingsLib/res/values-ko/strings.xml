@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"클립 경계, 여백 등을 표시"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL 레이아웃 방향 강제 적용"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"모든 언어에 대해 화면 레이아웃 방향을 RTL로 강제 적용"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"창 수준 블러 허용"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA 강제 사용"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 앱에서 4x MSAA 사용"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"사각형이 아닌 클립 작업 디버그"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"알람 및 리마인더"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"알람 및 리마인더 설정 허용"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"알람 및 리마인더"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"앱에서 알람을 설정하고 다른 작업의 일정을 예약할 수 있도록 허용합니다. 휴대전화를 사용하지 않을 때 앱이 사용될 수 있으며 이로 인해 배터리 사용량이 증가할 수 있습니다. 이 권한을 사용 중지하면 앱이 정상 작동하지 않고 알람이 일정대로 실행되지 않을 수 있습니다."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"앱에서 알람을 설정하고 다른 작업의 일정을 예약할 수 있도록 허용합니다. 태블릿을 사용하지 않을 때 앱이 사용될 수 있으며 이로 인해 배터리 사용량이 증가할 수 있습니다. 이 권한을 사용 중지하면 앱이 정상 작동하지 않고 알람이 일정대로 실행되지 않을 수 있습니다."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"앱에서 알람을 설정하고 다른 작업의 일정을 예약할 수 있도록 허용합니다. 기기를 사용하지 않을 때 앱이 사용될 수 있으며 이로 인해 배터리 사용량이 증가할 수 있습니다. 이 권한을 사용 중지하면 앱이 정상 작동하지 않고 알람이 일정대로 실행되지 않을 수 있습니다."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"이 앱이 알람을 설정하고 시간 기반 작업을 예약할 수 있도록 허용합니다. 이렇게 하면 백그라운드에서 앱 실행이 허용되어 배터리 사용량이 증가할 수 있습니다.\n\n이 권한을 사용 중지하면 이 앱에서 예약한 기존의 알람 및 시간 기반 일정이 작동하지 않습니다."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"일정 예약, 알람, 리마인더, 시계"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"사용 설정"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"방해 금지 모드 사용 설정"</string>

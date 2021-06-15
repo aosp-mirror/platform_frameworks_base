@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Prikazuju se obrubi, margine itd. isječaka."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Nametni zdesna ulijevo"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Nametni smjer zdesna ulijevo za sve zemlje/jezike"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Dopusti zamućenja na razini prozora"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Nametni 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Omogući 4x MSAA u aplikacijama OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Otkloni pogreške operacija nepravokutnog isječka"</string>
@@ -509,9 +508,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi i podsjetnici"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Dopusti postavljanje alarma i podsjetnika"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmi i podsjetnici"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Aplikaciji omogućuje da postavlja alarme i zakazuje druge radnje. Aplikacija se može koristiti kad ne upotrebljavate telefon, što može dodatno trošiti bateriju. Ako je to dopuštenje isključeno, aplikacija možda neće funkcionirati kako treba i njezini se alarmi neće oglašavati prema rasporedu."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Aplikaciji omogućuje da postavlja alarme i zakazuje druge radnje. Aplikacija se može koristiti kad ne upotrebljavate tablet, što može dodatno trošiti bateriju. Ako je to dopuštenje isključeno, aplikacija možda neće funkcionirati kako treba i njezini se alarmi neće oglašavati prema rasporedu."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Aplikaciji omogućuje da postavlja alarme i zakazuje druge radnje. Aplikacija se može koristiti kad ne upotrebljavate uređaj, što može dodatno trošiti bateriju. Ako je to dopuštenje isključeno, aplikacija možda neće funkcionirati kako treba i njezini se alarmi neće oglašavati prema rasporedu."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Aplikaciji omogućuje da postavlja alarme i zakazuje vremenski osjetljive radnje. To aplikaciji omogućuje da se izvodi u pozadini, pa je moguće dodatno trošenje baterije.\n\nAko je to dopuštenje isključeno, postojeći alarmi i događaji temeljeni na vremenu koji su zakazani putem ove aplikacije neće funkcionirati."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"raspored, alarm, podsjetnik, sat"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Uključi"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Uključite opciju Ne uznemiravaj."</string>

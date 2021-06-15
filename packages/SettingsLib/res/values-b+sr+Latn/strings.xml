@@ -236,7 +236,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Povežite se na WiFi mrežu"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, otklanjanje grešaka, programer"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Prečica za izveštaj o greškama"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Prikazuje dugme u meniju napajanja za pravljenje izveštaja o greškama"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Prikazuje dugme u meniju dugmeta za uključivanje za pravljenje izveštaja o greškama"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Ne zaključavaj"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Ekran neće biti u režimu spavanja tokom punjenja"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Omogući snoop evid. za Bluetooth HCI"</string>
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Prikazuje granice klipa, margine itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Nametni smer rasporeda zdesna nalevo"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Nameće smer rasporeda ekrana zdesna nalevo za sve lokalitete"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Dozvoli zamagljenja prozora"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Nametni 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Omogućava 4x MSAA u OpenGL ES 2.0 aplikacijama"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Otkloni greške isecanja oblasti nepravougaonog oblika"</string>
@@ -509,9 +508,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi i podsetnici"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Omogući podešavanje alarma i podsetnika"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmi i podsetnici"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Omogućite ovoj aplikaciji da podešava alarme i zakazuje druge radnje. Ova aplikacija može da se koristi kada ne koristite telefon, što može da dodatno troši bateriju. Ako je ova dozvola isključena, ova aplikacija možda neće raditi normalno i njeni alarmi neće raditi po rasporedu."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Omogućite ovoj aplikaciji da podešava alarme i zakazuje druge radnje. Ova aplikacija može da se koristi kada ne koristite tablet, što može da dodatno troši bateriju. Ako je ova dozvola isključena, ova aplikacija možda neće raditi normalno i njeni alarmi neće raditi po rasporedu."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Omogućite ovoj aplikaciji da podešava alarme i zakazuje druge radnje. Ova aplikacija može da se koristi kada ne koristite uređaj, što može da dodatno troši bateriju. Ako je ova dozvola isključena, ova aplikacija možda neće raditi normalno i njeni alarmi neće raditi po rasporedu."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Omogućite ovoj aplikaciji da podešava alarme i zakazuje vremenski osetljive radnje. To omogućava da aplikacija bude pokrenuta u pozadini, što može da troši više baterije.\n\nAko je ova dozvola isključena, postojeći alarmi i događaji zasnovani na vremenu zakazani pomoću ove aplikacije neće raditi."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"zakazati, alarm, podsetnik, sat"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Uključi"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Uključite režim Ne uznemiravaj"</string>

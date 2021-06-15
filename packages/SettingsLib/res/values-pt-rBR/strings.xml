@@ -211,7 +211,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modo de depuração quando a rede Wi‑Fi estiver conectada"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Erro"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuração por Wi-Fi"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e usar dispositivos disponíveis, ative a depuração por Wi-Fi"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e usar dispositivos disponíveis, ative a depuração por Wi-Fi."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Parear o dispositivo com um código QR"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Parear novos dispositivos usando um leitor de código QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Parear o dispositivo com um código de pareamento"</string>
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostrar limites de corte, margens, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forçar layout da direita p/ esquerda"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forçar a direção do layout da direita para a esquerda para todas as localidades"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Permitir desfoques de janela"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forçar 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Ativar 4x MSAA em apps OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operações de corte não retangulares"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes e lembretes"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Autorizar a definição de alarmes e lembretes"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes e lembretes"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Permitir que esse app defina alarmes e programe outras ações. Ele poderá ser usado quando você não estiver usando o smartphone, o que consumirá mais bateria. Se essa permissão for desativada, o app e os alarmes dele poderão não funcionar como planejado."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Permitir que esse app defina alarmes e programe outras ações. Ele poderá ser usado quando você não estiver usando o tablet, o que consumirá mais bateria. Se essa permissão for desativada, o app e os alarmes dele poderão não funcionar como planejado."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Permitir que esse app defina alarmes e programe outras ações. Ele poderá ser usado quando você não estiver usando o dispositivo, o que consumirá mais bateria. Se essa permissão for desativada, o app e os alarmes dele poderão não funcionar como planejado."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permitir que o app defina alarmes e programe ações mais imediatas. Essa opção autoriza o app a ser executado em segundo plano, o que pode consumir mais bateria.\n\nSe a permissão for desativada, os alarmes e eventos programados pelo app não funcionarão."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programar, alarme, lembrete, relógio"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ativar"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ativar o Não perturbe"</string>
