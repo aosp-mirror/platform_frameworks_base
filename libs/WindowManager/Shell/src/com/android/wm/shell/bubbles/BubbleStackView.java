@@ -50,7 +50,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
-import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.FrameLayout;
@@ -1018,7 +1017,10 @@ public class BubbleStackView extends FrameLayout
             removeView(mDismissView);
         }
         mDismissView = new DismissView(getContext());
+        int elevation = getResources().getDimensionPixelSize(R.dimen.bubble_elevation);
+
         addView(mDismissView);
+        mDismissView.setElevation(elevation);
 
         final ContentResolver contentResolver = getContext().getContentResolver();
         final int dismissRadius = Settings.Secure.getInt(
@@ -1028,6 +1030,8 @@ public class BubbleStackView extends FrameLayout
         // MagnetizedObjects.
         mMagneticTarget = new MagnetizedObject.MagneticTarget(
                 mDismissView.getCircle(), dismissRadius);
+
+        mBubbleContainer.bringToFront();
     }
 
     // TODO: Create ManageMenuView and move setup / animations there
