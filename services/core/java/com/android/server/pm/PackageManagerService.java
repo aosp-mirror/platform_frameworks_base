@@ -26421,14 +26421,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         synchronized(mLock) {
             final AndroidPackage pkg = mPackages.get(packageName);
-            if (pkg == null) {
+            if (pkg == null
+                    || shouldFilterApplicationLocked(getPackageSetting(pkg.getPackageName()),
+                    Binder.getCallingUid(), UserHandle.getCallingUserId())) {
                 Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
-            final PackageSetting ps = getPackageSetting(pkg.getPackageName());
-            if (shouldFilterApplicationLocked(
-                    ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
-                Slog.w(TAG, "KeySet requested for filtered package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
             final KeySetManagerService ksms = mSettings.getKeySetManagerService();
