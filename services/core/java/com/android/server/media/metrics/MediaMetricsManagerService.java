@@ -17,7 +17,6 @@
 package com.android.server.media.metrics;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.media.metrics.IMediaMetricsManager;
 import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
@@ -25,29 +24,19 @@ import android.media.metrics.PlaybackMetrics;
 import android.media.metrics.PlaybackStateEvent;
 import android.media.metrics.TrackChangeEvent;
 import android.os.Binder;
-import android.provider.DeviceConfig;
 import android.util.Base64;
-import android.util.Slog;
 import android.util.StatsEvent;
 import android.util.StatsLog;
 
 import com.android.server.SystemService;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * System service manages media metrics.
  */
 public final class MediaMetricsManagerService extends SystemService {
-    private static final String TAG = "MediaMetricsManagerService";
-    // TODO: update these constants when finalized
-    private static final String MEDIA_METRICS_MODE = "media_metrics_mode";
-    private static final int MEDIA_METRICS_MODE_OFF = 0;
-    private static final int MEDIA_METRICS_MODE_ON = 1;
     private final SecureRandom mSecureRandom;
-    private List<String> mBlockList = new ArrayList<>();
 
     /**
      * Initializes the playback metrics manager service.
@@ -67,9 +56,6 @@ public final class MediaMetricsManagerService extends SystemService {
     private final class BinderService extends IMediaMetricsManager.Stub {
         @Override
         public void reportPlaybackMetrics(String sessionId, PlaybackMetrics metrics, int userId) {
-            if (!shouldWriteStats()) {
-                return;
-            }
             StatsEvent statsEvent = StatsEvent.newBuilder()
                     .setAtomId(320)
                     .writeInt(Binder.getCallingUid())
@@ -99,9 +85,6 @@ public final class MediaMetricsManagerService extends SystemService {
         @Override
         public void reportPlaybackStateEvent(
                 String sessionId, PlaybackStateEvent event, int userId) {
-            if (!shouldWriteStats()) {
-                return;
-            }
             StatsEvent statsEvent = StatsEvent.newBuilder()
                     .setAtomId(322)
                     .writeString(sessionId)
@@ -132,9 +115,6 @@ public final class MediaMetricsManagerService extends SystemService {
         @Override
         public void reportPlaybackErrorEvent(
                 String sessionId, PlaybackErrorEvent event, int userId) {
-            if (!shouldWriteStats()) {
-                return;
-            }
             StatsEvent statsEvent = StatsEvent.newBuilder()
                     .setAtomId(323)
                     .writeString(sessionId)
@@ -149,9 +129,6 @@ public final class MediaMetricsManagerService extends SystemService {
 
         public void reportNetworkEvent(
                 String sessionId, NetworkEvent event, int userId) {
-            if (!shouldWriteStats()) {
-                return;
-            }
             StatsEvent statsEvent = StatsEvent.newBuilder()
                     .setAtomId(321)
                     .writeString(sessionId)
@@ -165,9 +142,6 @@ public final class MediaMetricsManagerService extends SystemService {
         @Override
         public void reportTrackChangeEvent(
                 String sessionId, TrackChangeEvent event, int userId) {
-            if (!shouldWriteStats()) {
-                return;
-            }
             StatsEvent statsEvent = StatsEvent.newBuilder()
                     .setAtomId(324)
                     .writeString(sessionId)
@@ -189,34 +163,6 @@ public final class MediaMetricsManagerService extends SystemService {
                     .usePooledBuffer()
                     .build();
             StatsLog.write(statsEvent);
-        }
-
-        private boolean shouldWriteStats() {
-            int uid = Binder.getCallingUid();
-
-            final long identity = Binder.clearCallingIdentity();
-            int mode = DeviceConfig.getInt(
-                    DeviceConfig.NAMESPACE_MEDIA, MEDIA_METRICS_MODE, MEDIA_METRICS_MODE_OFF);
-            Binder.restoreCallingIdentity(identity);
-
-            if (mode != MEDIA_METRICS_MODE_ON) {
-                return false;
-            }
-            if (mBlockList.isEmpty()) {
-                return true;
-            }
-
-            PackageManager pm = getContext().getPackageManager();
-            String[] packages = pm.getPackagesForUid(uid);
-            if (packages == null) {
-                // The valid application UID range is from android.os.Process.FIRST_APPLICATION_UID
-                // to android.os.Process.LAST_APPLICATION_UID.
-                // UIDs outside this range will not have a package and will therefore be false.
-                Slog.d(TAG, "null package from uid " + uid);
-                return false;
-            }
-            // TODO: check calling package with allowlist/blocklist.
-            return true;
         }
     }
 }
