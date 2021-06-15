@@ -2200,8 +2200,9 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateQSExpansionEnabledAmbient() {
+        final float scrollRangeToTop = mAmbientState.getTopPadding() - mQuickQsOffsetHeight;
         mQsExpansionEnabledAmbient =
-                mAmbientState.getScrollY() <= 0 && !mAmbientState.isShadeOpening();
+                mAmbientState.getScrollY() <= scrollRangeToTop && !mAmbientState.isShadeOpening();
         setQsExpansionEnabled();
     }
 
