@@ -68,6 +68,12 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
                 .getIntArray(R.array.config_face_acquire_vendor_enroll_ignorelist);
     }
 
+    @NonNull
+    @Override
+    protected Callback wrapCallbackForStart(@NonNull Callback callback) {
+        return new CompositeCallback(createALSCallback(), callback);
+    }
+
     @Override
     protected boolean hasReachedEnrollmentLimit() {
         final int limit = getContext().getResources().getInteger(

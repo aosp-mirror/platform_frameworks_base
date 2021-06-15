@@ -991,8 +991,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         addSecondWidgetForPersonTile();
         mManager.updateWidgets(new int[]{WIDGET_ID_WITH_SHORTCUT, SECOND_WIDGET_ID_WITH_SHORTCUT});
 
-        // Delete only one widget for the conversation.
+        // Delete only one widget for the conversation in background.
         mManager.deleteWidgets(new int[]{WIDGET_ID_WITH_SHORTCUT});
+        mClock.advanceTime(MIN_LINGER_DURATION);
 
         // Check deleted storage.
         SharedPreferences widgetSp = mContext.getSharedPreferences(
@@ -1010,8 +1011,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 eq(Arrays.asList(SHORTCUT_ID)), eq(UserHandle.of(0)),
                 eq(LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS));
 
-        // Delete all widgets for the conversation.
+        // Delete all widgets for the conversation in background.
         mManager.deleteWidgets(new int[]{SECOND_WIDGET_ID_WITH_SHORTCUT});
+        mClock.advanceTime(MIN_LINGER_DURATION);
 
         // Check deleted storage.
         SharedPreferences secondWidgetSp = mContext.getSharedPreferences(
@@ -1341,6 +1343,13 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_STARRED_CONTACTS);
+
+        setFinalField("suppressedVisualEffects", SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
+                | SUPPRESSED_EFFECT_AMBIENT);
+        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+
+        tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
+        assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_CONVERSATIONS);
     }
 
     @Test

@@ -79,8 +79,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     private final HandlerThread mHandlerThread;
     private final CameraExtensionSession.StateCallback mCallbacks;
     private final IAdvancedExtenderImpl mAdvancedExtender;
-    // maps camera outputs to extension output ids
-    private final HashMap<Surface, Integer> mSurfaceIdMap = new HashMap<>();
+    // maps registered camera surfaces to extension output configs
+    private final HashMap<Surface, CameraOutputConfig> mCameraConfigMap = new HashMap<>();
     // maps camera extension output ids to camera registered image readers
     private final HashMap<Integer, ImageReader> mReaderMap = new HashMap<>();
     private final RequestProcessor mRequestProcessor = new RequestProcessor();
@@ -226,7 +226,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                             reader.getSurface());
                     break;
                 case CameraOutputConfig.TYPE_MULTIRES_IMAGEREADER:
-                    // TBD
+                    // Support for multi-resolution outputs to be added in future releases
                 default:
                     throw new IllegalArgumentException("Unsupported output config type: " +
                             output.type);
@@ -251,7 +251,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 }
             }
             outputList.add(outConfig);
-            mSurfaceIdMap.put(outConfig.getSurface(), output.outputId.id);
+            mCameraConfigMap.put(outConfig.getSurface(), output);
         }
 
         SessionConfiguration sessionConfiguration = new SessionConfiguration(
@@ -629,7 +629,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 if (request.getTag() instanceof Integer) {
                     Integer requestId = (Integer) request.getTag();
                     mCallback.onCaptureBufferLost(requestId, frameNumber,
-                            mSurfaceIdMap.get(target));
+                            mCameraConfigMap.get(target).outputId.id);
                 } else {
                     Log.e(TAG, "Invalid capture request tag!");
                 }
@@ -736,12 +736,14 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     private static final class ImageReaderHandler implements ImageReader.OnImageAvailableListener {
         private final OutputConfigId mOutputConfigId;
         private final IImageProcessorImpl mIImageProcessor;
+        private final String mPhysicalCameraId;
 
         private ImageReaderHandler(int outputConfigId,
-                IImageProcessorImpl iImageProcessor) {
+                IImageProcessorImpl iImageProcessor, String physicalCameraId) {
             mOutputConfigId = new OutputConfigId();
             mOutputConfigId.id = outputConfigId;
             mIImageProcessor = iImageProcessor;
+            mPhysicalCameraId = physicalCameraId;
         }
 
         @Override
@@ -787,7 +789,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             parcelImage.crop = img.getCropRect();
 
             try {
-                mIImageProcessor.onNextImageAvailable(mOutputConfigId, parcelImage);
+                mIImageProcessor.onNextImageAvailable(mOutputConfigId, parcelImage,
+                        mPhysicalCameraId);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to propagate image buffer on output surface id: " +
                         mOutputConfigId + " extension service does not respond!");
@@ -804,8 +807,17 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 IImageProcessorImpl imageProcessor) {
             synchronized (mInterfaceLock) {
                 if (mReaderMap.containsKey(outputConfigId.id)) {
-                    mReaderMap.get(outputConfigId.id).setOnImageAvailableListener(
-                            new ImageReaderHandler(outputConfigId.id, imageProcessor), mHandler);
+                    ImageReader reader = mReaderMap.get(outputConfigId.id);
+                    String physicalCameraId = null;
+                    if (mCameraConfigMap.containsKey(reader.getSurface())) {
+                        physicalCameraId =
+                                mCameraConfigMap.get(reader.getSurface()).physicalCameraId;
+                        reader.setOnImageAvailableListener(new ImageReaderHandler(outputConfigId.id,
+                                    imageProcessor, physicalCameraId), mHandler);
+                    } else {
+                        Log.e(TAG, "Camera output configuration for ImageReader with " +
+                                        " config Id " + outputConfigId.id + " not found!");
+                    }
                 } else {
                     Log.e(TAG, "ImageReader with output config id: " + outputConfigId.id +
                             " not found!");
@@ -828,7 +840,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                     ArrayList<CaptureRequest> captureRequests = new ArrayList<>();
                     for (Request request : requests) {
                         captureRequests.add(initializeCaptureRequest(mCameraDevice, request,
-                                mSurfaceIdMap));
+                                mCameraConfigMap));
                     }
                     mCaptureSession.captureBurstRequests(captureRequests,
                             new CameraExtensionUtils.HandlerExecutor(mHandler), captureCallback);
@@ -848,7 +860,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             synchronized (mInterfaceLock) {
                 try {
                     CaptureRequest repeatingRequest = initializeCaptureRequest(mCameraDevice,
-                                request, mSurfaceIdMap);
+                                request, mCameraConfigMap);
                     CaptureCallbackHandler captureCallback = new CaptureCallbackHandler(callback);
                     mCaptureSession.setSingleRepeatingRequest(repeatingRequest,
                             new CameraExtensionUtils.HandlerExecutor(mHandler), captureCallback);
@@ -891,12 +903,13 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     }
 
     private static CaptureRequest initializeCaptureRequest(CameraDevice cameraDevice,
-            Request request, HashMap<Surface, Integer> surfaceIdMap) throws CameraAccessException {
+            Request request, HashMap<Surface, CameraOutputConfig> surfaceIdMap)
+            throws CameraAccessException {
         CaptureRequest.Builder builder = cameraDevice.createCaptureRequest(request.templateId);
         for (OutputConfigId configId : request.targetOutputConfigIds) {
             boolean found = false;
-            for (Map.Entry<Surface, Integer> entry : surfaceIdMap.entrySet()) {
-                if (entry.getValue() == configId.id) {
+            for (Map.Entry<Surface, CameraOutputConfig> entry : surfaceIdMap.entrySet()) {
+                if (entry.getValue().outputId.id == configId.id) {
                     builder.addTarget(entry.getKey());
                     found = true;
                     break;

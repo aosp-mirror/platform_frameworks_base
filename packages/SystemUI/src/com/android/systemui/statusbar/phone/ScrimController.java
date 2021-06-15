@@ -642,7 +642,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             return;
         }
 
-        if (mState == ScrimState.UNLOCKED) {
+        if (mState == ScrimState.UNLOCKED || mState == ScrimState.BUBBLE_EXPANDED) {
             // Darken scrim as you pull down the shade when unlocked, unless the shade is expanding
             // because we're doing the screen off animation.
             if (!mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
@@ -657,12 +657,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 }
                 mInFrontAlpha = 0;
             }
-        } else if (mState == ScrimState.BUBBLE_EXPANDED) {
-            // Darken scrim as you pull down the shade when unlocked
-            float behindFraction = getInterpolatedFraction();
-            behindFraction = (float) Math.pow(behindFraction, 0.8f);
-            mBehindAlpha = behindFraction * mDefaultScrimAlpha;
-            mInFrontAlpha = 0;
         } else if (mState == ScrimState.KEYGUARD || mState == ScrimState.SHADE_LOCKED
                 || mState == ScrimState.PULSING) {
             Pair<Integer, Float> result = calculateBackStateForState(mState);

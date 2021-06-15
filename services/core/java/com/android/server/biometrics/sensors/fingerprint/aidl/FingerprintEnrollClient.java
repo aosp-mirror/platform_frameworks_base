@@ -79,6 +79,12 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
         }
     }
 
+    @NonNull
+    @Override
+    protected Callback wrapCallbackForStart(@NonNull Callback callback) {
+        return new CompositeCallback(createALSCallback(), callback);
+    }
+
     @Override
     public void onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining) {
         super.onEnrollResult(identifier, remaining);

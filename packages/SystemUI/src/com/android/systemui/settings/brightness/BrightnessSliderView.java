@@ -17,6 +17,10 @@
 package com.android.systemui.settings.brightness;
 
 import android.content.Context;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.DrawableWrapper;
+import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,6 +28,7 @@ import android.widget.FrameLayout;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Gefingerpoken;
@@ -39,6 +44,9 @@ public class BrightnessSliderView extends FrameLayout {
     private ToggleSeekBar mSlider;
     private DispatchTouchEventListener mListener;
     private Gefingerpoken mOnInterceptListener;
+    @Nullable
+    private Drawable mProgressDrawable;
+    private float mScale = 1f;
 
     public BrightnessSliderView(Context context) {
         this(context, null);
@@ -55,6 +63,17 @@ public class BrightnessSliderView extends FrameLayout {
 
         mSlider = requireViewById(R.id.slider);
         mSlider.setAccessibilityLabel(getContentDescription().toString());
+
+        // Finds the progress drawable. Assumes brightness_progress_drawable.xml
+        try {
+            LayerDrawable progress = (LayerDrawable) mSlider.getProgressDrawable();
+            DrawableWrapper progressSlider = (DrawableWrapper) progress
+                    .findDrawableByLayerId(android.R.id.progress);
+            LayerDrawable actualProgressSlider = (LayerDrawable) progressSlider.getDrawable();
+            mProgressDrawable = actualProgressSlider.findDrawableByLayerId(R.id.slider_foreground);
+        } catch (Exception e) {
+            // Nothing to do, mProgressDrawable will be null.
+        }
     }
 
     /**
@@ -149,6 +168,37 @@ public class BrightnessSliderView extends FrameLayout {
             return mOnInterceptListener.onInterceptTouchEvent(ev);
         }
         return super.onInterceptTouchEvent(ev);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        applySliderScale();
+    }
+
+    /**
+     * Sets the scale for the progress bar (for brightness_progress_drawable.xml)
+     *
+     * This will only scale the thick progress bar and not the icon inside
+     */
+    public void setSliderScaleY(float scale) {
+        if (scale != mScale) {
+            mScale = scale;
+            applySliderScale();
+        }
+    }
+
+    private void applySliderScale() {
+        if (mProgressDrawable != null) {
+            final Rect r = mProgressDrawable.getBounds();
+            int height = (int) (mProgressDrawable.getIntrinsicHeight() * mScale);
+            int inset = (mProgressDrawable.getIntrinsicHeight() - height) / 2;
+            mProgressDrawable.setBounds(r.left, inset, r.right, inset + height);
+        }
+    }
+
+    public float getSliderScaleY() {
+        return mScale;
     }
 
     /**

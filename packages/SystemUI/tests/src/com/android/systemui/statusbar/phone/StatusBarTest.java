@@ -755,7 +755,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mCommandQueue.panelsEnabled()).thenReturn(false);
         mStatusBar.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
-        verify(mNotificationPanelViewController).setQsExpansionEnabled(false);
+        verify(mNotificationPanelViewController).setQsExpansionEnabledPolicy(false);
         mStatusBar.animateExpandNotificationsPanel();
         verify(mNotificationPanelViewController, never()).expand(anyBoolean());
         mStatusBar.animateExpandSettingsPanel(null);
@@ -764,7 +764,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
         mStatusBar.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NONE, false);
-        verify(mNotificationPanelViewController).setQsExpansionEnabled(true);
+        verify(mNotificationPanelViewController).setQsExpansionEnabledPolicy(true);
         mStatusBar.animateExpandNotificationsPanel();
         verify(mNotificationPanelViewController).expandWithoutQs();
         mStatusBar.animateExpandSettingsPanel(null);
