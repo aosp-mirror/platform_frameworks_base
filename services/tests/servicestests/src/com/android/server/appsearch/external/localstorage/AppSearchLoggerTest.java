@@ -53,6 +53,10 @@ public class AppSearchLoggerTest {
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
     private AppSearchImpl mAppSearchImpl;
     private TestLogger mLogger;
+    /**
+     * Always trigger optimize in this class. OptimizeStrategy will be tested in its own test class.
+     */
+    private static final OptimizeStrategy ALWAYS_OPTIMIZE = optimizeInfo -> true;
 
     @Before
     public void setUp() throws Exception {
@@ -63,7 +67,8 @@ public class AppSearchLoggerTest {
                 AppSearchImpl.create(
                         mTemporaryFolder.newFolder(),
                         context,
-                        /*logger=*/ null);
+                        /*logger=*/ null,
+                        ALWAYS_OPTIMIZE);
         mLogger = new TestLogger();
     }
 
@@ -286,11 +291,13 @@ public class AppSearchLoggerTest {
     public void testLoggingStats_initialize() throws Exception {
         Context context = ApplicationProvider.getApplicationContext();
 
+        // Create an unused AppSearchImpl to generated an InitializeStats.
         AppSearchImpl appSearchImpl =
                 AppSearchImpl.create(
                         mTemporaryFolder.newFolder(),
                         context,
-                        mLogger);
+                        mLogger,
+                        ALWAYS_OPTIMIZE);
 
         InitializeStats iStats = mLogger.mInitializeStats;
         assertThat(iStats).isNotNull();
@@ -325,9 +332,9 @@ public class AppSearchLoggerTest {
 
         PutDocumentStats pStats = mLogger.mPutDocumentStats;
         assertThat(pStats).isNotNull();
-        assertThat(pStats.getGeneralStats().getPackageName()).isEqualTo(testPackageName);
-        assertThat(pStats.getGeneralStats().getDatabase()).isEqualTo(testDatabase);
-        assertThat(pStats.getGeneralStats().getStatusCode()).isEqualTo(AppSearchResult.RESULT_OK);
+        assertThat(pStats.getPackageName()).isEqualTo(testPackageName);
+        assertThat(pStats.getDatabase()).isEqualTo(testDatabase);
+        assertThat(pStats.getStatusCode()).isEqualTo(AppSearchResult.RESULT_OK);
         // The rest of native stats have been tested in testCopyNativeStats
         assertThat(pStats.getNativeDocumentSizeBytes()).isGreaterThan(0);
     }
