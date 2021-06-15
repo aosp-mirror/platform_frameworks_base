@@ -59,6 +59,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -79,7 +80,9 @@ import java.util.regex.Pattern;
 public class ActivityManagerTest {
     private static final String TAG = "ActivityManagerTest";
 
-    private static final String TEST_APP = "com.android.servicestests.apps.simpleservicetestapp1";
+    private static final String TEST_APP1 = "com.android.servicestests.apps.simpleservicetestapp1";
+    private static final String TEST_APP2 = "com.android.servicestests.apps.simpleservicetestapp2";
+    private static final String TEST_APP3 = "com.android.servicestests.apps.simpleservicetestapp3";
     private static final String TEST_CLASS =
             "com.android.servicestests.apps.simpleservicetestapp.SimpleService";
     private static final int TEST_LOOPS = 100;
@@ -135,13 +138,13 @@ public class ActivityManagerTest {
         final PackageManager pm = mContext.getPackageManager();
         int uid = 0;
         try {
-            uid = pm.getPackageUid(TEST_APP, 0);
+            uid = pm.getPackageUid(TEST_APP1, 0);
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
         }
 
         Intent intent = new Intent();
-        intent.setClassName(TEST_APP, TEST_CLASS);
+        intent.setClassName(TEST_APP1, TEST_CLASS);
 
         // Create a service connection with auto creation.
         CountDownLatch latch = new CountDownLatch(1);
@@ -156,7 +159,7 @@ public class ActivityManagerTest {
 
         // Create a service connection without any flags.
         intent = new Intent();
-        intent.setClassName(TEST_APP, TEST_CLASS);
+        intent.setClassName(TEST_APP1, TEST_CLASS);
         latch = new CountDownLatch(1);
         MyServiceConnection otherConnection = new MyServiceConnection(latch);
         mContext.bindService(intent, otherConnection, 0);
@@ -242,7 +245,7 @@ public class ActivityManagerTest {
     public void testFgsProcStatsTracker() throws Exception {
         final PackageManager pm = mContext.getPackageManager();
         final long timeout = 5000;
-        int uid = pm.getPackageUid(TEST_APP, 0);
+        int uid = pm.getPackageUid(TEST_APP1, 0);
         final MyUidImportanceListener uidListener1 = new MyUidImportanceListener(uid);
         final MyUidImportanceListener uidListener2 = new MyUidImportanceListener(uid);
         final ActivityManager am = mContext.getSystemService(ActivityManager.class);
@@ -275,12 +278,12 @@ public class ActivityManagerTest {
             am.addOnUidImportanceListener(uidListener1,
                     RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE);
             am.addOnUidImportanceListener(uidListener2, RunningAppProcessInfo.IMPORTANCE_GONE);
-            runShellCommand("cmd deviceidle whitelist +" + TEST_APP);
+            runShellCommand("cmd deviceidle whitelist +" + TEST_APP1);
             toggleScreenOn(true);
 
             final Intent intent = new Intent(ACTION_FGS_STATS_TEST);
             final ComponentName cn = ComponentName.unflattenFromString(
-                    TEST_APP + "/" + TEST_FGS_CLASS);
+                    TEST_APP1 + "/" + TEST_FGS_CLASS);
             final Bundle bundle = new Bundle();
             intent.setComponent(cn);
             bundle.putBinder(EXTRA_MESSENGER, messenger.getBinder());
@@ -314,10 +317,10 @@ public class ActivityManagerTest {
                     timeout * 2, TimeUnit.MILLISECONDS));
         } finally {
             toggleScreenOn(true);
-            runShellCommand("cmd deviceidle whitelist -" + TEST_APP);
+            runShellCommand("cmd deviceidle whitelist -" + TEST_APP1);
             am.removeOnUidImportanceListener(uidListener1);
             am.removeOnUidImportanceListener(uidListener2);
-            am.forceStopPackage(TEST_APP);
+            am.forceStopPackage(TEST_APP1);
             mContext.unregisterReceiver(receiver);
         }
     }
@@ -358,7 +361,7 @@ public class ActivityManagerTest {
                     ActivityManagerConstants.KEY_MAX_SERVICE_INACTIVITY + "=" + waitFor);
 
             final Intent intent = new Intent();
-            intent.setClassName(TEST_APP, TEST_CLASS);
+            intent.setClassName(TEST_APP1, TEST_CLASS);
 
             final CountDownLatch latch = new CountDownLatch(1);
             autoConnection = new MyServiceConnection(latch);
@@ -370,7 +373,7 @@ public class ActivityManagerTest {
             } catch (InterruptedException e) {
                 fail("Unable to bind to service " + intent.getComponent());
             }
-            assertFalse(TEST_APP + " shouldn't be frozen now.", isAppFrozen(TEST_APP));
+            assertFalse(TEST_APP1 + " shouldn't be frozen now.", isAppFrozen(TEST_APP1));
 
             // Trigger oomAdjUpdate/
             toggleScreenOn(false);
@@ -380,7 +383,7 @@ public class ActivityManagerTest {
             Thread.sleep(waitFor * 4);
 
             // It still shouldn't be frozen, although it's been in cached state.
-            assertFalse(TEST_APP + " shouldn't be frozen now.", isAppFrozen(TEST_APP));
+            assertFalse(TEST_APP1 + " shouldn't be frozen now.", isAppFrozen(TEST_APP1));
         } finally {
             toggleScreenOn(true);
             if (amConstantsSettings != null) {
@@ -424,7 +427,7 @@ public class ActivityManagerTest {
         final long shortTimeoutMs = 5_000;
         final long backgroundSettleMs = 10_000;
         final PackageManager pm = mContext.getPackageManager();
-        final int uid = pm.getPackageUid(TEST_APP, 0);
+        final int uid = pm.getPackageUid(TEST_APP1, 0);
         final MyUidImportanceListener uidListener1 = new MyUidImportanceListener(uid);
         final MyUidImportanceListener uidListener2 = new MyUidImportanceListener(uid);
         SettingsSession<String> amConstantsSettings = null;
@@ -462,11 +465,11 @@ public class ActivityManagerTest {
             Thread.sleep(currentBackgroundSettleMs);
             amConstantsSettings.set(
                     ActivityManagerConstants.KEY_BACKGROUND_SETTLE_TIME + "=" + backgroundSettleMs);
-            runShellCommand("cmd appops set " + TEST_APP + " RUN_ANY_IN_BACKGROUND allow");
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND allow");
 
             final Intent intent = new Intent(ACTION_FGS_STATS_TEST);
             final ComponentName cn = ComponentName.unflattenFromString(
-                    TEST_APP + "/" + TEST_FGS_CLASS);
+                    TEST_APP1 + "/" + TEST_FGS_CLASS);
             final Bundle bundle = new Bundle();
             intent.setComponent(cn);
             bundle.putBinder(EXTRA_MESSENGER, messenger.getBinder());
@@ -491,21 +494,21 @@ public class ActivityManagerTest {
                     RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
 
             // Set the FAS state.
-            runShellCommand("cmd appops set " + TEST_APP + " RUN_ANY_IN_BACKGROUND deny");
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND deny");
             // Now it should've been killed.
             assertTrue("Should have been killed", uidListener2.waitFor(
                     RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
 
             // Start the FGS.
             // Temporarily allow RUN_ANY_IN_BACKGROUND to start FGS.
-            runShellCommand("cmd appops set " + TEST_APP + " RUN_ANY_IN_BACKGROUND allow");
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND allow");
             latchHolder[0] = new CountDownLatch(1);
             mContext.startForegroundService(intent);
             assertTrue("Timed out to start fg service", uidListener1.waitFor(
                     RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE, shortTimeoutMs));
             assertTrue("Timed out to get the remote messenger", latchHolder[0].await(
                     shortTimeoutMs, TimeUnit.MILLISECONDS));
-            runShellCommand("cmd appops set " + TEST_APP + " RUN_ANY_IN_BACKGROUND deny");
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND deny");
             // It shouldn't be killed since it's not cached.
             assertFalse("FGS shouldn't be killed", uidListener2.waitFor(
                     RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
@@ -523,14 +526,14 @@ public class ActivityManagerTest {
 
             // Start the FGS.
             // Temporarily allow RUN_ANY_IN_BACKGROUND to start FGS.
-            runShellCommand("cmd appops set " + TEST_APP + " RUN_ANY_IN_BACKGROUND allow");
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND allow");
             latchHolder[0] = new CountDownLatch(1);
             mContext.startForegroundService(intent);
             assertTrue("Timed out to start fg service", uidListener1.waitFor(
                     RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE, shortTimeoutMs));
             assertTrue("Timed out to get the remote messenger", latchHolder[0].await(
                     shortTimeoutMs, TimeUnit.MILLISECONDS));
-            runShellCommand("cmd appops set " + TEST_APP + " RUN_ANY_IN_BACKGROUND deny");
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND deny");
             assertFalse("FGS shouldn't be killed", uidListener2.waitFor(
                     RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
 
@@ -542,7 +545,7 @@ public class ActivityManagerTest {
             assertFalse("FGS shouldn't be killed", uidListener2.waitFor(
                     RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
         } finally {
-            runShellCommand("cmd appops set " + TEST_APP + " RUN_ANY_IN_BACKGROUND default");
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND default");
             if (amConstantsSettings != null) {
                 amConstantsSettings.close();
             }
@@ -552,6 +555,82 @@ public class ActivityManagerTest {
             am.removeOnUidImportanceListener(uidListener1);
             am.removeOnUidImportanceListener(uidListener2);
         }
+    }
+
+    @Ignore("Need to disable calling uid check in ActivityManagerService.killPids before this test")
+    @Test
+    public void testKillPids() throws Exception {
+        final long timeout = 5000;
+        final long shortTimeout = 2000;
+        final ActivityManager am = mContext.getSystemService(ActivityManager.class);
+        final PackageManager pm = mContext.getPackageManager();
+        final int uid1 = pm.getPackageUid(TEST_APP1, 0);
+        final int uid2 = pm.getPackageUid(TEST_APP2, 0);
+        final int uid3 = pm.getPackageUid(TEST_APP3, 0);
+        final MyUidImportanceListener uid1Listener1 = new MyUidImportanceListener(uid1);
+        final MyUidImportanceListener uid1Listener2 = new MyUidImportanceListener(uid1);
+        final MyUidImportanceListener uid2Listener1 = new MyUidImportanceListener(uid2);
+        final MyUidImportanceListener uid2Listener2 = new MyUidImportanceListener(uid2);
+        final MyUidImportanceListener uid3Listener1 = new MyUidImportanceListener(uid3);
+        final MyUidImportanceListener uid3Listener2 = new MyUidImportanceListener(uid3);
+        try {
+            am.addOnUidImportanceListener(uid1Listener1, RunningAppProcessInfo.IMPORTANCE_SERVICE);
+            am.addOnUidImportanceListener(uid1Listener2, RunningAppProcessInfo.IMPORTANCE_GONE);
+            am.addOnUidImportanceListener(uid2Listener1, RunningAppProcessInfo.IMPORTANCE_SERVICE);
+            am.addOnUidImportanceListener(uid2Listener2, RunningAppProcessInfo.IMPORTANCE_GONE);
+            am.addOnUidImportanceListener(uid3Listener1, RunningAppProcessInfo.IMPORTANCE_SERVICE);
+            am.addOnUidImportanceListener(uid3Listener2, RunningAppProcessInfo.IMPORTANCE_GONE);
+            runShellCommand("cmd deviceidle whitelist +" + TEST_APP1);
+            runShellCommand("cmd deviceidle whitelist +" + TEST_APP2);
+            runShellCommand("cmd deviceidle whitelist +" + TEST_APP3);
+            final int[] pids = new int[3];
+            // Test sync kills
+            pids[0] = startTargetService(am, TEST_APP1, TEST_CLASS, uid1, TEST_APP1,
+                    uid1Listener1, timeout);
+            pids[1] = startTargetService(am, TEST_APP2, TEST_CLASS, uid2, TEST_APP2,
+                    uid2Listener1, timeout);
+            pids[2] = startTargetService(am, TEST_APP3, TEST_CLASS, uid3, TEST_APP3,
+                    uid3Listener1, timeout);
+            Thread.sleep(shortTimeout);
+            mService.killPids(pids, "testKillPids", false);
+            assertTrue("Timed out to kill process", uid1Listener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, timeout));
+            assertTrue("Timed out to kill process", uid2Listener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, timeout));
+            assertTrue("Timed out to kill process", uid3Listener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, timeout));
+        } finally {
+            runShellCommand("cmd deviceidle whitelist -" + TEST_APP1);
+            runShellCommand("cmd deviceidle whitelist -" + TEST_APP2);
+            runShellCommand("cmd deviceidle whitelist -" + TEST_APP3);
+            am.removeOnUidImportanceListener(uid1Listener1);
+            am.removeOnUidImportanceListener(uid1Listener2);
+            am.removeOnUidImportanceListener(uid2Listener1);
+            am.removeOnUidImportanceListener(uid2Listener2);
+            am.removeOnUidImportanceListener(uid3Listener1);
+            am.removeOnUidImportanceListener(uid3Listener2);
+            am.forceStopPackage(TEST_APP1);
+            am.forceStopPackage(TEST_APP2);
+            am.forceStopPackage(TEST_APP3);
+        }
+    }
+
+    private int startTargetService(ActivityManager am, String targetPakage, String targetService,
+            int targetUid, String targetProcessName, MyUidImportanceListener uidListener,
+            long timeout) throws Exception {
+        final Intent intent = new Intent();
+        intent.setComponent(ComponentName.unflattenFromString(targetPakage + "/" + targetService));
+        mContext.startService(intent);
+        assertTrue("Timed out to start service", uidListener.waitFor(
+                RunningAppProcessInfo.IMPORTANCE_SERVICE, timeout));
+        final List<RunningAppProcessInfo> processes = am.getRunningAppProcesses();
+        for (int i = processes.size() - 1; i >= 0; i--) {
+            final RunningAppProcessInfo info = processes.get(i);
+            if (info.uid == targetUid && targetProcessName.equals(info.processName)) {
+                return info.pid;
+            }
+        }
+        return -1;
     }
 
     /**
