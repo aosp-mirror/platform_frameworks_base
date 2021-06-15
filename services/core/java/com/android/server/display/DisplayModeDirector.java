@@ -155,12 +155,21 @@ public class DisplayModeDirector {
         mSettingsObserver.observe();
         mDisplayObserver.observe();
         mBrightnessObserver.observe(sensorManager);
-        mUdfpsObserver.observe();
         synchronized (mLock) {
             // We may have a listener already registered before the call to start, so go ahead and
             // notify them to pick up our newly initialized state.
             notifyDesiredDisplayModeSpecsChangedLocked();
         }
+    }
+
+    /**
+     * Same as {@link #start(SensorManager)}, but for observers that need to be delayed even more,
+     * for example until SystemUI is ready.
+     */
+    public void onBootCompleted() {
+        // UDFPS observer registers a listener with SystemUI which might not be ready until the
+        // system is fully booted.
+        mUdfpsObserver.observe();
     }
 
     public void setLoggingEnabled(boolean loggingEnabled) {
