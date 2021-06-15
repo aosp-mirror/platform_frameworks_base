@@ -509,7 +509,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Fins que no el desactivis"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Ara mateix"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altaveu del telèfon"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Hi ha hagut un problema amb la connexió. Desactiva el dispositiu i torna\'l a activar."</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Hi ha hagut un problema amb la connexió. Apaga el dispositiu i torna\'l a encendre."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositiu d\'àudio amb cable"</string>
     <string name="help_label" msgid="3528360748637781274">"Ajuda i suggeriments"</string>
     <string name="storage_category" msgid="2287342585424631813">"Emmagatzematge"</string>
