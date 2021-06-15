@@ -32,7 +32,7 @@
         android:gravity="center_vertical|right"
         android:height="@dimen/rounded_slider_icon_size"
         android:width="@dimen/rounded_slider_icon_size"
-        android:right="@dimen/rounded_slider_icon_inset">
+        android:right="@dimen/volume_slider_icon_inset">
         <rotate
             android:fromDegrees="-270"
             android:toDegrees="-270">

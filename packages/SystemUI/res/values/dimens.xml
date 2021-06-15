@@ -486,6 +486,9 @@
 
     <dimen name="volume_dialog_slider_height">116dp</dimen>
 
+    <!-- (volume_dialog_panel_width - rounded_slider_icon_size) / 2 -->
+    <dimen name="volume_slider_icon_inset">11dp</dimen>
+
     <dimen name="volume_dialog_track_width">4dp</dimen>
 
     <dimen name="volume_dialog_track_corner_radius">2dp</dimen>
