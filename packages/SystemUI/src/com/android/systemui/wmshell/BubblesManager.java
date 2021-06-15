@@ -84,6 +84,7 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleEntry;
 import com.android.wm.shell.bubbles.Bubbles;
 
@@ -655,6 +656,22 @@ public class BubblesManager implements Dumpable {
      */
     public void expandStackAndSelectBubble(NotificationEntry entry) {
         mBubbles.expandStackAndSelectBubble(notifToBubbleEntry(entry));
+    }
+
+    /**
+     * Request the stack expand if needed, then select the specified Bubble as current.
+     *
+     * @param bubble the bubble to be selected
+     */
+    public void expandStackAndSelectBubble(Bubble bubble) {
+        mBubbles.expandStackAndSelectBubble(bubble);
+    }
+
+    /**
+     * @return a bubble that matches the provided shortcutId, if one exists.
+     */
+    public Bubble getBubbleWithShortcutId(String shortcutId) {
+        return mBubbles.getBubbleWithShortcutId(shortcutId);
     }
 
     /** See {@link NotifCallback}. */
