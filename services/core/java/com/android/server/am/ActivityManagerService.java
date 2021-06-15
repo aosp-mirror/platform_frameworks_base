@@ -1267,6 +1267,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     final PendingTempWhitelists mPendingTempWhitelist = new PendingTempWhitelists(this);
 
     /**
+     * List of uids that are allowed to have while-in-use permission when FGS is started from
+     * background.
+     */
+    private final FgsWhileInUseTempAllowList mFgsWhileInUseTempAllowList =
+            new FgsWhileInUseTempAllowList();
+
+    /**
      * Information about and control over application operations
      */
     final AppOpsService mAppOpsService;
@@ -2129,7 +2136,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         0,
                         new HostingRecord("system"));
                 app.setPersistent(true);
-                app.pid = MY_PID;
+                app.pid = app.mPidForCompact = MY_PID;
                 app.getWindowProcessController().setPid(MY_PID);
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
                 app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
@@ -5117,6 +5124,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, app.pid, app.processName);
 
         app.curAdj = app.setAdj = app.verifiedAdj = ProcessList.INVALID_ADJ;
+        synchronized (mOomAdjuster.mCachedAppOptimizer) {
+            app.mSetAdjForCompact = ProcessList.INVALID_ADJ;
+        }
         mOomAdjuster.setAttachingSchedGroupLocked(app);
         app.forcingToImportant = null;
         updateProcessForegroundLocked(app, false, 0, false);
@@ -6012,9 +6022,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private boolean isAppBad(ApplicationInfo info) {
-        synchronized (this) {
-            return mAppErrors.isBadProcessLocked(info);
-        }
+        return mAppErrors.isBadProcess(info.processName, info.uid);
     }
 
     // NOTE: this is an internal method used by the OnShellCommand implementation only and should
@@ -19903,6 +19911,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public boolean hasForegroundServiceNotification(String pkg, int userId,
+                String channelId) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.hasForegroundServiceNotificationLocked(pkg, userId, channelId);
+            }
+        }
+
+        @Override
+        public void stopForegroundServicesForChannel(String pkg, int userId,
+                String channelId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.stopForegroundServicesForChannelLocked(pkg, userId, channelId);
+            }
+        }
+
+        @Override
         public void registerProcessObserver(IProcessObserver processObserver) {
             ActivityManagerService.this.registerProcessObserver(processObserver);
         }
@@ -19953,6 +19977,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean isPendingTopUid(int uid) {
             return mPendingStartActivityUids.isPendingTopUid(uid);
+        }
+
+        @Override
+        public void tempAllowWhileInUsePermissionInFgs(int uid, long duration) {
+            mFgsWhileInUseTempAllowList.add(uid, duration);
+        }
+
+        @Override
+        public boolean isTempAllowlistedForFgsWhileInUse(int uid) {
+            return mFgsWhileInUseTempAllowList.isAllowed(uid);
+        }
+
+        @Override
+        public boolean canAllowWhileInUsePermissionInFgs(int pid, int uid,
+                @NonNull String packageName) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.canAllowWhileInUsePermissionInFgsLocked(pid, uid, packageName);
+            }
         }
     }
 
@@ -20554,7 +20596,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int callerUid = Binder.getCallingUid();
 
         // Only system can toggle the freezer state
-        if (callerUid == SYSTEM_UID) {
+        if (callerUid == SYSTEM_UID || Build.IS_DEBUGGABLE) {
             return mOomAdjuster.mCachedAppOptimizer.enableFreezer(enable);
         } else {
             throw new SecurityException("Caller uid " + callerUid + " cannot set freezer state ");

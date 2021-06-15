@@ -41,7 +41,7 @@
       android:right="@dimen/car_switch_track_margin_size">
     <shape
         android:shape="rectangle"
-        android:tint="@color/switch_track_material">
+        android:tint="@color/car_switch_track">
       <corners android:radius="7dp" />
       <solid android:color="@color/white_disabled_material" />
       <size android:height="14dp" />

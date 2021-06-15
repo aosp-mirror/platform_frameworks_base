@@ -135,7 +135,7 @@ public final class CachedAppOptimizer {
     static final int REPORT_UNFREEZE_MSG = 4;
 
     //TODO:change this static definition into a configurable flag.
-    static final int FREEZE_TIMEOUT_MS = 10000;
+    static final long FREEZE_TIMEOUT_MS = 600000;
 
     static final int DO_FREEZE = 1;
     static final int REPORT_UNFREEZE = 2;
@@ -153,6 +153,7 @@ public final class CachedAppOptimizer {
      */
     final ServiceThread mCachedAppOptimizerThread;
 
+    @GuardedBy("this")
     private final ArrayList<ProcessRecord> mPendingCompactionProcesses =
             new ArrayList<ProcessRecord>();
     private final ActivityManagerService mAm;
@@ -350,51 +351,74 @@ public final class CachedAppOptimizer {
 
     @GuardedBy("mAm")
     void compactAppSome(ProcessRecord app) {
-        app.reqCompactAction = COMPACT_PROCESS_SOME;
-        mPendingCompactionProcesses.add(app);
-        mCompactionHandler.sendMessage(
-                mCompactionHandler.obtainMessage(
-                COMPACT_PROCESS_MSG, app.setAdj, app.setProcState));
+        synchronized (this) {
+            app.reqCompactAction = COMPACT_PROCESS_SOME;
+            if (!app.mPendingCompact) {
+                app.mPendingCompact = true;
+                mPendingCompactionProcesses.add(app);
+                mCompactionHandler.sendMessage(
+                        mCompactionHandler.obtainMessage(
+                        COMPACT_PROCESS_MSG, app.setAdj, app.setProcState));
+            }
+        }
     }
 
     @GuardedBy("mAm")
     void compactAppFull(ProcessRecord app) {
-        app.reqCompactAction = COMPACT_PROCESS_FULL;
-        mPendingCompactionProcesses.add(app);
-        mCompactionHandler.sendMessage(
-                mCompactionHandler.obtainMessage(
-                COMPACT_PROCESS_MSG, app.setAdj, app.setProcState));
-
+        synchronized (this) {
+            app.reqCompactAction = COMPACT_PROCESS_FULL;
+            if (!app.mPendingCompact) {
+                app.mPendingCompact = true;
+                mPendingCompactionProcesses.add(app);
+                mCompactionHandler.sendMessage(
+                        mCompactionHandler.obtainMessage(
+                        COMPACT_PROCESS_MSG, app.setAdj, app.setProcState));
+            }
+        }
     }
 
     @GuardedBy("mAm")
     void compactAppPersistent(ProcessRecord app) {
-        app.reqCompactAction = COMPACT_PROCESS_PERSISTENT;
-        mPendingCompactionProcesses.add(app);
-        mCompactionHandler.sendMessage(
-                mCompactionHandler.obtainMessage(
-                    COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
+        synchronized (this) {
+            app.reqCompactAction = COMPACT_PROCESS_PERSISTENT;
+            if (!app.mPendingCompact) {
+                app.mPendingCompact = true;
+                mPendingCompactionProcesses.add(app);
+                mCompactionHandler.sendMessage(
+                        mCompactionHandler.obtainMessage(
+                        COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
+            }
+        }
     }
 
     @GuardedBy("mAm")
     boolean shouldCompactPersistent(ProcessRecord app, long now) {
-        return (app.lastCompactTime == 0
-                || (now - app.lastCompactTime) > mCompactThrottlePersistent);
+        synchronized (this) {
+            return (app.lastCompactTime == 0
+                    || (now - app.lastCompactTime) > mCompactThrottlePersistent);
+        }
     }
 
     @GuardedBy("mAm")
     void compactAppBfgs(ProcessRecord app) {
-        app.reqCompactAction = COMPACT_PROCESS_BFGS;
-        mPendingCompactionProcesses.add(app);
-        mCompactionHandler.sendMessage(
-                mCompactionHandler.obtainMessage(
-                    COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
+        synchronized (this) {
+            app.reqCompactAction = COMPACT_PROCESS_BFGS;
+            if (!app.mPendingCompact) {
+                app.mPendingCompact = true;
+                mPendingCompactionProcesses.add(app);
+                mCompactionHandler.sendMessage(
+                        mCompactionHandler.obtainMessage(
+                        COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
+            }
+        }
     }
 
     @GuardedBy("mAm")
     boolean shouldCompactBFGS(ProcessRecord app, long now) {
-        return (app.lastCompactTime == 0
-                || (now - app.lastCompactTime) > mCompactThrottleBFGS);
+        synchronized (this) {
+            return (app.lastCompactTime == 0
+                    || (now - app.lastCompactTime) > mCompactThrottleBFGS);
+        }
     }
 
     @GuardedBy("mAm")
@@ -725,10 +749,12 @@ public final class CachedAppOptimizer {
 
     // This will ensure app will be out of the freezer for at least FREEZE_TIMEOUT_MS
     void unfreezeTemporarily(ProcessRecord app) {
-        synchronized (mAm) {
-            if (app.frozen) {
-                unfreezeAppLocked(app);
-                freezeAppAsync(app);
+        if (mUseFreezer) {
+            synchronized (mAm) {
+                if (app.frozen) {
+                    unfreezeAppLocked(app);
+                    freezeAppAsync(app);
+                }
             }
         }
     }
@@ -855,18 +881,19 @@ public final class CachedAppOptimizer {
                     LastCompactionStats lastCompactionStats;
                     int lastOomAdj = msg.arg1;
                     int procState = msg.arg2;
-                    synchronized (mAm) {
+                    synchronized (CachedAppOptimizer.this) {
                         proc = mPendingCompactionProcesses.remove(0);
 
                         pendingAction = proc.reqCompactAction;
-                        pid = proc.pid;
+                        pid = proc.mPidForCompact;
                         name = proc.processName;
+                        proc.mPendingCompact = false;
 
                         // don't compact if the process has returned to perceptible
                         // and this is only a cached/home/prev compaction
                         if ((pendingAction == COMPACT_PROCESS_SOME
                                 || pendingAction == COMPACT_PROCESS_FULL)
-                                && (proc.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ)) {
+                                && (proc.mSetAdjForCompact <= ProcessList.PERCEPTIBLE_APP_ADJ)) {
                             if (DEBUG_COMPACTION) {
                                 Slog.d(TAG_AM,
                                         "Skipping compaction as process " + name + " is "
@@ -1054,7 +1081,7 @@ public final class CachedAppOptimizer {
                                     lastOomAdj, ActivityManager.processStateAmToProto(procState),
                                     zramFreeKbBefore, zramFreeKbAfter);
                         }
-                        synchronized (mAm) {
+                        synchronized (CachedAppOptimizer.this) {
                             proc.lastCompactTime = end;
                             proc.lastCompactAction = pendingAction;
                         }
@@ -1105,15 +1132,26 @@ public final class CachedAppOptimizer {
         }
 
         private void freezeProcess(ProcessRecord proc) {
-            final int pid;
-            final String name;
+            final int pid = proc.pid;
+            final String name = proc.processName;
             final long unfrozenDuration;
             final boolean frozen;
 
-            synchronized (mAm) {
-                pid = proc.pid;
-                name = proc.processName;
+            try {
+                // pre-check for locks to avoid unnecessary freeze/unfreeze operations
+                if (Process.hasFileLocks(pid)) {
+                    if (DEBUG_FREEZER) {
+                        Slog.d(TAG_AM, name + " (" + pid + ") holds file locks, not freezing");
+                    }
+                    return;
+                }
+            } catch (Exception e) {
+                Slog.e(TAG_AM, "Not freezing. Unable to check file locks for " + name + "(" + pid
+                        + "): " + e);
+                return;
+            }
 
+            synchronized (mAm) {
                 if (proc.curAdj < ProcessList.CACHED_APP_MIN_ADJ
                         || proc.shouldNotFreeze) {
                     if (DEBUG_FREEZER) {
@@ -1145,29 +1183,50 @@ public final class CachedAppOptimizer {
                 frozen = proc.frozen;
             }
 
-            if (frozen) {
-                if (DEBUG_FREEZER) {
-                    Slog.d(TAG_AM, "froze " + pid + " " + name);
+            if (!frozen) {
+                return;
+            }
+
+
+            if (DEBUG_FREEZER) {
+                Slog.d(TAG_AM, "froze " + pid + " " + name);
+            }
+
+            EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
+
+            try {
+                freezeBinder(pid, true);
+            } catch (RuntimeException e) {
+                Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
+                proc.kill("Unable to freeze binder interface",
+                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+            }
+
+            // See above for why we're not taking mPhenotypeFlagLock here
+            if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {
+                FrameworkStatsLog.write(FrameworkStatsLog.APP_FREEZE_CHANGED,
+                        FrameworkStatsLog.APP_FREEZE_CHANGED__ACTION__FREEZE_APP,
+                        pid,
+                        name,
+                        unfrozenDuration);
+            }
+
+            try {
+                // post-check to prevent races
+                if (Process.hasFileLocks(pid)) {
+                    if (DEBUG_FREEZER) {
+                        Slog.d(TAG_AM, name + " (" + pid + ") holds file locks, reverting freeze");
+                    }
+
+                    synchronized (mAm) {
+                        unfreezeAppLocked(proc);
+                    }
                 }
-
-                EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
-
-                try {
-                    freezeBinder(pid, true);
-                } catch (RuntimeException e) {
-                    Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
-                    proc.kill("Unable to freeze binder interface",
-                            ApplicationExitInfo.REASON_OTHER,
-                            ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
-                }
-
-                // See above for why we're not taking mPhenotypeFlagLock here
-                if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {
-                    FrameworkStatsLog.write(FrameworkStatsLog.APP_FREEZE_CHANGED,
-                            FrameworkStatsLog.APP_FREEZE_CHANGED__ACTION__FREEZE_APP,
-                            pid,
-                            name,
-                            unfrozenDuration);
+            } catch (Exception e) {
+                Slog.e(TAG_AM, "Unable to check file locks for " + name + "(" + pid + "): " + e);
+                synchronized (mAm) {
+                    unfreezeAppLocked(proc);
                 }
             }
         }
