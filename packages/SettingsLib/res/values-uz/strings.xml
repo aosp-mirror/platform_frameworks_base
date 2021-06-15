@@ -178,7 +178,7 @@
     <string name="tts_status_checking" msgid="8026559918948285013">"Tekshirilmoqda…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> sozlamalari"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"Mexanizm sozlamalarini ishga tushirish"</string>
-    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Standart tizim"</string>
+    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Asosiy vosita"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"Umumiy"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Standart ohang"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Matnni o‘qish ohangini standart holatga qaytarish."</string>

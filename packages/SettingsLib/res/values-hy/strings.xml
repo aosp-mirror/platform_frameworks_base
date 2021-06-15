@@ -211,9 +211,9 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Սխալ"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Անլար վրիպազերծում"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Հասանելի սարքերը տեսնելու և օգտագործելու համար միացրեք անլար վրիպազերծումը"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Զուգակցեք սարքը՝ օգտագործելով QR կոդը"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Զուգակցել սարքը QR կոդով"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Զուգակցեք նոր սարքեր՝ օգտագործելով QR կոդերի սկաները"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Զուգակցեք սարքը՝ օգտագործելով զուգակցման կոդը"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Զուգակցել սարքը զուգակցման կոդով"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Զուգակցեք նոր սարքեր՝ օգտագործելով վեցանիշ կոդը"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Զուգակցված սարքեր"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Միացված է"</string>

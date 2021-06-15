@@ -235,7 +235,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Повежите се на WiFi мрежу"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, отклањање грешака, програмер"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Пречица за извештај о грешкама"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Приказује дугме у менију напајања за прављење извештаја о грешкама"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Приказује дугме у менију дугмета за укључивање за прављење извештаја о грешкама"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Не закључавај"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Екран неће бити у режиму спавања током пуњења"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Омогући snoop евид. за Bluetooth HCI"</string>

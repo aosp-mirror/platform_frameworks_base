@@ -155,7 +155,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"ਕੁਝ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਸੈੱਟ ਕੀਤੇ"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"ਕੋਈ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਸੈੱਟ ਨਹੀਂ ਕੀਤੇ"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ਲਿਖਤ ਤੋਂ ਬੋਲੀ ਸੈਟਿੰਗਾਂ"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"ਲਿਖਤ ਤੋਂ ਬੋਲੀ ਆਊਟਪੁੱਟ"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"ਲਿਖਤ-ਤੋਂ-ਬੋਲੀ ਆਊਟਪੁੱਟ"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"ਬੋਲਣ ਦੀ ਗਤੀ"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ਸਪੀਡ ਜਿਸਤੇ ਟੈਕਸਟ ਬੋਲਿਆ ਜਾਂਦਾ ਹੈ"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"ਪਿਚ"</string>
@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"ਪ੍ਰੋਫਾਈਲ ਚੁਣੋ"</string>
     <string name="category_personal" msgid="6236798763159385225">"ਨਿੱਜੀ"</string>
-    <string name="category_work" msgid="4014193632325996115">"ਕਾਰਜ-ਸਥਾਨ"</string>
+    <string name="category_work" msgid="4014193632325996115">"ਕੰਮ ਸੰਬੰਧੀ"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ਵਿਕਾਸਕਾਰ ਚੋਣਾਂ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ਵਿਕਾਸਕਾਰ ਵਿਕਲਪਾਂ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ਐਪ ਵਿਕਾਸ ਲਈ ਚੋਣਾਂ ਸੈੱਟ ਕਰੋ"</string>
@@ -213,7 +213,7 @@
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ਉਪਲਬਧ ਡੀਵਾਈਸਾਂ ਨੂੰ ਦੇਖਣ ਅਤੇ ਵਰਤਣ ਲਈ, ਵਾਇਰਲੈੱਸ ਡੀਬੱਗਿੰਗ ਚਾਲੂ ਕਰੋ"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR ਕੋਡ ਨਾਲ ਡੀਵਾਈਸ ਨੂੰ ਜੋੜਾਬੱਧ ਕਰੋ"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR ਕੋਡ ਸਕੈਨਰ ਵਰਤ ਕੇ ਨਵੇਂ ਡੀਵਾਈਸਾਂ ਨੂੰ ਜੋੜਾਬੱਧ ਕਰੋ"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ਜੋੜਾਬੱਧਕਰਨ ਕੋਡ ਨਾਲ ਡੀਵਾਈਸ ਜੋੜਾਬੱਧ ਕਰੋ"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ਜੋੜਾਬੱਧਕਰਨ ਕੋਡ ਨਾਲ ਡੀਵਾਈਸ ਨੂੰ ਜੋੜਾਬੱਧ ਕਰੋ"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ਛੇ ਅੰਕਾਂ ਵਾਲਾ ਕੋਡ ਵਰਤ ਕੇ ਨਵੇਂ ਡੀਵਾਈਸਾਂ ਨੂੰ ਜੋੜਾਬੱਧ ਕਰੋ"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"ਜੋੜਾਬੱਧ ਕੀਤੇ ਡੀਵਾਈਸ"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"ਇਸ ਵੇਲੇ ਕਨੈਕਟ ਹੈ"</string>
