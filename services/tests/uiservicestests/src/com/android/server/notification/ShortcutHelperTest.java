@@ -34,6 +34,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutQueryWrapper;
 import android.content.pm.ShortcutServiceInternal;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableLooper;
@@ -71,6 +72,8 @@ public class ShortcutHelperTest extends UiServiceTestCase {
     @Mock
     ShortcutHelper.ShortcutListener mShortcutListener;
     @Mock
+    UserManager mUserManager;
+    @Mock
     ShortcutServiceInternal mShortcutServiceInternal;
     @Mock
     NotificationRecord mNr;
@@ -92,11 +95,12 @@ public class ShortcutHelperTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
 
         mShortcutHelper = new ShortcutHelper(
-                mLauncherApps, mShortcutListener, mShortcutServiceInternal);
+                mLauncherApps, mShortcutListener, mShortcutServiceInternal, mUserManager);
         when(mSbn.getPackageName()).thenReturn(PKG);
         when(mShortcutInfo.getId()).thenReturn(SHORTCUT_ID);
         when(mNotif.getBubbleMetadata()).thenReturn(mBubbleMetadata);
         when(mBubbleMetadata.getShortcutId()).thenReturn(SHORTCUT_ID);
+        when(mUserManager.isUserUnlocked(any(UserHandle.class))).thenReturn(true);
 
         setUpMockNotificationRecord(mNr, KEY);
     }
@@ -315,6 +319,25 @@ public class ShortcutHelperTest extends UiServiceTestCase {
 
         assertThat(mShortcutHelper.getValidShortcutInfo("a", "p", UserHandle.SYSTEM))
                 .isSameInstanceAs(si);
+    }
+
+
+    @Test
+    public void testGetValidShortcutInfo_isValidButUserLocked() {
+        ShortcutInfo si = mock(ShortcutInfo.class);
+        when(si.getPackage()).thenReturn(PKG);
+        when(si.getId()).thenReturn(SHORTCUT_ID);
+        when(si.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
+        when(si.isLongLived()).thenReturn(true);
+        when(si.isEnabled()).thenReturn(true);
+        when(si.getPersons()).thenReturn(new Person[]{PERSON});
+        ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
+        shortcuts.add(si);
+        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcuts);
+        when(mUserManager.isUserUnlocked(any(UserHandle.class))).thenReturn(false);
+
+        assertThat(mShortcutHelper.getValidShortcutInfo("a", "p", UserHandle.SYSTEM))
+                .isNull();
     }
 
     @Test
