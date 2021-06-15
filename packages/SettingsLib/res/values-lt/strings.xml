@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Rodyti iškarpų ribas, kraštines ir t. t."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Išdėst. iš dešin. į kairę"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Nust. visų lokalių ekran. išdėst. iš deš. į kairę"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Leisti lango suliejimus"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Priverst. vykdyti 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Įgalinti 4x MSAA „OpenGL ES 2.0“ programose"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Derinti ne stačiakampio klipo operacijas"</string>
@@ -510,9 +509,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Signalai ir priminimai"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Leisti nustatyti signalus ir priminimus"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Signalai ir priminimai"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Leiskite šiai programai nustatyti signalus ir suplanuoti kitus veiksmus. Ši programa gali būti naudojama, kai nenaudojate telefono, todėl gali būti išeikvojama daugiau akumuliatoriaus energijos. Jei šis leidimas išjungtas, ši programa gali tinkamai neveikti ir jos signalai neveiks, kaip suplanuota."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Leiskite šiai programai nustatyti signalus ir suplanuoti kitus veiksmus. Ši programa gali būti naudojama, kai nenaudojate planšetinio kompiuterio, todėl gali būti išeikvojama daugiau akumuliatoriaus energijos. Jei šis leidimas išjungtas, ši programa gali tinkamai neveikti ir jos signalai neveiks, kaip suplanuota."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Leiskite šiai programai nustatyti signalus ir suplanuoti kitus veiksmus. Ši programa gali būti naudojama, kai nenaudojate įrenginio, todėl gali būti išeikvojama daugiau akumuliatoriaus energijos. Jei šis leidimas išjungtas, ši programa gali tinkamai neveikti ir jos signalai neveiks, kaip suplanuota."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Leisti šiai programai nustatyti signalus ir suplanuoti veiksmus, kuriems svarbus laiko veiksnys. Dėl to programa gali veikti fone ir sunaudoti daugiau akumuliatoriaus energijos.\n\nJei šis leidimas išjungtas, šios programos suplanuoti esami signalai ir laiku pagrįsti įvykiai neveiks."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"tvarkaraštis, signalas, priminimas, laikrodis"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Įjungti"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Netrukdymo režimo įjungimas"</string>

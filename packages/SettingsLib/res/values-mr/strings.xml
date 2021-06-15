@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमा, समास इत्यादी दर्शवा."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL लेआउट दिशानिर्देशाची सक्ती करा"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"सर्व लोकॅलसाठी RTL स्क्रीन लेआउट दिशानिर्देशाची सक्ती करा"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"विंडो पातळीवरील ब्लरना अनुमती द्या"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ची सक्ती करा"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ॲप्समध्ये 4x MSAA सुरू करा"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"आयताकृती नसलेले क्लिप ऑपरेशन डीबग करा"</string>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म आणि रिमाइंडर"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म आणि रिमाइंडर सेट करण्याची अनुमती द्या"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"अलार्म आणि रिमाइंडर"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"या ॲपला अलार्म सेट करण्याची आणि इतर कृती शेड्युल करण्याची अनुमती द्या. तुम्ही तुमचा फोन वापरत नसताना हे ॲप वापरले जाऊ शकते, ज्यामुळे जास्त बॅटरी वापरली जाऊ शकते. ही परवानगी नसल्यास, हे ॲप सामान्यपणे काम करू शकणार नाही आणि त्याचे अलार्म शेड्युल केल्याप्रमाणे काम करणार नाहीत."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"या ॲपला अलार्म सेट करण्याची आणि इतर कृती शेड्युल करण्याची अनुमती द्या. तुम्ही तुमचा टॅबलेट वापरत नसताना हे ॲप वापरले जाऊ शकते, ज्यामुळे जास्त बॅटरी वापरली जाऊ शकते. ही परवानगी नसल्यास, हे ॲप सामान्यपणे काम करू शकणार नाही आणि त्याचे अलार्म शेड्युल केल्याप्रमाणे काम करणार नाहीत."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"या ॲपला अलार्म सेट करण्याची आणि इतर कृती शेड्युल करण्याची अनुमती द्या. तुम्ही तुमचे डिव्हाइस वापरत नसताना हे ॲप वापरले जाऊ शकते, ज्यामुळे जास्त बॅटरी वापरली जाऊ शकते. ही परवानगी नसल्यास, हे ॲप सामान्यपणे काम करू शकणार नाही आणि त्याचे अलार्म शेड्युल केल्याप्रमाणे काम करणार नाहीत."</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"शेड्युल, अलार्म, रिमाइंडर, घड्याळ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"सुरू करा"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"व्यत्यय आणू नका सुरू करा"</string>

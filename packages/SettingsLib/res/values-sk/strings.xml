@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Zobraziť vo výstrižku ohraničenie, okraje a pod."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Rozloženie sprava doľava"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Vynútiť pre všetky jazyky rozloženie obrazovky sprava doľava"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Povolenie rozmazania na úrovni okna"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Vynútiť 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Povoliť 4x MSAA v aplikáciách OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Ladiť operácie s neobdĺžnikovými výstrižkami"</string>
@@ -510,9 +509,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Budíky a pripomenutia"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Povoliť nastavovanie budíkov a pripomenutí"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Budíky a pripomenutia"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Povoľte tejto aplikácii nastavovať budíky a plánovať ďalšie akcie. Táto aplikácia môže byť spustená, keď nepoužívate telefón, čo môže zvýšiť spotrebu batérie. Ak je toto povolenie vypnuté, daná aplikácia nemusí správne fungovať a jej budíky nebudú aktivované podľa plánu."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Povoľte tejto aplikácii nastavovať budíky a plánovať ďalšie akcie. Táto aplikácia môže byť spustená, keď nepoužívate tablet, čo môže zvýšiť spotrebu batérie. Ak je toto povolenie vypnuté, daná aplikácia nemusí správne fungovať a jej budíky nebudú aktivované podľa plánu."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Povoľte tejto aplikácii nastavovať budíky a plánovať ďalšie akcie. Táto aplikácia môže byť spustená, keď nepoužívate zariadenie, čo môže zvýšiť spotrebu batérie. Ak je toto povolenie vypnuté, daná aplikácia nemusí správne fungovať a jej budíky nebudú aktivované podľa plánu."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Povoľte tejto aplikácii nastavovať budíky a plánovať akcie s časovým obmedzením. Aplikácii to umožní pracovať na pozadí, čo môže zvýšiť spotrebu batérie.\n\nAk je toto povolenie vypnuté, súčasné budíky a udalosti s časovým obmedzením naplánované touto aplikáciu nebudú fungovať."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"plán, budík, pripomenutie, hodiny"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Zapnúť"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Zapnite režim bez vyrušení"</string>

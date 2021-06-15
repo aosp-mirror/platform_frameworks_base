@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Erakutsi kliparen mugak, marjinak, etab."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Behartu eskuin-ezker norabidea"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Behartu pantaila-diseinuaren norabidea eskuin-ezker izatera lurraldeko ezarpen guztiekin"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Gaitu leiho-lausotzeak"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Behartu 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Gaitu 4x MSAA, OpenGL ES 2.0 aplikazioetan"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Araztu angeluzuzenak ez diren klip-eragiketak"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmak eta abisuak"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Eman alarmak eta abisuak ezartzeko baimena"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmak eta abisuak"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Eman alarmak ezartzeko eta beste ekintza batzuk programatzeko baimena aplikazioari. Telefonoa erabili ez arren, agian aplikazioak martxan jarraituko du, eta bateria gehiago erabiliko. Baimena desaktibatuta badago, baliteke aplikazioak zuzen ez funtzionatzea eta programatutako alarmek ez jotzea."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Eman alarmak ezartzeko eta beste ekintza batzuk programatzeko baimena aplikazioari. Tableta erabili ez arren, agian aplikazioak martxan jarraituko du, eta bateria gehiago erabiliko. Baimena desaktibatuta badago, baliteke aplikazioak zuzen ez funtzionatzea eta programatutako alarmek ez jotzea."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Eman alarmak ezartzeko eta beste ekintza batzuk programatzeko baimena aplikazioari. Gailua erabili ez arren, agian aplikazioak martxan jarraituko du, eta bateria gehiago erabiliko. Baimena desaktibatuta badago, baliteke aplikazioak zuzen ez funtzionatzea eta programatutako alarmek ez jotzea."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Eman alarmak ezartzeko eta denbora-muga duten ekintzak programatzeko baimena aplikazioari. Hala, aplikazioak atzeko planoan funtzionatuko du, eta litekeena da bateria gehiago kontsumitzea.\n\nEz baduzu ematen baimen hori, ez dute funtzionatuko aplikazio honen bidez programatutako alarmek eta denbora-muga duten ekintzek."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programazioa, alarma, abisua, erlojua"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktibatu"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktibatu ez molestatzeko modua"</string>

@@ -212,9 +212,9 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Սխալ"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Անլար վրիպազերծում"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Հասանելի սարքերը տեսնելու և օգտագործելու համար միացրեք անլար վրիպազերծումը"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Զուգակցեք սարքը՝ օգտագործելով QR կոդը"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Զուգակցել սարքը QR կոդով"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Զուգակցեք նոր սարքեր՝ օգտագործելով QR կոդերի սկաները"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Զուգակցեք սարքը՝ օգտագործելով զուգակցման կոդը"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Զուգակցել սարքը զուգակցման կոդով"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Զուգակցեք նոր սարքեր՝ օգտագործելով վեցանիշ կոդը"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Զուգակցված սարքեր"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Միացված է"</string>
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Ցույց տալ կտրվածքի սահմանները, լուսանցքները և այլն"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Ուղղությունը դարձնել RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Բոլոր լեզուների համար էկրանի տեքստի ուղղությունը դարձնել աջից ձախ"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Շաղում պատուհանի մակարդակում"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Ստիպել  4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Միացնել 4x MSAA-ը  OpenGL ES 2.0 հավելվածներում"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Վրիպազերծել ոչ ուղղանկյուն կտրումների գործողությունները"</string>
@@ -506,11 +505,9 @@
     <string name="cancel" msgid="5665114069455378395">"Չեղարկել"</string>
     <string name="okay" msgid="949938843324579502">"Եղավ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Զարթուցիչներ և հիշեցումներ"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Թույլատրել զարթուցիչների/հիշեցումների կարգավորումը"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Թույլատրել զարթուցիչների և հիշեցումների սահմանումը"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Զարթուցիչներ և հիշեցումներ"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Թույլ տվեք այս հավելվածին կարգավորել զարթուցիչներ և պլանավորել այլ գործողություններ։ Այս հավելվածը կարող է օգտագործվել այն ժամանակ, երբ դուք չեք օգտվում ձեր հեռախոսից, ինչը կարող է արագացնել մարտկոցի լիցքի սպառումը։ Եթե այս թույլտվությունն անջատված է, այս գործառույթը կարող է պատշաճ չաշխատել, իսկ զարթուցիչները պլանավորված ժամերին չեն աշխատի։"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Թույլ տվեք այս հավելվածին կարգավորել զարթուցիչներ և պլանավորել այլ գործողություններ։ Այս հավելվածը կարող է օգտագործվել այն ժամանակ, երբ դուք չեք օգտվում ձեր պլանշետից, ինչը կարող է արագացնել մարտկոցի լիցքի սպառումը։ Եթե այս թույլտվությունն անջատված է, այս գործառույթը կարող է պատշաճ չաշխատել, իսկ զարթուցիչները պլանավորված ժամերին չեն աշխատի։"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Թույլ տվեք այս հավելվածին կարգավորել զարթուցիչներ և պլանավորել այլ գործողություններ։ Այս հավելվածը կարող է օգտագործվել այն ժամանակ, երբ դուք չեք օգտվում ձեր սարքից, ինչը կարող է արագացնել մարտկոցի լիցքի սպառումը։ Եթե այս թույլտվությունն անջատված է, այս գործառույթը կարող է պատշաճ չաշխատել, իսկ զարթուցիչները պլանավորված ժամերին չեն աշխատի։"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Թույլատրեք այս հավելվածին դնել զարթուցիչներ և ստեղծել գործողությունների կատարման ժամանակացույցներ։ Այդպես հավելվածը կկարողանա աշխատել ֆոնային ռեժիմում, ինչի արդյունքում ավելի շատ մարտկոցի լիցք կսպառվի։\n\nԵթե այս թույլտվությունն անջատված է, հավելվածի կողմից կարգավորված զարթուցիչները և միջոցառումների ժամանակացույցները չեն աշխատի։"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ժամանակացույց, զարթուցիչ, հիշեցում, ժամացույց"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Միացնել"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Միացրեք «Չանհանգստացնել» ռեժիմը"</string>

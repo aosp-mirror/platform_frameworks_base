@@ -94,7 +94,7 @@
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"सिम ऐक्सेस"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"एचडी ऑडियो: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"एचडी ऑडियो"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"सुनने में मदद करने वाले डिवाइस"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"कान की मशीन"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"सुनने में मदद करने वाले डिवाइस से कनेक्ट है"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"मीडिया ऑडियो से कनेक्‍ट किया गया"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"फ़ोन ऑडियो से कनेक्‍ट किया गया"</string>
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमाएं, मार्जिन वगैरह दिखाएं."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"लेआउट की दिशा दाएं से बाएं करें"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"सभी भाषाओं के लिए स्क्रीन लेआउट की दिशा दाएं से बाएं रखें"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"विंडो को धुंधला करने की सुविधा चालू करें"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA को हर हाल में चालू करें"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ऐप में 4x MSAA को चालू करें"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"उन क्लिप ऑपरेशन को डीबग करें, जो आयताकार नहीं हैं"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म और रिमाइंडर"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म और रिमाइंडर सेट करने की अनुमति दें"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"अलार्म और रिमाइंडर"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"इस ऐप्लिकेशन को अनुमति दें कि यह अलार्म सेट कर सके और दूसरी कार्रवाइयां शेड्यूल कर सके. इस ऐप्लिकेशन का इस्तेमाल तब भी किया जा सकता है, जब आप अपने फ़ोन का इस्तेमाल नहीं कर रहे होते. इससे बैटरी ज़्यादा खर्च हो सकती है. अगर आप यह अनुमति नहीं देते हैं, तो हो सकता है कि यह ऐप्लिकेशन ठीक तरह से काम न करे. साथ ही, इसमें शेड्यूल किए गए अलार्म भी नहीं बजेंगे."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"इस ऐप्लिकेशन को अनुमति दें कि यह अलार्म सेट कर सके और दूसरी कार्रवाइयां शेड्यूल कर सके. इस ऐप्लिकेशन का इस्तेमाल तब भी किया जा सकता है, जब आप अपने टैबलेट का इस्तेमाल नहीं कर रहे होते. इससे बैटरी ज़्यादा खर्च हो सकती है. अगर आप यह अनुमति नहीं देते हैं, तो हो सकता है कि यह ऐप्लिकेशन ठीक तरह से काम न करे. साथ ही, इसमें शेड्यूल किए गए अलार्म भी नहीं बजेंगे."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"इस ऐप्लिकेशन को अनुमति दें कि यह अलार्म सेट कर सके और दूसरी कार्रवाइयां शेड्यूल कर सके. इस ऐप्लिकेशन का इस्तेमाल तब भी किया जा सकता है, जब आप अपने डिवाइस का इस्तेमाल नहीं कर रहे होते. इससे बैटरी ज़्यादा खर्च हो सकती है. अगर आप यह अनुमति नहीं देते हैं, तो हो सकता है कि यह ऐप्लिकेशन ठीक तरह से काम न करे. साथ ही, इसमें शेड्यूल किए गए अलार्म भी नहीं बजेंगे."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"इस ऐप्लिकेशन को अलार्म और तय समय पर होने वाली कार्रवाइयों के रिमाइंडर सेट करने की अनुमति दें. ऐसा करने से, ऐप्लिकेशन को बैकग्राउंड में चलने की अनुमति मिलती है. इससे, बैटरी ज़्यादा खर्च होती है.\n\nअगर आप यह अनुमति नहीं देते हैं, तो इस ऐप्लिकेशन की मदद से सेट किए गए अलार्म और तय समय पर होने वाली कार्रवाइयों के रिमाइंडर काम नहीं करेंगे."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"शेड्यूल, अलार्म, रिमाइंडर, घड़ी"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"चालू करें"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'परेशान न करें\' चालू करें"</string>
