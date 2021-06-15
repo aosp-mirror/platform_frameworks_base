@@ -151,12 +151,12 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private final int mDialogShowAnimationDurationMs;
     private final int mDialogHideAnimationDurationMs;
-    private final int mDialogWidth;
-    private final int mDialogCornerRadius;
-    private final int mRingerDrawerItemSize;
-    private final int mRingerRowsPadding;
-    private final boolean mShowVibrate;
-    private final int mRingerCount;
+    private int mDialogWidth;
+    private int mDialogCornerRadius;
+    private int mRingerDrawerItemSize;
+    private int mRingerRowsPadding;
+    private boolean mShowVibrate;
+    private int mRingerCount;
     private final boolean mShowLowMediaVolumeIcon;
     private final boolean mChangeVolumeRowTintWhenInactive;
 
@@ -288,18 +288,8 @@ public class VolumeDialogImpl implements VolumeDialog,
                 mDialogRowsView.invalidate();
             };
         }
-        mDialogWidth = mContext.getResources().getDimensionPixelSize(
-                R.dimen.volume_dialog_panel_width);
-        mDialogCornerRadius = mContext.getResources().getDimensionPixelSize(
-                R.dimen.volume_dialog_panel_width_half);
-        mRingerDrawerItemSize = mContext.getResources().getDimensionPixelSize(
-                R.dimen.volume_ringer_drawer_item_size);
-        mRingerRowsPadding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.volume_dialog_ringer_rows_padding);
-        mShowVibrate = mController.hasVibrator();
 
-        // Normal, mute, and possibly vibrate.
-        mRingerCount = mShowVibrate ? 3 : 2;
+        initDimens();
     }
 
     @Override
@@ -377,6 +367,8 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private void initDialog() {
         mDialog = new CustomDialog(mContext);
+
+        initDimens();
 
         mConfigurableTexts = new ConfigurableTexts(mContext);
         mHovering = false;
@@ -567,6 +559,21 @@ public class VolumeDialogImpl implements VolumeDialog,
         initRingerH();
         initSettingsH();
         initODICaptionsH();
+    }
+
+    private void initDimens() {
+        mDialogWidth = mContext.getResources().getDimensionPixelSize(
+                R.dimen.volume_dialog_panel_width);
+        mDialogCornerRadius = mContext.getResources().getDimensionPixelSize(
+                R.dimen.volume_dialog_panel_width_half);
+        mRingerDrawerItemSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.volume_ringer_drawer_item_size);
+        mRingerRowsPadding = mContext.getResources().getDimensionPixelSize(
+                R.dimen.volume_dialog_ringer_rows_padding);
+        mShowVibrate = mController.hasVibrator();
+
+        // Normal, mute, and possibly vibrate.
+        mRingerCount = mShowVibrate ? 3 : 2;
     }
 
     protected ViewGroup getDialogView() {
