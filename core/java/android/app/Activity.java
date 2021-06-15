@@ -3866,9 +3866,26 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Called when the activity has detected the user's press of the back
-     * key.  The default implementation simply finishes the current activity,
-     * but you can override this to do whatever you want.
+     * Called when the activity has detected the user's press of the back key. The default
+     * implementation depends on the platform version:
+     *
+     * <ul>
+     *     <li>On platform versions prior to {@link android.os.Build.VERSION_CODES#S}, it
+     *         finishes the current activity, but you can override this to do whatever you want.
+     *
+     *     <li><p>Starting with platform version {@link android.os.Build.VERSION_CODES#S}, for
+     *         activities that are the root activity of the task and also declare an
+     *         {@link android.content.IntentFilter} with {@link Intent#ACTION_MAIN} and
+     *         {@link Intent#CATEGORY_LAUNCHER} in the manifest, the current activity and its
+     *         task will be moved to the back of the activity stack instead of being finished.
+     *         Other activities will simply be finished.
+     *
+     *         <p>If you target version {@link android.os.Build.VERSION_CODES#S} or later and
+     *         override this method, it is strongly recommended to call through to the superclass
+     *         implementation after you finish handling navigation within the app.
+     * </ul>
+     *
+     * @see #moveTaskToBack(boolean)
      */
     public void onBackPressed() {
         if (mActionBar != null && mActionBar.collapseActionView()) {
