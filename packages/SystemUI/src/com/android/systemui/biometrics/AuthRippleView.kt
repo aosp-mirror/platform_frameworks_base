@@ -31,6 +31,7 @@ import android.util.MathUtils
 import android.view.View
 import android.view.animation.PathInterpolator
 import com.android.internal.graphics.ColorUtils
+import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.charging.RippleShader
 
 private const val RIPPLE_ANIMATION_DURATION: Long = 1533
@@ -70,51 +71,79 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             .toFloat()
     }
 
-    fun startRipple(onAnimationEnd: Runnable?) {
+    fun startRipple(onAnimationEnd: Runnable?, lightReveal: LightRevealScrim?) {
         if (rippleInProgress) {
             return // Ignore if ripple effect is already playing
         }
 
-        val animator = ValueAnimator.ofFloat(0f, 1f)
-        animator.interpolator = PathInterpolator(0.4f, 0f, 0f, 1f)
-        animator.duration = RIPPLE_ANIMATION_DURATION
-        animator.addUpdateListener { animator ->
-            val now = animator.currentPlayTime
-            rippleShader.progress = animator.animatedValue as Float
-            rippleShader.time = now.toFloat()
-            rippleShader.distortionStrength = 1 - rippleShader.progress
-            invalidate()
-        }
-        val alphaInAnimator = ValueAnimator.ofInt(0, 127)
-        alphaInAnimator.duration = 167
-        alphaInAnimator.addUpdateListener { alphaInAnimator ->
-            rippleShader.color = ColorUtils.setAlphaComponent(rippleShader.color,
-                alphaInAnimator.animatedValue as Int)
-            invalidate()
-        }
-        val alphaOutAnimator = ValueAnimator.ofInt(127, 0)
-        alphaOutAnimator.startDelay = 417
-        alphaOutAnimator.duration = 1116
-        alphaOutAnimator.addUpdateListener { alphaOutAnimator ->
-            rippleShader.color = ColorUtils.setAlphaComponent(rippleShader.color,
-                alphaOutAnimator.animatedValue as Int)
-            invalidate()
+        val rippleAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            interpolator = PathInterpolator(0.4f, 0f, 0f, 1f)
+            duration = RIPPLE_ANIMATION_DURATION
+            addUpdateListener { animator ->
+                val now = animator.currentPlayTime
+                rippleShader.progress = animator.animatedValue as Float
+                rippleShader.time = now.toFloat()
+
+                lightReveal?.revealAmount = animator.animatedValue as Float
+                invalidate()
+            }
         }
 
-        val animatorSet = AnimatorSet()
-        animatorSet.playTogether(animator, alphaInAnimator, alphaOutAnimator)
-        animatorSet.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
-                onAnimationEnd?.run()
-                rippleInProgress = false
-                visibility = GONE
+        val revealAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            interpolator = rippleAnimator.interpolator
+            startDelay = 10
+            duration = rippleAnimator.duration
+            addUpdateListener { animator ->
+                lightReveal?.revealAmount = animator.animatedValue as Float
             }
-        })
+        }
+
+        val alphaInAnimator = ValueAnimator.ofInt(0, 127).apply {
+            duration = 167
+            addUpdateListener { animator ->
+                rippleShader.color = ColorUtils.setAlphaComponent(
+                    rippleShader.color,
+                    animator.animatedValue as Int
+                )
+                invalidate()
+            }
+        }
+
+        val alphaOutAnimator = ValueAnimator.ofInt(127, 0).apply {
+            startDelay = 417
+            duration = 1116
+            addUpdateListener { animator ->
+                rippleShader.color = ColorUtils.setAlphaComponent(
+                    rippleShader.color,
+                    animator.animatedValue as Int
+                )
+                invalidate()
+            }
+        }
+
+        val animatorSet = AnimatorSet().apply {
+            playTogether(
+                rippleAnimator,
+                revealAnimator,
+                alphaInAnimator,
+                alphaOutAnimator
+            )
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator?) {
+                    rippleInProgress = true
+                    visibility = VISIBLE
+                }
+
+                override fun onAnimationEnd(animation: Animator?) {
+                    onAnimationEnd?.run()
+                    rippleInProgress = false
+                    visibility = GONE
+                }
+            })
+        }
         // TODO (b/185124905):  custom haptic TBD
         // vibrate()
         animatorSet.start()
-        visibility = VISIBLE
-        rippleInProgress = true
     }
 
     fun setColor(color: Int) {
