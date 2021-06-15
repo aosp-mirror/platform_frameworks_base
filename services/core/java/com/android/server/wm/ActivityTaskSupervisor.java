@@ -137,7 +137,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
-import com.android.internal.os.TransferPipe;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
@@ -147,7 +146,6 @@ import com.android.server.am.UserState;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -1969,76 +1967,14 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     static boolean dumpHistoryList(FileDescriptor fd, PrintWriter pw, List<ActivityRecord> list,
             String prefix, String label, boolean complete, boolean brief, boolean client,
             String dumpPackage, boolean needNL, Runnable header, Task lastTask) {
-        String innerPrefix = null;
-        String[] args = null;
         boolean printed = false;
-        for (int i=list.size()-1; i>=0; i--) {
+        for (int i = list.size() - 1; i >= 0; i--) {
             final ActivityRecord r = list.get(i);
-            if (dumpPackage != null && !dumpPackage.equals(r.packageName)) {
-                continue;
-            }
-            if (innerPrefix == null) {
-                innerPrefix = prefix + "      ";
-                args = new String[0];
-            }
-            printed = true;
-            final boolean full = !brief && (complete || !r.isInHistory());
-            if (needNL) {
-                pw.println("");
-                needNL = false;
-            }
-            if (header != null) {
-                header.run();
-                header = null;
-            }
-            if (lastTask != r.getTask()) {
-                lastTask = r.getTask();
-                pw.print(prefix);
-                pw.print(full ? "* " : "  ");
-                pw.println(lastTask);
-                if (full) {
-                    lastTask.dump(pw, prefix + "  ");
-                } else if (complete) {
-                    // Complete + brief == give a summary.  Isn't that obvious?!?
-                    if (lastTask.intent != null) {
-                        pw.print(prefix); pw.print("  ");
-                                pw.println(lastTask.intent.toInsecureString());
-                    }
-                }
-            }
-            pw.print(prefix); pw.print(full ? "  * " : "    "); pw.print(label);
-            pw.print(" #"); pw.print(i); pw.print(": ");
-            pw.println(r);
-            if (full) {
-                r.dump(pw, innerPrefix, true /* dumpAll */);
-            } else if (complete) {
-                // Complete + brief == give a summary.  Isn't that obvious?!?
-                pw.print(innerPrefix); pw.println(r.intent.toInsecureString());
-                if (r.app != null) {
-                    pw.print(innerPrefix); pw.println(r.app);
-                }
-            }
-            if (client && r.attachedToProcess()) {
-                // flush anything that is already in the PrintWriter since the thread is going
-                // to write to the file descriptor directly
-                pw.flush();
-                try {
-                    TransferPipe tp = new TransferPipe();
-                    try {
-                        r.app.getThread().dumpActivity(
-                                tp.getWriteFd(), r.appToken, innerPrefix, args);
-                        // Short timeout, since blocking here can deadlock with the application.
-                        tp.go(fd, 2000);
-                    } finally {
-                        tp.kill();
-                    }
-                } catch (IOException e) {
-                    pw.println(innerPrefix + "Failure while dumping the activity: " + e);
-                } catch (RemoteException e) {
-                    pw.println(innerPrefix + "Got a RemoteException while dumping the activity");
-                }
-                needNL = true;
-            }
+            ActivityRecord.dumpActivity(fd, pw, i, r, prefix, label, complete, brief,
+                    client, dumpPackage, needNL, header, lastTask);
+            lastTask = r.getTask();
+            header = null;
+            needNL = client && r.attachedToProcess();
         }
         return printed;
     }
