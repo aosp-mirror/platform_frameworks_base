@@ -506,6 +506,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         lp.windowAnimations = 0;
         lp.setTitle("NavigationBar" + mContext.getDisplayId());
         lp.setFitInsetsTypes(0 /* types */);
+        lp.setTrustedOverlay();
 
         NavigationBarFrame frame = (NavigationBarFrame) LayoutInflater.from(mContext).inflate(
                 R.layout.navigation_bar_window, null);

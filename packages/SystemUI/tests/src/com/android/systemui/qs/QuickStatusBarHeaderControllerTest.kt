@@ -127,6 +127,11 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testClockNotClickable() {
+        assertThat(clock.isClickable).isFalse()
+    }
+
+    @Test
     fun testIgnoredSlotsOnAttached_noIndicators() {
         setPrivacyController(micCamera = false, location = false)
 

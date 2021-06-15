@@ -16,9 +16,7 @@
 
 package com.android.systemui.qs;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.provider.AlarmClock;
 import android.view.View;
 import android.view.View.OnClickListener;
 
@@ -113,10 +111,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private View.OnClickListener mOnClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (v == mClockView) {
-                mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
-                        AlarmClock.ACTION_SHOW_ALARMS), 0);
-            } else if (v == mPrivacyChip) {
+            if (v == mPrivacyChip) {
                 // If the privacy chip is visible, it means there were some indicators
                 mUiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_CLICK);
                 mPrivacyDialogController.showDialog(getContext());
@@ -167,7 +162,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
     @Override
     protected void onViewAttached() {
-        mClockView.setOnClickListener(mOnClickListener);
         mPrivacyChip.setOnClickListener(mOnClickListener);
 
         mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
@@ -188,7 +182,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
     @Override
     protected void onViewDetached() {
-        mClockView.setOnClickListener(null);
         mColorExtractor.removeOnColorsChangedListener(mOnColorsChangedListener);
         mPrivacyChip.setOnClickListener(null);
         mStatusBarIconController.removeIconGroup(mIconManager);

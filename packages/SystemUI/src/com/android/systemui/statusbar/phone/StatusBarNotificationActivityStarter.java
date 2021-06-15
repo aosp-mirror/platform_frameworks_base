@@ -252,10 +252,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }
 
         boolean isActivityIntent = intent != null && intent.isActivity() && !isBubble;
-        final boolean afterKeyguardGone = isActivityIntent
+        final boolean willLaunchResolverActivity = isActivityIntent
                 && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
-        final boolean animate = mStatusBar.shouldAnimateLaunch(isActivityIntent);
+        final boolean animate = !willLaunchResolverActivity
+                && mStatusBar.shouldAnimateLaunch(isActivityIntent);
         boolean showOverLockscreen = mKeyguardStateController.isShowing() && intent != null
                 && mActivityIntentHelper.wouldShowOverLockscreen(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
@@ -268,7 +269,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             postKeyguardAction.onDismiss();
         } else {
             mActivityStarter.dismissKeyguardThenExecute(
-                    postKeyguardAction, null /* cancel */, afterKeyguardGone);
+                    postKeyguardAction, null /* cancel */, willLaunchResolverActivity);
         }
     }
 
@@ -296,7 +297,9 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         } else {
             runnable.run();
         }
-        return !mNotificationPanel.isFullyCollapsed();
+
+        // Always defer the keyguard dismiss when animating.
+        return animate || !mNotificationPanel.isFullyCollapsed();
     }
 
     private void handleNotificationClickAfterPanelCollapsed(

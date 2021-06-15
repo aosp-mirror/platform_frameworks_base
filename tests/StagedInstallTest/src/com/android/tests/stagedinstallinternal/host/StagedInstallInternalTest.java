@@ -139,6 +139,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
      * Tests that duplicate packages in apk-in-apex and apk should fail to install.
      */
     @Test
+    @LargeTest
     public void testDuplicateApkInApexShouldFail() throws Exception {
         pushTestApex();
         runPhase("testDuplicateApkInApexShouldFail_Commit");
@@ -290,6 +291,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     }
 
     @Test
+    @LargeTest
     public void testOrphanedStagingDirectoryGetsCleanedUpOnReboot() throws Exception {
         //create random directories in /data/app-staging folder
         getDevice().enableAdbRoot();
@@ -305,6 +307,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     }
 
     @Test
+    @LargeTest
     public void testFailStagedSessionIfStagingDirectoryDeleted() throws Exception {
         // Create a staged session
         runPhase("testFailStagedSessionIfStagingDirectoryDeleted_Commit");

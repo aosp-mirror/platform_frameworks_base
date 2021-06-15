@@ -689,7 +689,7 @@ public abstract class AccessibilityService extends Service {
      * @hide
      */
     @TestApi
-    public static final int ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS = 1000;
+    public static final int ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS = 333;
 
     /** @hide */
     public static final String KEY_ACCESSIBILITY_SCREENSHOT_STATUS =

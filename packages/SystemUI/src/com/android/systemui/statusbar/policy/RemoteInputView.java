@@ -775,7 +775,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             mOnVisibilityChangedListener.accept(visibility == VISIBLE);
             // Hide soft-keyboard when the input view became invisible
             // (i.e. The notification shade collapsed by pressing the home key)
-            if (visibility != VISIBLE && !mEditText.isVisibleToUser()) {
+            if (visibility != VISIBLE && !mEditText.isVisibleToUser()
+                    && !mController.isRemoteInputActive()) {
                 mEditText.hideIme();
             }
         }

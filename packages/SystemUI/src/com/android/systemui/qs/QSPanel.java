@@ -97,7 +97,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     private BrightnessMirrorController mBrightnessMirrorController;
     private LinearLayout mHorizontalLinearLayout;
-    private LinearLayout mHorizontalContentContainer;
+    protected LinearLayout mHorizontalContentContainer;
 
     // Only used with media
     private QSTileLayout mHorizontalTileLayout;
@@ -132,7 +132,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
             mHorizontalContentContainer = new RemeasuringLinearLayout(mContext);
             mHorizontalContentContainer.setOrientation(LinearLayout.VERTICAL);
-            mHorizontalContentContainer.setClipChildren(false);
+            mHorizontalContentContainer.setClipChildren(true);
             mHorizontalContentContainer.setClipToPadding(false);
 
             mHorizontalTileLayout = createHorizontalTileLayout();
