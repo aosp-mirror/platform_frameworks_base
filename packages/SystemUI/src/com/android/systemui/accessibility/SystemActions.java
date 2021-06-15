@@ -161,7 +161,7 @@ public class SystemActions extends SystemUI {
         mNotificationShadeController = notificationShadeController;
         // Saving in instance variable since to prevent GC since
         // NotificationShadeWindowController.registerCallback() only keeps weak references.
-        mNotificationShadeCallback = (keyguardShowing, keyguardOccluded, bouncerShowing) ->
+        mNotificationShadeCallback = (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing) ->
                 registerOrUnregisterDismissNotificationShadeAction();
         mStatusBar = statusBar;
     }
