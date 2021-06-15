@@ -17097,10 +17097,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 callerPackageName);
         synchronized (mLock) {
             PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps == null) {
-                throw new IllegalArgumentException("Unknown target package " + packageName);
-            }
-            if (shouldFilterApplicationLocked(
+            if (ps == null || shouldFilterApplicationLocked(
                     ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
                 throw new IllegalArgumentException("Unknown target package " + packageName);
             }
