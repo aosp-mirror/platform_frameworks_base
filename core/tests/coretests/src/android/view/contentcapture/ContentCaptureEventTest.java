@@ -236,13 +236,13 @@ public class ContentCaptureEventTest {
     @Test
     public void testMergeEvent_typeViewTextChanged() {
         final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_TEXT_CHANGED)
-                .setText("test", false);
+                .setText("test");
         final ContentCaptureEvent event2 = new ContentCaptureEvent(43, TYPE_VIEW_TEXT_CHANGED)
-                .setText("empty", true);
+                .setText("composing").setComposingIndex(0, 1);
 
         event.mergeEvent(event2);
         assertThat(event.getText()).isEqualTo(event2.getText());
-        assertThat(event.getTextHasComposingSpan()).isEqualTo(event2.getTextHasComposingSpan());
+        assertThat(event.hasComposingSpan()).isEqualTo(event2.hasComposingSpan());
     }
 
     @Test
@@ -283,18 +283,18 @@ public class ContentCaptureEventTest {
     @Test
     public void testMergeEvent_differentEventTypes() {
         final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED)
-                .setText("test", false).setAutofillId(new AutofillId(1));
+                .setText("test").setAutofillId(new AutofillId(1));
         final ContentCaptureEvent event2 = new ContentCaptureEvent(17, TYPE_VIEW_TEXT_CHANGED)
-                .setText("empty", true).setAutofillId(new AutofillId(2));
+                .setText("composing").setAutofillId(new AutofillId(2)).setComposingIndex(0, 1);
 
         event.mergeEvent(event2);
         assertThat(event.getText()).isEqualTo("test");
-        assertThat(event.getTextHasComposingSpan()).isFalse();
+        assertThat(event.hasComposingSpan()).isFalse();
         assertThat(event.getId()).isEqualTo(new AutofillId(1));
 
         event2.mergeEvent(event);
-        assertThat(event2.getText()).isEqualTo("empty");
-        assertThat(event2.getTextHasComposingSpan()).isTrue();
+        assertThat(event2.getText()).isEqualTo("composing");
+        assertThat(event2.hasComposingSpan()).isTrue();
         assertThat(event2.getId()).isEqualTo(new AutofillId(2));
     }
 

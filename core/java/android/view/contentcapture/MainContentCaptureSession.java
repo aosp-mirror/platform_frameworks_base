@@ -43,6 +43,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
+import android.text.Selection;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -347,8 +348,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             //    2.2 last event doesn't have composing span: add.
             // Otherwise, merge.
             final CharSequence text = event.getText();
-            final boolean textHasComposingSpan = event.getTextHasComposingSpan();
-            if (textHasComposingSpan) {
+            final boolean hasComposingSpan = event.hasComposingSpan();
+            if (hasComposingSpan) {
                 ContentCaptureEvent lastEvent = null;
                 for (int index = mEvents.size() - 1; index >= 0; index--) {
                     final ContentCaptureEvent tmpEvent = mEvents.get(index);
@@ -357,7 +358,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                         break;
                     }
                 }
-                if (lastEvent != null && lastEvent.getTextHasComposingSpan()) {
+                if (lastEvent != null && lastEvent.hasComposingSpan()) {
                     final CharSequence lastText = lastEvent.getText();
                     final boolean bothNonEmpty = !TextUtils.isEmpty(lastText)
                             && !TextUtils.isEmpty(text);
@@ -705,12 +706,24 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         // a copy of its content so that its value will not be changed by subsequent updates
         // in the TextView.
         final CharSequence eventText = stringOrSpannedStringWithoutNoCopySpans(text);
-        final boolean textHasComposingSpan =
-                text instanceof Spannable && BaseInputConnection.getComposingSpanStart(
-                        (Spannable) text) >= 0;
+
+        final int composingStart;
+        final int composingEnd;
+        if (text instanceof Spannable) {
+            composingStart = BaseInputConnection.getComposingSpanStart((Spannable) text);
+            composingEnd = BaseInputConnection.getComposingSpanEnd((Spannable) text);
+        } else {
+            composingStart = ContentCaptureEvent.MAX_INVALID_VALUE;
+            composingEnd = ContentCaptureEvent.MAX_INVALID_VALUE;
+        }
+
+        final int startIndex = Selection.getSelectionStart(text);
+        final int endIndex = Selection.getSelectionEnd(text);
         mHandler.post(() -> sendEvent(
                 new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED)
-                        .setAutofillId(id).setText(eventText, textHasComposingSpan)));
+                        .setAutofillId(id).setText(eventText)
+                        .setComposingIndex(composingStart, composingEnd)
+                        .setSelectionIndex(startIndex, endIndex)));
     }
 
     private CharSequence stringOrSpannedStringWithoutNoCopySpans(CharSequence source) {
