@@ -506,6 +506,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
     private int mOverrideMaxCachedProcesses = -1;
+    private final int mCustomizedMaxCachedProcesses;
 
     // The maximum number of cached processes we will keep around before killing them.
     // NOTE: this constant is *only* a control to not let us go too crazy with
@@ -515,11 +516,12 @@ final class ActivityManagerConstants extends ContentObserver {
     // kill them.  Also note that this limit only applies to cached background processes;
     // we have no limit on the number of service, visible, foreground, or other such
     // processes and the number of those processes does not count against the cached
-    // process limit.
-    public int CUR_MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
+    // process limit. This will be initialized in the constructor.
+    public int CUR_MAX_CACHED_PROCESSES;
 
-    // The maximum number of empty app processes we will let sit around.
-    public int CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
+    // The maximum number of empty app processes we will let sit around.  This will be
+    // initialized in the constructor.
+    public int CUR_MAX_EMPTY_PROCESSES;
 
     // The number of empty apps at which we don't consider it necessary to do
     // memory trimming.
@@ -762,6 +764,10 @@ final class ActivityManagerConstants extends ContentObserver {
                 context.getResources().getStringArray(
                         com.android.internal.R.array.config_keep_warming_services))
                 .map(ComponentName::unflattenFromString).collect(Collectors.toSet()));
+        mCustomizedMaxCachedProcesses = context.getResources().getInteger(
+                com.android.internal.R.integer.config_customizedMaxCachedProcesses);
+        CUR_MAX_CACHED_PROCESSES = mCustomizedMaxCachedProcesses;
+        CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
     }
 
     public void start(ContentResolver resolver) {
@@ -1105,13 +1111,13 @@ final class ActivityManagerConstants extends ContentObserver {
         try {
             CUR_MAX_CACHED_PROCESSES = mOverrideMaxCachedProcesses < 0
                     ? (TextUtils.isEmpty(maxCachedProcessesFlag)
-                    ? DEFAULT_MAX_CACHED_PROCESSES : Integer.parseInt(maxCachedProcessesFlag))
+                    ? mCustomizedMaxCachedProcesses : Integer.parseInt(maxCachedProcessesFlag))
                     : mOverrideMaxCachedProcesses;
         } catch (NumberFormatException e) {
             // Bad flag value from Phenotype, revert to default.
             Slog.e(TAG,
                     "Unable to parse flag for max_cached_processes: " + maxCachedProcessesFlag, e);
-            CUR_MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
+            CUR_MAX_CACHED_PROCESSES = mCustomizedMaxCachedProcesses;
         }
         CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
 
@@ -1288,6 +1294,7 @@ final class ActivityManagerConstants extends ContentObserver {
         if (mOverrideMaxCachedProcesses >= 0) {
             pw.print("  mOverrideMaxCachedProcesses="); pw.println(mOverrideMaxCachedProcesses);
         }
+        pw.print("  mCustomizedMaxCachedProcesses="); pw.println(mCustomizedMaxCachedProcesses);
         pw.print("  CUR_MAX_CACHED_PROCESSES="); pw.println(CUR_MAX_CACHED_PROCESSES);
         pw.print("  CUR_MAX_EMPTY_PROCESSES="); pw.println(CUR_MAX_EMPTY_PROCESSES);
         pw.print("  CUR_TRIM_EMPTY_PROCESSES="); pw.println(CUR_TRIM_EMPTY_PROCESSES);

@@ -5042,4 +5042,7 @@
     <!-- The default number of times per second that the seconds hand on AnalogClock ticks. If set
          to 0, the seconds hand will be disabled. -->
     <integer name="config_defaultAnalogClockSecondsHandFps">1</integer>
+
+    <!-- the number of the max cached processes in the system. -->
+    <integer name="config_customizedMaxCachedProcesses">32</integer>
 </resources>

@@ -4420,4 +4420,6 @@
   <java-symbol type="dimen" name="config_wallpaperDimAmount" />
 
   <java-symbol type="bool" name="config_volumeShowRemoteSessions" />
+
+  <java-symbol type="integer" name="config_customizedMaxCachedProcesses" />
 </resources>
