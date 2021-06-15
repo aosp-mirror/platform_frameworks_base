@@ -229,6 +229,7 @@ public abstract class RecognitionService extends Service {
     protected abstract void onStopListening(Callback listener);
 
     @Override
+    @SuppressLint("MissingNullability")
     public Context createContext(@NonNull ContextParams contextParams) {
         if (contextParams.getNextAttributionSource() != null) {
             if (mHandler.getLooper().equals(Looper.myLooper())) {
