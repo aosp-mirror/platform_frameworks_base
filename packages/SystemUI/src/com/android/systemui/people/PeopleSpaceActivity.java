@@ -91,8 +91,8 @@ public class PeopleSpaceActivity extends Activity {
             // than the activity's background.
             LinearLayout item = findViewById(R.id.item);
             GradientDrawable shape = (GradientDrawable) item.getBackground();
-            final TypedArray ta = mContext.obtainStyledAttributes(
-                    new int[]{android.R.attr.colorBackgroundFloating});
+            final TypedArray ta = mContext.getTheme().obtainStyledAttributes(
+                    new int[]{com.android.internal.R.attr.colorSurface});
             shape.setColor(ta.getColor(0, Color.WHITE));
             return;
         }
