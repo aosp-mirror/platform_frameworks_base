@@ -19,6 +19,8 @@ package com.android.keyguard;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import static com.android.keyguard.KeyguardClockSwitch.LARGE;
+
 import android.app.WallpaperManager;
 import android.content.res.Resources;
 import android.text.TextUtils;
@@ -234,10 +236,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     /**
-     * Set whether or not the lock screen is showing notifications.
+     * Set which clock should be displayed on the keyguard. The other one will be automatically
+     * hidden.
      */
-    public void setHasVisibleNotifications(boolean hasVisibleNotifications) {
-        if (mView.willSwitchToLargeClock(hasVisibleNotifications)) {
+    public void displayClock(@KeyguardClockSwitch.ClockSize int clockSize) {
+        boolean appeared = mView.switchToClock(clockSize);
+        if (appeared && clockSize == LARGE) {
             mLargeClockViewController.animateAppear();
         }
     }
