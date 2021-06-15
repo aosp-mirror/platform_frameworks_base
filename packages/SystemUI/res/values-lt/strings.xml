@@ -748,7 +748,7 @@
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Būsenos:&lt;/b&gt; reitingas padidintas"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Būsenos:&lt;/b&gt; reitingas sumažintas"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, debesėlyje"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, burbule"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, pertraukia netrukdymo režimą"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, debesėlyje, pertraukia netrukdymo režimą"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nustatymai"</string>
@@ -1016,8 +1016,8 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Programos naudoja: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" ir "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Naudojama <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Neseniai naudota <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Naudoja <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Neseniai naudojo <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(darbas)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefono skambutis"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(naud. <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
