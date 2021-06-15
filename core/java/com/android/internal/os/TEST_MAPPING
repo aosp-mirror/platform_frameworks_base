@@ -14,6 +14,14 @@
     },
     {
       "file_patterns": [
+        "Battery[^/]*\\.java",
+        "Kernel[^/]*\\.java",
+        "[^/]*Power[^/]*\\.java"
+      ],
+      "name": "BatteryUsageStatsProtoTests"
+    },
+    {
+      "file_patterns": [
         "BinderDeathDispatcher\\.java"
       ],
       "name": "FrameworksCoreTests",
@@ -23,7 +31,11 @@
       ]
     },
     {
-      "file_patterns": ["Battery[^/]*\\.java"],
+      "file_patterns": [
+        "Battery[^/]*\\.java",
+        "Kernel[^/]*\\.java",
+        "[^/]*Power[^/]*\\.java"
+      ],
       "name": "FrameworksServicesTests",
       "options": [
         { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
