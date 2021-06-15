@@ -369,6 +369,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         holder.getTileAsCustomizeView().setShowAppLabel(position > mEditIndex && !info.isSystem);
         // Don't show the side view for third party tiles, as we don't have the actual state.
         holder.getTileAsCustomizeView().setShowSideView(position < mEditIndex || info.isSystem);
+        holder.mTileView.setSelected(true);
         holder.mTileView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         holder.mTileView.setClickable(true);
         holder.mTileView.setOnClickListener(null);
