@@ -62,7 +62,6 @@ import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
-import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.telephony.ServiceState;
@@ -165,8 +164,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private AuthController mAuthController;
-    @Mock
-    private PowerManager mPowerManager;
     @Mock
     private TelephonyListenerManager mTelephonyListenerManager;
     @Mock
@@ -523,46 +520,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt());
-    }
-
-    @Test
-    public void testFingerprintCancelAodInterrupt_onAuthenticationFailed() {
-        // GIVEN on keyguard and listening for fingerprint authentication
-        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
-        mTestableLooper.processAllMessages();
-
-        ArgumentCaptor<FingerprintManager.AuthenticationCallback> fingerprintCallbackCaptor =
-                ArgumentCaptor.forClass(FingerprintManager.AuthenticationCallback.class);
-        verify(mFingerprintManager).authenticate(any(), any(), fingerprintCallbackCaptor.capture(),
-                any(), anyInt(), anyInt());
-        FingerprintManager.AuthenticationCallback authCallback =
-                fingerprintCallbackCaptor.getValue();
-
-        // WHEN authentication fails
-        authCallback.onAuthenticationFailed();
-
-        // THEN aod interrupt is cancelled
-        verify(mAuthController).onCancelUdfps();
-    }
-
-    @Test
-    public void testFingerprintCancelAodInterrupt_onAuthenticationError() {
-        // GIVEN on keyguard and listening for fingerprint authentication
-        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
-        mTestableLooper.processAllMessages();
-
-        ArgumentCaptor<FingerprintManager.AuthenticationCallback> fingerprintCallbackCaptor =
-                ArgumentCaptor.forClass(FingerprintManager.AuthenticationCallback.class);
-        verify(mFingerprintManager).authenticate(any(), any(), fingerprintCallbackCaptor.capture(),
-                any(), anyInt(), anyInt());
-        FingerprintManager.AuthenticationCallback authCallback =
-                fingerprintCallbackCaptor.getValue();
-
-        // WHEN authentication errors
-        authCallback.onAuthenticationError(0, "");
-
-        // THEN aod interrupt is cancelled
-        verify(mAuthController).onCancelUdfps();
     }
 
     @Test
@@ -1022,7 +979,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mBroadcastDispatcher, mDumpManager,
                     mRingerModeTracker, mBackgroundExecutor,
                     mStatusBarStateController, mLockPatternUtils,
-                    mAuthController, mTelephonyListenerManager, mPowerManager, mFeatureFlags);
+                    mAuthController, mTelephonyListenerManager, mFeatureFlags);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 
