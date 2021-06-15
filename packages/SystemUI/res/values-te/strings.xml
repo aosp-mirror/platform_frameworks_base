@@ -666,8 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ఈథర్‌నెట్"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"అలారం"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <!-- no translation found for wallet_empty_state_label (7776761245237530394) -->
-    <skip />
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"మీ ఫోన్‌తో మరింత వేగంగా, సురక్షితంగా కొనుగోళ్లు చేయడానికి సెటప్ చేయండి"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"అన్నింటినీ చూపు"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"పే చేయడానికి అన్‌లాక్ చేయండి"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"సెటప్ చేయలేదు"</string>
@@ -1086,15 +1085,11 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"విస్మరించు"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"కొనసాగించండి"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"సెట్టింగ్‌లు"</string>
-    <!-- no translation found for controls_media_playing_item_description (4531853311504359098) -->
-    <skip />
+    <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> పాడిన <xliff:g id="SONG_NAME">%1$s</xliff:g> <xliff:g id="APP_LABEL">%3$s</xliff:g> నుండి ప్లే అవుతోంది"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ప్లే చేయండి"</string>
-    <!-- no translation found for controls_media_smartspace_rec_description (4136242327044070732) -->
-    <skip />
-    <!-- no translation found for controls_media_smartspace_rec_item_description (2189271793070870883) -->
-    <skip />
-    <!-- no translation found for controls_media_smartspace_rec_item_no_artist_description (8703614798636591077) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g>ను తెరవండి"</string>
+    <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> నుండి <xliff:g id="ARTIST_NAME">%2$s</xliff:g> పాడిన <xliff:g id="SONG_NAME">%1$s</xliff:g>‌ను ప్లే చేయండి"</string>
+    <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> నుండి <xliff:g id="SONG_NAME">%1$s</xliff:g>‌ను ప్లే చేయండి"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ఇన్‌యాక్టివ్, యాప్ చెక్ చేయండి"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"లోపం, మళ్లీ ప్రయత్నిస్తోంది..."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"కనుగొనబడలేదు"</string>
