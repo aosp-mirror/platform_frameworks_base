@@ -4568,7 +4568,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (visible) {
                 displayContent.mOpeningApps.add(this);
                 mEnteringAnimation = true;
-            } else {
+            } else if (mVisible) {
                 displayContent.mClosingApps.add(this);
                 mEnteringAnimation = false;
             }
