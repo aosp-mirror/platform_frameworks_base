@@ -43,6 +43,7 @@ import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
+import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -99,6 +100,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     private WindowManager mWindowManager;
     @Nullable
     private UdfpsController mUdfpsController;
+    @Nullable
+    private IUdfpsHbmListener mUdfpsHbmListener;
     @Nullable
     private SidefpsController mSidefpsController;
     @VisibleForTesting
@@ -468,6 +471,24 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
         mTaskStackListener = new BiometricTaskStackListener();
         mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+    }
+
+    /**
+     * Stores the listener received from {@link com.android.server.display.DisplayModeDirector}.
+     *
+     * DisplayModeDirector implements {@link IUdfpsHbmListener} and registers it with this class by
+     * calling {@link CommandQueue#setUdfpsHbmListener(IUdfpsHbmListener)}.
+     */
+    @Override
+    public void setUdfpsHbmListener(IUdfpsHbmListener listener) {
+        mUdfpsHbmListener = listener;
+    }
+
+    /**
+     * @return IUdfpsHbmListener that can be set by DisplayModeDirector.
+     */
+    @Nullable public IUdfpsHbmListener getUdfpsHbmListener() {
+        return mUdfpsHbmListener;
     }
 
     @Override
