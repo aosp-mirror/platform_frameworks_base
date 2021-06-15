@@ -666,8 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarme"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <!-- no translation found for wallet_empty_state_label (7776761245237530394) -->
-    <skip />
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Préparez-vous à faire des achats plus rapidement et de façon plus sûre avec votre téléphone"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Tout afficher"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Déverrouiller pour payer"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Non configuré"</string>
@@ -767,7 +766,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"La notification a été automatiquement &lt;b&gt;abaissée à la catégorie Silencieux&lt;/b&gt; par le système."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"La notification a été automatiquement &lt;b&gt;élevée d\'un niveau&lt;/b&gt; dans votre volet."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"La notification a été automatiquement &lt;b&gt;abaissée d\'un niveau&lt;/b&gt; dans votre volet."</string>
-    <string name="feedback_prompt" msgid="3656728972307896379">"Faites part de vos commentaires au concepteur. Était-ce correct?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Faites part de vos commentaires au développeur. Était-ce correct?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Merci de vos commentaires!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Les paramètres des notifications pour <xliff:g id="APP_NAME">%1$s</xliff:g> sont ouverts"</string>

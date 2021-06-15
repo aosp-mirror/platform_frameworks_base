@@ -117,7 +117,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Отказ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Споделяне"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Записването на екрана е анулирано"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"Записът на екрана е запазен"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Записът е запазен"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Докоснете за преглед"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"При изтриването на записа на екрана възникна грешка"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Извличането на разрешенията не бе успешно."</string>

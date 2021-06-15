@@ -101,7 +101,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Trvalé oznámení o relaci nahrávání"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Spustit nahrávání?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Při nahrávání může systém Android zaznamenávat citlivé údaje, které jsou viditelné na obrazovce nebo které jsou přehrávány na zařízení. Týká se to hesel, údajů o platbě, fotek, zpráv a zvuků."</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrát zvuk"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrávat zvuk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk zařízení"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk ze zařízení, například hudba, hovory a vyzvánění"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
@@ -117,8 +117,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Zrušit"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Sdílet"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Nahrávání obrazovky bylo zrušeno"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"Nahrávka obrazovky byla uložena"</string>
-    <string name="screenrecord_save_text" msgid="3008973099800840163">"Nahrávku zobrazíte klepnutím"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Nahrávka obrazovky se uložila"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Klepnutím nahrávku zobrazíte"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Při mazání záznamu obrazovky došlo k chybě"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Nepodařilo se načíst oprávnění"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Při spouštění nahrávání obrazovky došlo k chybě"</string>
@@ -617,9 +617,9 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítka Plocha."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Může mít přístup k soukromým datům (například kontaktům a obsahu e-mailů)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Připnutá aplikace může otevírat další aplikace."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Chcete-li tuto aplikaci odepnout, podržte tlačítka Zpět a Přehled"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Chcete-li tuto aplikaci odepnout, podržte tlačítka Zpět a Plocha"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Chcete-li tuto aplikaci odepnout, přejeďte prstem nahoru a podržte"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Aplikaci odepnete podržením tlačítek Zpět a Přehled"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Aplikaci odepnete podržením tlačítek Zpět a Plocha"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Aplikaci odepnete přejetím prstem nahoru a podržením"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Rozumím"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, děkuji"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikace byla připnuta"</string>

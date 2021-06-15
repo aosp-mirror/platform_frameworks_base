@@ -622,8 +622,8 @@
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Če želite odpeti to aplikacijo, povlecite navzgor in pridržite."</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Razumem"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, hvala"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacija je pripeta"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacija je odpeta"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacija je pripeta."</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacija je odpeta."</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Želite skriti <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Znova se bo pojavila, ko jo naslednjič vklopite v nastavitvah."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Skrij"</string>
@@ -900,8 +900,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Desna koda tipke"</string>
     <string name="left_icon" msgid="5036278531966897006">"Leva ikona"</string>
     <string name="right_icon" msgid="1103955040645237425">"Desna ikona"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Držite in povlecite, da dodate ploščice"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Držite in povlecite, da prerazporedite ploščice"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Držite in povlecite, da dodate ploščice."</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Držite in povlecite, da prerazporedite ploščice."</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Če želite odstraniti, povlecite sem"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Imeti morate vsaj toliko ploščic: <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Uredi"</string>
