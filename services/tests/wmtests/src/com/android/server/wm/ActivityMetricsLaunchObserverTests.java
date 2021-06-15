@@ -38,6 +38,7 @@ import static org.mockito.Mockito.timeout;
 import android.app.ActivityOptions;
 import android.app.ActivityOptions.SourceInfo;
 import android.app.WaitResult;
+import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -474,6 +475,18 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         // There should be 2 events instead of coalescing as one event.
         transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
         transitToDrawnAndVerifyOnLaunchFinished(activityOnNewDisplay);
+    }
+
+    @Test
+    public void testConsecutiveLaunchWithDifferentWindowingMode() {
+        mTopActivity.setWindowingMode(WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+        onActivityLaunched(mTrampolineActivity);
+        mActivityMetricsLogger.notifyActivityLaunching(mTopActivity.intent,
+                mTrampolineActivity /* caller */, mTrampolineActivity.getUid());
+        notifyActivityLaunched(START_SUCCESS, mTopActivity);
+        // Different windowing modes should be independent launch events.
+        transitToDrawnAndVerifyOnLaunchFinished(mTrampolineActivity);
+        transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
     }
 
     private void transitToDrawnAndVerifyOnLaunchFinished(ActivityRecord activity) {
