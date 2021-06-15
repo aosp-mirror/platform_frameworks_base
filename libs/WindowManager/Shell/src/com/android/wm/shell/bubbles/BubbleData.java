@@ -26,6 +26,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.LocusId;
 import android.content.pm.ShortcutInfo;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -872,6 +873,34 @@ public class BubbleData {
             b = getOverflowBubbleWithKey(key);
         }
         return b;
+    }
+
+    /** @return any bubble (in the stack or the overflow) that matches the provided shortcutId. */
+    @Nullable
+    Bubble getAnyBubbleWithShortcutId(String shortcutId) {
+        if (TextUtils.isEmpty(shortcutId)) {
+            return null;
+        }
+        for (int i = 0; i < mBubbles.size(); i++) {
+            Bubble bubble = mBubbles.get(i);
+            String bubbleShortcutId = bubble.getShortcutInfo() != null
+                    ? bubble.getShortcutInfo().getId()
+                    : bubble.getMetadataShortcutId();
+            if (shortcutId.equals(bubbleShortcutId)) {
+                return bubble;
+            }
+        }
+
+        for (int i = 0; i < mOverflowBubbles.size(); i++) {
+            Bubble bubble = mOverflowBubbles.get(i);
+            String bubbleShortcutId = bubble.getShortcutInfo() != null
+                    ? bubble.getShortcutInfo().getId()
+                    : bubble.getMetadataShortcutId();
+            if (shortcutId.equals(bubbleShortcutId)) {
+                return bubble;
+            }
+        }
+        return null;
     }
 
     @VisibleForTesting(visibility = PRIVATE)

@@ -118,6 +118,19 @@ public interface Bubbles {
      */
     void expandStackAndSelectBubble(BubbleEntry entry);
 
+    /**
+     * Request the stack expand if needed, then select the specified Bubble as current.
+     *
+     * @param bubble the bubble to be selected
+     */
+    void expandStackAndSelectBubble(Bubble bubble);
+
+    /**
+     * @return a bubble that matches the provided shortcutId, if one exists.
+     */
+    @Nullable
+    Bubble getBubbleWithShortcutId(String shortcutId);
+
     /** Called for any taskbar changes. */
     void onTaskbarChanged(Bundle b);
 
