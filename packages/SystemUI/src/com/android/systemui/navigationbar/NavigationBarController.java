@@ -153,7 +153,8 @@ public class NavigationBarController implements Callbacks,
             UiEventLogger uiEventLogger,
             NavigationBarOverlayController navBarOverlayController,
             ConfigurationController configurationController,
-            NavigationBarA11yHelper navigationBarA11yHelper) {
+            NavigationBarA11yHelper navigationBarA11yHelper,
+            TaskbarDelegate taskbarDelegate) {
         mContext = context;
         mWindowManager = windowManager;
         mAssistManagerLazy = assistManagerLazy;
@@ -185,7 +186,8 @@ public class NavigationBarController implements Callbacks,
         mNavBarOverlayController = navBarOverlayController;
         mNavMode = mNavigationModeController.addListener(this);
         mNavigationModeController.addListener(this);
-        mTaskbarDelegate = new TaskbarDelegate(mOverviewProxyService,
+        mTaskbarDelegate = taskbarDelegate;
+        mTaskbarDelegate.setOverviewProxyService(overviewProxyService,
                 navigationBarA11yHelper, mSysUiFlagsContainer);
         mIsTablet = isTablet(mContext.getResources().getConfiguration());
     }
