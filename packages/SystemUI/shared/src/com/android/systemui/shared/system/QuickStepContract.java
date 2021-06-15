@@ -114,6 +114,8 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_MAGNIFICATION_OVERLAP = 1 << 19;
     // ImeSwitcher is showing
     public static final int SYSUI_STATE_IME_SWITCHER_SHOWING = 1 << 20;
+    // Device dozing/AOD state
+    public static final int SYSUI_STATE_DEVICE_DOZING = 1 << 21;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -136,7 +138,8 @@ public class QuickStepContract {
             SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
             SYSUI_STATE_IME_SHOWING,
             SYSUI_STATE_MAGNIFICATION_OVERLAP,
-            SYSUI_STATE_IME_SWITCHER_SHOWING
+            SYSUI_STATE_IME_SWITCHER_SHOWING,
+            SYSUI_STATE_DEVICE_DOZING
     })
     public @interface SystemUiStateFlags {}
 
@@ -166,6 +169,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_IME_SHOWING) != 0 ? "ime_visible" : "");
         str.add((flags & SYSUI_STATE_MAGNIFICATION_OVERLAP) != 0 ? "magnification_overlap" : "");
         str.add((flags & SYSUI_STATE_IME_SWITCHER_SHOWING) != 0 ? "ime_switcher_showing" : "");
+        str.add((flags & SYSUI_STATE_DEVICE_DOZING) != 0 ? "device_dozing" : "");
         return str.toString();
     }
 
