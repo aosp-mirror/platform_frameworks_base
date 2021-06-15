@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.camera;
+package com.android.cameraextensions;
 
 import android.app.Service;
 import android.content.Context;
