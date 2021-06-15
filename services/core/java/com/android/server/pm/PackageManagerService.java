@@ -26445,14 +26445,10 @@ public class PackageManagerService extends IPackageManager.Stub
             final int callingUid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(callingUid);
             final AndroidPackage pkg = mPackages.get(packageName);
-            if (pkg == null) {
-                Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
-            final PackageSetting ps = getPackageSetting(pkg.getPackageName());
-            if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
-                // filter and pretend the package doesn't exist
-                Slog.w(TAG, "KeySet requested for filtered package: " + packageName
+            if (pkg == null
+                    || shouldFilterApplicationLocked(getPackageSetting(pkg.getPackageName()),
+                    callingUid, callingUserId)) {
+                Slog.w(TAG, "KeySet requested for unknown package: " + packageName
                         + ", uid:" + callingUid);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
