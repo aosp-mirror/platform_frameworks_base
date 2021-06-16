@@ -1842,9 +1842,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return super.hasContentToDisplay();
     }
 
-    @Override
-    boolean isVisible() {
-        return wouldBeVisibleIfPolicyIgnored() && isVisibleByPolicy()
+    private boolean isVisibleByPolicyOrInsets() {
+        return isVisibleByPolicy()
                 // If we don't have a provider, this window isn't used as a window generating
                 // insets, so nobody can hide it over the inset APIs.
                 && (mControllableInsetProvider == null
@@ -1852,11 +1851,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
+    boolean isVisible() {
+        return wouldBeVisibleIfPolicyIgnored() && isVisibleByPolicyOrInsets();
+    }
+
+    @Override
     boolean isVisibleRequested() {
-        if (shouldCheckTokenVisibleRequested()) {
-            return isVisible() && mToken.isVisibleRequested();
+        final boolean localVisibleRequested =
+                wouldBeVisibleRequestedIfPolicyIgnored() && isVisibleByPolicyOrInsets();
+        if (localVisibleRequested && shouldCheckTokenVisibleRequested()) {
+            return mToken.isVisibleRequested();
         }
-        return isVisible();
+        return localVisibleRequested;
     }
 
     /**
@@ -1901,6 +1907,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         final boolean isWallpaper = mToken.asWallpaperToken() != null;
         return !isWallpaper || mToken.isVisible();
+    }
+
+    private boolean wouldBeVisibleRequestedIfPolicyIgnored() {
+        final WindowState parent = getParentWindow();
+        final boolean isParentHiddenRequested = parent != null && !parent.isVisibleRequested();
+        if (isParentHiddenRequested || mAnimatingExit || mDestroying) {
+            return false;
+        }
+        final boolean isWallpaper = mToken.asWallpaperToken() != null;
+        return !isWallpaper || mToken.isVisibleRequested();
     }
 
     /**
