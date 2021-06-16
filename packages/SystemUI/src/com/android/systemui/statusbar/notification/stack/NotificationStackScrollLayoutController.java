@@ -822,8 +822,18 @@ public class NotificationStackScrollLayoutController {
         return mView.isLayoutRtl();
     }
 
+    /**
+     * @return the left of the view.
+     */
     public int getLeft() {
-        return  mView.getLeft();
+        return mView.getLeft();
+    }
+
+    /**
+     * @return the top of the view.
+     */
+    public int getTop() {
+        return mView.getTop();
     }
 
     public float getTranslationX() {
@@ -1442,6 +1452,14 @@ public class NotificationStackScrollLayoutController {
      */
     public void setOnScrollListener(Consumer<Integer> listener) {
         mView.setOnScrollListener(listener);
+    }
+
+    /**
+     * Set rounded rect clipping bounds on this view.
+     */
+    public void setRoundedClippingBounds(int left, int top, int right, int bottom, int topRadius,
+            int bottomRadius) {
+        mView.setRoundedClippingBounds(left, top, right, bottom, topRadius, bottomRadius);
     }
 
     /**
