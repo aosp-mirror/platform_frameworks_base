@@ -1295,7 +1295,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Не се изискват разрешения"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"това може да ви струва пари"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Това устройство се зарежда през USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Устройството се зарежда през USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Свързаното устройство се зарежда през USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Прехвърлянето на файлове през USB е включено"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Режимът PTP през USB е включен"</string>

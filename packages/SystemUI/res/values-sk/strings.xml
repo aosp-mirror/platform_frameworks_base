@@ -997,7 +997,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Keď batéria klesne pod <xliff:g id="PERCENTAGE">%d</xliff:g> %%, automaticky sa aktivujte Šetrič batérie."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Nastavenia"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Dobre"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"V7pis haldy SysUI"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Senzory sú vypnuté"</string>
     <string name="device_services" msgid="1549944177856658705">"Služby zariadenia"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez názvu"</string>

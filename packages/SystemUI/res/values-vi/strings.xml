@@ -411,7 +411,7 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Sử dụng dữ liệu"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"Dữ liệu còn lại"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Vượt quá giới hạn"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Đã sử dụng <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Đã dùng <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Giới hạn <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Cảnh báo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Hồ sơ công việc"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Theo mặc định, các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Luôn chú ý vào nội dung này bằng phím tắt nổi."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiển thị ở đầu phần cuộc trò chuyện, dưới dạng bong bóng nổi và hiển thị ảnh hồ sơ trên màn hình khóa"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiện ở đầu phần cuộc trò chuyện, dưới dạng bong bóng nổi và hiện ảnh hồ sơ trên màn hình khóa"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cài đặt"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ các tính năng trò chuyện"</string>

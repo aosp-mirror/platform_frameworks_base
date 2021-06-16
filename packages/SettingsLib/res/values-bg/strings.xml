@@ -253,7 +253,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Ограничаване на сканирането за Wi-Fi"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Подобр. рандом. на MAC адреса чрез Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Винаги активни мобилни данни"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Хардуерно ускорение за тетъринга"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Хардуерно ускорение на тетъринга"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Показване на устройствата с Bluetooth без имена"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Деактивиране на пълната сила на звука"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Активиране на Gabeldorsche"</string>
@@ -545,7 +545,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Инф. за потр. профил"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Преди да можете да създадете потребителски профил с ограничена функционалност, трябва да настроите заключения екран, за да защитите приложенията и личните си данни."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Задаване на заключване"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Превключване към <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Превключване към: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Добавяне на гост"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Премахване на госта"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Гост"</string>
