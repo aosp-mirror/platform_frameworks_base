@@ -796,6 +796,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
         @Override
         public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
         }
+        @Override
+        public void onAppSplashScreenViewRemoved(int taskId) {
+        }
     };
 
     private ActivityRecord makePipableActivity() {
