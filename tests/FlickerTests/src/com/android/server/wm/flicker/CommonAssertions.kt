@@ -25,15 +25,21 @@ import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelpe
 
 val HOME_WINDOW_TITLE = arrayOf("Wallpaper", "Launcher")
 
-fun FlickerTestParameter.statusBarWindowIsAlwaysVisible() {
-    assertWm {
-        this.showsAboveAppWindow(STATUS_BAR_WINDOW_NAME)
+fun FlickerTestParameter.statusBarWindowIsVisible() {
+    assertWmStart {
+        this.isAboveAppWindow(STATUS_BAR_WINDOW_NAME)
+    }
+    assertWmEnd {
+        this.isAboveAppWindow(STATUS_BAR_WINDOW_NAME)
     }
 }
 
-fun FlickerTestParameter.navBarWindowIsAlwaysVisible() {
-    assertWm {
-        this.showsAboveAppWindow(NAV_BAR_WINDOW_NAME)
+fun FlickerTestParameter.navBarWindowIsVisible() {
+    assertWmStart {
+        this.isAboveAppWindow(NAV_BAR_WINDOW_NAME)
+    }
+    assertWmEnd {
+        this.isAboveAppWindow(NAV_BAR_WINDOW_NAME)
     }
 }
 
@@ -111,37 +117,21 @@ fun FlickerTestParameter.noUncoveredRegions(
     }
 }
 
-@JvmOverloads
-fun FlickerTestParameter.navBarLayerIsAlwaysVisible(rotatesScreen: Boolean = false) {
-    if (rotatesScreen) {
-        assertLayers {
-            this.isVisible(NAV_BAR_LAYER_NAME)
-                .then()
-                .isInvisible(NAV_BAR_LAYER_NAME)
-                .then()
-                .isVisible(NAV_BAR_LAYER_NAME)
-        }
-    } else {
-        assertLayers {
-            this.isVisible(NAV_BAR_LAYER_NAME)
-        }
+fun FlickerTestParameter.navBarLayerIsVisible() {
+    assertLayersStart {
+        this.isVisible(NAV_BAR_LAYER_NAME)
+    }
+    assertLayersEnd {
+        this.isVisible(NAV_BAR_LAYER_NAME)
     }
 }
 
-@JvmOverloads
-fun FlickerTestParameter.statusBarLayerIsAlwaysVisible(rotatesScreen: Boolean = false) {
-    if (rotatesScreen) {
-        assertLayers {
-            this.isVisible(STATUS_BAR_LAYER_NAME)
-                .then()
-                .isInvisible(STATUS_BAR_LAYER_NAME)
-                .then()
-                .isVisible(STATUS_BAR_LAYER_NAME)
-        }
-    } else {
-        assertLayers {
-            this.isVisible(STATUS_BAR_LAYER_NAME)
-        }
+fun FlickerTestParameter.statusBarLayerIsVisible() {
+    assertLayersStart {
+        this.isVisible(STATUS_BAR_LAYER_NAME)
+    }
+    assertLayersEnd {
+        this.isVisible(STATUS_BAR_LAYER_NAME)
     }
 }
 

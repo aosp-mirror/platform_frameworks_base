@@ -27,8 +27,8 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.appPairsPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.appPairsSecondaryBoundsIsVisible
@@ -69,16 +69,16 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
 
     @Presubmit
     @Test
-    override fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
     @Presubmit
     @Test
-    override fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
 
     @FlakyTest
     @Test
-    override fun statusBarLayerIsAlwaysVisible() {
-        super.statusBarLayerIsAlwaysVisible()
+    override fun statusBarLayerIsVisible() {
+        super.statusBarLayerIsVisible()
     }
 
     @Presubmit

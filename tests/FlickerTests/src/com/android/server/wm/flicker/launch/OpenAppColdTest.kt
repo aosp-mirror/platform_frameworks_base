@@ -70,8 +70,8 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
 
     @FlakyTest
     @Test
-    override fun navBarLayerIsAlwaysVisible() {
-        super.navBarLayerIsAlwaysVisible()
+    override fun navBarLayerIsVisible() {
+        super.navBarLayerIsVisible()
     }
 
     @FlakyTest
@@ -82,8 +82,8 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
 
     @FlakyTest
     @Test
-    override fun statusBarLayerIsAlwaysVisible() {
-        super.statusBarLayerIsAlwaysVisible()
+    override fun statusBarLayerIsVisible() {
+        super.statusBarLayerIsVisible()
     }
 
     @FlakyTest

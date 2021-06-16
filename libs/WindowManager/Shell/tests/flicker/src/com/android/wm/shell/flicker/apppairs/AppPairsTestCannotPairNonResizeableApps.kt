@@ -86,8 +86,8 @@ class AppPairsTestCannotPairNonResizeableApps(
 
     @FlakyTest
     @Test
-    override fun navBarLayerIsAlwaysVisible() {
-        super.navBarLayerIsAlwaysVisible()
+    override fun navBarLayerIsVisible() {
+        super.navBarLayerIsVisible()
     }
 
     @Presubmit
