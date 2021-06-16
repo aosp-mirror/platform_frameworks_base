@@ -846,8 +846,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateClickAndFocus();
         if (mNotificationParent != null) {
             setOverrideTintColor(NO_COLOR, 0.0f);
-            // Let's reset the distance to top roundness, as this isn't applied to group children
-            setDistanceToTopRoundness(NO_ROUNDNESS);
             mNotificationParent.updateBackgroundForGroupState();
         }
         updateBackgroundClipping();
@@ -3034,24 +3032,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return (canShowHeadsUp()
                 && (mIsPinned || mHeadsupDisappearRunning || (mIsHeadsUp && mAboveShelf)
                 || mExpandAnimationRunning || mChildIsExpanding));
-    }
-
-    @Override
-    public boolean topAmountNeedsClipping() {
-        if (isGroupExpanded()) {
-            return true;
-        }
-        if (isGroupExpansionChanging()) {
-            return true;
-        }
-        if (getShowingLayout().shouldClipToRounding(true /* topRounded */,
-                false /* bottomRounded */)) {
-            return true;
-        }
-        if (mGuts != null && mGuts.getAlpha() != 0.0f) {
-            return true;
-        }
-        return false;
     }
 
     @Override

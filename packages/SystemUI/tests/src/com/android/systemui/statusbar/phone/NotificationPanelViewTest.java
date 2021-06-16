@@ -84,7 +84,6 @@ import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -673,21 +672,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         listener.onDoubleTapRequired();
 
         verify(mTapAgainViewController).show();
-    }
-
-    @Test
-    public void testNotificationClipping_isAlignedWithNotificationScrimInSplitShade() {
-        mStatusBarStateController.setState(SHADE);
-        QS qs = mock(QS.class);
-        when(qs.getHeader()).thenReturn(mock(View.class));
-        mNotificationPanelViewController.mQs = qs;
-        enableSplitShade();
-
-        // hacky way to refresh notification scrim top with non-zero qsPanelBottom value
-        mNotificationPanelViewController.setTransitionToFullShadeAmount(200, false, 0);
-
-        verify(mAmbientState)
-                .setNotificationScrimTop(NOTIFICATION_SCRIM_TOP_PADDING_IN_SPLIT_SHADE);
     }
 
     private FalsingManager.FalsingTapListener getFalsingTapListener() {
