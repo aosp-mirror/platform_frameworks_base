@@ -11,6 +11,7 @@ import android.text.TextUtils
 import android.text.format.DateFormat
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
@@ -70,7 +71,10 @@ class AlarmTile @Inject constructor(
     }
 
     override fun handleClick(view: View?) {
-        val animationController = view?.let { ActivityLaunchAnimator.Controller.fromView(it) }
+        val animationController = view?.let {
+            ActivityLaunchAnimator.Controller.fromView(
+                    it, InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE)
+        }
         val pendingIntent = lastAlarmInfo?.showIntent
         if (pendingIntent != null) {
             mActivityStarter.postStartActivityDismissingKeyguard(pendingIntent, animationController)

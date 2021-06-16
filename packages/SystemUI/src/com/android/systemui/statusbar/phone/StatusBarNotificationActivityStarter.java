@@ -41,6 +41,7 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.view.View;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
@@ -508,9 +509,12 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                         tsb.addNextIntent(intent);
                     }
 
+                    ActivityLaunchAnimator.Controller viewController =
+                            ActivityLaunchAnimator.Controller.fromView(view,
+                                    InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON
+                            );
                     ActivityLaunchAnimator.Controller animationController =
-                            new StatusBarLaunchAnimatorController(
-                                    ActivityLaunchAnimator.Controller.fromView(view), mStatusBar,
+                            new StatusBarLaunchAnimatorController(viewController, mStatusBar,
                                     true /* isActivityIntent */);
 
                     mActivityLaunchAnimator.startIntentWithAnimation(animationController, animate,
