@@ -75,16 +75,13 @@ public abstract class ExpandableOutlineView extends ExpandableView {
      * it is moved. Otherwise, the translation is set on the {@code ExpandableOutlineView} itself.
      */
     protected boolean mShouldTranslateContents;
-    private boolean mTopAmountRounded;
-    private float mDistanceToTopRoundness = -1;
     private float[] mTmpCornerRadii = new float[8];
 
     private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
         public void getOutline(View view, Outline outline) {
             if (!mCustomOutline && getCurrentTopRoundness() == 0.0f
-                    && getCurrentBottomRoundness() == 0.0f && !mAlwaysRoundBothCorners
-                    && !mTopAmountRounded) {
+                    && getCurrentBottomRoundness() == 0.0f && !mAlwaysRoundBothCorners) {
                 int translation = mShouldTranslateContents ? (int) getTranslation() : 0;
                 int left = Math.max(translation, 0);
                 int top = mClipTopAmount + mBackgroundTop;
@@ -168,32 +165,14 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         canvas.save();
-        Path intersectPath = null;
-        if (mTopAmountRounded && topAmountNeedsClipping()) {
-            int left = (int) (- mExtraWidthForClipping / 2.0f);
-            int top = (int) (mClipTopAmount - mDistanceToTopRoundness);
-            int right = getWidth() + (int) (mExtraWidthForClipping + left);
-            int bottom = (int) Math.max(mMinimumHeightForClipping,
-                    Math.max(getActualHeight() - mClipBottomAmount, top + mOutlineRadius));
-            getRoundedRectPath(left, top, right, bottom, mOutlineRadius, 0.0f, mClipPath);
-            intersectPath = mClipPath;
-        }
-        boolean clipped = false;
         if (childNeedsClipping(child)) {
             Path clipPath = getCustomClipPath(child);
             if (clipPath == null) {
                 clipPath = getClipPath(false /* ignoreTranslation */);
             }
             if (clipPath != null) {
-                if (intersectPath != null) {
-                    clipPath.op(intersectPath, Path.Op.INTERSECT);
-                }
                 canvas.clipPath(clipPath);
-                clipped = true;
             }
-        }
-        if (!clipped && intersectPath != null) {
-            canvas.clipPath(intersectPath);
         }
         boolean result = super.drawChild(canvas, child, drawingTime);
         canvas.restore();
@@ -212,22 +191,8 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         invalidate();
     }
 
-    @Override
-    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
-        super.setDistanceToTopRoundness(distanceToTopRoundness);
-        if (distanceToTopRoundness != mDistanceToTopRoundness) {
-            mTopAmountRounded = distanceToTopRoundness >= 0;
-            mDistanceToTopRoundness = distanceToTopRoundness;
-            applyRoundness();
-        }
-    }
-
     protected boolean childNeedsClipping(View child) {
         return false;
-    }
-
-    public boolean topAmountNeedsClipping() {
-        return true;
     }
 
     protected boolean isClippingNeeded() {
@@ -272,11 +237,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     }
 
     public float getCurrentBackgroundRadiusTop() {
-        // If this view is top amount notification view, it should always has round corners on top.
-        // It will be applied with applyRoundness()
-        if (mTopAmountRounded) {
-            return mOutlineRadius;
-        }
         return getCurrentTopRoundness() * mOutlineRadius;
     }
 
