@@ -98,6 +98,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -227,6 +228,8 @@ public class BubblesTest extends SysuiTestCase {
     private TaskStackListenerImpl mTaskStackListener;
     @Mock
     private ShellTaskOrganizer mShellTaskOrganizer;
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
 
     private TestableBubblePositioner mPositioner;
 
@@ -249,7 +252,7 @@ public class BubblesTest extends SysuiTestCase {
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
-                mColorExtractor, mDumpManager);
+                mColorExtractor, mDumpManager, mKeyguardStateController);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowController.attach();
 

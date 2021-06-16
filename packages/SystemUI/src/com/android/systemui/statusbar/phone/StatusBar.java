@@ -4060,7 +4060,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             // The screen off animation uses our LightRevealScrim - we need to be expanded for it to
             // be visible.
-            if (mUnlockedScreenOffAnimationController.shouldPlayScreenOffAnimation()) {
+            if (mDozeParameters.shouldControlUnlockedScreenOff()) {
                 makeExpandedVisible(true);
             }
 
