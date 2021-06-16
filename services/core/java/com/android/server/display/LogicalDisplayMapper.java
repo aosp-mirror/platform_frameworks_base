@@ -195,6 +195,9 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     }
 
     public LogicalDisplay getDisplayLocked(DisplayDevice device) {
+        if (device == null) {
+            return null;
+        }
         final int count = mLogicalDisplays.size();
         for (int i = 0; i < count; i++) {
             final LogicalDisplay display = mLogicalDisplays.valueAt(i);

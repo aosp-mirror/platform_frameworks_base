@@ -705,6 +705,34 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Sets the brightness configuration for a given display.
+     *
+     * @hide
+     */
+    public void setBrightnessConfigurationForDisplay(BrightnessConfiguration c,
+            String uniqueDisplayId, int userId, String packageName) {
+        try {
+            mDm.setBrightnessConfigurationForDisplay(c, uniqueDisplayId, userId, packageName);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the brightness configuration for a given display or null if one hasn't been set.
+     *
+     * @hide
+     */
+    public BrightnessConfiguration getBrightnessConfigurationForDisplay(String uniqueDisplayId,
+            int userId) {
+        try {
+            return mDm.getBrightnessConfigurationForDisplay(uniqueDisplayId, userId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the global brightness configuration for a given user or null if one hasn't been set.
      *
      * @hide
