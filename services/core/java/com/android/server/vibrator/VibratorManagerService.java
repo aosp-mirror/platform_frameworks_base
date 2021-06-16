@@ -132,6 +132,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private final VibrationSettings mVibrationSettings;
     private final VibrationScaler mVibrationScaler;
     private final InputDeviceDelegate mInputDeviceDelegate;
+    private final DeviceVibrationEffectAdapter mDeviceVibrationEffectAdapter;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -175,6 +176,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mVibrationSettings = new VibrationSettings(mContext, mHandler);
         mVibrationScaler = new VibrationScaler(mContext, mVibrationSettings);
         mInputDeviceDelegate = new InputDeviceDelegate(mContext, mHandler);
+        mDeviceVibrationEffectAdapter = new DeviceVibrationEffectAdapter(mContext);
 
         VibrationCompleteListener listener = new VibrationCompleteListener(this);
         mNativeWrapper = injector.getNativeWrapper();
@@ -512,8 +514,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 return Vibration.Status.FORWARDED_TO_INPUT_DEVICES;
             }
 
-            VibrationThread vibThread = new VibrationThread(vib, mVibrators, mWakeLock,
-                    mBatteryStatsService, mVibrationCallbacks);
+            VibrationThread vibThread = new VibrationThread(vib, mDeviceVibrationEffectAdapter,
+                    mVibrators, mWakeLock, mBatteryStatsService, mVibrationCallbacks);
 
             if (mCurrentVibration == null) {
                 return startVibrationThreadLocked(vibThread);

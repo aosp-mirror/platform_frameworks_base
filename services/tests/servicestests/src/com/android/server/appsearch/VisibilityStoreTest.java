@@ -56,6 +56,11 @@ import java.util.Collections;
 import java.util.Map;
 
 public class VisibilityStoreTest {
+    /**
+     * Always trigger optimize in this class. OptimizeStrategy will be tested in its own test class.
+     */
+    private static final OptimizeStrategy ALWAYS_OPTIMIZE = optimizeInfo -> true;
+
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
     private final Map<UserHandle, PackageManager> mMockPackageManagers = new ArrayMap<>();
     private Context mContext;
@@ -87,7 +92,8 @@ public class VisibilityStoreTest {
                 AppSearchImpl.create(
                         mTemporaryFolder.newFolder(),
                         mContext,
-                        /*logger=*/ null);
+                        /*logger=*/ null,
+                        ALWAYS_OPTIMIZE);
 
         mUid = mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
         mVisibilityStore = appSearchImpl.getVisibilityStoreLocked();
