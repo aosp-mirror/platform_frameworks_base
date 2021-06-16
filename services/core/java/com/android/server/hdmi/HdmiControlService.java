@@ -1395,8 +1395,9 @@ public class HdmiControlService extends SystemService {
                     deviceInfo.getLogicalAddress(), deviceInfo.getPhysicalAddress(),
                     deviceInfo.getPortId(), deviceInfo.getDeviceType(), deviceInfo.getVendorId(),
                     newDisplayName, deviceInfo.getDevicePowerStatus(), deviceInfo.getCecVersion()));
-            sendCecCommand(HdmiCecMessageBuilder.buildSetOsdNameCommand(
-                    device.mAddress, Constants.ADDR_TV, newDisplayName));
+            sendCecCommand(
+                    HdmiCecMessageBuilder.buildSetOsdNameCommand(
+                            deviceInfo.getLogicalAddress(), Constants.ADDR_TV, newDisplayName));
         }
     }
 
@@ -2294,7 +2295,9 @@ public class HdmiControlService extends SystemService {
                     }
                     sendCecCommand(
                             HdmiCecMessageBuilder.buildSetSystemAudioMode(
-                                    audioSystem().mAddress, Constants.ADDR_BROADCAST, true));
+                                    audioSystem().getDeviceInfo().getLogicalAddress(),
+                                    Constants.ADDR_BROADCAST,
+                                    true));
                 }
             });
         }
@@ -3200,7 +3203,6 @@ public class HdmiControlService extends SystemService {
             return;
         }
         mCecController.clearLogicalAddress();
-        mHdmiCecNetwork.clearLogicalAddress();
         mHdmiCecNetwork.clearLocalDevices();
     }
 

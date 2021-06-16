@@ -111,13 +111,17 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
         if (powerControlMode.equals(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST)) {
             mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_BROADCAST));
+                    HdmiCecMessageBuilder.buildStandby(
+                            getDeviceInfo().getLogicalAddress(), Constants.ADDR_BROADCAST));
             return;
         }
-        mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_TV));
+        mService.sendCecCommand(
+                HdmiCecMessageBuilder.buildStandby(
+                        getDeviceInfo().getLogicalAddress(), Constants.ADDR_TV));
         if (powerControlMode.equals(HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM)) {
             mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_AUDIO_SYSTEM));
+                    HdmiCecMessageBuilder.buildStandby(
+                            getDeviceInfo().getLogicalAddress(), Constants.ADDR_AUDIO_SYSTEM));
         }
     }
 

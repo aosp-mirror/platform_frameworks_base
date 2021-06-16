@@ -166,18 +166,6 @@ public class HdmiCecNetwork {
         }
         return false;
     }
-    /**
-     * Clear all logical addresses registered in the device.
-     *
-     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
-     */
-    @ServiceThreadOnly
-    void clearLogicalAddress() {
-        assertRunOnServiceThread();
-        for (int i = 0; i < mLocalDevices.size(); ++i) {
-            mLocalDevices.valueAt(i).clearAddress();
-        }
-    }
 
     @ServiceThreadOnly
     void clearLocalDevices() {
@@ -862,7 +850,7 @@ public class HdmiCecNetwork {
     private boolean isLocalDeviceAddress(int address) {
         for (int i = 0; i < mLocalDevices.size(); i++) {
             int key = mLocalDevices.keyAt(i);
-            if (mLocalDevices.get(key).mAddress == address) {
+            if (mLocalDevices.get(key).getDeviceInfo().getLogicalAddress() == address) {
                 return true;
             }
         }

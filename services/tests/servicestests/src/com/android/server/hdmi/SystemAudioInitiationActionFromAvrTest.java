@@ -197,6 +197,7 @@ public class SystemAudioInitiationActionFromAvrTest {
                     }
                 };
         mHdmiCecLocalDeviceAudioSystem.init();
+        mHdmiCecLocalDeviceAudioSystem.setDeviceInfo(mDeviceInfoForTests);
     }
 
     @Test
