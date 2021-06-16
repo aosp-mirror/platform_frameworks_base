@@ -250,6 +250,7 @@ public class LongScreenshotActivity extends Activity {
         Log.d(TAG, "onCachedImageLoaded(imageResult=" + imageResult + ")");
         BitmapDrawable drawable = new BitmapDrawable(getResources(), imageResult.bitmap);
         mPreview.setImageDrawable(drawable);
+        mPreview.setAlpha(1f);
         mMagnifierView.setDrawable(drawable, imageResult.bitmap.getWidth(),
                 imageResult.bitmap.getHeight());
         mCropView.setVisibility(View.VISIBLE);
@@ -476,19 +477,21 @@ public class LongScreenshotActivity extends Activity {
         params.height = boundaries.height();
         mTransitionView.setLayoutParams(params);
 
-        ConstraintLayout.LayoutParams enterTransitionParams =
-                (ConstraintLayout.LayoutParams) mEnterTransitionView.getLayoutParams();
-        float topFraction = Math.max(0,
-                -mLongScreenshot.getTop() / (float) mLongScreenshot.getHeight());
-        enterTransitionParams.width = (int) (scale * drawable.getIntrinsicWidth());
-        enterTransitionParams.height = (int) (scale * mLongScreenshot.getPageHeight());
-        mEnterTransitionView.setLayoutParams(enterTransitionParams);
+        if (mLongScreenshot != null) {
+            ConstraintLayout.LayoutParams enterTransitionParams =
+                    (ConstraintLayout.LayoutParams) mEnterTransitionView.getLayoutParams();
+            float topFraction = Math.max(0,
+                    -mLongScreenshot.getTop() / (float) mLongScreenshot.getHeight());
+            enterTransitionParams.width = (int) (scale * drawable.getIntrinsicWidth());
+            enterTransitionParams.height = (int) (scale * mLongScreenshot.getPageHeight());
+            mEnterTransitionView.setLayoutParams(enterTransitionParams);
 
-        Matrix matrix = new Matrix();
-        matrix.setScale(scale, scale);
-        matrix.postTranslate(0, -scale * drawable.getIntrinsicHeight() * topFraction);
-        mEnterTransitionView.setImageMatrix(matrix);
-        mEnterTransitionView.setTranslationY(
-                topFraction * previewHeight + mPreview.getPaddingTop() + extraPadding);
+            Matrix matrix = new Matrix();
+            matrix.setScale(scale, scale);
+            matrix.postTranslate(0, -scale * drawable.getIntrinsicHeight() * topFraction);
+            mEnterTransitionView.setImageMatrix(matrix);
+            mEnterTransitionView.setTranslationY(
+                    topFraction * previewHeight + mPreview.getPaddingTop() + extraPadding);
+        }
     }
 }
