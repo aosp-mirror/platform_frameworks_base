@@ -325,6 +325,13 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     }
 
     @Override
+    public void onAppSplashScreenViewRemoved(int taskId) {
+        if (mStartingWindow != null) {
+            mStartingWindow.onAppSplashScreenViewRemoved(taskId);
+        }
+    }
+
+    @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
         synchronized (mLock) {
             onTaskAppeared(new TaskAppearedInfo(taskInfo, leash));
