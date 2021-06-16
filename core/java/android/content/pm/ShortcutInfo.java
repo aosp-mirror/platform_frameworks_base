@@ -449,7 +449,7 @@ public final class ShortcutInfo implements Parcelable {
 
     private int mDisabledReason;
 
-    private int mStartingThemeResId;
+    @Nullable private String mStartingThemeResName;
 
     private ShortcutInfo(Builder b) {
         mUserId = b.mContext.getUserId();
@@ -478,8 +478,9 @@ public final class ShortcutInfo implements Parcelable {
         mExtras = b.mExtras;
         mLocusId = b.mLocusId;
 
+        mStartingThemeResName = b.mStartingThemeResId != 0
+                ? b.mContext.getResources().getResourceName(b.mStartingThemeResId) : null;
         updateTimestamp();
-        mStartingThemeResId = b.mStartingThemeResId;
     }
 
     /**
@@ -626,7 +627,7 @@ public final class ShortcutInfo implements Parcelable {
             // Set this bit.
             mFlags |= FLAG_KEY_FIELDS_ONLY;
         }
-        mStartingThemeResId = source.mStartingThemeResId;
+        mStartingThemeResName = source.mStartingThemeResName;
     }
 
     /**
@@ -950,8 +951,8 @@ public final class ShortcutInfo implements Parcelable {
         if (source.mLocusId != null) {
             mLocusId = source.mLocusId;
         }
-        if (source.mStartingThemeResId != 0) {
-            mStartingThemeResId = source.mStartingThemeResId;
+        if (source.mStartingThemeResName != null && !source.mStartingThemeResName.isEmpty()) {
+            mStartingThemeResName = source.mStartingThemeResName;
         }
     }
 
@@ -1454,11 +1455,12 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Returns the theme resource id used for the splash screen.
+     * Returns the theme resource name used for the splash screen.
      * @hide
      */
-    public int getStartingThemeResId() {
-        return mStartingThemeResId;
+    @Nullable
+    public String getStartingThemeResName() {
+        return mStartingThemeResName;
     }
 
     /** @hide -- old signature, the internal code still uses it. */
@@ -2182,7 +2184,7 @@ public final class ShortcutInfo implements Parcelable {
         mPersons = source.readParcelableArray(cl, Person.class);
         mLocusId = source.readParcelable(cl);
         mIconUri = source.readString8();
-        mStartingThemeResId = source.readInt();
+        mStartingThemeResName = source.readString8();
     }
 
     @Override
@@ -2234,7 +2236,7 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeParcelableArray(mPersons, flags);
         dest.writeParcelable(mLocusId, flags);
         dest.writeString8(mIconUri);
-        dest.writeInt(mStartingThemeResId);
+        dest.writeString8(mStartingThemeResName);
     }
 
     public static final @NonNull Creator<ShortcutInfo> CREATOR =
@@ -2391,10 +2393,10 @@ public final class ShortcutInfo implements Parcelable {
         sb.append("disabledReason=");
         sb.append(getDisabledReasonDebugString(mDisabledReason));
 
-        if (mStartingThemeResId != 0) {
+        if (mStartingThemeResName != null && !mStartingThemeResName.isEmpty()) {
             addIndentOrComma(sb, indent);
-            sb.append("SplashScreenThemeResId=");
-            sb.append(Integer.toHexString(mStartingThemeResId));
+            sb.append("SplashScreenThemeResName=");
+            sb.append(mStartingThemeResName);
         }
 
         addIndentOrComma(sb, indent);
@@ -2482,7 +2484,8 @@ public final class ShortcutInfo implements Parcelable {
             Set<String> categories, Intent[] intentsWithExtras, int rank, PersistableBundle extras,
             long lastChangedTimestamp,
             int flags, int iconResId, String iconResName, String bitmapPath, String iconUri,
-            int disabledReason, Person[] persons, LocusId locusId, int startingThemeResId) {
+            int disabledReason, Person[] persons, LocusId locusId,
+            @Nullable String startingThemeResName) {
         mUserId = userId;
         mId = id;
         mPackageName = packageName;
@@ -2511,6 +2514,6 @@ public final class ShortcutInfo implements Parcelable {
         mDisabledReason = disabledReason;
         mPersons = persons;
         mLocusId = locusId;
-        mStartingThemeResId = startingThemeResId;
+        mStartingThemeResName = startingThemeResName;
     }
 }
