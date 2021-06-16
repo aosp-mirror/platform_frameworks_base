@@ -5018,24 +5018,26 @@ class Task extends TaskFragment {
                     }
                 }
 
-                // TODO(185200798): Persist theme name instead of theme if
-                int splashScreenThemeResId = options != null
-                        ? options.getSplashScreenThemeResId() : 0;
-
-                // User can override the splashscreen theme. The theme name is used to persist
-                // the setting, so if no theme is set in the ActivityOptions, we check if has
-                // been persisted here.
-                if (splashScreenThemeResId == 0) {
+                // Find the splash screen theme. User can override the persisted theme by
+                // ActivityOptions.
+                String splashScreenThemeResName = options != null
+                        ? options.getSplashScreenThemeResName() : null;
+                if (splashScreenThemeResName == null || splashScreenThemeResName.isEmpty()) {
                     try {
-                        String themeName = mAtmService.getPackageManager()
+                        splashScreenThemeResName = mAtmService.getPackageManager()
                                 .getSplashScreenTheme(r.packageName, r.mUserId);
-                        if (themeName != null) {
-                            Context packageContext = mAtmService.mContext
-                                    .createPackageContext(r.packageName, 0);
-                            splashScreenThemeResId = packageContext.getResources()
-                                    .getIdentifier(themeName, null, null);
-                        }
-                    } catch (RemoteException | PackageManager.NameNotFoundException
+                    } catch (RemoteException ignore) {
+                        // Just use the default theme
+                    }
+                }
+                int splashScreenThemeResId = 0;
+                if (splashScreenThemeResName != null && !splashScreenThemeResName.isEmpty()) {
+                    try {
+                        final Context packageContext = mAtmService.mContext
+                                .createPackageContext(r.packageName, 0);
+                        splashScreenThemeResId = packageContext.getResources()
+                                .getIdentifier(splashScreenThemeResName, null, null);
+                    } catch (PackageManager.NameNotFoundException
                             | Resources.NotFoundException ignore) {
                         // Just use the default theme
                     }
