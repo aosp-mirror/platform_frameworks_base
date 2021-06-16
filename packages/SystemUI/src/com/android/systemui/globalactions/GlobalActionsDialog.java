@@ -30,6 +30,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
@@ -113,47 +114,100 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
     @VisibleForTesting
     boolean mShowLockScreenCards = false;
 
+    private final KeyguardStateController.Callback mKeyguardStateControllerListener =
+            new KeyguardStateController.Callback() {
+        @Override
+        public void onUnlockedChanged() {
+            if (mDialog != null) {
+                ActionsDialog dialog = (ActionsDialog) mDialog;
+                boolean unlocked = mKeyguardStateController.isUnlocked();
+                if (dialog.mWalletViewController != null) {
+                    dialog.mWalletViewController.onDeviceLockStateChanged(!unlocked);
+                }
+
+                if (unlocked) {
+                    dialog.hideLockMessage();
+                }
+            }
+        }
+    };
+
+    private final ContentObserver mSettingsObserver = new ContentObserver(mMainHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            onPowerMenuLockScreenSettingsChanged();
+        }
+    };
+
     /**
      * @param context everything needs a context :(
      */
     @Inject
-    public GlobalActionsDialog(Context context, GlobalActionsManager windowManagerFuncs,
-            AudioManager audioManager, IDreamManager iDreamManager,
-            DevicePolicyManager devicePolicyManager, LockPatternUtils lockPatternUtils,
+    public GlobalActionsDialog(
+            Context context,
+            GlobalActionsManager windowManagerFuncs,
+            AudioManager audioManager,
+            IDreamManager iDreamManager,
+            DevicePolicyManager devicePolicyManager,
+            LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
             TelephonyListenerManager telephonyListenerManager,
-            GlobalSettings globalSettings, SecureSettings secureSettings,
-            @Nullable Vibrator vibrator, @Main Resources resources,
-            ConfigurationController configurationController, ActivityStarter activityStarter,
-            KeyguardStateController keyguardStateController, UserManager userManager,
-            TrustManager trustManager, IActivityManager iActivityManager,
-            @Nullable TelecomManager telecomManager, MetricsLogger metricsLogger,
-            NotificationShadeDepthController depthController, SysuiColorExtractor colorExtractor,
+            GlobalSettings globalSettings,
+            SecureSettings secureSettings,
+            @Nullable Vibrator vibrator,
+            @Main Resources resources,
+            ConfigurationController configurationController,
+            ActivityStarter activityStarter,
+            KeyguardStateController keyguardStateController,
+            UserManager userManager,
+            TrustManager trustManager,
+            IActivityManager iActivityManager,
+            @Nullable TelecomManager telecomManager,
+            MetricsLogger metricsLogger,
+            NotificationShadeDepthController depthController,
+            SysuiColorExtractor colorExtractor,
             IStatusBarService statusBarService,
             NotificationShadeWindowController notificationShadeWindowController,
             IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
             UiEventLogger uiEventLogger,
-            RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler,
+            RingerModeTracker ringerModeTracker,
+            SysUiState sysUiState,
+            @Main Handler handler,
+            PackageManager packageManager,
             StatusBar statusBar) {
 
-        super(context, windowManagerFuncs,
-                audioManager, iDreamManager,
-                devicePolicyManager, lockPatternUtils,
-                broadcastDispatcher, telephonyListenerManager,
-                globalSettings, secureSettings,
-                vibrator, resources,
+        super(context,
+                windowManagerFuncs,
+                audioManager,
+                iDreamManager,
+                devicePolicyManager,
+                lockPatternUtils,
+                broadcastDispatcher,
+                telephonyListenerManager,
+                globalSettings,
+                secureSettings,
+                vibrator,
+                resources,
                 configurationController,
-                keyguardStateController, userManager,
-                trustManager, iActivityManager,
-                telecomManager, metricsLogger,
-                depthController, colorExtractor,
+                keyguardStateController,
+                userManager,
+                trustManager,
+                iActivityManager,
+                telecomManager,
+                metricsLogger,
+                depthController,
+                colorExtractor,
                 statusBarService,
                 notificationShadeWindowController,
                 iWindowManager,
                 backgroundExecutor,
                 uiEventLogger,
-                ringerModeTracker, sysUiState, handler, statusBar);
+                ringerModeTracker,
+                sysUiState,
+                handler,
+                packageManager,
+                statusBar);
 
         mLockPatternUtils = lockPatternUtils;
         mKeyguardStateController = keyguardStateController;
@@ -163,34 +217,22 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
         mNotificationShadeWindowController = notificationShadeWindowController;
         mSysUiState = sysUiState;
         mActivityStarter = activityStarter;
-        keyguardStateController.addCallback(new KeyguardStateController.Callback() {
-            @Override
-            public void onUnlockedChanged() {
-                if (mDialog != null) {
-                    ActionsDialog dialog = (ActionsDialog) mDialog;
-                    boolean unlocked = mKeyguardStateController.isUnlocked();
-                    if (dialog.mWalletViewController != null) {
-                        dialog.mWalletViewController.onDeviceLockStateChanged(!unlocked);
-                    }
 
-                    if (unlocked) {
-                        dialog.hideLockMessage();
-                    }
-                }
-            }
-        });
+        mKeyguardStateController.addCallback(mKeyguardStateControllerListener);
 
         // Listen for changes to show pay on the power menu while locked
         onPowerMenuLockScreenSettingsChanged();
         mGlobalSettings.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT),
                 false /* notifyForDescendants */,
-                new ContentObserver(handler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        onPowerMenuLockScreenSettingsChanged();
-                    }
-                });
+                mSettingsObserver);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        mKeyguardStateController.removeCallback(mKeyguardStateControllerListener);
+        mGlobalSettings.unregisterContentObserver(mSettingsObserver);
     }
 
     /**
