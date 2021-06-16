@@ -37,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -120,7 +121,8 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     @Override
     protected void handleClick(@Nullable View view) {
         ActivityLaunchAnimator.Controller animationController =
-                view == null ? null : ActivityLaunchAnimator.Controller.fromView(view);
+                view == null ? null : ActivityLaunchAnimator.Controller.fromView(view,
+                        InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE);
 
         mUiHandler.post(() -> {
             if (mSelectedCard != null) {
