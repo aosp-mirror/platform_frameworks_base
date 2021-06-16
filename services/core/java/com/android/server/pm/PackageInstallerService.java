@@ -1117,6 +1117,17 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mSilentUpdatePolicy.setAllowUnlimitedSilentUpdates(installerPackageName);
     }
 
+    /**
+     * Set the silent updates throttle time in seconds.
+     */
+    @Override
+    public void setSilentUpdatesThrottleTime(long throttleTimeInSeconds) {
+        if (!isCalledBySystemOrShell(Binder.getCallingUid())) {
+            throw new SecurityException("Caller not allowed to set silent updates throttle time");
+        }
+        mSilentUpdatePolicy.setSilentUpdatesThrottleTime(throttleTimeInSeconds);
+    }
+
     private static int getSessionCount(SparseArray<PackageInstallerSession> sessions,
             int installerUid) {
         int count = 0;
