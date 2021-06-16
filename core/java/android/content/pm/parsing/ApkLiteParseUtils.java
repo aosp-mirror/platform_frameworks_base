@@ -493,6 +493,7 @@ public class ApkLiteParseUtils {
                 if (targetResult.isError()) {
                     return input.error(targetResult);
                 }
+                targetSdkVersion = targetResult.getResult();
 
                 ParseResult<Integer> minResult = ParsingPackageUtils.computeMinSdkVersion(
                         minVer, minCode, ParsingPackageUtils.SDK_VERSION,
@@ -500,8 +501,6 @@ public class ApkLiteParseUtils {
                 if (minResult.isError()) {
                     return input.error(minResult);
                 }
-
-                targetSdkVersion = targetResult.getResult();
                 minSdkVersion = minResult.getResult();
             }
         }
