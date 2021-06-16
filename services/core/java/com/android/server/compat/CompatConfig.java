@@ -235,13 +235,11 @@ final class CompatConfig {
      * @param packageName app for which the overrides will be applied.
      */
     void addOverrides(CompatibilityOverrideConfig overrides, String packageName) {
-        synchronized (mChanges) {
-            for (Long changeId : overrides.overrides.keySet()) {
-                addOverrideUnsafe(changeId, packageName, overrides.overrides.get(changeId));
-            }
-            saveOverrides();
-            invalidateCache();
+        for (Long changeId : overrides.overrides.keySet()) {
+            addOverrideUnsafe(changeId, packageName, overrides.overrides.get(changeId));
         }
+        saveOverrides();
+        invalidateCache();
     }
 
     private boolean addOverrideUnsafe(long changeId, String packageName,
@@ -335,22 +333,33 @@ final class CompatConfig {
 
     /**
      * Unsafe version of {@link #removeOverride(long, String)}.
-     * It does not invalidate the cache nor save the overrides.
+     * It does not save the overrides.
      */
     private boolean removeOverrideUnsafe(long changeId, String packageName) {
         Long versionCode = getVersionCodeOrNull(packageName);
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c != null) {
-                OverrideAllowedState allowedState =
-                        mOverrideValidator.getOverrideAllowedState(changeId, packageName);
-                if (c.hasPackageOverride(packageName)) {
-                    allowedState.enforce(changeId, packageName);
-                    c.removePackageOverride(packageName, allowedState, versionCode);
-                    invalidateCache();
-                    return true;
-                }
+                return removeOverrideUnsafe(c, packageName, versionCode);
             }
+        }
+        return false;
+    }
+
+    /**
+     * Similar to {@link #removeOverrideUnsafe(long, String)} except this method receives a {@link
+     * CompatChange} directly as well as the package's version code.
+     */
+    private boolean removeOverrideUnsafe(CompatChange change, String packageName,
+            @Nullable Long versionCode) {
+        long changeId = change.getId();
+        OverrideAllowedState allowedState =
+                mOverrideValidator.getOverrideAllowedState(changeId, packageName);
+        if (change.hasPackageOverride(packageName)) {
+            allowedState.enforce(changeId, packageName);
+            change.removePackageOverride(packageName, allowedState, versionCode);
+            invalidateCache();
+            return true;
         }
         return false;
     }
@@ -364,10 +373,11 @@ final class CompatConfig {
      * @param packageName the package for which the overrides should be purged
      */
     void removePackageOverrides(String packageName) {
+        Long versionCode = getVersionCodeOrNull(packageName);
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
                 CompatChange change = mChanges.valueAt(i);
-                removeOverrideUnsafe(change.getId(), packageName);
+                removeOverrideUnsafe(change, packageName, versionCode);
             }
             saveOverrides();
             invalidateCache();
@@ -386,13 +396,11 @@ final class CompatConfig {
      */
     void removePackageOverrides(CompatibilityOverridesToRemoveConfig overridesToRemove,
             String packageName) {
-        synchronized (mChanges) {
-            for (Long changeId : overridesToRemove.changeIds) {
-                removeOverrideUnsafe(changeId, packageName);
-            }
-            saveOverrides();
-            invalidateCache();
+        for (Long changeId : overridesToRemove.changeIds) {
+            removeOverrideUnsafe(changeId, packageName);
         }
+        saveOverrides();
+        invalidateCache();
     }
 
     private long[] getAllowedChangesSinceTargetSdkForPackage(String packageName,

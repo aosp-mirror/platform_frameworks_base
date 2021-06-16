@@ -342,7 +342,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Aparelhos auditivos"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"A ativar..."</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Brilho"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotação automática"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotação auto."</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rodar o ecrã automaticamente"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"Modo <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Rotação bloqueada"</string>
@@ -352,7 +352,7 @@
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Localização"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Localização Desativada"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acesso câmara"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acesso microfone"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Ac. microfone"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponível"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqueado"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositivo multimédia"</string>
@@ -373,7 +373,7 @@
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi ligado"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Não estão disponíveis redes Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"A ativar..."</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Transm. do ecrã"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Transm. ecrã"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Transmissão"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Dispositivo sem nome"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Pronto para transmitir"</string>
@@ -408,14 +408,14 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> MB utiliz."</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limite de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Aviso de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Apps de trabalho"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Apps trabalho"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Luz noturna"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ativ. ao pôr-do-sol"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Até ao amanhecer"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Ativada à(s) <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Até à(s) <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tema escuro"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Poupança de bateria"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Poup. bateria"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Ativ. ao pôr do sol"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Até ao amanhecer"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Ativado à(s) <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -423,7 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"O NFC está desativado"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"O NFC está ativado"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Gravação do ecrã"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Gravação ecrã"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Parar"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Pretende desbloquear o microfone do dispositivo?"</string>
@@ -856,7 +856,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Abrir as definições"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Auscultadores ligados"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Auscultadores com microfone integrado ligados"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Poupança de dados"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Poup. dados"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Poupança de dados ativada"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Poupança de dados desativada"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Ativado"</string>
@@ -1042,7 +1042,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Mover p/ extremidade e ocultar"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Retirar extremidade e mostrar"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ativar/desativar"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"Controlos domésticos"</string>
+    <string name="quick_controls_title" msgid="7095074621086860062">"Controlo casa"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolha uma app para adicionar controlos"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controlos adicionados.</item>

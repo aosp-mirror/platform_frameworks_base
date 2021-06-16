@@ -17,10 +17,14 @@ package com.android.internal.os;
 
 import static android.os.BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.os.BatteryConsumer;
 import android.os.BatteryUsageStats;
@@ -35,7 +39,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
-
 
 
 @SmallTest
@@ -224,5 +227,76 @@ public class BatteryUsageStatsPulledTest {
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10200);
 
         return builder.build();
+    }
+
+    @Test
+    public void testLargeAtomTruncated() {
+        final BatteryUsageStats.Builder builder =
+                new BatteryUsageStats.Builder(new String[0]);
+        // If not truncated, this BatteryUsageStats object would generate a proto buffer
+        // larger than 70 Kb
+        for (int i = 0; i < 20000; i++) {
+            BatteryStatsImpl.Uid mockUid = mock(BatteryStatsImpl.Uid.class);
+            when(mockUid.getUid()).thenReturn(i);
+            builder.getOrCreateUidBatteryConsumerBuilder(mockUid)
+                    .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_FOREGROUND, 1 * 60 * 1000)
+                    .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_BACKGROUND, 2 * 60 * 1000)
+                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, 30)
+                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 40);
+        }
+
+        // Add a UID with much larger battery footprint
+        final int largeConsumerUid = 20001;
+        BatteryStatsImpl.Uid largeConsumerMockUid = mock(BatteryStatsImpl.Uid.class);
+        when(largeConsumerMockUid.getUid()).thenReturn(largeConsumerUid);
+        builder.getOrCreateUidBatteryConsumerBuilder(largeConsumerMockUid)
+                .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_FOREGROUND, 10 * 60 * 1000)
+                .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_BACKGROUND, 20 * 60 * 1000)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, 300)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 400);
+
+        // Add a UID with much larger usage duration
+        final int highUsageUid = 20002;
+        BatteryStatsImpl.Uid highUsageMockUid = mock(BatteryStatsImpl.Uid.class);
+        when(highUsageMockUid.getUid()).thenReturn(highUsageUid);
+        builder.getOrCreateUidBatteryConsumerBuilder(highUsageMockUid)
+                .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_FOREGROUND, 60 * 60 * 1000)
+                .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_BACKGROUND, 120 * 60 * 1000)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, 3)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 4);
+
+        BatteryUsageStats batteryUsageStats = builder.build();
+        final byte[] bytes = batteryUsageStats.getStatsProto();
+        assertThat(bytes.length).isGreaterThan(40000);
+        assertThat(bytes.length).isLessThan(50000);
+
+        BatteryUsageStatsAtomsProto proto;
+        try {
+            proto = BatteryUsageStatsAtomsProto.parseFrom(bytes);
+        } catch (InvalidProtocolBufferNanoException e) {
+            fail("Invalid proto: " + e);
+            return;
+        }
+
+        boolean largeConsumerIncluded = false;
+        boolean highUsageAppIncluded = false;
+        for (int i = 0; i < proto.uidBatteryConsumers.length; i++) {
+            if (proto.uidBatteryConsumers[i].uid == largeConsumerUid) {
+                largeConsumerIncluded = true;
+                BatteryUsageStatsAtomsProto.BatteryConsumerData consumerData =
+                        proto.uidBatteryConsumers[i].batteryConsumerData;
+                assertThat(consumerData.totalConsumedPowerDeciCoulombs / 36)
+                        .isEqualTo(300 + 400);
+            } else if (proto.uidBatteryConsumers[i].uid == highUsageUid) {
+                highUsageAppIncluded = true;
+                BatteryUsageStatsAtomsProto.BatteryConsumerData consumerData =
+                        proto.uidBatteryConsumers[i].batteryConsumerData;
+                assertThat(consumerData.totalConsumedPowerDeciCoulombs / 36)
+                        .isEqualTo(3 + 4);
+            }
+        }
+
+        assertThat(largeConsumerIncluded).isTrue();
+        assertThat(highUsageAppIncluded).isTrue();
     }
 }

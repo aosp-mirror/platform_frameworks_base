@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"କ୍ଲିପ୍‌ ବାଉଣ୍ଡ, ମାର୍ଜିନ୍‌ ଆଦି ଦେଖନ୍ତୁ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL ଲେଆଉଟ୍ ଦିଗ ବାଧ୍ୟ କରନ୍ତୁ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ସମସ୍ତ ଲୋକେଲ୍‌ ସକାଶେ ସ୍କ୍ରୀନ୍‌ ଲେଆଉଟ୍‌ ଦିଗ RTL ପାଇଁ ବାଧ୍ୟ କରନ୍ତୁ"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"ୱିଣ୍ଡୋ-ଲେଭେଲରେ ବ୍ଲରକୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ବାଧ୍ୟ କରନ୍ତୁ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ଆପ୍‌ରେ 4x MSAA ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"ଅଣ-ଆୟତାକାର କ୍ଲିପ୍‌ କାର୍ଯ୍ୟକୁ ଡିବଗ୍‌ କରନ୍ତୁ"</string>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ଆଲାରାମ୍ ଏବଂ ରିମାଇଣ୍ଡରଗୁଡ଼ିକ"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ଆଲାରାମ ଓ ରିମାଇଣ୍ଡରଗୁଡ଼ିକ ସେଟ କରିବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ଆଲାରାମ୍ ଏବଂ ରିମାଇଣ୍ଡରଗୁଡ଼ିକ"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"ଆଲାରାମଗୁଡ଼ିକୁ ସେଟ୍ କରିବା ଏବଂ ଅନ୍ୟ କାର୍ଯ୍ୟଗୁଡ଼ିକୁ ସିଡୁଲ୍ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଆପଣ ଆପଣଙ୍କ ଟାବଲେଟ୍ ବ୍ୟବହାର କରୁନଥିବା ସମୟରେ ଏହି ଆପକୁ ବ୍ୟବହାର କରାଯାଇପାରେ, ଯାହା ଅଧିକ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରିପାରେ। ଯଦି ଏହି ଅନୁମତି ବନ୍ଦ ଥାଏ, ଏହି ଆପ୍ ସାମାନ୍ୟ ରୂପେ କାର୍ଯ୍ୟ କରିନପାରେ ଏବଂ ଏହାର ଆଲାରାମଗୁଡ଼ିକ ସିଡୁଲ୍ କରାଯାଇଥିବା ଅନୁସାରେ କାମ କରିବ ନାହିଁ।"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"ଆଲାରାମଗୁଡ଼ିକୁ ସେଟ୍ କରିବା ଏବଂ ଅନ୍ୟ କାର୍ଯ୍ୟଗୁଡ଼ିକୁ ସିଡୁଲ୍ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଆପଣ ଆପଣଙ୍କ ଟାବଲେଟ୍ ବ୍ୟବହାର କରୁନଥିବା ସମୟରେ ଏହି ଆପକୁ ବ୍ୟବହାର କରାଯାଇପାରେ, ଯାହା ଅଧିକ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରିପାରେ। ଯଦି ଏହି ଅନୁମତି ବନ୍ଦ ଥାଏ, ଏହି ଆପ୍ ସାମାନ୍ୟ ରୂପେ କାର୍ଯ୍ୟ କରିନପାରେ ଏବଂ ଏହାର ଆଲାରାମଗୁଡ଼ିକ ସିଡୁଲ୍ କରାଯାଇଥିବା ଅନୁସାରେ କାମ କରିବ ନାହିଁ।"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"ଆଲାରାମଗୁଡ଼ିକୁ ସେଟ୍ କରିବା ଏବଂ ଅନ୍ୟ କାର୍ଯ୍ୟଗୁଡ଼ିକୁ ସିଡୁଲ୍ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଆପଣ ଆପଣଙ୍କ ଟାବଲେଟ୍ ବ୍ୟବହାର କରୁନଥିବା ସମୟରେ ଏହି ଆପକୁ ବ୍ୟବହାର କରାଯାଇପାରେ, ଯାହା ଅଧିକ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରିପାରେ। ଯଦି ଏହି ଅନୁମତି ବନ୍ଦ ଥାଏ, ଏହି ଆପ୍ ସାମାନ୍ୟ ରୂପେ କାର୍ଯ୍ୟ କରିନପାରେ ଏବଂ ଏହାର ଆଲାରାମଗୁଡ଼ିକ ସିଡୁଲ୍ କରାଯାଇଥିବା ଅନୁସାରେ କାମ କରିବ ନାହିଁ।"</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ସିଡୁଲ୍, ଆଲାରାମ୍, ରିମାଇଣ୍ଡର୍, ଘଣ୍ଟା"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅନ୍ କରନ୍ତୁ"</string>

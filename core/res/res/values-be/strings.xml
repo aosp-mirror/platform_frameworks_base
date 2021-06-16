@@ -1498,6 +1498,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Дазваляе праграме запытваць выдаленне пакетаў."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"запытваць дазвол на ігнараванне аптымізацыі акумулятара"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Дазваляе праграме запытваць дазвол на ігнараванне аптымізацыі акумулятара для гэтай праграмы."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Націсніце двойчы, каб кіраваць маштабаваннем"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Немагчыма дадаць віджэт."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Пачаць"</string>
@@ -2215,8 +2219,8 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Размова"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групавая размова"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Асабістыя"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"Працоўныя"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Асабісты"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Працоўны"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Прагляд асабістага змесціва"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Прагляд працоўнага змесціва"</string>
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Заблакіравана вашым ІТ-адміністратарам"</string>

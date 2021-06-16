@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ಕ್ಲಿಪ್‌ನ ಗಡಿಗಳು, ಅಂಚುಗಳು, ಇತ್ಯಾದಿ ತೋರಿಸು."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL ಲೇಔಟ್‌ ಡೈರೆಕ್ಷನ್ ಫೋರ್ಸ್ ಮಾಡುವಿಕೆ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ಎಲ್ಲ ಭಾಷೆಗಳಿಗಾಗಿ, RTL ಗೆ ಸ್ಕ್ರೀನ್‌ ಲೇಔಟ್‌ ಡೈರೆಕ್ಷನ್ ಅನ್ನು ಫೋರ್ಸ್ ಮಾಡಿ"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"ವಿಂಡೋ-ಮಟ್ಟ ಬ್ಲರ್ ಅನುಮತಿಸಿ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ಫೋರ್ಸ್ ಮಾಡಿ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ಅಪ್ಲಿಕೇಶನ್‌ಗಳಲ್ಲಿ 4x MSAA ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"ಆಯತಾಕಾರವಲ್ಲದ ಕ್ಲಿಪ್ ಕಾರ್ಯಾಚರಣೆ ಡೀಬಗ್"</string>
@@ -390,7 +389,7 @@
     <string name="loading_injected_setting_summary" msgid="8394446285689070348">"ಲೋಡ್ ಆಗುತ್ತಿದೆ…"</string>
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"ಸ್ಪಂದನಾತ್ಮಕ (ಡೀಫಾಲ್ಟ್)"</item>
-    <item msgid="9112200311983078311">"ಪ್ರಾಕೃತಿಕ"</item>
+    <item msgid="9112200311983078311">"ಸ್ವಾಭಾವಿಕ"</item>
     <item msgid="6564241960833766170">"ಪ್ರಮಾಣಿತ"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
@@ -467,8 +466,8 @@
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ನಿರ್ವಾಹಕರ ಮೂಲಕ ನಿಯಂತ್ರಿಸಲಾಗಿದೆ"</string>
     <string name="disabled" msgid="8017887509554714950">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ಅನುಮತಿಸಲಾಗಿದೆ"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"ಅಪರಿಚಿತ ಆ್ಯಪ್‍‍ಗಳನ್ನು ಸ್ಥಾಪಿಸಿ"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"ಅನುಮತಿ ಇಲ್ಲ"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"ಅಪರಿಚಿತ ಆ್ಯಪ್‍‍ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
     <string name="home" msgid="973834627243661438">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಮುಖಪುಟ"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ಅಲಾರಾಮ್‌ಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳು"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ಅಲಾರಂಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳನ್ನು ಹೊಂದಿಸಲು ಅನುಮತಿಸಿ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ಅಲಾರಂಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳು"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"ಅಲಾರಂ‌ಗಳನ್ನು ಹೊಂದಿಸಲು ಮತ್ತು ಇತರ ಕ್ರಿಯೆಗಳನ್ನು ನಿಗದಿಪಡಿಸಲು ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನುಮತಿಸಿ. ನಿಮ್ಮ ಫೋನ್ ಬಳಸದಿದ್ದಾಗ ಈ ಆ್ಯಪ್ ಅನ್ನು ಬಳಸಬಹುದು, ಅದು ಹೆಚ್ಚು ಬ್ಯಾಟರಿ ಬಳಸಬಹುದು. ಈ ಅನುಮತಿ ಆಫ್ ಆಗಿದ್ದರೆ, ಈ ಆ್ಯಪ್ ಸಾಮಾನ್ಯವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದೆ ಇರಬಹುದು ಮತ್ತು ಅದರ ಅಲಾರಂಗಳು ನಿಗದಿಯಂತೆ ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"ಅಲಾರಂ‌ಗಳನ್ನು ಹೊಂದಿಸಲು ಮತ್ತು ಇತರ ಕ್ರಿಯೆಗಳನ್ನು ನಿಗದಿಪಡಿಸಲು ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನುಮತಿಸಿ. ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌‌ ಅನ್ನು ನೀವು ಬಳಸದಿದ್ದಾಗ ಈ ಆ್ಯಪ್ ಅನ್ನು ಬಳಸಬಹುದು, ಅದು ಹೆಚ್ಚಿನ ಬ್ಯಾಟರಿಯನ್ನು ಬಳಸಬಹುದು. ಈ ಅನುಮತಿ ಆಫ್ ಆಗಿದ್ದರೆ, ಈ ಆ್ಯಪ್ ಸಾಮಾನ್ಯವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದೆ ಇರಬಹುದು ಮತ್ತು ಅದರ ಅಲಾರಂಗಳು ನಿಗದಿಯಂತೆ ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"ಅಲಾರಂ‌ಗಳನ್ನು ಹೊಂದಿಸಲು ಮತ್ತು ಇತರ ಕ್ರಿಯೆಗಳನ್ನು ನಿಗದಿಪಡಿಸಲು ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನುಮತಿಸಿ. ನಿಮ್ಮ ಸಾಧನವನ್ನು ನೀವು ಬಳಸದಿದ್ದಾಗ ಈ ಆ್ಯಪ್ ಅನ್ನು ಬಳಸಬಹುದು, ಅದು ಹೆಚ್ಚಿನ ಬ್ಯಾಟರಿಯನ್ನು ಬಳಸಬಹುದು. ಈ ಅನುಮತಿ ಆಫ್ ಆಗಿದ್ದರೆ, ಈ ಆ್ಯಪ್ ಸಾಮಾನ್ಯವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದೆ ಇರಬಹುದು ಮತ್ತು ಅದರ ಅಲಾರಂಗಳು ನಿಗದಿಯಂತೆ ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ."</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ವೇಳಾಪಟ್ಟಿ, ಅಲಾರಂ, ರಿಮೈಂಡರ್, ಗಡಿಯಾರ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ಆನ್ ಮಾಡಿ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
@@ -579,7 +577,7 @@
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ಈ ಬದಲಾವಣೆ ಅನ್ವಯವಾಗಲು ನಿಮ್ಮ ಸಾಧನವನ್ನು ರೀಬೂಟ್ ಮಾಡಬೇಕು. ಇದೀಗ ರೀಬೂಟ್ ಮಾಡಿ ಅಥವಾ ರದ್ದುಗೊಳಿಸಿ."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"ವೈಯರ್ ಹೊಂದಿರುವ ಹೆಡ್‌ಫೋನ್"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ಆನ್ ಆಗಿದೆ"</string>
-    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ಆಫ್ ಆಗಿದೆ"</string>
+    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ಆಫ್"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"ವಾಹಕ ನೆಟ್‌ವರ್ಕ್ ಬದಲಾಯಿಸುವಿಕೆ"</string>
     <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
     <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>

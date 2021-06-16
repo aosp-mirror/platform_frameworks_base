@@ -210,6 +210,14 @@ void CacheManager::onFrameCompleted() {
     }
 }
 
+void CacheManager::performDeferredCleanup(nsecs_t cleanupOlderThanMillis) {
+    if (mGrContext) {
+        mGrContext->performDeferredCleanup(
+            std::chrono::milliseconds(cleanupOlderThanMillis),
+            /* scratchResourcesOnly */true);
+    }
+}
+
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */

@@ -20,7 +20,9 @@
     <style name="Theme.SettingsBase" parent="@android:style/Theme.DeviceDefault.Settings" >
         <item name="android:textAppearanceListItem">@style/TextAppearance.PreferenceTitle.SettingsLib</item>
         <item name="android:listPreferredItemPaddingStart">24dp</item>
+        <item name="android:listPreferredItemPaddingLeft">24dp</item>
         <item name="android:listPreferredItemPaddingEnd">16dp</item>
+        <item name="android:listPreferredItemPaddingRight">16dp</item>
         <item name="preferenceTheme">@style/PreferenceTheme.SettingsLib</item>
         <item name="android:switchStyle">@style/Switch.SettingsLib</item>
         <item name="android:progressBarStyleHorizontal">@style/HorizontalProgressBar.SettingsLib</item>

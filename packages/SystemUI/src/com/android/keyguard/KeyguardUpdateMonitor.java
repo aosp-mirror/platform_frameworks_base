@@ -66,10 +66,8 @@ import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -243,20 +241,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final boolean mIsPrimaryUser;
     private final boolean mIsAutomotive;
     private final AuthController mAuthController;
-    private final PowerManager mPowerManager;
     private final StatusBarStateController mStatusBarStateController;
     private int mStatusBarState;
-    private boolean mDozing;
     private final StatusBarStateController.StateListener mStatusBarStateControllerListener =
             new StatusBarStateController.StateListener() {
         @Override
         public void onStateChanged(int newState) {
             mStatusBarState = newState;
-        }
-
-        @Override
-        public void onDozingChanged(boolean dozing) {
-            mDozing = dozing;
         }
     };
 
@@ -1330,19 +1321,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private final FingerprintManager.AuthenticationCallback mFingerprintAuthenticationCallback
             = new AuthenticationCallback() {
-        private boolean mIsUdfpsRunningWhileDozing;
 
         @Override
         public void onAuthenticationFailed() {
             handleFingerprintAuthFailed();
-            cancelAodInterrupt();
         }
 
         @Override
         public void onAuthenticationSucceeded(AuthenticationResult result) {
             Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationSucceeded");
             handleFingerprintAuthenticated(result.getUserId(), result.isStrongBiometric());
-            cancelAodInterrupt();
             Trace.endSection();
         }
 
@@ -1354,7 +1342,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         @Override
         public void onAuthenticationError(int errMsgId, CharSequence errString) {
             handleFingerprintError(errMsgId, errString.toString());
-            cancelAodInterrupt();
         }
 
         @Override
@@ -1365,24 +1352,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         @Override
         public void onUdfpsPointerDown(int sensorId) {
             Log.d(TAG, "onUdfpsPointerDown, sensorId: " + sensorId);
-
-            if (mDozing) {
-                mIsUdfpsRunningWhileDozing = true;
-            }
         }
 
         @Override
         public void onUdfpsPointerUp(int sensorId) {
             Log.d(TAG, "onUdfpsPointerUp, sensorId: " + sensorId);
-        }
-
-        private void cancelAodInterrupt() {
-            if (mIsUdfpsRunningWhileDozing) {
-                mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
-                        "com.android.systemui:AOD_INTERRUPT_END");
-            }
-            mAuthController.onCancelUdfps();
-            mIsUdfpsRunningWhileDozing = false;
         }
     };
 
@@ -1676,7 +1650,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             LockPatternUtils lockPatternUtils,
             AuthController authController,
             TelephonyListenerManager telephonyListenerManager,
-            PowerManager powerManager,
             FeatureFlags featureFlags) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
@@ -1689,10 +1662,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mStatusBarStateController = statusBarStateController;
         mStatusBarStateController.addCallback(mStatusBarStateControllerListener);
         mStatusBarState = mStatusBarStateController.getState();
-        mDozing = mStatusBarStateController.isDozing();
         mLockPatternUtils = lockPatternUtils;
         mAuthController = authController;
-        mPowerManager = powerManager;
         dumpManager.registerDumpable(getClass().getName(), this);
 
         mHandler = new Handler(mainLooper) {

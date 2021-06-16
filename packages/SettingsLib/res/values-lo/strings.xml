@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ສະແດງໜ້າປົກຄລິບ, ຂອບ ແລະ ອື່ນໆ."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"ບັງ​ຄັບ​ໃຫ້ຮູບຮ່າງຂຽນຈາກຂວາຫາຊ້າຍ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ບັງຄັບໃຫ້ຮູບຮ່າງໜ້າຈໍ ຂຽນຈາກຂວາໄປຊ້າຍ ສຳລັບທຸກພາສາ"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"ອະນຸຍາດການມົວໃນລະດັບໜ້າຈໍ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"ບັງຄັບໃຊ້ 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"ເປິດໃຊ້ 4x MSAA ໃນແອັບ OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"ດີບັກການເຮັດວຽກຂອງຄລິບທີ່ບໍ່ແມ່ນສີ່ຫຼ່ຽມ"</string>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ໂມງປຸກ ແລະ ການແຈ້ງເຕືອນ"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ອະນຸຍາດໃຫ້ຕັ້ງໂມງປຸກ ແລະ ການແຈ້ງເຕືອນ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ໂມງປຸກ ແລະ ການແຈ້ງເຕືອນ"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"ອະນຸຍາດໃຫ້ແອັບນີ້ຕັ້ງໂມງປຸກ ແລະ ກຳນົດເວລາຄຳສັ່ງອື່ນໆ. ແອັບນີ້ອາດຖືກໃຊ້ເມື່ອທ່ານບໍ່ໄດ້ກຳລັງໃຊ້ໂທລະສັບຂອງທ່ານຢູ່, ເຊິ່ງອາດໃຊ້ແບັດເຕີຣີຫຼາຍຂຶ້ນ. ຫາກການອະນຸຍາດນີ້ຖືກປິດໄວ້, ແອັບນີ້ອາດບໍ່ສາມາດເຮັດວຽກໄດ້ຕາມປົກກະຕິ ແລະ ໂມງປຸກຂອງມັນອາດບໍ່ປຸກຕາມທີ່ກຳນົດເວລາໄວ້."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"ອະນຸຍາດໃຫ້ແອັບນີ້ຕັ້ງໂມງປຸກ ແລະ ກຳນົດເວລາຄຳສັ່ງອື່ນໆ. ແອັບນີ້ອາດຖືກໃຊ້ເມື່ອທ່ານບໍ່ໄດ້ກຳລັງໃຊ້ແທັບເລັດຂອງທ່ານຢູ່, ເຊິ່ງອາດໃຊ້ແບັດເຕີຣີຫຼາຍຂຶ້ນ. ຫາກການອະນຸຍາດນີ້ຖືກປິດໄວ້, ແອັບນີ້ອາດບໍ່ສາມາດເຮັດວຽກໄດ້ຕາມປົກກະຕິ ແລະ ໂມງປຸກຂອງມັນອາດບໍ່ປຸກຕາມທີ່ກຳນົດເວລາໄວ້."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"ອະນຸຍາດໃຫ້ແອັບນີ້ຕັ້ງໂມງປຸກ ແລະ ກຳນົດເວລາຄຳສັ່ງອື່ນໆ. ແອັບນີ້ອາດຖືກໃຊ້ເມື່ອທ່ານບໍ່ໄດ້ກຳລັງໃຊ້ອຸປະກອນຂອງທ່ານຢູ່, ເຊິ່ງອາດໃຊ້ແບັດເຕີຣີຫຼາຍຂຶ້ນ. ຫາກການອະນຸຍາດນີ້ຖືກປິດໄວ້, ແອັບນີ້ອາດບໍ່ສາມາດເຮັດວຽກໄດ້ຕາມປົກກະຕິ ແລະ ໂມງປຸກຂອງມັນອາດບໍ່ປຸກຕາມທີ່ກຳນົດເວລາໄວ້."</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ກຳນົດເວລາ, ໂມງປຸກ, ການແຈ້ງເຕືອນ, ໂມງ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ເປີດ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ເປີດໂໝດຫ້າມລົບກວນ"</string>
