@@ -423,7 +423,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
                 shortLabelResName, longLabel, longLabelResId, longLabelResName, disabledMessage,
                 disabledMessageResId, disabledMessageResName, categoriesSet, intents, rank, extras,
                 getCreationTimestampMillis(), flags, iconResId, iconResName, bitmapPath, iconUri,
-                disabledReason, persons, locusId, 0);
+                disabledReason, persons, locusId, null);
         si.setImplicitRank(implicitRank);
         if ((implicitRank & ShortcutInfo.RANK_CHANGED_BIT) != 0) {
             si.setRankChanged();
