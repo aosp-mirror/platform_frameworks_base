@@ -225,8 +225,14 @@ public class AmbientState {
         return mScrollY;
     }
 
+    /**
+     * Set the new Scroll Y position.
+     */
     public void setScrollY(int scrollY) {
-        this.mScrollY = scrollY;
+        // Because we're dealing with an overscroller, scrollY could sometimes become smaller than
+        // 0. However this is only for internal purposes and the scroll position when read
+        // should never be smaller than 0, otherwise it can lead to flickers.
+        this.mScrollY = Math.max(scrollY, 0);
     }
 
     /**
