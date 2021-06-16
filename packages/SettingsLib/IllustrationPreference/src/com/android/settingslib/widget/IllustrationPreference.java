@@ -35,7 +35,9 @@ import com.airbnb.lottie.LottieAnimationView;
  */
 public class IllustrationPreference extends Preference {
 
-    static final String TAG = "IllustrationPreference";
+    private static final String TAG = "IllustrationPreference";
+
+    private static final boolean IS_ENABLED_LOTTIE_ADAPTIVE_COLOR = false;
 
     private int mAnimationId;
     private boolean mIsAutoScale;
@@ -70,13 +72,15 @@ public class IllustrationPreference extends Preference {
         mIllustrationView = (LottieAnimationView) holder.findViewById(R.id.lottie_view);
         mIllustrationView.setAnimation(mAnimationId);
         mIllustrationView.loop(true);
-        ColorUtils.applyDynamicColors(getContext(), mIllustrationView);
         mIllustrationView.playAnimation();
         if (mIsAutoScale) {
             enableAnimationAutoScale(mIsAutoScale);
         }
         if (mMiddleGroundView != null) {
             enableMiddleGroundView();
+        }
+        if (IS_ENABLED_LOTTIE_ADAPTIVE_COLOR) {
+            ColorUtils.applyDynamicColors(getContext(), mIllustrationView);
         }
     }
 
