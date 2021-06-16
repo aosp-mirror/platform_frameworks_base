@@ -20,20 +20,21 @@ import android.platform.helpers.IAppHelper
 import com.android.server.wm.flicker.FlickerTestParameter
 
 const val IME_WINDOW_TITLE = "InputMethod"
+const val IME_LAYER_TITLE = "$IME_WINDOW_TITLE#0"
 
 fun FlickerTestParameter.imeLayerBecomesVisible() {
     assertLayers {
-        this.isInvisible(IME_WINDOW_TITLE)
+        this.isInvisible(IME_LAYER_TITLE)
             .then()
-            .isVisible(IME_WINDOW_TITLE)
+            .isVisible(IME_LAYER_TITLE)
     }
 }
 
 fun FlickerTestParameter.imeLayerBecomesInvisible() {
     assertLayers {
-        this.isVisible(IME_WINDOW_TITLE)
+        this.isVisible(IME_LAYER_TITLE)
             .then()
-            .isInvisible(IME_WINDOW_TITLE)
+            .isInvisible(IME_LAYER_TITLE)
     }
 }
 
