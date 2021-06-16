@@ -777,6 +777,12 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
+    public void testDumpBarTransitions_DoesNotCrash() {
+        StatusBar.dumpBarTransitions(
+                new PrintWriter(new ByteArrayOutputStream()), "var", /* transitions= */ null);
+    }
+
+    @Test
     @RunWithLooper(setAsMainLooper = true)
     public void testUpdateKeyguardState_DoesNotCrash() {
         mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);

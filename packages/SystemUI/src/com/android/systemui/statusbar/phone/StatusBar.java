@@ -2778,9 +2778,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                 + String.valueOf(CameraIntents.getOverrideCameraPackage(mContext)));
     }
 
-    public static void dumpBarTransitions(PrintWriter pw, String var, BarTransitions transitions) {
+    public static void dumpBarTransitions(
+            PrintWriter pw, String var, @Nullable BarTransitions transitions) {
         pw.print("  "); pw.print(var); pw.print(".BarTransitions.mMode=");
-        pw.println(BarTransitions.modeToString(transitions.getMode()));
+        if (transitions != null) {
+            pw.println(BarTransitions.modeToString(transitions.getMode()));
+        } else {
+            pw.println("Unknown");
+        }
     }
 
     public void createAndAddWindows(@Nullable RegisterStatusBarResult result) {
