@@ -32,8 +32,6 @@ interface ActivityThreadInternal {
 
     boolean isInDensityCompatMode();
 
-    boolean hasImeComponent();
-
     boolean isCachedProcessState();
 
     Application getApplication();
