@@ -830,6 +830,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController.setOverscrollTopChangedListener(
                 mOnOverscrollTopChangedListener);
         mNotificationStackScrollLayoutController.setOnScrollListener(this::onNotificationScrolled);
+        mNotificationStackScrollLayoutController.setOnStackYChanged(this::onStackYChanged);
         mNotificationStackScrollLayoutController.setOnEmptySpaceClickListener(
                 mOnEmptySpaceClickListener);
         addTrackingHeadsUpListener(mNotificationStackScrollLayoutController::setTrackingHeadsUp);
@@ -2198,15 +2199,17 @@ public class NotificationPanelViewController extends PanelViewController {
         mDepthController.setQsPanelExpansion(qsExpansionFraction);
     }
 
-    private Runnable mOnStackYChanged = () -> {
+    private void onStackYChanged(boolean shouldAnimate) {
         if (mQs != null) {
+            if (shouldAnimate) {
+                mAnimateNextNotificationBounds = true;
+                mNotificationBoundsAnimationDelay = 0;
+            }
             setQSClippingBounds();
         }
     };
 
     private void onNotificationScrolled(int newScrollPosition) {
-        // Since this is an overscroller, sometimes the scrollY can be temporarily negative
-        // (when overscrollng on the top and flinging). Let's
         updateQSExpansionEnabledAmbient();
     }
 
@@ -3335,7 +3338,6 @@ public class NotificationPanelViewController extends PanelViewController {
             // The expandedHeight is always the full panel Height when bypassing
             expandedHeight = getMaxPanelHeightNonBypass();
         }
-        mNotificationStackScrollLayoutController.setOnStackYChanged(mOnStackYChanged);
         mNotificationStackScrollLayoutController.setExpandedHeight(expandedHeight);
         updateKeyguardBottomAreaAlpha();
         updateBigClockAlpha();
