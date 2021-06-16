@@ -221,6 +221,7 @@ public class RippleDrawable extends LayerDrawable {
     private boolean mForceSoftware;
 
     // Patterned
+    private boolean mAddRipple = false;
     private float mTargetBackgroundOpacity;
     private ValueAnimator mBackgroundAnimation;
     private float mBackgroundOpacity;
@@ -716,6 +717,7 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         cancelExitingRipples();
+        exitPatternedAnimation();
     }
 
     @Override
@@ -807,7 +809,7 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private void startPatternedAnimation() {
-        mRippleActive = true;
+        mAddRipple = true;
         invalidateSelf(false);
     }
 
@@ -862,17 +864,17 @@ public class RippleDrawable extends LayerDrawable {
             h = bounds.height();
             w = bounds.width();
         }
-        boolean shouldAnimate = mRippleActive;
+        boolean addRipple = mAddRipple;
         boolean shouldExit = mExitingAnimation;
-        mRippleActive = false;
         mExitingAnimation = false;
-        if (mRunningAnimations.size() > 0 && !shouldAnimate) {
+        mAddRipple = false;
+        if (mRunningAnimations.size() > 0 && !addRipple) {
             // update paint when view is invalidated
             getRipplePaint();
         }
         drawContent(canvas);
         drawPatternedBackground(canvas, cx, cy);
-        if (shouldAnimate && mRunningAnimations.size() <= MAX_RIPPLES) {
+        if (addRipple && mRunningAnimations.size() <= MAX_RIPPLES) {
             RippleAnimationSession.AnimationProperties<Float, Paint> properties =
                     createAnimationProperties(x, y, cx, cy, w, h);
             mRunningAnimations.add(new RippleAnimationSession(properties, !useCanvasProps)
