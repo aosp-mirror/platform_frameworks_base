@@ -59,7 +59,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.util.MathUtils;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
@@ -489,20 +488,20 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     @Test
     public void onRotationChanged_buttonIsShowing_expectedYPosition() {
         final Rect windowBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
-        final int oldWindowHeight = windowBounds.height();
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        final Rect oldDraggableBounds = new Rect(mMagnificationModeSwitch.mDraggableWindowBounds);
         final float windowHeightFraction =
-                (float) mWindowManager.getLayoutParamsFromAttachedView().y / oldWindowHeight;
+                (float) (mWindowManager.getLayoutParamsFromAttachedView().y
+                        - oldDraggableBounds.top) / oldDraggableBounds.height();
 
-        // The window bounds are changed due to the rotation change.
+        // The window bounds and the draggable bounds are changed due to the rotation change.
         final Rect newWindowBounds = new Rect(0, 0, windowBounds.height(), windowBounds.width());
         mWindowManager.setWindowBounds(newWindowBounds);
         mMagnificationModeSwitch.onConfigurationChanged(ActivityInfo.CONFIG_ORIENTATION);
 
-        int expectedY = (int) (newWindowBounds.height() * windowHeightFraction);
-        expectedY = MathUtils.constrain(expectedY,
-                mMagnificationModeSwitch.mDraggableWindowBounds.top,
-                mMagnificationModeSwitch.mDraggableWindowBounds.bottom);
+        int expectedY = (int) (windowHeightFraction
+                * mMagnificationModeSwitch.mDraggableWindowBounds.height())
+                + mMagnificationModeSwitch.mDraggableWindowBounds.top;
         assertEquals(
                 "The Y position does not keep the same height ratio after the rotation changed.",
                 expectedY, mWindowManager.getLayoutParamsFromAttachedView().y);
