@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
@@ -38,9 +39,10 @@ import java.util.Objects;
  * Manages the lifecycle of instances of {@link AppSearchImpl}.
  *
  * <p>These instances are managed per unique device-user.
+ * @hide
  */
 public final class ImplInstanceManager {
-    private static final String APP_SEARCH_DIR = "appSearch";
+    private static final String TAG = "AppSearchImplInstanceMa";
 
     private static ImplInstanceManager sImplInstanceManager;
 
@@ -71,8 +73,11 @@ public final class ImplInstanceManager {
      * <p>This folder should only be accessed after unlock.
      */
     public static File getAppSearchDir(@NonNull UserHandle userHandle) {
-        return new File(
-                Environment.getDataSystemCeDirectory(userHandle.getIdentifier()), APP_SEARCH_DIR);
+        // Duplicates the implementation of Environment#getDataSystemCeDirectory
+        // TODO(b/191059409): Unhide Environment#getDataSystemCeDirectory and switch to it.
+        File systemCeDir = new File(Environment.getDataDirectory(), "system_ce");
+        File systemCeUserDir = new File(systemCeDir, String.valueOf(userHandle.getIdentifier()));
+        return new File(systemCeUserDir, "appSearch");
     }
 
     /**
@@ -154,8 +159,10 @@ public final class ImplInstanceManager {
             @Nullable AppSearchLogger logger)
             throws AppSearchException {
         File appSearchDir = getAppSearchDir(userHandle);
+        File icingDir = new File(appSearchDir, "icing");
+        Log.i(TAG, "Creating new AppSearch instance at: " + icingDir);
         return AppSearchImpl.create(
-                appSearchDir,
+                icingDir,
                 userContext,
                 /*logger=*/ null,
                 new FrameworkOptimizeStrategy());
