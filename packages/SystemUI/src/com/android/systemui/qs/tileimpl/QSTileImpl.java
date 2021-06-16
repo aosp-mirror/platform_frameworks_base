@@ -50,6 +50,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
@@ -389,7 +390,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      */
     protected void handleLongClick(@Nullable View view) {
         ActivityLaunchAnimator.Controller animationController =
-                view != null ? ActivityLaunchAnimator.Controller.fromView(view) : null;
+                view != null ? ActivityLaunchAnimator.Controller.fromView(view,
+                        InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE) : null;
         mActivityStarter.postStartActivityDismissingKeyguard(getLongClickIntent(), 0,
                 animationController);
     }

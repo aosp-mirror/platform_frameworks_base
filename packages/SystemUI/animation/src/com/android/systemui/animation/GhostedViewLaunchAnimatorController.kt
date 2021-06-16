@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import android.widget.FrameLayout
+import com.android.internal.jank.InteractionJankMonitor
 import kotlin.math.min
 
 /**
@@ -29,7 +30,10 @@ import kotlin.math.min
  */
 open class GhostedViewLaunchAnimatorController(
     /** The view that will be ghosted and from which the background will be extracted. */
-    private val ghostedView: View
+    private val ghostedView: View,
+
+    /** The [InteractionJankMonitor.CujType] associated to this animation. */
+    private val cujType: Int? = null
 ) : ActivityLaunchAnimator.Controller {
     /** The container to which we will add the ghost view and expanding background. */
     override var launchContainer = ghostedView.rootView as ViewGroup
@@ -125,6 +129,8 @@ open class GhostedViewLaunchAnimatorController(
 
         val matrix = ghostView?.animationMatrix ?: Matrix.IDENTITY_MATRIX
         matrix.getValues(initialGhostViewMatrixValues)
+
+        cujType?.let { InteractionJankMonitor.getInstance().begin(ghostedView, it) }
     }
 
     override fun onLaunchAnimationProgress(
@@ -167,6 +173,8 @@ open class GhostedViewLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+        cujType?.let { InteractionJankMonitor.getInstance().end(it) }
+
         backgroundDrawable?.wrapped?.alpha = startBackgroundAlpha
 
         GhostView.removeGhost(ghostedView)
