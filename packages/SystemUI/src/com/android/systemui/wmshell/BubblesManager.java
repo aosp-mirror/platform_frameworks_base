@@ -617,7 +617,7 @@ public class BubblesManager implements Dumpable {
      * cancel it (and hence the bubbles associated with it).
      *
      * @return true if we want to intercept the dismissal of the entry, else false.
-     * @see Bubbles#handleDismissalInterception(BubbleEntry, List, IntConsumer)
+     * @see Bubbles#handleDismissalInterception(BubbleEntry, List, IntConsumer, Executor)
      */
     public boolean handleDismissalInterception(NotificationEntry entry) {
         if (entry == null) {
