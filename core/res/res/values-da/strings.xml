@@ -1459,6 +1459,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Tillader, at en app anmoder om sletning af pakker."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"bede om at ignorere batterioptimeringer"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Gør det muligt for en app at bede om tilladelse til at ignorere batterioptimeringer for den pågældende app."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Tryk to gange for zoomkontrol"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widget kunne ikke tilføjes."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Gå"</string>
@@ -2126,7 +2130,7 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fil</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> filer</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Der er ingen anbefalede brugere at dele med"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Der er ingen anbefalede personer at dele med"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Liste over apps"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Denne app har ikke fået tilladelse til at optage, men optager muligvis lyd via denne USB-enhed."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Hjem"</string>

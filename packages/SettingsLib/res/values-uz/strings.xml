@@ -179,7 +179,7 @@
     <string name="tts_status_checking" msgid="8026559918948285013">"Tekshirilmoqda…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> sozlamalari"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"Mexanizm sozlamalarini ishga tushirish"</string>
-    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Standart tizim"</string>
+    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Asosiy vosita"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"Umumiy"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Standart ohang"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Matnni o‘qish ohangini standart holatga qaytarish."</string>
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Klip, maydon va h.k. chegaralarini ko‘rsatish"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"O‘ngdan chapga qarab yozish"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Barcha tillarda o‘ngdan chapga qarab yozish"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Oyna xiralashga ruxsat"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAAni yoqish"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ilovasidan 4x MSAAni yoqish"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"To‘g‘ri burchakli bo‘lmagan kesishma amallarini tuzatish"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Signal va eslatmalar"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Signal va eslatmalarni sozlashga ruxsat berish"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Signal va eslatmalar"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Bu ilovaga signal oʻrnatish va boshqa amallarni rejalashtirishga ruxsat berish Bu ilova telefon qoʻlingizda emasligida ham ishlaydi va batareya quvvatini koʻproq sarflaydi. Agar ruxsat berilmasa, bu ilova odatiy ishlaydi va uning signallari rejalashtirilmaydi."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Bu ilovaga signal oʻrnatish va boshqa amallarni rejalashtirishga ruxsat berish Bu ilova planshet qoʻlingizda emasligida ham ishlaydi va batareya quvvatini koʻproq sarflaydi. Agar ruxsat berilmasa, bu ilova odatiy ishlaydi va uning signallari rejalashtirilmaydi."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Bu ilovaga signal oʻrnatish va boshqa amallarni rejalashtirishga ruxsat berish Bu ilova qurilma qoʻlingizda emasligida ham ishlaydi va batareya quvvatini koʻproq sarflaydi. Agar ruxsat berilmasa, bu ilova odatiy ishlaydi va uning signallari rejalashtirilmaydi."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Bu ilovaga signal oʻrnatish va vaqtga asoslangan amallarni rejalashtirishga ruxsat berish. Bunda ilovaga orqa fonda ishlashiga imkon beriladi, shu sababli batareya ortiqcha sarflanishi mumkin.\n\nAgar bu ruxsat oʻchirilsa, ushbu ilova tomonidan rejalashtirilgan mavjud signallar va vaqtga asoslangan tadbirlar ishlamaydi."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"reja, signal, eslatma, soat"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Yoqish"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Bezovta qilinmasin rejimini yoqing"</string>

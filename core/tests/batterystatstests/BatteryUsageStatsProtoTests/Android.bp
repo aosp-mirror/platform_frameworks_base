@@ -14,9 +14,11 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "junit",
+        "mockito-target-minus-junit4",
         "platform-test-annotations",
         "platformprotosnano",
         "statsdprotolite",
+        "truth-prebuilt",
     ],
 
     libs: ["android.test.runner"],

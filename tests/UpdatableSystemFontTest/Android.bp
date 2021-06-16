@@ -27,6 +27,7 @@ android_test {
     libs: ["android.test.runner"],
     static_libs: [
         "androidx.test.ext.junit",
+        "androidx.test.uiautomator_uiautomator",
         "compatibility-device-util-axt",
         "platform-test-annotations",
         "truth-prebuilt",

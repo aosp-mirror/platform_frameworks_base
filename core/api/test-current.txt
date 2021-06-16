@@ -1113,6 +1113,10 @@ package android.hardware.camera2 {
     method @RequiresPermission(android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER) public void onCameraOpened(@NonNull String, @NonNull String);
   }
 
+  public abstract class CameraMetadata<TKey> {
+    field public static final int SENSOR_TEST_PATTERN_MODE_BLACK = 5; // 0x5
+  }
+
 }
 
 package android.hardware.devicestate {

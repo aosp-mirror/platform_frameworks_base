@@ -804,28 +804,42 @@ class JobConcurrencyManager {
             @WorkType final int workType) {
         final List<StateController> controllers = mService.mControllers;
         final int numControllers = controllers.size();
-        for (int ic = 0; ic < numControllers; ic++) {
-            controllers.get(ic).prepareForExecutionLocked(jobStatus);
-        }
-        final PackageStats packageStats =
-                getPkgStatsLocked(jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
-        packageStats.adjustStagedCount(false, jobStatus.shouldTreatAsExpeditedJob());
-        if (!worker.executeRunnableJob(jobStatus, workType)) {
-            Slog.e(TAG, "Error executing " + jobStatus);
-            mWorkCountTracker.onStagedJobFailed(workType);
+        final PowerManager.WakeLock wl =
+                mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, jobStatus.getTag());
+        wl.setWorkSource(mService.deriveWorkSource(
+                jobStatus.getSourceUid(), jobStatus.getSourcePackageName()));
+        wl.setReferenceCounted(false);
+        // Since the quota controller will start counting from the time prepareForExecutionLocked()
+        // is called, hold a wakelock to make sure the CPU doesn't suspend between that call and
+        // when the service actually starts.
+        wl.acquire();
+        try {
             for (int ic = 0; ic < numControllers; ic++) {
-                controllers.get(ic).unprepareFromExecutionLocked(jobStatus);
+                controllers.get(ic).prepareForExecutionLocked(jobStatus);
             }
-        } else {
-            mRunningJobs.add(jobStatus);
-            mWorkCountTracker.onJobStarted(workType);
-            packageStats.adjustRunningCount(true, jobStatus.shouldTreatAsExpeditedJob());
-            mActivePkgStats.add(
-                    jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(), packageStats);
-        }
-        final List<JobStatus> pendingJobs = mService.mPendingJobs;
-        if (pendingJobs.remove(jobStatus)) {
-            mService.mJobPackageTracker.noteNonpending(jobStatus);
+            final PackageStats packageStats = getPkgStatsLocked(
+                    jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
+            packageStats.adjustStagedCount(false, jobStatus.shouldTreatAsExpeditedJob());
+            if (!worker.executeRunnableJob(jobStatus, workType)) {
+                Slog.e(TAG, "Error executing " + jobStatus);
+                mWorkCountTracker.onStagedJobFailed(workType);
+                for (int ic = 0; ic < numControllers; ic++) {
+                    controllers.get(ic).unprepareFromExecutionLocked(jobStatus);
+                }
+            } else {
+                mRunningJobs.add(jobStatus);
+                mWorkCountTracker.onJobStarted(workType);
+                packageStats.adjustRunningCount(true, jobStatus.shouldTreatAsExpeditedJob());
+                mActivePkgStats.add(
+                        jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(),
+                        packageStats);
+            }
+            final List<JobStatus> pendingJobs = mService.mPendingJobs;
+            if (pendingJobs.remove(jobStatus)) {
+                mService.mJobPackageTracker.noteNonpending(jobStatus);
+            }
+        } finally {
+            wl.release();
         }
     }
 

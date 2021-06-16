@@ -162,7 +162,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"संश्लेषित बोलीको टोनमा प्रभाव पार्छ"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"भाषा"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"प्रणालीको भाषा प्रयोग गर्नुहोस्"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"सिस्टमको भाषा प्रयोग गर्नुहोस्"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"भाषा चयन गरिएको छैन"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"बोली पाठका लागि भाषा-विशेष आवाज सेट गर्दछ"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"एउटा उदाहरण सुन्नुहोस्"</string>
@@ -223,9 +223,9 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"डिभाइसको फिंगरप्रिन्ट: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"वायरलेसमा जोड्न सकिएन"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> सही नेटवर्कमा जोडिएको कुरा सुनिश्चित गर्नुहोस्"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"यन्त्रसँग जोडा बनाउनुहोस्"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"यन्त्रसँग कनेक्ट गर्नुहोस्"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi मा कनेक्ट गर्ने कोड"</string>
-    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"जोडा बनाउने प्रक्रिया सफल भएन"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"कनेक्ट गर्न सकिएन"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"यन्त्र उही नेटवर्कमा जोडिएको कुरा सुनिश्चित गर्नुहोस्।"</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR कोड स्क्यान गरेर Wi‑Fi प्रयोग गरी डिभाइस कनेक्ट गर्नुहोस्"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"डिभाइस कनेक्ट गर्दै…"</string>
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमा, मार्जिन, इत्यादि देखाइयोस्।"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL लेआउट बलपूर्वक प्रयोग गरियोस्"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"सबै लोकेलमा RTLमा स्क्रिन लेआउट बलपूर्वक प्रयोग गरियोस्"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"विन्डो ब्लर गरियोस्"</string>
     <string name="force_msaa" msgid="4081288296137775550">"बलपूर्वक 4x MSAA प्रयोग गरियोस्"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES २.० एपमा ४x MSAA अन गरियोस्"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"गैर आयातकर क्लिप रहेका कार्यहरू डिबग गरियोस्"</string>
@@ -468,7 +467,7 @@
     <string name="disabled" msgid="8017887509554714950">"असक्षम पारियो"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति छ"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमति छैन"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"अज्ञात एपहरू इन्स्टल गर्नुहोस्"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"अज्ञात एप इन्स्टल गर्ने अनुमति"</string>
     <string name="home" msgid="973834627243661438">"सेटिङहरूको गृहपृष्ठ"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"०%"</item>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म र रिमाइन्डरहरू"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म तथा रिमाइन्डर सेट गर्न दिइयोस्"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"घडी तथा रिमाइन्डरहरू"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"यो एपलाई अलार्म सेट गर्न तथा अन्य कार्यको समयतालिका तोक्न दिनुहोस्। तपाईंले आफ्नो फोन नचलाएका बेला पनि यो एप प्रयोग गरिन सक्छ। यसले गर्दा थप ब्याट्री खपत हुन सक्छ। यो अनुमति नदिइएका खण्डमा यो एप राम्ररी नचल्न सक्छ र यो एपका अलार्म पनि तोकिएको समयमा बज्ने छैनन्।"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"यो एपलाई अलार्म सेट गर्न तथा अन्य कार्यको समयतालिका तोक्न दिनुहोस्। तपाईंले आफ्नो ट्याब्लेट नचलाएका बेला पनि यो एप प्रयोग गरिन सक्छ। यसले गर्दा थप ब्याट्री खपत हुन सक्छ। यो अनुमति नदिइएका खण्डमा यो एप राम्ररी नचल्न सक्छ र यो एपका अलार्म पनि तोकिएको समयमा बज्ने छैनन्।"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"यो एपलाई अलार्म सेट गर्न तथा अन्य कार्यको समयतालिका तोक्न दिनुहोस्। तपाईंले आफ्नो डिभाइस नचलाएका बेला पनि यो एप प्रयोग गरिन सक्छ। यसले गर्दा थप ब्याट्री खपत हुन सक्छ। यो अनुमति नदिइएका खण्डमा यो एप राम्ररी नचल्न सक्छ र यो एपका अलार्म पनि तोकिएको समयमा बज्ने छैनन्।"</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"समयतालिका, अलार्म, रिमाइन्डर, घडी"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"सक्रिय गर्नुहोस्"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"बाधा नपुऱ्याउनुहोस् नामक मोडलाई सक्रिय गर्नुहोस्"</string>

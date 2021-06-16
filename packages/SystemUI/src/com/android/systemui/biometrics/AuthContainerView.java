@@ -376,6 +376,17 @@ public class AuthContainerView extends LinearLayout
 
         addView(mFrameLayout);
 
+        // init view before showing
+        if (mBiometricView != null) {
+            mBiometricView.setRequireConfirmation(mConfig.mRequireConfirmation);
+            mBiometricView.setPanelController(mPanelController);
+            mBiometricView.setPromptInfo(mConfig.mPromptInfo);
+            mBiometricView.setCallback(mBiometricCallback);
+            mBiometricView.setBackgroundView(mBackgroundView);
+            mBiometricView.setUserId(mConfig.mUserId);
+            mBiometricView.setEffectiveUserId(mEffectiveUserId);
+        }
+
         // TODO: De-dupe the logic with AuthCredentialPasswordView
         setOnKeyListener((v, keyCode, event) -> {
             if (keyCode != KeyEvent.KEYCODE_BACK) {
@@ -404,13 +415,6 @@ public class AuthContainerView extends LinearLayout
     }
 
     private void addBiometricView() {
-        mBiometricView.setRequireConfirmation(mConfig.mRequireConfirmation);
-        mBiometricView.setPanelController(mPanelController);
-        mBiometricView.setPromptInfo(mConfig.mPromptInfo);
-        mBiometricView.setCallback(mBiometricCallback);
-        mBiometricView.setBackgroundView(mBackgroundView);
-        mBiometricView.setUserId(mConfig.mUserId);
-        mBiometricView.setEffectiveUserId(mEffectiveUserId);
         mBiometricScrollView.addView(mBiometricView);
     }
 

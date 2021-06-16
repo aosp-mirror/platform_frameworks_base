@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Pokaż granice przycięcia, marginesy itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Układ od prawej do lewej"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Wymuś wszędzie układ ekranu od prawej do lewej"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Zezwól na rozmycie na poziomie okna"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Wymuś 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Włącz 4x MSAA w aplikacjach OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Debuguj operacje przycinania nieprostokątnego"</string>
@@ -508,11 +507,9 @@
     <string name="cancel" msgid="5665114069455378395">"Anuluj"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmy i przypomnienia"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Zezwól na ustawianie alarmów i przypomnień"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Zezwalaj na ustawianie alarmów i przypomnień"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmy i przypomnienia"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Zezwól na ustawianie alarmów i planowanie innych działań przez tę aplikację. Ta aplikacja może być używana, gdy nie korzystasz z telefonu. Może to zwiększyć wykorzystanie baterii. Jeśli nie włączysz tych uprawnień, ta aplikacja może nie działać prawidłowo, a jej alarmy nie będą uruchamiane zgodnie z harmonogramem."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Zezwól na ustawianie alarmów i planowanie innych działań przez tę aplikację. Ta aplikacja może być używana, gdy nie korzystasz z tabletu. Może to zwiększyć wykorzystanie baterii. Jeśli nie włączysz tych uprawnień, ta aplikacja może nie działać prawidłowo, a jej alarmy nie będą uruchamiane zgodnie z harmonogramem."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Zezwól na ustawianie alarmów i planowanie innych działań przez tę aplikację. Ta aplikacja może być używana, gdy nie korzystasz z urządzenia. Może to zwiększyć wykorzystanie baterii. Jeśli nie włączysz tych uprawnień, ta aplikacja może nie działać prawidłowo, a jej alarmy nie będą uruchamiane zgodnie z harmonogramem."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Zezwól na ustawianie alarmów i planowanie innych działań, w przypadku których czas jest istotny. Dzięki temu aplikacja będzie mogła działać w tle, co może zwiększyć wykorzystanie baterii.\n\nJeśli nie włączysz tych uprawnień, istniejące alarmy i zaplanowane wydarzenia z tej aplikacji nie będą działać."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"harmonogram, alarm, przypomnienie, zegar"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Włącz"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Włącz tryb Nie przeszkadzać"</string>

@@ -19,6 +19,7 @@ package com.android.keyguard;
 import android.graphics.Rect;
 import android.util.Slog;
 
+import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
@@ -126,10 +127,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
-     * Set whether or not the lock screen is showing notifications.
+     * Set which clock should be displayed on the keyguard. The other one will be automatically
+     * hidden.
      */
-    public void setHasVisibleNotifications(boolean hasVisibleNotifications) {
-        mKeyguardClockSwitchController.setHasVisibleNotifications(hasVisibleNotifications);
+    public void displayClock(@ClockSize int clockSize) {
+        mKeyguardClockSwitchController.displayClock(clockSize);
     }
 
     /**

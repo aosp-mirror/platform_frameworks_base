@@ -179,7 +179,7 @@
     <string name="tts_status_checking" msgid="8026559918948285013">"Проверка…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"Настройки синтеза речи"</string>
-    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Система по умолчанию"</string>
+    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Синтезатор речи по умолчанию"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"Общие"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Тон по умолчанию"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Установить стандартный тон при озвучивании текста."</string>
@@ -213,9 +213,9 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Отладка по Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Чтобы увидеть и использовать доступные устройства, включите отладку по Wi-Fi."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Подключить устройство с помощью QR-кода"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Подключение новых устройств с помощью сканера QR-кодов"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Отсканировать QR-код для подключения устройства"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Подключить устройство с помощью кода подключения"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Подключение новых устройств с помощью шестизначного кода"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Ввести шестизначный код для подключения устройства"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Подключенные устройства"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Текущие подключения"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Сведения об устройстве"</string>
@@ -226,13 +226,13 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Подключение к устройству"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Код подключения по сети Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Не удалось подключить устройство"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Устройство должно быть подключено к той же самой сети."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Подключение устройства через Wi‑Fi с использованием QR-кода"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Оба устройства должны быть подключены к одной и той же сети."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Отсканируйте QR-код, чтобы подключить устройство через Wi‑Fi."</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Подключение устройства…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Не удалось подключить устройство. QR-код неверный, или устройство находится в другой сети."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-адрес и порт"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Отсканируйте QR-код"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Подключение устройства через Wi‑Fi с использованием QR-кода"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Отсканируйте QR-код, чтобы подключить устройство через Wi‑Fi."</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Подключите устройство к сети Wi-Fi."</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, отладка, разработчик"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Отчет об ошибке"</string>
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Показывать границы обрезки, поля и т. п."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Отразить интерфейс"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Принудительно расположить элементы интерфейса справа налево во всех локалях"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Размытие на уровне окон"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Включить 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Включить 4x MSAA в приложениях OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Отладка операций усечения сложной формы"</string>
@@ -510,9 +509,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будильники и напоминания"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Разрешить установку будильников и напоминаний"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Будильники и напоминания"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Если вы разрешите этому приложению устанавливать будильники и создавать напоминания, оно сможет работать, даже когда вы не пользуетесь телефоном. Правда, в результате заряд батареи будет расходоваться быстрее. Если отключить эту настройку, в работе приложения могут возникать сбои, а будильники не будут запускаться вовремя."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Если вы разрешите этому приложению устанавливать будильники и создавать напоминания, оно сможет работать, даже когда вы не пользуетесь планшетом. Правда, в результате заряд батареи будет расходоваться быстрее. Если отключить эту настройку, в работе приложения могут возникать сбои, а будильники не будут запускаться вовремя."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Если вы разрешите этому приложению устанавливать будильники и создавать напоминания, оно сможет работать, даже когда вы не пользуетесь устройством. Правда, в результате заряд батареи будет расходоваться быстрее. Если отключить эту настройку, в работе приложения могут возникать сбои, а будильники не будут запускаться вовремя."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Если вы разрешите этому приложению устанавливать будильники и планировать на определенное время действия, оно будет работать в фоновом режиме. В таком случае заряд батареи может расходоваться быстрее.\n\nЕсли отключить эту настройку, текущие будильники и созданные приложением мероприятия перестанут запускаться."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"установить, будильник, напоминание, часы"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Включить"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Включите режим \"Не беспокоить\""</string>

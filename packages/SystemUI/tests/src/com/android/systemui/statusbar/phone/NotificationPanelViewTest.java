@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+import static com.android.keyguard.KeyguardClockSwitch.LARGE;
+import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,6 +85,7 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSDetailDisplayer;
@@ -261,6 +265,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private PrivacyDotViewController mPrivacyDotViewController;
     @Mock
+    private NavigationModeController mNavigationModeController;
+    @Mock
     private SecureSettings mSecureSettings;
     @Mock
     private TapAgainViewController mTapAgainViewController;
@@ -391,6 +397,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mKeyguardMediaController,
                 mPrivacyDotViewController,
                 mTapAgainViewController,
+                mNavigationModeController,
                 mFragmentService,
                 mQuickAccessWalletController,
                 new FakeExecutor(new FakeSystemClock()),
@@ -684,6 +691,38 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
         verify(mAmbientState)
                 .setNotificationScrimTop(NOTIFICATION_SCRIM_TOP_PADDING_IN_SPLIT_SHADE);
+    }
+
+    @Test
+    public void testSwitchesToCorrectClockInSinglePaneShade() {
+        mStatusBarStateController.setState(KEYGUARD);
+
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        triggerPositionClockAndNotifications();
+        verify(mKeyguardStatusViewController).displayClock(LARGE);
+
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        mNotificationPanelViewController.closeQs();
+        verify(mKeyguardStatusViewController).displayClock(SMALL);
+    }
+
+    @Test
+    public void testSwitchesToCorrectClockInSplitShade() {
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade();
+
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        triggerPositionClockAndNotifications();
+        verify(mKeyguardStatusViewController).displayClock(LARGE);
+
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        triggerPositionClockAndNotifications();
+        verify(mKeyguardStatusViewController, times(2)).displayClock(LARGE);
+        verify(mKeyguardStatusViewController, never()).displayClock(SMALL);
+    }
+
+    private void triggerPositionClockAndNotifications() {
+        mNotificationPanelViewController.closeQs();
     }
 
     private FalsingManager.FalsingTapListener getFalsingTapListener() {

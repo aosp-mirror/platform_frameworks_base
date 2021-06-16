@@ -512,6 +512,8 @@ public final class DisplayManagerService extends SystemService {
                     }
                 }
             }
+        } else if (phase == PHASE_BOOT_COMPLETED) {
+            mDisplayModeDirector.onBootCompleted();
         }
     }
 

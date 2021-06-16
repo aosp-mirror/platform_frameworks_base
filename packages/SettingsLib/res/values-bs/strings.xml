@@ -180,7 +180,7 @@
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"Postavke za <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"Pokreni postavke programa"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Željeni alat"</string>
-    <string name="tts_general_section_title" msgid="8919671529502364567">"Opće postavke"</string>
+    <string name="tts_general_section_title" msgid="8919671529502364567">"Opće"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Postavite visinu glasa"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Visinu glasa koji izgovara tekst postavite na podrazumjevanu."</string>
   <string-array name="tts_rate_entries">
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Prikaz granica isječka, margina itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Prisilno postavi raspored s desna ulijevo"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Prisilno postavljanje rasporeda ekrana s desna ulijevo za sve regije"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Dozvoli zamućenja prozora"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Prinudno primijeni 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Omogućava 4x MSAA u OpenGL ES 2.0 aplikacijama"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Otkl. greške na operac. nepravoug. isjecanja"</string>
@@ -509,9 +508,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi i podsjetnici"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Dozvoli postavljanje alarma i podsjetnika"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmi i podsjetnici"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Dozvolite ovoj aplikaciji da postavlja alarme i zakaže druge radnje. Ova aplikacija se može koristiti kada ne koristite telefon, čime se može povećati potrošnja baterije. Ako isključite ovo odobrenje, moguće je da ova aplikacija neće funkcionirati kako je namijenjeno, a njeni alarmi neće funkcionirati prema rasporedu."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Dozvolite ovoj aplikaciji da postavlja alarme i zakaže druge radnje. Ova aplikacija se može koristiti kada ne koristite tablet, čime se može povećati potrošnja baterije. Ako isključite ovo odobrenje, moguće je da ova aplikacija neće funkcionirati kako je namijenjeno, a njeni alarmi neće funkcionirati prema rasporedu."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Dozvolite ovoj aplikaciji da postavlja alarme i zakaže druge radnje. Ova aplikacija se može koristiti kada ne koristite uređaj, čime se može povećati potrošnja baterije. Ako isključite ovo odobrenje, moguće je da ova aplikacija neće funkcionirati kako je namijenjeno, a njeni alarmi neće funkcionirati prema rasporedu."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Dozvolite ovoj aplikaciji da postavlja alarme i zakazuje vremenski osjetljive radnje. Ovim će se omogućiti aplikaciji da radi u pozadini, čime se može povećati potrošnja baterije.\n\nAko je ovo odobrenje isključeno, postojeći alarmi i događaji zasnovani na vremenu koje je ova aplikacija zakazala neće funkcionirati."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"raspored, alarm, podsjetnik, sat"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Uključi"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Uključi način rada Ne ometaj"</string>

@@ -1459,6 +1459,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"አንድ መተግበሪያ የጥቅሎች ስረዛን እንዲጠይቅ ይፈቅዳል።"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"የባትሪ ማትባቶችን ችላ ለማለት መጠየቅ"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"አንድ መተግበሪያ ለዚያ መተግበሪያ የባትሪ ማትባቶችን ችላ ለማለት እንዲጠይቅ ይፈቅድለታል።"</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ለአጉላ መቆጣጠሪያ ሁለት ጊዜ ነካ አድርግ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ምግብር ማከል አልተቻለም።"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ሂድ"</string>

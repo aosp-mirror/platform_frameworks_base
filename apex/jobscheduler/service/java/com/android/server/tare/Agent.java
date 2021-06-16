@@ -16,6 +16,11 @@
 
 package com.android.server.tare;
 
+import static com.android.server.tare.EconomicPolicy.REGULATION_BASIC_INCOME;
+import static com.android.server.tare.EconomicPolicy.REGULATION_BIRTHRIGHT;
+import static com.android.server.tare.EconomicPolicy.eventToString;
+import static com.android.server.tare.TareUtils.narcToString;
+
 import android.annotation.NonNull;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -85,23 +90,25 @@ class Agent {
         if (transaction.delta > 0 && newArcsInCirculation > maxCirculationAllowed) {
             final long newDelta = maxCirculationAllowed - mCurrentNarcsInCirculation;
             Slog.i(TAG, "Would result in too many credits in circulation. Decreasing transaction "
-                    + transaction.reason + (transaction.tag == null ? "" : ":" + transaction.tag)
+                    + eventToString(transaction.eventId)
+                    + (transaction.tag == null ? "" : ":" + transaction.tag)
                     + " for <" + userId + ">" + pkgName + " by " + (transaction.delta - newDelta));
             transaction = new Ledger.Transaction(
                     transaction.startTimeMs, transaction.endTimeMs,
-                    transaction.reason, transaction.tag, newDelta);
+                    transaction.eventId, transaction.tag, newDelta);
         }
         final long originalBalance = ledger.getCurrentBalance();
         if (transaction.delta > 0
                 && originalBalance + transaction.delta
                 > mCompleteEconomicPolicy.getMaxSatiatedBalance()) {
             final long newDelta = mCompleteEconomicPolicy.getMaxSatiatedBalance() - originalBalance;
-            Slog.i(TAG, "Would result in becoming too rich. Decreasing transaction  "
-                    + transaction.reason + (transaction.tag == null ? "" : ":" + transaction.tag)
+            Slog.i(TAG, "Would result in becoming too rich. Decreasing transaction "
+                    + eventToString(transaction.eventId)
+                    + (transaction.tag == null ? "" : ":" + transaction.tag)
                     + " for <" + userId + ">" + pkgName + " by " + (transaction.delta - newDelta));
             transaction = new Ledger.Transaction(
                     transaction.startTimeMs, transaction.endTimeMs,
-                    transaction.reason, transaction.tag, newDelta);
+                    transaction.eventId, transaction.tag, newDelta);
         }
         ledger.recordTransaction(transaction);
         mCurrentNarcsInCirculation += transaction.delta;
@@ -129,7 +136,7 @@ class Agent {
             if (ledger.getCurrentBalance() < minBalance) {
                 final long shortfall = minBalance - getBalanceLocked(userId, pkgName);
                 recordTransactionLocked(userId, pkgName, ledger,
-                        new Ledger.Transaction(now, now, "UNIVERSAL_BASIC_INCOME",
+                        new Ledger.Transaction(now, now, REGULATION_BASIC_INCOME,
                                 null, (long) (perc * shortfall)));
             }
         }
@@ -165,7 +172,7 @@ class Agent {
             }
 
             recordTransactionLocked(userId, pkgName, ledger,
-                    new Ledger.Transaction(now, now, "BIRTHRIGHT", null,
+                    new Ledger.Transaction(now, now, REGULATION_BIRTHRIGHT, null,
                             Math.min(maxBirthright, mIrs.getMinBalanceLocked(userId, pkgName))));
         }
     }
@@ -185,7 +192,7 @@ class Agent {
         final long now = System.currentTimeMillis();
 
         recordTransactionLocked(userId, pkgName, ledger,
-                new Ledger.Transaction(now, now, "BIRTHRIGHT", null,
+                new Ledger.Transaction(now, now, REGULATION_BIRTHRIGHT, null,
                         Math.min(maxBirthright, mIrs.getMinBalanceLocked(userId, pkgName))));
     }
 
@@ -223,6 +230,6 @@ class Agent {
     @GuardedBy("mLock")
     void dumpLocked(IndentingPrintWriter pw) {
         pw.print("Current GDP: ");
-        pw.println(mCurrentNarcsInCirculation);
+        pw.println(narcToString(mCurrentNarcsInCirculation));
     }
 }

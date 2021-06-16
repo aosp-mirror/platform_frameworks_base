@@ -23,24 +23,24 @@ import static com.android.server.tare.TareUtils.arcToNarc;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.ArrayMap;
+import android.util.SparseArray;
 
 /**
  * Policy defining pricing information and daily ARC requirements and suggestions for
  * JobScheduler.
  */
 public class JobSchedulerEconomicPolicy extends EconomicPolicy {
-    public static final String ACTION_JOB_MAX_START = "JOB_MAX_START";
-    public static final String ACTION_JOB_MAX_RUNNING = "JOB_MAX_RUNNING";
-    public static final String ACTION_JOB_HIGH_START = "JOB_HIGH_START";
-    public static final String ACTION_JOB_HIGH_RUNNING = "JOB_HIGH_RUNNING";
-    public static final String ACTION_JOB_DEFAULT_START = "JOB_DEFAULT_START";
-    public static final String ACTION_JOB_DEFAULT_RUNNING = "JOB_DEFAULT_RUNNING";
-    public static final String ACTION_JOB_LOW_START = "JOB_LOW_START";
-    public static final String ACTION_JOB_LOW_RUNNING = "JOB_LOW_RUNNING";
-    public static final String ACTION_JOB_MIN_START = "JOB_MIN_START";
-    public static final String ACTION_JOB_MIN_RUNNING = "JOB_MIN_RUNNING";
-    public static final String ACTION_JOB_TIMEOUT = "JOB_TIMEOUT";
+    public static final int ACTION_JOB_MAX_START = TYPE_ACTION | POLICY_JS | 0;
+    public static final int ACTION_JOB_MAX_RUNNING = TYPE_ACTION | POLICY_JS | 1;
+    public static final int ACTION_JOB_HIGH_START = TYPE_ACTION | POLICY_JS | 2;
+    public static final int ACTION_JOB_HIGH_RUNNING = TYPE_ACTION | POLICY_JS | 3;
+    public static final int ACTION_JOB_DEFAULT_START = TYPE_ACTION | POLICY_JS | 4;
+    public static final int ACTION_JOB_DEFAULT_RUNNING = TYPE_ACTION | POLICY_JS | 5;
+    public static final int ACTION_JOB_LOW_START = TYPE_ACTION | POLICY_JS | 6;
+    public static final int ACTION_JOB_LOW_RUNNING = TYPE_ACTION | POLICY_JS | 7;
+    public static final int ACTION_JOB_MIN_START = TYPE_ACTION | POLICY_JS | 8;
+    public static final int ACTION_JOB_MIN_RUNNING = TYPE_ACTION | POLICY_JS | 9;
+    public static final int ACTION_JOB_TIMEOUT = TYPE_ACTION | POLICY_JS | 10;
 
     private static final int[] COST_MODIFIERS = new int[]{
             COST_MODIFIER_CHARGING,
@@ -48,8 +48,8 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
             COST_MODIFIER_PROCESS_STATE
     };
 
-    private final ArrayMap<String, Action> mActions = new ArrayMap<>();
-    private final ArrayMap<String, Reward> mRewards = new ArrayMap<>();
+    private final SparseArray<Action> mActions = new SparseArray<>();
+    private final SparseArray<Reward> mRewards = new SparseArray<>();
 
     JobSchedulerEconomicPolicy(InternalResourceService irs) {
         super(irs);
@@ -81,14 +81,14 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
 
     @Nullable
     @Override
-    Action getAction(@NonNull String actionName) {
-        return mActions.get(actionName);
+    Action getAction(@AppAction int actionId) {
+        return mActions.get(actionId);
     }
 
     @Nullable
     @Override
-    Reward getReward(@NonNull String rewardName) {
-        return mRewards.get(rewardName);
+    Reward getReward(@UtilityReward int rewardId) {
+        return mRewards.get(rewardId);
     }
 
     private void loadActions() {

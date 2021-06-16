@@ -115,13 +115,18 @@ public class FooterView extends StackScrollerDecorView {
     }
 
     public class FooterViewState extends ExpandableViewState {
+        /**
+         * used to hide the content of the footer to animate.
+         * #hide is applied without animation, but #hideContent has animation.
+         */
+        public boolean hideContent;
+
         @Override
         public void applyToView(View view) {
             super.applyToView(view);
             if (view instanceof FooterView) {
                 FooterView footerView = (FooterView) view;
-                boolean visible = this.clipTopAmount < mClearAllTopPadding;
-                footerView.setContentVisible(visible && footerView.isVisible());
+                footerView.setContentVisible(!hideContent);
             }
         }
     }
