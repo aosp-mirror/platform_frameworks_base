@@ -64,6 +64,7 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.ScrollCaptureResponse;
 import android.view.SurfaceControl;
@@ -72,6 +73,7 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
@@ -203,6 +205,15 @@ public class ScreenshotController {
         void onActionsReady(ScreenshotController.QuickShareData quickShareData);
     }
 
+    interface TransitionDestination {
+        /**
+         * Allows the long screenshot activity to call back with a destination location (the bounds
+         * on screen of the destination for the transitioning view) and a Runnable to be run once
+         * the transition animation is complete.
+         */
+        void setTransitionDestination(Rect transitionDestination, Runnable onTransitionEnd);
+    }
+
     // These strings are used for communicating the action invoked to
     // ScreenshotNotificationSmartActionsProvider.
     static final String EXTRA_ACTION_TYPE = "android:screenshot_action_type";
@@ -241,7 +252,7 @@ public class ScreenshotController {
     private final PhoneWindow mWindow;
     private final DisplayManager mDisplayManager;
     private final ScrollCaptureController mScrollCaptureController;
-    private final LongScreenshotHolder mLongScreenshotHolder;
+    private final LongScreenshotData mLongScreenshotHolder;
 
     private ScreenshotView mScreenshotView;
     private Bitmap mScreenBitmap;
@@ -286,7 +297,7 @@ public class ScreenshotController {
             ImageExporter imageExporter,
             @Main Executor mainExecutor,
             ScrollCaptureController scrollCaptureController,
-            LongScreenshotHolder longScreenshotHolder) {
+            LongScreenshotData longScreenshotHolder) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
         mScrollCaptureClient = scrollCaptureClient;
@@ -644,17 +655,29 @@ public class ScreenshotController {
                     }
 
                     mLongScreenshotHolder.setLongScreenshot(longScreenshot);
+                    mLongScreenshotHolder.setTransitionDestinationCallback(
+                            (transitionDestination, onTransitionEnd) ->
+                                    mScreenshotView.startLongScreenshotTransition(
+                                            transitionDestination, onTransitionEnd,
+                                            longScreenshot));
 
                     final Intent intent = new Intent(mContext, LongScreenshotActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                     Pair<ActivityOptions, ExitTransitionCoordinator> transition =
-                            ActivityOptions.startSharedElementAnimation(
-                                    mWindow, new ScreenshotExitTransitionCallbacks(), null,
-                                    Pair.create(mScreenshotView.getScrollablePreview(),
-                                            ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME));
+                            ActivityOptions.startSharedElementAnimation(mWindow,
+                                    new ScreenshotExitTransitionCallbacksSupplier(false).get(),
+                                    null);
                     transition.second.startExit();
                     mContext.startActivity(intent, transition.first.toBundle());
+                    RemoteAnimationAdapter runner = new RemoteAnimationAdapter(
+                            SCREENSHOT_REMOTE_RUNNER, 0, 0);
+                    try {
+                        WindowManagerGlobal.getWindowManagerService()
+                                .overridePendingAppTransitionRemote(runner, DEFAULT_DISPLAY);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error overriding screenshot app transition", e);
+                    }
                 }, mMainExecutor);
             });
         } catch (CancellationException e) {
@@ -879,8 +902,8 @@ public class ScreenshotController {
         return () -> {
             Pair<ActivityOptions, ExitTransitionCoordinator> transition =
                     ActivityOptions.startSharedElementAnimation(
-                            mWindow, new ScreenshotExitTransitionCallbacks(), null,
-                            Pair.create(mScreenshotView.getScreenshotPreview(),
+                            mWindow, new ScreenshotExitTransitionCallbacksSupplier(true).get(),
+                            null, Pair.create(mScreenshotView.getScreenshotPreview(),
                                     ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME));
             transition.second.startExit();
 
@@ -966,19 +989,33 @@ public class ScreenshotController {
         return matchWithinTolerance;
     }
 
-    private class ScreenshotExitTransitionCallbacks implements ExitTransitionCallbacks {
-        @Override
-        public boolean isReturnTransitionAllowed() {
-            return false;
+    private class ScreenshotExitTransitionCallbacksSupplier implements
+            Supplier<ExitTransitionCallbacks> {
+        final boolean mDismissOnHideSharedElements;
+
+        ScreenshotExitTransitionCallbacksSupplier(boolean dismissOnHideSharedElements) {
+            mDismissOnHideSharedElements = dismissOnHideSharedElements;
         }
 
         @Override
-        public void hideSharedElements() {
-            finishDismiss();
-        }
+        public ExitTransitionCallbacks get() {
+            return new ExitTransitionCallbacks() {
+                @Override
+                public boolean isReturnTransitionAllowed() {
+                    return false;
+                }
 
-        @Override
-        public void onFinish() {
+                @Override
+                public void hideSharedElements() {
+                    if (mDismissOnHideSharedElements) {
+                        finishDismiss();
+                    }
+                }
+
+                @Override
+                public void onFinish() {
+                }
+            };
         }
     }
 }

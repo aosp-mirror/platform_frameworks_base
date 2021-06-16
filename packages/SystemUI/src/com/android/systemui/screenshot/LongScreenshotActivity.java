@@ -32,8 +32,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.text.TextUtils;
-import android.transition.Transition;
-import android.transition.TransitionListenerAdapter;
 import android.util.Log;
 import android.view.ScrollCaptureResponse;
 import android.view.View;
@@ -74,7 +72,7 @@ public class LongScreenshotActivity extends Activity {
     private final Executor mUiExecutor;
     private final Executor mBackgroundExecutor;
     private final ImageExporter mImageExporter;
-    private final LongScreenshotHolder mLongScreenshotHolder;
+    private final LongScreenshotData mLongScreenshotHolder;
 
     private ImageView mPreview;
     private ImageView mTransitionView;
@@ -103,7 +101,7 @@ public class LongScreenshotActivity extends Activity {
     @Inject
     public LongScreenshotActivity(UiEventLogger uiEventLogger, ImageExporter imageExporter,
             @Main Executor mainExecutor, @Background Executor bgExecutor,
-            LongScreenshotHolder longScreenshotHolder) {
+            LongScreenshotData longScreenshotHolder) {
         mUiEventLogger = uiEventLogger;
         mUiExecutor = mainExecutor;
         mBackgroundExecutor = bgExecutor;
@@ -116,7 +114,6 @@ public class LongScreenshotActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate(savedInstanceState = " + savedInstanceState + ")");
         super.onCreate(savedInstanceState);
-        postponeEnterTransition();
         setContentView(R.layout.long_screenshot);
 
         mPreview = requireViewById(R.id.preview);
@@ -210,25 +207,22 @@ public class LongScreenshotActivity extends Activity {
                     public boolean onPreDraw() {
                         mEnterTransitionView.getViewTreeObserver().removeOnPreDrawListener(this);
                         updateImageDimensions();
-                        startPostponedEnterTransition();
-                        if (isActivityTransitionRunning()) {
-                            getWindow().getSharedElementEnterTransition().addListener(
-                                    new TransitionListenerAdapter() {
-                                        @Override
-                                        public void onTransitionEnd(Transition transition) {
-                                            super.onTransitionEnd(transition);
-                                            mPreview.animate().alpha(1f);
-                                            mCropView.setBoundaryPosition(
-                                                    CropView.CropBoundary.TOP, topFraction);
-                                            mCropView.setBoundaryPosition(
-                                                    CropView.CropBoundary.BOTTOM, bottomFraction);
-                                            mCropView.animateEntrance();
-                                            mCropView.setVisibility(View.VISIBLE);
-                                            setButtonsEnabled(true);
-                                            mEnterTransitionView.setVisibility(View.GONE);
-                                        }
+                        mEnterTransitionView.post(() -> {
+                            Rect dest = new Rect();
+                            mEnterTransitionView.getBoundsOnScreen(dest);
+                            mLongScreenshotHolder.takeTransitionDestinationCallback()
+                                    .setTransitionDestination(dest, () -> {
+                                        mPreview.animate().alpha(1f);
+                                        mCropView.setBoundaryPosition(
+                                                CropView.CropBoundary.TOP, topFraction);
+                                        mCropView.setBoundaryPosition(
+                                                CropView.CropBoundary.BOTTOM, bottomFraction);
+                                        mCropView.animateEntrance();
+                                        mCropView.setVisibility(View.VISIBLE);
+                                        setButtonsEnabled(true);
+                                        mEnterTransitionView.setVisibility(View.GONE);
                                     });
-                        }
+                        });
                         return true;
                     }
                 });

@@ -23,16 +23,19 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 
 /**
- * LongScreenshotHolder holds on to 1 LongScreenshot reference to facilitate indirect in-process
- * passing.
+ * LongScreenshotData holds on to 1 LongScreenshot reference and 1 TransitionDestination
+ * reference, to facilitate indirect in-process passing.
  */
 @SysUISingleton
-public class LongScreenshotHolder {
+public class LongScreenshotData {
     private final AtomicReference<ScrollCaptureController.LongScreenshot> mLongScreenshot;
+    private final AtomicReference<ScreenshotController.TransitionDestination>
+            mTransitionDestinationCallback;
 
     @Inject
-    public LongScreenshotHolder() {
+    public LongScreenshotData() {
         mLongScreenshot = new AtomicReference<>();
+        mTransitionDestinationCallback = new AtomicReference<>();
     }
 
     /**
@@ -56,4 +59,18 @@ public class LongScreenshotHolder {
         return mLongScreenshot.getAndSet(null);
     }
 
+    /**
+     * Set the holder's TransitionDestination callback.
+     */
+    public void setTransitionDestinationCallback(
+            ScreenshotController.TransitionDestination destination) {
+        mTransitionDestinationCallback.set(destination);
+    }
+
+    /**
+     * Return the current TransitionDestination callback and clear.
+     */
+    public ScreenshotController.TransitionDestination takeTransitionDestinationCallback() {
+        return mTransitionDestinationCallback.getAndSet(null);
+    }
 }
