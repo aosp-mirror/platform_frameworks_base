@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"የቅንጥብ ገደቦች፣ ጠርዞች፣ ወዘተ አሳይ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"የቀኝ-ወደ-ግራ አቀማመጥ አቅጣጫ አስገድድ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ለሁሉም አካባቢዎች የማያ ገጽ አቀማመጥ ከቀኝ-ወደ-ግራ እንዲሆን አስገድድ"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"የመስኮት ደረጃ ብዥታዎችን ፍቀድ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA አስገድድ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"4x MSAA በ OpenGL ES 2.0 መተግበሪያዎች ውስጥ ያንቁ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"አራት ማእዘን ያልሆኑ የቅንጥብ ክዋኔዎችን ስህተት አርም"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ማንቂያዎች እና አስታዋሾች"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ማንቂያዎች እና አስታዋሾች እንዲዋቀሩ ይፍቀዱ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ማንቂያዎች እና አስታዋሾች"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"ይህ መተግበሪያ ማንቂያዎችን እንዲያቀናብር እና ለሌሎች እርምጃዎች የጊዜ መርሐግብር እንዲያዘጋጅ ይፍቀዱለት። ይህ መተግበሪያ መሣሪያዎን በማይጠቀሙበት ጊዜ ጥቅም ላይ ሊውል ይችላል፤ ይኽም ተጨማሪ ባትሪ ሊጠቀም ይችላል። ይህ ፈቃድ ከጠፋ ይህ መተግበሪያ መደበኛ ሥራውን ላይሰራ ይችላል፣ እንዲሁም ማንቂያዎቹ በጊዜ መርሐግብራቸው መሰረት አይሰሩም።"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"ይህ መተግበሪያ ማንቂያዎችን እንዲያቀናብር እና ለሌሎች እርምጃዎች የጊዜ መርሐግብር እንዲያዘጋጅ ይፍቀዱለት። ይህ መተግበሪያ መሣሪያዎን በማይጠቀሙበት ጊዜ ጥቅም ላይ ሊውል ይችላል፤ ይኽም ተጨማሪ ባትሪ ሊጠቀም ይችላል። ይህ ፈቃድ ከጠፋ ይህ መተግበሪያ መደበኛ ሥራውን ላይሰራ ይችላል፣ እንዲሁም ማንቂያዎቹ በጊዜ መርሐግብራቸው መሰረት አይሰሩም።"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"ይህ መተግበሪያ ማንቂያዎችን እንዲያቀናብር እና ለሌሎች እርምጃዎች የጊዜ መርሐግብር እንዲያዘጋጅ ይፍቀዱለት። ይህ መተግበሪያ መሣሪያዎን በማይጠቀሙበት ጊዜ ጥቅም ላይ ሊውል ይችላል፤ ይኽም ተጨማሪ ባትሪ ሊጠቀም ይችላል። ይህ ፈቃድ ከጠፋ ይህ መተግበሪያ መደበኛ ሥራውን ላይሰራ ይችላል፣ እንዲሁም ማንቂያዎቹ በጊዜ መርሐግብራቸው መሰረት አይሰሩም።"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ይህ መተግበሪያ ማንቂያዎችን እንዲያቀናብር እና የጊዜ ትብነት ያላቸው እርምጃዎችን መርሐግብር እንዲያስይዝ ይፍቀዱለት። ይህ መተግበሪያው ከበስተጀርባ ማሄድ እንዲችል ያስችለዋል፣ ይህም የበለጠ ባትሪ ሊጠቀም ይችላል።\n\nይህ ፈቃድ ከጠፋ በዚህ መተግበሪያ መርሐግብር የተያዘላቸው ነባር ማንቂያዎች እና ጊዜ-ተኮር ክስተቶች አይሰሩም።"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"የጊዜ መርሐግብር፣ ማንቂያ፣ አስታዋሽ ሰዓት"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"አብራ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"አትረብሽን አብራ"</string>

@@ -96,7 +96,7 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Знизу на <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Зліва на <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Справа на <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Відеозапис екрана"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Запис відео з екрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обробка записування екрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Сповіщення про сеанс запису екрана"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Почати запис?"</string>
@@ -117,7 +117,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Скасувати"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Поділитися"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Запис екрана скасовано"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"Запис відео з екрана збережено"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Запис екрана збережено"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Натисніть, щоб переглянути"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Не вдалося видалити запис екрана"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Не вдалось отримати дозволи"</string>
@@ -427,7 +427,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC вимкнено"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ввімкнено"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Запис відео з екрана"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Запис екрана"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Почати"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Зупинити"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Надати доступ до мікрофона?"</string>
@@ -748,7 +748,7 @@
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Статус&lt;/b&gt;: пріоритет підвищено"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус&lt;/b&gt;: пріоритет знижено"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, відображається у вигляді спливаючої підказки"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, показується у вигляді спливаючої підказки"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, показується навіть у режимі \"Не турбувати\""</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, відображається у вигляді спливаючої підказки, показується навіть у режимі \"Не турбувати\""</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Налаштування"</string>

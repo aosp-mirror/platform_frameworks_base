@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Apresentar limites de clipes, margens, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forçar direção do esquema RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forçar dir. do esq. do ecrã p. RTL tds os locais"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Permitir esbater janelas"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forçar 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Ativar o 4x MSAA em aplicações OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operações de clipe não retangulares"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes e lembretes"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir a definição de alarmes e lembretes"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes e lembretes"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Permita que esta app defina alarmes e agende outras ações. Esta app pode ser utilizada quando não estiver a utilizar o seu telemóvel, o que pode consumir mais bateria. Se esta autorização estiver desativada, esta app pode não funcionar normalmente e os respetivos alarmes não irão funcionar conforme agendado."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Permita que esta app defina alarmes e agende outras ações. Esta app pode ser utilizada quando não estiver a utilizar o seu tablet, o que pode consumir mais bateria. Se esta autorização estiver desativada, esta app pode não funcionar normalmente e os respetivos alarmes não irão funcionar conforme agendado."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Permita que esta app defina alarmes e agende outras ações. Esta app pode ser utilizada quando não estiver a utilizar o seu dispositivo, o que pode consumir mais bateria. Se esta autorização estiver desativada, esta app pode não funcionar normalmente e os respetivos alarmes não irão funcionar conforme agendado."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permita que esta app defina alarmes e agende outras ações com base no tempo. Esta ação permite que a app seja executada em segundo plano, o que pode utilizar mais bateria.\n\nSe esta autorização estiver desativada, os alarmes existentes e os eventos com base no tempo agendados por esta app não funcionam."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"agendar, alarme, lembrete, relógio"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ativar"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ativar o modo Não incomodar"</string>

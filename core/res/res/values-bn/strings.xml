@@ -1458,6 +1458,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"একটি অ্যাপ্লিকেশানকে প্যাকেজগুলি মুছে দেওয়ার অনুরোধ জানাতে দেয়৷"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ব্যাটারি অপ্টিমাইজেশন উপেক্ষা করার জন্য অনুমতি চাওয়া"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"কোনো অ্যাপের জন্য ব্যাটারি অপ্টিমাইজেশন উপেক্ষা করতে সেটিকে অনুমতির চাওয়ার মঞ্জুরি দেয়৷"</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"জুম নিয়ন্ত্রণের জন্য দুবার ট্যাপ করুন"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"উইজেট যোগ করা যায়নি৷"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"যান"</string>
@@ -2158,7 +2162,7 @@
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ব্যক্তিগত অ্যাপে এই কন্টেন্ট খোলা যাবে না"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"অফিস প্রোফাইল বন্ধ করা আছে"</string>
     <string name="resolver_switch_on_work" msgid="463709043650610420">"চালু করতে ট্যাপ করুন"</string>
-    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"অফিসের অ্যাপ ব্যবহার করা যাবে না"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"এর জন্য কোনও অফিস অ্যাপ নেই"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ব্যক্তিগত অ্যাপে দেখা যাবে না"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"ব্যক্তিগত প্রোফাইলে <xliff:g id="APP">%s</xliff:g> অ্যাপ খুলতে চান?"</string>
     <string name="miniresolver_open_in_work" msgid="152208044699347924">"অফিস প্রোফাইলে <xliff:g id="APP">%s</xliff:g> অ্যাপ খুলতে চান?"</string>

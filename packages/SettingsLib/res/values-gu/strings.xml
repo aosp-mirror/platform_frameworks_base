@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ક્લિપ બાઉન્ડ, હાંસિયાં વગેરે બતાવો."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL લેઆઉટ દિશા નિર્દેશની ફરજ પાડો"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"તમામ લૉકેલ માટે સ્ક્રીન લેઆઉટ દિશા નિર્દેશને RTLની ફરજ પાડો"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"વિન્ડો-લેવલને ઝાંખું કરવાની સુવિધા ચાલુ કરો"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAAને ફરજ પાડો"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ઍપમાં 4x MSAA ચાલુ કરો"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"બિન-લંબચોરસ ક્લિપ કામગીરી ડીબગ કરો"</string>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"અલાર્મ અને રિમાઇન્ડર"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"અલાર્મ અને રિમાન્ડરના સેટિંગની મંજૂરી આપો"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"અલાર્મ અને રિમાઇન્ડર"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"આ ઍપને અલાર્મ સેટ કરવા અને અન્ય ક્રિયાઓ શેડ્યૂલ કરવા માટે મંજૂરી આપો. જ્યારે તમે તમારા ફોનનો ઉપયોગ ન કરતા હો, ત્યારે આ ઍપનો ઉપયોગ થઈ શકે છે, જેમાં વધારે બૅટરી વપરાઈ શકે છે. જો આ પરવાનગી બંધ હોય, તો આ ઍપ સામાન્ય રીતે કાર્ય ન પણ કરી શકે અને તેના અલાર્મ શેડ્યૂલ કર્યા મુજબ કાર્ય ન પણ કરે."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"આ ઍપને અલાર્મ સેટ કરવા અને અન્ય ક્રિયાઓ શેડ્યૂલ કરવા માટે મંજૂરી આપો. જ્યારે તમે તમારા ટૅબ્લેટનો ઉપયોગ ન કરતા હો, ત્યારે આ ઍપનો ઉપયોગ થઈ શકે છે, જેમાં વધારે બૅટરી વપરાઈ શકે છે. જો આ પરવાનગી બંધ હોય, તો આ ઍપ સામાન્ય રીતે કાર્ય ન પણ કરી શકે અને તેના અલાર્મ શેડ્યૂલ કર્યા મુજબ કાર્ય ન પણ કરે."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"આ ઍપને અલાર્મ સેટ કરવા અને અન્ય ક્રિયાઓ શેડ્યૂલ કરવા માટે મંજૂરી આપો. જ્યારે તમે તમારા ડિવાઇસનો ઉપયોગ ન કરતા હો, ત્યારે આ ઍપનો ઉપયોગ થઈ શકે છે, જેમાં વધારે બૅટરી વપરાઈ શકે છે. જો આ પરવાનગી બંધ હોય, તો આ ઍપ સામાન્ય રીતે કાર્ય ન પણ કરી શકે અને તેના અલાર્મ શેડ્યૂલ કર્યા મુજબ કાર્ય ન પણ કરે."</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"શેડ્યૂલ, અલાર્મ, રિમાઇન્ડર, ઘડિયાળ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ચાલુ કરો"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ખલેલ પાડશો નહીં ચાલુ કરો"</string>

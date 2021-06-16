@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra els límits de clips, els marges, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Força direcció dreta-esquerra"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Força direcció de pantalla dreta-esquerra en totes les llengües"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Permet desenfoc. finestra"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Força MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activa MSAA 4x en aplicacions d\'OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depura operacions de retall no rectangulars"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes i recordatoris"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permet la configuració d\'alarmes i recordatoris"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes i recordatoris"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Permet que aquesta aplicació configuri alarmes i programi altres accions. Aquesta aplicació es pot utilitzar quan no fas servir el telèfon, que pot consumir més bateria. Si aquest permís està desactivat, pot ser que l\'aplicació no funcioni amb normalitat i que les alarmes no funcionin tal com s\'han programat."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Permet que aquesta aplicació configuri alarmes i programi altres accions. Aquesta aplicació es pot utilitzar quan no fas servir la tauleta, que pot consumir més bateria. Si aquest permís està desactivat, pot ser que l\'aplicació no funcioni amb normalitat i que les alarmes no funcionin tal com s\'han programat."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Permet que aquesta aplicació configuri alarmes i programi altres accions. Aquesta aplicació es pot utilitzar quan no fas servir el dispositiu, que pot consumir més bateria. Si aquest permís està desactivat, pot ser que l\'aplicació no funcioni amb normalitat i que les alarmes no funcionin tal com s\'han programat."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permet que aquesta aplicació configuri alarmes i programi accions urgents. Això permet a l\'aplicació executar-se en segon pla i, per tant, és possible que consumeixi més bateria.\n\nSi aquest permís està desactivat, les alarmes i els esdeveniments urgents que ja hagi programat l\'aplicació no funcionaran."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programació, alarma, recordatori, rellotge"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activa"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activa el mode No molestis"</string>
@@ -527,7 +524,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Ara mateix"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altaveu del telèfon"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Aquest telèfon"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Hi ha hagut un problema amb la connexió. Desactiva el dispositiu i torna\'l a activar."</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Hi ha hagut un problema amb la connexió. Apaga el dispositiu i torna\'l a encendre."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositiu d\'àudio amb cable"</string>
     <string name="help_label" msgid="3528360748637781274">"Ajuda i suggeriments"</string>
     <string name="storage_category" msgid="2287342585424631813">"Emmagatzematge"</string>

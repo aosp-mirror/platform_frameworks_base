@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Klip sınırlarını, kenar boşluklarını vb. göster"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Sağdan sola düzenini zorla"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tüm yerel ayarlar için sağdan sola ekran düzenini zorlar"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Pencere bulanıklaştırmaya izin ver"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA\'yı zorla"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 uygulamalarda 4x MSAA\'yı etkinleştir"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Dikdörtgen olmayan kırpma işlemlerinde hata ayıkla"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmlar ve hatırlatıcılar"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Alarm ve hatırlatıcı ayarlanmasına izin ver"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmlar ve hatırlatıcılar"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Bu uygulamanın, alarmlar kurup başka işlemler programlamasına izin verir. Telefonunuzu kullanmadığınız sırada bu uygulama kullanılabilir. Bu da daha fazla pil kullanımına neden olabilir. Bu izin kapatılırsa hem bu uygulama işlevini normal şekilde yerine getirmeyebilir hem de alarmları programladığı gibi çalışmayabilir."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Bu uygulamanın, alarmlar kurup başka işlemler programlamasına izin verir. Tabletinizi kullanmadığınız sırada bu uygulama kullanılabilir. Bu da daha fazla pil kullanımına neden olabilir. Bu izin kapatılırsa hem bu uygulama işlevini normal şekilde yerine getirmeyebilir hem de alarmları programladığı gibi çalışmayabilir."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Bu uygulamanın, alarmlar kurup başka işlemler programlamasına izin verir. Cihazınızı kullanmadığınız sırada bu uygulama kullanılabilir. Bu da daha fazla pil kullanımına neden olabilir. Bu izin kapatılırsa hem bu uygulama işlevini normal şekilde yerine getirmeyebilir hem de alarmları programladığı gibi çalışmayabilir."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Bu uygulamanın alarmlar kurmasına ve zamana bağlı işlemler programlamasına izin verin. Bu izin, uygulamanın arka planda çalışmasına olanak sağlayarak daha fazla pil harcanmasına neden olabilir.\n\nBu izin verilmezse bu uygulama tarafından programlanmış mevcut alarmlar ve zamana bağlı etkinlikler çalışmaz."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"program, alarm, hatırlatıcı, saat"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aç"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Rahatsız Etmeyin\'i açın"</string>

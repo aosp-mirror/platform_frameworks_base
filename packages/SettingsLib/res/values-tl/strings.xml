@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Ipakita ang mga hangganan ng clip, margin, atbp."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Ipilit ang RTL na dir. ng layout"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Ipilit ang RTL na direksyon ng screen layout sa lahat ng lokal"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Payagan ang pag-blur sa antas ng window"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Puwersahin ang 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Paganahin ang 4x MSAA sa OpenGL ES 2.0 na apps"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"I-debug ang di-parihabang mga clip operation"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Mga alarm at paalala"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Payagan ang pagtakda ng mga alarm at paalala"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Mga alarm at paalala"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Payagan ang app na ito na magtakda ng mga alarm at mag-iskedyul ng iba pang aksyon. Posibleng gamitin ang app na ito kapag hindi mo ginagamit ang iyong telepono, na posibleng gumamit ng mas maraming baterya. Kung naka-off ang pahintulot na ito, posibleng hindi gumana nang normal ang app na ito, at hindi gagana ang mga alarm nito gaya ng nakaiskedyul."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Payagan ang app na ito na magtakda ng mga alarm at mag-iskedyul ng iba pang aksyon. Posibleng gamitin ang app na ito kapag hindi mo ginagamit ang iyong tablet, na posibleng gumamit ng mas maraming baterya. Kung naka-off ang pahintulot na ito, posibleng hindi gumana nang normal ang app na ito, at hindi gagana ang mga alarm nito gaya ng nakaiskedyul."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Payagan ang app na ito na magtakda ng mga alarm at mag-iskedyul ng iba pang aksyon. Posibleng gamitin ang app na ito kapag hindi mo ginagamit ang iyong device, na posibleng gumamit ng mas maraming baterya. Kung naka-off ang pahintulot na ito, posibleng hindi gumana nang normal ang app na ito, at hindi gagana ang mga alarm nito gaya ng nakaiskedyul."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Payagan ang app na ito na magtakda ng mga alarm at mag-iskedyul ng mga pagkilos na may limitadong oras. Papayagan nitong tumakbo ang app sa background, na posibleng gumamit ng mas maraming baterya.\n\nKung naka-off ang pahintulot na ito, hindi gagana ang mga kasalukuyang alarm at event na nakabatay sa oras na naiskedyul ng app na ito."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"iskedyul, alarm, paalala, orasan"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"I-on"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"I-on ang Huwag Istorbohin"</string>

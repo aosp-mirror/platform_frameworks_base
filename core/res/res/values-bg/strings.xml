@@ -1355,7 +1355,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Не се изискват разрешения"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"това може да ви струва пари"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Това устройство се зарежда през USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Устройството се зарежда през USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Свързаното устройство се зарежда през USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Прехвърлянето на файлове през USB е включено"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Режимът PTP през USB е включен"</string>
@@ -1458,6 +1458,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Разрешава на приложението да заявява изтриване на пакети."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"искане за пренебрегване на оптимизациите на батерията"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Разрешава на дадено приложение да иска разрешение за пренебрегване на свързаните с него оптимизации на батерията."</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Докоснете двукратно за управление на промяната на мащаба"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Приспособлението не можа да бъде добавено."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Старт"</string>

@@ -411,8 +411,8 @@ public class StackScrollAlgorithm {
             final float footerEnd = algorithmState.mCurrentExpandedYPosition
                     + view.getIntrinsicHeight();
             final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
-
-            viewState.hidden = shadeClosed || isShelfShowing || noSpaceForFooter;
+            ((FooterView.FooterViewState) viewState).hideContent =
+                    shadeClosed || isShelfShowing || noSpaceForFooter;
 
         } else if (view != ambientState.getTrackedHeadsUpRow()) {
             if (ambientState.isExpansionChanging()) {
