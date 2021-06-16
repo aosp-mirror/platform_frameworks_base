@@ -865,4 +865,11 @@ interface IWindowManager
     void unregisterCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener);
 
     boolean isTaskSnapshotSupported();
+
+    /**
+     * Returns the preferred display ID to show software keyboard.
+     *
+     * @see android.window.WindowProviderService#getLaunchedDisplayId
+     */
+    int getImeDisplayId();
 }

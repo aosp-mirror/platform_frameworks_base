@@ -629,10 +629,13 @@ public class InputMethodService extends AbstractInputMethodService {
                 throw new IllegalStateException(
                         "attachToken() must be called at most once. token=" + token);
             }
+            attachToWindowToken(token);
             mToken = token;
             mWindow.setToken(token);
         }
 
+        // TODO(b/149463653): remove updateInputMethodDisplay(int displayId) since we'll get the
+        // right display by attachToWindowToken
         /**
          * {@inheritDoc}
          * @hide
