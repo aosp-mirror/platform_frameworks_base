@@ -232,6 +232,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
 
         mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
+        mPositioner.setMaxBubbles(5);
         mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, syncExecutor);
 
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
