@@ -63,4 +63,5 @@ interface IPackageInstaller {
     void bypassNextStagedInstallerCheck(boolean value);
 
     void setAllowUnlimitedSilentUpdates(String installerPackageName);
+    void setSilentUpdatesThrottleTime(long throttleTimeInSeconds);
 }

@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Pokaži meje obrezovanja, obrobe ipd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Vsili od desne proti levi"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Vsili smer postavitve na zaslonu od desne proti levi za vse jezike."</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Dovoli zameglitve na ravni okna"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Vsili 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"V aplikacijah OpenGL ES 2.0 omogoči 4x MSAA."</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Odpravljanje težav s postopki nepravokotnega izrezovanja"</string>
@@ -510,9 +509,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi in opomniki"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Dovoli nastavljanje alarmov in opomnikov"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmi in opomniki"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Tej aplikaciji dovolite nastavljanje alarmov in načrtovanje drugih dejanj. Ta aplikacija je lahko v uporabi, ko ne uporabljate telefona, kar lahko povzroči večjo porabo energije baterije. Če je to dovoljenje izklopljeno, ta aplikacija morda ne bo normalno delovala in se zato alarmi ne bodo sprožili po urniku."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Tej aplikaciji dovolite nastavljanje alarmov in načrtovanje drugih dejanj. Ta aplikacija je lahko v uporabi, ko ne uporabljate tabličnega računalnika, kar lahko povzroči večjo porabo energije baterije. Če je to dovoljenje izklopljeno, ta aplikacija morda ne bo normalno delovala in se zato alarmi ne bodo sprožili po urniku."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Tej aplikaciji dovolite nastavljanje alarmov in načrtovanje drugih dejanj. Ta aplikacija je lahko v uporabi, ko ne uporabljate naprave, kar lahko povzroči večjo porabo energije baterije. Če je to dovoljenje izklopljeno, ta aplikacija morda ne bo normalno delovala in se zato alarmi ne bodo sprožili po urniku."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Tej aplikaciji dovolite nastavljanje alarmov in načrtovanje časovno občutljivih dejanj. S tem aplikaciji omogočite izvajanje v ozadju, kar bo morda povečalo porabo energije baterije.\n\nČe je to dovoljenje izklopljeno, obstoječi alarmi in časovno občutljivi dogodki, ki jih nastavi ta aplikacija, ne bodo delovali."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"načrtovanje, urnik, alarm, opomnik, ura"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Vklopi"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Vklop načina »Ne moti«"</string>

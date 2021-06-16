@@ -29,6 +29,7 @@ apex {
     key: "com.android.appsearch.key",
     certificate: ":com.android.appsearch.certificate",
     updatable: false,
+    generate_hashtree: false,
 }
 
 apex_key {

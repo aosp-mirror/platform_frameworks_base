@@ -18,17 +18,15 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
-import androidx.preference.Preference.OnPreferenceClickListener;
 import androidx.preference.PreferenceViewHolder;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -36,14 +34,14 @@ import com.airbnb.lottie.LottieAnimationView;
 /**
  * IllustrationPreference is a preference that can play lottie format animation
  */
-public class IllustrationPreference extends Preference implements OnPreferenceClickListener {
+public class IllustrationPreference extends Preference {
 
-    static final String TAG = "IllustrationPreference";
+    private static final String TAG = "IllustrationPreference";
+
+    private static final boolean IS_ENABLED_LOTTIE_ADAPTIVE_COLOR = false;
 
     private int mAnimationId;
-    private boolean mIsAnimating;
     private boolean mIsAutoScale;
-    private ImageView mPlayButton;
     private LottieAnimationView mIllustrationView;
     private View mMiddleGroundView;
     private FrameLayout mMiddleGroundLayout;
@@ -71,42 +69,32 @@ public class IllustrationPreference extends Preference implements OnPreferenceCl
             Log.w(TAG, "Invalid illustration resource id.");
             return;
         }
+
+        // To solve the problem of non-compliant illustrations, we set the frame height
+        // to 300dp and set the length of the short side of the screen to
+        // the width of the frame.
+        final int screenWidth = getContext().getResources().getDisplayMetrics().widthPixels;
+        final int screenHeight = getContext().getResources().getDisplayMetrics().heightPixels;
+        final FrameLayout illustrationFrame = (FrameLayout) holder.findViewById(
+                R.id.illustration_frame);
+        final LayoutParams lp = (LayoutParams) illustrationFrame.getLayoutParams();
+        lp.width = screenWidth < screenHeight ? screenWidth : screenHeight;
+        illustrationFrame.setLayoutParams(lp);
+
         mMiddleGroundLayout = (FrameLayout) holder.findViewById(R.id.middleground_layout);
-        mPlayButton = (ImageView) holder.findViewById(R.id.video_play_button);
         mIllustrationView = (LottieAnimationView) holder.findViewById(R.id.lottie_view);
         mIllustrationView.setAnimation(mAnimationId);
         mIllustrationView.loop(true);
-        ColorUtils.applyDynamicColors(getContext(), mIllustrationView);
         mIllustrationView.playAnimation();
-        updateAnimationStatus(mIsAnimating);
         if (mIsAutoScale) {
             enableAnimationAutoScale(mIsAutoScale);
         }
         if (mMiddleGroundView != null) {
             enableMiddleGroundView();
         }
-    }
-
-    @Override
-    public boolean onPreferenceClick(Preference preference) {
-        mIsAnimating = !isAnimating();
-        updateAnimationStatus(mIsAnimating);
-        return true;
-    }
-
-    @Override
-    protected Parcelable onSaveInstanceState() {
-        Parcelable superState = super.onSaveInstanceState();
-        SavedState ss = new SavedState(superState);
-        ss.mIsAnimating = mIsAnimating;
-        return ss;
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        SavedState ss = (SavedState) state;
-        super.onRestoreInstanceState(ss.getSuperState());
-        mIsAnimating = ss.mIsAnimating;
+        if (IS_ENABLED_LOTTIE_ADAPTIVE_COLOR) {
+            ColorUtils.applyDynamicColors(getContext(), mIllustrationView);
+        }
     }
 
     @VisibleForTesting
@@ -149,6 +137,13 @@ public class IllustrationPreference extends Preference implements OnPreferenceCl
                 mIsAutoScale ? ImageView.ScaleType.CENTER_CROP : ImageView.ScaleType.CENTER_INSIDE);
     }
 
+    /**
+     * Set the lottie illustration resource id.
+     */
+    public void setLottieAnimationResId(int resId) {
+        mAnimationId = resId;
+    }
+
     private void enableMiddleGroundView() {
         mMiddleGroundLayout.removeAllViews();
         mMiddleGroundLayout.addView(mMiddleGroundView);
@@ -158,7 +153,6 @@ public class IllustrationPreference extends Preference implements OnPreferenceCl
     private void init(Context context, AttributeSet attrs) {
         setLayoutResource(R.layout.illustration_preference);
 
-        mIsAnimating = true;
         mIsAutoScale = false;
         if (attrs != null) {
             final TypedArray a = context.obtainStyledAttributes(attrs,
@@ -166,56 +160,5 @@ public class IllustrationPreference extends Preference implements OnPreferenceCl
             mAnimationId = a.getResourceId(R.styleable.LottieAnimationView_lottie_rawRes, 0);
             a.recycle();
         }
-        setOnPreferenceClickListener(this);
-    }
-
-    private void updateAnimationStatus(boolean playAnimation) {
-        if (playAnimation) {
-            mIllustrationView.resumeAnimation();
-            mPlayButton.setVisibility(View.INVISIBLE);
-        } else {
-            mIllustrationView.pauseAnimation();
-            mPlayButton.setVisibility(View.VISIBLE);
-        }
-    }
-
-    static class SavedState extends BaseSavedState {
-        boolean mIsAnimating;
-
-        SavedState(Parcelable superState) {
-            super(superState);
-        }
-
-        /**
-         * Constructor called from {@link #CREATOR}
-         */
-        private SavedState(Parcel in) {
-            super(in);
-            mIsAnimating = (Boolean) in.readValue(null);
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            super.writeToParcel(out, flags);
-            out.writeValue(mIsAnimating);
-        }
-
-        @Override
-        public String toString() {
-            return "IllustrationPreference.SavedState{"
-                    + Integer.toHexString(System.identityHashCode(this))
-                    + " mIsAnimating=" + mIsAnimating + "}";
-        }
-
-        public static final Parcelable.Creator<SavedState> CREATOR =
-                new Parcelable.Creator<SavedState>() {
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
-
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
     }
 }

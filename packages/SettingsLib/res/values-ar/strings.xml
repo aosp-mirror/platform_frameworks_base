@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"عرض حدود وهوامش المقطع وما إلى ذلك"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"فرض اتجاه التنسيق ليكون من اليمين إلى اليسار"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"فرض اتجاه تنسيق الشاشة ليكون من اليمين إلى اليسار لجميع اللغات"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"السماح بعمليات التعتيم على مستوى النافذة"</string>
     <string name="force_msaa" msgid="4081288296137775550">"‏فرض 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"‏تفعيل 4x MSAA في تطبيقات OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"تصحيح أخطاء عمليات القصاصات غير المستطيلة"</string>
@@ -512,9 +511,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"المنبّهات والتذكيرات"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"السماح بضبط المنبّهات والتذكيرات"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"المنبّهات والتذكيرات"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات الأخرى. قد يتم استخدام هذا التطبيق عند عدم استخدامك للهاتف، مما قد يستهلك المزيد من شحن البطارية. إذا كان هذا الإذن غير مفعّل، قد لا يعمل هذا التطبيق بشكل طبيعي ولن تعمل المنبّهات فيه كما هو مقرر."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات الأخرى. قد يتم استخدام هذا التطبيق عند عدم استخدامك للجهاز اللوحي، مما قد يستهلك المزيد من شحن البطارية. إذا كان هذا الإذن غير مفعّل، قد لا يعمل هذا التطبيق بشكل طبيعي ولن تعمل المنبّهات فيه كما هو مقرر."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات الأخرى. قد يتم استخدام هذا التطبيق عند عدم استخدامك للجهاز، مما قد يستهلك المزيد من شحن البطارية. إذا كان هذا الإذن غير مفعّل، قد لا يعمل هذا التطبيق بشكل طبيعي ولن تعمل المنبّهات فيه كما هو مقرر."</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"جدول زمني، جدولة، منبّه، تذكير، ساعة"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"تفعيل"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"تفعيل ميزة \"عدم الإزعاج\""</string>

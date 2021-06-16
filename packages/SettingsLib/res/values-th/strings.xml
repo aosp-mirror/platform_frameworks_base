@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"แสดงหน้าปกคลิป ขอบ ฯลฯ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"บังคับทิศทางการจัดวาง RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"บังคับทิศทางการจัดวางหน้าจอเป็น RTL สำหรับทุกภาษา"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"อนุญาตการเบลอระดับหน้าต่าง"</string>
     <string name="force_msaa" msgid="4081288296137775550">"บังคับใช้ 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"เปิดใช้งาน 4x MSAA ในแอปพลิเคชัน OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"แก้ไขการทำงานของคลิปที่ไม่ใช่สี่เหลี่ยม"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"การปลุกและการช่วยเตือน"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"อนุญาตให้ตั้งปลุกและการช่วยเตือน"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"การปลุกและการช่วยเตือน"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้แม้คุณจะไม่ได้ใช้โทรศัพท์อยู่ จึงอาจทำให้เปลืองแบตเตอรี่มากขึ้น การปิดสิทธิ์นี้จะทำให้แอปทำงานไม่ปกติและการปลุกไม่ทำงานตามกำหนดเวลา"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้แม้คุณจะไม่ได้ใช้แท็บเล็ตอยู่ จึงอาจทำให้เปลืองแบตเตอรี่มากขึ้น การปิดสิทธิ์นี้จะทำให้แอปทำงานไม่ปกติและการปลุกไม่ทำงานตามกำหนดเวลา"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"อนุญาตให้แอปตั้งปลุกและกำหนดเวลาการดำเนินการอื่นๆ ระบบอาจใช้แอปนี้แม้คุณจะไม่ได้ใช้อุปกรณ์อยู่ จึงอาจทำให้เปลืองแบตเตอรี่มากขึ้น การปิดสิทธิ์นี้จะทำให้แอปทำงานไม่ปกติและการปลุกไม่ทำงานตามกำหนดเวลา"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"อนุญาตให้แอปนี้ตั้งปลุกและกำหนดเวลาการดำเนินการที่ต้องคำนึงถึงเวลาเป็นสำคัญ สิทธิ์นี้ช่วยให้แอปทำงานในเบื้องหลังได้ จึงอาจทำให้ใช้แบตเตอรี่มากขึ้น\n\nหากปิดใช้สิทธิ์นี้ การปลุกที่มีอยู่และกิจกรรมที่ต้องคำนึงถึงเวลาเป็นสำคัญซึ่งแอปนี้กำหนดเวลาไว้จะไม่ทำงาน"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"กำหนดเวลา การปลุก การช่วยเตือน นาฬิกา"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"เปิด"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"เปิด \"ห้ามรบกวน\""</string>

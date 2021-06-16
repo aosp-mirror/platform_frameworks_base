@@ -2841,9 +2841,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mActivityIntentHelper.wouldLaunchResolverActivity(intent,
                         mLockscreenUserManager.getCurrentUserId());
 
+        boolean animate =
+                animationController != null && !willLaunchResolverActivity && shouldAnimateLaunch(
+                        true /* isActivityIntent */);
         ActivityLaunchAnimator.Controller animController =
-                !willLaunchResolverActivity && shouldAnimateLaunch(true /* isActivityIntent */)
-                        ? wrapAnimationController(animationController, dismissShade) : null;
+                animate ? wrapAnimationController(animationController, dismissShade) : null;
 
         // If we animate, we will dismiss the shade only once the animation is done. This is taken
         // care of by the StatusBarLaunchAnimationController.
@@ -2857,7 +2859,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             int[] result = new int[]{ActivityManager.START_CANCELED};
 
             mActivityLaunchAnimator.startIntentWithAnimation(animController,
-                    true /* animate */, intent.getPackage(), (adapter) -> {
+                    animate, intent.getPackage(), (adapter) -> {
                         ActivityOptions options = new ActivityOptions(
                                 getActivityOptions(mDisplayId, adapter));
                         options.setDisallowEnterPictureInPictureWhileLaunching(
@@ -2907,16 +2909,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         };
         executeRunnableDismissingKeyguard(runnable, cancelRunnable, dismissShadeDirectly,
-                willLaunchResolverActivity, true /* deferred */);
+                willLaunchResolverActivity, true /* deferred */, animate);
     }
 
     @Nullable
     private ActivityLaunchAnimator.Controller wrapAnimationController(
-            @Nullable ActivityLaunchAnimator.Controller animationController, boolean dismissShade) {
-        if (animationController == null) {
-            return null;
-        }
-
+            ActivityLaunchAnimator.Controller animationController, boolean dismissShade) {
         View rootView = animationController.getLaunchContainer().getRootView();
         if (rootView == mSuperStatusBarViewFactory.getStatusBarWindowView()) {
             // We are animating a view in the status bar. We have to make sure that the status bar
@@ -2959,34 +2957,56 @@ public class StatusBar extends SystemUI implements DemoMode,
             final boolean dismissShade,
             final boolean afterKeyguardGone,
             final boolean deferred) {
-        dismissKeyguardThenExecute(() -> {
-            if (runnable != null) {
-                if (mStatusBarKeyguardViewManager.isShowing()
-                        && mStatusBarKeyguardViewManager.isOccluded()) {
-                    mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
-                } else {
-                    AsyncTask.execute(runnable);
-                }
-            }
-            if (dismissShade) {
-                if (mExpandedVisible && !mBouncerShowing) {
-                    mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
-                            true /* force */, true /* delayed*/);
-                } else {
+        executeRunnableDismissingKeyguard(runnable, cancelAction, dismissShade, afterKeyguardGone,
+                deferred, false /* willAnimateOnKeyguard */);
+    }
 
-                    // Do it after DismissAction has been processed to conserve the needed ordering.
-                    mHandler.post(mShadeController::runPostCollapseRunnables);
+    public void executeRunnableDismissingKeyguard(final Runnable runnable,
+            final Runnable cancelAction,
+            final boolean dismissShade,
+            final boolean afterKeyguardGone,
+            final boolean deferred,
+            final boolean willAnimateOnKeyguard) {
+        OnDismissAction onDismissAction = new OnDismissAction() {
+            @Override
+            public boolean onDismiss() {
+                if (runnable != null) {
+                    if (mStatusBarKeyguardViewManager.isShowing()
+                            && mStatusBarKeyguardViewManager.isOccluded()) {
+                        mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
+                    } else {
+                        AsyncTask.execute(runnable);
+                    }
                 }
-            } else if (isInLaunchTransition()
-                    && mNotificationPanelViewController.isLaunchTransitionFinished()) {
+                if (dismissShade) {
+                    if (mExpandedVisible && !mBouncerShowing) {
+                        mShadeController.animateCollapsePanels(
+                                CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                                true /* force */, true /* delayed*/);
+                    } else {
 
-                // We are not dismissing the shade, but the launch transition is already finished,
-                // so nobody will call readyForKeyguardDone anymore. Post it such that
-                // keyguardDonePending gets called first.
-                mHandler.post(mStatusBarKeyguardViewManager::readyForKeyguardDone);
+                        // Do it after DismissAction has been processed to conserve the needed
+                        // ordering.
+                        mHandler.post(mShadeController::runPostCollapseRunnables);
+                    }
+                } else if (StatusBar.this.isInLaunchTransition()
+                        && mNotificationPanelViewController.isLaunchTransitionFinished()) {
+
+                    // We are not dismissing the shade, but the launch transition is already
+                    // finished,
+                    // so nobody will call readyForKeyguardDone anymore. Post it such that
+                    // keyguardDonePending gets called first.
+                    mHandler.post(mStatusBarKeyguardViewManager::readyForKeyguardDone);
+                }
+                return deferred;
             }
-            return deferred;
-        }, cancelAction, afterKeyguardGone);
+
+            @Override
+            public boolean willRunAnimationOnKeyguard() {
+                return willAnimateOnKeyguard;
+            }
+        };
+        dismissKeyguardThenExecute(onDismissAction, cancelAction, afterKeyguardGone);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -4609,28 +4629,37 @@ public class StatusBar extends SystemUI implements DemoMode,
      *
      * @param action The action to execute after dismissing the keyguard.
      * @param collapsePanel Whether we should collapse the panel after dismissing the keyguard.
-     * @param deferKeyguardDismiss Whether we should defer the keyguard actual dismissal, for
-     *                             instance to run animations on the keyguard before hiding it.
+     * @param willAnimateOnKeyguard Whether {@param action} will run an animation on the keyguard if
+     *                              we are locked.
      */
     private void executeActionDismissingKeyguard(Runnable action, boolean afterKeyguardGone,
-            boolean collapsePanel, boolean deferKeyguardDismiss) {
+            boolean collapsePanel, boolean willAnimateOnKeyguard) {
         if (!mDeviceProvisionedController.isDeviceProvisioned()) return;
 
-        dismissKeyguardThenExecute(() -> {
-            new Thread(() -> {
-                try {
-                    // The intent we are sending is for the application, which
-                    // won't have permission to immediately start an activity after
-                    // the user switches to home.  We know it is safe to do at this
-                    // point, so make sure new activity switches are now allowed.
-                    ActivityManager.getService().resumeAppSwitches();
-                } catch (RemoteException e) {
-                }
-                action.run();
-            }).start();
+        OnDismissAction onDismissAction = new OnDismissAction() {
+            @Override
+            public boolean onDismiss() {
+                new Thread(() -> {
+                    try {
+                        // The intent we are sending is for the application, which
+                        // won't have permission to immediately start an activity after
+                        // the user switches to home.  We know it is safe to do at this
+                        // point, so make sure new activity switches are now allowed.
+                        ActivityManager.getService().resumeAppSwitches();
+                    } catch (RemoteException e) {
+                    }
+                    action.run();
+                }).start();
 
-            return collapsePanel ? mShadeController.collapsePanel() : deferKeyguardDismiss;
-        }, afterKeyguardGone);
+                return collapsePanel ? mShadeController.collapsePanel() : willAnimateOnKeyguard;
+            }
+
+            @Override
+            public boolean willRunAnimationOnKeyguard() {
+                return willAnimateOnKeyguard;
+            }
+        };
+        dismissKeyguardThenExecute(onDismissAction, afterKeyguardGone);
     }
 
     @Override
@@ -4674,7 +4703,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         // the animation on the keyguard). The animation will take care of (instantly) collapsing
         // the shade and hiding the keyguard once it is done.
         boolean collapse = !animate;
-        boolean deferKeyguardDismiss = animate;
         executeActionDismissingKeyguard(() -> {
             try {
                 // We wrap animationCallback with a StatusBarLaunchAnimatorController so that the
@@ -4703,7 +4731,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (intentSentUiThreadCallback != null) {
                 postOnUiThread(intentSentUiThreadCallback);
             }
-        }, willLaunchResolverActivity, collapse, deferKeyguardDismiss);
+        }, willLaunchResolverActivity, collapse, animate);
     }
 
     private void postOnUiThread(Runnable runnable) {

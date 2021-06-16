@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -166,5 +167,38 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         assertTrue(mTile.getState().contentDescription.toString().contains(mTile.getState().label));
+    }
+
+    @Test
+    public void testForceExpandIcon_notRecordingNotStarting() {
+        when(mController.isStarting()).thenReturn(false);
+        when(mController.isRecording()).thenReturn(false);
+
+        mTile.refreshState();
+        mTestableLooper.processAllMessages();
+
+        assertTrue(mTile.getState().forceExpandIcon);
+    }
+
+    @Test
+    public void testForceExpandIcon_recordingNotStarting() {
+        when(mController.isStarting()).thenReturn(false);
+        when(mController.isRecording()).thenReturn(true);
+
+        mTile.refreshState();
+        mTestableLooper.processAllMessages();
+
+        assertFalse(mTile.getState().forceExpandIcon);
+    }
+
+    @Test
+    public void testForceExpandIcon_startingNotRecording() {
+        when(mController.isStarting()).thenReturn(true);
+        when(mController.isRecording()).thenReturn(false);
+
+        mTile.refreshState();
+        mTestableLooper.processAllMessages();
+
+        assertFalse(mTile.getState().forceExpandIcon);
     }
 }

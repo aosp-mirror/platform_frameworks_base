@@ -35,9 +35,11 @@ import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.people.PeopleSpaceUtils;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.wmshell.BubblesManager;
+import com.android.wm.shell.bubbles.Bubble;
 
 import java.util.Optional;
 
@@ -53,14 +55,35 @@ public class LaunchConversationActivity extends Activity {
     private final UserManager mUserManager;
     private boolean mIsForTesting;
     private IStatusBarService mIStatusBarService;
+    private CommandQueue mCommandQueue;
+    private Bubble mBubble;
+    private NotificationEntry mEntryToBubble;
 
     @Inject
     public LaunchConversationActivity(NotificationEntryManager notificationEntryManager,
-            Optional<BubblesManager> bubblesManagerOptional, UserManager userManager) {
+            Optional<BubblesManager> bubblesManagerOptional, UserManager userManager,
+            CommandQueue commandQueue) {
         super();
         mNotificationEntryManager = notificationEntryManager;
         mBubblesManagerOptional = bubblesManagerOptional;
         mUserManager = userManager;
+        mCommandQueue = commandQueue;
+        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
+            // (b/190833924) Wait for the app transition to finish before showing the bubble,
+            // opening the bubble while the transition is happening can mess with the placement
+            // of the  bubble's surface.
+            @Override
+            public void appTransitionFinished(int displayId) {
+                if (mBubblesManagerOptional.isPresent()) {
+                    if (mBubble != null) {
+                        mBubblesManagerOptional.get().expandStackAndSelectBubble(mBubble);
+                    } else if (mEntryToBubble != null) {
+                        mBubblesManagerOptional.get().expandStackAndSelectBubble(mEntryToBubble);
+                    }
+                }
+                mCommandQueue.removeCallback(this);
+            }
+        });
     }
 
     @Override
@@ -95,14 +118,28 @@ public class LaunchConversationActivity extends Activity {
                     return;
                 }
 
-                NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
-                        notificationKey);
-                if (entry != null && entry.canBubble() && mBubblesManagerOptional.isPresent()) {
-                    if (DEBUG) Log.d(TAG, "Open bubble for conversation");
-                    mBubblesManagerOptional.get().expandStackAndSelectBubble(entry);
-                    // Just opt-out and don't cancel the notification for bubbles.
-                    finish();
-                    return;
+                // We can potentially bubble without a notification, so rather than rely on
+                // notificationKey here (which could be null if there's no notification or if the
+                // bubble is suppressing the notification), so we'll use the shortcutId for lookups.
+                // This misses one specific case: a bubble that was never opened & still has a
+                // visible notification, but the bubble was dismissed & aged out of the overflow.
+                // So it wouldn't exist in the stack or overflow to be looked up BUT the notif entry
+                // would still exist & be bubbleable. So if we don't get a bubble from the
+                // shortcutId, fallback to notificationKey if it exists.
+                if (mBubblesManagerOptional.isPresent()) {
+                    mBubble = mBubblesManagerOptional.get().getBubbleWithShortcutId(tileId);
+                    NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
+                            notificationKey);
+                    if (mBubble != null || (entry != null && entry.canBubble())) {
+                        mEntryToBubble = entry;
+                        if (DEBUG) {
+                            Log.d(TAG,
+                                    "Opening bubble: " + mBubble  + ", entry: " + mEntryToBubble);
+                        }
+                        // Just opt-out and don't cancel the notification for bubbles.
+                        finish();
+                        return;
+                    }
                 }
 
                 if (mIStatusBarService == null) {

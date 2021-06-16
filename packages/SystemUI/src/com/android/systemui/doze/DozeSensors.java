@@ -70,6 +70,7 @@ public class DozeSensors {
     private final Consumer<Boolean> mProxCallback;
     private final SecureSettings mSecureSettings;
     private final Callback mCallback;
+    private final boolean mScreenOffUdfpsEnabled;
     @VisibleForTesting
     protected TriggerSensor[] mSensors;
 
@@ -116,6 +117,8 @@ public class DozeSensors {
         mProximitySensor = proximitySensor;
         mSelectivelyRegisterProxSensors = dozeParameters.getSelectivelyRegisterSensorsUsingProx();
         mListeningProxSensors = !mSelectivelyRegisterProxSensors;
+        mScreenOffUdfpsEnabled =
+                config.screenOffUdfpsEnabled(KeyguardUpdateMonitor.getCurrentUser());
 
         boolean udfpsEnrolled =
                 authController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser());
@@ -171,7 +174,7 @@ public class DozeSensors {
                         findSensorWithType(config.udfpsLongPressSensorType()),
                         "doze_pulse_on_auth",
                         true /* settingDef */,
-                        udfpsEnrolled,
+                        udfpsEnrolled && (alwaysOn || mScreenOffUdfpsEnabled),
                         DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS,
                         true /* reports touch coordinates */,
                         true /* touchscreen */,
@@ -369,6 +372,7 @@ public class DozeSensors {
         pw.println("mListeningTouchScreenSensors=" + mListeningTouchScreenSensors);
         pw.println("mSelectivelyRegisterProxSensors=" + mSelectivelyRegisterProxSensors);
         pw.println("mListeningProxSensors=" + mListeningProxSensors);
+        pw.println("mScreenOffUdfpsEnabled=" + mScreenOffUdfpsEnabled);
         IndentingPrintWriter idpw = new IndentingPrintWriter(pw);
         idpw.increaseIndent();
         for (TriggerSensor s : mSensors) {

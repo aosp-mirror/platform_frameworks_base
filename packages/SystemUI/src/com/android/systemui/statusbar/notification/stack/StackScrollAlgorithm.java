@@ -158,7 +158,7 @@ public class StackScrollAlgorithm {
             AmbientState ambientState) {
         float drawStart = ambientState.isOnKeyguard() ? 0
                 : ambientState.getStackY() - ambientState.getScrollY();
-        float clipStart = ambientState.getNotificationScrimTop();
+        float clipStart = 0;
         int childCount = algorithmState.visibleChildren.size();
         boolean firstHeadsUp = true;
         for (int i = 0; i < childCount; i++) {
@@ -411,8 +411,8 @@ public class StackScrollAlgorithm {
             final float footerEnd = algorithmState.mCurrentExpandedYPosition
                     + view.getIntrinsicHeight();
             final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
-
-            viewState.hidden = shadeClosed || isShelfShowing || noSpaceForFooter;
+            ((FooterView.FooterViewState) viewState).hideContent =
+                    shadeClosed || isShelfShowing || noSpaceForFooter;
 
         } else if (view != ambientState.getTrackedHeadsUpRow()) {
             if (ambientState.isExpansionChanging()) {

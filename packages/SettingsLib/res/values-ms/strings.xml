@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Tunjukkan batas klip, margin dll."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Paksa arah reka letak RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Paksa arah reka letak skrin RTL bagi semua tempat peristiwa"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Benarkan kabur tahap tetingkap"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Paksa 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Dayakan 4x MSAA dalam apl OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Nyahpepijat operasi keratan bukan segi empat tepat"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Penggera dan peringatan"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Benarkan penetapan penggera dan peringatan"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Penggera &amp; peringatan"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Benarkan apl ini menetapkan penggera dan menjadualkan tindakan lain. Apl ini mungkin digunakan ketika anda tidak menggunakan telefon, apl mungkin menggunakan lebih banyak bateri. Jika kebenaran ini dimatikan, apl ini mungkin tidak berfungsi seperti biasa dan penggera tidak akan berfungsi seperti yang dijadualkan."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Benarkan apl ini menetapkan penggera dan menjadualkan tindakan lain. Apl ini mungkin digunakan ketika anda tidak menggunakan tablet, apl mungkin menggunakan lebih banyak bateri. Jika kebenaran ini dimatikan, apl ini mungkin tidak berfungsi seperti biasa dan penggera tidak akan berfungsi seperti yang dijadualkan."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Benarkan apl ini menetapkan penggera dan menjadualkan tindakan lain. Apl ini mungkin digunakan ketika anda tidak menggunakan peranti, apl mungkin menggunakan lebih banyak bateri. Jika kebenaran ini dimatikan, apl ini mungkin tidak berfungsi seperti biasa dan penggera tidak akan berfungsi seperti yang dijadualkan."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Benarkan apl ini menetapkan penggera dan menjadualkan tindakan yang sensitif masa. Ini membolehkan apl berjalan di latar, yang mungkin menggunakan lebih banyak bateri.\n\nJika kebenaran ini dimatikan, penggera sedia ada dan acara berdasarkan masa yang dijadualkan oleh apl ini tidak akan berfungsi."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"jadual, penggera, peringatan, jam"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Hidupkan"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Hidupkan Jangan Ganggu"</string>

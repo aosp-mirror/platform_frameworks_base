@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Kliphatárok, margók stb. megjelenítése."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Elrendezés jobbról balra"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Elrendezés jobbról balra minden nyelvnél"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Ablakszintű homályosítás"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA kényszerítése"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"A 4x MSAA engedélyezése az OpenGL ES 2.0-nál"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Nem négyzetes kivágási műveletek hibakeresése"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ébresztések és emlékeztetők"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Beállíthat ébresztéseket és emlékeztetőket"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Ébresztések és emlékeztetők"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Engedélyezheti ennek az alkalmazásnak, hogy ébresztéseket állítson be és további műveleteket ütemezzen. Ez az alkalmazás használatban lehet, amikor nem használja a telefonját, ami jobban igénybe veheti az akkumulátort. Ha ez az engedély ki van kapcsolva, előfordulhat, hogy az alkalmazás nem működik megfelelően, és az ébresztések nem működnek az ütemezésnek megfelelően."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Engedélyezheti ennek az alkalmazásnak, hogy ébresztéseket állítson be és további műveleteket ütemezzen. Ez az alkalmazás használatban lehet, amikor nem használja a táblagépét, ami jobban igénybe veheti az akkumulátort. Ha ez az engedély ki van kapcsolva, előfordulhat, hogy az alkalmazás nem működik megfelelően, és az ébresztések nem működnek az ütemezésnek megfelelően."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Engedélyezheti ennek az alkalmazásnak, hogy ébresztéseket állítson be és további műveleteket ütemezzen. Ez az alkalmazás használatban lehet, amikor nem használja az eszközét, ami jobban igénybe veheti az akkumulátort. Ha ez az engedély ki van kapcsolva, előfordulhat, hogy az alkalmazás nem működik megfelelően, és az ébresztések nem működnek az ütemezésnek megfelelően."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Lehetővé teszi ennek az alkalmazásnak, hogy ébresztéseket állítson be és időérzékeny feladatokat ütemezzen. Ezzel engedélyezi az alkalmazásnak, hogy a háttérben fusson, ami megnövekedett akkumulátorhasználattal járhat.\n\nHa ez az engedély ki van kapcsolva, az alkalmazás által beállított ébresztések és ütemezett időérzékeny események nem fognak működni."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ütemezés, ébresztés, emlékeztető, óra"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Bekapcsolás"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"A Ne zavarjanak mód bekapcsolása"</string>
