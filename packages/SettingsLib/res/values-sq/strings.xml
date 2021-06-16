@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Shfaq konturet e klipit, hapësirat etj."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Detyro drejtimin e shkrimit nga e djathta në të majtë"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Ndrysho me detyrim drejtimin e planit të ekranit nga e djathta në të majtë për të gjitha vendet"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Lejo turbullimet në nivel dritareje"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Detyro 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Aktivizo 4x MSAA në aplikacionet OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Korrigjo veprimet mbi klipet jodrejtkëndore"</string>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmet dhe alarmet rikujtuese"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Lejo caktimin e alarmeve dhe alarmeve rikujtuese"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmet dhe alarmet rikujtuese"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Lejo që ky aplikacion të caktojë alarme dhe të planifikojë veprime të tjera. Ky aplikacion mund të përdoret kur ti nuk e përdor telefonin, gjë që mund të përdorë më shumë bateri. Nëse leja është joaktive, ky aplikacion mund të mos funksionojë në mënyrë normale dhe alarmet e tij nuk do të punojnë siç janë planifikuar."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Lejo që ky aplikacion të caktojë alarme dhe të planifikojë veprime të tjera. Ky aplikacion mund të përdoret kur ti nuk e përdor tabletin, gjë që mund të përdorë më shumë bateri. Nëse leja është joaktive, ky aplikacion mund të mos funksionojë në mënyrë normale dhe alarmet e tij nuk do të punojnë siç janë planifikuar."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Lejo që ky aplikacion të caktojë alarme dhe të planifikojë veprime të tjera. Ky aplikacion mund të përdoret kur ti nuk e përdor pajisjen, gjë që mund të përdorë më shumë bateri. Nëse leja është joaktive, ky aplikacion mund të mos funksionojë në mënyrë normale dhe alarmet e tij nuk do të punojnë siç janë planifikuar."</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"planifiko, alarm, alarm rikujtues, ora"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivizo"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktivizo \"Mos shqetëso\""</string>

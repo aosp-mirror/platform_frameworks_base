@@ -696,13 +696,17 @@ public class MediaRouter {
             @Override
             public void onGlobalA2dpChanged(boolean a2dpOn) {
                 mHandler.post(() -> {
-                    if (mSelectedRoute == null) {
+                    if (mSelectedRoute == null || mBluetoothA2dpRoute == null) {
                         return;
                     }
                     if (mSelectedRoute.isDefault() && a2dpOn) {
-                        setSelectedRoute(mBluetoothA2dpRoute, /*explicit=*/false);
+                        setSelectedRoute(mBluetoothA2dpRoute, /*explicit=*/ false);
+                        dispatchRouteUnselected(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudioVideo);
+                        dispatchRouteSelected(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute);
                     } else if (mSelectedRoute.isBluetooth() && !a2dpOn) {
-                        setSelectedRoute(mDefaultAudioVideo, /*explicit=*/false);
+                        setSelectedRoute(mDefaultAudioVideo, /*explicit=*/ false);
+                        dispatchRouteUnselected(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute);
+                        dispatchRouteSelected(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudioVideo);
                     }
                 });
             }
@@ -1363,6 +1367,9 @@ public class MediaRouter {
     }
 
     static void dispatchRouteSelected(int type, RouteInfo info) {
+        if (DEBUG) {
+            Log.d(TAG, "Dispatching route selected: " + info);
+        }
         for (CallbackInfo cbi : sStatic.mCallbacks) {
             if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteSelected(cbi.router, type, info);
@@ -1371,6 +1378,9 @@ public class MediaRouter {
     }
 
     static void dispatchRouteUnselected(int type, RouteInfo info) {
+        if (DEBUG) {
+            Log.d(TAG, "Dispatching route unselected: " + info);
+        }
         for (CallbackInfo cbi : sStatic.mCallbacks) {
             if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteUnselected(cbi.router, type, info);

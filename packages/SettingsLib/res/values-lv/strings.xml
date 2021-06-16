@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Rādīt klipu robežas, malas utt."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Virziens no labās uz kreiso (Obligāts) WL: 295"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Obl. izkārt. virz. no labās uz kr. pusi visām lok."</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Atļaut logu aizmiglošanu"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA piespiedu palaiš."</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Iespējot 4x MSAA OpenGL ES 2.0 lietotnēs"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Atkļūdot darbības daļā, kas nav taisnstūris."</string>
@@ -509,9 +508,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Signāli un atgādinājumi"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Atļaut iestatīt signālus un atgādinājumus"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Signāli un atgādinājumi"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Atļaut šai lietotnei iestatīt signālus un ieplānot citas darbības. Šī lietotne var tikt izmantota, kamēr jūs neizmantojat tālruni, tāpēc var tikt patērēts vairāk akumulatora enerģijas. Ja šī atļauja ir izslēgta, šī lietotne var nedarboties, kā paredzēts, un tās signāli netiek rādīti ieplānotajā laikā."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Atļaut šai lietotnei iestatīt signālus un ieplānot citas darbības. Šī lietotne var tikt izmantota, kamēr jūs neizmantojat planšetdatoru, tāpēc var tikt patērēts vairāk akumulatora enerģijas. Ja šī atļauja ir izslēgta, šī lietotne var nedarboties, kā paredzēts, un tās signāli netiek rādīti ieplānotajā laikā."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Atļaut šai lietotnei iestatīt signālus un ieplānot citas darbības. Šī lietotne var tikt izmantota, kamēr jūs neizmantojat ierīci, tāpēc var tikt patērēts vairāk akumulatora enerģijas. Ja šī atļauja ir izslēgta, šī lietotne var nedarboties, kā paredzēts, un tās signāli netiek rādīti ieplānotajā laikā."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Atļaujiet šai lietotnei iestatīt signālus un ieplānot darbības, kas jāveic konkrētā laikā. Tādējādi lietotne darbosies fonā un, iespējams, patērēs vairāk akumulatora enerģijas.\n\nJa šī atļauja nav piešķirta, esošie signāli un šīs lietotnes ieplānotie notikumi, kas jāizpilda konkrētā laikā, nedarbosies."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ieplānot, signāls, atgādinājums, pulkstenis"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ieslēgt"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Režīma “Netraucēt” ieslēgšana"</string>

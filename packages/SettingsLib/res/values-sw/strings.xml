@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Onyesha mipaka ya picha, kingo, nk."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Lazimisha uelekezaji wa muundo wa RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Lazimisha mkao wa skrini uwe wa kulia kwenda kushoto kwa lugha zote"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Ruhusu ukungu wa kiwango cha dirisha"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Lazimisha 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Wezesha 4x MSAA katika programu za OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Tatua uendeshaji wa klipu usio mstatili"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ving\'ora na vikumbusho"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Ruhusu iweke kengele na vikumbusho"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Kengele na vikumbusho"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Ruhusu programu hii iweke kengele na ratiba za vitendo vingine. Programu hii inaweza kutumika wakati hutumii simu yako, hali inayoweza kutumia chaji nyingi ya betri. Ikiwa ruhusa hii itazimwa, huenda programu hii isifanye kazi ipasavyo, na kengele zake hazitafanya kazi kama zilivyoratibiwa."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Ruhusu programu hii iweke kengele na ratiba za vitendo vingine. Programu hii inaweza kutumika wakati hutumii kompyuta yako kibao, hali inayoweza kutumia chaji nyingi ya betri. Ikiwa ruhusa hii itazimwa, huenda programu hii isifanye kazi ipasavyo, na kengele zake hazitafanya kazi kama zilivyoratibiwa."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Ruhusu programu hii iweke kengele na ratiba za vitendo vingine. Programu hii inaweza kutumika wakati hutumii kifaa chako, hali inayoweza kutumia chaji nyingi ya betri. Ikiwa ruhusa hii itazimwa, huenda programu hii isifanye kazi ipasavyo, na kengele zake hazitafanya kazi kama zilivyoratibiwa."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Ruhusu programu hii iweke kengele na ratiba za vitendo vingine vinavyotegemea wakati. Hatua hii inairuhusu programu itumike chinichini, hali inayoweza kutumia chaji nyingi ya betri.\n\nIkiwa ruhusa hii itazimwa, kengele zilizopo na ratiba za vitendo vinavyotegemea wakati zilizowekwa na programu hii hazitafanya kazi."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ratiba, kengele, kikumbusho, saa"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Washa"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Washa kipengele cha Usinisumbue"</string>

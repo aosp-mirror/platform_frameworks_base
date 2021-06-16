@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Afișați limitele clipului, marginile etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Direcție aspect dreapta - stânga"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Direcție obligatorie aspect ecran dreapta - stânga"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Permiteți estompări la nivel de fereastră"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forțați MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activați MSAA 4x în aplicațiile OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Remediați decupări nerectangulare"</string>
@@ -509,9 +508,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarme și mementouri"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permiteți setarea pentru alarme și mementouri"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarme și mementouri"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Permiteți ca aplicația să seteze alarme și să programeze alte acțiuni. Aplicația poate rula când nu folosiți telefonul, ceea ce poate consuma mai multă baterie. Dacă permisiunea este dezactivată, este posibil ca aplicația să nu funcționeze normal, iar alarmele nu vor funcționa conform planului."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Permiteți ca aplicația să seteze alarme și să programeze alte acțiuni. Aplicația poate rula când nu folosiți tableta, ceea ce poate consuma mai multă baterie. Dacă permisiunea este dezactivată, este posibil ca aplicația să nu funcționeze normal, iar alarmele nu vor funcționa conform planului."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Permiteți ca aplicația să seteze alarme și să programeze alte acțiuni. Aplicația poate rula când nu folosiți dispozitivul, ceea ce poate consuma mai multă baterie. Dacă permisiunea este dezactivată, este posibil ca aplicația să nu funcționeze normal, iar alarmele nu vor funcționa conform planului."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permiteți acestei aplicații să stabilească alarme și să planifice acțiuni dependente de timp. Astfel, aplicația poate să ruleze în fundal, fapt care ar putea consuma mai multă baterie.\n\nDacă permisiunea este dezactivată, alarmele și evenimentele dependente de timp planificate de aplicație nu vor funcționa."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programare, alarmă, memento, ceas"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activați"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activați Nu deranja"</string>

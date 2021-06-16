@@ -91,15 +91,17 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     @Override
     public void reportChange(long changeId, ApplicationInfo appInfo) {
-        reportChangeByUid(changeId, appInfo.uid);
+        checkCompatChangeLogPermission();
+        reportChangeInternal(changeId, appInfo.uid, ChangeReporter.STATE_LOGGED);
     }
 
     @Override
     public void reportChangeByPackageName(long changeId, String packageName,
             @UserIdInt int userId) {
+        checkCompatChangeLogPermission();
         ApplicationInfo appInfo = getApplicationInfo(packageName, userId);
         if (appInfo != null) {
-            reportChangeByUid(changeId, appInfo.uid);
+            reportChangeInternal(changeId, appInfo.uid, ChangeReporter.STATE_LOGGED);
         }
     }
 

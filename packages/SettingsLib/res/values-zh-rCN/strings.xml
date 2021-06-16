@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"显示剪辑边界、边距等。"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"强制使用从右到左的布局方向"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"强制将所有语言区域的屏幕布局方向改为从右到左"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"允许窗口级模糊处理"</string>
     <string name="force_msaa" msgid="4081288296137775550">"强制启用 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"在 OpenGL ES 2.0 应用中启用 4x MSAA"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"调试非矩形剪裁操作"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"闹钟和提醒"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"允许设置闹钟和提醒"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"闹钟和提醒"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"允许该应用设置闹钟及安排其他操作的执行时间。该应用可能会在您未使用手机时运行，以致手机的电源消耗更快。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟也无法在排定的时间响起。"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"允许该应用设置闹钟及安排其他操作的执行时间。该应用可能会在您未使用平板电脑时运行，以致平板电脑的电源消耗更快。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟也无法在排定的时间响起。"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"允许该应用设置闹钟及安排其他操作的执行时间。该应用可能会在您未使用设备时运行，以致设备电源消耗更快。如果您关闭此权限，该应用可能无法正常运行，已设置的闹钟也无法在排定的时间响起。"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允许该应用设置闹钟以及安排在特定时间执行某些操作。如此一来，该应用将在后台运行，而这可能会消耗更多电池电量。\n\n如果您关闭了此权限，该应用设置的现有闹钟将不会响起，而且该应用安排在特定时间执行的现有活动也不会执行。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"设置, 闹钟, 提醒, 时钟, schedule, alarm, reminder, clock"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"开启"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"开启勿扰模式"</string>

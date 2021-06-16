@@ -29,6 +29,7 @@ import android.content.pm.ShortcutServiceInternal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -67,6 +68,7 @@ public class ShortcutHelper {
     private LauncherApps mLauncherAppsService;
     private ShortcutListener mShortcutListener;
     private ShortcutServiceInternal mShortcutServiceInternal;
+    private UserManager mUserManager;
 
     // Key: packageName Value: <shortcutId, notifId>
     private HashMap<String, HashMap<String, String>> mActiveShortcutBubbles = new HashMap<>();
@@ -144,10 +146,11 @@ public class ShortcutHelper {
     };
 
     ShortcutHelper(LauncherApps launcherApps, ShortcutListener listener,
-            ShortcutServiceInternal shortcutServiceInternal) {
+            ShortcutServiceInternal shortcutServiceInternal, UserManager userManager) {
         mLauncherAppsService = launcherApps;
         mShortcutListener = listener;
         mShortcutServiceInternal = shortcutServiceInternal;
+        mUserManager = userManager;
     }
 
     @VisibleForTesting
@@ -158,6 +161,11 @@ public class ShortcutHelper {
     @VisibleForTesting
     void setShortcutServiceInternal(ShortcutServiceInternal shortcutServiceInternal) {
         mShortcutServiceInternal = shortcutServiceInternal;
+    }
+
+    @VisibleForTesting
+    void setUserManager(UserManager userManager) {
+        mUserManager = userManager;
     }
 
     /**
@@ -182,7 +190,8 @@ public class ShortcutHelper {
      * Only returns shortcut info if it's found and if it's a conversation shortcut.
      */
     ShortcutInfo getValidShortcutInfo(String shortcutId, String packageName, UserHandle user) {
-        if (mLauncherAppsService == null) {
+        // Shortcuts cannot be accessed when the user is locked.
+        if (mLauncherAppsService == null  || !mUserManager.isUserUnlocked(user)) {
             return null;
         }
         final long token = Binder.clearCallingIdentity();
