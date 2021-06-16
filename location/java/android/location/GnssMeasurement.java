@@ -363,9 +363,9 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Gets per-satellite sync state.
+     * Gets per-satellite-signal sync state.
      *
-     * <p>It represents the current sync state for the associated satellite.
+     * <p>It represents the current sync state for the associated satellite signal.
      *
      * <p>This value helps interpret {@link #getReceivedSvTimeNanos()}.
      */
