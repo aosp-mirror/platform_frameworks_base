@@ -20,7 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
+import android.content.Context;
+import android.os.Build;
 import android.os.UserHandle;
+import android.provider.Settings;
 
 /**
  * "Base" functionality. For settings-specific functionality (which may rely on this base
@@ -28,6 +31,27 @@ import android.os.UserHandle;
  * @hide
  */
 public class ParentalControlsUtilsInternal {
+
+    private static final String TEST_ALWAYS_REQUIRE_CONSENT =
+            "android.hardware.biometrics.ParentalControlsUtilsInternal.always_require_consent";
+
+    public static boolean isTestModeEnabled(@NonNull Context context) {
+        if (Build.IS_USERDEBUG || Build.IS_ENG) {
+            return Settings.Secure.getInt(context.getContentResolver(),
+                    TEST_ALWAYS_REQUIRE_CONSENT, 0) != 0;
+        }
+        return false;
+    }
+
+    public static boolean parentConsentRequired(@NonNull Context context,
+            @NonNull DevicePolicyManager dpm, @BiometricAuthenticator.Modality int modality,
+            @NonNull UserHandle userHandle) {
+        if (isTestModeEnabled(context)) {
+            return true;
+        }
+
+        return parentConsentRequired(dpm, modality, userHandle);
+    }
 
     /**
      * @return true if parental consent is required in order for biometric sensors to be used.
