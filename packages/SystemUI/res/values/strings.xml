@@ -2705,6 +2705,8 @@
     <!-- Accessibility floating menu strings -->
     <!-- Message for the accessibility floating button migration tooltip. It shows when the user use gestural navigation then upgrade their system. It will tell the user the accessibility gesture had been replaced by accessibility floating button. [CHAR LIMIT=100] -->
     <string name="accessibility_floating_button_migration_tooltip">Accessibility button replaced the accessibility gesture\n\n<annotation id="link">View settings</annotation></string>
+    <!-- Message for the accessibility floating button settings tooltip. It shows when the user use gestural navigation then upgrade their system. It will tell the user to have another option to switch from the accessibility gesture to a button. [CHAR LIMIT=100] -->
+    <string name="accessibility_floating_button_switch_migration_tooltip">You can switch from the accessibility gesture to a button\n\n<annotation id="link">Settings</annotation></string>
     <!-- Message for the accessibility floating button docking tooltip. It shows when the user first time drag the button. It will tell the user about docking behavior. [CHAR LIMIT=70] -->
     <string name="accessibility_floating_button_docking_tooltip">Move button to the edge to hide it temporarily</string>
     <!-- Action in accessibility menu to move the accessibility floating button to the top left of the screen. [CHAR LIMIT=30] -->
