@@ -92,5 +92,12 @@ public interface ActivityStarter {
          *         *after* returning to start hiding the keyguard.
          */
         boolean onDismiss();
+
+        /**
+         * Whether running this action when we are locked will start an animation on the keyguard.
+         */
+        default boolean willRunAnimationOnKeyguard() {
+            return false;
+        }
     }
 }
