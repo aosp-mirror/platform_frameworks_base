@@ -64,6 +64,7 @@ import com.android.systemui.navigationbar.NavigationBarA11yHelper;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarOverlayController;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.ReduceBrightColorsController;
@@ -233,7 +234,8 @@ public class DependencyProvider {
             UiEventLogger uiEventLogger,
             NavigationBarOverlayController navBarOverlayController,
             ConfigurationController configurationController,
-            NavigationBarA11yHelper navigationBarA11yHelper) {
+            NavigationBarA11yHelper navigationBarA11yHelper,
+            TaskbarDelegate taskbarDelegate) {
         return new NavigationBarController(context,
                 windowManager,
                 assistManagerLazy,
@@ -259,7 +261,8 @@ public class DependencyProvider {
                 uiEventLogger,
                 navBarOverlayController,
                 configurationController,
-                navigationBarA11yHelper);
+                navigationBarA11yHelper,
+                taskbarDelegate);
     }
 
     /** */

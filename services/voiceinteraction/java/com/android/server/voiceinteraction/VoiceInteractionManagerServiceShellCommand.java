@@ -71,6 +71,7 @@ final class VoiceInteractionManagerServiceShellCommand extends ShellCommand {
             pw.println("");
             pw.println("  hide");
             pw.println("    Hides the current session");
+            pw.println("");
             pw.println("  disable [true|false]");
             pw.println("    Temporarily disable (when true) service");
             pw.println("");

@@ -3354,6 +3354,15 @@
      (e.g. accessibility, alarms). This is mainly for Wear devices that don't have speakers. -->
     <bool name="config_allowPriorityVibrationsInLowPowerMode">false</bool>
 
+    <!-- The duration (in milliseconds) that should be used to convert vibration ramps to a sequence
+         of fixed amplitude steps on devices without PWLE support. -->
+    <integer name="config_vibrationWaveformRampStepDuration">5</integer>
+
+    <!-- The duration (in milliseconds) that should be applied to waveform vibrations that ends in
+         non-zero amplitudes, . The waveform will
+         be played as a PWLE instead of on/off calls if this value is set. -->
+    <integer name="config_vibrationWaveformRampDownDuration">0</integer>
+
     <!-- Number of retries Cell Data should attempt for a given error code before
          restarting the modem.
          Error codes not listed will not lead to modem restarts.
