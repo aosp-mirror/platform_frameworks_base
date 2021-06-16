@@ -525,10 +525,13 @@ public final class ContentCaptureEvent implements Parcelable {
             string.append(", insets=").append(mInsets);
         }
         if (mComposingStart > MAX_INVALID_VALUE) {
-            string.append(", hasComposing");
+            string.append(", composing=[")
+                    .append(mComposingStart).append(",").append(mComposingEnd).append("]");
         }
         if (mSelectionStartIndex > MAX_INVALID_VALUE) {
-            string.append(", hasSelection");
+            string.append(", selection=[")
+                    .append(mSelectionStartIndex).append(",")
+                    .append(mSelectionEndIndex).append("]");
         }
         return string.append(']').toString();
     }
