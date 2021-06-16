@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -40,7 +41,8 @@ public class PackageTagsListTest {
         PackageTagsList.Builder builder = new PackageTagsList.Builder()
                 .add("package1", "attr1")
                 .add("package1", "attr2")
-                .add("package2");
+                .add("package2")
+                .add("package4", Arrays.asList("attr1", "attr2"));
         PackageTagsList list = builder.build();
 
         assertTrue(list.contains(builder.build()));
@@ -49,10 +51,13 @@ public class PackageTagsListTest {
         assertTrue(list.contains("package2", "attr1"));
         assertTrue(list.contains("package2", "attr2"));
         assertTrue(list.contains("package2", "attr3"));
+        assertTrue(list.contains("package4", "attr1"));
+        assertTrue(list.contains("package4", "attr2"));
         assertTrue(list.containsAll("package2"));
         assertTrue(list.includes("package1"));
         assertTrue(list.includes("package2"));
         assertFalse(list.contains("package1", "attr3"));
+        assertFalse(list.contains("package4", "attr3"));
         assertFalse(list.containsAll("package1"));
         assertFalse(list.includes("package3"));
 
@@ -89,6 +94,51 @@ public class PackageTagsListTest {
         assertTrue(bigList.contains(builder.build()));
         assertTrue(bigList.contains(list));
         assertFalse(list.contains(bigList));
+    }
+
+    @Test
+    public void testPackageTagsList_Remove() {
+        PackageTagsList.Builder builder = new PackageTagsList.Builder()
+                .add("package1", "attr1")
+                .add("package1", "attr2")
+                .add("package2")
+                .add("package4", Arrays.asList("attr1", "attr2", "attr3"))
+                .add("package3", "attr1")
+                .remove("package1", "attr1")
+                .remove("package1", "attr2")
+                .remove("package2", "attr1")
+                .remove("package4", Arrays.asList("attr1", "attr2"))
+                .remove("package3");
+        PackageTagsList list = builder.build();
+
+        assertTrue(list.contains(builder.build()));
+        assertFalse(list.contains("package1", "attr1"));
+        assertFalse(list.contains("package1", "attr2"));
+        assertTrue(list.contains("package2", "attr1"));
+        assertTrue(list.contains("package2", "attr2"));
+        assertTrue(list.contains("package2", "attr3"));
+        assertFalse(list.contains("package3", "attr1"));
+        assertFalse(list.contains("package4", "attr1"));
+        assertFalse(list.contains("package4", "attr2"));
+        assertTrue(list.contains("package4", "attr3"));
+        assertTrue(list.containsAll("package2"));
+        assertFalse(list.includes("package1"));
+        assertTrue(list.includes("package2"));
+        assertFalse(list.includes("package3"));
+        assertTrue(list.includes("package4"));
+    }
+
+    @Test
+    public void testPackageTagsList_EmptyCollections() {
+        PackageTagsList.Builder builder = new PackageTagsList.Builder()
+                .add("package1", Collections.emptyList())
+                .add("package2")
+                .remove("package2", Collections.emptyList());
+        PackageTagsList list = builder.build();
+
+        assertTrue(list.contains(builder.build()));
+        assertFalse(list.contains("package1", "attr1"));
+        assertTrue(list.contains("package2", "attr2"));
     }
 
     @Test
