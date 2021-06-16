@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -33,7 +32,7 @@ import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.appPairsPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.appPairsSecondaryBoundsIsVisible
-import com.android.wm.shell.flicker.helpers.AppPairsHelper
+import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -60,7 +59,7 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
                 this.setRotation(testSpec.config.endRotation)
                 executeShellCommand(
                     composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
-                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
+                waitAppsShown(primaryApp, secondaryApp)
             }
         }
 
