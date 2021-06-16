@@ -287,6 +287,7 @@ public class BubblesTest extends SysuiTestCase {
 
         // TODO: Fix
         mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
+        mPositioner.setMaxBubbles(5);
         mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, syncExecutor);
 
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
