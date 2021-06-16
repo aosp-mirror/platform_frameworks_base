@@ -285,6 +285,15 @@ public final class ContentCaptureEvent implements Parcelable {
         return this;
     }
 
+    boolean hasSameComposingSpan(@NonNull ContentCaptureEvent other) {
+        return mComposingStart == other.mComposingStart && mComposingEnd == other.mComposingEnd;
+    }
+
+    boolean hasSameSelectionSpan(@NonNull ContentCaptureEvent other) {
+        return mSelectionStartIndex == other.mSelectionStartIndex
+                && mSelectionEndIndex == other.mSelectionEndIndex;
+    }
+
     private int getComposingStart() {
         return mComposingStart;
     }
