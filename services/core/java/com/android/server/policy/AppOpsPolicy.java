@@ -33,14 +33,15 @@ import android.content.pm.ResolveInfo;
 import android.location.LocationManagerInternal;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.PackageTagsList;
 import android.os.Process;
 import android.os.UserHandle;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.DecFunction;
@@ -52,9 +53,9 @@ import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
 import com.android.server.LocalServices;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -67,10 +68,9 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             "android:activity_recognition_allow_listed_tags";
     private static final String ACTIVITY_RECOGNITION_TAGS_SEPARATOR = ";";
 
-    private static ArraySet<String> sExpectedTags = new ArraySet<>(new String[] {
+    private static final ArraySet<String> sExpectedTags = new ArraySet<>(new String[] {
             "awareness_provider", "activity_recognition_provider", "network_location_provider",
             "network_location_calibration", "fused_location_provider", "geofencer_provider"});
-
 
     @NonNull
     private final Object mLock = new Object();
@@ -96,13 +96,22 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
      */
     @GuardedBy("mLock - writes only - see above")
     @NonNull
-    private final ConcurrentHashMap<Integer, ArrayMap<String, ArraySet<String>>> mLocationTags =
+    private final ConcurrentHashMap<Integer, PackageTagsList> mLocationTags =
             new ConcurrentHashMap<>();
 
+    // location tags can vary per uid - but we merge all tags under an app id into the final data
+    // structure above
+    @GuardedBy("mLock")
+    private final SparseArray<PackageTagsList> mPerUidLocationTags = new SparseArray<>();
+
+    // activity recognition currently only grabs tags from the APK manifest. we know that the
+    // manifest is the same for all users, so there's no need to track variations in tags across
+    // different users. if that logic ever changes, this might need to behave more like location
+    // tags above.
     @GuardedBy("mLock - writes only - see above")
     @NonNull
-    private final ConcurrentHashMap<Integer, ArrayMap<String, ArraySet<String>>>
-            mActivityRecognitionTags = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, PackageTagsList> mActivityRecognitionTags =
+            new ConcurrentHashMap<>();
 
     public AppOpsPolicy(@NonNull Context context) {
         mContext = context;
@@ -112,13 +121,28 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
         final LocationManagerInternal locationManagerInternal = LocalServices.getService(
                 LocationManagerInternal.class);
-        locationManagerInternal.setOnProviderLocationTagsChangeListener((providerTagInfo) -> {
-            synchronized (mLock) {
-                updateAllowListedTagsForPackageLocked(providerTagInfo.getUid(),
-                        providerTagInfo.getPackageName(), providerTagInfo.getTags(),
-                        mLocationTags);
-            }
-        });
+        locationManagerInternal.setLocationPackageTagsListener(
+                (uid, packageTagsList) -> {
+                    synchronized (mLock) {
+                        if (packageTagsList.isEmpty()) {
+                            mPerUidLocationTags.remove(uid);
+                        } else {
+                            mPerUidLocationTags.set(uid, packageTagsList);
+                        }
+
+                        int appId = UserHandle.getAppId(uid);
+                        PackageTagsList.Builder appIdTags = new PackageTagsList.Builder(1);
+                        int size = mPerUidLocationTags.size();
+                        for (int i = 0; i < size; i++) {
+                            if (UserHandle.getAppId(mPerUidLocationTags.keyAt(i)) == appId) {
+                                appIdTags.add(mPerUidLocationTags.valueAt(i));
+                            }
+                        }
+
+                        updateAllowListedTagsForPackageLocked(appId, appIdTags.build(),
+                                mLocationTags);
+                    }
+                });
 
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -306,95 +330,30 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         }
         final String tagsList = resolvedService.serviceInfo.metaData.getString(
                 ACTIVITY_RECOGNITION_TAGS);
-        if (tagsList != null) {
-            final String[] tags = tagsList.split(ACTIVITY_RECOGNITION_TAGS_SEPARATOR);
+        if (!TextUtils.isEmpty(tagsList)) {
+            PackageTagsList packageTagsList = new PackageTagsList.Builder(1).add(
+                    resolvedService.serviceInfo.packageName,
+                    Arrays.asList(tagsList.split(ACTIVITY_RECOGNITION_TAGS_SEPARATOR))).build();
             synchronized (mLock) {
                 updateAllowListedTagsForPackageLocked(
-                        resolvedService.serviceInfo.applicationInfo.uid,
-                        resolvedService.serviceInfo.packageName, new ArraySet<>(tags),
+                        UserHandle.getAppId(resolvedService.serviceInfo.applicationInfo.uid),
+                        packageTagsList,
                         mActivityRecognitionTags);
             }
         }
     }
 
-    private static void updateAllowListedTagsForPackageLocked(int uid, String packageName,
-            Set<String> allowListedTags, ConcurrentHashMap<Integer, ArrayMap<String,
-            ArraySet<String>>> datastore) {
-        final int appId = UserHandle.getAppId(uid);
-        // We make a copy of the per UID state to limit our mutation to one
-        // operation in the underlying concurrent data structure.
-        ArrayMap<String, ArraySet<String>> appIdTags = datastore.get(appId);
-        if (appIdTags != null) {
-            appIdTags = new ArrayMap<>(appIdTags);
-        }
-
-        ArraySet<String> packageTags = (appIdTags != null) ? appIdTags.get(packageName) : null;
-        if (packageTags != null) {
-            packageTags = new ArraySet<>(packageTags);
-        }
-
-        if (allowListedTags != null && !allowListedTags.isEmpty()) {
-            if (packageTags != null) {
-                packageTags.clear();
-                packageTags.addAll(allowListedTags);
-            } else {
-                packageTags = new ArraySet<>(allowListedTags);
-            }
-            if (appIdTags == null) {
-                appIdTags = new ArrayMap<>();
-            }
-
-            // Remove any invalid tags
-            boolean nullRemoved = packageTags.remove(null);
-            boolean nullStrRemoved = packageTags.remove("null");
-            boolean emptyRemoved = packageTags.remove("");
-            if (nullRemoved || nullStrRemoved || emptyRemoved) {
-                Log.e(LOG_TAG, "Attempted to add invalid source attribution tag, removed "
-                        + "null: " + nullRemoved + " removed \"null\": " + nullStrRemoved
-                        + " removed empty string: " + emptyRemoved);
-            }
-
-            appIdTags.put(packageName, packageTags);
-            datastore.put(appId, appIdTags);
-        } else if (appIdTags != null) {
-            appIdTags.remove(packageName);
-            if (!appIdTags.isEmpty()) {
-                datastore.put(appId, appIdTags);
-            } else {
-                datastore.remove(appId);
-            }
-        }
+    private static void updateAllowListedTagsForPackageLocked(int appId,
+            PackageTagsList packageTagsList,
+            ConcurrentHashMap<Integer, PackageTagsList> datastore) {
+        datastore.put(appId, packageTagsList);
     }
 
     private static boolean isDatasourceAttributionTag(int uid, @NonNull String packageName,
-            @NonNull String attributionTag, @NonNull Map<Integer, ArrayMap<String,
-            ArraySet<String>>> mappedOps) {
+            @NonNull String attributionTag, @NonNull Map<Integer, PackageTagsList> mappedOps) {
         // Only a single lookup from the underlying concurrent data structure
-        final int appId = UserHandle.getAppId(uid);
-        final ArrayMap<String, ArraySet<String>> appIdTags = mappedOps.get(appId);
-        if (appIdTags != null) {
-            final ArraySet<String> packageTags = appIdTags.get(packageName);
-            if (packageTags != null && packageTags.contains(attributionTag)) {
-                if (packageName.equals("com.google.android.gms")
-                        && !sExpectedTags.contains(attributionTag)) {
-                    Log.i("AppOpsDebugRemapping", packageName + " tag "
-                            + attributionTag + " in " + packageTags);
-                }
-                return true;
-            }
-            if (packageName.equals("com.google.android.gms")
-                    && sExpectedTags.contains(attributionTag)) {
-                Log.i("AppOpsDebugRemapping", packageName + " tag " + attributionTag
-                        + " NOT in " + packageTags);
-            }
-        } else {
-            if (packageName.equals("com.google.android.gms")) {
-                Log.i("AppOpsDebugRemapping", "no package tags for uid " + uid
-                        + " package " + packageName);
-            }
-
-        }
-        return false;
+        final PackageTagsList appIdTags = mappedOps.get(UserHandle.getAppId(uid));
+        return appIdTags != null && appIdTags.contains(packageName, attributionTag);
     }
 
     private static int resolveLocationOp(int code) {
