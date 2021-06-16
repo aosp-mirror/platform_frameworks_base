@@ -846,8 +846,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateClickAndFocus();
         if (mNotificationParent != null) {
             setOverrideTintColor(NO_COLOR, 0.0f);
-            // Let's reset the distance to top roundness, as this isn't applied to group children
-            setDistanceToTopRoundness(NO_ROUNDNESS);
             mNotificationParent.updateBackgroundForGroupState();
         }
         updateBackgroundClipping();
@@ -876,7 +874,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     protected boolean handleSlideBack() {
         if (mMenuRow != null && mMenuRow.isMenuVisible()) {
-            animateTranslateNotification(0 /* targetLeft */);
+            animateResetTranslation();
             return true;
         }
         return false;
@@ -1713,21 +1711,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mChildrenContainer.setContainingNotification(ExpandableNotificationRow.this);
             mChildrenContainer.onNotificationUpdated();
 
-            if (mShouldTranslateContents) {
-                mTranslateableViews.add(mChildrenContainer);
-            }
+            mTranslateableViews.add(mChildrenContainer);
         });
 
-        if (mShouldTranslateContents) {
-            // Add the views that we translate to reveal the menu
-            mTranslateableViews = new ArrayList<>();
-            for (int i = 0; i < getChildCount(); i++) {
-                mTranslateableViews.add(getChildAt(i));
-            }
-            // Remove views that don't translate
-            mTranslateableViews.remove(mChildrenContainerStub);
-            mTranslateableViews.remove(mGutsStub);
+        // Add the views that we translate to reveal the menu
+        mTranslateableViews = new ArrayList<>();
+        for (int i = 0; i < getChildCount(); i++) {
+            mTranslateableViews.add(getChildAt(i));
         }
+        // Remove views that don't translate
+        mTranslateableViews.remove(mChildrenContainerStub);
+        mTranslateableViews.remove(mGutsStub);
     }
 
     private void doLongClickCallback() {
@@ -1805,7 +1799,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mTranslateAnim.cancel();
         }
 
-        if (!mShouldTranslateContents) {
+        if (mDismissUsingRowTranslationX) {
             setTranslationX(0);
         } else if (mTranslateableViews != null) {
             for (int i = 0; i < mTranslateableViews.size(); i++) {
@@ -1867,13 +1861,37 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mPrivateLayout.getActiveRemoteInputText();
     }
 
-    public void animateTranslateNotification(final float leftTarget) {
+    /**
+     * Reset the translation with an animation.
+     */
+    public void animateResetTranslation() {
         if (mTranslateAnim != null) {
             mTranslateAnim.cancel();
         }
-        mTranslateAnim = getTranslateViewAnimator(leftTarget, null /* updateListener */);
+        mTranslateAnim = getTranslateViewAnimator(0, null /* updateListener */);
         if (mTranslateAnim != null) {
             mTranslateAnim.start();
+        }
+    }
+
+    /**
+     * Set the dismiss behavior of the view.
+     * @param usingRowTranslationX {@code true} if the view should translate using regular
+     *                                          translationX, otherwise the contents will be
+     *                                          translated.
+     */
+    @Override
+    public void setDismissUsingRowTranslationX(boolean usingRowTranslationX) {
+        if (usingRowTranslationX != mDismissUsingRowTranslationX) {
+            // In case we were already transitioning, let's switch over!
+            float previousTranslation = getTranslation();
+            if (previousTranslation != 0) {
+                setTranslation(0);
+            }
+            super.setDismissUsingRowTranslationX(usingRowTranslationX);
+            if (previousTranslation != 0) {
+                setTranslation(previousTranslation);
+            }
         }
     }
 
@@ -1883,7 +1901,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (isBlockingHelperShowingAndTranslationFinished()) {
             mGuts.setTranslationX(translationX);
             return;
-        } else if (!mShouldTranslateContents) {
+        } else if (mDismissUsingRowTranslationX) {
             setTranslationX(translationX);
         } else if (mTranslateableViews != null) {
             // Translate the group of views
@@ -1907,7 +1925,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public float getTranslation() {
-        if (!mShouldTranslateContents) {
+        if (mDismissUsingRowTranslationX) {
             return getTranslationX();
         }
 
@@ -2898,7 +2916,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         float y = event.getY();
         NotificationViewWrapper wrapper = getVisibleNotificationViewWrapper();
         NotificationHeaderView header = wrapper == null ? null : wrapper.getNotificationHeader();
-        if (header != null && header.isInTouchRect(x - getTranslation(), y)) {
+        // the extra translation only needs to be added, if we're translating the notification
+        // contents, otherwise the motionEvent is already at the right place due to the
+        // touch event system.
+        float translation = !mDismissUsingRowTranslationX ? getTranslation() : 0;
+        if (header != null && header.isInTouchRect(x - translation, y)) {
             return true;
         }
         if ((!mIsSummaryWithChildren || shouldShowPublic())
@@ -3034,24 +3056,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return (canShowHeadsUp()
                 && (mIsPinned || mHeadsupDisappearRunning || (mIsHeadsUp && mAboveShelf)
                 || mExpandAnimationRunning || mChildIsExpanding));
-    }
-
-    @Override
-    public boolean topAmountNeedsClipping() {
-        if (isGroupExpanded()) {
-            return true;
-        }
-        if (isGroupExpansionChanging()) {
-            return true;
-        }
-        if (getShowingLayout().shouldClipToRounding(true /* topRounded */,
-                false /* bottomRounded */)) {
-            return true;
-        }
-        if (mGuts != null && mGuts.getAlpha() != 0.0f) {
-            return true;
-        }
-        return false;
     }
 
     @Override
