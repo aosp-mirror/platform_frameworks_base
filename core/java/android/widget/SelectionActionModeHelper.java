@@ -565,6 +565,7 @@ public final class SelectionActionModeHelper {
          */
         public void onSmartSelection(SelectionResult result) {
             onClassifiedSelection(result);
+            mTextView.notifyContentCaptureTextChanged();
             mLogger.logSelectionModified(
                     result.mStart, result.mEnd, result.mClassification, result.mSelection);
         }
@@ -595,6 +596,7 @@ public final class SelectionActionModeHelper {
                 mSelectionStart = selectionStart;
                 mSelectionEnd = selectionEnd;
                 mAllowReset = false;
+                mTextView.notifyContentCaptureTextChanged();
                 mLogger.logSelectionModified(selectionStart, selectionEnd, classification, null);
             }
         }
