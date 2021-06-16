@@ -62,9 +62,9 @@
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Bubble schließen"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Unterhaltung nicht als Bubble anzeigen"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Bubbles zum Chatten verwenden"</string>
-    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Neue Unterhaltungen erscheinen als unverankerte Symbole, \"Bubbles\" genannt. Wenn du die Bubble öffnen möchtest, tippe sie an. Wenn du sie verschieben möchtest, zieh an ihr."</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Neue Unterhaltungen erscheinen als unverankerte Symbole, „Bubbles“ genannt. Wenn du eine Bubble öffnen möchtest, tippe sie an. Wenn du sie verschieben möchtest, zieh an ihr."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Bubble-Einstellungen festlegen"</string>
-    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tippe auf \"Verwalten\", um Bubbles für diese App zu deaktivieren"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tippe auf „Verwalten“, um Bubbles für diese App zu deaktivieren"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Keine kürzlich geschlossenen Bubbles"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Hier werden aktuelle und geschlossene Bubbles angezeigt"</string>

@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Visa gränser för videoklipp, marginaler m.m."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Tvinga fram RTL-layout"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tvinga fram RTL-skärmlayout (hö–vä) för alla språk"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Tillåt oskärpa på fönsternivå"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Tvinga 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Aktivera 4x MSAA i OpenGL ES 2.0-appar"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Felsök icke-rektangulära urklippsåtgärder"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarm och påminnelser"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Tillåt att alarm och påminnelser ställs in"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarm och påminnelser"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Tillåt att den här appen ställer in alarm och schemalägger andra åtgärder. Appen kan användas när du inte använder telefonen, vilket drar mer batteri. Om behörigheten är inaktiverad kanske appen inte fungerar som den ska och dess alarm fungerar inte enligt schemat."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Tillåt att den här appen ställer in alarm och schemalägger andra åtgärder. Appen kan användas när du inte använder surfplattan, vilket drar mer batteri. Om behörigheten är inaktiverad kanske appen inte fungerar som den ska och dess alarm fungerar inte enligt schemat."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Tillåt att den här appen ställer in alarm och schemalägger andra åtgärder. Appen kan användas när du inte använder enheten, vilket drar mer batteri. Om behörigheten är inaktiverad kanske appen inte fungerar som den ska och dess alarm fungerar inte enligt schemat."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Tillåt att den här appen ställer in alarm och schemalägger tidskänsliga åtgärder. Om du tillåter detta kan appen köras i bakgrunden, vilket kan dra mer batteri.\n\nOm behörigheten är inaktiverad fungerar inte befintliga alarm och tidsbaserade händelser som schemalagts av den här appen."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"schema, alarm, påminnelse, klocka"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivera"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktivera Stör ej."</string>
@@ -525,7 +522,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Fråga varje gång"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Tills du inaktiverar funktionen"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Nyss"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonens högtalare"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonhögtalare"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Den här telefonen"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Det gick inte att ansluta. Stäng av enheten och slå på den igen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Ljudenhet med kabelanslutning"</string>

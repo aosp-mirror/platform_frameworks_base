@@ -105,7 +105,7 @@
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio des Geräts"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Audioinhalte auf deinem Gerät, wie Musik, Anrufe und Klingeltöne"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio des Geräts und über externes Mikrofon aufnehmen"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio des Geräts und über Mikrofon"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Start"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Bildschirm wird aufgezeichnet"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Bildschirm und Ton werden aufgezeichnet"</string>
@@ -616,7 +616,7 @@
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Zum Loslösen der App nach oben wischen und halten"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Ok"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nein danke"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"App angepinnt"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Bildschirm wurde fixiert"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App vom Bildschirm losgelöst"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ausblenden?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Sie wird wieder eingeblendet, wenn du sie in den Einstellungen erneut aktivierst."</string>
@@ -666,8 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Weckruf"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Geldbörse"</string>
-    <!-- no translation found for wallet_empty_state_label (7776761245237530394) -->
-    <skip />
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Füge eine Zahlungsmethode hinzu, um noch schneller und sicherer mit deinem Smartphone zu bezahlen"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Alle anzeigen"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Zum Bezahlen entsperren"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nicht eingerichtet"</string>

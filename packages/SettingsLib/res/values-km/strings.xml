@@ -156,7 +156,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"លំនាំដើមមួយចំនួនត្រូវបានកំណត់"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"គ្មានការកំណត់លំនាំដើម"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ការ​កំណត់​អត្ថបទ​ទៅ​ជា​កា​និយាយ"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"លទ្ធផល​នៃការបំប្លែងអត្ថបទទៅជាការនិយាយ"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"ធាតុចេញ​នៃការបំប្លែងអត្ថបទទៅជាការនិយាយ"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"អត្រា​និយាយ"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ល្បឿន​ពេល​អាន​​អត្ថបទ"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"ឡើង​-ចុះ"</string>
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"បង្ហាញ​ការ​ភ្ជាប់​អត្ថបទ​សម្រង់ រឹម ។ល។"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"បង្ខំ​ទិស​ប្លង់ RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ប្តូរទិស​ប្លង់​អេក្រង់​ទៅជា RTL សម្រាប់​គ្រប់ភាសា​ទាំងអស់"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"អនុញ្ញាតភាពព្រាលកម្រិតវិនដូ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"បង្ខំ 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"បើក 4x MSAA ក្នុង​កម្មវិធី OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"កែ​ប្រតិបត្តិការ​​​ផ្នែកដកចេញដែលមិនមាន​រាង​ចតុកោណកែង"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ម៉ោងរោទ៍ និងការរំលឹក"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"អនុញ្ញាតឱ្យ​កំណត់​ម៉ោងរោទ៍ និង​ការរំលឹក"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ម៉ោងរោទ៍ និង​ការរំលឹក"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"អនុញ្ញាតឱ្យ​កម្មវិធីនេះ​កំណត់ម៉ោងរោទ៍ និង​កំណត់កាលវិភាគ​សកម្មភាព​ផ្សេងទៀត​។ កម្មវិធីនេះ​អាចត្រូវបាន​ប្រើ នៅពេលដែល​អ្នកមិនកំពុងប្រើ​ទូរសព្ទ​របស់អ្នក។ សកម្មភាពនេះ​អាចនឹង​ប្រើប្រាស់ថ្ម​ច្រើនជាងមុន​។ ប្រសិនបើបិទ​ការអនុញ្ញាត​នេះ កម្មវិធីនេះ​មិនអាចដំណើរការ​តាមធម្មតា​ទេ ហើយម៉ោងរោទ៍​របស់វានឹង​មិនដំណើរការ​តាមកាលវិភាគឡើយ​។"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"អនុញ្ញាតឱ្យ​កម្មវិធីនេះ​កំណត់ម៉ោងរោទ៍ និង​កំណត់កាលវិភាគ​សកម្មភាព​ផ្សេងទៀត​។ កម្មវិធីនេះ​អាចត្រូវបាន​ប្រើ នៅពេលដែល​អ្នកមិនកំពុងប្រើ​ថេប្លេត​របស់អ្នក។ សកម្មភាពនេះ​អាចនឹង​ប្រើប្រាស់ថ្ម​ច្រើនជាងមុន​។ ប្រសិនបើបិទ​ការអនុញ្ញាត​នេះ កម្មវិធីនេះ​មិនអាចដំណើរការ​តាមធម្មតា​ទេ ហើយម៉ោងរោទ៍​របស់វានឹង​មិនដំណើរការ​តាមកាលវិភាគឡើយ​។"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"អនុញ្ញាតឱ្យ​កម្មវិធីនេះ​កំណត់ម៉ោងរោទ៍ និង​កំណត់កាលវិភាគ​សកម្មភាព​ផ្សេងទៀត​។ កម្មវិធីនេះ​អាចត្រូវបាន​ប្រើ នៅពេលដែល​អ្នកមិនកំពុងប្រើ​ឧបករណ៍​របស់អ្នក។ សកម្មភាពនេះ​អាចនឹង​ប្រើប្រាស់ថ្ម​ច្រើនជាងមុន​។ ប្រសិនបើបិទ​ការអនុញ្ញាត​នេះ កម្មវិធីនេះ​មិនអាចដំណើរការ​តាមធម្មតា​ទេ ហើយម៉ោងរោទ៍​របស់វានឹង​មិនដំណើរការ​តាមកាលវិភាគឡើយ​។"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"អនុញ្ញាតឱ្យ​កម្មវិធីនេះ​កំណត់ម៉ោងរោទ៍ និងកំណត់កាលវិភាគសកម្មភាពដែលតម្រូវឱ្យទាន់ពេលវេលា។ សកម្មភាពនេះអនុញ្ញាតឱ្យកម្មវិធីនេះដំណើរការនៅផ្ទៃខាងក្រោយ ដែលអាចប្រើថ្មច្រើន។\n\nប្រសិនបើបិទការអនុញ្ញាតនេះ ម៉ោងរោទ៍ដែលមានស្រាប់ និងព្រឹត្តិការណ៍ផ្អែកលើពេលវេលាដែលកម្មវិធីនេះបានកំណត់កាលវិភាគនឹងមិនដំណើរការទេ។"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"កាលវិភាគ ម៉ោងរោទ៍ ការរំលឹក នាឡិកា"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"បើក"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"បើកមុខងារកុំរំខាន"</string>

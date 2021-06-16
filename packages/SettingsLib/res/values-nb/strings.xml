@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Vis kanter, marger osv."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Tving layoutretning for RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tving RTL-retning på skjermen for alle språk"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Tillat uskarphet i vindu"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Tving 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Slå på 4x MSAA i OpenGL ES 2.0-apper"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Feilsøk ikke-rektangulær klipping"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmer og påminnelser"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Tillat innstilling av alarmer og påminnelser"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmer og påminnelser"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Tillat at denne appen stiller inn alarmer og planlegger andre handlinger. Denne appen kan brukes når du ikke bruker telefonen, noe som kan bruke mer batteri. Hvis denne tillatelsen er av, fungerer appen muligens ikke som normalt, og alarmene i den fungerer ikke som planlagt."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Tillat at denne appen stiller inn alarmer og planlegger andre handlinger. Denne appen kan brukes når du ikke bruker nettbrettet, noe som kan bruke mer batteri. Hvis denne tillatelsen er av, fungerer appen muligens ikke som normalt, og alarmene i den fungerer ikke som planlagt."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Tillat at denne appen stiller inn alarmer og planlegger andre handlinger. Denne appen kan brukes når du ikke bruker enheten, noe som kan bruke mer batteri. Hvis denne tillatelsen er av, fungerer appen muligens ikke som normalt, og alarmene i den fungerer ikke som planlagt."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Gi denne appen tillatelse til å angi alarmer og planlegge tidssensitive handlinger. Dette gir appen tillatelse til å kjøre i bakgrunnen, noe som kan bruke mer batteri.\n\nHvis denne tillatelsen er av, fungerer ikke eksisterende alarmer og tidsbaserte hendelser som er planlagt av denne appen."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"tidsplan, alarm, påminnelse, klokke"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Slå på"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Slå på Ikke forstyrr"</string>
