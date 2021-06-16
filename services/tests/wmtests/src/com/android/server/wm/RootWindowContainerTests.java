@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
@@ -36,10 +37,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -168,6 +172,35 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         activity.setState(FINISHING, "test FINISHING");
         assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
+    }
+
+    @Test
+    public void testLockAllProfileTasks() {
+        // Make an activity visible with the user id set to 0
+        DisplayContent displayContent = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
+        TaskDisplayArea taskDisplayArea = displayContent.getTaskDisplayAreaAt(0);
+        final ActivityStack stack = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, displayContent);
+        final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(stack.mAtmService)
+                .setStack(stack)
+                .setUid(0)
+                .setCreateTask(true)
+                .build();
+
+        // Create another activity on top and the user id is 1
+        Task task = activity.getTask();
+        final ActivityRecord topActivity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                .setStack(stack)
+                .setUid(UserHandle.PER_USER_RANGE + 1)
+                .setTask(task)
+                .build();
+
+        // Make sure the listeners will be notified for putting the task to locked state
+        TaskChangeNotificationController controller =
+                mWm.mAtmService.getTaskChangeNotificationController();
+        spyOn(controller);
+        mWm.mRoot.lockAllProfileTasks(0);
+        verify(controller).notifyTaskProfileLocked(eq(task.mTaskId), eq(0));
     }
 }
 

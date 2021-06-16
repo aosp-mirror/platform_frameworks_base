@@ -482,6 +482,33 @@ public class StagedRollbackTest {
     }
 
     @Test
+    public void testExpireSession_Phase1_Install() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
+        Install.single(TestApp.A1).commit();
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        Install.single(TestApp.A2).setEnableRollback().setStaged().commit();
+    }
+
+    @Test
+    public void testExpireSession_Phase2_VerifyInstall() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                rm.getAvailableRollbacks(), TestApp.A);
+        assertThat(rollback).isNotNull();
+        assertThat(rollback).packagesContainsExactly(Rollback.from(TestApp.A2).to(TestApp.A1));
+        assertThat(rollback.isStaged()).isTrue();
+    }
+
+    @Test
+    public void testExpireSession_Phase3_VerifyRollback() throws Exception {
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                rm.getAvailableRollbacks(), TestApp.A);
+        assertThat(rollback).isNotNull();
+    }
+
+    @Test
     public void hasMainlineModule() throws Exception {
         String pkgName = getModuleMetadataPackageName();
         boolean existed =  InstrumentationRegistry.getInstrumentation().getContext()

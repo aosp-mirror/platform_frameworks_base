@@ -38,7 +38,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -441,6 +443,27 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         after.forEach(dir -> assertDirectoryIsEmpty(dir));
     }
 
+    /**
+     * Tests an available rollback shouldn't be deleted when its session expires.
+     */
+    @Test
+    public void testExpireSession() throws Exception {
+        runPhase("testExpireSession_Phase1_Install");
+        getDevice().reboot();
+        runPhase("testExpireSession_Phase2_VerifyInstall");
+
+        // Advance system clock by 7 days to expire the staged session
+        Instant t1 = Instant.ofEpochMilli(getDevice().getDeviceDate());
+        Instant t2 = t1.plusMillis(TimeUnit.DAYS.toMillis(7));
+        runAsRoot(() -> getDevice().setDate(Date.from(t2)));
+
+        // Somehow we need to wait for a while before reboot. Otherwise the change to the
+        // system clock will be reset after reboot.
+        Thread.sleep(3000);
+        getDevice().reboot();
+        runPhase("testExpireSession_Phase3_VerifyRollback");
+    }
+
     private void pushTestApex() throws Exception {
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
         final String fileName = APK_IN_APEX_TESTAPEX_NAME + "_v1.apex";
@@ -519,6 +542,20 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
             return true;
         } catch (AssertionError ignore) {
             return false;
+        }
+    }
+
+    @FunctionalInterface
+    private interface ExceptionalRunnable {
+        void run() throws Exception;
+    }
+
+    private void runAsRoot(ExceptionalRunnable runnable) throws Exception {
+        try {
+            getDevice().enableAdbRoot();
+            runnable.run();
+        } finally {
+            getDevice().disableAdbRoot();
         }
     }
 }
