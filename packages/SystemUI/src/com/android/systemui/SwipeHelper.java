@@ -391,9 +391,9 @@ public class SwipeHelper implements Gefingerpoken {
         boolean animateLeft = (Math.abs(velocity) > getEscapeVelocity() && velocity < 0) ||
                 (getTranslation(animView) < 0 && !isDismissAll);
         if (animateLeft || animateLeftForRtl || animateUpForMenu) {
-            newPos = -getSize(animView);
+            newPos = -getTotalTranslationLength(animView);
         } else {
-            newPos = getSize(animView);
+            newPos = getTotalTranslationLength(animView);
         }
         long duration;
         if (fixedDuration == 0) {
@@ -467,6 +467,15 @@ public class SwipeHelper implements Gefingerpoken {
         prepareDismissAnimation(animView, anim);
         mDismissPendingMap.put(animView, anim);
         anim.start();
+    }
+
+    /**
+     * Get the total translation length where we want to swipe to when dismissing the view. By
+     * default this is the size of the view, but can also be larger.
+     * @param animView the view to ask about
+     */
+    protected float getTotalTranslationLength(View animView) {
+        return getSize(animView);
     }
 
     /**
