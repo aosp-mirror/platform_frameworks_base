@@ -71,10 +71,10 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private int mBackgroundTop;
 
     /**
-     * {@code true} if the children views of the {@link ExpandableOutlineView} are translated when
+     * {@code false} if the children views of the {@link ExpandableOutlineView} are translated when
      * it is moved. Otherwise, the translation is set on the {@code ExpandableOutlineView} itself.
      */
-    protected boolean mShouldTranslateContents;
+    protected boolean mDismissUsingRowTranslationX = true;
     private float[] mTmpCornerRadii = new float[8];
 
     private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
@@ -82,7 +82,8 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         public void getOutline(View view, Outline outline) {
             if (!mCustomOutline && getCurrentTopRoundness() == 0.0f
                     && getCurrentBottomRoundness() == 0.0f && !mAlwaysRoundBothCorners) {
-                int translation = mShouldTranslateContents ? (int) getTranslation() : 0;
+                // Only when translating just the contents, does the outline need to be shifted.
+                int translation = !mDismissUsingRowTranslationX ? (int) getTranslation() : 0;
                 int left = Math.max(translation, 0);
                 int top = mClipTopAmount + mBackgroundTop;
                 int right = getWidth() + Math.min(translation, 0);
@@ -107,7 +108,9 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         float topRoundness = mAlwaysRoundBothCorners
                 ? mOutlineRadius : getCurrentBackgroundRadiusTop();
         if (!mCustomOutline) {
-            int translation = mShouldTranslateContents && !ignoreTranslation
+            // The outline just needs to be shifted if we're translating the contents. Otherwise
+            // it's already in the right place.
+            int translation = !mDismissUsingRowTranslationX && !ignoreTranslation
                     ? (int) getTranslation() : 0;
             int halfExtraWidth = (int) (mExtraWidthForClipping / 2.0f);
             left = Math.max(translation, 0) - halfExtraWidth;
@@ -196,13 +199,14 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     }
 
     protected boolean isClippingNeeded() {
-        return mAlwaysRoundBothCorners || mCustomOutline || getTranslation() != 0 ;
+        // When translating the contents instead of the overall view, we need to make sure we clip
+        // rounded to the contents.
+        boolean forTranslation = getTranslation() != 0 && !mDismissUsingRowTranslationX;
+        return mAlwaysRoundBothCorners || mCustomOutline || forTranslation;
     }
 
     private void initDimens() {
         Resources res = getResources();
-        mShouldTranslateContents =
-                res.getBoolean(R.bool.config_translateNotificationContentsOnSwipe);
         mOutlineRadius = res.getDimension(R.dimen.notification_shadow_radius);
         mAlwaysRoundBothCorners = res.getBoolean(R.bool.config_clipNotificationsToOutline);
         if (!mAlwaysRoundBothCorners) {
@@ -342,9 +346,25 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         }
     }
 
+    /**
+     * Set the dismiss behavior of the view.
+     * @param usingRowTranslationX {@code true} if the view should translate using regular
+     *                                          translationX, otherwise the contents will be
+     *                                          translated.
+     */
+    public void setDismissUsingRowTranslationX(boolean usingRowTranslationX) {
+        mDismissUsingRowTranslationX = usingRowTranslationX;
+    }
+
     @Override
     public int getOutlineTranslation() {
-        return mCustomOutline ? mOutlineRect.left : (int) getTranslation();
+        if (mCustomOutline) {
+            return mOutlineRect.left;
+        }
+        if (mDismissUsingRowTranslationX) {
+            return 0;
+        }
+        return (int) getTranslation();
     }
 
     public void updateOutline() {
