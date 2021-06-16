@@ -18,8 +18,6 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -28,7 +26,6 @@ import android.widget.ImageView;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
-import androidx.preference.Preference.OnPreferenceClickListener;
 import androidx.preference.PreferenceViewHolder;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -36,14 +33,12 @@ import com.airbnb.lottie.LottieAnimationView;
 /**
  * IllustrationPreference is a preference that can play lottie format animation
  */
-public class IllustrationPreference extends Preference implements OnPreferenceClickListener {
+public class IllustrationPreference extends Preference {
 
     static final String TAG = "IllustrationPreference";
 
     private int mAnimationId;
-    private boolean mIsAnimating;
     private boolean mIsAutoScale;
-    private ImageView mPlayButton;
     private LottieAnimationView mIllustrationView;
     private View mMiddleGroundView;
     private FrameLayout mMiddleGroundLayout;
@@ -72,41 +67,17 @@ public class IllustrationPreference extends Preference implements OnPreferenceCl
             return;
         }
         mMiddleGroundLayout = (FrameLayout) holder.findViewById(R.id.middleground_layout);
-        mPlayButton = (ImageView) holder.findViewById(R.id.video_play_button);
         mIllustrationView = (LottieAnimationView) holder.findViewById(R.id.lottie_view);
         mIllustrationView.setAnimation(mAnimationId);
         mIllustrationView.loop(true);
         ColorUtils.applyDynamicColors(getContext(), mIllustrationView);
         mIllustrationView.playAnimation();
-        updateAnimationStatus(mIsAnimating);
         if (mIsAutoScale) {
             enableAnimationAutoScale(mIsAutoScale);
         }
         if (mMiddleGroundView != null) {
             enableMiddleGroundView();
         }
-    }
-
-    @Override
-    public boolean onPreferenceClick(Preference preference) {
-        mIsAnimating = !isAnimating();
-        updateAnimationStatus(mIsAnimating);
-        return true;
-    }
-
-    @Override
-    protected Parcelable onSaveInstanceState() {
-        Parcelable superState = super.onSaveInstanceState();
-        SavedState ss = new SavedState(superState);
-        ss.mIsAnimating = mIsAnimating;
-        return ss;
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        SavedState ss = (SavedState) state;
-        super.onRestoreInstanceState(ss.getSuperState());
-        mIsAnimating = ss.mIsAnimating;
     }
 
     @VisibleForTesting
@@ -158,7 +129,6 @@ public class IllustrationPreference extends Preference implements OnPreferenceCl
     private void init(Context context, AttributeSet attrs) {
         setLayoutResource(R.layout.illustration_preference);
 
-        mIsAnimating = true;
         mIsAutoScale = false;
         if (attrs != null) {
             final TypedArray a = context.obtainStyledAttributes(attrs,
@@ -166,56 +136,5 @@ public class IllustrationPreference extends Preference implements OnPreferenceCl
             mAnimationId = a.getResourceId(R.styleable.LottieAnimationView_lottie_rawRes, 0);
             a.recycle();
         }
-        setOnPreferenceClickListener(this);
-    }
-
-    private void updateAnimationStatus(boolean playAnimation) {
-        if (playAnimation) {
-            mIllustrationView.resumeAnimation();
-            mPlayButton.setVisibility(View.INVISIBLE);
-        } else {
-            mIllustrationView.pauseAnimation();
-            mPlayButton.setVisibility(View.VISIBLE);
-        }
-    }
-
-    static class SavedState extends BaseSavedState {
-        boolean mIsAnimating;
-
-        SavedState(Parcelable superState) {
-            super(superState);
-        }
-
-        /**
-         * Constructor called from {@link #CREATOR}
-         */
-        private SavedState(Parcel in) {
-            super(in);
-            mIsAnimating = (Boolean) in.readValue(null);
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            super.writeToParcel(out, flags);
-            out.writeValue(mIsAnimating);
-        }
-
-        @Override
-        public String toString() {
-            return "IllustrationPreference.SavedState{"
-                    + Integer.toHexString(System.identityHashCode(this))
-                    + " mIsAnimating=" + mIsAnimating + "}";
-        }
-
-        public static final Parcelable.Creator<SavedState> CREATOR =
-                new Parcelable.Creator<SavedState>() {
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
-
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
     }
 }

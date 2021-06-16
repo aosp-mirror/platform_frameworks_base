@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"კლიპის საზღვრების, მინდვრების ჩვენება და ა.შ."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"მარჯვნიდან მარცხნივ განლაგების მიმართულების იძულება"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ეკრანის RTL მიმართულებაზე იძულება ყველა ლოკალისათვის"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"ფანჯრის დონეზე გაბუნდოვნების დაშვება"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA-ს ჩართვა"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"4x MSAA-ის ჩართვა OpenGL ES 2.0 აპში."</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"არა-მართკუთხა კლიპ-ოპერაციების გამართვა"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"მაღვიძარები და შეხსენებები"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"დაუშვით მაღვიძარების და შეხსენებების დაყენება"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"მაღვიძარები და შეხსენებები"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"საშუალება მიეცით ამ აპს, დააყენოს მაღვიძარა და დაგეგმოს სხვა მოქმედებები. ამ აპის გამოყენება შესაძლებელია მაშინაც, როცა ტელეფონს არ იყენებთ, რადგან ის მეტ ენერგიას ხარჯავს. თუ ეს ნებართვა გამორთულია, აპმა და მაღვიძარამ შეიძლება სათანადოდ ვერ იმუშაონ."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"საშუალება მიეცით ამ აპს, დააყენოს მაღვიძარა და დაგეგმოს სხვა მოქმედებები. ამ აპის გამოყენება შესაძლებელია მაშინაც, როცა ტაბლეტს არ იყენებთ, რადგან ის მეტ ენერგიას ხარჯავს. თუ ეს ნებართვა გამორთულია, აპმა და მაღვიძარამ შეიძლება სათანადოდ ვერ იმუშაონ."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"საშუალება მიეცით ამ აპს, დააყენოს მაღვიძარა და დაგეგმოს სხვა მოქმედებები. ამ აპის გამოყენება შესაძლებელია მაშინაც, როცა მოწყობილობას არ იყენებთ, რადგან ის მეტ ენერგიას ხარჯავს. თუ ეს ნებართვა გამორთულია, აპმა და მაღვიძარამ შეიძლება სათანადოდ ვერ იმუშაონ."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ნებას რთავს ამ აპს, დააყენოს მაღვიძარები და დაგეგმოს დროზე დამოკიდებული მოქმედებები. ეს საშუალებას აძლევს აპს, იმუშაოს ფონურად, რამაც შეიძლება ბატარეის ხარჯი გაზარდოს.\n\nთუ ეს ნებართვა გამორთულია, ამ აპით დაგეგმილი მაღვიძარები და დროზე დამოკიდებული მოვლენები არ იმუშავებს."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"განრიგი, მაღვიძარა, შეხსენება, საათი"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ჩართვა"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"„არ შემაწუხოთ“ რეჟიმის ჩართვა"</string>

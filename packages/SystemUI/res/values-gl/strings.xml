@@ -342,7 +342,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Audiófonos"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Activando…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Brillo"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Xirar automaticamente"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Xirar automat."</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Xirar pantalla automaticamente"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"Modo <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Rotación bloqueada"</string>
@@ -423,7 +423,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"A opción NFC está desactivada"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"A opción NFC está activada"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Gravación da pantalla"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Gravar pant."</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Deter"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Queres desbloquear o micrófono do dispositivo?"</string>
@@ -666,8 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <!-- no translation found for wallet_empty_state_label (7776761245237530394) -->
-    <skip />
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Configura un método de pago para comprar de xeito máis rápido e seguro co teléfono"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Amosar todo"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Desbloquear para pagar"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Sen configurar"</string>
@@ -734,8 +733,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automática"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sen son nin vibración"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sen son nin vibración, e aparecen máis abaixo na sección de conversas"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Poderían soar ou vibrar en función da configuración do teléfono"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Podería soar ou vibrar en función da configuración do teléfono. Conversas desde a burbulla da aplicación <xliff:g id="APP_NAME">%1$s</xliff:g> de forma predeterminada."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Poderían facer que o teléfono soe ou vibre en función da súa configuración"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Poderían facer que o teléfono soe ou vibre en función da súa configuración. Conversas desde a burbulla da aplicación <xliff:g id="APP_NAME">%1$s</xliff:g> de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantén a túa atención cun atallo flotante a este contido."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Fai que o sistema determine se a notificación debe emitir un son ou unha vibración"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Estado:&lt;/b&gt; ascendeuse a Predeterminada"</string>

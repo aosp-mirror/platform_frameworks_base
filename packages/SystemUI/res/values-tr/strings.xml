@@ -117,7 +117,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"İptal"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Paylaş"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Ekran kaydı iptal edildi"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"Ekran kaydı saklandı"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Ekran kaydı kaydedildi"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Görüntülemek için dokunun"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Ekran kaydı silinirken hata oluştu"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"İzinler alınamadı"</string>
@@ -675,8 +675,8 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Kilit ekranı ayarları"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"İş profili"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Uçak modu"</string>
-    <string name="add_tile" msgid="6239678623873086686">"Blok ekle"</string>
-    <string name="broadcast_tile" msgid="5224010633596487481">"Yayın Bloku"</string>
+    <string name="add_tile" msgid="6239678623873086686">"Kutu ekle"</string>
+    <string name="broadcast_tile" msgid="5224010633596487481">"Yayın Kutusu"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"<xliff:g id="WHEN">%1$s</xliff:g> olarak ayarlanmış bir sonraki alarmınızdan önce bu işlevi kapatmazsanız alarmı duymayacaksınız"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g> olarak ayarlanmış bir sonraki alarmınızı duymayacaksınız"</string>
     <string name="alarm_template" msgid="2234991538018805736">"saat: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -890,10 +890,10 @@
     <string name="right_keycode" msgid="2480715509844798438">"Sağ tuş kodu"</string>
     <string name="left_icon" msgid="5036278531966897006">"Sol simge"</string>
     <string name="right_icon" msgid="1103955040645237425">"Sağ simge"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Blok eklemek için basılı tutup sürükleyin"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Blokları yeniden düzenlemek için basılı tutun ve sürükleyin"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Kutu eklemek için basılı tutup sürükleyin"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Kutuları yeniden düzenlemek için basılı tutun ve sürükleyin"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Kaldırmak için buraya sürükleyin"</string>
-    <string name="drag_to_remove_disabled" msgid="933046987838658850">"En az <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> blok gerekiyor"</string>
+    <string name="drag_to_remove_disabled" msgid="933046987838658850">"En az <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> kutu gerekiyor"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Düzenle"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Saat"</string>
   <string-array name="clock_options">
@@ -908,15 +908,15 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Düşük öncelikli bildirim simgelerini göster"</string>
     <string name="other" msgid="429768510980739978">"Diğer"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"Karoyu kaldırmak için"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"Sona karo eklemek için"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Karoyu taşı"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Karo ekle"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"Kutuyu kaldırmak için"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"Sona kutu eklemek için"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Kutuyu taşı"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Kutu ekle"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> konumuna taşı"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> konumuna ekle"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Konum: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Kart eklendi"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Parça kaldırıldı"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Kutu eklendi"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Kutu kaldırıldı"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Hızlı ayar düzenleyicisi."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> bildirimi: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Ayarları aç."</string>
@@ -1142,7 +1142,7 @@
     <string name="missed_call" msgid="4228016077700161689">"Cevapsız arama"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Yeni mesajları, cevapsız aramaları ve durum güncellemelerini görün"</string>
-    <string name="people_tile_title" msgid="6589377493334871272">"Konuşma"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Görüşme"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> bir mesaj gönderdi"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> bir resim gönderdi"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Pil ölçeriniz okunurken sorun oluştu"</string>

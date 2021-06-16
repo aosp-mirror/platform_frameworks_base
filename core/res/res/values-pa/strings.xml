@@ -1459,6 +1459,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ਕਿਸੇ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਪੈਕੇਜਾਂ ਨੂੰ ਮਿਟਾਉਣ ਦੀ ਬੇਨਤੀ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ਬੈਟਰੀ ਸੁਯੋਗਤਾਵਾਂ ਨੂੰ ਅਣਡਿੱਠ ਕਰਨ ਲਈ ਪੁੱਛੋ"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ਕਿਸੇ ਐਪ ਨੂੰ ਉਸ ਵਾਸਤੇ ਬੈਟਰੀ ਸੁਯੋਗਤਾਵਾਂ ਨੂੰ ਅਣਡਿੱਠ ਕਰਨ ਲਈ ਇਜਾਜ਼ਤ ਵਾਸਤੇ ਪੁੱਛਣ ਲਈ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ਜ਼ੂਮ ਕੰਟਰੋਲ ਲਈ ਦੋ ਵਾਰ ਟੈਪ ਕਰੋ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ਵਿਜੇਟ ਸ਼ਾਮਲ ਨਹੀਂ ਹੋ ਸਕਿਆ।"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ਜਾਓ"</string>

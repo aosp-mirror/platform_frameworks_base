@@ -204,10 +204,9 @@ static sk_sp<SkData> makeSkDataCached(const std::string& path, bool hasVerity) {
     return entry;
 }
 
-static std::function<std::shared_ptr<minikin::MinikinFont>()> readMinikinFontSkia(
-        minikin::BufferReader* reader) {
-    const void* buffer = reader->data();
-    size_t pos = reader->pos();
+static std::shared_ptr<minikin::MinikinFont> loadMinikinFontSkia(minikin::BufferReader);
+
+static minikin::Font::TypefaceLoader* readMinikinFontSkia(minikin::BufferReader* reader) {
     // Advance reader's position.
     reader->skipString(); // fontPath
     reader->skip<int>(); // fontIndex
@@ -217,60 +216,63 @@ static std::function<std::shared_ptr<minikin::MinikinFont>()> readMinikinFontSki
         reader->skip<uint32_t>(); // expectedFontRevision
         reader->skipString(); // expectedPostScriptName
     }
-    return [buffer, pos]() -> std::shared_ptr<minikin::MinikinFont> {
-        minikin::BufferReader fontReader(buffer, pos);
-        std::string_view fontPath = fontReader.readString();
-        std::string path(fontPath.data(), fontPath.size());
-        ATRACE_FORMAT("Loading font %s", path.c_str());
-        int fontIndex = fontReader.read<int>();
-        const minikin::FontVariation* axesPtr;
-        uint32_t axesCount;
-        std::tie(axesPtr, axesCount) = fontReader.readArray<minikin::FontVariation>();
-        bool hasVerity = static_cast<bool>(fontReader.read<int8_t>());
-        uint32_t expectedFontRevision;
-        std::string_view expectedPostScriptName;
-        if (hasVerity) {
-            expectedFontRevision = fontReader.read<uint32_t>();
-            expectedPostScriptName = fontReader.readString();
-        }
-        sk_sp<SkData> data = makeSkDataCached(path, hasVerity);
-        if (data.get() == nullptr) {
-            // This may happen if:
-            // 1. When the process failed to open the file (e.g. invalid path or permission).
-            // 2. When the process failed to map the file (e.g. hitting max_map_count limit).
-            ALOGE("Failed to make SkData from file name: %s", path.c_str());
+    return &loadMinikinFontSkia;
+}
+
+static std::shared_ptr<minikin::MinikinFont> loadMinikinFontSkia(minikin::BufferReader reader) {
+    std::string_view fontPath = reader.readString();
+    std::string path(fontPath.data(), fontPath.size());
+    ATRACE_FORMAT("Loading font %s", path.c_str());
+    int fontIndex = reader.read<int>();
+    const minikin::FontVariation* axesPtr;
+    uint32_t axesCount;
+    std::tie(axesPtr, axesCount) = reader.readArray<minikin::FontVariation>();
+    bool hasVerity = static_cast<bool>(reader.read<int8_t>());
+    uint32_t expectedFontRevision;
+    std::string_view expectedPostScriptName;
+    if (hasVerity) {
+        expectedFontRevision = reader.read<uint32_t>();
+        expectedPostScriptName = reader.readString();
+    }
+    sk_sp<SkData> data = makeSkDataCached(path, hasVerity);
+    if (data.get() == nullptr) {
+        // This may happen if:
+        // 1. When the process failed to open the file (e.g. invalid path or permission).
+        // 2. When the process failed to map the file (e.g. hitting max_map_count limit).
+        ALOGE("Failed to make SkData from file name: %s", path.c_str());
+        return nullptr;
+    }
+    const void* fontPtr = data->data();
+    size_t fontSize = data->size();
+    if (hasVerity) {
+        // Verify font metadata if verity is enabled.
+        minikin::FontFileParser parser(fontPtr, fontSize, fontIndex);
+        std::optional<uint32_t> revision = parser.getFontRevision();
+        if (!revision.has_value() || revision.value() != expectedFontRevision) {
+            LOG_ALWAYS_FATAL("Wrong font revision: %s", path.c_str());
             return nullptr;
         }
-        const void* fontPtr = data->data();
-        size_t fontSize = data->size();
-        if (hasVerity) {
-            // Verify font metadata if verity is enabled.
-            minikin::FontFileParser parser(fontPtr, fontSize, fontIndex);
-            std::optional<uint32_t> revision = parser.getFontRevision();
-            if (!revision.has_value() || revision.value() != expectedFontRevision) {
-              LOG_ALWAYS_FATAL("Wrong font revision: %s", path.c_str());
-              return nullptr;
-            }
-            std::optional<std::string> psName = parser.getPostScriptName();
-            if (!psName.has_value() || psName.value() != expectedPostScriptName) {
-              LOG_ALWAYS_FATAL("Wrong PostScript name: %s", path.c_str());
-              return nullptr;
-            }
-        }
-        std::vector<minikin::FontVariation> axes(axesPtr, axesPtr + axesCount);
-        std::shared_ptr<minikin::MinikinFont> minikinFont =
-                fonts::createMinikinFontSkia(std::move(data), fontPath, fontPtr, fontSize,
-                                             fontIndex, axes);
-        if (minikinFont == nullptr) {
-            ALOGE("Failed to create MinikinFontSkia: %s", path.c_str());
+        std::optional<std::string> psName = parser.getPostScriptName();
+        if (!psName.has_value() || psName.value() != expectedPostScriptName) {
+            LOG_ALWAYS_FATAL("Wrong PostScript name: %s", path.c_str());
             return nullptr;
         }
-        return minikinFont;
-    };
+    }
+    std::vector<minikin::FontVariation> axes(axesPtr, axesPtr + axesCount);
+    std::shared_ptr<minikin::MinikinFont> minikinFont = fonts::createMinikinFontSkia(
+            std::move(data), fontPath, fontPtr, fontSize, fontIndex, axes);
+    if (minikinFont == nullptr) {
+        ALOGE("Failed to create MinikinFontSkia: %s", path.c_str());
+        return nullptr;
+    }
+    return minikinFont;
 }
 
 static void writeMinikinFontSkia(minikin::BufferWriter* writer,
         const minikin::MinikinFont* typeface) {
+    // When you change the format of font metadata, please update code to parse
+    // typefaceMetadataReader() in
+    // frameworks/base/libs/hwui/jni/fonts/Font.cpp too.
     const std::string& path = typeface->GetFontPath();
     writer->writeString(path);
     writer->write<int>(typeface->GetFontIndex());

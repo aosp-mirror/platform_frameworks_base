@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Afficher les limites de coupe, les marges, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forcer écriture droite à gauche"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forcer l\'orientation du texte de droite à gauche pour toutes les langues"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Autor. floutage fenêtre"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forcer MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activer MSAA 4x dans les applications OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Déboguer découpage non rectangulaire"</string>
@@ -508,9 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes et rappels"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Autoriser à définir des alarmes et des rappels"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes et rappels"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Autoriser cette appli à définir des alarmes et à programmer d\'autres actions. Cette appli peut être utilisée quand vous n\'utilisez pas votre téléphone, ce qui peut consommer davantage de batterie. Si cette autorisation est désactivée, l\'appli peut ne pas fonctionner correctement, et les alarmes définies ne se déclencheront pas comme prévu."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Autoriser cette appli à définir des alarmes et à programmer d\'autres actions. Cette appli peut être utilisée lorsque vous n\'utilisez pas votre tablette, ce qui peut consommer davantage de batterie. Si cette autorisation est désactivée, l\'appli peut ne pas fonctionner correctement, et les alarmes définies ne se déclencheront pas comme prévu."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Autoriser cette appli à définir des alarmes et à programmer d\'autres actions. Cette appli peut être utilisée quand vous n\'utilisez pas votre appareil, ce qui peut consommer davantage de batterie. Si cette autorisation est désactivée, l\'appli peut ne pas fonctionner correctement, et les alarmes définies ne se déclencheront pas comme prévu."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Autorisez cette appli à définir des alarmes et à planifier des actions soumises à un délai. Cela lui permet de s\'exécuter en arrière-plan, ce qui peut consommer plus de batterie.\n\nSi cette autorisation est désactivée, les alarmes existantes et les événements basés sur l\'heure planifiés par cette appli ne fonctionneront pas."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"définir, alarme, rappel, horloge"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activer"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode Ne pas déranger"</string>

@@ -617,7 +617,7 @@
     <string name="screen_pinning_positive" msgid="3285785989665266984">"E kuptova"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Jo, faleminderit!"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacioni u gozhdua"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacioni i zhgozhduar"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacioni u zhgozhdua"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Të fshihet <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Do të rishfaqet herën tjetër kur ta aktivizoni te cilësimet."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Fshih"</string>
@@ -666,8 +666,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Eternet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarmi"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <!-- no translation found for wallet_empty_state_label (7776761245237530394) -->
-    <skip />
+    <string name="wallet_empty_state_label" msgid="7776761245237530394">"Konfiguro për të kryer pagesa më të shpejta dhe më të sigurta përmes telefonit"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Shfaqi të gjitha"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Shkyçe për të paguar"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nuk është konfiguruar"</string>

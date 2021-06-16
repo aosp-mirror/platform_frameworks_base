@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ক্লিপ বাউন্ড, মার্জিন ইত্যাদি দেখান"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL লেআউট দিকনির্দেশ জোর দিন"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"সমস্ত স্থানের জন্য RTL এ স্ক্রিন লেআউট দিকনির্দেশে জোর দেয়"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"উইন্ডো-লেভেল অস্পষ্ট করার সুবিধা চালু করুন"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA-এ জোর দিন"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 অ্যাপের মধ্যে 4x MSAA চালু করুন"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"অ-আয়তক্ষেত্রাকার ক্লিপ অ্যাক্টিভিটি ডিবাগ করুন"</string>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"অ্যালার্ম এবং রিমাইন্ডার"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"অ্যালার্ম এবং রিমাইন্ডার সেট করার অনুমতি দিন"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"অ্যালার্ম এবং রিমাইন্ডার"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"অন্যান্য অ্যাকশন শিডিউল করতে এবং অ্যালার্ম সেট করার জন্য এই অ্যাপকে অনুমতি দিন। আপনি ফোন ব্যবহার না করার সময় এই অ্যাপ ব্যবহার করা হতে পারে, যার ফলে আরও ব্যাটারির চার্জ খরচ হতে পারে। অনুমতি দেওয়া না থাকলে, এই অ্যাপ সঠিকভাবে কাজ নাও করতে পারে এবং অ্যালার্মও শিডিউল অনুযায়ী বাজবে না।"</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"অন্যান্য অ্যাকশন শিডিউল করতে এবং অ্যালার্ম সেট করার জন্য এই অ্যাপকে অনুমতি দিন। আপনি ট্যাবলেট ব্যবহার না করার সময় এই অ্যাপ ব্যবহার করা হতে পারে, যার ফলে আরও ব্যাটারির চার্জ খরচ হতে পারে। অনুমতি দেওয়া না থাকলে, এই অ্যাপ সঠিকভাবে কাজ নাও করতে পারে এবং অ্যালার্মও শিডিউল অনুযায়ী বাজবে না।"</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"অন্যান্য অ্যাকশন শিডিউল করতে এবং অ্যালার্ম সেট করার জন্য এই অ্যাপকে অনুমতি দিন। আপনি ডিভাইস ব্যবহার না করার সময় এই অ্যাপ ব্যবহার করা হতে পারে, যার ফলে আরও ব্যাটারির চার্জ খরচ হতে পারে। অনুমতি দেওয়া না থাকলে, এই অ্যাপ সঠিকভাবে কাজ নাও করতে পারে এবং অ্যালার্মও শিডিউল অনুযায়ী বাজবে না।"</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"শিডিউল, অ্যালার্ম, রিমাইন্ডার, ঘড়ি"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"চালু করুন"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'বিরক্ত করবে না\' মোড চালু করুন"</string>

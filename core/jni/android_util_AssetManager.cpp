@@ -1282,6 +1282,8 @@ static void NativeThemeRebase(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlong th
     if (style_id_args == nullptr) {
       return;
     }
+  } else {
+    CHECK(style_count == 0) << "style_ids is null while style_count is non-zero";
   }
 
   jboolean* force_args = nullptr;
@@ -1292,12 +1294,18 @@ static void NativeThemeRebase(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlong th
       env->ReleasePrimitiveArrayCritical(style_ids, style_id_args, JNI_ABORT);
       return;
     }
+  } else {
+    CHECK(style_count == 0) << "force is null while style_count is non-zero";
   }
 
   auto theme = reinterpret_cast<Theme*>(theme_ptr);
   theme->Rebase(&(*assetmanager), style_id_args, force_args, static_cast<size_t>(style_count));
-  env->ReleasePrimitiveArrayCritical(style_ids, style_id_args, JNI_ABORT);
-  env->ReleasePrimitiveArrayCritical(force, force_args, JNI_ABORT);
+  if (style_ids != nullptr) {
+    env->ReleasePrimitiveArrayCritical(style_ids, style_id_args, JNI_ABORT);
+  }
+  if (force != nullptr) {
+    env->ReleasePrimitiveArrayCritical(force, force_args, JNI_ABORT);
+  }
 }
 
 static void NativeThemeCopy(JNIEnv* env, jclass /*clazz*/, jlong dst_asset_manager_ptr,

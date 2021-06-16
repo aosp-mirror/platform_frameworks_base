@@ -461,6 +461,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 }
 
 void CanvasContext::stopDrawing() {
+    cleanupResources();
     mRenderThread.removeFrameCallback(this);
     mAnimationContext->pauseAnimators();
     mGenerationID++;
@@ -619,8 +620,23 @@ nsecs_t CanvasContext::draw() {
         }
     }
 
+    cleanupResources();
     mRenderThread.cacheManager().onFrameCompleted();
     return mCurrentFrameInfo->get(FrameInfoIndex::DequeueBufferDuration);
+}
+
+void CanvasContext::cleanupResources() {
+    auto& tracker = mJankTracker.frames();
+    auto size = tracker.size();
+    auto capacity = tracker.capacity();
+    if (size == capacity) {
+        nsecs_t nowNanos = systemTime(SYSTEM_TIME_MONOTONIC);
+        nsecs_t frameCompleteNanos =
+            tracker[0].get(FrameInfoIndex::FrameCompleted);
+        nsecs_t frameDiffNanos = nowNanos - frameCompleteNanos;
+        nsecs_t cleanupMillis = ns2ms(std::max(frameDiffNanos, 10_s));
+        mRenderThread.cacheManager().performDeferredCleanup(cleanupMillis);
+    }
 }
 
 void CanvasContext::reportMetricsWithPresentTime() {
