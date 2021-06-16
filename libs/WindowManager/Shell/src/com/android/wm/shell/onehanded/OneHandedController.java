@@ -81,6 +81,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private volatile boolean mIsSwipeToNotificationEnabled;
     private boolean mTaskChangeToExit;
     private boolean mLockedDisabled;
+    private boolean mKeyguardShowing;
     private int mUserId;
     private float mOffSetFraction;
 
@@ -357,7 +358,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     @VisibleForTesting
     void startOneHanded() {
-        if (isLockedDisabled()) {
+        if (isLockedDisabled() || mKeyguardShowing) {
             Slog.d(TAG, "Temporary lock disabled");
             return;
         }
@@ -692,6 +693,10 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         mTutorialHandler.onConfigurationChanged();
     }
 
+    private void onKeyguardVisibilityChanged(boolean showing) {
+        mKeyguardShowing = showing;
+    }
+
     private void onUserSwitch(int newUserId) {
         unregisterSettingObservers();
         mUserId = newUserId;
@@ -836,6 +841,13 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         public void onUserSwitch(int userId) {
             mMainExecutor.execute(() -> {
                 OneHandedController.this.onUserSwitch(userId);
+            });
+        }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            mMainExecutor.execute(() -> {
+                OneHandedController.this.onKeyguardVisibilityChanged(showing);
             });
         }
     }
