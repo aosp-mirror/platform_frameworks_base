@@ -52,6 +52,11 @@ oneway interface ITaskOrganizer {
     void copySplashScreenView(int taskId);
 
     /**
+     * Called when the Task removed the splash screen.
+     */
+    void onAppSplashScreenViewRemoved(int taskId);
+
+    /**
      * A callback when the Task is available for the registered organizer. The client is responsible
      * for releasing the SurfaceControl in the callback. For non-root tasks, the leash may initially
      * be hidden so it is up to the organizer to show this task.
