@@ -21,7 +21,6 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
-import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -46,8 +45,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import static com.android.wm.shell.bubbles.BubbleController.TASKBAR_CHANGED_BROADCAST;
 
-import android.animation.ValueAnimator;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -121,6 +118,7 @@ import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
@@ -402,8 +400,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private LightRevealScrim mLightRevealScrim;
     private WiredChargingRippleController mChargingRippleAnimationController;
     private PowerButtonReveal mPowerButtonReveal;
-    private CircleReveal mCircleReveal;
-    private ValueAnimator mCircleRevealAnimator = ValueAnimator.ofFloat(0f, 1f);
 
     private final Object mQueueLock = new Object();
 
@@ -2808,11 +2804,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mDisplayMetrics.density;
     }
 
-    float getDisplayWidth() {
+    public float getDisplayWidth() {
         return mDisplayMetrics.widthPixels;
     }
 
-    float getDisplayHeight() {
+    public float getDisplayHeight() {
         return mDisplayMetrics.heightPixels;
     }
 
@@ -3542,9 +3538,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void fadeKeyguardWhilePulsing() {
         mNotificationPanelViewController.fadeOut(0, FADE_KEYGUARD_DURATION_PULSING,
                 ()-> {
-                if (shouldShowCircleReveal()) {
-                    startCircleReveal();
-                }
                 hideKeyguard();
                 mStatusBarKeyguardViewManager.onKeyguardFadedAway();
             }).start();
@@ -3885,7 +3878,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onDozeAmountChanged(float linear, float eased) {
         if (mFeatureFlags.useNewLockscreenAnimations()
-                && !mCircleRevealAnimator.isRunning()) {
+                && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
             mLightRevealScrim.setRevealAmount(1f - linear);
         }
     }
@@ -3908,7 +3901,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 || (!isDozing && mWakefulnessLifecycle.getLastWakeReason()
                 == PowerManager.WAKE_REASON_POWER_BUTTON)) {
             mLightRevealScrim.setRevealEffect(mPowerButtonReveal);
-        } else if (!mCircleRevealAnimator.isRunning()) {
+        } else if (!(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
             mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
         }
 
@@ -3920,36 +3913,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         Trace.endSection();
     }
 
-    /**
-     * Update the parameters for the dozing circle reveal that animates when the user authenticates
-     * from AOD using the fingerprint sensor.
-     */
-    public void updateCircleReveal() {
-        final PointF fpLocation = mAuthRippleController.getFingerprintSensorLocation();
-        if (fpLocation != null) {
-            mCircleReveal =
-                    new CircleReveal(
-                            fpLocation.x,
-                            fpLocation.y,
-                            0,
-                            Math.max(Math.max(fpLocation.x, getDisplayWidth() - fpLocation.x),
-                                    Math.max(fpLocation.y, getDisplayHeight() - fpLocation.y)));
-        }
-    }
-
-    private void startCircleReveal() {
-        mLightRevealScrim.setRevealEffect(mCircleReveal);
-        mCircleRevealAnimator.cancel();
-        mCircleRevealAnimator.addUpdateListener(animation ->
-                mLightRevealScrim.setRevealAmount(
-                        (float) mCircleRevealAnimator.getAnimatedValue()));
-        mCircleRevealAnimator.setDuration(900);
-        mCircleRevealAnimator.start();
-    }
-
-    private boolean shouldShowCircleReveal() {
-        return mCircleReveal != null && !mCircleRevealAnimator.isRunning()
-                && mBiometricUnlockController.getBiometricType() == FINGERPRINT;
+    public LightRevealScrim getLightRevealScrim() {
+        return mLightRevealScrim;
     }
 
     private void updateKeyguardState() {
