@@ -961,6 +961,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
+    "-1003678883": {
+      "message": "Cleaning splash screen token=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STARTING_WINDOW",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-1003060523": {
       "message": "Finish needs to pause: %s",
       "level": "VERBOSE",

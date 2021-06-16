@@ -43,6 +43,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
+import android.window.SplashScreenView;
 import android.window.StartingWindowInfo;
 import android.window.TaskAppearedInfo;
 import android.window.TaskSnapshot;
@@ -215,6 +216,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             }
         }
 
+        void onAppSplashScreenViewRemoved(Task task) {
+            try {
+                mTaskOrganizer.onAppSplashScreenViewRemoved(task.mTaskId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Exception sending onAppSplashScreenViewRemoved callback", e);
+            }
+        }
+
         SurfaceControl prepareLeash(Task task, String reason) {
             return new SurfaceControl(task.getSurfaceControl(), reason);
         }
@@ -312,6 +321,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
         void copySplashScreenView(Task t) {
             mOrganizer.copySplashScreenView(t);
+        }
+
+        public void onAppSplashScreenViewRemoved(Task t) {
+            mOrganizer.onAppSplashScreenViewRemoved(t);
         }
 
         /**
@@ -564,6 +577,22 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
         state.copySplashScreenView(task);
         return true;
+    }
+
+    /**
+     * Notify the shell ({@link com.android.wm.shell.ShellTaskOrganizer} that the client has
+     * removed the splash screen view.
+     * @see com.android.wm.shell.ShellTaskOrganizer#onAppSplashScreenViewRemoved(int)
+     * @see SplashScreenView#remove()
+     */
+    public void onAppSplashScreenViewRemoved(Task task) {
+        final Task rootTask = task.getRootTask();
+        if (rootTask == null || rootTask.mTaskOrganizer == null) {
+            return;
+        }
+        final TaskOrganizerState state =
+                mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
+        state.onAppSplashScreenViewRemoved(task);
     }
 
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {
