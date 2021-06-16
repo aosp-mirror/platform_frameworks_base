@@ -384,6 +384,11 @@ public class NotificationStackScrollLayoutController {
                 }
 
                 @Override
+                public float getTotalTranslationLength(View animView) {
+                    return mView.getTotalTranslationLength(animView);
+                }
+
+                @Override
                 public void onSnooze(StatusBarNotification sbn,
                         NotificationSwipeActionHelper.SnoozeOption snoozeOption) {
                     mStatusBar.setNotificationSnoozed(sbn, snoozeOption);
@@ -1018,7 +1023,7 @@ public class NotificationStackScrollLayoutController {
         mView.setQsExpansionFraction(expansionFraction);
     }
 
-    public void setOnStackYChanged(Runnable onStackYChanged) {
+    public void setOnStackYChanged(Consumer<Boolean> onStackYChanged) {
         mView.setOnStackYChanged(onStackYChanged);
     }
 
