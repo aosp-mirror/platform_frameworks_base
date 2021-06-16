@@ -18,8 +18,6 @@ package com.android.settingslib.widget;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.when;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -54,20 +52,6 @@ public class IllustrationPreferenceTest {
         final AttributeSet attributeSet = Robolectric.buildAttributeSet().build();
         mPreference = new IllustrationPreference(mContext, attributeSet);
         ReflectionHelpers.setField(mPreference, "mIllustrationView", mAnimationView);
-    }
-
-    @Test
-    public void isAnimating_lottieAnimationViewIsNotAnimating_shouldReturnFalse() {
-        when(mAnimationView.isAnimating()).thenReturn(false);
-
-        assertThat(mPreference.isAnimating()).isFalse();
-    }
-
-    @Test
-    public void isAnimating_lottieAnimationViewIsAnimating_shouldReturnTrue() {
-        when(mAnimationView.isAnimating()).thenReturn(true);
-
-        assertThat(mPreference.isAnimating()).isTrue();
     }
 
     @Test

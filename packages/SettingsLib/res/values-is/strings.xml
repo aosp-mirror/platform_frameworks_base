@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Sýna skurðlínur, spássíur o.s.frv."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Þvinga umbrot frá hægri til vinstri"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Þvinga umbrot skjás frá hægri til vinstri fyrir alla tungumálskóða"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"Leyfa að gera glugga ósk."</string>
     <string name="force_msaa" msgid="4081288296137775550">"Þvinga 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Virkja 4x MSAA í OpenGL ES 2.0 forritum"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Villuleita klippt svæði sem ekki eru rétthyrnd"</string>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Vekjarar og áminningar"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Leyfa stillingu vekjara og áminninga"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Vekjarar og áminningar"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"Leyfa þessu forriti að stilla vekjara og tímasetja aðrar aðgerðir. Mögulegt er að þetta forrit verði notað þegar þú ert ekki að nota símann og því gæti rafhlaðan tæmst hraðar. Ef slökkt er á þessari heimild er óvíst að forritið starfi sem skyldi og vekjarar munu ekki fylgja áætlun."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"Leyfa þessu forriti að stilla vekjara og tímasetja aðrar aðgerðir. Mögulegt er að þetta forrit verði notað þegar þú ert ekki að nota spjaldtölvuna og því gæti rafhlaðan tæmst hraðar. Ef slökkt er á þessari heimild er óvíst að forritið starfi sem skyldi og vekjarar munu ekki fylgja áætlun."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"Leyfa þessu forriti að stilla vekjara og tímasetja aðrar aðgerðir. Mögulegt er að þetta forrit verði notað þegar þú ert ekki að nota tækið og því gæti rafhlaðan tæmst hraðar. Ef slökkt er á þessari heimild er óvíst að forritið starfi sem skyldi og vekjarar munu ekki fylgja áætlun."</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"áætlun, vekjari, áminning, klukka"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Kveikja"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Kveikja á „Ónáðið ekki“"</string>

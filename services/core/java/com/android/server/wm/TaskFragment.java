@@ -76,6 +76,8 @@ import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -1884,5 +1886,47 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return applicationType;
         }
         return getTopChild().getActivityType();
+    }
+
+    boolean dump(String prefix, FileDescriptor fd, PrintWriter pw, boolean dumpAll,
+            boolean dumpClient, String dumpPackage, final boolean needSep, Runnable header) {
+        boolean printed = false;
+        Runnable headerPrinter = () -> {
+            if (needSep) {
+                pw.println();
+            }
+            if (header != null) {
+                header.run();
+            }
+
+            dumpInner(prefix, pw, dumpAll, dumpPackage);
+        };
+
+        if (dumpPackage == null) {
+            // If we are not filtering by package, we want to print absolutely everything,
+            // so always print the header even if there are no tasks/activities inside.
+            headerPrinter.run();
+            headerPrinter = null;
+            printed = true;
+        }
+
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            WindowContainer child = mChildren.get(i);
+            if (child.asTaskFragment() != null) {
+                printed |= child.asTaskFragment().dump(prefix + "      ", fd, pw, dumpAll,
+                        dumpClient, dumpPackage, needSep, headerPrinter);
+            } else if (child.asActivityRecord() != null) {
+                ActivityRecord.dumpActivity(fd, pw, i, child.asActivityRecord(), prefix + "      ",
+                        "Hist ", true, !dumpAll, dumpClient, dumpPackage, false, headerPrinter,
+                        getTask());
+            }
+        }
+
+        return printed;
+    }
+
+    void dumpInner(String prefix, PrintWriter pw, boolean dumpAll, String dumpPackage) {
+        pw.print(prefix); pw.print("* "); pw.println(this);
+        pw.println(prefix + "  mBounds=" + getRequestedOverrideBounds());
     }
 }

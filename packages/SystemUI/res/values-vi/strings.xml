@@ -405,7 +405,7 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Sử dụng dữ liệu"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"Dữ liệu còn lại"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Vượt quá giới hạn"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Đã sử dụng <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Đã dùng <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Giới hạn <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Cảnh báo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Ứng dụng công việc"</string>

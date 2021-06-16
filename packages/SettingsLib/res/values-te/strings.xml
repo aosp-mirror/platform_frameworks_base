@@ -211,7 +211,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi కనెక్ట్ అయి ఉన్నప్పుడు, డీబగ్ మోడ్‌లో ఉంచు"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ఎర్రర్"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"వైర్‌లెస్ డీబగ్గింగ్"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"అందుబాటులో వున్న పరికరాలను చూడటానికి, ఉపయోగించడానికి, వైర్‌లెస్ డీబగ్గింగ్‌ను ఆన్ చేయండి"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"అందుబాటులో ఉన్న పరికరాలను చూడటానికి, ఉపయోగించడానికి, వైర్‌లెస్ డీబగ్గింగ్‌ను ఆన్ చేయండి"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR కోడ్‌తో పరికరాన్ని పెయిర్ చేయండి"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR కోడ్ స్కానర్‌ను ఉపయోగించి కొత్త పరికరాలను పెయిర్ చేయండి"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"పెయిరింగ్ కోడ్‌తో పరికరాన్ని పెయిర్ చేయండి"</string>
@@ -226,7 +226,7 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"పరికరంతో పెయిర్ చేయండి"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi పెయిరింగ్ కోడ్"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"పెయిరింగ్ విఫలమైంది"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"పరికరం అదే నెట్‌వర్క్‌కు కనెక్ట్ అయి వుందో లేదో సరి చూసుకోండి."</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"పరికరం అదే నెట్‌వర్క్‌కు కనెక్ట్ చేయబడి ఉందని నిర్ధారించుకోండి."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR కోడ్‌ను స్కాన్ చేయడం ద్వారా Wi-Fiని ఉపయోగించి పరికరాన్ని పెయిర్ చెయ్యండి"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"పరికరం పెయిర్ చేయబడుతోంది…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"పరికరాన్ని పెయిర్ చేయడం విఫలమైంది. QR కోడ్ తప్పుగా ఉండడం గాని, లేదా పరికరం అదే నెట్‌వర్క్‌కు కనెక్ట్ అయి లేకపోవడం గాని జరిగింది."</string>
@@ -353,8 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"క్లిప్ సరిహద్దులు, అంచులు మొ. చూపు"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL లేఅవుట్ దిశను నిర్బంధం చేయండి"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"అన్ని లొకేల్‌ల కోసం RTLకి స్క్రీన్ లేఅవుట్ దిశను నిర్భందించు"</string>
-    <!-- no translation found for window_blurs (6831008984828425106) -->
-    <skip />
+    <string name="window_blurs" msgid="6831008984828425106">"విండో-స్థాయి బ్లర్ అనుమతించు"</string>
     <string name="force_msaa" msgid="4081288296137775550">"నిర్భందం 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 యాప్‌లలో 4x MSAAను ప్రారంభించండి"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"దీర్ఘ చతురస్రం కాని క్లిప్ చర్యలను డీబగ్ చేయండి"</string>
@@ -508,9 +507,8 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"అలారాలు, రిమైండర్‌లు"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"అలారాలు, రిమైండర్‌లను సెట్ చేయడానికి అనుమతించండి"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"అలారాలు &amp; రిమైండర్‌లు"</string>
-    <string name="alarms_and_reminders_footer_title" product="default" msgid="1122213569699233612">"అలారాలను సెట్ చేయడానికి, ఇతర చర్యలను షెడ్యూల్ చేయడానికి ఈ యాప్‌ను అనుమతించండి. మీ ఫోన్‌ను మీరు ఉపయోగించనప్పుడు కూడా ఈ యాప్ ఉపయోగించబడవచ్చు, తద్వారా ఎక్కువ బ్యాటరీని ఉపయోగించవచ్చు. ఈ అనుమతిని ఆఫ్ చేస్తే, ఈ యాప్ సాధారణ రీతిలో పనిచేయకపోవచ్చు, దాని అలారాలు షెడ్యూల్ ప్రకారం పనిచేయవు."</string>
-    <string name="alarms_and_reminders_footer_title" product="tablet" msgid="4596201244991057839">"అలారాలను సెట్ చేయడానికి, ఇతర చర్యలను షెడ్యూల్ చేయడానికి ఈ యాప్‌ను అనుమతించండి. మీరు మీ టాబ్లెట్‌ను ఉపయోగించనప్పుడు ఈ యాప్ ఉపయోగించబడవచ్చు, ఇది ఎక్కువ బ్యాటరీని ఉపయోగించవచ్చు. ఈ అనుమతిని ఆఫ్ చేసినట్లైతే, ఈ యాప్ సాధారణంగా పనిచేయకపోవచ్చు అలాగే దాని అలారాలు షెడ్యూల్ ప్రకారం పనిచేయవు."</string>
-    <string name="alarms_and_reminders_footer_title" product="device" msgid="349578867821273761">"అలారాలను సెట్ చేయడానికి, ఇతర చర్యలను షెడ్యూల్ చేయడానికి ఈ యాప్‌ను అనుమతించండి. మీరు మీ పరికరాన్ని ఉపయోగించనప్పుడు ఈ యాప్ ఉపయోగించబడవచ్చు, ఇది ఎక్కువ బ్యాటరీని ఉపయోగించవచ్చు. ఈ అనుమతిని ఆఫ్ చేసినట్లైతే, ఈ యాప్ సాధారణంగా పనిచేయకపోవచ్చు అలాగే దాని అలారాలు షెడ్యూల్ ప్రకారం పనిచేయవు."</string>
+    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
+    <skip />
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"షెడ్యూల్, అలారం, రిమైండర్, గడియారం"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ఆన్ చేయండి"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"అంతరాయం కలిగించవద్దును ఆన్ చేయండి"</string>
@@ -563,7 +561,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"ప్రొఫైల్ సమాచారం"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"మీరు పరిమితం చేయబడిన ప్రొఫైల్‌ను సృష్టించడానికి ముందు, మీ యాప్‌లు మరియు వ్యక్తిగత డేటాను రక్షించడానికి స్క్రీన్ లాక్‌ను సెటప్ చేయాల్సి ఉంటుంది."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"లాక్‌ను సెట్ చేయి"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>కు మార్చు"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>కు స్విచ్ చేయి"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"కొత్త యూజర్‌ను క్రియేట్ చేస్తోంది…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"కొత్త యూజర్‌ను క్రియేట్ చేయడం విఫలమైంది"</string>
     <string name="user_nickname" msgid="262624187455825083">"మారుపేరు"</string>

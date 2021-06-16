@@ -65,6 +65,8 @@ import static com.android.server.notification.NotificationManagerService.ACTION_
 import static com.android.server.notification.NotificationManagerService.ACTION_ENABLE_NAS;
 import static com.android.server.notification.NotificationManagerService.ACTION_LEARNMORE_NAS;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -260,6 +262,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private LauncherApps mLauncherApps;
     @Mock
     private ShortcutServiceInternal mShortcutServiceInternal;
+    @Mock
+    private UserManager mUserManager;
     @Mock
     ActivityManager mActivityManager;
     @Mock
@@ -526,6 +530,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mShortcutHelper = mService.getShortcutHelper();
         mShortcutHelper.setLauncherApps(mLauncherApps);
         mShortcutHelper.setShortcutServiceInternal(mShortcutServiceInternal);
+        mShortcutHelper.setUserManager(mUserManager);
 
         // Capture PackageIntentReceiver
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
@@ -567,6 +572,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
         when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
                 anyString(), anyInt(), any())).thenReturn(true);
+        when(mUserManager.isUserUnlocked(any(UserHandle.class))).thenReturn(true);
 
         // Set the testable bubble extractor
         RankingHelper rankingHelper = mService.getRankingHelper();
@@ -7506,6 +7512,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mBinderService.getConversationsForPackage(PKG_P, mUid).getList();
         assertEquals(si, conversations.get(0).getShortcutInfo());
         assertEquals(si, conversations.get(1).getShortcutInfo());
+
+        // Returns null shortcuts when locked.
+        when(mUserManager.isUserUnlocked(any(UserHandle.class))).thenReturn(false);
+        conversations =
+                mBinderService.getConversationsForPackage(PKG_P, mUid).getList();
+        assertThat(conversations.get(0).getShortcutInfo()).isNull();
+        assertThat(conversations.get(1).getShortcutInfo()).isNull();
     }
 
     @Test

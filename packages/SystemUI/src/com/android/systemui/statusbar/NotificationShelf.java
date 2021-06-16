@@ -259,11 +259,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
             final float inShelfAmount = updateShelfTransformation(i, child, scrollingFast,
                     expandingAnimated, isLastChild);
 
-            final float stackEnd = mAmbientState.getStackY()
-                    + mAmbientState.getStackHeight();
             // TODO(b/172289889) scale mPaddingBetweenElements with expansion amount
             if ((isLastChild && !child.isInShelf()) || aboveShelf || backgroundForceHidden) {
-                notificationClipEnd = stackEnd;
+                notificationClipEnd = shelfStart + getIntrinsicHeight();
             } else {
                 notificationClipEnd = shelfStart - mPaddingBetweenElements;
             }

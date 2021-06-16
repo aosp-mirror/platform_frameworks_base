@@ -1458,6 +1458,10 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"एपलाई प्याकेजहरू मेटाउने अनुरोध गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ब्याट्री सम्बन्धी अनुकूलनहरूलाई बेवास्ता गर्न सोध्नुहोस्"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"कुनै एपलाई त्यसका ब्याट्री सम्बन्धी अनुकूलनहरूलाई बेवास्ता गर्नाका लागि अनुमति माग्न दिन्छ।"</string>
+    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
+    <skip />
+    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"जुम नियन्त्रणको लागि दुई चोटि ट्याप गर्नुहोस्"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"विजेट थप गर्न सकिँदैन।"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"जानुहोस्"</string>

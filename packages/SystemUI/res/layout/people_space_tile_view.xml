@@ -13,7 +13,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/tile_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -21,7 +23,7 @@
 
     <LinearLayout
         android:orientation="vertical"
-        android:background="@drawable/people_space_activity_card"
+        android:background="?androidprv:attr/colorSurface"
         android:padding="12dp"
         android:elevation="4dp"
         android:layout_width="match_parent"
