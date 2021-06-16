@@ -33,6 +33,7 @@
         android:gravity="start"
         android:textDirection="locale"
         android:ellipsize="marquee"
+        android:marqueeRepeatLimit="1"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.QS.TileLabel"/>
 
@@ -43,6 +44,7 @@
         android:gravity="start"
         android:textDirection="locale"
         android:ellipsize="marquee"
+        android:marqueeRepeatLimit="1"
         android:singleLine="true"
         android:visibility="gone"
         android:textAppearance="@style/TextAppearance.QS.TileLabel.Secondary"
