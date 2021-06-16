@@ -372,8 +372,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     /** Notifies the VcnManagementService that external dependencies can be set up. */
     public void systemReady() {
-        mContext.getSystemService(ConnectivityManager.class)
-                .registerNetworkProvider(mNetworkProvider);
+        mNetworkProvider.register();
         mContext.getSystemService(ConnectivityManager.class)
                 .registerNetworkCallback(
                         new NetworkRequest.Builder().clearCapabilities().build(),
