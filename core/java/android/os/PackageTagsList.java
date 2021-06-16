@@ -23,20 +23,26 @@ import android.annotation.TestApi;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import com.android.internal.annotations.Immutable;
+
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 /**
- * A list of packages and associated attribution tags that supports easy membership checks.
+ * A list of packages and associated attribution tags that supports easy membership checks. Supports
+ * "wildcard" attribution tags (ie, matching any attribution tag under a package) in additional to
+ * standard checks.
  *
  * @hide
  */
 @TestApi
+@Immutable
 public final class PackageTagsList implements Parcelable {
 
-    // an empty set value matches any attribution tag
+    // an empty set value matches any attribution tag (ie, wildcard)
     private final ArrayMap<String, ArraySet<String>> mPackageTags;
 
     private PackageTagsList(@NonNull ArrayMap<String, ArraySet<String>> packageTags) {
@@ -51,12 +57,31 @@ public final class PackageTagsList implements Parcelable {
     }
 
     /**
-     * Returns true if the given package is represented within this instance. If this returns true
-     * this does not imply anything about whether any given attribution tag under the given package
-     * name is present.
+     * Returns true if the given package is found within this instance. If this returns true this
+     * does not imply anything about whether any given attribution tag under the given package name
+     * is present.
      */
     public boolean includes(@NonNull String packageName) {
         return mPackageTags.containsKey(packageName);
+    }
+
+    /**
+     * Returns true if the given attribution tag is found within this instance under any package.
+     * Only returns true if the attribution tag literal is found, not if any package contains the
+     * set of all attribution tags.
+     *
+     * @hide
+     */
+    public boolean includesTag(@NonNull String attributionTag) {
+        final int size = mPackageTags.size();
+        for (int i = 0; i < size; i++) {
+            ArraySet<String> tags = mPackageTags.valueAt(i);
+            if (tags.contains(attributionTag)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -76,6 +101,7 @@ public final class PackageTagsList implements Parcelable {
         if (tags == null) {
             return false;
         } else if (tags.isEmpty()) {
+            // our tags are the full set, so we contain any attribution tag
             return true;
         } else {
             return tags.contains(attributionTag);
@@ -98,10 +124,12 @@ public final class PackageTagsList implements Parcelable {
                 return false;
             }
             if (tags.isEmpty()) {
+                // our tags are the full set, so we contain whatever the other tags are
                 continue;
             }
             ArraySet<String> otherTags = packageTagsList.mPackageTags.valueAt(i);
             if (otherTags.isEmpty()) {
+                // other tags are the full set, so we can't contain them
                 return false;
             }
             if (!tags.containsAll(otherTags)) {
@@ -248,6 +276,31 @@ public final class PackageTagsList implements Parcelable {
         }
 
         /**
+         * Adds the specified package and set of attribution tags to the builder.
+         *
+         * @hide
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder add(@NonNull String packageName,
+                @NonNull Collection<String> attributionTags) {
+            if (attributionTags.isEmpty()) {
+                // the input is not allowed to specify a full set by passing in an empty collection
+                return this;
+            }
+
+            ArraySet<String> tags = mPackageTags.get(packageName);
+            if (tags == null) {
+                tags = new ArraySet<>(attributionTags);
+                mPackageTags.put(packageName, tags);
+            } else if (!tags.isEmpty()) {
+                // if we contain the full set, already done, otherwise add all the tags
+                tags.addAll(attributionTags);
+            }
+
+            return this;
+        }
+
+        /**
          * Adds the specified {@link PackageTagsList} to the builder.
          */
         @SuppressLint("MissingGetterMatchingBuilder")
@@ -267,13 +320,92 @@ public final class PackageTagsList implements Parcelable {
                 if (newTags.isEmpty()) {
                     add(entry.getKey());
                 } else {
-                    ArraySet<String> tags = mPackageTags.get(entry.getKey());
-                    if (tags == null) {
-                        tags = new ArraySet<>(newTags);
-                        mPackageTags.put(entry.getKey(), tags);
-                    } else if (!tags.isEmpty()) {
-                        tags.addAll(newTags);
-                    }
+                    add(entry.getKey(), newTags);
+                }
+            }
+
+            return this;
+        }
+
+        /**
+         * Removes all attribution tags under the specified package from the builder.
+         *
+         * @hide
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder remove(@NonNull String packageName) {
+            mPackageTags.remove(packageName);
+            return this;
+        }
+
+        /**
+         * Removes the specified package and attribution tag from the builder if and only if the
+         * specified attribution tag is listed explicitly under the package. If the package contains
+         * all possible attribution tags, then nothing will be removed.
+         *
+         * @hide
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder remove(@NonNull String packageName,
+                @Nullable String attributionTag) {
+            ArraySet<String> tags = mPackageTags.get(packageName);
+            if (tags != null && tags.remove(attributionTag) && tags.isEmpty()) {
+                mPackageTags.remove(packageName);
+            }
+            return this;
+        }
+
+        /**
+         * Removes the specified package and set of attribution tags from the builder if and only if
+         * the specified set of attribution tags are listed explicitly under the package. If the
+         * package contains all possible attribution tags, then nothing will be removed.
+         *
+         * @hide
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder remove(@NonNull String packageName,
+                @NonNull Collection<String> attributionTags) {
+            if (attributionTags.isEmpty()) {
+                // the input is not allowed to specify a full set by passing in an empty collection
+                return this;
+            }
+
+            ArraySet<String> tags = mPackageTags.get(packageName);
+            if (tags != null && tags.removeAll(attributionTags) && tags.isEmpty()) {
+                mPackageTags.remove(packageName);
+            }
+            return this;
+        }
+
+        /**
+         * Removes the specified {@link PackageTagsList} from the builder. If a package contains all
+         * possible attribution tags, it will only be removed if the package in the removed
+         * {@link PackageTagsList} also contains all possible attribution tags.
+         *
+         * @hide
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder remove(@NonNull PackageTagsList packageTagsList) {
+            return remove(packageTagsList.mPackageTags);
+        }
+
+        /**
+         * Removes the given map of package to attribution tags to the builder. An empty set of
+         * attribution tags is interpreted to imply all attribution tags under that package. If a
+         * package contains all possible attribution tags, it will only be removed if the package in
+         * the removed map also contains all possible attribution tags.
+         *
+         * @hide
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder remove(@NonNull Map<String, ? extends Set<String>> packageTagsMap) {
+            for (Map.Entry<String, ? extends Set<String>> entry : packageTagsMap.entrySet()) {
+                Set<String> removedTags = entry.getValue();
+                if (removedTags.isEmpty()) {
+                    // if removing the full set, drop the package completely
+                    remove(entry.getKey());
+                } else {
+                    remove(entry.getKey(), removedTags);
                 }
             }
 
