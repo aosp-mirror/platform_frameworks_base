@@ -2602,6 +2602,19 @@ public final class SmsManager {
      *  sending the message.
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
+     * The result code will be <code>Activity.RESULT_OK</code> for success
+     * or one of these errors:<br>
+     * <code>MMS_ERROR_UNSPECIFIED</code><br>
+     * <code>MMS_ERROR_INVALID_APN</code><br>
+     * <code>MMS_ERROR_UNABLE_CONNECT_MMS</code><br>
+     * <code>MMS_ERROR_HTTP_FAILURE</code><br>
+     * <code>MMS_ERROR_IO_ERROR</code><br>
+     * <code>MMS_ERROR_RETRY</code><br>
+     * <code>MMS_ERROR_CONFIGURATION_ERROR</code><br>
+     * <code>MMS_ERROR_NO_DATA_NETWORK</code><br>
+     * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
+     * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
+     * <code>MMS_ERROR_DATA_DISABLED</code><br>
      * @throws IllegalArgumentException if contentUri is empty
      */
     public void sendMultimediaMessage(Context context, Uri contentUri, String locationUrl,
@@ -2630,6 +2643,19 @@ public final class SmsManager {
      *  sending the message.
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
+     * The result code will be <code>Activity.RESULT_OK</code> for success
+     * or one of these errors:<br>
+     * <code>MMS_ERROR_UNSPECIFIED</code><br>
+     * <code>MMS_ERROR_INVALID_APN</code><br>
+     * <code>MMS_ERROR_UNABLE_CONNECT_MMS</code><br>
+     * <code>MMS_ERROR_HTTP_FAILURE</code><br>
+     * <code>MMS_ERROR_IO_ERROR</code><br>
+     * <code>MMS_ERROR_RETRY</code><br>
+     * <code>MMS_ERROR_CONFIGURATION_ERROR</code><br>
+     * <code>MMS_ERROR_NO_DATA_NETWORK</code><br>
+     * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
+     * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
+     * <code>MMS_ERROR_DATA_DISABLED</code><br>
      * @param messageId an id that uniquely identifies the message requested to be sent.
      * Used for logging and diagnostics purposes. The id may be 0.
      * @throws IllegalArgumentException if contentUri is empty
@@ -2677,6 +2703,19 @@ public final class SmsManager {
      *  downloading the message.
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
+     * The result code will be <code>Activity.RESULT_OK</code> for success
+     * or one of these errors:<br>
+     * <code>MMS_ERROR_UNSPECIFIED</code><br>
+     * <code>MMS_ERROR_INVALID_APN</code><br>
+     * <code>MMS_ERROR_UNABLE_CONNECT_MMS</code><br>
+     * <code>MMS_ERROR_HTTP_FAILURE</code><br>
+     * <code>MMS_ERROR_IO_ERROR</code><br>
+     * <code>MMS_ERROR_RETRY</code><br>
+     * <code>MMS_ERROR_CONFIGURATION_ERROR</code><br>
+     * <code>MMS_ERROR_NO_DATA_NETWORK</code><br>
+     * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
+     * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
+     * <code>MMS_ERROR_DATA_DISABLED</code><br>
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
      */
     public void downloadMultimediaMessage(Context context, String locationUrl, Uri contentUri,
@@ -2707,6 +2746,19 @@ public final class SmsManager {
      *  downloading the message.
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
+     * The result code will be <code>Activity.RESULT_OK</code> for success
+     * or one of these errors:<br>
+     * <code>MMS_ERROR_UNSPECIFIED</code><br>
+     * <code>MMS_ERROR_INVALID_APN</code><br>
+     * <code>MMS_ERROR_UNABLE_CONNECT_MMS</code><br>
+     * <code>MMS_ERROR_HTTP_FAILURE</code><br>
+     * <code>MMS_ERROR_IO_ERROR</code><br>
+     * <code>MMS_ERROR_RETRY</code><br>
+     * <code>MMS_ERROR_CONFIGURATION_ERROR</code><br>
+     * <code>MMS_ERROR_NO_DATA_NETWORK</code><br>
+     * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
+     * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
+     * <code>MMS_ERROR_DATA_DISABLED</code><br>
      * @param messageId an id that uniquely identifies the message requested to be downloaded.
      * Used for logging and diagnostics purposes. The id may be 0.
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
@@ -2739,14 +2791,61 @@ public final class SmsManager {
     }
 
     // MMS send/download failure result codes
+
+    /**
+     * Unspecific MMS error occurred during send/download.
+     */
     public static final int MMS_ERROR_UNSPECIFIED = 1;
+
+    /**
+     * ApnException occurred during MMS network setup.
+     */
     public static final int MMS_ERROR_INVALID_APN = 2;
+
+    /**
+     * An error occurred during the MMS connection setup.
+     */
     public static final int MMS_ERROR_UNABLE_CONNECT_MMS = 3;
+
+    /**
+     * An error occurred during the HTTP client setup.
+     */
     public static final int MMS_ERROR_HTTP_FAILURE = 4;
+
+    /**
+     * An I/O error occurred reading the PDU.
+     */
     public static final int MMS_ERROR_IO_ERROR = 5;
+
+    /**
+     * An error occurred while retrying sending/downloading the MMS.
+     */
     public static final int MMS_ERROR_RETRY = 6;
+
+    /**
+     * The carrier-dependent configuration values could not be loaded.
+     */
     public static final int MMS_ERROR_CONFIGURATION_ERROR = 7;
+
+    /**
+     * There is no data network.
+     */
     public static final int MMS_ERROR_NO_DATA_NETWORK = 8;
+
+    /**
+     * The subscription id for the send/download is invalid.
+     */
+    public static final int MMS_ERROR_INVALID_SUBSCRIPTION_ID = 9;
+
+    /**
+     * The subscription id for the send/download is inactive.
+     */
+    public static final int MMS_ERROR_INACTIVE_SUBSCRIPTION = 10;
+
+    /**
+     * Data is disabled for the MMS APN.
+     */
+    public static final int MMS_ERROR_DATA_DISABLED = 11;
 
     /** Intent extra name for MMS sending result data in byte array type */
     public static final String EXTRA_MMS_DATA = "android.telephony.extra.MMS_DATA";

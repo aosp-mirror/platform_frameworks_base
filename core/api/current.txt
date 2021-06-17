@@ -42378,8 +42378,11 @@ package android.telephony {
     field public static final String MMS_CONFIG_UA_PROF_URL = "uaProfUrl";
     field public static final String MMS_CONFIG_USER_AGENT = "userAgent";
     field public static final int MMS_ERROR_CONFIGURATION_ERROR = 7; // 0x7
+    field public static final int MMS_ERROR_DATA_DISABLED = 11; // 0xb
     field public static final int MMS_ERROR_HTTP_FAILURE = 4; // 0x4
+    field public static final int MMS_ERROR_INACTIVE_SUBSCRIPTION = 10; // 0xa
     field public static final int MMS_ERROR_INVALID_APN = 2; // 0x2
+    field public static final int MMS_ERROR_INVALID_SUBSCRIPTION_ID = 9; // 0x9
     field public static final int MMS_ERROR_IO_ERROR = 5; // 0x5
     field public static final int MMS_ERROR_NO_DATA_NETWORK = 8; // 0x8
     field public static final int MMS_ERROR_RETRY = 6; // 0x6
