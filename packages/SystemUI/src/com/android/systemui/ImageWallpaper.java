@@ -130,10 +130,7 @@ public class ImageWallpaper extends WallpaperService {
                     .getBounds();
             mHeight = window.height();
             mWidth = window.width();
-            mMiniBitmap = null;
-            if (mWorker != null && mWorker.getThreadHandler() != null) {
-                mWorker.getThreadHandler().post(this::updateMiniBitmap);
-            }
+            mRenderer.setOnBitmapChanged(this::updateMiniBitmap);
         }
 
         EglHelper getEglHelperInstance() {
@@ -177,20 +174,19 @@ public class ImageWallpaper extends WallpaperService {
             mPageOffset = (1 - imgWidth) / (float) (mPages - 1);
         }
 
-        private void updateMiniBitmap() {
-            mRenderer.useBitmap(b -> {
-                int size = Math.min(b.getWidth(), b.getHeight());
-                float scale = 1.0f;
-                if (size > MIN_SURFACE_WIDTH) {
-                    scale = (float) MIN_SURFACE_WIDTH / (float) size;
-                }
-                mImgHeight = b.getHeight();
-                mImgWidth = b.getWidth();
-                mMiniBitmap = Bitmap.createScaledBitmap(b,  (int) Math.max(scale * b.getWidth(), 1),
-                        (int) Math.max(scale * b.getHeight(), 1), false);
-                computeAndNotifyLocalColors(mLocalColorsToAdd, mMiniBitmap);
-                mLocalColorsToAdd.clear();
-            });
+        private void updateMiniBitmap(Bitmap b) {
+            if (b == null) return;
+            int size = Math.min(b.getWidth(), b.getHeight());
+            float scale = 1.0f;
+            if (size > MIN_SURFACE_WIDTH) {
+                scale = (float) MIN_SURFACE_WIDTH / (float) size;
+            }
+            mImgHeight = b.getHeight();
+            mImgWidth = b.getWidth();
+            mMiniBitmap = Bitmap.createScaledBitmap(b,  (int) Math.max(scale * b.getWidth(), 1),
+                    (int) Math.max(scale * b.getHeight(), 1), false);
+            computeAndNotifyLocalColors(mLocalColorsToAdd, mMiniBitmap);
+            mLocalColorsToAdd.clear();
         }
 
         private void updateSurfaceSize() {
