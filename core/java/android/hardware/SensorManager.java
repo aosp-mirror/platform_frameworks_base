@@ -399,7 +399,9 @@ public abstract class SensorManager {
      * Use this method to get the list of available sensors of a certain type.
      * Make multiple calls to get sensors of different types or use
      * {@link android.hardware.Sensor#TYPE_ALL Sensor.TYPE_ALL} to get all the
-     * sensors.
+     * sensors. Note that the {@link android.hardware.Sensor#getName()} is
+     * expected to yield a value that is unique across any sensors that return
+     * the same value for {@link android.hardware.Sensor#getType()}.
      *
      * <p class="note">
      * NOTE: Both wake-up and non wake-up sensors matching the given type are
