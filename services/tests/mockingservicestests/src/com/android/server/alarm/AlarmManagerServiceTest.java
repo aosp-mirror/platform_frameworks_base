@@ -2309,12 +2309,14 @@ public class AlarmManagerServiceTest {
     public void minWindowChangeDisabled() {
         mockChangeEnabled(AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS, false);
         final long minWindow = 73;
+        final long futurity = 10_000;
         setDeviceConfigLong(KEY_MIN_WINDOW, minWindow);
 
         // 0 is WINDOW_EXACT and < 0 is WINDOW_HEURISTIC.
         for (int window = 1; window <= minWindow; window++) {
             final PendingIntent pi = getNewMockPendingIntent();
-            setTestAlarm(ELAPSED_REALTIME, 0, window, pi, 0, 0, TEST_CALLING_UID, null);
+            setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + futurity, window, pi, 0, 0,
+                    TEST_CALLING_UID, null);
 
             assertEquals(1, mService.mAlarmStore.size());
             final Alarm a = mService.mAlarmStore.remove(unused -> true).get(0);
@@ -2323,18 +2325,61 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
+    public void minWindowExempted() {
+        mockChangeEnabled(AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS, true);
+        final long minWindow = 73;
+        final long futurity = 10_000;
+
+        setDeviceConfigLong(KEY_MIN_WINDOW, minWindow);
+
+        final int coreUid = 2312;
+        doReturn(true).when(() -> UserHandle.isCore(coreUid));
+
+        final int allowlisted = 54239;
+        when(mDeviceIdleInternal.isAppOnWhitelist(UserHandle.getAppId(allowlisted))).thenReturn(
+                true);
+
+        for (final int callingUid : new int[]{SYSTEM_UI_UID, coreUid, coreUid}) {
+            // 0 is WINDOW_EXACT and < 0 is WINDOW_HEURISTIC.
+            for (int window = 1; window <= minWindow; window++) {
+                final PendingIntent pi = getNewMockPendingIntent();
+                setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + futurity, window, pi, 0, 0,
+                        callingUid, null);
+
+                assertEquals(1, mService.mAlarmStore.size());
+                final Alarm a = mService.mAlarmStore.remove(unused -> true).get(0);
+                assertEquals(window, a.windowLength);
+            }
+        }
+
+        // 0 is WINDOW_EXACT and < 0 is WINDOW_HEURISTIC.
+        for (int window = 1; window <= minWindow; window++) {
+            final PendingIntent pi = getNewMockPendingIntent();
+            setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + futurity, window, pi, 0, 0,
+                    TEST_CALLING_UID, null);
+
+            assertEquals(1, mService.mAlarmStore.size());
+            final Alarm a = mService.mAlarmStore.remove(unused -> true).get(0);
+            assertEquals(minWindow, a.windowLength);
+        }
+    }
+
+    @Test
     public void minWindowPriorityAlarm() {
         mockChangeEnabled(AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS, true);
         final long minWindow = 73;
+        final long futurity = 10_000;
         setDeviceConfigLong(KEY_MIN_WINDOW, minWindow);
 
         // 0 is WINDOW_EXACT and < 0 is WINDOW_HEURISTIC.
         for (int window = 1; window <= minWindow; window++) {
-            setPrioritizedAlarm(ELAPSED_REALTIME, 0, window, new IAlarmListener.Stub() {
-                @Override
-                public void doAlarm(IAlarmCompleteListener callback) throws RemoteException {
-                }
-            });
+            setPrioritizedAlarm(ELAPSED_REALTIME, mNowElapsedTest + futurity, window,
+                    new IAlarmListener.Stub() {
+                        @Override
+                        public void doAlarm(IAlarmCompleteListener callback)
+                                throws RemoteException {
+                        }
+                    });
             assertEquals(1, mService.mAlarmStore.size());
             final Alarm a = mService.mAlarmStore.remove(unused -> true).get(0);
             assertEquals(window, a.windowLength);
