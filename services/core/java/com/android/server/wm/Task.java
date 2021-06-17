@@ -2418,17 +2418,16 @@ class Task extends TaskFragment {
 
         // Figure-out min/max possible position depending on if child can show for current user.
         int minPosition = (canShowChild) ? computeMinUserPosition(0, size) : 0;
-        int maxPosition = (canShowChild) ? size - 1 : computeMaxUserPosition(size - 1);
-        if (!hasChild(wc)) {
-            // Increase the maxPosition because children size will grow once wc is added.
-            ++maxPosition;
+        int maxPosition = minPosition;
+        if (size > 0) {
+            maxPosition = (canShowChild) ? size - 1 : computeMaxUserPosition(size - 1);
         }
 
         // Factor in always-on-top children in max possible position.
         if (!wc.isAlwaysOnTop()) {
             // We want to place all non-always-on-top containers below always-on-top ones.
             while (maxPosition > minPosition) {
-                if (!mChildren.get(maxPosition - 1).isAlwaysOnTop()) break;
+                if (!mChildren.get(maxPosition).isAlwaysOnTop()) break;
                 --maxPosition;
             }
         }
@@ -2439,6 +2438,12 @@ class Task extends TaskFragment {
         } else if (suggestedPosition == POSITION_TOP && maxPosition >= (size - 1)) {
             return POSITION_TOP;
         }
+
+        // Increase the maxPosition because children size will grow once wc is added.
+        if (!hasChild(wc)) {
+            ++maxPosition;
+        }
+
         // Reset position based on minimum/maximum possible positions.
         return Math.min(Math.max(suggestedPosition, minPosition), maxPosition);
     }
@@ -5013,24 +5018,26 @@ class Task extends TaskFragment {
                     }
                 }
 
-                // TODO(185200798): Persist theme name instead of theme if
-                int splashScreenThemeResId = options != null
-                        ? options.getSplashScreenThemeResId() : 0;
-
-                // User can override the splashscreen theme. The theme name is used to persist
-                // the setting, so if no theme is set in the ActivityOptions, we check if has
-                // been persisted here.
-                if (splashScreenThemeResId == 0) {
+                // Find the splash screen theme. User can override the persisted theme by
+                // ActivityOptions.
+                String splashScreenThemeResName = options != null
+                        ? options.getSplashScreenThemeResName() : null;
+                if (splashScreenThemeResName == null || splashScreenThemeResName.isEmpty()) {
                     try {
-                        String themeName = mAtmService.getPackageManager()
+                        splashScreenThemeResName = mAtmService.getPackageManager()
                                 .getSplashScreenTheme(r.packageName, r.mUserId);
-                        if (themeName != null) {
-                            Context packageContext = mAtmService.mContext
-                                    .createPackageContext(r.packageName, 0);
-                            splashScreenThemeResId = packageContext.getResources()
-                                    .getIdentifier(themeName, null, null);
-                        }
-                    } catch (RemoteException | PackageManager.NameNotFoundException
+                    } catch (RemoteException ignore) {
+                        // Just use the default theme
+                    }
+                }
+                int splashScreenThemeResId = 0;
+                if (splashScreenThemeResName != null && !splashScreenThemeResName.isEmpty()) {
+                    try {
+                        final Context packageContext = mAtmService.mContext
+                                .createPackageContext(r.packageName, 0);
+                        splashScreenThemeResId = packageContext.getResources()
+                                .getIdentifier(splashScreenThemeResName, null, null);
+                    } catch (PackageManager.NameNotFoundException
                             | Resources.NotFoundException ignore) {
                         // Just use the default theme
                     }

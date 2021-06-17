@@ -117,6 +117,16 @@ public class TaskOrganizer extends WindowOrganizer {
     public void copySplashScreenView(int taskId) {}
 
     /**
+     * Notify the shell ({@link com.android.wm.shell.ShellTaskOrganizer} that the client has
+     * removed the splash screen view.
+     * @see com.android.wm.shell.ShellTaskOrganizer#onAppSplashScreenViewRemoved(int)
+     * @see SplashScreenView#remove()
+     */
+    @BinderThread
+    public void onAppSplashScreenViewRemoved(int taskId) {
+    }
+
+    /**
      * Called when a task with the registered windowing mode can be controlled by this task
      * organizer. For non-root tasks, the leash may initially be hidden so it is up to the organizer
      * to show this task.
@@ -236,8 +246,13 @@ public class TaskOrganizer extends WindowOrganizer {
         }
 
         @Override
-        public void copySplashScreenView(int taskId) {
+        public void copySplashScreenView(int taskId)  {
             mExecutor.execute(() -> TaskOrganizer.this.copySplashScreenView(taskId));
+        }
+
+        @Override
+        public void onAppSplashScreenViewRemoved(int taskId) {
+            mExecutor.execute(() -> TaskOrganizer.this.onAppSplashScreenViewRemoved(taskId));
         }
 
         @Override

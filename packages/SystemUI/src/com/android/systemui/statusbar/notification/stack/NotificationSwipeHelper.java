@@ -325,6 +325,11 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     }
 
     @Override
+    protected float getTotalTranslationLength(View animView) {
+        return mCallback.getTotalTranslationLength(animView);
+    }
+
+    @Override
     public void setTranslation(View v, float translate) {
         if (v instanceof SwipeableView) {
             ((SwipeableView) v).setTranslation(translate);
@@ -466,6 +471,13 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         void onSnooze(StatusBarNotification sbn, SnoozeOption snoozeOption);
 
         void onDismiss();
+
+        /**
+         * Get the total translation length where we want to swipe to when dismissing the view. By
+         * default this is the size of the view, but can also be larger.
+         * @param animView the view to ask about
+         */
+        float getTotalTranslationLength(View animView);
     }
 
     static class Builder {

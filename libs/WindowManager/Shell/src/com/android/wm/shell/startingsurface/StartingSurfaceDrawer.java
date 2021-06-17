@@ -35,6 +35,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
+import android.os.RemoteCallback;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -42,6 +43,7 @@ import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -120,6 +122,13 @@ public class StartingSurfaceDrawer {
     }
 
     private final SparseArray<StartingWindowRecord> mStartingWindowRecords = new SparseArray<>();
+
+    /**
+     * Records of {@link SurfaceControlViewHost} where the splash screen icon animation is
+     * rendered and that have not yet been removed by their client.
+     */
+    private final SparseArray<SurfaceControlViewHost> mAnimatedSplashScreenSurfaceHosts =
+            new SparseArray<>(1);
 
     /** Obtain proper context for showing splash screen on the provided display. */
     private Context getDisplayContext(Context context, int displayId) {
@@ -386,23 +395,56 @@ public class StartingSurfaceDrawer {
 
     /**
      * Called when the Task wants to copy the splash screen.
-     * @param taskId
      */
     public void copySplashScreenView(int taskId) {
         final StartingWindowRecord preView = mStartingWindowRecords.get(taskId);
         SplashScreenViewParcelable parcelable;
-        if (preView != null && preView.mContentView != null
-                && preView.mContentView.isCopyable()) {
-            parcelable = new SplashScreenViewParcelable(preView.mContentView);
-            preView.mContentView.onCopied();
+        SplashScreenView splashScreenView = preView != null ? preView.mContentView : null;
+        if (splashScreenView != null && splashScreenView.isCopyable()) {
+            parcelable = new SplashScreenViewParcelable(splashScreenView);
+            parcelable.setClientCallback(
+                    new RemoteCallback((bundle) -> mSplashScreenExecutor.execute(
+                            () -> onAppSplashScreenViewRemoved(taskId, false))));
+            splashScreenView.onCopied();
+            mAnimatedSplashScreenSurfaceHosts.append(taskId, splashScreenView.getSurfaceHost());
         } else {
             parcelable = null;
         }
         if (DEBUG_SPLASH_SCREEN) {
             Slog.v(TAG, "Copying splash screen window view for task: " + taskId
-                    + " parcelable? " + parcelable);
+                    + " parcelable: " + parcelable);
         }
         ActivityTaskManager.getInstance().onSplashScreenViewCopyFinished(taskId, parcelable);
+    }
+
+    /**
+     * Called when the {@link SplashScreenView} is removed from the client Activity view's hierarchy
+     * or when the Activity is clean up.
+     *
+     * @param taskId The Task id on which the splash screen was attached
+     */
+    public void onAppSplashScreenViewRemoved(int taskId) {
+        onAppSplashScreenViewRemoved(taskId, true /* fromServer */);
+    }
+
+    /**
+     * @param fromServer If true, this means the removal was notified by the server. This is only
+     *                   used for debugging purposes.
+     * @see #onAppSplashScreenViewRemoved(int)
+     */
+    private void onAppSplashScreenViewRemoved(int taskId, boolean fromServer) {
+        SurfaceControlViewHost viewHost =
+                mAnimatedSplashScreenSurfaceHosts.get(taskId);
+        if (viewHost == null) {
+            return;
+        }
+        mAnimatedSplashScreenSurfaceHosts.remove(taskId);
+        if (DEBUG_SPLASH_SCREEN) {
+            String reason = fromServer ? "Server cleaned up" : "App removed";
+            Slog.v(TAG, reason + "the splash screen. Releasing SurfaceControlViewHost for task:"
+                    + taskId);
+        }
+        viewHost.getView().post(viewHost::release);
     }
 
     protected boolean addWindow(int taskId, IBinder appToken, View view, WindowManager wm,

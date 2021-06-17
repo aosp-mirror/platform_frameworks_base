@@ -74,7 +74,7 @@ public abstract class ShortcutServiceInternal {
     /**
      * Get the theme res ID of the starting window, it can be 0 if not specified.
      */
-    public abstract int getShortcutStartingThemeResId(int launcherUserId,
+    public abstract @Nullable String getShortcutStartingThemeResName(int launcherUserId,
             @NonNull String callingPackage, @NonNull String packageName, @NonNull String shortcutId,
             int userId);
 
