@@ -2087,6 +2087,7 @@ package android.bluetooth {
     field public static final int PBAP_CLIENT = 17; // 0x11
     field @Deprecated public static final int PRIORITY_OFF = 0; // 0x0
     field @Deprecated public static final int PRIORITY_ON = 100; // 0x64
+    field public static final int VOLUME_CONTROL = 23; // 0x17
   }
 
   public final class BluetoothStatusCodes {
