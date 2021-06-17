@@ -78,6 +78,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.BatteryUsageStatsProvider;
+import com.android.internal.os.BatteryUsageStatsStore;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RailStats;
@@ -124,10 +125,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         Watchdog.Monitor {
     static final String TAG = "BatteryStatsService";
     static final boolean DBG = false;
+    private static final boolean BATTERY_USAGE_STORE_ENABLED = true;
 
     private static IBatteryStats sService;
 
     final BatteryStatsImpl mStats;
+    private final BatteryUsageStatsStore mBatteryUsageStatsStore;
     private final BatteryStatsImpl.UserInfoProvider mUserManagerUserInfoProvider;
     private final Context mContext;
     private final BatteryExternalStatsWorker mWorker;
@@ -348,7 +351,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mStats.setPowerProfileLocked(new PowerProfile(context));
         mStats.startTrackingSystemServerCpuTime();
 
-        mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mStats);
+        if (BATTERY_USAGE_STORE_ENABLED) {
+            mBatteryUsageStatsStore =
+                    new BatteryUsageStatsStore(context, mStats, systemDir, mHandler);
+        } else {
+            mBatteryUsageStatsStore = null;
+        }
+        mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mStats,
+                mBatteryUsageStatsStore);
     }
 
     public void publish() {
@@ -752,6 +762,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET_USING_POWER_PROFILE_MODEL,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(), pullAtomCallback);
+        statsManager.setPullAtomCallback(
+                FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(), pullAtomCallback);
     }
 
     /** StatsPullAtomCallback for pulling BatteryUsageStats data. */
@@ -767,6 +781,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     final BatteryUsageStatsQuery powerProfileQuery =
                             new BatteryUsageStatsQuery.Builder().powerProfileModeledOnly().build();
                     bus = getBatteryUsageStats(List.of(powerProfileQuery)).get(0);
+                    break;
+                case FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET:
+                    final long sessionStart = mBatteryUsageStatsStore
+                            .getLastBatteryUsageStatsBeforeResetAtomPullTimestamp();
+                    final long sessionEnd = mStats.getStartClockTime();
+                    final BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()
+                            .aggregateSnapshots(sessionStart, sessionEnd)
+                            .build();
+                    bus = getBatteryUsageStats(List.of(query)).get(0);
+                    mBatteryUsageStatsStore
+                            .setLastBatteryUsageStatsBeforeResetAtomPullTimestamp(sessionEnd);
                     break;
                 default:
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);

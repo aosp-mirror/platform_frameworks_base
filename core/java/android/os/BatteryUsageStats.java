@@ -20,16 +20,23 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.util.Range;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.PowerCalculator;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -77,6 +84,34 @@ public final class BatteryUsageStats implements Parcelable {
 
     private static final int STATSD_PULL_ATOM_MAX_BYTES = 45000;
 
+    // XML tags and attributes for BatteryUsageStats persistence
+    static final String XML_TAG_BATTERY_USAGE_STATS = "battery_usage_stats";
+    static final String XML_TAG_AGGREGATE = "aggregate";
+    static final String XML_TAG_UID = "uid";
+    static final String XML_TAG_USER = "user";
+    static final String XML_TAG_POWER_COMPONENTS = "power_components";
+    static final String XML_TAG_COMPONENT = "component";
+    static final String XML_TAG_CUSTOM_COMPONENT = "custom_component";
+    static final String XML_ATTR_ID = "id";
+    static final String XML_ATTR_UID = "uid";
+    static final String XML_ATTR_USER_ID = "user_id";
+    static final String XML_ATTR_SCOPE = "scope";
+    static final String XML_ATTR_PREFIX_CUSTOM_COMPONENT = "custom_component_";
+    static final String XML_ATTR_START_TIMESTAMP = "start_timestamp";
+    static final String XML_ATTR_END_TIMESTAMP = "end_timestamp";
+    static final String XML_ATTR_POWER = "power";
+    static final String XML_ATTR_DURATION = "duration";
+    static final String XML_ATTR_MODEL = "model";
+    static final String XML_ATTR_BATTERY_CAPACITY = "battery_capacity";
+    static final String XML_ATTR_DISCHARGE_PERCENT = "discharge_pct";
+    static final String XML_ATTR_DISCHARGE_LOWER = "discharge_lower";
+    static final String XML_ATTR_DISCHARGE_UPPER = "discharge_upper";
+    static final String XML_ATTR_BATTERY_REMAINING = "battery_remaining";
+    static final String XML_ATTR_CHARGE_REMAINING = "charge_remaining";
+    static final String XML_ATTR_HIGHEST_DRAIN_PACKAGE = "highest_drain_package";
+    static final String XML_ATTR_TIME_IN_FOREGROUND = "time_in_foreground";
+    static final String XML_ATTR_TIME_IN_BACKGROUND = "time_in_background";
+
     private final int mDischargePercentage;
     private final double mBatteryCapacityMah;
     private final long mStatsStartTimestampMs;
@@ -96,11 +131,7 @@ public final class BatteryUsageStats implements Parcelable {
     private BatteryUsageStats(@NonNull Builder builder) {
         mStatsStartTimestampMs = builder.mStatsStartTimestampMs;
         mStatsEndTimestampMs = builder.mStatsEndTimestampMs;
-        if (builder.mStatsDurationMs != -1) {
-            mStatsDurationMs = builder.mStatsDurationMs;
-        } else {
-            mStatsDurationMs = mStatsEndTimestampMs - mStatsStartTimestampMs;
-        }
+        mStatsDurationMs = builder.getStatsDuration();
         mBatteryCapacityMah = builder.mBatteryCapacityMah;
         mDischargePercentage = builder.mDischargePercentage;
         mDischargedPowerLowerBound = builder.mDischargedPowerLowerBoundMah;
@@ -579,6 +610,109 @@ public final class BatteryUsageStats implements Parcelable {
         }
     }
 
+    /** Serializes this object to XML */
+    public void writeXml(TypedXmlSerializer serializer) throws IOException {
+        serializer.startTag(null, XML_TAG_BATTERY_USAGE_STATS);
+
+        for (int i = 0; i < mCustomPowerComponentNames.length; i++) {
+            serializer.attribute(null, XML_ATTR_PREFIX_CUSTOM_COMPONENT + i,
+                    mCustomPowerComponentNames[i]);
+        }
+
+        serializer.attributeLong(null, XML_ATTR_START_TIMESTAMP, mStatsStartTimestampMs);
+        serializer.attributeLong(null, XML_ATTR_END_TIMESTAMP, mStatsEndTimestampMs);
+        serializer.attributeLong(null, XML_ATTR_DURATION, mStatsDurationMs);
+        serializer.attributeDouble(null, XML_ATTR_BATTERY_CAPACITY, mBatteryCapacityMah);
+        serializer.attributeInt(null, XML_ATTR_DISCHARGE_PERCENT, mDischargePercentage);
+        serializer.attributeDouble(null, XML_ATTR_DISCHARGE_LOWER, mDischargedPowerLowerBound);
+        serializer.attributeDouble(null, XML_ATTR_DISCHARGE_UPPER, mDischargedPowerUpperBound);
+        serializer.attributeLong(null, XML_ATTR_BATTERY_REMAINING, mBatteryTimeRemainingMs);
+        serializer.attributeLong(null, XML_ATTR_CHARGE_REMAINING, mChargeTimeRemainingMs);
+
+        for (int scope = 0; scope < BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT;
+                scope++) {
+            mAggregateBatteryConsumers[scope].writeToXml(serializer, scope);
+        }
+        for (UidBatteryConsumer consumer : mUidBatteryConsumers) {
+            consumer.writeToXml(serializer);
+        }
+        for (UserBatteryConsumer consumer : mUserBatteryConsumers) {
+            consumer.writeToXml(serializer);
+        }
+        serializer.endTag(null, XML_TAG_BATTERY_USAGE_STATS);
+    }
+
+    /** Parses an XML representation of BatteryUsageStats */
+    public static BatteryUsageStats createFromXml(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        Builder builder = null;
+        int eventType = parser.getEventType();
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG
+                    && parser.getName().equals(XML_TAG_BATTERY_USAGE_STATS)) {
+                List<String> customComponentNames = new ArrayList<>();
+                int i = 0;
+                while (true) {
+                    int index = parser.getAttributeIndex(null,
+                            XML_ATTR_PREFIX_CUSTOM_COMPONENT + i);
+                    if (index == -1) {
+                        break;
+                    }
+                    customComponentNames.add(parser.getAttributeValue(index));
+                    i++;
+                }
+
+                builder = new Builder(
+                        customComponentNames.toArray(new String[0]), true);
+
+                builder.setStatsStartTimestamp(
+                        parser.getAttributeLong(null, XML_ATTR_START_TIMESTAMP));
+                builder.setStatsEndTimestamp(
+                        parser.getAttributeLong(null, XML_ATTR_END_TIMESTAMP));
+                builder.setStatsDuration(
+                        parser.getAttributeLong(null, XML_ATTR_DURATION));
+                builder.setBatteryCapacity(
+                        parser.getAttributeDouble(null, XML_ATTR_BATTERY_CAPACITY));
+                builder.setDischargePercentage(
+                        parser.getAttributeInt(null, XML_ATTR_DISCHARGE_PERCENT));
+                builder.setDischargedPowerRange(
+                        parser.getAttributeDouble(null, XML_ATTR_DISCHARGE_LOWER),
+                        parser.getAttributeDouble(null, XML_ATTR_DISCHARGE_UPPER));
+                builder.setBatteryTimeRemainingMs(
+                        parser.getAttributeLong(null, XML_ATTR_BATTERY_REMAINING));
+                builder.setChargeTimeRemainingMs(
+                        parser.getAttributeLong(null, XML_ATTR_CHARGE_REMAINING));
+
+                eventType = parser.next();
+                break;
+            }
+            eventType = parser.next();
+        }
+
+        if (builder == null) {
+            throw new XmlPullParserException("No root element");
+        }
+
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG) {
+                switch (parser.getName()) {
+                    case XML_TAG_AGGREGATE:
+                        AggregateBatteryConsumer.parseXml(parser, builder);
+                        break;
+                    case XML_TAG_UID:
+                        UidBatteryConsumer.createFromXml(parser, builder);
+                        break;
+                    case XML_TAG_USER:
+                        UserBatteryConsumer.createFromXml(parser, builder);
+                        break;
+                }
+            }
+            eventType = parser.next();
+        }
+
+        return builder.build();
+    }
+
     /**
      * Builder for BatteryUsageStats.
      */
@@ -656,6 +790,14 @@ public final class BatteryUsageStats implements Parcelable {
         public Builder setStatsDuration(long statsDurationMs) {
             mStatsDurationMs = statsDurationMs;
             return this;
+        }
+
+        private long getStatsDuration() {
+            if (mStatsDurationMs != -1) {
+                return mStatsDurationMs;
+            } else {
+                return mStatsEndTimestampMs - mStatsStartTimestampMs;
+            }
         }
 
         /**
@@ -738,6 +880,22 @@ public final class BatteryUsageStats implements Parcelable {
         }
 
         /**
+         * Creates or returns a UidBatteryConsumer, which represents battery attribution
+         * data for an individual UID. This version of the method is not suitable for use
+         * with PowerCalculators.
+         */
+        @NonNull
+        public UidBatteryConsumer.Builder getOrCreateUidBatteryConsumerBuilder(int uid) {
+            UidBatteryConsumer.Builder builder = mUidBatteryConsumerBuilders.get(uid);
+            if (builder == null) {
+                builder = new UidBatteryConsumer.Builder(mCustomPowerComponentNames,
+                        mIncludePowerModels, uid);
+                mUidBatteryConsumerBuilders.put(uid, builder);
+            }
+            return builder;
+        }
+
+        /**
          * Creates or returns a UserBatteryConsumer, which represents battery attribution
          * data for an individual {@link UserHandle}.
          */
@@ -755,6 +913,60 @@ public final class BatteryUsageStats implements Parcelable {
         @NonNull
         public SparseArray<UidBatteryConsumer.Builder> getUidBatteryConsumerBuilders() {
             return mUidBatteryConsumerBuilders;
+        }
+
+        /**
+         * Adds battery usage stats from another snapshots. The two snapshots are assumed to be
+         * non-overlapping, meaning that the power consumption estimates and session durations
+         * can be simply summed across the two snapshots.  This remains true even if the timestamps
+         * seem to indicate that the sessions are in fact overlapping: timestamps may be off as a
+         * result of realtime clock adjustments by the user or the system.
+         */
+        @NonNull
+        public Builder add(BatteryUsageStats stats) {
+            if (!Arrays.equals(mCustomPowerComponentNames, stats.mCustomPowerComponentNames)) {
+                throw new IllegalArgumentException(
+                        "BatteryUsageStats have different custom power components");
+            }
+
+            if (mUserBatteryConsumerBuilders.size() != 0
+                    || !stats.getUserBatteryConsumers().isEmpty()) {
+                throw new UnsupportedOperationException(
+                        "Combining UserBatteryConsumers is not supported");
+            }
+
+            mDischargedPowerLowerBoundMah += stats.mDischargedPowerLowerBound;
+            mDischargedPowerUpperBoundMah += stats.mDischargedPowerUpperBound;
+            mDischargePercentage += stats.mDischargePercentage;
+
+            mStatsDurationMs = getStatsDuration() + stats.getStatsDuration();
+
+            if (mStatsStartTimestampMs == 0
+                    || stats.mStatsStartTimestampMs < mStatsStartTimestampMs) {
+                mStatsStartTimestampMs = stats.mStatsStartTimestampMs;
+            }
+
+            final boolean addingLaterSnapshot = stats.mStatsEndTimestampMs > mStatsEndTimestampMs;
+            if (addingLaterSnapshot) {
+                mStatsEndTimestampMs = stats.mStatsEndTimestampMs;
+            }
+
+            for (int scope = 0; scope < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; scope++) {
+                getAggregateBatteryConsumerBuilder(scope)
+                        .add(stats.mAggregateBatteryConsumers[scope]);
+            }
+
+            for (UidBatteryConsumer consumer : stats.getUidBatteryConsumers()) {
+                getOrCreateUidBatteryConsumerBuilder(consumer.getUid()).add(consumer);
+            }
+
+            if (addingLaterSnapshot) {
+                mBatteryCapacityMah = stats.mBatteryCapacityMah;
+                mBatteryTimeRemainingMs = stats.mBatteryTimeRemainingMs;
+                mChargeTimeRemainingMs = stats.mChargeTimeRemainingMs;
+            }
+
+            return this;
         }
     }
 }
