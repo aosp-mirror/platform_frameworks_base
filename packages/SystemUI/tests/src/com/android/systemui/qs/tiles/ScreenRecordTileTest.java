@@ -91,6 +91,9 @@ public class ScreenRecordTileTest extends SysuiTestCase {
                 mController,
                 mKeyguardDismissUtil
         );
+
+        mTile.initialize();
+        mTestableLooper.processAllMessages();
     }
 
     // Test that the tile is inactive and labeled correctly when the controller is neither starting
