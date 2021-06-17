@@ -139,6 +139,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     protected final AccessibilitySecurityPolicy mSecurityPolicy;
     protected final AccessibilityTrace mTrace;
 
+    // The attribution tag set by the service that is bound to this instance
+    protected String mAttributionTag;
+
     // The service that's bound to this instance. Whenever this value is non-null, this
     // object is registered as a death recipient
     IBinder mService;
@@ -417,6 +420,15 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @Override
+    public void setAttributionTag(String attributionTag) {
+        mAttributionTag = attributionTag;
+    }
+
+    String getAttributionTag() {
+        return mAttributionTag;
     }
 
     protected abstract boolean hasRightsToCurrentUserLocked();
