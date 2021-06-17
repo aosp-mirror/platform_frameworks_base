@@ -396,10 +396,6 @@
     <!-- Whether or not the notifications should always fade as they are dismissed. -->
     <bool name="config_fadeNotificationsOnDismiss">false</bool>
 
-    <!-- Whether or not the parent of the notification row itself is being translated when swiped or
-         its children views. If true, then the contents are translated and vice versa. -->
-    <bool name="config_translateNotificationContentsOnSwipe">true</bool>
-
     <!-- Whether or not the fade on the notification is based on the amount that it has been swiped
          off-screen. -->
     <bool name="config_fadeDependingOnAmountSwiped">false</bool>

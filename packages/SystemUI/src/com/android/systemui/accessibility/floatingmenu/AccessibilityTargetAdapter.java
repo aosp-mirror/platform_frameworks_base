@@ -143,7 +143,7 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
         }
 
         void updateItemPadding(int padding, int size) {
-            itemView.setPaddingRelative(padding, padding, padding, padding);
+            itemView.setPaddingRelative(padding, padding, padding, 0);
         }
     }
 
@@ -154,7 +154,7 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
 
         @Override
         void updateItemPadding(int padding, int size) {
-            final int paddingBottom = size <= 2 ? padding : 0;
+            final int paddingBottom = size <= 1 ? padding : 0;
             itemView.setPaddingRelative(padding, padding, padding, paddingBottom);
         }
     }
@@ -166,7 +166,7 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
 
         @Override
         void updateItemPadding(int padding, int size) {
-            itemView.setPaddingRelative(padding, 0, padding, padding);
+            itemView.setPaddingRelative(padding, padding, padding, padding);
         }
     }
 }

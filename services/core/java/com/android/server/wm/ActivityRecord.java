@@ -309,6 +309,7 @@ import android.view.animation.Animation;
 import android.window.IRemoteTransition;
 import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreen;
+import android.window.SplashScreenView;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
@@ -716,25 +717,29 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean startingMoved;
 
     boolean mHandleExitSplashScreen;
-    @TransferSplashScreenState int mTransferringSplashScreenState =
-            TRANSFER_SPLASH_SCREEN_IDLE;
+    @TransferSplashScreenState
+    int mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_IDLE;
 
-    // Idle, can be triggered to do transfer if needed.
+    /** Idle, can be triggered to do transfer if needed. */
     static final int TRANSFER_SPLASH_SCREEN_IDLE = 0;
-    // requesting a copy from shell.
+
+    /** Requesting a copy from shell. */
     static final int TRANSFER_SPLASH_SCREEN_COPYING = 1;
-    // attach the splash screen view to activity.
+
+    /** Attach the splash screen view to activity. */
     static final int TRANSFER_SPLASH_SCREEN_ATTACH_TO_CLIENT = 2;
-    // client has taken over splash screen view.
+
+    /** Client has taken over splash screen view. */
     static final int TRANSFER_SPLASH_SCREEN_FINISH = 3;
 
-    @IntDef(prefix = { "TRANSFER_SPLASH_SCREEN_" }, value = {
+    @IntDef(prefix = {"TRANSFER_SPLASH_SCREEN_"}, value = {
             TRANSFER_SPLASH_SCREEN_IDLE,
             TRANSFER_SPLASH_SCREEN_COPYING,
             TRANSFER_SPLASH_SCREEN_ATTACH_TO_CLIENT,
             TRANSFER_SPLASH_SCREEN_FINISH,
     })
-    @interface TransferSplashScreenState {}
+    @interface TransferSplashScreenState {
+    }
 
     // How long we wait until giving up transfer splash screen.
     private static final int TRANSFER_SPLASH_SCREEN_TIMEOUT = 2000;
@@ -2196,6 +2201,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         removeStartingWindowAnimation(false /* prepareAnimation */);
     }
 
+    /**
+     * Notify the shell ({@link com.android.wm.shell.ShellTaskOrganizer} it should clean up any
+     * remaining reference to this {@link ActivityRecord}'s splash screen.
+     * @see com.android.wm.shell.ShellTaskOrganizer#onAppSplashScreenViewRemoved(int)
+     * @see SplashScreenView#remove()
+     */
+    void cleanUpSplashScreen() {
+        // We only clean up the splash screen if we were supposed to handle it. If it was
+        // transferred to another activity, the next one will handle the clean up.
+        if (mHandleExitSplashScreen && !startingMoved
+                && (mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH
+                || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_IDLE)) {
+            ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Cleaning splash screen token=%s", this);
+            mAtmService.mTaskOrganizerController.onAppSplashScreenViewRemoved(getTask());
+        }
+    }
+
     void removeStartingWindow() {
         removeStartingWindowAnimation(true /* prepareAnimation */);
     }
@@ -3342,6 +3364,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void cleanUp(boolean cleanServices, boolean setState) {
         task.cleanUpActivityReferences(this);
         clearLastParentBeforePip();
+
+        // Clean up the splash screen if it was still displayed.
+        cleanUpSplashScreen();
 
         deferRelaunchUntilPaused = false;
         frozenBeforeDestroy = false;

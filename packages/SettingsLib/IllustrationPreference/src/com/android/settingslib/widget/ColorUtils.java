@@ -39,13 +39,6 @@ import java.util.HashMap;
 public class ColorUtils {
 
     private static HashMap<String, Integer> sSysColors;
-    static {
-        sSysColors = new HashMap<>();
-        sSysColors.put(".colorAccent", android.R.attr.colorAccent);
-        sSysColors.put(".colorPrimary", android.R.attr.colorPrimary);
-        sSysColors.put(".colorPrimaryDark", android.R.attr.colorPrimaryDark);
-        sSysColors.put(".colorSecondary", android.R.attr.colorSecondary);
-    }
 
     private static HashMap<String, Pair<Integer, Integer>> sFixedColors;
     static {
@@ -110,19 +103,6 @@ public class ColorUtils {
      * Apply the color of tags to the animation.
      */
     public static void applyDynamicColors(Context context, LottieAnimationView animationView) {
-        for (String key : sSysColors.keySet()) {
-            final int color = sSysColors.get(key);
-            animationView.addValueCallback(
-                    new KeyPath("**", key, "**"),
-                    LottieProperty.COLOR_FILTER,
-                    new SimpleLottieValueCallback<ColorFilter>() {
-                        @Override
-                        public ColorFilter getValue(LottieFrameInfo<ColorFilter> frameInfo) {
-                            return new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN);
-                        }
-                    }
-            );
-        }
         for (String key : sFixedColors.keySet()) {
             final Pair<Integer, Integer> fixedColorPair = sFixedColors.get(key);
             final int color = isDarkMode(context) ? fixedColorPair.second : fixedColorPair.first;

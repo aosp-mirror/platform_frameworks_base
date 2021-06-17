@@ -71,11 +71,11 @@ public final class NotificationClicker implements View.OnClickListener {
         // Check if the notification is displaying the menu, if so slide notification back
         if (isMenuVisible(row)) {
             mLogger.logMenuVisible(entry);
-            row.animateTranslateNotification(0);
+            row.animateResetTranslation();
             return;
         } else if (row.isChildInGroup() && isMenuVisible(row.getNotificationParent())) {
             mLogger.logParentMenuVisible(entry);
-            row.getNotificationParent().animateTranslateNotification(0);
+            row.getNotificationParent().animateResetTranslation();
             return;
         } else if (row.isSummaryWithChildren() && row.areChildrenExpanded()) {
             // We never want to open the app directly if the user clicks in between

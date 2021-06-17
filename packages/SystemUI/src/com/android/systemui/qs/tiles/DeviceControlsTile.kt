@@ -22,6 +22,7 @@ import android.os.Handler
 import android.os.Looper
 import android.service.quicksettings.Tile
 import android.view.View
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
@@ -106,7 +107,8 @@ class DeviceControlsTile @Inject constructor(
             putExtra(ControlsUiController.EXTRA_ANIMATE, true)
         }
         val animationController = view?.let {
-            ActivityLaunchAnimator.Controller.fromView(it)
+            ActivityLaunchAnimator.Controller.fromView(
+                    it, InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE)
         }
 
         mUiHandler.post {
