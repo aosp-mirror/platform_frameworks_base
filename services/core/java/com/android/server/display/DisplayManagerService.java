@@ -63,6 +63,7 @@ import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayGroupListener;
 import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
+import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
 import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayedContentSample;
@@ -130,6 +131,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
@@ -2111,6 +2113,11 @@ public final class DisplayManagerService extends SystemService {
                 DisplayManagerGlobal.EVENT_DISPLAY_BRIGHTNESS_CHANGED);
     }
 
+    private DisplayDevice getDeviceForDisplayLocked(int displayId) {
+        final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
+        return display == null ? null : display.getPrimaryDisplayDeviceLocked();
+    }
+
     private final class DisplayManagerHandler extends Handler {
         public DisplayManagerHandler(Looper looper) {
             super(looper, null, true /*async*/);
@@ -3294,6 +3301,19 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
             return null;
+        }
+
+        @Override
+        public List<RefreshRateLimitation> getRefreshRateLimitations(int displayId) {
+            final DisplayDeviceConfig config;
+            synchronized (mSyncRoot) {
+                final DisplayDevice device = getDeviceForDisplayLocked(displayId);
+                if (device == null) {
+                    return null;
+                }
+                config = device.getDisplayDeviceConfig();
+            }
+            return config.getRefreshRateLimitations();
         }
     }
 
