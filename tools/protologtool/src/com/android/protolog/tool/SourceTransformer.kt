@@ -16,7 +16,7 @@
 
 package com.android.protolog.tool
 
-import com.android.server.protolog.common.LogDataType
+import com.android.internal.protolog.common.LogDataType
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.NodeList
@@ -89,7 +89,7 @@ class SourceTransformer(
             // Out: ProtoLog.e(GROUP, 1234, 0, null, arg)
             newCall.arguments.add(2, IntegerLiteralExpr(typeMask))
             // Replace call to a stub method with an actual implementation.
-            // Out: com.android.server.protolog.ProtoLogImpl.e(GROUP, 1234, null, arg)
+            // Out: ProtoLogImpl.e(GROUP, 1234, null, arg)
             newCall.setScope(protoLogImplClassNode)
             // Create a call to ProtoLog$Cache.GROUP_enabled
             // Out: com.android.server.protolog.ProtoLog$Cache.GROUP_enabled
@@ -119,9 +119,9 @@ class SourceTransformer(
             }
             blockStmt.addStatement(ExpressionStmt(newCall))
             // Create an IF-statement with the previously created condition.
-            // Out: if (com.android.server.protolog.ProtoLogImpl.isEnabled(GROUP)) {
+            // Out: if (ProtoLogImpl.isEnabled(GROUP)) {
             //          long protoLogParam0 = arg;
-            //          com.android.server.protolog.ProtoLogImpl.e(GROUP, 1234, 0, null, protoLogParam0);
+            //          ProtoLogImpl.e(GROUP, 1234, 0, null, protoLogParam0);
             //      }
             ifStmt = IfStmt(isLogEnabled, blockStmt, null)
         } else {

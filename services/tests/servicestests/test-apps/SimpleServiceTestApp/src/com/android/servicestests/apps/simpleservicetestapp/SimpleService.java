@@ -21,14 +21,23 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Process;
+import android.util.Log;
 
 public class SimpleService extends Service {
+    private static final String TAG = "SimpleService";
+
     private final IRemoteCallback.Stub mBinder = new IRemoteCallback.Stub() {
         @Override
         public void sendResult(Bundle bundle) {
             Process.killProcess(Process.myPid());
         }
     };
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG, "onStartCommand");
+        return START_STICKY;
+    }
 
     @Override
     public IBinder onBind(Intent intent) {

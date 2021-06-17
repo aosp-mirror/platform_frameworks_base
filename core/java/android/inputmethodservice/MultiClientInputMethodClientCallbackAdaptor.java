@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.InputChannel;
@@ -38,8 +39,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.inputmethod.IMultiClientInputMethodSession;
 import com.android.internal.inputmethod.CancellationGroup;
+import com.android.internal.inputmethod.IMultiClientInputMethodSession;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.view.IInputContext;
@@ -256,18 +257,6 @@ final class MultiClientInputMethodClientCallbackAdaptor {
         }
 
         @Override
-        public void toggleSoftInput(int showFlags, int hideFlags) {
-            synchronized (mSessionLock) {
-                if (mCallbackImpl == null || mHandler == null) {
-                    return;
-                }
-                mHandler.sendMessage(PooledLambda.obtainMessage(
-                        CallbackImpl::toggleSoftInput, mCallbackImpl, showFlags,
-                        hideFlags));
-            }
-        }
-
-        @Override
         public void finishSession() {
             synchronized (mSessionLock) {
                 if (mCallbackImpl == null || mHandler == null) {
@@ -300,6 +289,12 @@ final class MultiClientInputMethodClientCallbackAdaptor {
 
         @Override
         public void removeImeSurface() {
+            // no-op for multi-session
+            reportNotSupported();
+        }
+
+        @Override
+        public void finishInput() throws RemoteException {
             // no-op for multi-session
             reportNotSupported();
         }
@@ -410,13 +405,6 @@ final class MultiClientInputMethodClientCallbackAdaptor {
                 return;
             }
             mOriginalCallback.onAppPrivateCommand(action, data);
-        }
-
-        void toggleSoftInput(int showFlags, int hideFlags) {
-            if (mFinished) {
-                return;
-            }
-            mOriginalCallback.onToggleSoftInput(showFlags, hideFlags);
         }
 
         void finishSession() {

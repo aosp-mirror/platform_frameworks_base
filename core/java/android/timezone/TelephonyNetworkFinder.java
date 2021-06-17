@@ -29,9 +29,9 @@ import java.util.Objects;
 public final class TelephonyNetworkFinder {
 
     @NonNull
-    private final libcore.timezone.TelephonyNetworkFinder mDelegate;
+    private final com.android.i18n.timezone.TelephonyNetworkFinder mDelegate;
 
-    TelephonyNetworkFinder(libcore.timezone.TelephonyNetworkFinder delegate) {
+    TelephonyNetworkFinder(com.android.i18n.timezone.TelephonyNetworkFinder delegate) {
         mDelegate = Objects.requireNonNull(delegate);
     }
 
@@ -45,7 +45,7 @@ public final class TelephonyNetworkFinder {
         Objects.requireNonNull(mcc);
         Objects.requireNonNull(mnc);
 
-        libcore.timezone.TelephonyNetwork telephonyNetworkDelegate =
+        com.android.i18n.timezone.TelephonyNetwork telephonyNetworkDelegate =
                 mDelegate.findNetworkByMccMnc(mcc, mnc);
         return telephonyNetworkDelegate != null
                 ? new TelephonyNetwork(telephonyNetworkDelegate) : null;

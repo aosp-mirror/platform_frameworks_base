@@ -169,6 +169,13 @@ public class InsetsSourceTest {
     }
 
     @Test
+    public void testCalculateInsetsForIme_noIntersection_horizontal() {
+        mImeSource.setFrame(new Rect(0, 0, 100, 500));
+        Insets insets = mImeSource.calculateInsets(new Rect(100, 0, 500, 500), false);
+        assertEquals(Insets.NONE, insets);
+    }
+
+    @Test
     public void testCalculateInsets_zeroWidthIntersection_horizontal_start() {
         mSource.setFrame(new Rect(0, 0, 100, 500));
         Insets insets = mSource.calculateInsets(new Rect(0, 0, 500, 0), false);

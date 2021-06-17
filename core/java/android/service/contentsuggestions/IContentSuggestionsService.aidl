@@ -20,7 +20,7 @@ import android.app.contentsuggestions.IClassificationsCallback;
 import android.app.contentsuggestions.ISelectionsCallback;
 import android.app.contentsuggestions.ClassificationsRequest;
 import android.app.contentsuggestions.SelectionsRequest;
-import android.graphics.GraphicBuffer;
+import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 
 /**
@@ -31,7 +31,7 @@ import android.os.Bundle;
 oneway interface IContentSuggestionsService {
     void provideContextImage(
             int taskId,
-            in GraphicBuffer contextImage,
+            in HardwareBuffer contextImage,
             int colorSpaceId,
             in Bundle imageContextRequestExtras);
     void suggestContentSelections(

@@ -13,19 +13,21 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-        package="com.android.hardware.usb.externalmanagementtest" >
 
-    <uses-permission android:name="android.permission.MANAGE_USB" />
-    <application android:label="UsbHostExternalManagementTestApp" >
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+     package="com.android.hardware.usb.externalmanagementtest">
+
+    <uses-permission android:name="android.permission.MANAGE_USB"/>
+    <application android:label="UsbHostExternalManagementTestApp">
         <activity android:name=".UsbHostManagementActivity"
-            android:configChanges="keyboard|keyboardHidden" >
+             android:configChanges="keyboard|keyboardHidden"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>
             </intent-filter>
         </activity>
     </application>

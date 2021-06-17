@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ -->
+<configuration description="Runs Input Tests">
+    <option name="test-tag" value="InputTests" />
+    <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
+        <!-- keeps the screen on during tests -->
+        <option name="screen-always-on" value="on" />
+        <!-- prevents the phone from restarting -->
+        <option name="force-skip-system-props" value="true" />
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true"/>
+        <option name="test-file-name" value="InputTests.apk"/>
+
+    </target_preparer>
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest">
+        <option name="package" value="com.android.test.input"/>
+        <option name="exclude-annotation" value="androidx.test.filters.FlakyTest" />
+        <option name="shell-timeout" value="660s" />
+        <option name="test-timeout" value="600s" />
+        <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
+    </test>
+</configuration>

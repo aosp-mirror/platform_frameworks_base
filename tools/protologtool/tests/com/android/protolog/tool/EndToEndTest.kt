@@ -33,8 +33,8 @@ class EndToEndTest {
         val output = run(
                 src = "frameworks/base/org/example/Example.java" to """
                     package org.example;
-                    import com.android.server.protolog.common.ProtoLog;
-                    import static com.android.server.wm.ProtoLogGroup.GROUP;
+                    import com.android.internal.protolog.common.ProtoLog;
+                    import static com.android.internal.protolog.ProtoLogGroup.GROUP;
 
                     class Example {
                         void method() {
@@ -46,11 +46,11 @@ class EndToEndTest {
                 """.trimIndent(),
                 logGroup = LogGroup("GROUP", true, false, "TAG_GROUP"),
                 commandOptions = CommandOptions(arrayOf("transform-protolog-calls",
-                        "--protolog-class", "com.android.server.protolog.common.ProtoLog",
-                        "--protolog-impl-class", "com.android.server.protolog.ProtoLogImpl",
+                        "--protolog-class", "com.android.internal.protolog.common.ProtoLog",
+                        "--protolog-impl-class", "com.android.internal.protolog.ProtoLogImpl",
                         "--protolog-cache-class",
-                        "com.android.server.protolog.ProtoLog${"\$\$"}Cache",
-                        "--loggroups-class", "com.android.server.wm.ProtoLogGroup",
+                        "com.android.server.wm.ProtoLogCache",
+                        "--loggroups-class", "com.android.internal.protolog.ProtoLogGroup",
                         "--loggroups-jar", "not_required.jar",
                         "--output-srcjar", "out.srcjar",
                         "frameworks/base/org/example/Example.java"))
@@ -64,8 +64,8 @@ class EndToEndTest {
         val output = run(
                 src = "frameworks/base/org/example/Example.java" to """
                     package org.example;
-                    import com.android.server.protolog.common.ProtoLog;
-                    import static com.android.server.wm.ProtoLogGroup.GROUP;
+                    import com.android.internal.protolog.common.ProtoLog;
+                    import static com.android.internal.protolog.ProtoLogGroup.GROUP;
 
                     class Example {
                         void method() {
@@ -77,8 +77,8 @@ class EndToEndTest {
                 """.trimIndent(),
                 logGroup = LogGroup("GROUP", true, false, "TAG_GROUP"),
                 commandOptions = CommandOptions(arrayOf("generate-viewer-config",
-                        "--protolog-class", "com.android.server.protolog.common.ProtoLog",
-                        "--loggroups-class", "com.android.server.wm.ProtoLogGroup",
+                        "--protolog-class", "com.android.internal.protolog.common.ProtoLog",
+                        "--loggroups-class", "com.android.internal.protolog.ProtoLogGroup",
                         "--loggroups-jar", "not_required.jar",
                         "--viewer-conf", "out.json",
                         "frameworks/base/org/example/Example.java"))

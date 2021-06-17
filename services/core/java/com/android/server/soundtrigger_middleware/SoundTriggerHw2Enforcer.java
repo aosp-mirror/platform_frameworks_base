@@ -21,6 +21,8 @@ import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
 import android.hardware.soundtrigger.V2_3.ModelParameterRange;
 import android.hardware.soundtrigger.V2_3.Properties;
 import android.hardware.soundtrigger.V2_3.RecognitionConfig;
+import android.media.soundtrigger_middleware.Status;
+import android.os.DeadObjectException;
 import android.os.IHwBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -128,12 +130,14 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     @Override
     public void startRecognition(int modelHandle, RecognitionConfig config, Callback callback,
             int cookie) {
+        // It is possible that an event will be sent before the HAL returns from the
+        // startRecognition call, thus it is important to set the state to active before the call.
+        synchronized (mModelStates) {
+            mModelStates.replace(modelHandle, true);
+        }
         try {
             mUnderlying.startRecognition(modelHandle, config, new CallbackEnforcer(callback),
                     cookie);
-            synchronized (mModelStates) {
-                mModelStates.replace(modelHandle, true);
-            }
         } catch (RuntimeException e) {
             throw handleException(e);
         }
@@ -191,6 +195,11 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     }
 
     private static RuntimeException handleException(RuntimeException e) {
+        if (e.getCause() instanceof DeadObjectException) {
+            // Server is dead, no need to reboot.
+            Log.e(TAG, "HAL died");
+            throw new RecoverableException(Status.DEAD_OBJECT);
+        }
         Log.e(TAG, "Exception caught from HAL, rebooting HAL");
         rebootHal();
         throw e;

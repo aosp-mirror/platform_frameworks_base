@@ -37,7 +37,7 @@ public:
      * "get" returns a pointer to the singleton ShaderCache object.  This
      * singleton object will never be destroyed.
      */
-    ANDROID_API static ShaderCache& get();
+    static ShaderCache& get();
 
     /**
      * initShaderDiskCache" loads the serialized cache contents from disk,
@@ -80,7 +80,7 @@ public:
      * Pipeline cache is saved on disk only if the size of the data has changed or there was
      * a new shader compiled.
      */
-    void onVkFrameFlushed(GrContext* context);
+    void onVkFrameFlushed(GrDirectContext* context);
 
 private:
     // Creation and (the lack of) destruction is handled internally.

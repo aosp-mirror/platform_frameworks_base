@@ -73,7 +73,7 @@ public class ContrastColorUtil {
 
     private ContrastColorUtil(Context context) {
         mGrayscaleIconMaxSize = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_large_icon_width);
+                com.android.internal.R.dimen.notification_grayscale_icon_max_size);
     }
 
     /**
@@ -595,7 +595,9 @@ public class ContrastColorUtil {
         if (backgroundColor == Notification.COLOR_DEFAULT) {
             return !defaultBackgroundIsDark;
         }
-        return ColorUtilsFromCompat.calculateLuminance(backgroundColor) > 0.5;
+        // Color contrast ratio luminance midpoint, X: 1.05 / (X + 0.05) = (X + 0.05) / 0.05
+        // Solved as X = sqrt(.05 * 1.05) - 0.05 = 0.17912878474
+        return ColorUtilsFromCompat.calculateLuminance(backgroundColor) > 0.17912878474;
     }
 
     public static double calculateLuminance(int backgroundColor) {
@@ -619,6 +621,7 @@ public class ContrastColorUtil {
     }
 
     public static boolean isColorLight(int backgroundColor) {
+        // TODO(b/188947832): Use 0.17912878474 instead of 0.5 to ensure better contrast
         return calculateLuminance(backgroundColor) > 0.5f;
     }
 

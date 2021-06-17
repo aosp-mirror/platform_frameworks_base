@@ -49,6 +49,8 @@ import java.util.stream.Collectors;
 
 /**
  * A class that monitors and controls media routing of other apps.
+ * {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} is required to use this class,
+ * or {@link SecurityException} will be thrown.
  * @hide
  */
 public final class MediaRouter2Manager {
@@ -147,6 +149,53 @@ public final class MediaRouter2Manager {
     }
 
     /**
+     * Starts scanning remote routes.
+     * <p>
+     * Route discovery can happen even when the {@link #startScan()} is not called.
+     * This is because the scanning could be started before by other apps.
+     * Therefore, calling this method after calling {@link #stopScan()} does not necessarily mean
+     * that the routes found before are removed and added again.
+     * <p>
+     * Use {@link Callback} to get the route related events.
+     * <p>
+     * @see #stopScan()
+     */
+    public void startScan() {
+        Client client = getOrCreateClient();
+        if (client != null) {
+            try {
+                mMediaRouterService.startScan(client);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
+            }
+        }
+    }
+
+    /**
+     * Stops scanning remote routes to reduce resource consumption.
+     * <p>
+     * Route discovery can be continued even after this method is called.
+     * This is because the scanning is only turned off when all the apps stop scanning.
+     * Therefore, calling this method does not necessarily mean the routes are removed.
+     * Also, for the same reason it does not mean that {@link Callback#onRoutesAdded(List)}
+     * is not called afterwards.
+     * <p>
+     * Use {@link Callback} to get the route related events.
+     *
+     * @see #startScan()
+     */
+    public void stopScan() {
+        Client client = getOrCreateClient();
+        if (client != null) {
+            try {
+                mMediaRouterService.stopScan(client);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
+            }
+        }
+    }
+
+    /**
      * Gets a {@link android.media.session.MediaController} associated with the
      * given routing session.
      * If there is no matching media session, {@code null} is returned.
@@ -204,6 +253,50 @@ public final class MediaRouter2Manager {
             }
         }
         return routes;
+    }
+
+    /**
+     * Returns the preferred features of the specified package name.
+     */
+    @NonNull
+    public List<String> getPreferredFeatures(@NonNull String packageName) {
+        Objects.requireNonNull(packageName, "packageName must not be null");
+
+        List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
+        if (preferredFeatures == null) {
+            preferredFeatures = Collections.emptyList();
+        }
+        return preferredFeatures;
+    }
+
+    /**
+     * Returns a list of routes which are related to the given package name in the given route list.
+     */
+    @NonNull
+    public List<MediaRoute2Info> filterRoutesForPackage(@NonNull List<MediaRoute2Info> routes,
+            @NonNull String packageName) {
+        Objects.requireNonNull(routes, "routes must not be null");
+        Objects.requireNonNull(packageName, "packageName must not be null");
+
+        List<RoutingSessionInfo> sessions = getRoutingSessions(packageName);
+        RoutingSessionInfo sessionInfo = sessions.get(sessions.size() - 1);
+
+        List<MediaRoute2Info> result = new ArrayList<>();
+        List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
+        if (preferredFeatures == null) {
+            preferredFeatures = Collections.emptyList();
+        }
+
+        synchronized (mRoutesLock) {
+            for (MediaRoute2Info route : routes) {
+                if (route.hasAnyFeatures(preferredFeatures)
+                        || sessionInfo.getSelectedRoutes().contains(route.getId())
+                        || sessionInfo.getTransferableRoutes().contains(route.getId())) {
+                    result.add(route);
+                }
+            }
+        }
+        return result;
     }
 
     /**
@@ -728,8 +821,8 @@ public final class MediaRouter2Manager {
      * Requests releasing a session.
      * <p>
      * If a session is released, any operation on the session will be ignored.
-     * {@link Callback#onTransferred(RoutingSessionInfo, RoutingSessionInfo)} with {@code null}
-     * session will be called when the session is released.
+     * {@link Callback#onSessionReleased(RoutingSessionInfo)} will be called
+     * when the session is released.
      * </p>
      *
      * @see Callback#onTransferred(RoutingSessionInfo, RoutingSessionInfo)
@@ -849,52 +942,51 @@ public final class MediaRouter2Manager {
     /**
      * Interface for receiving events about media routing changes.
      */
-    public static class Callback {
-
+    public interface Callback {
         /**
          * Called when routes are added.
          * @param routes the list of routes that have been added. It's never empty.
          */
-        public void onRoutesAdded(@NonNull List<MediaRoute2Info> routes) {}
+        default void onRoutesAdded(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
          * Called when routes are removed.
          * @param routes the list of routes that have been removed. It's never empty.
          */
-        public void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {}
+        default void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
          * Called when routes are changed.
          * @param routes the list of routes that have been changed. It's never empty.
          */
-        public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
+        default void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
          * Called when a session is changed.
          * @param session the updated session
          */
-        public void onSessionUpdated(@NonNull RoutingSessionInfo session) {}
+        default void onSessionUpdated(@NonNull RoutingSessionInfo session) {}
 
         /**
          * Called when a session is released.
          * @param session the released session.
          * @see #releaseSession(RoutingSessionInfo)
          */
-        public void onSessionReleased(@NonNull RoutingSessionInfo session) {}
+        default void onSessionReleased(@NonNull RoutingSessionInfo session) {}
 
         /**
          * Called when media is transferred.
          *
          * @param oldSession the previous session
-         * @param newSession the new session or {@code null} if the session is released.
+         * @param newSession the new session
          */
-        public void onTransferred(@NonNull RoutingSessionInfo oldSession,
-                @Nullable RoutingSessionInfo newSession) { }
+        default void onTransferred(@NonNull RoutingSessionInfo oldSession,
+                @NonNull RoutingSessionInfo newSession) { }
 
         /**
          * Called when {@link #transfer(RoutingSessionInfo, MediaRoute2Info)} fails.
          */
-        public void onTransferFailed(@NonNull RoutingSessionInfo session,
+        default void onTransferFailed(@NonNull RoutingSessionInfo session,
                 @NonNull MediaRoute2Info route) { }
 
         /**
@@ -903,7 +995,7 @@ public final class MediaRouter2Manager {
          * @param packageName the package name of the application
          * @param preferredFeatures the list of preferred route features set by an application.
          */
-        public void onPreferredFeaturesChanged(@NonNull String packageName,
+        default void onPreferredFeaturesChanged(@NonNull String packageName,
                 @NonNull List<String> preferredFeatures) {}
 
         /**
@@ -916,7 +1008,7 @@ public final class MediaRouter2Manager {
          *               {@link MediaRoute2ProviderService#REASON_ROUTE_NOT_AVAILABLE},
          *               {@link MediaRoute2ProviderService#REASON_INVALID_COMMAND},
          */
-        public void onRequestFailed(int reason) {}
+        default void onRequestFailed(int reason) {}
     }
 
     final class CallbackRecord {

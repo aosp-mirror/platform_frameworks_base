@@ -30,11 +30,13 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +45,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class AutomaticBrightnessControllerTest {
     private static final float BRIGHTNESS_MIN_FLOAT = 0.0f;
@@ -53,21 +56,39 @@ public class AutomaticBrightnessControllerTest {
     private static final int DARKENING_LIGHT_DEBOUNCE_CONFIG = 0;
     private static final float DOZE_SCALE_FACTOR = 0.0f;
     private static final boolean RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG = false;
+    private static final int DISPLAY_ID = 0;
+    private static final int LAYER_STACK = 0;
+    private static final int LIGHT_SENSOR_WARMUP_TIME = 0;
 
     private Context mContext;
+    private LogicalDisplay mLogicalDisplay;
+    private AutomaticBrightnessController mController;
+
     @Mock SensorManager mSensorManager;
     @Mock BrightnessMappingStrategy mBrightnessMappingStrategy;
     @Mock HysteresisLevels mAmbientBrightnessThresholds;
     @Mock HysteresisLevels mScreenBrightnessThresholds;
-    @Mock Handler mNoopHandler;
-    @Mock DisplayDeviceConfig mDisplayDeviceConfig;
+    @Mock Handler mNoOpHandler;
+    @Mock DisplayDevice mDisplayDevice;
+    @Mock HighBrightnessModeController mHbmController;
 
-    private static final int LIGHT_SENSOR_WARMUP_TIME = 0;
     @Before
     public void setUp() {
+        // Share classloader to allow package private access.
+        System.setProperty("dexmaker.share_classloader", "true");
         MockitoAnnotations.initMocks(this);
 
         mContext = InstrumentationRegistry.getContext();
+        mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice);
+    }
+
+    @After
+    public void tearDown() {
+        if (mController != null) {
+            // Stop the update Brightness loop.
+            mController.stop();
+            mController = null;
+        }
     }
 
     private AutomaticBrightnessController setupController(Sensor lightSensor) {
@@ -75,7 +96,7 @@ public class AutomaticBrightnessControllerTest {
                 new AutomaticBrightnessController.Injector() {
                     @Override
                     public Handler getBackgroundThreadHandler() {
-                        return mNoopHandler;
+                        return mNoOpHandler;
                     }
                 },
                 () -> { }, mContext.getMainLooper(), mSensorManager, lightSensor,
@@ -83,9 +104,12 @@ public class AutomaticBrightnessControllerTest {
                 BRIGHTNESS_MAX_FLOAT, DOZE_SCALE_FACTOR, LIGHT_SENSOR_RATE,
                 INITIAL_LIGHT_SENSOR_RATE, BRIGHTENING_LIGHT_DEBOUNCE_CONFIG,
                 DARKENING_LIGHT_DEBOUNCE_CONFIG, RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
-                mAmbientBrightnessThresholds, mScreenBrightnessThresholds, mContext,
-                mDisplayDeviceConfig);
-        controller.setLoggingEnabled(true);
+                mAmbientBrightnessThresholds, mScreenBrightnessThresholds, mLogicalDisplay,
+                mContext, mHbmController
+        );
+
+        when(mHbmController.getCurrentBrightnessMax()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mHbmController.getCurrentBrightnessMin()).thenReturn(BRIGHTNESS_MIN_FLOAT);
 
         // Configure the brightness controller and grab an instance of the sensor listener,
         // through which we can deliver fake (for test) sensor values.
@@ -99,7 +123,7 @@ public class AutomaticBrightnessControllerTest {
     @Test
     public void testNoHysteresisAtMinBrightness() throws Exception {
         Sensor lightSensor = TestUtils.createSensor(Sensor.TYPE_LIGHT, "Light Sensor");
-        AutomaticBrightnessController controller = setupController(lightSensor);
+        mController = setupController(lightSensor);
 
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
@@ -126,7 +150,7 @@ public class AutomaticBrightnessControllerTest {
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, (int) lux1));
-        assertEquals(normalizedBrightness1, controller.getAutomaticScreenBrightness(), 0.001f);
+        assertEquals(normalizedBrightness1, mController.getAutomaticScreenBrightness(), 0.001f);
 
         // Set up system to return 0.0f (minimum possible brightness) as a brightness value
         float lux2 = 10.0f;
@@ -140,13 +164,13 @@ public class AutomaticBrightnessControllerTest {
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, (int) lux2));
-        assertEquals(normalizedBrightness2, controller.getAutomaticScreenBrightness(), 0.001f);
+        assertEquals(normalizedBrightness2, mController.getAutomaticScreenBrightness(), 0.001f);
     }
 
     @Test
     public void testNoHysteresisAtMaxBrightness() throws Exception {
         Sensor lightSensor = TestUtils.createSensor(Sensor.TYPE_LIGHT, "Light Sensor");
-        AutomaticBrightnessController controller = setupController(lightSensor);
+        mController = setupController(lightSensor);
 
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
@@ -172,7 +196,7 @@ public class AutomaticBrightnessControllerTest {
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, (int) lux1));
-        assertEquals(normalizedBrightness1, controller.getAutomaticScreenBrightness(), 0.001f);
+        assertEquals(normalizedBrightness1, mController.getAutomaticScreenBrightness(), 0.001f);
 
 
         // Set up system to return 1.0f as a brightness value (brightness_max)
@@ -187,13 +211,13 @@ public class AutomaticBrightnessControllerTest {
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, (int) lux2));
-        assertEquals(normalizedBrightness2, controller.getAutomaticScreenBrightness(), 0.001f);
+        assertEquals(normalizedBrightness2, mController.getAutomaticScreenBrightness(), 0.001f);
     }
 
     @Test
     public void testUserAddUserDataPoint() throws Exception {
         Sensor lightSensor = TestUtils.createSensor(Sensor.TYPE_LIGHT, "Light Sensor");
-        AutomaticBrightnessController controller = setupController(lightSensor);
+        mController = setupController(lightSensor);
 
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
@@ -205,7 +229,7 @@ public class AutomaticBrightnessControllerTest {
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 1000));
 
         // User sets brightness to 100
-        controller.configure(true /* enable */, null /* configuration */,
+        mController.configure(true /* enable */, null /* configuration */,
                 0.5f /* brightness */, true /* userChangedBrightness */, 0 /* adjustment */,
                 false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
 

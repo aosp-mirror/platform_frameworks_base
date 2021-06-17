@@ -24,6 +24,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.tv.tuner.TunerFrontendInfo;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -74,6 +75,7 @@ public class TunerResourceManager {
         TUNER_RESOURCE_TYPE_DESCRAMBLER,
         TUNER_RESOURCE_TYPE_LNB,
         TUNER_RESOURCE_TYPE_CAS_SESSION,
+        TUNER_RESOURCE_TYPE_FRONTEND_CICAM,
         TUNER_RESOURCE_TYPE_MAX,
      })
     @Retention(RetentionPolicy.SOURCE)
@@ -84,7 +86,8 @@ public class TunerResourceManager {
     public static final int TUNER_RESOURCE_TYPE_DESCRAMBLER = 2;
     public static final int TUNER_RESOURCE_TYPE_LNB = 3;
     public static final int TUNER_RESOURCE_TYPE_CAS_SESSION = 4;
-    public static final int TUNER_RESOURCE_TYPE_MAX = 5;
+    public static final int TUNER_RESOURCE_TYPE_FRONTEND_CICAM = 5;
+    public static final int TUNER_RESOURCE_TYPE_MAX = 6;
 
     private final ITunerResourceManager mService;
     private final int mUserId;
@@ -379,6 +382,38 @@ public class TunerResourceManager {
     }
 
     /**
+     * Requests a CiCam resource.
+     *
+     * <p>There are three possible scenarios:
+     * <ul>
+     * <li>If there is CiCam available, the API would send the id back.
+     *
+     * <li>If no CiCam is available but the current request info can show higher priority than
+     * other uses of the CiCam, the API will send
+     * {@link IResourcesReclaimListener#onReclaimResources()} to the {@link Tuner}. Tuner would
+     * handle the resource reclaim on the holder of lower priority and notify the holder of its
+     * resource loss.
+     *
+     * <p><strong>Note:</strong> {@link #updateCasInfo(int, int)} must be called before this
+     * request.
+     *
+     * @param request {@link TunerCiCamRequest} information of the current request.
+     * @param ciCamHandle a one-element array to return the granted ciCam handle.
+     *                    If no ciCam granted, this will return {@link #INVALID_RESOURCE_HANDLE}.
+     *
+     * @return true if there is ciCam granted.
+     */
+    public boolean requestCiCam(TunerCiCamRequest request, int[] ciCamHandle) {
+        boolean result = false;
+        try {
+            result = mService.requestCiCam(request, ciCamHandle);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return result;
+    }
+
+    /**
      * Requests a Tuner Lnb resource.
      *
      * <p>There are three possible scenarios:
@@ -476,6 +511,25 @@ public class TunerResourceManager {
     public void releaseCasSession(int casSessionHandle, int clientId) {
         try {
             mService.releaseCasSession(casSessionHandle, clientId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies the TRM that the given CiCam has been released.
+     *
+     * <p>Client must call this whenever it releases a CiCam.
+     *
+     * <p><strong>Note:</strong> {@link #updateCasInfo(int, int)} must be called before this
+     * release.
+     *
+     * @param ciCamHandle the handle of the releasing CiCam.
+     * @param clientId the id of the client that is releasing the CiCam.
+     */
+    public void releaseCiCam(int ciCamHandle, int clientId) {
+        try {
+            mService.releaseCiCam(ciCamHandle, clientId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

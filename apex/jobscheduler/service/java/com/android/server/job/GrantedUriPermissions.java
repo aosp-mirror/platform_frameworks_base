@@ -26,6 +26,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+
 import com.android.server.LocalServices;
 import com.android.server.uri.UriGrantsManagerInternal;
 
@@ -144,13 +145,13 @@ public final class GrantedUriPermissions {
     }
 
     // Dumpsys infrastructure
-    public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("mGrantFlags=0x"); pw.print(Integer.toHexString(mGrantFlags));
+    public void dump(PrintWriter pw) {
+        pw.print("mGrantFlags=0x"); pw.print(Integer.toHexString(mGrantFlags));
         pw.print(" mSourceUserId="); pw.println(mSourceUserId);
-        pw.print(prefix); pw.print("mTag="); pw.println(mTag);
-        pw.print(prefix); pw.print("mPermissionOwner="); pw.println(mPermissionOwner);
+        pw.print("mTag="); pw.println(mTag);
+        pw.print("mPermissionOwner="); pw.println(mPermissionOwner);
         for (int i = 0; i < mUris.size(); i++) {
-            pw.print(prefix); pw.print("#"); pw.print(i); pw.print(": ");
+            pw.print("#"); pw.print(i); pw.print(": ");
             pw.println(mUris.get(i));
         }
     }

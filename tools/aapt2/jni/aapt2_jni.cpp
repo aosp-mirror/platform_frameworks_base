@@ -139,5 +139,5 @@ JNIEXPORT jint JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeLink(JNIEnv* 
 
 JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_ping(
         JNIEnv *env, jclass aapt_obj) {
-  // This is just a dummy method to see if the library has been loaded.
+  // This is just a no-op method to see if the library has been loaded.
 }

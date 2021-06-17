@@ -14,9 +14,11 @@
 
 package com.android.systemui.statusbar;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -26,8 +28,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
+import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.IBiometricSysuiReceiver;
+import android.hardware.biometrics.PromptInfo;
+import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
 import android.view.WindowInsetsController.Appearance;
+import android.view.WindowInsetsController.Behavior;
 
 import androidx.test.filters.SmallTest;
 
@@ -114,24 +121,27 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnSystemBarAppearanceChanged() {
-        doTestOnSystemBarAppearanceChanged(DEFAULT_DISPLAY, 1,
-                new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false);
+    public void testOnSystemBarAttributesChanged() {
+        doTestOnSystemBarAttributesChanged(DEFAULT_DISPLAY, 1,
+                new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
+                BEHAVIOR_DEFAULT, false);
     }
 
     @Test
-    public void testOnSystemBarAppearanceChangedForSecondaryDisplay() {
-        doTestOnSystemBarAppearanceChanged(SECONDARY_DISPLAY, 1,
-                new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false);
+    public void testOnSystemBarAttributesChangedForSecondaryDisplay() {
+        doTestOnSystemBarAttributesChanged(SECONDARY_DISPLAY, 1,
+                new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
+                BEHAVIOR_DEFAULT, false);
     }
 
-    private void doTestOnSystemBarAppearanceChanged(int displayId, @Appearance int appearance,
-            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme) {
-        mCommandQueue.onSystemBarAppearanceChanged(displayId, appearance, appearanceRegions,
-                navbarColorManagedByIme);
+    private void doTestOnSystemBarAttributesChanged(int displayId, @Appearance int appearance,
+            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
+            @Behavior int behavior, boolean isFullscreen) {
+        mCommandQueue.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
+                navbarColorManagedByIme, behavior, isFullscreen);
         waitForIdleSync();
-        verify(mCallbacks).onSystemBarAppearanceChanged(eq(displayId), eq(appearance),
-                eq(appearanceRegions), eq(navbarColorManagedByIme));
+        verify(mCallbacks).onSystemBarAttributesChanged(eq(displayId), eq(appearance),
+                eq(appearanceRegions), eq(navbarColorManagedByIme), eq(behavior), eq(isFullscreen));
     }
 
     @Test
@@ -407,15 +417,23 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowAuthenticationDialog() {
-        Bundle bundle = new Bundle();
-        String packageName = "test";
+        PromptInfo promptInfo = new PromptInfo();
+        final IBiometricSysuiReceiver receiver = mock(IBiometricSysuiReceiver.class);
+        final int[] sensorIds = {1, 2};
+        final boolean credentialAllowed = true;
+        final boolean requireConfirmation = true;
+        final int userId = 10;
+        final String packageName = "test";
         final long operationId = 1;
-        final int sysUiSessionId = 2;
-        mCommandQueue.showAuthenticationDialog(bundle, null /* receiver */, 1, true, 3,
-                packageName, operationId, sysUiSessionId);
+        final int multiSensorConfig = BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
+
+        mCommandQueue.showAuthenticationDialog(promptInfo, receiver, sensorIds,
+                credentialAllowed, requireConfirmation , userId, packageName, operationId,
+                multiSensorConfig);
         waitForIdleSync();
-        verify(mCallbacks).showAuthenticationDialog(eq(bundle), eq(null), eq(1), eq(true), eq(3),
-                eq(packageName), eq(operationId), eq(sysUiSessionId));
+        verify(mCallbacks).showAuthenticationDialog(eq(promptInfo), eq(receiver), eq(sensorIds),
+                eq(credentialAllowed), eq(requireConfirmation), eq(userId), eq(packageName),
+                eq(operationId), eq(multiSensorConfig));
     }
 
     @Test
@@ -427,10 +445,11 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testOnBiometricHelp() {
-        String helpMessage = "test_help_message";
-        mCommandQueue.onBiometricHelp(helpMessage);
+        final int modality = TYPE_FACE;
+        final String helpMessage = "test_help_message";
+        mCommandQueue.onBiometricHelp(modality, helpMessage);
         waitForIdleSync();
-        verify(mCallbacks).onBiometricHelp(eq(helpMessage));
+        verify(mCallbacks).onBiometricHelp(eq(modality), eq(helpMessage));
     }
 
     @Test
@@ -451,9 +470,31 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSetUdfpsHbmListener() {
+        final IUdfpsHbmListener listener = mock(IUdfpsHbmListener.class);
+        mCommandQueue.setUdfpsHbmListener(listener);
+        waitForIdleSync();
+        verify(mCallbacks).setUdfpsHbmListener(eq(listener));
+    }
+
+    @Test
     public void testSuppressAmbientDisplay() {
         mCommandQueue.suppressAmbientDisplay(true);
         waitForIdleSync();
         verify(mCallbacks).suppressAmbientDisplay(true);
+    }
+
+    @Test
+    public void testRequestWindowMagnificationConnection() {
+        mCommandQueue.requestWindowMagnificationConnection(true);
+        waitForIdleSync();
+        verify(mCallbacks).requestWindowMagnificationConnection(true);
+    }
+
+    @Test
+    public void testSetEnableNavigationBarLumaSampling() {
+        mCommandQueue.setNavigationBarLumaSamplingEnabled(1, true);
+        waitForIdleSync();
+        verify(mCallbacks).setNavigationBarLumaSamplingEnabled(eq(1), eq(true));
     }
 }

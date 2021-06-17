@@ -40,6 +40,23 @@ public class AssistUtils {
 
     private static final String TAG = "AssistUtils";
 
+    /** bundle key: how was the assistant invoked? */
+    public static final String INVOCATION_TYPE_KEY = "invocation_type";
+    /** value for INVOCATION_TYPE_KEY: no data */
+    public static final int INVOCATION_TYPE_UNKNOWN = 0;
+    /** value for INVOCATION_TYPE_KEY: on-screen swipe gesture */
+    public static final int INVOCATION_TYPE_GESTURE = 1;
+    /** value for INVOCATION_TYPE_KEY: device-specific physical gesture */
+    public static final int INVOCATION_TYPE_PHYSICAL_GESTURE = 2;
+    /** value for INVOCATION_TYPE_KEY: voice hotword */
+    public static final int INVOCATION_TYPE_VOICE = 3;
+    /** value for INVOCATION_TYPE_KEY: search bar affordance */
+    public static final int INVOCATION_TYPE_QUICK_SEARCH_BAR = 4;
+    /** value for INVOCATION_TYPE_KEY: long press on home navigation button */
+    public static final int INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS = 5;
+    /** value for INVOCATION_TYPE_KEY: long press on physical power button */
+    public static final int INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS = 6;
+
     private final Context mContext;
     private final IVoiceInteractionManagerService mVoiceInteractionManagerService;
 

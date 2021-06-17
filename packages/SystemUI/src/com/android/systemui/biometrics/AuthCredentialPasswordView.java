@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.os.UserHandle;
 import android.text.InputType;
@@ -27,7 +28,9 @@ import android.widget.ImeAwareEditText;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternChecker;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.systemui.R;
 
 /**
@@ -104,18 +107,21 @@ public class AuthCredentialPasswordView extends AuthCredentialView
                 return;
             }
 
+            // Request LockSettingsService to return the Gatekeeper Password in the
+            // VerifyCredentialResponse so that we can request a Gatekeeper HAT with the
+            // Gatekeeper Password and operationId.
             mPendingLockCheck = LockPatternChecker.verifyCredential(mLockPatternUtils,
-                    password, mOperationId, mEffectiveUserId, this::onCredentialVerified);
+                    password, mEffectiveUserId, LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE,
+                    this::onCredentialVerified);
         }
     }
 
     @Override
-    protected void onCredentialVerified(byte[] attestation, int timeoutMs) {
-        super.onCredentialVerified(attestation, timeoutMs);
+    protected void onCredentialVerified(@NonNull VerifyCredentialResponse response,
+            int timeoutMs) {
+        super.onCredentialVerified(response, timeoutMs);
 
-        final boolean matched = attestation != null;
-
-        if (matched) {
+        if (response.isMatched()) {
             mImm.hideSoftInputFromWindow(getWindowToken(), 0 /* flags */);
         } else {
             mPasswordField.setText("");

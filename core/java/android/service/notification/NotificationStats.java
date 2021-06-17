@@ -71,6 +71,11 @@ public final class NotificationStats implements Parcelable {
      * Notification has been dismissed from the notification shade.
      */
     public static final int DISMISSAL_SHADE = 3;
+    /**
+     * Notification has been dismissed as a bubble.
+     * @hide
+     */
+    public static final int DISMISSAL_BUBBLE = 3;
 
     /** @hide */
     @IntDef(prefix = { "DISMISS_SENTIMENT_" }, value = {

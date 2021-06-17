@@ -84,7 +84,7 @@ public class BluetoothGattCharacteristic implements Parcelable {
     public static final int PERMISSION_READ_ENCRYPTED = 0x02;
 
     /**
-     * Characteristic permission: Allow reading with man-in-the-middle protection
+     * Characteristic permission: Allow reading with person-in-the-middle protection
      */
     public static final int PERMISSION_READ_ENCRYPTED_MITM = 0x04;
 
@@ -99,7 +99,7 @@ public class BluetoothGattCharacteristic implements Parcelable {
     public static final int PERMISSION_WRITE_ENCRYPTED = 0x20;
 
     /**
-     * Characteristic permission: Allow encrypted writes with man-in-the-middle
+     * Characteristic permission: Allow encrypted writes with person-in-the-middle
      * protection
      */
     public static final int PERMISSION_WRITE_ENCRYPTED_MITM = 0x40;
@@ -111,7 +111,7 @@ public class BluetoothGattCharacteristic implements Parcelable {
 
     /**
      * Characteristic permission: Allow signed write operations with
-     * man-in-the-middle protection
+     * person-in-the-middle protection
      */
     public static final int PERMISSION_WRITE_SIGNED_MITM = 0x100;
 
@@ -237,7 +237,6 @@ public class BluetoothGattCharacteristic implements Parcelable {
 
     /**
      * Create a new BluetoothGattCharacteristic.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param uuid The UUID for this characteristic
      * @param properties Properties of this characteristic
@@ -344,7 +343,6 @@ public class BluetoothGattCharacteristic implements Parcelable {
 
     /**
      * Adds a descriptor to this characteristic.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param descriptor Descriptor to be added to this characteristic.
      * @return true, if the descriptor was added to the characteristic

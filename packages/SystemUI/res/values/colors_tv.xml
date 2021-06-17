@@ -22,9 +22,18 @@
     <color name="recents_tv_dismiss_text_color">#7FEEEEEE</color>
     <color name="recents_tv_text_shadow_color">#7F000000</color>
 
-    <!-- Background color for audio recording indicator (G800) -->
-    <color name="tv_audio_recording_indicator_background">#FF3C4043</color>
-    <color name="tv_audio_recording_indicator_pulse">#4DFFFFFF</color>
+    <color name="tv_audio_recording_indicator_icon_background">#CC000000</color>
+    <color name="tv_audio_recording_indicator_stroke">#33FFFFFF</color>
 
     <color name="red">#FFCC0000</color>
+    <color name="tv_volume_dialog_circle">#08FFFFFF</color>
+    <color name="tv_volume_dialog_seek_thumb_focus_ring">#1AFFFFFF</color>
+    <color name="tv_volume_dialog_seek_thumb_shadow">#40000000</color>
+    <color name="tv_volume_dialog_seek_bar_background">#A03C4043</color>
+    <color name="tv_volume_dialog_seek_bar_fill">#FFF8F9FA</color>
+    <color name="tv_volume_dialog_accent">#FFDADCE0</color>
+
+    <color name="tv_notification_default_background_color">#383838</color>
+    <color name="tv_notification_blur_background_color">#a0383838</color>
+    <color name="tv_notification_text_color">#FFFFFF</color>
 </resources>

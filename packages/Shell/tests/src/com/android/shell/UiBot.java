@@ -18,16 +18,22 @@ package com.android.shell;
 
 import android.app.Instrumentation;
 import android.app.StatusBarManager;
+import android.os.SystemClock;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
+import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+
+import java.util.List;
 
 /**
  * A helper class for UI-related testing tasks.
@@ -36,6 +42,9 @@ final class UiBot {
 
     private static final String TAG = "UiBot";
     private static final String SYSTEMUI_PACKAGE = "com.android.systemui";
+    private static final String ANDROID_PACKAGE = "android";
+
+    private static final long SHORT_UI_TIMEOUT_MS = (3 * DateUtils.SECOND_IN_MILLIS);
 
     private final Instrumentation mInstrumentation;
     private final UiDevice mDevice;
@@ -48,9 +57,9 @@ final class UiBot {
     }
 
     /**
-     * Opens the system notification and gets a given notification.
+     * Opens the system notification and gets a UiObject with the text.
      *
-     * @param text Notificaton's text as displayed by the UI.
+     * @param text Notification's text as displayed by the UI.
      * @return notification object.
      */
     public UiObject getNotification(String text) {
@@ -60,6 +69,43 @@ final class UiBot {
         assertTrue("could not get system ui (" + SYSTEMUI_PACKAGE + ")", gotIt);
 
         return getObject(text);
+    }
+
+    /**
+     * Opens the system notification and gets a notification containing the text.
+     *
+     * @param text Notification's text as displayed by the UI.
+     * @return notification object.
+     */
+    public UiObject2 getNotification2(String text) {
+        boolean opened = mDevice.openNotification();
+        Log.v(TAG, "openNotification(): " + opened);
+        final UiObject2 notificationScroller = mDevice.wait(Until.findObject(
+                By.res(SYSTEMUI_PACKAGE, "notification_stack_scroller")), mTimeout);
+        assertNotNull("could not get notification stack scroller", notificationScroller);
+        final List<UiObject2> notificationList = notificationScroller.getChildren();
+        for (UiObject2 notification: notificationList) {
+            final UiObject2 notificationText = notification.findObject(By.textContains(text));
+            if (notificationText != null) {
+                return notification;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Expands the notification.
+     *
+     * @param notification The notification object returned by {@link #getNotification2(String)}.
+     */
+    public void expandNotification(UiObject2 notification) {
+        final UiObject2 expandBtn =  notification.findObject(
+                By.res(ANDROID_PACKAGE, "expand_button"));
+        if (expandBtn.getContentDescription().equals("Collapse")) {
+            return;
+        }
+        expandBtn.click();
+        mDevice.waitForIdle();
     }
 
     public void collapseStatusBar() throws Exception {
@@ -162,6 +208,12 @@ final class UiBot {
      */
     public void chooseActivity(String name) {
         // It uses an intent chooser now, so just getting the activity by text is enough...
+        final String share = mInstrumentation.getContext().getString(
+                com.android.internal.R.string.share);
+        boolean gotIt = mDevice.wait(Until.hasObject(By.text(share)), mTimeout);
+        assertTrue("could not get share activity (" + share + ")", gotIt);
+        swipeUp();
+        SystemClock.sleep(SHORT_UI_TIMEOUT_MS);
         UiObject activity = getObject(name);
         click(activity, name);
     }
@@ -173,6 +225,11 @@ final class UiBot {
     public void turnScreenOn() throws Exception {
         mDevice.executeShellCommand("input keyevent KEYCODE_WAKEUP");
         mDevice.executeShellCommand("wm dismiss-keyguard");
+        mDevice.waitForIdle();
     }
 
+    public void swipeUp() {
+        mDevice.swipe(mDevice.getDisplayWidth() / 2, mDevice.getDisplayHeight() * 3 / 4,
+                mDevice.getDisplayWidth() / 2, 0, 30);
+    }
 }

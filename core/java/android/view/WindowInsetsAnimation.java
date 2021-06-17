@@ -61,7 +61,7 @@ public final class WindowInsetsAnimation {
     }
 
     /**
-     * @return The bitmask of {@link WindowInsets.Type.InsetsType}s that are animating.
+     * @return The bitmask of {@link WindowInsets.Type}s that are animating.
      */
     @WindowInsets.Type.InsetsType
     public int getTypeMask() {
@@ -140,7 +140,7 @@ public final class WindowInsetsAnimation {
     }
 
     /**
-     * Set fraction of the progress if {@link WindowInsets.Type.InsetsType} animation is
+     * Set fraction of the progress if {@link WindowInsets.Type} animation is
      * controlled by the app.
      * <p>
      * Note: This should only be used for testing, as the system fills in the fraction for the
@@ -159,7 +159,7 @@ public final class WindowInsetsAnimation {
     /**
      * Retrieves the translucency of the windows that are animating.
      *
-     * @return Alpha of windows that cause insets of type {@link WindowInsets.Type.InsetsType}.
+     * @return Alpha of windows that cause insets of type {@link WindowInsets.Type}.
      */
     @FloatRange(from = 0f, to = 1f)
     public float getAlpha() {
@@ -174,8 +174,7 @@ public final class WindowInsetsAnimation {
      * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)} is being
      * used.
      * </p>
-     * @param alpha Alpha of windows that cause insets of type
-     *              {@link WindowInsets.Type.InsetsType}.
+     * @param alpha Alpha of windows that cause insets of type {@link WindowInsets.Type}.
      * @see #getAlpha()
      */
     public void setAlpha(@FloatRange(from = 0f, to = 1f) float alpha) {

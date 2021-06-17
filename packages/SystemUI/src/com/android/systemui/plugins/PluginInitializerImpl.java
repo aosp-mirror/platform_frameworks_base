@@ -15,6 +15,7 @@
 package com.android.systemui.plugins;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
 
@@ -66,5 +67,10 @@ public class PluginInitializerImpl implements PluginInitializer {
                 }
             });
         }
+    }
+
+    @Override
+    public boolean isDebuggable() {
+        return Build.IS_DEBUGGABLE;
     }
 }

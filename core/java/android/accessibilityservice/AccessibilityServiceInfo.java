@@ -24,6 +24,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -364,6 +365,31 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x0001000;
 
+    /**
+     * This flag requests that when when {@link #FLAG_REQUEST_MULTI_FINGER_GESTURES} is enabled,
+     * two-finger passthrough gestures are re-enabled. Two-finger swipe gestures are not detected,
+     * but instead passed through as one-finger gestures. In addition, three-finger swipes from the
+     * bottom of the screen are not detected, and instead are passed through unchanged. If {@link
+     * #FLAG_REQUEST_MULTI_FINGER_GESTURES} is disabled this flag has no effect.
+     *
+     * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
+     */
+    public static final int FLAG_REQUEST_2_FINGER_PASSTHROUGH = 0x0002000;
+
+    /**
+     * This flag requests that when when {@link #FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled, a
+     * service will receive the motion events for each successfully-detected gesture. The service
+     * will also receive an AccessibilityGestureEvent of type GESTURE_INVALID for each cancelled
+     * gesture along with its motion events. A service will receive a gesture of type
+     * GESTURE_PASSTHROUGH and accompanying motion events for every passthrough gesture that does
+     * not start gesture detection. This information can be used to collect instances of improper
+     * gesture detection behavior and relay that information to framework developers. If {@link
+     * #FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is disabled this flag has no effect.
+     *
+     * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
+     */
+    public static final int FLAG_SEND_MOTION_EVENTS = 0x0004000;
+
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
@@ -496,6 +522,7 @@ public class AccessibilityServiceInfo implements Parcelable {
     /**
      * The component name the accessibility service.
      */
+    @NonNull
     private ComponentName mComponentName;
 
     /**
@@ -552,6 +579,13 @@ public class AccessibilityServiceInfo implements Parcelable {
      * Resource id of the html description of the accessibility service.
      */
     private int mHtmlDescriptionRes;
+
+    /**
+     * Whether the service is for accessibility.
+     *
+     * @hide
+     */
+    private boolean mIsAccessibilityTool = false;
 
     /**
      * Creates a new instance.
@@ -682,6 +716,8 @@ public class AccessibilityServiceInfo implements Parcelable {
             if (peekedValue != null) {
                 mHtmlDescriptionRes = peekedValue.resourceId;
             }
+            mIsAccessibilityTool = asAttributes.getBoolean(
+                    R.styleable.AccessibilityService_isAccessibilityTool, false);
             asAttributes.recycle();
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException( "Unable to create context for: "
@@ -737,13 +773,15 @@ public class AccessibilityServiceInfo implements Parcelable {
     /**
      * @hide
      */
-    public void setComponentName(ComponentName component) {
+    public void setComponentName(@NonNull ComponentName component) {
         mComponentName = component;
     }
 
     /**
      * @hide
      */
+    @TestApi
+    @NonNull
     public ComponentName getComponentName() {
         return mComponentName;
     }
@@ -861,7 +899,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setCapabilities(int capabilities) {
         mCapabilities = capabilities;
     }
@@ -1010,6 +1048,15 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
+     * Indicates if the service is used to assist users with disabilities.
+     *
+     * @return {@code true} if the property is set to true.
+     */
+    public boolean isAccessibilityTool() {
+        return mIsAccessibilityTool;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public int describeContents() {
@@ -1035,6 +1082,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeInt(mAnimatedImageRes);
         parcel.writeInt(mHtmlDescriptionRes);
         parcel.writeString(mNonLocalizedDescription);
+        parcel.writeBoolean(mIsAccessibilityTool);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -1056,6 +1104,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         mAnimatedImageRes = parcel.readInt();
         mHtmlDescriptionRes = parcel.readInt();
         mNonLocalizedDescription = parcel.readString();
+        mIsAccessibilityTool = parcel.readBoolean();
     }
 
     @Override
@@ -1064,7 +1113,7 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -1109,6 +1158,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         stringBuilder.append("settingsActivityName: ").append(mSettingsActivityName);
         stringBuilder.append(", ");
         stringBuilder.append("summary: ").append(mNonLocalizedSummary);
+        stringBuilder.append(", ");
+        stringBuilder.append("isAccessibilityTool: ").append(mIsAccessibilityTool);
         stringBuilder.append(", ");
         appendCapabilities(stringBuilder, mCapabilities);
         return stringBuilder.toString();
@@ -1261,6 +1312,10 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_SERVICE_HANDLES_DOUBLE_TAP";
             case FLAG_REQUEST_MULTI_FINGER_GESTURES:
                 return "FLAG_REQUEST_MULTI_FINGER_GESTURES";
+            case FLAG_REQUEST_2_FINGER_PASSTHROUGH:
+                return "FLAG_REQUEST_2_FINGER_PASSTHROUGH";
+            case FLAG_SEND_MOTION_EVENTS:
+                return "FLAG_SEND_MOTION_EVENTS";
             case FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY:
                 return "FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY";
             case FLAG_REPORT_VIEW_IDS:

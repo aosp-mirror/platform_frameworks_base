@@ -71,37 +71,38 @@ public class BubbleExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        int bubblePreference =
-                mConfig.getBubblePreference(
-                        record.getSbn().getPackageName(), record.getSbn().getUid());
-        NotificationChannel recordChannel = record.getChannel();
-        boolean canPresentAsBubble = canPresentAsBubble(record)
+        boolean notifCanPresentAsBubble = canPresentAsBubble(record)
                 && !mActivityManager.isLowRamDevice()
                 && record.isConversation()
                 && record.getShortcutInfo() != null
                 && (record.getNotification().flags & FLAG_FOREGROUND_SERVICE) == 0;
 
-        if (!mConfig.bubblesEnabled()
-                || bubblePreference == BUBBLE_PREFERENCE_NONE
-                || !canPresentAsBubble) {
+        boolean userEnabledBubbles = mConfig.bubblesEnabled(record.getUser());
+        int appPreference =
+                mConfig.getBubblePreference(
+                        record.getSbn().getPackageName(), record.getSbn().getUid());
+        NotificationChannel recordChannel = record.getChannel();
+        if (!userEnabledBubbles
+                || appPreference == BUBBLE_PREFERENCE_NONE
+                || !notifCanPresentAsBubble) {
             record.setAllowBubble(false);
-            if (!canPresentAsBubble) {
+            if (!notifCanPresentAsBubble) {
                 // clear out bubble metadata since it can't be used
                 record.getNotification().setBubbleMetadata(null);
             }
         } else if (recordChannel == null) {
             // the app is allowed but there's no channel to check
             record.setAllowBubble(true);
-        } else if (bubblePreference == BUBBLE_PREFERENCE_ALL) {
+        } else if (appPreference == BUBBLE_PREFERENCE_ALL) {
             record.setAllowBubble(recordChannel.getAllowBubbles() != ALLOW_BUBBLE_OFF);
-        } else if (bubblePreference == BUBBLE_PREFERENCE_SELECTED) {
+        } else if (appPreference == BUBBLE_PREFERENCE_SELECTED) {
             record.setAllowBubble(recordChannel.canBubble());
         }
         if (DBG) {
             Slog.d(TAG, "record: " + record.getKey()
-                    + " appPref: " + bubblePreference
+                    + " appPref: " + appPreference
                     + " canBubble: " + record.canBubble()
-                    + " canPresentAsBubble: " + canPresentAsBubble
+                    + " canPresentAsBubble: " + notifCanPresentAsBubble
                     + " flagRemoved: " + record.isFlagBubbleRemoved());
         }
 

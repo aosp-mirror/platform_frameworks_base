@@ -18,10 +18,9 @@ package com.android.internal.util.dump;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
-
-import com.android.internal.util.IndentingPrintWriter;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

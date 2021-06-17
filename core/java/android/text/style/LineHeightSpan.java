@@ -89,7 +89,7 @@ public interface LineHeightSpan extends ParagraphStyle, WrapTogetherSpan {
          * Set the line height of the paragraph to <code>height</code> physical pixels.
          */
         public Standard(@Px @IntRange(from = 1) int height) {
-            Preconditions.checkArgument(height > 0, "Height:" + height + "must be positive");
+            Preconditions.checkArgument(height > 0, "Height: %d must be positive", height);
             mHeight = height;
         }
 

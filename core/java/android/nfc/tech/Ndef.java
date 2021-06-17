@@ -112,7 +112,7 @@ public final class Ndef extends BasicTagTechnology {
     public static final String NFC_FORUM_TYPE_1 = "org.nfcforum.ndef.type1";
     /** NFC Forum Tag Type 2 */
     public static final String NFC_FORUM_TYPE_2 = "org.nfcforum.ndef.type2";
-    /** NFC Forum Tag Type 4 */
+    /** NFC Forum Tag Type 3 */
     public static final String NFC_FORUM_TYPE_3 = "org.nfcforum.ndef.type3";
     /** NFC Forum Tag Type 4 */
     public static final String NFC_FORUM_TYPE_4 = "org.nfcforum.ndef.type4";

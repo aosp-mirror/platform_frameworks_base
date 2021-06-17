@@ -384,7 +384,7 @@ public class PowerUITest extends SysuiTestCase {
         mPowerUI.mSevereWarningShownThisChargeCycle = false;
         BatteryStateSnapshotWrapper state = new BatteryStateSnapshotWrapper();
 
-        // sanity check to make sure we can show for a valid config
+        // readiness check to make sure we can show for a valid config
         state.mBatteryLevel = 10;
         state.mTimeRemainingMillis = Duration.ofHours(2).toMillis();
         boolean shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
@@ -449,7 +449,7 @@ public class PowerUITest extends SysuiTestCase {
         mPowerUI.mSevereWarningShownThisChargeCycle = false;
         BatteryStateSnapshotWrapper state = new BatteryStateSnapshotWrapper();
 
-        // sanity check to make sure we can show for a valid config
+        // readiness check to make sure we can show for a valid config
         state.mBatteryLevel = 1;
         state.mTimeRemainingMillis = Duration.ofMinutes(1).toMillis();
         boolean shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
@@ -572,7 +572,7 @@ public class PowerUITest extends SysuiTestCase {
         state.mIsHybrid = false;
         BatteryStateSnapshot lastState = state.get();
 
-        // sanity check to make sure we can show for a valid config
+        // readiness check to make sure we can show for a valid config
         state.mBatteryLevel = 10;
         state.mBucket = -1;
         boolean shouldShow = mPowerUI.shouldShowLowBatteryWarning(state.get(), lastState);

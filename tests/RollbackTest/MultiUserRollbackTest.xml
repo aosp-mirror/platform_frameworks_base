@@ -20,6 +20,8 @@
         <option name="run-command" value="pm uninstall com.android.cts.install.lib.testapp.B" />
         <option name="teardown-command" value="pm uninstall com.android.cts.install.lib.testapp.A" />
         <option name="teardown-command" value="pm uninstall com.android.cts.install.lib.testapp.B" />
+        <option name="run-command" value="setprop persist.rollback.is_test 1" />
+        <option name="teardown-command" value="setprop persist.rollback.is_test 0" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.HostTest" >
         <option name="class" value="com.android.tests.rollback.host.MultiUserRollbackTest" />

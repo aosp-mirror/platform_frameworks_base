@@ -21,10 +21,9 @@
 namespace aapt {
 
 TEST(NoDefaultResourceRemoverTest, RemoveEntryWithNoDefaultAndOnlyLocales) {
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().SetPackageId(0x01).Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("android", 0x01)
           .AddSimple("android:string/foo")
           .AddSimple("android:string/foo", test::ParseConfigOrDie("en-rGB"))
           .AddSimple("android:string/foo", test::ParseConfigOrDie("fr-rFR"))
@@ -47,10 +46,10 @@ TEST(NoDefaultResourceRemoverTest, RemoveEntryWithNoDefaultAndOnlyLocales) {
 }
 
 TEST(NoDefaultResourceRemoverTest, KeepEntryWithLocalesAndDensities) {
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().SetMinSdkVersion(26).Build();
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetPackageId(0x01).SetMinSdkVersion(26).Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("android", 0x01)
           .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("mdpi")) // v4
           .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("en-rGB"))
           .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("fr-rFR"))
@@ -71,10 +70,10 @@ TEST(NoDefaultResourceRemoverTest, KeepEntryWithLocalesAndDensities) {
 }
 
 TEST(NoDefaultResourceRemoverTest, RemoveEntryWithLocalesAndDensitiesLowVersion) {
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().SetMinSdkVersion(3).Build();
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetPackageId(0x01).SetMinSdkVersion(3).Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("android", 0x01)
           .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("mdpi")) // v4
           .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("en-rGB"))
           .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("fr-rFR"))
@@ -87,10 +86,10 @@ TEST(NoDefaultResourceRemoverTest, RemoveEntryWithLocalesAndDensitiesLowVersion)
 }
 
 TEST(NoDefaultResourceRemoverTest, KeepEntryWithVersion) {
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().SetMinSdkVersion(8).Build();
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetPackageId(0x01).SetMinSdkVersion(8).Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("android", 0x01)
           .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("v8"))
           .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("en-rGB"))
           .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("fr-rFR"))

@@ -27,7 +27,7 @@ import android.hardware.lights.LightState;
 interface ILightsManager {
   List<Light> getLights();
   LightState getLightState(int lightId);
-  void openSession(in IBinder sessionToken);
+  void openSession(in IBinder sessionToken, in int priority);
   void closeSession(in IBinder sessionToken);
   void setLightStates(in IBinder sessionToken, in int[] lightIds, in LightState[] states);
 }

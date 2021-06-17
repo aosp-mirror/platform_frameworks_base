@@ -17,6 +17,15 @@
 //##########################################################
 // Variant: Privileged app
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 android_app_import {
     name: "CtsShimPrivPrebuilt",
 
@@ -43,6 +52,16 @@ android_app_import {
         },
     },
     presigned: true,
+
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.apex.cts.shim.v1",
+        "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_legacy",
+        "com.android.apex.cts.shim.v2_no_hashtree",
+        "com.android.apex.cts.shim.v2_sdk_target_p",
+        "com.android.apex.cts.shim.v3",
+    ],
 }
 
 //##########################################################
@@ -71,4 +90,14 @@ android_app_import {
         },
     },
     presigned: true,
+
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.apex.cts.shim.v1",
+        "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_legacy",
+        "com.android.apex.cts.shim.v2_no_hashtree",
+        "com.android.apex.cts.shim.v2_sdk_target_p",
+        "com.android.apex.cts.shim.v3",
+    ],
 }

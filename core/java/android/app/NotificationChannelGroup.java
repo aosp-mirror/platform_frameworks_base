@@ -15,6 +15,7 @@
  */
 package android.app;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -22,12 +23,12 @@ import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -227,22 +228,16 @@ public final class NotificationChannelGroup implements Parcelable {
     /**
      * @hide
      */
-    public void populateFromXml(XmlPullParser parser) {
+    public void populateFromXml(TypedXmlPullParser parser) {
         // Name, id, and importance are set in the constructor.
         setDescription(parser.getAttributeValue(null, ATT_DESC));
-        setBlocked(safeBool(parser, ATT_BLOCKED, false));
-    }
-
-    private static boolean safeBool(XmlPullParser parser, String att, boolean defValue) {
-        final String value = parser.getAttributeValue(null, att);
-        if (TextUtils.isEmpty(value)) return defValue;
-        return Boolean.parseBoolean(value);
+        setBlocked(parser.getAttributeBoolean(null, ATT_BLOCKED, false));
     }
 
     /**
      * @hide
      */
-    public void writeXml(XmlSerializer out) throws IOException {
+    public void writeXml(TypedXmlSerializer out) throws IOException {
         out.startTag(null, TAG_GROUP);
 
         out.attribute(null, ATT_ID, getId());
@@ -252,8 +247,8 @@ public final class NotificationChannelGroup implements Parcelable {
         if (getDescription() != null) {
             out.attribute(null, ATT_DESC, getDescription().toString());
         }
-        out.attribute(null, ATT_BLOCKED, Boolean.toString(isBlocked()));
-        out.attribute(null, ATT_USER_LOCKED, Integer.toString(mUserLockedFields));
+        out.attributeBoolean(null, ATT_BLOCKED, isBlocked());
+        out.attributeInt(null, ATT_USER_LOCKED, mUserLockedFields);
 
         out.endTag(null, TAG_GROUP);
     }
@@ -291,7 +286,7 @@ public final class NotificationChannelGroup implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NotificationChannelGroup that = (NotificationChannelGroup) o;

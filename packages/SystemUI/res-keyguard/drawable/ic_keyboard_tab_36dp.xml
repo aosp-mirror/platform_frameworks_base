@@ -13,8 +13,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<vector android:height="36sp" android:viewportHeight="36"
-        android:viewportWidth="36" android:width="36sp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="?android:attr/colorAccent" android:pathData="M18,18m-18,0a18,18 0,1 1,36 0a18,18 0,1 1,-36 0"/>
-    <path android:fillColor="?android:attr/textColorPrimaryInverse" android:pathData="M17.59,13.41L21.17,17H7v2h14.17l-3.59,3.59L19,24l6,-6l-6,-6L17.59,13.41zM26,12v12h2V12H26z"/>
+<vector
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:height="36sp"
+     android:viewportHeight="36"
+     android:viewportWidth="36"
+     android:width="36sp">
+  <path android:fillColor="?android:attr/colorBackground"
+        android:pathData="M17.59,13.41L21.17,17H7v2h14.17l-3.59,3.59L19,24l6,-6l-6,-6L17.59,
+                          13.41zM26,12v12h2V12H26z"/>
 </vector>

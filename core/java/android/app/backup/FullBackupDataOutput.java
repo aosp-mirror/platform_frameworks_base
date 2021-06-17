@@ -1,6 +1,7 @@
 package android.app.backup;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 
 /**
@@ -77,7 +78,7 @@ public class FullBackupDataOutput {
     public BackupDataOutput getData() { return mData; }
 
     /** @hide - used for measurement pass */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void addSize(long size) {
         if (size > 0) {
             mSize += size;

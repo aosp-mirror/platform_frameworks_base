@@ -25,12 +25,12 @@ import android.os.UserHandle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 class RingerModeTrackerImpl @Inject constructor(
     audioManager: AudioManager,
     broadcastDispatcher: BroadcastDispatcher,

@@ -33,7 +33,7 @@ public final class DumpState {
     public static final int DUMP_KEYSETS = 1 << 14;
     public static final int DUMP_VERSION = 1 << 15;
     public static final int DUMP_INSTALLS = 1 << 16;
-    public static final int DUMP_INTENT_FILTER_VERIFIERS = 1 << 17;
+    public static final int DUMP_DOMAIN_VERIFIER = 1 << 17;
     public static final int DUMP_DOMAIN_PREFERRED = 1 << 18;
     public static final int DUMP_FROZEN = 1 << 19;
     public static final int DUMP_DEXOPT = 1 << 20;
@@ -43,6 +43,9 @@ public final class DumpState {
     public static final int DUMP_SERVICE_PERMISSIONS = 1 << 24;
     public static final int DUMP_APEX = 1 << 25;
     public static final int DUMP_QUERIES = 1 << 26;
+    public static final int DUMP_KNOWN_PACKAGES = 1 << 27;
+    public static final int DUMP_PER_UID_READ_TIMEOUTS = 1 << 28;
+    public static final int DUMP_SNAPSHOT_STATISTICS = 1 << 29;
 
     public static final int OPTION_SHOW_FILTERS = 1 << 0;
     public static final int OPTION_DUMP_ALL_COMPONENTS = 1 << 1;
@@ -53,6 +56,11 @@ public final class DumpState {
     private int mOptions;
 
     private boolean mTitlePrinted;
+    private boolean mFullPreferred;
+    private boolean mCheckIn;
+    private boolean mBrief;
+
+    private String mTargetPackageName;
 
     private SharedUserSetting mSharedUser;
 
@@ -96,5 +104,37 @@ public final class DumpState {
 
     public void setSharedUser(SharedUserSetting user) {
         mSharedUser = user;
+    }
+
+    public String getTargetPackageName() {
+        return mTargetPackageName;
+    }
+
+    public void setTargetPackageName(String packageName) {
+        mTargetPackageName = packageName;
+    }
+
+    public boolean isFullPreferred() {
+        return mFullPreferred;
+    }
+
+    public void setFullPreferred(boolean fullPreferred) {
+        mFullPreferred = fullPreferred;
+    }
+
+    public boolean isCheckIn() {
+        return mCheckIn;
+    }
+
+    public void setCheckIn(boolean checkIn) {
+        mCheckIn = checkIn;
+    }
+
+    public boolean isBrief() {
+        return mBrief;
+    }
+
+    public void setBrief(boolean brief) {
+        mBrief = brief;
     }
 }

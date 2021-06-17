@@ -11,13 +11,15 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.inputmethod;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -38,9 +40,9 @@ public class InputMethodManagerServiceTests {
             (displayId) -> {
                 switch (displayId) {
                     case SYSTEM_DECORATION_SUPPORT_DISPLAY_ID:
-                        return true;
+                        return DISPLAY_IME_POLICY_LOCAL;
                     case NO_SYSTEM_DECORATION_SUPPORT_DISPLAY_ID:
-                        return false;
+                        return DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
                     default:
                         throw new IllegalArgumentException("Unknown displayId=" + displayId);
                 }
@@ -49,7 +51,7 @@ public class InputMethodManagerServiceTests {
     static InputMethodManagerService.ImeDisplayValidator sMustNotBeCalledChecker =
             (displayId) -> {
                 fail("Should not pass to display config check for this test case.");
-                return false;
+                return DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
             };
 
     @Test

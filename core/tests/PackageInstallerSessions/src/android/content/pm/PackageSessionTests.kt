@@ -16,7 +16,12 @@
 
 package android.content.pm
 
+import android.app.Instrumentation
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageInstaller.SessionParams
 import android.platform.test.annotations.Presubmit
 import androidx.test.InstrumentationRegistry
@@ -27,6 +32,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.testng.Assert.assertThrows
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 /**
@@ -53,15 +60,50 @@ class PackageSessionTests {
                 "android.permission.WRITE_CALL_LOG",
                 "android.permission.PROCESS_OUTGOING_CALLS"
         )
+
+        private const val TEST_PKG_NAME = "com.android.server.pm.test.test_app"
+        private const val INTENT_ACTION = "com.android.server.pm.test.test_app.action"
     }
 
     private val context: Context = InstrumentationRegistry.getContext()
+    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
 
     private val installer = context.packageManager.packageInstaller
+
+    private val receiver = object : BroadcastReceiver() {
+        private val results = ArrayBlockingQueue<Intent>(1)
+
+        override fun onReceive(context: Context, intent: Intent) {
+            results.add(intent)
+        }
+
+        fun makeIntentSender(sessionId: Int) = PendingIntent.getBroadcast(context, sessionId,
+                Intent(INTENT_ACTION),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE_UNAUDITED).intentSender
+
+        fun getResult(unit: TimeUnit, timeout: Long) = results.poll(timeout, unit)
+
+        fun clear() = results.clear()
+    }
+
+    @Before
+    fun registerReceiver() {
+        receiver.clear()
+        context.registerReceiver(receiver, IntentFilter(INTENT_ACTION))
+    }
+
+    @After
+    fun unregisterReceiver() {
+        context.unregisterReceiver(receiver)
+    }
 
     @Before
     @After
     fun abandonAllSessions() {
+        instrumentation.uiAutomation
+                .executeShellCommand("pm uninstall com.android.server.pm.test.test_app")
+                .close()
+
         installer.mySessions.asSequence()
                 .map { it.sessionId }
                 .forEach {
@@ -82,7 +124,7 @@ class PackageSessionTests {
             setAppLabel(longLabel)
         }
 
-        createSession(params) {
+        createAndAbandonSession(params) {
             assertThat(installer.getSessionInfo(it)?.appLabel)
                     .isEqualTo(longLabel.take(PackageItemInfo.MAX_SAFE_LABEL_LENGTH))
         }
@@ -95,7 +137,7 @@ class PackageSessionTests {
             setAppPackageName(longName)
         }
 
-        createSession(params) {
+        createAndAbandonSession(params) {
             assertThat(installer.getSessionInfo(it)?.appPackageName)
                     .isEqualTo(null)
         }
@@ -108,7 +150,7 @@ class PackageSessionTests {
             setInstallerPackageName(longName)
         }
 
-        createSession(params) {
+        createAndAbandonSession(params) {
             // If a custom installer name is dropped, it defaults to the caller
             assertThat(installer.getSessionInfo(it)?.installerPackageName)
                     .isEqualTo(context.packageName)
@@ -121,10 +163,37 @@ class PackageSessionTests {
             setWhitelistedRestrictedPermissions(invalidPermissions())
         }
 
-        createSession(params) {
+        createAndAbandonSession(params) {
             assertThat(installer.getSessionInfo(it)?.whitelistedRestrictedPermissions!!)
                     .containsExactlyElementsIn(RESTRICTED_PERMISSIONS)
         }
+    }
+
+    @Test
+    fun fillPackageNameWithParsedValue() {
+        val params = SessionParams(SessionParams.MODE_FULL_INSTALL)
+        val sessionId = installer.createSession(params)
+        val session = installer.openSession(sessionId)
+
+        javaClass.classLoader.getResourceAsStream("PackageManagerTestAppVersion1.apk")!!
+                .use { input ->
+                    session.openWrite("base", 0, -1)
+                            .use { output -> input.copyTo(output) }
+                }
+
+        // Test instrumentation doesn't have install permissions, so use shell
+        ShellIdentityUtils.invokeWithShellPermissions {
+            session.commit(receiver.makeIntentSender(sessionId))
+        }
+        session.close()
+
+        // The actual contents aren't verified as part of this test. Only care about it finishing.
+        val result = receiver.getResult(TimeUnit.SECONDS, 30)
+        assertThat(result).isNotNull()
+
+        val sessionInfo = installer.getSessionInfo(sessionId)
+        assertThat(sessionInfo).isNotNull()
+        assertThat(sessionInfo!!.getAppPackageName()).isEqualTo(TEST_PKG_NAME)
     }
 
     @LargeTest
@@ -177,7 +246,7 @@ class PackageSessionTests {
                 repeat(10) { add(invalidPackageName(300)) }
             }
 
-    private fun createSession(params: SessionParams, block: (Int) -> Unit = {}) {
+    private fun createAndAbandonSession(params: SessionParams, block: (Int) -> Unit = {}) {
         val sessionId = installer.createSession(params)
         try {
             block(sessionId)

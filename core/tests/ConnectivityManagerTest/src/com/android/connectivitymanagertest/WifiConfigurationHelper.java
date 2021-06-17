@@ -244,17 +244,19 @@ public class WifiConfigurationHelper {
 
         IpConfiguration ipConfiguration = config.getIpConfiguration();
         if (jsonConfig.has("ip")) {
-            StaticIpConfiguration staticIpConfig = new StaticIpConfiguration();
-
             InetAddress ipAddress = getInetAddress(jsonConfig.getString("ip"));
             int prefixLength = getPrefixLength(jsonConfig.getInt("prefix_length"));
-            staticIpConfig.ipAddress = new LinkAddress(ipAddress, prefixLength);
-            staticIpConfig.gateway = getInetAddress(jsonConfig.getString("gateway"));
-            staticIpConfig.dnsServers.add(getInetAddress(jsonConfig.getString("dns1")));
-            staticIpConfig.dnsServers.add(getInetAddress(jsonConfig.getString("dns2")));
+
+            final StaticIpConfiguration.Builder builder = new StaticIpConfiguration.Builder();
+            builder.setIpAddress(new LinkAddress(ipAddress, prefixLength));
+            builder.setGateway(getInetAddress(jsonConfig.getString("gateway")));
+            final ArrayList<InetAddress> dnsServers = new ArrayList<>();
+            dnsServers.add(getInetAddress(jsonConfig.getString("dns1")));
+            dnsServers.add(getInetAddress(jsonConfig.getString("dns2")));
+            builder.setDnsServers(dnsServers);
+            ipConfiguration.setStaticIpConfiguration(builder.build());
 
             ipConfiguration.setIpAssignment(IpAssignment.STATIC);
-            ipConfiguration.setStaticIpConfiguration(staticIpConfig);
         } else {
             ipConfiguration.setIpAssignment(IpAssignment.DHCP);
         }

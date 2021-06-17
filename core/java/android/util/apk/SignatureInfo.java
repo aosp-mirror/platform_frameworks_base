@@ -16,15 +16,18 @@
 
 package android.util.apk;
 
+import android.annotation.NonNull;
+
 import java.nio.ByteBuffer;
 
 /**
  * APK Signature Scheme v2 block and additional information relevant to verifying the signatures
  * contained in the block against the file.
+ * @hide
  */
-class SignatureInfo {
+public class SignatureInfo {
     /** Contents of APK Signature Scheme v2 block. */
-    public final ByteBuffer signatureBlock;
+    public final @NonNull ByteBuffer signatureBlock;
 
     /** Position of the APK Signing Block in the file. */
     public final long apkSigningBlockOffset;
@@ -36,10 +39,10 @@ class SignatureInfo {
     public final long eocdOffset;
 
     /** Contents of ZIP End of Central Directory (EoCD) of the file. */
-    public final ByteBuffer eocd;
+    public final @NonNull ByteBuffer eocd;
 
-    SignatureInfo(ByteBuffer signatureBlock, long apkSigningBlockOffset, long centralDirOffset,
-            long eocdOffset, ByteBuffer eocd) {
+    SignatureInfo(@NonNull ByteBuffer signatureBlock, long apkSigningBlockOffset,
+            long centralDirOffset, long eocdOffset, @NonNull ByteBuffer eocd) {
         this.signatureBlock = signatureBlock;
         this.apkSigningBlockOffset = apkSigningBlockOffset;
         this.centralDirOffset = centralDirOffset;

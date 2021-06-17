@@ -18,6 +18,6 @@ package android.service.euicc;
 
 /** @hide */
 oneway interface ISwitchToSubscriptionCallback {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void onComplete(int result);
 }

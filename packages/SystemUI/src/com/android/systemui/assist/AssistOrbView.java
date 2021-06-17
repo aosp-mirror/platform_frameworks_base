@@ -32,8 +32,8 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 
 public class AssistOrbView extends FrameLayout {
 

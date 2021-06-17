@@ -51,7 +51,8 @@ final class TvInputHal implements Handler.Callback {
     public interface Callback {
         void onDeviceAvailable(TvInputHardwareInfo info, TvStreamConfig[] configs);
         void onDeviceUnavailable(int deviceId);
-        void onStreamConfigurationChanged(int deviceId, TvStreamConfig[] configs);
+        void onStreamConfigurationChanged(int deviceId, TvStreamConfig[] configs,
+                int cableConnectionStatus);
         void onFirstFrameCaptured(int deviceId, int streamId);
     }
 
@@ -142,8 +143,9 @@ final class TvInputHal implements Handler.Callback {
         mHandler.obtainMessage(EVENT_DEVICE_UNAVAILABLE, deviceId, 0).sendToTarget();
     }
 
-    private void streamConfigsChangedFromNative(int deviceId) {
-        mHandler.obtainMessage(EVENT_STREAM_CONFIGURATION_CHANGED, deviceId, 0).sendToTarget();
+    private void streamConfigsChangedFromNative(int deviceId, int cableConnectionStatus) {
+        mHandler.obtainMessage(EVENT_STREAM_CONFIGURATION_CHANGED, deviceId,
+            cableConnectionStatus).sendToTarget();
     }
 
     private void firstFrameCapturedFromNative(int deviceId, int streamId) {
@@ -184,6 +186,7 @@ final class TvInputHal implements Handler.Callback {
             case EVENT_STREAM_CONFIGURATION_CHANGED: {
                 TvStreamConfig[] configs;
                 int deviceId = msg.arg1;
+                int cableConnectionStatus = msg.arg2;
                 synchronized (mLock) {
                     if (DEBUG) {
                         Slog.d(TAG, "EVENT_STREAM_CONFIGURATION_CHANGED: deviceId = " + deviceId);
@@ -191,7 +194,7 @@ final class TvInputHal implements Handler.Callback {
                     retrieveStreamConfigsLocked(deviceId);
                     configs = mStreamConfigs.get(deviceId);
                 }
-                mCallback.onStreamConfigurationChanged(deviceId, configs);
+                mCallback.onStreamConfigurationChanged(deviceId, configs, cableConnectionStatus);
                 break;
             }
 

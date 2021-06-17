@@ -57,6 +57,8 @@ message IntervalStatsProto {
     // Time attributes stored as an offset of the IntervalStats's beginTime.
     optional int64 last_time_visible_ms = 10;
     optional int64 total_time_visible_ms = 11;
+    // Time attributes stored as an offset of the IntervalStats's beginTime.
+    optional int64 last_time_component_used_ms = 12;
   }
 
   // Stores the relevant information an IntervalStats will have about a Configuration

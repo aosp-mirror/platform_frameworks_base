@@ -158,7 +158,7 @@ public final class SharedMemory implements Parcelable, Closeable {
      *
      * @hide Exposed for native ASharedMemory_dupFromJava()
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 171971817)
     public int getFd() {
         return mFileDescriptor.getInt$();
     }

@@ -15,16 +15,18 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.serialchat">
+     package="com.android.serialchat">
 
     <uses-permission android:name="android.permission.SERIAL_PORT"/>
 
     <application android:label="Serial Chat">
-        <activity android:name="SerialChat" android:label="Serial Chat">
+        <activity android:name="SerialChat"
+             android:label="Serial Chat"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>

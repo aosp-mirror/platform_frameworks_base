@@ -21,6 +21,7 @@
 #include <apex/window.h>
 #include <utils/Errors.h>
 #include <utils/Macros.h>
+#include <utils/NdkUtils.h>
 #include <utils/StrongPointer.h>
 
 #include <memory>
@@ -67,8 +68,7 @@ private:
 
     uint64_t mUsage = AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER;
     AHardwareBuffer_Format mFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
-    std::unique_ptr<AHardwareBuffer, void (*)(AHardwareBuffer*)> mScratchBuffer{
-            nullptr, AHardwareBuffer_release};
+    UniqueAHardwareBuffer mScratchBuffer;
     ANativeWindowBuffer* mReservedBuffer = nullptr;
     base::unique_fd mReservedFenceFd;
     bool mHasDequeuedBuffer = false;

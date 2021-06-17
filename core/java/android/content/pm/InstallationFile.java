@@ -26,9 +26,6 @@ import android.annotation.SystemApi;
  * metadata. These file attributes will be consistent with those used in:
  * {@code PackageInstaller.Session#addFile}, when the file was first added into the session.
  *
- * WARNING: This is a system API to aid internal development.
- * Use at your own risk. It will change or be removed without warning.
- *
  * @see android.content.pm.PackageInstaller.Session#addFile
  * @hide
  */

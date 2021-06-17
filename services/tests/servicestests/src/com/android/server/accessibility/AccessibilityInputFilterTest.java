@@ -28,14 +28,17 @@ import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEA
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -47,12 +50,19 @@ import android.view.MotionEvent;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.LocalServices;
 import com.android.server.accessibility.gestures.TouchExplorer;
+import com.android.server.accessibility.magnification.FullScreenMagnificationController;
+import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
+import com.android.server.accessibility.magnification.MagnificationGestureHandler;
+import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
+import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -83,7 +93,9 @@ public class AccessibilityInputFilterTest {
                     FullScreenMagnificationGestureHandler.class, TouchExplorer.class,
                     AutoclickController.class, AccessibilityInputFilter.class};
 
-    private MagnificationController mMockMagnificationController;
+    @Mock private WindowManagerInternal.AccessibilityControllerInternal mMockA11yController;
+    @Mock private WindowManagerInternal mMockWindowManagerService;
+    @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
     private AccessibilityManagerService mAms;
     private AccessibilityInputFilter mA11yInputFilter;
     private EventCaptor mCaptor1;
@@ -126,15 +138,21 @@ public class AccessibilityInputFilterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         Context context = InstrumentationRegistry.getContext();
+        LocalServices.removeServiceForTest(WindowManagerInternal.class);
+        LocalServices.addService(
+                WindowManagerInternal.class, mMockWindowManagerService);
+        when(mMockWindowManagerService.getAccessibilityController()).thenReturn(
+                mMockA11yController);
+        when(mMockA11yController.isAccessibilityTracingEnabled()).thenReturn(false);
 
         setDisplayCount(1);
         mAms = spy(new AccessibilityManagerService(context));
-        mMockMagnificationController = mock(MagnificationController.class);
         mA11yInputFilter = new AccessibilityInputFilter(context, mAms, mEventHandler);
         mA11yInputFilter.onInstalled();
 
-        when(mAms.getValidDisplayList()).thenReturn(mDisplayList);
-        when(mAms.getMagnificationController()).thenReturn(mMockMagnificationController);
+        doReturn(mDisplayList).when(mAms).getValidDisplayList();
+        doReturn(mMockFullScreenMagnificationController).when(mAms)
+                .getFullScreenMagnificationController();
     }
 
     @After
@@ -241,6 +259,63 @@ public class AccessibilityInputFilterTest {
         assertEquals(1, mCaptor1.mEvents.size());
     }
 
+    @Test
+    public void testEnabledFeatures_windowMagnificationMode_expectedMagnificationGestureHandler() {
+        prepareLooper();
+        doReturn(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW).when(
+                mAms).getMagnificationMode(DEFAULT_DISPLAY);
+
+        mA11yInputFilter.setUserAndEnabledFeatures(0, mFeatures);
+
+        MagnificationGestureHandler handler =
+                getMagnificationGestureHandlerFromEventHandler(DEFAULT_DISPLAY);
+        assertNotNull(handler);
+        assertEquals(WindowMagnificationGestureHandler.class, handler.getClass());
+    }
+
+    @Test
+    public void testChangeMagnificationModeToWindow_expectedMagnificationGestureHandler() {
+        prepareLooper();
+        doReturn(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN).when(
+                mAms).getMagnificationMode(DEFAULT_DISPLAY);
+        mA11yInputFilter.setUserAndEnabledFeatures(0, mFeatures);
+        doReturn(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW).when(
+                mAms).getMagnificationMode(DEFAULT_DISPLAY);
+        EventStreamTransformation nextEventStream = getMagnificationGestureHandlerFromEventHandler(
+                DEFAULT_DISPLAY).getNext();
+
+        mA11yInputFilter.refreshMagnificationMode(mDisplayList.get(DEFAULT_DISPLAY));
+
+        MagnificationGestureHandler handler =
+                getMagnificationGestureHandlerFromEventHandler(DEFAULT_DISPLAY);
+        assertNotNull(handler);
+        assertEquals(WindowMagnificationGestureHandler.class, handler.getClass());
+        assertEquals(nextEventStream.getClass(), handler.getNext().getClass());
+
+    }
+
+    @Test public void
+    testChangeMagnificationModeToWindow_magnifierFeature_expectedMagnificationGestureHandler() {
+        prepareLooper();
+        doReturn(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN).when(
+                mAms).getMagnificationMode(DEFAULT_DISPLAY);
+        final int feature = FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER
+                | FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER | FLAG_FEATURE_TOUCH_EXPLORATION;
+        mA11yInputFilter.setUserAndEnabledFeatures(0, feature);
+        doReturn(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW).when(
+                mAms).getMagnificationMode(DEFAULT_DISPLAY);
+        EventStreamTransformation nextEventStream = getMagnificationGestureHandlerFromEventHandler(
+                DEFAULT_DISPLAY).getNext();
+
+        mA11yInputFilter.refreshMagnificationMode(mDisplayList.get(DEFAULT_DISPLAY));
+
+        MagnificationGestureHandler handler =
+                getMagnificationGestureHandlerFromEventHandler(DEFAULT_DISPLAY);
+        assertNotNull(handler);
+        assertEquals(WindowMagnificationGestureHandler.class, handler.getClass());
+        assertEquals(nextEventStream.getClass(), handler.getNext().getClass());
+    }
+
     private static void prepareLooper() {
         if (Looper.myLooper() == null) {
             Looper.prepare();
@@ -273,5 +348,18 @@ public class AccessibilityInputFilterTest {
         ev.setDisplayId(displayId);
         ev.setSource(source);
         return ev;
+    }
+
+    @Nullable
+    private MagnificationGestureHandler getMagnificationGestureHandlerFromEventHandler(
+            int displayId) {
+        EventStreamTransformation next = mEventHandler.get(displayId);
+        while (next != null) {
+            if (next instanceof MagnificationGestureHandler) {
+                return (MagnificationGestureHandler) next;
+            }
+            next = next.getNext();
+        }
+        return null;
     }
 }

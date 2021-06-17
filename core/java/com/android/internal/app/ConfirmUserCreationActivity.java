@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.DialogInterface;
@@ -52,6 +54,8 @@ public class ConfirmUserCreationActivity extends AlertActivity
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
+        getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         Intent intent = getIntent();
         mUserName = intent.getStringExtra(UserManager.EXTRA_USER_NAME);

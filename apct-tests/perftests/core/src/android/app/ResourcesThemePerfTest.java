@@ -95,8 +95,9 @@ public class ResourcesThemePerfTest {
                 ? Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
 
         Resources destResources = resourcesManager.getResources(null, ai.sourceDir,
-                ai.splitSourceDirs, ai.resourceDirs, ai.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
-                c, mContext.getResources().getCompatibilityInfo(), null, null);
+                ai.splitSourceDirs, ai.resourceDirs, ai.overlayPaths, ai.sharedLibraryFiles,
+                Display.DEFAULT_DISPLAY, c, mContext.getResources().getCompatibilityInfo(),
+                null, null);
         Assert.assertNotEquals(destResources.getAssets(), mContext.getAssets());
 
         Resources.Theme destTheme = destResources.newTheme();

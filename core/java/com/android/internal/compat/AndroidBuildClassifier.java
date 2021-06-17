@@ -31,4 +31,14 @@ public class AndroidBuildClassifier {
     public boolean isFinalBuild() {
         return "REL".equals(Build.VERSION.CODENAME);
     }
+
+    /**
+     * The current platform SDK version.
+     */
+    public int platformTargetSdk() {
+        if (isFinalBuild()) {
+            return Build.VERSION.SDK_INT;
+        }
+        return Build.VERSION_CODES.CUR_DEVELOPMENT;
+    }
 }

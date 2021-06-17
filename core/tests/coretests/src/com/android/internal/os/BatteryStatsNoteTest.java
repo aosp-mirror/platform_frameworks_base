@@ -24,12 +24,14 @@ import android.os.BatteryStats;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.Uid.Sensor;
 import android.os.WorkSource;
+import android.util.SparseLongArray;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.os.BatteryStatsImpl.DualTimer;
 import com.android.internal.os.BatteryStatsImpl.Uid;
+import com.android.internal.power.MeasuredEnergyStats;
 
 import junit.framework.TestCase;
 
@@ -293,6 +295,7 @@ public class BatteryStatsNoteTest extends TestCase {
     }
 
     @SmallTest
+    @SkipPresubmit("b/180015146")
     public void testAlarmStartAndFinishLocked() throws Exception {
         final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -330,6 +333,7 @@ public class BatteryStatsNoteTest extends TestCase {
     }
 
     @SmallTest
+    @SkipPresubmit("b/180015146")
     public void testAlarmStartAndFinishLocked_workSource() throws Exception {
         final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -496,5 +500,240 @@ public class BatteryStatsNoteTest extends TestCase {
         bi.noteGpsChangedLocked(ws, new WorkSource());
         t = bi.getUidStatsLocked(UID).getSensorTimerLocked(Sensor.GPS, false);
         assertFalse(t.isRunningLocked());
+    }
+
+    @SmallTest
+    public void testUpdateDisplayMeasuredEnergyStatsLocked() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.initMeasuredEnergyStats();
+
+        clocks.realtime = 0;
+        int screen = Display.STATE_OFF;
+        boolean battery = false;
+
+        final int uid1 = 10500;
+        final int uid2 = 10501;
+        long blame1 = 0;
+        long blame2 = 0;
+        long globalDoze = 0;
+
+        // Case A: uid1 off, uid2 off, battery off, screen off
+        bi.updateTimeBasesLocked(battery, screen, clocks.realtime*1000, 0);
+        bi.setOnBatteryInternal(battery);
+        bi.updateDisplayMeasuredEnergyStatsLocked(500_000, screen, clocks.realtime);
+        checkMeasuredCharge("A", uid1, blame1, uid2, blame2, globalDoze, bi);
+
+        // Case B: uid1 off, uid2 off, battery ON,  screen off
+        clocks.realtime += 17;
+        battery = true;
+        bi.updateTimeBasesLocked(battery, screen, clocks.realtime*1000, 0);
+        bi.setOnBatteryInternal(battery);
+        clocks.realtime += 19;
+        bi.updateDisplayMeasuredEnergyStatsLocked(510_000, screen, clocks.realtime);
+        checkMeasuredCharge("B", uid1, blame1, uid2, blame2, globalDoze, bi);
+
+        // Case C: uid1 ON,  uid2 off, battery on,  screen off
+        clocks.realtime += 18;
+        setFgState(uid1, true, bi);
+        clocks.realtime += 18;
+        bi.updateDisplayMeasuredEnergyStatsLocked(520_000, screen, clocks.realtime);
+        checkMeasuredCharge("C", uid1, blame1, uid2, blame2, globalDoze, bi);
+
+        // Case D: uid1 on,  uid2 off, battery on,  screen ON
+        clocks.realtime += 17;
+        screen = Display.STATE_ON;
+        bi.updateDisplayMeasuredEnergyStatsLocked(521_000, screen, clocks.realtime);
+        blame1 += 0; // Screen had been off during the measurement period
+        checkMeasuredCharge("D.1", uid1, blame1, uid2, blame2, globalDoze, bi);
+        clocks.realtime += 101;
+        bi.updateDisplayMeasuredEnergyStatsLocked(530_000, screen, clocks.realtime);
+        blame1 += 530_000;
+        checkMeasuredCharge("D.2", uid1, blame1, uid2, blame2, globalDoze, bi);
+
+        // Case E: uid1 on,  uid2 ON,  battery on,  screen on
+        clocks.realtime += 20;
+        setFgState(uid2, true, bi);
+        clocks.realtime += 40;
+        bi.updateDisplayMeasuredEnergyStatsLocked(540_000, screen, clocks.realtime);
+        // In the past 60ms, sum of fg is 20+40+40=100ms. uid1 is blamed for 60/100; uid2 for 40/100
+        blame1 += 540_000 * (20 + 40) / (20 + 40 + 40);
+        blame2 += 540_000 * ( 0 + 40) / (20 + 40 + 40);
+        checkMeasuredCharge("E", uid1, blame1, uid2, blame2, globalDoze, bi);
+
+        // Case F: uid1 on,  uid2 OFF, battery on,  screen on
+        clocks.realtime += 40;
+        setFgState(uid2, false, bi);
+        clocks.realtime += 120;
+        bi.updateDisplayMeasuredEnergyStatsLocked(550_000, screen, clocks.realtime);
+        // In the past 160ms, sum f fg is 200ms. uid1 is blamed for 40+120 of it; uid2 for 40 of it.
+        blame1 += 550_000 * (40 + 120) / (40 + 40 + 120);
+        blame2 += 550_000 * (40 + 0  ) / (40 + 40 + 120);
+        checkMeasuredCharge("F", uid1, blame1, uid2, blame2, globalDoze, bi);
+
+        // Case G: uid1 on,  uid2 off,  battery on, screen DOZE
+        clocks.realtime += 5;
+        screen = Display.STATE_DOZE;
+        bi.updateDisplayMeasuredEnergyStatsLocked(570_000, screen, clocks.realtime);
+        blame1 += 570_000; // All of this pre-doze time is blamed on uid1.
+        checkMeasuredCharge("G", uid1, blame1, uid2, blame2, globalDoze, bi);
+
+        // Case H: uid1 on,  uid2 off,  battery on, screen ON
+        clocks.realtime += 6;
+        screen = Display.STATE_ON;
+        bi.updateDisplayMeasuredEnergyStatsLocked(580_000, screen, clocks.realtime);
+        blame1 += 0; // The screen had been doze during the energy period
+        globalDoze += 580_000;
+        checkMeasuredCharge("H", uid1, blame1, uid2, blame2, globalDoze, bi);
+    }
+
+    @SmallTest
+    public void testUpdateCustomMeasuredEnergyStatsLocked_neverCalled() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.initMeasuredEnergyStats();
+        bi.setOnBatteryInternal(true);
+
+        final int uid1 = 11500;
+        final int uid2 = 11501;
+
+        // Initially, all custom buckets report charge of 0.
+        checkCustomBatteryConsumption("0", 0, 0, uid1, 0, 0, uid2, 0, 0, bi);
+    }
+
+    @SmallTest
+    public void testUpdateCustomMeasuredEnergyStatsLocked() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.initMeasuredEnergyStats();
+
+        final int bucketA = 0; // Custom bucket 0
+        final int bucketB = 1; // Custom bucket 1
+
+        long totalBlameA = 0; // Total charge consumption for bucketA (may exceed sum of uids)
+        long totalBlameB = 0; // Total charge consumption for bucketB (may exceed sum of uids)
+
+        final int uid1 = 10500;
+        long blame1A = 0; // Blame for uid1 in bucketA
+        long blame1B = 0; // Blame for uid1 in bucketB
+
+        final int uid2 = 10501;
+        long blame2A = 0; // Blame for uid2 in bucketA
+        long blame2B = 0; // Blame for uid2 in bucketB
+
+        final SparseLongArray newChargesA = new SparseLongArray(2);
+        final SparseLongArray newChargesB = new SparseLongArray(2);
+
+
+        // ----- Case A: battery off (so blame does not increase)
+        bi.setOnBatteryInternal(false);
+
+        newChargesA.put(uid1, 20_000);
+        // Implicit newChargesA.put(uid2, 0);
+        bi.updateCustomMeasuredEnergyStatsLocked(bucketA, 500_000, newChargesA);
+
+        newChargesB.put(uid1, 60_000);
+        // Implicit newChargesB.put(uid2, 0);
+        bi.updateCustomMeasuredEnergyStatsLocked(bucketB, 700_000, newChargesB);
+
+        checkCustomBatteryConsumption(
+                "A", totalBlameA, totalBlameB, uid1, blame1A, blame1B, uid2, blame2A, blame2B, bi);
+
+
+        // ----- Case B: battery on
+        bi.setOnBatteryInternal(true);
+
+        newChargesA.put(uid1, 7_000); blame1A += 7_000;
+        // Implicit newChargesA.put(uid2, 0); blame2A += 0;
+        bi.updateCustomMeasuredEnergyStatsLocked(bucketA, 310_000, newChargesA);
+        totalBlameA += 310_000;
+
+        newChargesB.put(uid1, 63_000); blame1B += 63_000;
+        newChargesB.put(uid2, 15_000); blame2B += 15_000;
+        bi.updateCustomMeasuredEnergyStatsLocked(bucketB, 790_000, newChargesB);
+        totalBlameB += 790_000;
+
+        checkCustomBatteryConsumption(
+                "B", totalBlameA, totalBlameB, uid1, blame1A, blame1B, uid2, blame2A, blame2B, bi);
+
+
+        // ----- Case C: battery still on
+        newChargesA.delete(uid1); blame1A += 0;
+        newChargesA.put(uid2, 16_000); blame2A += 16_000;
+        bi.updateCustomMeasuredEnergyStatsLocked(bucketA, 560_000, newChargesA);
+        totalBlameA += 560_000;
+
+        bi.updateCustomMeasuredEnergyStatsLocked(bucketB, 10_000, null);
+        totalBlameB += 10_000;
+
+        checkCustomBatteryConsumption(
+                "C", totalBlameA, totalBlameB, uid1, blame1A, blame1B, uid2, blame2A, blame2B, bi);
+
+
+        // ----- Case D: battery still on
+        bi.updateCustomMeasuredEnergyStatsLocked(bucketA, 0, newChargesA);
+        bi.updateCustomMeasuredEnergyStatsLocked(bucketB, 15_000, new SparseLongArray(1));
+        totalBlameB += 15_000;
+        checkCustomBatteryConsumption(
+                "D", totalBlameA, totalBlameB, uid1, blame1A, blame1B, uid2, blame2A, blame2B, bi);
+    }
+
+    private void setFgState(int uid, boolean fgOn, MockBatteryStatsImpl bi) {
+        // Note that noteUidProcessStateLocked uses ActivityManager process states.
+        if (fgOn) {
+            bi.noteActivityResumedLocked(uid);
+            bi.noteUidProcessStateLocked(uid, ActivityManager.PROCESS_STATE_TOP);
+        } else {
+            bi.noteActivityPausedLocked(uid);
+            bi.noteUidProcessStateLocked(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        }
+    }
+
+    private void checkMeasuredCharge(String caseName, int uid1, long blame1, int uid2, long blame2,
+            long globalDoze, MockBatteryStatsImpl bi) {
+        final int bucket = MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON;
+
+        assertEquals("Wrong uid1 blame for Case " + caseName, blame1,
+                bi.getUidStatsLocked(uid1).getMeasuredBatteryConsumptionUC(bucket));
+
+        assertEquals("Wrong uid2 blame for Case " + caseName, blame2,
+                bi.getUidStatsLocked(uid2).getMeasuredBatteryConsumptionUC(bucket));
+
+        assertEquals("Wrong total blame for Case " + caseName, blame1 + blame2,
+                bi.getScreenOnMeasuredBatteryConsumptionUC());
+
+        assertEquals("Wrong doze for Case " + caseName, globalDoze,
+                bi.getScreenDozeMeasuredBatteryConsumptionUC());
+    }
+
+    private void checkCustomBatteryConsumption(String caseName,
+            long totalBlameA, long totalBlameB,
+            int uid1, long blame1A, long blame1B,
+            int uid2, long blame2A, long blame2B,
+            MockBatteryStatsImpl bi) {
+
+        final long[] actualTotal = bi.getCustomConsumerMeasuredBatteryConsumptionUC();
+        final long[] actualUid1 =
+                bi.getUidStatsLocked(uid1).getCustomConsumerMeasuredBatteryConsumptionUC();
+        final long[] actualUid2 =
+                bi.getUidStatsLocked(uid2).getCustomConsumerMeasuredBatteryConsumptionUC();
+
+        assertNotNull(actualTotal);
+        assertNotNull(actualUid1);
+        assertNotNull(actualUid2);
+
+        assertEquals("Wrong total blame in bucket 0 for Case " + caseName, totalBlameA,
+                actualTotal[0]);
+
+        assertEquals("Wrong total blame in bucket 1 for Case " + caseName, totalBlameB,
+                actualTotal[1]);
+
+        assertEquals("Wrong uid1 blame in bucket 0 for Case " + caseName, blame1A, actualUid1[0]);
+
+        assertEquals("Wrong uid1 blame in bucket 1 for Case " + caseName, blame1B, actualUid1[1]);
+
+        assertEquals("Wrong uid2 blame in bucket 0 for Case " + caseName, blame2A, actualUid2[0]);
+
+        assertEquals("Wrong uid2 blame in bucket 1 for Case " + caseName, blame2B, actualUid2[1]);
     }
 }

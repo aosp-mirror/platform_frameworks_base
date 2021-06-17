@@ -40,12 +40,19 @@ public class WaitResult implements Parcelable {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"LAUNCH_STATE_"}, value = {
+            LAUNCH_STATE_UNKNOWN,
             LAUNCH_STATE_COLD,
             LAUNCH_STATE_WARM,
-            LAUNCH_STATE_HOT
+            LAUNCH_STATE_HOT,
+            LAUNCH_STATE_RELAUNCH
     })
     public @interface LaunchState {
     }
+
+    /**
+     * Not considered as a launch event, e.g. the activity is already on top.
+     */
+    public static final int LAUNCH_STATE_UNKNOWN = 0;
 
     /**
      * Cold launch sequence: a new process has started.
@@ -61,6 +68,13 @@ public class WaitResult implements Parcelable {
      * Hot launch sequence: process reused, activity brought-to-top.
      */
     public static final int LAUNCH_STATE_HOT = 3;
+
+    /**
+     * Relaunch launch sequence: process reused, but activity has to be destroyed and created.
+     * E.g. the current device configuration is different from the background activity that will be
+     * brought to foreground, and the activity doesn't declare to handle the change.
+     */
+    public static final int LAUNCH_STATE_RELAUNCH = 4;
 
     public static final int INVALID_DELAY = -1;
     public int result;
@@ -124,6 +138,8 @@ public class WaitResult implements Parcelable {
                 return "WARM";
             case LAUNCH_STATE_HOT:
                 return "HOT";
+            case LAUNCH_STATE_RELAUNCH:
+                return "RELAUNCH";
             default:
                 return "UNKNOWN (" + type + ")";
         }

@@ -17,6 +17,7 @@
 syntax = "proto2";
 
 import "frameworks/base/core/proto/android/view/inputmethod/editorinfo.proto";
+import "frameworks/base/core/proto/android/view/insetssourceconsumer.proto";
 
 package android.view;
 
@@ -26,6 +27,7 @@ option java_multiple_files = true;
  * Represents a {@link android.view.ImeInsetsSourceConsumer} object.
  */
 message ImeInsetsSourceConsumerProto {
-    optional .android.view.inputmethod.EditorInfoProto focused_editor = 1;
-    optional bool is_requested_visible_awaiting_control = 2;
+    optional InsetsSourceConsumerProto insets_source_consumer = 1;
+    reserved 2; // focused_editor = 2
+    optional bool is_requested_visible_awaiting_control = 3;
 }

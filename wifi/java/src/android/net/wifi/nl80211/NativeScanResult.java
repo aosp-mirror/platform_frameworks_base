@@ -157,7 +157,9 @@ public final class NativeScanResult implements Parcelable {
                     BSS_CAPABILITY_RADIO_MANAGEMENT,
                     BSS_CAPABILITY_DSSS_OFDM,
                     BSS_CAPABILITY_DELAYED_BLOCK_ACK,
-                    BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK
+                    BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK,
+                    BSS_CAPABILITY_DMG_ESS,
+                    BSS_CAPABILITY_DMG_IBSS
             })
     public @interface BssCapabilityBits { }
 
@@ -225,6 +227,15 @@ public final class NativeScanResult implements Parcelable {
      * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): Immediate Block Ack.
      */
     public static final int BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK = 0x1 << 15;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): DMG ESS.
+     * In DMG bits 0 and 1 are parsed together, where ESS=0x3 and IBSS=0x1
+     */
+    public static final int BSS_CAPABILITY_DMG_ESS = 0x3;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): DMG IBSS.
+     */
+    public static final int BSS_CAPABILITY_DMG_IBSS = 0x1;
 
     /**
      *  Returns the capabilities of the AP repseresented by this scan result as advertised in the

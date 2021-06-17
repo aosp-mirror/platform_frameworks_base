@@ -16,15 +16,18 @@
 
 package com.android.server.am;
 
-import com.android.internal.R;
-
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.widget.Button;
+
+import com.android.internal.R;
 
 public class BaseErrorDialog extends AlertDialog {
     private static final int ENABLE_BUTTONS = 0;
@@ -44,10 +47,19 @@ public class BaseErrorDialog extends AlertDialog {
         getWindow().setAttributes(attrs);
     }
 
+    @Override
     public void onStart() {
         super.onStart();
         mHandler.sendEmptyMessage(DISABLE_BUTTONS);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(ENABLE_BUTTONS), 1000);
+        getContext().registerReceiver(mReceiver,
+                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        getContext().unregisterReceiver(mReceiver);
     }
 
     public boolean dispatchKeyEvent(KeyEvent event) {
@@ -81,6 +93,26 @@ public class BaseErrorDialog extends AlertDialog {
                 setEnabled(true);
             } else if (msg.what == DISABLE_BUTTONS) {
                 setEnabled(false);
+            }
+        }
+    };
+
+    /**
+     * Called when received ACTION_CLOSE_SYSTEM_DIALOGS.
+     */
+    protected void closeDialog() {
+        if (mCancelable) {
+            cancel();
+        } else {
+            dismiss();
+        }
+    }
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                closeDialog();
             }
         }
     };

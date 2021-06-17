@@ -16,6 +16,7 @@
 
 package com.android.systemui.globalactions;
 
+import static android.provider.Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD;
 import static android.view.WindowInsets.Type.ime;
 
 import static org.junit.Assert.assertEquals;
@@ -24,9 +25,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
@@ -34,6 +37,7 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -41,6 +45,7 @@ import androidx.test.rule.ActivityTestRule;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -48,14 +53,32 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
 @LargeTest
+@FlakyTest(bugId = 176891566)
 public class GlobalActionsImeTest extends SysuiTestCase {
 
     @Rule
     public ActivityTestRule<TestActivity> mActivityTestRule = new ActivityTestRule<>(
             TestActivity.class, false, false);
 
+    private int mOriginalShowImeWithHardKeyboard;
+
+    @Before
+    public void setUp() {
+        final ContentResolver contentResolver = mContext.getContentResolver();
+        mOriginalShowImeWithHardKeyboard = Settings.Secure.getInt(
+                contentResolver, SHOW_IME_WITH_HARD_KEYBOARD, 0);
+        // Forcibly shows IME even when hardware keyboard is connected.
+        // To change USER_SYSTEM settings, we have to use settings shell command.
+        executeShellCommand("settings put secure " + SHOW_IME_WITH_HARD_KEYBOARD + " 1");
+    }
+
     @After
     public void tearDown() {
+        // To restore USER_SYSTEM settings, we have to use settings shell command.
+        executeShellCommand("settings put secure "
+                + SHOW_IME_WITH_HARD_KEYBOARD + " " + mOriginalShowImeWithHardKeyboard);
+        // Hide power menu and return to home screen
+        executeShellCommand("input keyevent --longpress POWER");
         executeShellCommand("input keyevent HOME");
     }
 
@@ -159,6 +182,7 @@ public class GlobalActionsImeTest extends SysuiTestCase {
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            setShowWhenLocked(true); // Allow this test to work even if device got stuck on keyguard
             mEditText = new EditText(this);
             mEditText.setCursorVisible(false);  // Otherwise, main thread doesn't go idle.
             setContentView(mEditText);

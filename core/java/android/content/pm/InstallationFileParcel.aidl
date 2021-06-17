@@ -24,7 +24,7 @@ import android.content.pm.InstallationFileLocation;
  */
 parcelable InstallationFileParcel {
     String name;
-    InstallationFileLocation location;
+    InstallationFileLocation location = InstallationFileLocation.UNKNOWN;
     long size;
     byte[] metadata;
     byte[] signature;

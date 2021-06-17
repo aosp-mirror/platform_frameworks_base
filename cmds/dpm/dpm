@@ -1,7 +1,5 @@
 #!/system/bin/sh
 # Script to start "dpm" on the device
 #
-base=/system
-export CLASSPATH=$base/framework/dpm.jar
-exec app_process $base/bin com.android.commands.dpm.Dpm "$@"
+cmd device_policy "$@"
 

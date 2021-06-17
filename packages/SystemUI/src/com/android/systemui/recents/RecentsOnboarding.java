@@ -67,6 +67,7 @@ import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -138,7 +139,7 @@ public class RecentsOnboarding {
         private void onAppLaunch() {
             ActivityManager.RunningTaskInfo info = ActivityManagerWrapper.getInstance()
                     .getRunningTask();
-            if (info == null) {
+            if (info == null || info.baseActivity == null) {
                 return;
             }
             if (mBlacklistedPackages.contains(info.baseActivity.getPackageName())) {
@@ -365,7 +366,7 @@ public class RecentsOnboarding {
             mOverviewProxyListenerRegistered = true;
         }
         if (!mTaskListenerRegistered) {
-            ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskListener);
+            TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskListener);
             mTaskListenerRegistered = true;
         }
     }
@@ -377,7 +378,7 @@ public class RecentsOnboarding {
             mOverviewProxyListenerRegistered = false;
         }
         if (mTaskListenerRegistered) {
-            ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskListener);
+            TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskListener);
             mTaskListenerRegistered = false;
         }
 
@@ -466,23 +467,22 @@ public class RecentsOnboarding {
     }
 
     public void dump(PrintWriter pw) {
-        pw.println("RecentsOnboarding {");
-        pw.println("      mTaskListenerRegistered: " + mTaskListenerRegistered);
-        pw.println("      mOverviewProxyListenerRegistered: " + mOverviewProxyListenerRegistered);
-        pw.println("      mLayoutAttachedToWindow: " + mLayoutAttachedToWindow);
-        pw.println("      mHasDismissedSwipeUpTip: " + mHasDismissedSwipeUpTip);
-        pw.println("      mHasDismissedQuickScrubTip: " + mHasDismissedQuickScrubTip);
-        pw.println("      mNumAppsLaunchedSinceSwipeUpTipDismiss: "
+        pw.println("RecentsOnboarding");
+        pw.println("  mTaskListenerRegistered: " + mTaskListenerRegistered);
+        pw.println("  mOverviewProxyListenerRegistered: " + mOverviewProxyListenerRegistered);
+        pw.println("  mLayoutAttachedToWindow: " + mLayoutAttachedToWindow);
+        pw.println("  mHasDismissedSwipeUpTip: " + mHasDismissedSwipeUpTip);
+        pw.println("  mHasDismissedQuickScrubTip: " + mHasDismissedQuickScrubTip);
+        pw.println("  mNumAppsLaunchedSinceSwipeUpTipDismiss: "
                 + mNumAppsLaunchedSinceSwipeUpTipDismiss);
-        pw.println("      hasSeenSwipeUpOnboarding: " + hasSeenSwipeUpOnboarding());
-        pw.println("      hasSeenQuickScrubOnboarding: " + hasSeenQuickScrubOnboarding());
-        pw.println("      getDismissedSwipeUpOnboardingCount: "
+        pw.println("  hasSeenSwipeUpOnboarding: " + hasSeenSwipeUpOnboarding());
+        pw.println("  hasSeenQuickScrubOnboarding: " + hasSeenQuickScrubOnboarding());
+        pw.println("  getDismissedSwipeUpOnboardingCount: "
                 + getDismissedSwipeUpOnboardingCount());
-        pw.println("      hasDismissedQuickScrubOnboardingOnce: "
+        pw.println("  hasDismissedQuickScrubOnboardingOnce: "
                 + hasDismissedQuickScrubOnboardingOnce());
-        pw.println("      getOpenedOverviewCount: " + getOpenedOverviewCount());
-        pw.println("      getOpenedOverviewFromHomeCount: " + getOpenedOverviewFromHomeCount());
-        pw.println("    }");
+        pw.println("  getOpenedOverviewCount: " + getOpenedOverviewCount());
+        pw.println("  getOpenedOverviewFromHomeCount: " + getOpenedOverviewFromHomeCount());
     }
 
     private WindowManager.LayoutParams getWindowLayoutParams(int gravity, int x) {

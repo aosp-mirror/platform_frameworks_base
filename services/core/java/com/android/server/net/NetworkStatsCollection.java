@@ -30,6 +30,7 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_REMOVED;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
+import static com.android.internal.net.NetworkUtilsInternal.multiplySafeByRational;
 import static com.android.server.net.NetworkStatsService.TAG;
 
 import android.net.NetworkIdentity;
@@ -53,6 +54,8 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FastDataInput;
+import com.android.internal.util.FastDataOutput;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -62,12 +65,15 @@ import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
 import java.io.BufferedInputStream;
+import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ProtocolException;
 import java.time.ZonedDateTime;
@@ -81,9 +87,12 @@ import java.util.Objects;
  * Collection of {@link NetworkStatsHistory}, stored based on combined key of
  * {@link NetworkIdentitySet}, UID, set, and tag. Knows how to persist itself.
  */
-public class NetworkStatsCollection implements FileRotator.Reader {
+public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.Writer {
     /** File header magic number: "ANET" */
     private static final int FILE_MAGIC = 0x414E4554;
+
+    /** Default buffer size from BufferedInputStream */
+    private static final int BUFFER_SIZE = 8192;
 
     private static final int VERSION_NETWORK_INIT = 1;
 
@@ -185,35 +194,6 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         }
     }
 
-    /**
-     * Safely multiple a value by a rational.
-     * <p>
-     * Internally it uses integer-based math whenever possible, but switches
-     * over to double-based math if values would overflow.
-     */
-    @VisibleForTesting
-    public static long multiplySafe(long value, long num, long den) {
-        if (den == 0) den = 1;
-        long x = value;
-        long y = num;
-
-        // Logic shamelessly borrowed from Math.multiplyExact()
-        long r = x * y;
-        long ax = Math.abs(x);
-        long ay = Math.abs(y);
-        if (((ax | ay) >>> 31 != 0)) {
-            // Some bits greater than 2^31 that might cause overflow
-            // Check the result using the divide operator
-            // and check for the special case of Long.MIN_VALUE * -1
-            if (((y != 0) && (r / y != x)) ||
-                    (x == Long.MIN_VALUE && y == -1)) {
-                // Use double math to avoid overflowing
-                return (long) (((double) num / den) * value);
-            }
-        }
-        return r / den;
-    }
-
     public int[] getRelevantUids(@NetworkStatsAccess.Level int accessLevel) {
         return getRelevantUids(accessLevel, Binder.getCallingUid());
     }
@@ -311,11 +291,13 @@ public class NetworkStatsCollection implements FileRotator.Reader {
             }
 
             final long rawBytes = entry.rxBytes + entry.txBytes;
-            final long rawRxBytes = entry.rxBytes;
-            final long rawTxBytes = entry.txBytes;
+            final long rawRxBytes = entry.rxBytes == 0 ? 1 : entry.rxBytes;
+            final long rawTxBytes = entry.txBytes == 0 ? 1 : entry.txBytes;
             final long targetBytes = augmentPlan.getDataUsageBytes();
-            final long targetRxBytes = multiplySafe(targetBytes, rawRxBytes, rawBytes);
-            final long targetTxBytes = multiplySafe(targetBytes, rawTxBytes, rawBytes);
+
+            final long targetRxBytes = multiplySafeByRational(targetBytes, rawRxBytes, rawBytes);
+            final long targetTxBytes = multiplySafeByRational(targetBytes, rawTxBytes, rawBytes);
+
 
             // Scale all matching buckets to reach anchor target
             final long beforeTotal = combined.getTotalBytes();
@@ -323,8 +305,10 @@ public class NetworkStatsCollection implements FileRotator.Reader {
                 combined.getValues(i, entry);
                 if (entry.bucketStart >= augmentStart
                         && entry.bucketStart + entry.bucketDuration <= augmentEnd) {
-                    entry.rxBytes = multiplySafe(targetRxBytes, entry.rxBytes, rawRxBytes);
-                    entry.txBytes = multiplySafe(targetTxBytes, entry.txBytes, rawTxBytes);
+                    entry.rxBytes = multiplySafeByRational(
+                            targetRxBytes, entry.rxBytes, rawRxBytes);
+                    entry.txBytes = multiplySafeByRational(
+                            targetTxBytes, entry.txBytes, rawTxBytes);
                     // We purposefully clear out packet counters to indicate
                     // that this data has been augmented.
                     entry.rxPackets = 0;
@@ -455,10 +439,11 @@ public class NetworkStatsCollection implements FileRotator.Reader {
 
     @Override
     public void read(InputStream in) throws IOException {
-        read(new DataInputStream(in));
+        final FastDataInput dataIn = new FastDataInput(in, BUFFER_SIZE);
+        read(dataIn);
     }
 
-    public void read(DataInputStream in) throws IOException {
+    private void read(DataInput in) throws IOException {
         // verify file magic header intact
         final int magic = in.readInt();
         if (magic != FILE_MAGIC) {
@@ -492,7 +477,14 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         }
     }
 
-    public void write(DataOutputStream out) throws IOException {
+    @Override
+    public void write(OutputStream out) throws IOException {
+        final FastDataOutput dataOut = new FastDataOutput(out, BUFFER_SIZE);
+        write(dataOut);
+        dataOut.flush();
+    }
+
+    private void write(DataOutput out) throws IOException {
         // cluster key lists grouped by ident
         final HashMap<NetworkIdentitySet, ArrayList<Key>> keysByIdent = Maps.newHashMap();
         for (Key key : mStats.keySet()) {
@@ -521,8 +513,6 @@ public class NetworkStatsCollection implements FileRotator.Reader {
                 history.writeToStream(out);
             }
         }
-
-        out.flush();
     }
 
     @Deprecated

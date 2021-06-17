@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -33,19 +34,26 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.print.PrintDocumentAdapter;
+import android.util.LongSparseArray;
 import android.util.SparseArray;
 import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.textclassifier.TextClassifier;
+import android.view.translation.TranslationCapability;
+import android.view.translation.TranslationSpec.DataFormat;
+import android.view.translation.ViewTranslationRequest;
+import android.view.translation.ViewTranslationResponse;
 import android.webkit.WebView.HitTestResult;
 import android.webkit.WebView.PictureListener;
 import android.webkit.WebView.VisualStateCallback;
@@ -53,8 +61,10 @@ import android.webkit.WebView.VisualStateCallback;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * WebView backend provider interface: this interface is the abstract backend to a WebView
@@ -357,6 +367,27 @@ public interface WebViewProvider {
                 @SuppressWarnings("unused") int flags) {
         }
 
+        @SuppressLint("NullableCollection")
+        default void onCreateVirtualViewTranslationRequests(
+                @NonNull @SuppressWarnings("unused") long[] virtualIds,
+                @NonNull @SuppressWarnings("unused") @DataFormat int[] supportedFormats,
+                @NonNull @SuppressWarnings("unused")
+                        Consumer<ViewTranslationRequest> requestsCollector) {
+        }
+
+        default void onVirtualViewTranslationResponses(
+                @NonNull @SuppressWarnings("unused")
+                        LongSparseArray<ViewTranslationResponse> response) {
+        }
+
+        default void dispatchCreateViewTranslationRequest(
+                @NonNull @SuppressWarnings("unused") Map<AutofillId, long[]> viewIds,
+                @NonNull @SuppressWarnings("unused") @DataFormat int[] supportedFormats,
+                @Nullable @SuppressWarnings("unused") TranslationCapability capability,
+                @NonNull @SuppressWarnings("unused") List<ViewTranslationRequest> requests) {
+
+        }
+
         public AccessibilityNodeProvider getAccessibilityNodeProvider();
 
         public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info);
@@ -447,6 +478,12 @@ public interface WebViewProvider {
         @SuppressWarnings("unused")
         default boolean onCheckIsTextEditor() {
             return false;
+        }
+
+        @SuppressWarnings("unused")
+        @Nullable
+        default WindowInsets onApplyWindowInsets(@Nullable WindowInsets insets) {
+            return null;
         }
     }
 

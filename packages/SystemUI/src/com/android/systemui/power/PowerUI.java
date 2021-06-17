@@ -46,6 +46,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -56,11 +57,10 @@ import java.util.Arrays;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
-@Singleton
+@SysUISingleton
 public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
 
     static final String TAG = "PowerUI";

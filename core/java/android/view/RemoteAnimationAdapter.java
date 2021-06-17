@@ -18,6 +18,7 @@ package android.view;
 
 import android.app.ActivityOptions;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -65,7 +66,7 @@ public class RemoteAnimationAdapter implements Parcelable {
      * @param statusBarTransitionDelay The desired delay for all visual animations in the
      *        status bar caused by this app animation in millis.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public RemoteAnimationAdapter(IRemoteAnimationRunner runner, long duration,
             long statusBarTransitionDelay, boolean changeNeedsSnapshot) {
         mRunner = runner;

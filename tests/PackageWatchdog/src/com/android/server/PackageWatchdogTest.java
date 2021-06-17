@@ -22,7 +22,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -43,10 +43,15 @@ import android.os.SystemProperties;
 import android.os.test.TestLooper;
 import android.provider.DeviceConfig;
 import android.util.AtomicFile;
+import android.util.LongArrayQueue;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
+import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.internal.util.XmlUtils;
 import com.android.server.PackageWatchdog.HealthCheckState;
 import com.android.server.PackageWatchdog.MonitoredPackage;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
@@ -64,6 +69,7 @@ import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,11 +78,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Test PackageWatchdog.
  */
 public class PackageWatchdogTest {
+    private static final long RETRY_MAX_COUNT = 30;
+    private static final long RETRY_TIMEOUT_MILLIS = 500;
+
     private static final String APP_A = "com.package.a";
     private static final String APP_B = "com.package.b";
     private static final String APP_C = "com.package.c";
@@ -91,6 +101,8 @@ public class PackageWatchdogTest {
     private final TestClock mTestClock = new TestClock();
     private TestLooper mTestLooper;
     private Context mSpyContext;
+    // Keep track of all created watchdogs to apply device config changes
+    private List<PackageWatchdog> mAllocatedWatchdogs;
     @Mock
     private ConnectivityModuleConnector mConnectivityModuleConnector;
     @Mock
@@ -100,12 +112,23 @@ public class PackageWatchdogTest {
     private MockitoSession mSession;
     private HashMap<String, String> mSystemSettingsMap;
 
+    private boolean retry(Supplier<Boolean> supplier) throws Exception {
+        for (int i = 0; i < RETRY_MAX_COUNT; ++i) {
+            if (supplier.get()) {
+                return true;
+            }
+            Thread.sleep(RETRY_TIMEOUT_MILLIS);
+        }
+        return false;
+    }
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         new File(InstrumentationRegistry.getContext().getFilesDir(),
                 "package-watchdog.xml").delete();
-        adoptShellPermissions(Manifest.permission.READ_DEVICE_CONFIG);
+        adoptShellPermissions(Manifest.permission.READ_DEVICE_CONFIG,
+                Manifest.permission.WRITE_DEVICE_CONFIG);
         mTestLooper = new TestLooper();
         mSpyContext = spy(InstrumentationRegistry.getContext());
         when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
@@ -150,12 +173,27 @@ public class PackageWatchdogTest {
                     return storedValue == null ? defaultValue : Long.parseLong(storedValue);
                 }
         ).when(() -> SystemProperties.getLong(anyString(), anyLong()));
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED,
+                Boolean.toString(true), false);
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT), false);
+
+        mAllocatedWatchdogs = new ArrayList<>();
     }
 
     @After
     public void tearDown() throws Exception {
         dropShellPermissions();
         mSession.finishMocking();
+        // Clean up listeners since too many listeners will delay notifications significantly
+        for (PackageWatchdog watchdog : mAllocatedWatchdogs) {
+            watchdog.removePropertyChangedListener();
+        }
+        mAllocatedWatchdogs.clear();
     }
 
     @Test
@@ -376,7 +414,7 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1) {
                 @Override
                 public int onHealthCheckFailed(VersionedPackage versionedPackage,
-                        int failureReason) {
+                        int failureReason, int mitigationCount) {
                     if (versionedPackage.getVersionCode() == VERSION_CODE) {
                         // Only rollback for specific versionCode
                         return PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
@@ -604,10 +642,6 @@ public class PackageWatchdogTest {
      */
     @Test
     public void testExplicitHealthCheckStateChanges() throws Exception {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
-
         TestController controller = new TestController();
         PackageWatchdog watchdog = createWatchdog(controller, true /* withPackagesReady */);
         TestObserver observer = new TestObserver(OBSERVER_NAME_1,
@@ -739,7 +773,8 @@ public class PackageWatchdogTest {
                 false /* hasPassedHealthCheck */);
         MonitoredPackage m2 = wd.newMonitoredPackage(APP_B, LONG_DURATION, false);
         MonitoredPackage m3 = wd.newMonitoredPackage(APP_C, LONG_DURATION, false);
-        MonitoredPackage m4 = wd.newMonitoredPackage(APP_D, LONG_DURATION, SHORT_DURATION, true);
+        MonitoredPackage m4 = wd.newMonitoredPackage(APP_D, LONG_DURATION, SHORT_DURATION, true,
+                new LongArrayQueue());
 
         // Verify transition: inactive -> active -> passed
         // Verify initially inactive
@@ -799,9 +834,6 @@ public class PackageWatchdogTest {
     /** Test default values are used when device property is invalid. */
     @Test
     public void testInvalidConfig_watchdogTriggerFailureCount() {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
                 Integer.toString(-1), /*makeDefault*/false);
@@ -827,9 +859,6 @@ public class PackageWatchdogTest {
     /** Test default values are used when device property is invalid. */
     @Test
     public void testInvalidConfig_watchdogTriggerDurationMillis() {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
                 Integer.toString(2), /*makeDefault*/false);
@@ -842,7 +871,6 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A, APP_B), Long.MAX_VALUE);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS + 1);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
@@ -854,7 +882,6 @@ public class PackageWatchdogTest {
 
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS - 1);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
@@ -909,9 +936,6 @@ public class PackageWatchdogTest {
     /** Test we are notified when enough failures are triggered within any window. */
     @Test
     public void testFailureTriggerWindow() {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
                 Integer.toString(3), /*makeDefault*/false);
@@ -925,11 +949,9 @@ public class PackageWatchdogTest {
         // Raise 2 failures at t=0 and t=900 respectively
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(900);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
 
         // Raise 2 failures at t=1100
         moveTimeForwardAndDispatch(200);
@@ -1064,6 +1086,31 @@ public class PackageWatchdogTest {
     }
 
     /**
+     * Ensure that the correct mitigation counts are sent to the boot loop observer.
+     */
+    @Test
+    public void testMultipleBootLoopMitigation() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver bootObserver = new TestObserver(OBSERVER_NAME_1);
+        watchdog.registerHealthObserver(bootObserver);
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; j++) {
+                watchdog.noteBoot();
+            }
+        }
+
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_DEESCALATION_WINDOW_MS + 1);
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; j++) {
+                watchdog.noteBoot();
+            }
+        }
+
+        assertThat(bootObserver.mBootMitigationCounts).isEqualTo(List.of(1, 2, 3, 4, 1, 2, 3, 4));
+    }
+
+    /**
      * Ensure that passing a null list of failed packages does not cause any mitigation logic to
      * execute.
      */
@@ -1146,6 +1193,172 @@ public class PackageWatchdogTest {
         assertThat(observer.mMitigatedPackages).isEqualTo(List.of(APP_A));
     }
 
+    /**
+     * Ensure that the sliding window logic results in the correct mitigation count being sent to
+     * an observer.
+     */
+    @Test
+    public void testMitigationSlidingWindow() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+        watchdog.startObservingHealth(observer, List.of(APP_A),
+                PackageWatchdog.DEFAULT_OBSERVING_DURATION_MS * 2);
+
+
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+
+        moveTimeForwardAndDispatch(TimeUnit.MINUTES.toMillis(10));
+
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_DEESCALATION_WINDOW_MS);
+
+        // The first failure will be outside the threshold.
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+
+        moveTimeForwardAndDispatch(TimeUnit.MINUTES.toMillis(20));
+
+        // The next 2 failures will also be outside the threshold.
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+
+        assertThat(observer.mMitigationCounts).isEqualTo(List.of(1, 2, 3, 3, 2, 3));
+    }
+
+    @Test
+    public void testNormalizingMitigationCalls()  {
+        PackageWatchdog watchdog = createWatchdog();
+
+        LongArrayQueue mitigationCalls = new LongArrayQueue();
+        mitigationCalls.addLast(1000);
+        mitigationCalls.addLast(2000);
+        mitigationCalls.addLast(3000);
+
+        MonitoredPackage pkg = watchdog.newMonitoredPackage(
+                "test", 123, 456, true, mitigationCalls);
+
+        // Make current system uptime 10000ms.
+        moveTimeForwardAndDispatch(9999);
+
+        LongArrayQueue expectedCalls = pkg.normalizeMitigationCalls();
+
+        assertThat(expectedCalls.size()).isEqualTo(mitigationCalls.size());
+
+        for (int i = 0; i < mitigationCalls.size(); i++) {
+            assertThat(expectedCalls.get(i)).isEqualTo(mitigationCalls.get(i) - 10000);
+        }
+    }
+
+    /**
+     * Ensure that a {@link MonitoredPackage} may be correctly written and read in order to persist
+     * across reboots.
+     */
+    @Test
+    public void testWritingAndReadingMonitoredPackage() throws Exception {
+        PackageWatchdog watchdog = createWatchdog();
+
+        LongArrayQueue mitigationCalls = new LongArrayQueue();
+        mitigationCalls.addLast(1000);
+        mitigationCalls.addLast(2000);
+        mitigationCalls.addLast(3000);
+        MonitoredPackage writePkg = watchdog.newMonitoredPackage(
+                "test.package", 1000, 2000, true, mitigationCalls);
+
+        // Move time forward so that the current uptime is 4000ms. Therefore, the written mitigation
+        // calls will each be reduced by 4000.
+        moveTimeForwardAndDispatch(3999);
+        LongArrayQueue expectedCalls = new LongArrayQueue();
+        expectedCalls.addLast(-3000);
+        expectedCalls.addLast(-2000);
+        expectedCalls.addLast(-1000);
+        MonitoredPackage expectedPkg = watchdog.newMonitoredPackage(
+                "test.package", 1000, 2000, true, expectedCalls);
+
+        // Write the package
+        File tmpFile = File.createTempFile("package-watchdog-test", ".xml");
+        AtomicFile testFile = new AtomicFile(tmpFile);
+        FileOutputStream stream = testFile.startWrite();
+        TypedXmlSerializer outputSerializer = Xml.resolveSerializer(stream);
+        outputSerializer.startDocument(null, true);
+        writePkg.writeLocked(outputSerializer);
+        outputSerializer.endDocument();
+        testFile.finishWrite(stream);
+
+        // Read the package
+        TypedXmlPullParser parser = Xml.resolvePullParser(testFile.openRead());
+        XmlUtils.beginDocument(parser, "package");
+        MonitoredPackage readPkg = watchdog.parseMonitoredPackage(parser);
+
+        assertTrue(readPkg.isEqualTo(expectedPkg));
+    }
+
+    /**
+     * Tests device config changes are propagated correctly.
+     */
+    @Test
+    public void testDeviceConfigChange_explicitHealthCheckEnabled() throws Exception {
+        TestController controller = new TestController();
+        PackageWatchdog watchdog = createWatchdog(controller, true /* withPackagesReady */);
+        assertThat(controller.mIsEnabled).isTrue();
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED,
+                Boolean.toString(false), /*makeDefault*/false);
+        retry(() -> !controller.mIsEnabled);
+        assertThat(controller.mIsEnabled).isFalse();
+    }
+
+    /**
+     * Tests device config changes are propagated correctly.
+     */
+    @Test
+    public void testDeviceConfigChange_triggerFailureCount() throws Exception {
+        PackageWatchdog watchdog = createWatchdog();
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(777), false);
+        retry(() -> watchdog.getTriggerFailureCount() == 777);
+        assertThat(watchdog.getTriggerFailureCount()).isEqualTo(777);
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(0), false);
+        retry(() -> watchdog.getTriggerFailureCount()
+                == PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT);
+        assertThat(watchdog.getTriggerFailureCount()).isEqualTo(
+                PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT);
+    }
+
+    /**
+     * Tests device config changes are propagated correctly.
+     */
+    @Test
+    public void testDeviceConfigChange_triggerFailureDurationMs() throws Exception {
+        PackageWatchdog watchdog = createWatchdog();
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_DURATION_MILLIS,
+                Integer.toString(888), false);
+        retry(() -> watchdog.getTriggerFailureDurationMs() == 888);
+        assertThat(watchdog.getTriggerFailureDurationMs()).isEqualTo(888);
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_DURATION_MILLIS,
+                Integer.toString(0), false);
+        retry(() -> watchdog.getTriggerFailureDurationMs()
+                == PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS);
+        assertThat(watchdog.getTriggerFailureDurationMs()).isEqualTo(
+                PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS);
+    }
+
     private void adoptShellPermissions(String... permissions) {
         InstrumentationRegistry
                 .getInstrumentation()
@@ -1164,15 +1377,15 @@ public class PackageWatchdogTest {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED,
                 Boolean.toString(enabled), /*makeDefault*/false);
-        //give time for DeviceConfig to broadcast the property value change
-        try {
-            Thread.sleep(SHORT_DURATION);
-        } catch (InterruptedException e) {
-            fail("Thread.sleep unexpectedly failed!");
+        // Call updateConfigs() so device config changes take effect immediately
+        for (PackageWatchdog watchdog : mAllocatedWatchdogs) {
+            watchdog.updateConfigs();
         }
     }
 
     private void moveTimeForwardAndDispatch(long milliSeconds) {
+        // Exhaust all due runnables now which shouldn't be executed after time-leap
+        mTestLooper.dispatchAll();
         mTestClock.moveTimeForward(milliSeconds);
         mTestLooper.moveTimeForward(milliSeconds);
         mTestLooper.dispatchAll();
@@ -1215,6 +1428,7 @@ public class PackageWatchdogTest {
             verify(mConnectivityModuleConnector).registerHealthListener(
                     mConnectivityModuleCallbackCaptor.capture());
         }
+        mAllocatedWatchdogs.add(watchdog);
         return watchdog;
     }
 
@@ -1227,6 +1441,8 @@ public class PackageWatchdogTest {
         private boolean mMitigatedBootLoop = false;
         final List<String> mHealthCheckFailedPackages = new ArrayList<>();
         final List<String> mMitigatedPackages = new ArrayList<>();
+        final List<Integer> mMitigationCounts = new ArrayList<>();
+        final List<Integer> mBootMitigationCounts = new ArrayList<>();
 
         TestObserver(String name) {
             mName = name;
@@ -1238,13 +1454,16 @@ public class PackageWatchdogTest {
             mImpact = impact;
         }
 
-        public int onHealthCheckFailed(VersionedPackage versionedPackage, int failureReason) {
+        public int onHealthCheckFailed(VersionedPackage versionedPackage, int failureReason,
+                int mitigationCount) {
             mHealthCheckFailedPackages.add(versionedPackage.getPackageName());
             return mImpact;
         }
 
-        public boolean execute(VersionedPackage versionedPackage, int failureReason) {
+        public boolean execute(VersionedPackage versionedPackage, int failureReason,
+                int mitigationCount) {
             mMitigatedPackages.add(versionedPackage.getPackageName());
+            mMitigationCounts.add(mitigationCount);
             mLastFailureReason = failureReason;
             return true;
         }
@@ -1261,12 +1480,13 @@ public class PackageWatchdogTest {
             return mMayObservePackages;
         }
 
-        public int onBootLoop() {
+        public int onBootLoop(int level) {
             return mImpact;
         }
 
-        public boolean executeBootLoopMitigation() {
+        public boolean executeBootLoopMitigation(int level) {
             mMitigatedBootLoop = true;
+            mBootMitigationCounts.add(level);
             return true;
         }
 

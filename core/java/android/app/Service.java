@@ -697,6 +697,11 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * service element of manifest file. The value of attribute
      * {@link android.R.attr#foregroundServiceType} can be multiple flags ORed together.</p>
      *
+     * @throws ForegroundServiceStartNotAllowedException
+     * If the app targeting API is
+     * {@link android.os.Build.VERSION_CODES#S} or later, and the service is restricted from
+     * becoming foreground service due to background restriction.
+     *
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
      * NotificationManager.notify(int, Notification)}; must not be 0.
@@ -734,8 +739,14 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
    * @param notification The Notification to be displayed.
    * @param foregroundServiceType must be a subset flags of manifest attribute
    * {@link android.R.attr#foregroundServiceType} flags.
+   *
    * @throws IllegalArgumentException if param foregroundServiceType is not subset of manifest
    *     attribute {@link android.R.attr#foregroundServiceType}.
+   * @throws ForegroundServiceStartNotAllowedException
+   * If the app targeting API is
+   * {@link android.os.Build.VERSION_CODES#S} or later, and the service is restricted from
+   * becoming foreground service due to background restriction.
+   *
    * @see android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST
    */
     public final void startForeground(int id, @NonNull Notification notification,
@@ -847,6 +858,19 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
                 < Build.VERSION_CODES.ECLAIR;
 
         setContentCaptureOptions(application.getContentCaptureOptions());
+    }
+
+    /**
+     * Creates the base {@link Context} of this {@link Service}.
+     * Users may override this API to create customized base context.
+     *
+     * @see android.window.WindowProviderService WindowProviderService class for example
+     * @see ContextWrapper#attachBaseContext(Context)
+     *
+     * @hide
+     */
+    public Context createServiceBaseContext(ActivityThread mainThread, LoadedApk packageInfo) {
+        return ContextImpl.createAppContext(mainThread, packageInfo);
     }
 
     /**

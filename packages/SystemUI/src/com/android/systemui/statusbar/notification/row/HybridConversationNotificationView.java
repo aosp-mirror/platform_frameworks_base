@@ -37,8 +37,9 @@ public class HybridConversationNotificationView extends HybridNotificationView {
     private ImageView mConversationIconView;
     private TextView mConversationSenderName;
     private View mConversationFacePile;
-    private int mConversationIconSize;
+    private int mSingleAvatarSize;
     private int mFacePileSize;
+    private int mFacePileAvatarSize;
     private int mFacePileProtectionWidth;
 
     public HybridConversationNotificationView(Context context) {
@@ -67,7 +68,9 @@ public class HybridConversationNotificationView extends HybridNotificationView {
         mConversationSenderName = requireViewById(R.id.conversation_notification_sender);
         mFacePileSize = getResources()
                 .getDimensionPixelSize(R.dimen.conversation_single_line_face_pile_size);
-        mConversationIconSize = getResources()
+        mFacePileAvatarSize = getResources()
+                .getDimensionPixelSize(R.dimen.conversation_single_line_face_pile_avatar_size);
+        mSingleAvatarSize = getResources()
                 .getDimensionPixelSize(R.dimen.conversation_single_line_avatar_size);
         mFacePileProtectionWidth = getResources().getDimensionPixelSize(
                 R.dimen.conversation_single_line_face_pile_protection_width);
@@ -89,6 +92,7 @@ public class HybridConversationNotificationView extends HybridNotificationView {
             mConversationFacePile.setVisibility(GONE);
             mConversationIconView.setVisibility(VISIBLE);
             mConversationIconView.setImageIcon(conversationIcon);
+            setSize(mConversationIconView, mSingleAvatarSize);
         } else {
             // If there isn't an icon, generate a "face pile" based on the sender avatars
             mConversationIconView.setVisibility(GONE);
@@ -104,9 +108,9 @@ public class HybridConversationNotificationView extends HybridNotificationView {
                     com.android.internal.R.id.conversation_face_pile_top);
             conversationLayout.bindFacePile(facePileBottomBg, facePileBottom, facePileTop);
             setSize(mConversationFacePile, mFacePileSize);
-            setSize(facePileBottom, mConversationIconSize);
-            setSize(facePileTop, mConversationIconSize);
-            setSize(facePileBottomBg, mConversationIconSize + 2 * mFacePileProtectionWidth);
+            setSize(facePileBottom, mFacePileAvatarSize);
+            setSize(facePileTop, mFacePileAvatarSize);
+            setSize(facePileBottomBg, mFacePileAvatarSize + 2 * mFacePileProtectionWidth);
             mTransformationHelper.addViewTransformingToSimilar(facePileTop);
             mTransformationHelper.addViewTransformingToSimilar(facePileBottom);
             mTransformationHelper.addViewTransformingToSimilar(facePileBottomBg);

@@ -25,6 +25,7 @@ import android.provider.Settings;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.wm.shell.pip.tv.TvPipNotificationController;
 
 import java.util.Arrays;
 
@@ -34,8 +35,8 @@ public class NotificationChannels extends SystemUI {
     public static String SCREENSHOTS_HEADSUP = "SCN_HEADSUP";
     public static String GENERAL     = "GEN";
     public static String STORAGE     = "DSK";
-    public static String TVPIP       = "TPP";
     public static String BATTERY     = "BAT";
+    public static String TVPIP       = TvPipNotificationController.NOTIFICATION_CHANNEL; // "TVPIP"
     public static String HINTS       = "HNT";
 
     public NotificationChannels(Context context) {

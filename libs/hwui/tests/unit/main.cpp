@@ -62,8 +62,10 @@ int main(int argc, char* argv[]) {
         gSigChain.insert(pair<int, struct sigaction>(sig, old_sa));
     }
 
-    // Replace the default GLES driver
+    // Avoid talking to SF
     Properties::isolatedProcess = true;
+    // Default to GLES (Vulkan-aware tests will override this)
+    Properties::overrideRenderPipelineType(RenderPipelineType::SkiaGL);
 
     // Run the tests
     testing::InitGoogleTest(&argc, argv);

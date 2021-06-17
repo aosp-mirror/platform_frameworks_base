@@ -113,7 +113,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private final PassThroughClickListener mPassThroughClickListener;
 
     private CharSequence mHintText;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private TextView mHintView;
     private int mHintResource;
 
@@ -615,7 +615,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @hide Pending API council approval
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setDropDownDismissedOnCompletion(boolean dropDownDismissedOnCompletion) {
         mDropDownDismissedOnCompletion = dropDownDismissedOnCompletion;
     }
@@ -1225,7 +1225,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @hide internal used only by SearchDialog
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void showDropDownAfterLayout() {
         mPopup.postShow();
     }
@@ -1407,6 +1407,11 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      */
     protected Filter getFilter() {
         return mFilter;
+    }
+
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return AutoCompleteTextView.class.getName();
     }
 
     private class DropDownItemClickListener implements AdapterView.OnItemClickListener {

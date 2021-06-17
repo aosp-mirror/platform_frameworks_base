@@ -24,14 +24,17 @@ import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_RIGHT;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_UP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_TRIPLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_TRIPLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_DOUBLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_DOUBLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SINGLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SINGLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_DOWN;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_LEFT;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_RIGHT;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_UP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_TRIPLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_TRIPLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_DOUBLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_DOUBLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_SINGLE_TAP;
@@ -94,17 +97,27 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
     private boolean mServiceHandlesDoubleTap = false;
     // Whether multi-finger gestures are enabled.
     boolean mMultiFingerGesturesEnabled;
+    // Whether the two-finger passthrough is enabled when multi-finger gestures are enabled.
+    private boolean mTwoFingerPassthroughEnabled;
+    // Whether to send the motion events during gesture dispatch.
+    private boolean mSendMotionEventsEnabled = false;
     // A list of all the multi-finger gestures, for easy adding and removal.
     private final List<GestureMatcher> mMultiFingerGestures = new ArrayList<>();
+    // A list of two-finger swipes, for easy adding and removal when turning on or off two-finger
+    // passthrough.
+    private final List<GestureMatcher> mTwoFingerSwipes = new ArrayList<>();
+    // The list of motion events for the current gesture.
+    private List<MotionEvent> mEvents = new ArrayList<>();
     // Shared state information.
     private TouchState mState;
 
-    GestureManifold(Context context, Listener listener, TouchState state) {
+    GestureManifold(Context context, Listener listener, TouchState state, Handler handler) {
         mContext = context;
-        mHandler = new Handler(context.getMainLooper());
+        mHandler = handler;
         mListener = listener;
         mState = state;
         mMultiFingerGesturesEnabled = false;
+        mTwoFingerPassthroughEnabled = false;
         // Set up gestures.
         // Start with double tap.
         mGestures.add(new MultiTap(context, 2, GESTURE_DOUBLE_TAP, this));
@@ -140,6 +153,9 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                         mContext, 2, 2, GESTURE_2_FINGER_DOUBLE_TAP_AND_HOLD, this));
         mMultiFingerGestures.add(
                 new MultiFingerMultiTap(mContext, 2, 3, GESTURE_2_FINGER_TRIPLE_TAP, this));
+        mMultiFingerGestures.add(
+                new MultiFingerMultiTapAndHold(
+                        mContext, 2, 3, GESTURE_2_FINGER_TRIPLE_TAP_AND_HOLD, this));
         // Three-finger taps.
         mMultiFingerGestures.add(
                 new MultiFingerMultiTap(mContext, 3, 1, GESTURE_3_FINGER_SINGLE_TAP, this));
@@ -147,7 +163,15 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                 new MultiFingerMultiTap(mContext, 3, 2, GESTURE_3_FINGER_DOUBLE_TAP, this));
         mMultiFingerGestures.add(
                 new MultiFingerMultiTapAndHold(
+                        mContext, 3, 1, GESTURE_3_FINGER_SINGLE_TAP_AND_HOLD, this));
+        mMultiFingerGestures.add(
+                new MultiFingerMultiTapAndHold(
                         mContext, 3, 2, GESTURE_3_FINGER_DOUBLE_TAP_AND_HOLD, this));
+        mMultiFingerGestures.add(
+                new MultiFingerMultiTap(mContext, 3, 3, GESTURE_3_FINGER_TRIPLE_TAP, this));
+        mMultiFingerGestures.add(
+                new MultiFingerMultiTapAndHold(
+                        mContext, 3, 3, GESTURE_3_FINGER_TRIPLE_TAP_AND_HOLD, this));
         mMultiFingerGestures.add(
                 new MultiFingerMultiTap(mContext, 3, 3, GESTURE_3_FINGER_TRIPLE_TAP, this));
         // Four-finger taps.
@@ -161,14 +185,14 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
         mMultiFingerGestures.add(
                 new MultiFingerMultiTap(mContext, 4, 3, GESTURE_4_FINGER_TRIPLE_TAP, this));
         // Two-finger swipes.
-        mMultiFingerGestures.add(
+        mTwoFingerSwipes.add(
                 new MultiFingerSwipe(context, 2, DOWN, GESTURE_2_FINGER_SWIPE_DOWN, this));
-        mMultiFingerGestures.add(
+        mTwoFingerSwipes.add(
                 new MultiFingerSwipe(context, 2, LEFT, GESTURE_2_FINGER_SWIPE_LEFT, this));
-        mMultiFingerGestures.add(
+        mTwoFingerSwipes.add(
                 new MultiFingerSwipe(context, 2, RIGHT, GESTURE_2_FINGER_SWIPE_RIGHT, this));
-        mMultiFingerGestures.add(
-                new MultiFingerSwipe(context, 2, UP, GESTURE_2_FINGER_SWIPE_UP, this));
+        mTwoFingerSwipes.add(new MultiFingerSwipe(context, 2, UP, GESTURE_2_FINGER_SWIPE_UP, this));
+        mMultiFingerGestures.addAll(mTwoFingerSwipes);
         // Three-finger swipes.
         mMultiFingerGestures.add(
                 new MultiFingerSwipe(context, 3, DOWN, GESTURE_3_FINGER_SWIPE_DOWN, this));
@@ -201,7 +225,7 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
     boolean onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (mState.isClear()) {
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                // Sanity safeguard: if touch state is clear, then matchers should always be clear
+                // Validity safeguard: if touch state is clear, then matchers should always be clear
                 // before processing the next down event.
                 clear();
             } else {
@@ -209,6 +233,9 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                 // compromise the state of particular matchers, so we just ignore them.
                 return false;
             }
+        }
+        if (mSendMotionEventsEnabled) {
+            mEvents.add(MotionEvent.obtainNoHistory(rawEvent));
         }
         for (GestureMatcher matcher : mGestures) {
             if (matcher.getState() != GestureMatcher.STATE_GESTURE_CANCELED) {
@@ -220,9 +247,8 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                     Slog.d(LOG_TAG, matcher.toString());
                 }
                 if (matcher.getState() == GestureMatcher.STATE_GESTURE_COMPLETED) {
-                    // Here we just clear and return. The actual gesture dispatch is done in
+                    // Here we just return. The actual gesture dispatch is done in
                     // onStateChanged().
-                    clear();
                     // No need to process this event any further.
                     return true;
                 }
@@ -234,6 +260,11 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
     public void clear() {
         for (GestureMatcher matcher : mGestures) {
             matcher.clear();
+        }
+        if (mEvents != null) {
+            while (mEvents.size() > 0) {
+                mEvents.remove(0).recycle();
+            }
         }
     }
 
@@ -320,29 +351,28 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
             case GESTURE_DOUBLE_TAP:
                 if (mServiceHandlesDoubleTap) {
                     AccessibilityGestureEvent gestureEvent =
-                            new AccessibilityGestureEvent(gestureId, event.getDisplayId());
+                            new AccessibilityGestureEvent(gestureId, event.getDisplayId(), mEvents);
                     mListener.onGestureCompleted(gestureEvent);
                 } else {
                     mListener.onDoubleTap(event, rawEvent, policyFlags);
                 }
-                clear();
                 break;
             case GESTURE_DOUBLE_TAP_AND_HOLD:
                 if (mServiceHandlesDoubleTap) {
                     AccessibilityGestureEvent gestureEvent =
-                            new AccessibilityGestureEvent(gestureId, event.getDisplayId());
+                            new AccessibilityGestureEvent(gestureId, event.getDisplayId(), mEvents);
                     mListener.onGestureCompleted(gestureEvent);
                 } else {
                     mListener.onDoubleTapAndHold(event, rawEvent, policyFlags);
                 }
-                clear();
                 break;
             default:
                 AccessibilityGestureEvent gestureEvent =
-                        new AccessibilityGestureEvent(gestureId, event.getDisplayId());
+                        new AccessibilityGestureEvent(gestureId, event.getDisplayId(), mEvents);
                 mListener.onGestureCompleted(gestureEvent);
                 break;
         }
+        clear();
     }
 
     public boolean isMultiFingerGesturesEnabled() {
@@ -360,11 +390,51 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
         }
     }
 
+    public boolean isTwoFingerPassthroughEnabled() {
+        return mTwoFingerPassthroughEnabled;
+    }
+
+    public void setTwoFingerPassthroughEnabled(boolean mode) {
+        if (mTwoFingerPassthroughEnabled != mode) {
+            mTwoFingerPassthroughEnabled = mode;
+            if (!mode) {
+                mMultiFingerGestures.addAll(mTwoFingerSwipes);
+                if (mMultiFingerGesturesEnabled) {
+                    mGestures.addAll(mTwoFingerSwipes);
+                }
+            } else {
+                mMultiFingerGestures.removeAll(mTwoFingerSwipes);
+                mGestures.removeAll(mTwoFingerSwipes);
+            }
+        }
+    }
+
     public void setServiceHandlesDoubleTap(boolean mode) {
         mServiceHandlesDoubleTap = mode;
     }
 
     public boolean isServiceHandlesDoubleTapEnabled() {
         return mServiceHandlesDoubleTap;
+    }
+
+    public void setSendMotionEventsEnabled(boolean mode) {
+        mSendMotionEventsEnabled = mode;
+        if (!mode) {
+            while (mEvents.size() > 0) {
+                mEvents.remove(0).recycle();
+            }
+        }
+    }
+
+    public boolean isSendMotionEventsEnabled() {
+        return mSendMotionEventsEnabled;
+    }
+
+    /**
+     * Returns the current list of motion events. It is the caller's responsibility to copy the list
+     * if they want it to persist after a call to clear().
+     */
+    public List<MotionEvent> getMotionEvents() {
+        return mEvents;
     }
 }

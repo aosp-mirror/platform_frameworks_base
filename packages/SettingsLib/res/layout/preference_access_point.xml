@@ -24,6 +24,8 @@
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:gravity="center_vertical"
     android:background="?android:attr/selectableItemBackground"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:clipToPadding="false">
 
     <LinearLayout
@@ -31,16 +33,14 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="start|center_vertical"
-        android:clipToPadding="false"
-        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
+        android:clipToPadding="false">
 
         <LinearLayout
             android:id="@+id/icon_frame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="start|center_vertical"
-            android:minWidth="56dp"
+            android:minWidth="48dp"
             android:orientation="horizontal"
             android:clipToPadding="false"
             android:paddingTop="4dp"
@@ -64,7 +64,7 @@
                 android:id="@android:id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
+                android:maxLines="2"
                 android:textAppearance="?android:attr/textAppearanceListItem"
                 android:ellipsize="marquee" />
 
@@ -89,7 +89,7 @@
         android:id="@android:id/widget_frame"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:minWidth="64dp"
+        android:minWidth="@dimen/two_target_min_width"
         android:gravity="center"
         android:orientation="vertical" />
 
@@ -97,7 +97,7 @@
         android:id="@+id/icon_button"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:minWidth="64dp"
+        android:minWidth="@dimen/two_target_min_width"
         android:minHeight="@dimen/min_tap_target_size"
         android:layout_gravity="center"
         android:background="?android:attr/selectableItemBackground"

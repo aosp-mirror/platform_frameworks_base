@@ -36,6 +36,10 @@ struct Span {
   std::string name;
   uint32_t first_char;
   uint32_t last_char;
+
+  bool operator==(const Span& right) const {
+    return name == right.name && first_char == right.first_char && last_char == right.last_char;
+  }
 };
 
 struct StyleString {

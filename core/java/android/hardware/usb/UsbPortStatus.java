@@ -202,7 +202,7 @@ public final class UsbPortStatus implements Parcelable {
     public static final int CONTAMINANT_PROTECTION_DISABLED =
             android.hardware.usb.V1_2.Constants.ContaminantProtectionStatus.DISABLED;
 
-    @IntDef(prefix = { "CONTAMINANT_DETECION_" }, flag = true, value = {
+    @IntDef(prefix = { "CONTAMINANT_DETECTION_" }, value = {
             CONTAMINANT_DETECTION_NOT_SUPPORTED,
             CONTAMINANT_DETECTION_DISABLED,
             CONTAMINANT_DETECTION_NOT_DETECTED,
@@ -221,7 +221,7 @@ public final class UsbPortStatus implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @interface ContaminantProtectionStatus{}
 
-    @IntDef(prefix = { "MODE_" }, flag = true, value = {
+    @IntDef(prefix = { "MODE_" }, value = {
             MODE_NONE,
             MODE_DFP,
             MODE_UFP,

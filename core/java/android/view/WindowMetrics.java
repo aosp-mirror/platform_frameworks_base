@@ -51,7 +51,7 @@ public final class WindowMetrics {
      * final WindowMetrics metrics = windowManager.getCurrentWindowMetrics();
      * // Gets all excluding insets
      * final WindowInsets windowInsets = metrics.getWindowInsets();
-     * Insets insets = windowInsets.getInsetsIgnoreVisibility(WindowInsets.Type.navigationBars()
+     * Insets insets = windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.navigationBars()
      *         | WindowInsets.Type.displayCutout());
      *
      * int insetsWidth = insets.right + insets.left;

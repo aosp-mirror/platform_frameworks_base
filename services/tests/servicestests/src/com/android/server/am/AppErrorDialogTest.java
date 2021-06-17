@@ -18,17 +18,25 @@ package com.android.server.am;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.LocalServices;
 import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
 
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -41,6 +49,18 @@ import java.io.File;
 @SmallTest
 @FlakyTest(bugId = 113616538)
 public class AppErrorDialogTest {
+
+    @BeforeClass
+    public static void setUpOnce() {
+        final PackageManagerInternal pm = mock(PackageManagerInternal.class);
+        doReturn(new ComponentName("", "")).when(pm).getSystemUiServiceComponent();
+        LocalServices.addService(PackageManagerInternal.class, pm);
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+    }
 
     @Rule
     public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();

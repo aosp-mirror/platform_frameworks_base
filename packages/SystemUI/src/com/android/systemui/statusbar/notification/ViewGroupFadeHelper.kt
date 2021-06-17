@@ -21,8 +21,8 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.Interpolators
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators
 
 /**
  * Class to help with fading of view groups without fading one subview

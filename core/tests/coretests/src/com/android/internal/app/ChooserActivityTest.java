@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static android.app.Activity.RESULT_OK;
+
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
@@ -154,8 +156,8 @@ public class ChooserActivityTest {
         sOverrides.reset();
         sOverrides.createPackageManager = mPackageManagerOverride;
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.APPEND_DIRECT_SHARE_ENABLED,
-                Boolean.toString(false),
+                SystemUiDeviceConfigFlags.APPLY_SHARING_APP_LIMITS_IN_SYSUI,
+                Boolean.toString(true),
                 true /* makeDefault*/);
     }
 
@@ -558,6 +560,8 @@ public class ChooserActivityTest {
 
         ClipDescription clipDescription = clipData.getDescription();
         assertThat("text/plain", is(clipDescription.getMimeType(0)));
+
+        assertEquals(mActivityRule.getActivityResult().getResultCode(), RESULT_OK);
     }
 
     @Test
@@ -589,6 +593,107 @@ public class ChooserActivityTest {
                         .getSubtype(),
                 is(1));
     }
+
+
+    @Test
+    public void testNearbyShareLogging() throws Exception {
+        Intent sendIntent = createSendTextIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(ChooserWrapperActivity.sOverrides.resolverListController.getResolversForIntent(
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        onView(withId(R.id.chooser_nearby_button)).check(matches(isDisplayed()));
+        onView(withId(R.id.chooser_nearby_button)).perform(click());
+
+        ChooserActivityLoggerFake logger =
+                (ChooserActivityLoggerFake) activity.getChooserActivityLogger();
+        assertThat(logger.numCalls(), is(6));
+        // first one should be SHARESHEET_TRIGGERED uievent
+        assertThat(logger.get(0).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
+        assertThat(logger.get(0).event.getId(),
+                is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_TRIGGERED.getId()));
+        // second one should be SHARESHEET_STARTED event
+        assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
+        assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
+        assertThat(logger.get(1).mimeType, is("text/plain"));
+        assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
+        assertThat(logger.get(1).appProvidedApp, is(0));
+        assertThat(logger.get(1).appProvidedDirect, is(0));
+        assertThat(logger.get(1).isWorkprofile, is(false));
+        assertThat(logger.get(1).previewType, is(3));
+        // third one should be SHARESHEET_APP_LOAD_COMPLETE uievent
+        assertThat(logger.get(2).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
+        assertThat(logger.get(2).event.getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_APP_LOAD_COMPLETE.getId()));
+        // fourth and fifth are just artifacts of test set-up
+        // sixth one should be ranking atom with SHARESHEET_NEARBY_TARGET_SELECTED event
+        assertThat(logger.get(5).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
+        assertThat(logger.get(5).targetType,
+                is(ChooserActivityLogger
+                        .SharesheetTargetSelectedEvent.SHARESHEET_NEARBY_TARGET_SELECTED.getId()));
+    }
+
+
+
+    @Test
+    public void testEditImageLogs() throws Exception {
+        Intent sendIntent = createSendImageIntent(
+                Uri.parse("android.resource://com.android.frameworks.coretests/"
+                        + com.android.frameworks.coretests.R.drawable.test320x240));
+
+        sOverrides.previewThumbnail = createBitmap();
+        sOverrides.isImageType = true;
+
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(ChooserWrapperActivity.sOverrides.resolverListController.getResolversForIntent(
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        onView(withId(R.id.chooser_edit_button)).check(matches(isDisplayed()));
+        onView(withId(R.id.chooser_edit_button)).perform(click());
+
+        ChooserActivityLoggerFake logger =
+                (ChooserActivityLoggerFake) activity.getChooserActivityLogger();
+        // first one should be SHARESHEET_TRIGGERED uievent
+        assertThat(logger.get(0).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
+        assertThat(logger.get(0).event.getId(),
+                is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_TRIGGERED.getId()));
+        // second one should be SHARESHEET_STARTED event
+        assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
+        assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
+        assertThat(logger.get(1).mimeType, is("image/png"));
+        assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
+        assertThat(logger.get(1).appProvidedApp, is(0));
+        assertThat(logger.get(1).appProvidedDirect, is(0));
+        assertThat(logger.get(1).isWorkprofile, is(false));
+        assertThat(logger.get(1).previewType, is(1));
+        // third one should be SHARESHEET_APP_LOAD_COMPLETE uievent
+        assertThat(logger.get(2).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
+        assertThat(logger.get(2).event.getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_APP_LOAD_COMPLETE.getId()));
+        // fourth and fifth are just artifacts of test set-up
+        // sixth one should be ranking atom with SHARESHEET_EDIT_TARGET_SELECTED event
+        assertThat(logger.get(5).atomId, is(FrameworkStatsLog.RANKING_SELECTED));
+        assertThat(logger.get(5).targetType,
+                is(ChooserActivityLogger
+                        .SharesheetTargetSelectedEvent.SHARESHEET_EDIT_TARGET_SELECTED.getId()));
+    }
+
 
     @Test
     public void oneVisibleImagePreview() throws InterruptedException {
@@ -916,7 +1021,7 @@ public class ChooserActivityTest {
         assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_DEFAULT), is(testBaseScore));
         assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_CHOOSER_TARGET), is(testBaseScore));
         assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE),
-                is(SHORTCUT_TARGET_SCORE_BOOST));
+                is(testBaseScore * SHORTCUT_TARGET_SCORE_BOOST));
         assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER),
                 is(testBaseScore * SHORTCUT_TARGET_SCORE_BOOST));
     }
@@ -1161,6 +1266,126 @@ public class ChooserActivityTest {
                 .getAllValues().get(2).getTaggedData(MetricsEvent.FIELD_RANKED_POSITION), is(0));
     }
 
+    @Test
+    public void testShortcutTargetWithApplyAppLimits() throws InterruptedException {
+        // Set up resources
+        sOverrides.resources = Mockito.spy(
+                InstrumentationRegistry.getInstrumentation().getContext().getResources());
+        when(sOverrides.resources.getInteger(R.integer.config_maxShortcutTargetsPerApp))
+                .thenReturn(1);
+        Intent sendIntent = createSendTextIntent();
+        // We need app targets for direct targets to get displayed
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        // Create direct share target
+        List<ChooserTarget> serviceTargets = createDirectShareTargets(2,
+                resolvedComponentInfos.get(0).getResolveInfoAt(0).activityInfo.packageName);
+        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0);
+
+        // Start activity
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+
+        // Insert the direct share target
+        Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos = new HashMap<>();
+        List<ShareShortcutInfo> shortcutInfos = createShortcuts(activity);
+        directShareToShortcutInfos.put(serviceTargets.get(0),
+                shortcutInfos.get(0).getShortcutInfo());
+        directShareToShortcutInfos.put(serviceTargets.get(1),
+                shortcutInfos.get(1).getShortcutInfo());
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> activity.getAdapter().addServiceResults(
+                        activity.createTestDisplayResolveInfo(sendIntent,
+                                ri,
+                                "testLabel",
+                                "testInfo",
+                                sendIntent,
+                                /* resolveInfoPresentationGetter */ null),
+                        serviceTargets,
+                        TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE,
+                        directShareToShortcutInfos,
+                        List.of())
+        );
+        // Thread.sleep shouldn't be a thing in an integration test but it's
+        // necessary here because of the way the code is structured
+        // TODO: restructure the tests b/129870719
+        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+
+        assertThat("Chooser should have 3 targets (2 apps, 1 direct)",
+                activity.getAdapter().getCount(), is(3));
+        assertThat("Chooser should have exactly one selectable direct target",
+                activity.getAdapter().getSelectableServiceTargetCount(), is(1));
+        assertThat("The resolver info must match the resolver info used to create the target",
+                activity.getAdapter().getItem(0).getResolveInfo(), is(ri));
+        assertThat("The display label must match",
+                activity.getAdapter().getItem(0).getDisplayLabel(), is("testTitle0"));
+    }
+
+    @Test
+    public void testShortcutTargetWithoutApplyAppLimits() throws InterruptedException {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.APPLY_SHARING_APP_LIMITS_IN_SYSUI,
+                Boolean.toString(false),
+                true /* makeDefault*/);
+        // Set up resources
+        sOverrides.resources = Mockito.spy(
+                InstrumentationRegistry.getInstrumentation().getContext().getResources());
+        when(sOverrides.resources.getInteger(R.integer.config_maxShortcutTargetsPerApp))
+                .thenReturn(1);
+        Intent sendIntent = createSendTextIntent();
+        // We need app targets for direct targets to get displayed
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        // Create direct share target
+        List<ChooserTarget> serviceTargets = createDirectShareTargets(2,
+                resolvedComponentInfos.get(0).getResolveInfoAt(0).activityInfo.packageName);
+        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0);
+
+        // Start activity
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+
+        // Insert the direct share target
+        Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos = new HashMap<>();
+        List<ShareShortcutInfo> shortcutInfos = createShortcuts(activity);
+        directShareToShortcutInfos.put(serviceTargets.get(0),
+                shortcutInfos.get(0).getShortcutInfo());
+        directShareToShortcutInfos.put(serviceTargets.get(1),
+                shortcutInfos.get(1).getShortcutInfo());
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> activity.getAdapter().addServiceResults(
+                        activity.createTestDisplayResolveInfo(sendIntent,
+                                ri,
+                                "testLabel",
+                                "testInfo",
+                                sendIntent,
+                                /* resolveInfoPresentationGetter */ null),
+                        serviceTargets,
+                        TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE,
+                        directShareToShortcutInfos,
+                        List.of())
+        );
+        // Thread.sleep shouldn't be a thing in an integration test but it's
+        // necessary here because of the way the code is structured
+        // TODO: restructure the tests b/129870719
+        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+
+        assertThat("Chooser should have 4 targets (2 apps, 2 direct)",
+                activity.getAdapter().getCount(), is(4));
+        assertThat("Chooser should have exactly two selectable direct target",
+                activity.getAdapter().getSelectableServiceTargetCount(), is(2));
+        assertThat("The resolver info must match the resolver info used to create the target",
+                activity.getAdapter().getItem(0).getResolveInfo(), is(ri));
+        assertThat("The display label must match",
+                activity.getAdapter().getItem(0).getDisplayLabel(), is("testTitle0"));
+        assertThat("The display label must match",
+                activity.getAdapter().getItem(1).getDisplayLabel(), is("testTitle1"));
+    }
+
     // This test is too long and too slow and should not be taken as an example for future tests.
     @Test
     public void testDirectTargetLoggingWithAppTargetNotRankedPortrait()
@@ -1387,14 +1612,13 @@ public class ChooserActivityTest {
         onView(withId(R.id.contentPanel))
                 .perform(swipeUp());
 
-        onView(withText(R.string.resolver_cant_share_with_work_apps))
+        onView(withText(R.string.resolver_cross_profile_blocked))
                 .check(matches(isDisplayed()));
     }
 
     @Test
     public void testWorkTab_workProfileDisabled_emptyStateShown() {
         // enable the work tab feature flag
-        ResolverActivity.ENABLE_TABBED_VIEW = true;
         markWorkProfileUserAvailable();
         int workProfileTargets = 4;
         List<ResolvedComponentInfo> personalResolvedComponentInfos =
@@ -1406,6 +1630,7 @@ public class ChooserActivityTest {
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType("TestType");
 
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
         final ChooserWrapperActivity activity =
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
         waitForIdle();
@@ -1439,7 +1664,7 @@ public class ChooserActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_no_work_apps_available_share))
+        onView(withText(R.string.resolver_no_work_apps_available))
                 .check(matches(isDisplayed()));
     }
 
@@ -1465,7 +1690,7 @@ public class ChooserActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_cant_share_with_work_apps))
+        onView(withText(R.string.resolver_cross_profile_blocked))
                 .check(matches(isDisplayed()));
     }
 
@@ -1490,7 +1715,7 @@ public class ChooserActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_no_work_apps_available_share))
+        onView(withText(R.string.resolver_no_work_apps_available))
                 .check(matches(isDisplayed()));
     }
 
@@ -1629,6 +1854,57 @@ public class ChooserActivityTest {
         assertThat(logger.get(5).targetType,
                 is(ChooserActivityLogger
                         .SharesheetTargetSelectedEvent.SHARESHEET_SERVICE_TARGET_SELECTED.getId()));
+    }
+
+    @Test
+    public void testEmptyDirectRowLogging() throws InterruptedException {
+        Intent sendIntent = createSendTextIntent();
+        // We need app targets for direct targets to get displayed
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        // Start activity
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+
+        // Thread.sleep shouldn't be a thing in an integration test but it's
+        // necessary here because of the way the code is structured
+        Thread.sleep(3000);
+
+        assertThat("Chooser should have 2 app targets",
+                activity.getAdapter().getCount(), is(2));
+        assertThat("Chooser should have no direct targets",
+                activity.getAdapter().getSelectableServiceTargetCount(), is(0));
+
+        ChooserActivityLoggerFake logger =
+                (ChooserActivityLoggerFake) activity.getChooserActivityLogger();
+        assertThat(logger.numCalls(), is(6));
+        // first one should be SHARESHEET_TRIGGERED uievent
+        assertThat(logger.get(0).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
+        assertThat(logger.get(0).event.getId(),
+                is(ChooserActivityLogger.SharesheetStandardEvent.SHARESHEET_TRIGGERED.getId()));
+        // second one should be SHARESHEET_STARTED event
+        assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
+        assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
+        assertThat(logger.get(1).mimeType, is("text/plain"));
+        assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
+        assertThat(logger.get(1).appProvidedApp, is(0));
+        assertThat(logger.get(1).appProvidedDirect, is(0));
+        assertThat(logger.get(1).isWorkprofile, is(false));
+        assertThat(logger.get(1).previewType, is(3));
+        // third one should be SHARESHEET_APP_LOAD_COMPLETE uievent
+        assertThat(logger.get(2).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
+        assertThat(logger.get(2).event.getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_APP_LOAD_COMPLETE.getId()));
+        // fourth and fifth are just artifacts of test set-up
+        // sixth one should be ranking atom with SHARESHEET_EMPTY_DIRECT_SHARE_ROW event
+        assertThat(logger.get(5).atomId, is(FrameworkStatsLog.UI_EVENT_REPORTED));
+        assertThat(logger.get(5).event.getId(),
+                is(ChooserActivityLogger
+                        .SharesheetStandardEvent.SHARESHEET_EMPTY_DIRECT_SHARE_ROW.getId()));
     }
 
     @Test
@@ -1895,7 +2171,7 @@ public class ChooserActivityTest {
         onView(withId(R.id.contentPanel))
                 .perform(swipeUp());
 
-        onView(withText(R.string.resolver_cant_access_work_apps))
+        onView(withText(R.string.resolver_cross_profile_blocked))
                 .check(matches(isDisplayed()));
     }
 
@@ -1925,7 +2201,7 @@ public class ChooserActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_no_work_apps_available_resolve))
+        onView(withText(R.string.resolver_no_work_apps_available))
                 .check(matches(isDisplayed()));
     }
 
@@ -2151,6 +2427,19 @@ public class ChooserActivityTest {
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, "testing intent sending");
         sendIntent.setType("text/plain");
+        return sendIntent;
+    }
+
+    private Intent createSendImageIntent(Uri imageThumbnail) {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_STREAM, imageThumbnail);
+        sendIntent.setType("image/png");
+        if (imageThumbnail != null) {
+            ClipData.Item clipItem = new ClipData.Item(imageThumbnail);
+            sendIntent.setClipData(new ClipData("Clip Label", new String[]{"image/png"}, clipItem));
+        }
+
         return sendIntent;
     }
 

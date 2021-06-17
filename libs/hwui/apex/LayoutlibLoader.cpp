@@ -47,6 +47,7 @@ extern int register_android_graphics_MaskFilter(JNIEnv* env);
 extern int register_android_graphics_NinePatch(JNIEnv*);
 extern int register_android_graphics_PathEffect(JNIEnv* env);
 extern int register_android_graphics_Shader(JNIEnv* env);
+extern int register_android_graphics_RenderEffect(JNIEnv* env);
 extern int register_android_graphics_Typeface(JNIEnv* env);
 
 namespace android {
@@ -108,6 +109,7 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.RecordingCanvas", REG_JNI(register_android_view_DisplayListCanvas)},
 //        {"android.graphics.Region", REG_JNI(register_android_graphics_Region)},
         {"android.graphics.Shader", REG_JNI(register_android_graphics_Shader)},
+        {"android.graphics.RenderEffect", REG_JNI(register_android_graphics_RenderEffect)},
         {"android.graphics.Typeface", REG_JNI(register_android_graphics_Typeface)},
         {"android.graphics.animation.NativeInterpolatorFactory",
          REG_JNI(register_android_graphics_animation_NativeInterpolatorFactory)},

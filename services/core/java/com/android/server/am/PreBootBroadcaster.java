@@ -17,8 +17,12 @@
 package com.android.server.am;
 
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.os.PowerWhitelistManager.REASON_PRE_BOOT_COMPLETED;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -39,6 +43,7 @@ import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ProgressReporter;
+import com.android.server.LocalServices;
 import com.android.server.UiThread;
 
 import java.util.List;
@@ -107,9 +112,20 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
         EventLogTags.writeAmPreBoot(mUserId, componentName.getPackageName());
 
         mIntent.setComponent(componentName);
+        long duration = 10_000;
+        final ActivityManagerInternal amInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+        if (amInternal != null) {
+            duration = amInternal.getBootTimeTempAllowListDuration();
+        }
+        final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
+        bOptions.setTemporaryAppAllowlist(duration,
+                TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                REASON_PRE_BOOT_COMPLETED, "");
         synchronized (mService) {
             mService.broadcastIntentLocked(null, null, null, mIntent, null, this, 0, null, null,
-                    null, AppOpsManager.OP_NONE, null, true, false, ActivityManagerService.MY_PID,
+                    null, null, AppOpsManager.OP_NONE, bOptions.toBundle(), true,
+                    false, ActivityManagerService.MY_PID,
                     Process.SYSTEM_UID, Binder.getCallingUid(), Binder.getCallingPid(), mUserId);
         }
     }
@@ -144,7 +160,8 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
 
                     final PendingIntent contentIntent;
                     if (context.getPackageManager().resolveActivity(intent, 0) != null) {
-                        contentIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                        contentIntent = PendingIntent.getActivity(context, 0, intent,
+                                PendingIntent.FLAG_IMMUTABLE);
                     } else {
                         contentIntent = null;
                     }

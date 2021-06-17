@@ -40,8 +40,9 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.TooltipManager
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
+import com.android.systemui.controls.ui.ControlsActivity
+import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.util.LifecycleActivity
 import java.text.Collator
@@ -53,8 +54,8 @@ class ControlsFavoritingActivity @Inject constructor(
     @Main private val executor: Executor,
     private val controller: ControlsControllerImpl,
     private val listingController: ControlsListingController,
-    broadcastDispatcher: BroadcastDispatcher,
-    private val globalActionsComponent: GlobalActionsComponent
+    private val broadcastDispatcher: BroadcastDispatcher,
+    private val uiController: ControlsUiController
 ) : LifecycleActivity() {
 
     companion object {
@@ -114,7 +115,7 @@ class ControlsFavoritingActivity @Inject constructor(
 
     override fun onBackPressed() {
         if (!fromProviderSelector) {
-            globalActionsComponent.handleShowGlobalActionsMenu()
+            openControlsOrigin()
         }
         animateExitAndFinish()
     }
@@ -302,9 +303,6 @@ class ControlsFavoritingActivity @Inject constructor(
     private fun bindButtons() {
         otherAppsButton = requireViewById<Button>(R.id.other_apps).apply {
             setOnClickListener {
-                val i = Intent().apply {
-                    component = ComponentName(context, ControlsProviderSelectorActivity::class.java)
-                }
                 if (doneButton.isEnabled) {
                     // The user has made changes
                     Toast.makeText(
@@ -313,8 +311,11 @@ class ControlsFavoritingActivity @Inject constructor(
                             Toast.LENGTH_SHORT
                             ).show()
                 }
-                startActivity(i, ActivityOptions
-                    .makeSceneTransitionAnimation(this@ControlsFavoritingActivity).toBundle())
+                startActivity(
+                    Intent(context, ControlsProviderSelectorActivity::class.java),
+                    ActivityOptions
+                        .makeSceneTransitionAnimation(this@ControlsFavoritingActivity).toBundle()
+                )
                 animateExitAndFinish()
             }
         }
@@ -330,9 +331,16 @@ class ControlsFavoritingActivity @Inject constructor(
                     )
                 }
                 animateExitAndFinish()
-                globalActionsComponent.handleShowGlobalActionsMenu()
+                openControlsOrigin()
             }
         }
+    }
+
+    private fun openControlsOrigin() {
+        startActivity(
+            Intent(applicationContext, ControlsActivity::class.java),
+            ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+        )
     }
 
     override fun onPause() {

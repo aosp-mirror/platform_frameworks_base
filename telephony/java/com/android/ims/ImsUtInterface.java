@@ -17,6 +17,7 @@
 package com.android.ims;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.ims.ImsCallForwardInfo;
@@ -124,7 +125,7 @@ public interface ImsUtInterface {
      * Retrieves the configuration of the call forward.
      * The return value of ((AsyncResult)result.obj) is an array of {@link ImsCallForwardInfo}.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void queryCallForward(int condition, String number, Message result);
 
     /**

@@ -22,13 +22,14 @@ import android.annotation.NonNull;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 
 import com.android.internal.R;
 
@@ -40,8 +41,6 @@ import java.util.Objects;
 
 /** @hide */
 public class ParsedServiceUtils {
-
-    private static final String TAG = ParsingPackageUtils.TAG;
 
     @NonNull
     public static ParseResult<ParsedService> parseService(String[] separateProcesses,
@@ -69,7 +68,8 @@ public class ParsedServiceUtils {
                     R.styleable.AndroidManifestService_name,
                     R.styleable.AndroidManifestService_process,
                     R.styleable.AndroidManifestService_roundIcon,
-                    R.styleable.AndroidManifestService_splitName
+                    R.styleable.AndroidManifestService_splitName,
+                    R.styleable.AndroidManifestService_attributionTags
             );
 
             if (result.isError()) {
@@ -146,6 +146,10 @@ public class ParsedServiceUtils {
                 case "meta-data":
                     parseResult = ParsedComponentUtils.addMetaData(service, pkg, res, parser, input);
                     break;
+                case "property":
+                    parseResult =
+                            ParsedComponentUtils.addProperty(service, pkg, res, parser, input);
+                    break;
                 default:
                     parseResult = ParsingUtils.unknownTag(tag, pkg, parser, input);
                     break;
@@ -157,7 +161,18 @@ public class ParsedServiceUtils {
         }
 
         if (!setExported) {
-            service.exported = service.getIntents().size() > 0;
+            boolean hasIntentFilters = service.getIntents().size() > 0;
+            if (hasIntentFilters) {
+                final ParseResult exportedCheckResult = input.deferError(
+                        service.getName() + ": Targeting S+ (version " + Build.VERSION_CODES.S
+                        + " and above) requires that an explicit value for android:exported be"
+                        + " defined when intent filters are present",
+                        DeferredError.MISSING_EXPORTED_FLAG);
+                if (exportedCheckResult.isError()) {
+                    return input.error(exportedCheckResult);
+                }
+            }
+            service.exported = hasIntentFilters;
         }
 
         return input.success(service);

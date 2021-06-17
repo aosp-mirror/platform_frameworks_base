@@ -17,13 +17,48 @@
 package com.android.internal.view;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.view.View;
+import android.view.ViewGroup;
 
-interface ScrollCaptureViewHelper<V extends View> {
+/**
+ * Provides view-specific handling to ScrollCaptureViewSupport.
+ *
+ * @param <V> the View subclass
+ */
+public interface ScrollCaptureViewHelper<V extends View> {
     int UP = -1;
     int DOWN = 1;
+
+    /**
+     * Contains the result of a scroll request.
+     */
+    class ScrollResult {
+        /**
+         * The area requested in pixels, within {@link #onComputeScrollBounds scroll bounds}, with
+         * top/bottom relative to the scroll position at the start of capture.
+         */
+        public Rect requestedArea;
+        /**
+         * The area, in pixels of the request which is visible and available for capture. In the
+         * same coordinate space as {@link #requestedArea}.
+         */
+        public Rect availableArea;
+        /**
+         * The updated scroll delta (the relative distance, in pixels that the scroll position has
+         * moved from the starting position since capture started).
+         */
+        public int scrollDelta; // visible top offset from start
+
+        @Override
+        public String toString() {
+            return "ScrollResult{"
+                    + "requestedArea=" + requestedArea
+                    + ", availableArea=" + availableArea
+                    + ", scrollDelta=" + scrollDelta
+                    + '}';
+        }
+    }
 
     /**
      * Verifies that the view is still visible and scrollable. If true is returned here, expect a
@@ -32,8 +67,8 @@ interface ScrollCaptureViewHelper<V extends View> {
      * @param view the view being captured
      * @return true if the callback should respond to a request with scroll bounds
      */
-    default boolean onAcceptSession(@Nullable V view) {
-        return view != null && view.isVisibleToUser()
+    default boolean onAcceptSession(@NonNull V view) {
+        return view.isVisibleToUser()
                 && (view.canScrollVertically(UP) || view.canScrollVertically(DOWN));
     }
 
@@ -43,11 +78,15 @@ interface ScrollCaptureViewHelper<V extends View> {
      *
      * @param view the view being captured
      */
-    default Rect onComputeScrollBounds(@Nullable V view) {
-        return new Rect(view.getPaddingLeft(), view.getPaddingTop(),
-                view.getWidth() - view.getPaddingRight(),
-                view.getHeight() - view.getPaddingBottom());
+    @NonNull default Rect onComputeScrollBounds(@NonNull V view) {
+        Rect bounds = new Rect(0, 0, view.getWidth(), view.getHeight());
+        if (view instanceof ViewGroup && ((ViewGroup) view).getClipToPadding()) {
+            bounds.inset(view.getPaddingLeft(), view.getPaddingTop(),
+                    view.getPaddingRight(), view.getPaddingBottom());
+        }
+        return bounds;
     }
+
     /**
      * Adjust the target for capture.
      * <p>
@@ -57,7 +96,7 @@ interface ScrollCaptureViewHelper<V extends View> {
      * @param view         the view being captured
      * @param scrollBounds the bounds within {@code view} where content scrolls
      */
-    void onPrepareForStart(@NonNull V view, Rect scrollBounds);
+    void onPrepareForStart(@NonNull V view, @NonNull Rect scrollBounds);
 
     /**
      * Map the request onto the screen.
@@ -67,14 +106,16 @@ interface ScrollCaptureViewHelper<V extends View> {
      * needed and return the resulting rectangle describing the position and bounds of the area
      * which is visible.
      *
+     * @param view the view being captured
      * @param scrollBounds the area in which scrolling content moves, local to the {@code containing
      *                     view}
      * @param requestRect  the area relative to {@code scrollBounds} which describes the location of
      *                     content to capture for the request
-     * @return the visible area within scrollBounds of the requested rectangle, return {@code null}
-     * in the case of an unrecoverable error condition, to abort the capture process
+     * @return the result of the request as a {@link ScrollResult}
      */
-    Rect onScrollRequested(@NonNull V view, Rect scrollBounds, Rect requestRect);
+    @NonNull
+    ScrollResult onScrollRequested(@NonNull V view, @NonNull Rect scrollBounds,
+            @NonNull Rect requestRect);
 
     /**
      * Restore the target after capture.

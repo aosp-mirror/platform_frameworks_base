@@ -1,0 +1,15 @@
+{
+  "presubmit-large": [
+    {
+      "name": "CtsAutoFillServiceTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ]
+}

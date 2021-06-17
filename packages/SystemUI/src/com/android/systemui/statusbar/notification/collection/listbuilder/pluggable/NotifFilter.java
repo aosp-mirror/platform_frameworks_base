@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.listbuilder.pluggable;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -45,5 +47,5 @@ public abstract class NotifFilter extends Pluggable<NotifFilter> {
      *            various entries against.
      * @return True if the notif should be removed from the list
      */
-    public abstract boolean shouldFilterOut(NotificationEntry entry, long now);
+    public abstract boolean shouldFilterOut(@NonNull NotificationEntry entry, long now);
 }

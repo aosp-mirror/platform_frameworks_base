@@ -1,56 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.statusbartest">
-    <uses-permission android:name="android.permission.DEVICE_POWER" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.STATUS_BAR" />
-    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
-    <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
+     package="com.android.statusbartest">
+    <uses-permission android:name="android.permission.DEVICE_POWER"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.STATUS_BAR"/>
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
+    <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS"/>
 
     <application>
-        <activity android:name="StatusBarTest" android:label="_StatusBar">
+        <activity android:name="StatusBarTest"
+             android:label="_StatusBar"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="NotificationTestList" android:label="_Notifications">
+        <activity android:name="NotificationTestList"
+             android:label="_Notifications"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name="NotificationBuilderTest"
-                android:label="_Notify Builder"
-                android:theme="@android:style/Theme.Holo"
-                android:hardwareAccelerated="true"
-                >
+             android:label="_Notify Builder"
+             android:theme="@android:style/Theme.Holo"
+             android:hardwareAccelerated="true"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="ToastTest" android:label="_Toasts">
+        <activity android:name="ToastTest"
+             android:label="_Toasts"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="PowerTest" android:label="_Power">
+        <activity android:name="PowerTest"
+             android:label="_Power"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="ConfirmationActivity" android:theme="@android:style/Theme.Dialog">
+        <activity android:name="ConfirmationActivity"
+             android:theme="@android:style/Theme.Dialog">
         </activity>
-        <activity android:name="TestAlertActivity" android:theme="@android:style/Theme.Dialog">
+        <activity android:name="TestAlertActivity"
+             android:theme="@android:style/Theme.Dialog">
         </activity>
     </application>
 </manifest>

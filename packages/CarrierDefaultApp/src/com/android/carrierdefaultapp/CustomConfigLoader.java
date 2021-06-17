@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
+import android.telephony.data.ApnSetting;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -85,8 +86,8 @@ public class CustomConfigLoader {
                 case TelephonyManager.ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED:
                     configs = b.getStringArray(CarrierConfigManager
                             .KEY_CARRIER_DEFAULT_ACTIONS_ON_DCFAILURE_STRING_ARRAY);
-                    arg1 = intent.getStringExtra(TelephonyManager.EXTRA_APN_TYPE);
-                    arg2 = intent.getStringExtra(TelephonyManager.EXTRA_ERROR_CODE);
+                    arg1 = String.valueOf(intent.getIntExtra(TelephonyManager.EXTRA_APN_TYPE, -1));
+                    arg2 = intent.getStringExtra(TelephonyManager.EXTRA_DATA_FAIL_CAUSE);
                     break;
                 case TelephonyManager.ACTION_CARRIER_SIGNAL_RESET:
                     configs = b.getStringArray(CarrierConfigManager
@@ -141,10 +142,24 @@ public class CustomConfigLoader {
             // case 1
             actionStr = splitStr[0];
         } else if (splitStr.length == 2 && arg1 != null && arg2 != null) {
-            // case 2
+            // case 2. The only thing that uses this is CARRIER_SIGNAL_REQUEST_NETWORK_FAILED,
+            // and the carrier config for that can provide either an int or string for the apn type,
+            // depending on when it was introduced. Therefore, return a positive match if either
+            // the int version or the string version of the apn type in the broadcast matches.
+            String apnInIntFormat = arg1;
+            String apnInStringFormat = null;
+            try {
+                int apnInt = Integer.parseInt(apnInIntFormat);
+                apnInStringFormat = ApnSetting.getApnTypeString(apnInt);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Got invalid apn type from broadcast: " + apnInIntFormat);
+            }
+
             String[] args = splitStr[0].split(INTRA_GROUP_DELIMITER);
-            if (args.length == 2 && TextUtils.equals(arg1, args[0]) &&
-                    TextUtils.equals(arg2, args[1])) {
+            boolean doesArg1Match = TextUtils.equals(apnInIntFormat, args[0])
+                    || (apnInStringFormat != null && TextUtils.equals(apnInStringFormat, args[0]));
+            if (args.length == 2 && doesArg1Match
+                    && TextUtils.equals(arg2, args[1])) {
                 actionStr = splitStr[1];
             }
         } else if ((splitStr.length == 2) && (arg1 != null) && (arg2 == null)) {

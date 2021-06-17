@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -102,7 +103,7 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
     
     private Dialog mDialog;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private ListView mListView;
 
     private int mLayoutResId = com.android.internal.R.layout.preference_list_fragment;

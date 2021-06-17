@@ -89,7 +89,7 @@ public class BadgeExtractorTest extends UiServiceTestCase {
         when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
 
         Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
-                PendingIntent.getActivity(mContext, 0, new Intent(), 0),
+                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE),
                         Icon.createWithResource("", 0)).build();
 
         int flags = metadata.getFlags();

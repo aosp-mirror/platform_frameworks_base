@@ -18,8 +18,9 @@ package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.media.permission.Identity;
+import android.media.permission.IdentityContext;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
-import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.ModelParameterRange;
 import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
@@ -28,17 +29,15 @@ import android.media.soundtrigger_middleware.RecognitionConfig;
 import android.media.soundtrigger_middleware.RecognitionEvent;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
-import android.os.Binder;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Objects;
 
 /**
  * An ISoundTriggerMiddlewareService decorator, which adds logging of all API calls (and
@@ -71,7 +70,8 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
     }
 
     @Override
-    public @NonNull SoundTriggerModuleDescriptor[] listModules() throws RemoteException {
+    public @NonNull
+    SoundTriggerModuleDescriptor[] listModules() {
         try {
             SoundTriggerModuleDescriptor[] result = mDelegate.listModules();
             logReturn("listModules", result);
@@ -83,12 +83,13 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
     }
 
     @Override
-    public @NonNull ISoundTriggerModule attach(int handle, ISoundTriggerCallback callback)
-            throws RemoteException {
+    public @NonNull
+    ISoundTriggerModule attach(int handle, ISoundTriggerCallback callback) {
         try {
-            ISoundTriggerModule result = mDelegate.attach(handle, new CallbackLogging(callback));
+            ModuleLogging result = new ModuleLogging(callback);
+            result.attach(mDelegate.attach(handle, result.getCallbackWrapper()));
             logReturn("attach", result, handle, callback);
-            return new ModuleLogging(result);
+            return result;
         } catch (Exception e) {
             logException("attach", e, handle, callback);
             throw e;
@@ -106,7 +107,8 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         }
     }
 
-    @Override public IBinder asBinder() {
+    @Override
+    public IBinder asBinder() {
         throw new UnsupportedOperationException(
                 "This implementation is not inteded to be used directly with Binder.");
     }
@@ -118,94 +120,33 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
     }
 
     private void logException(String methodName, Exception ex, Object... args) {
-        logExceptionWithObject(this, methodName, ex, args);
+        logExceptionWithObject(this, IdentityContext.get(), methodName, ex, args);
     }
 
     private void logReturn(String methodName, Object retVal, Object... args) {
-        logReturnWithObject(this, methodName, retVal, args);
+        logReturnWithObject(this, IdentityContext.get(), methodName, retVal, args);
     }
 
     private void logVoidReturn(String methodName, Object... args) {
-        logVoidReturnWithObject(this, methodName, args);
-    }
-
-    private class CallbackLogging implements ISoundTriggerCallback {
-        private final ISoundTriggerCallback mDelegate;
-
-        private CallbackLogging(ISoundTriggerCallback delegate) {
-            mDelegate = delegate;
-        }
-
-        @Override
-        public void onRecognition(int modelHandle, RecognitionEvent event) throws RemoteException {
-            try {
-                mDelegate.onRecognition(modelHandle, event);
-                logVoidReturn("onRecognition", modelHandle, event);
-            } catch (Exception e) {
-                logException("onRecognition", e, modelHandle, event);
-                throw e;
-            }
-        }
-
-        @Override
-        public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event)
-                throws RemoteException {
-            try {
-                mDelegate.onPhraseRecognition(modelHandle, event);
-                logVoidReturn("onPhraseRecognition", modelHandle, event);
-            } catch (Exception e) {
-                logException("onPhraseRecognition", e, modelHandle, event);
-                throw e;
-            }
-        }
-
-        @Override
-        public void onRecognitionAvailabilityChange(boolean available) throws RemoteException {
-            try {
-                mDelegate.onRecognitionAvailabilityChange(available);
-                logVoidReturn("onRecognitionAvailabilityChange", available);
-            } catch (Exception e) {
-                logException("onRecognitionAvailabilityChange", e, available);
-                throw e;
-            }
-        }
-
-        @Override
-        public void onModuleDied() throws RemoteException {
-            try {
-                mDelegate.onModuleDied();
-                logVoidReturn("onModuleDied");
-            } catch (Exception e) {
-                logException("onModuleDied", e);
-                throw e;
-            }
-        }
-
-        private void logException(String methodName, Exception ex, Object... args) {
-            logExceptionWithObject(this, methodName, ex, args);
-        }
-
-        private void logVoidReturn(String methodName, Object... args) {
-            logVoidReturnWithObject(this, methodName, args);
-        }
-
-        @Override
-        public IBinder asBinder() {
-            return mDelegate.asBinder();
-        }
-
-        // Override toString() in order to have the delegate's ID in it.
-        @Override
-        public String toString() {
-            return mDelegate.toString();
-        }
+        logVoidReturnWithObject(this, IdentityContext.get(), methodName, args);
     }
 
     private class ModuleLogging implements ISoundTriggerModule {
-        private final ISoundTriggerModule mDelegate;
+        private ISoundTriggerModule mDelegate;
+        private final @NonNull CallbackLogging mCallbackWrapper;
+        private final @NonNull Identity mOriginatorIdentity;
 
-        private ModuleLogging(ISoundTriggerModule delegate) {
+        ModuleLogging(@NonNull ISoundTriggerCallback callback) {
+            mCallbackWrapper = new CallbackLogging(callback);
+            mOriginatorIdentity = IdentityContext.getNonNull();
+        }
+
+        void attach(@NonNull ISoundTriggerModule delegate) {
             mDelegate = delegate;
+        }
+
+        ISoundTriggerCallback getCallbackWrapper() {
+            return mCallbackWrapper;
         }
 
         @Override
@@ -334,19 +275,92 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         // Override toString() in order to have the delegate's ID in it.
         @Override
         public String toString() {
-            return mDelegate.toString();
+            return Objects.toString(mDelegate);
         }
 
         private void logException(String methodName, Exception ex, Object... args) {
-            logExceptionWithObject(this, methodName, ex, args);
+            logExceptionWithObject(this, mOriginatorIdentity, methodName, ex, args);
         }
 
         private void logReturn(String methodName, Object retVal, Object... args) {
-            logReturnWithObject(this, methodName, retVal, args);
+            logReturnWithObject(this, mOriginatorIdentity, methodName, retVal, args);
         }
 
         private void logVoidReturn(String methodName, Object... args) {
-            logVoidReturnWithObject(this, methodName, args);
+            logVoidReturnWithObject(this, mOriginatorIdentity, methodName, args);
+        }
+
+        private class CallbackLogging implements ISoundTriggerCallback {
+            private final ISoundTriggerCallback mCallbackDelegate;
+
+            private CallbackLogging(ISoundTriggerCallback delegate) {
+                mCallbackDelegate = delegate;
+            }
+
+            @Override
+            public void onRecognition(int modelHandle, RecognitionEvent event)
+                    throws RemoteException {
+                try {
+                    mCallbackDelegate.onRecognition(modelHandle, event);
+                    logVoidReturn("onRecognition", modelHandle, event);
+                } catch (Exception e) {
+                    logException("onRecognition", e, modelHandle, event);
+                    throw e;
+                }
+            }
+
+            @Override
+            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event)
+                    throws RemoteException {
+                try {
+                    mCallbackDelegate.onPhraseRecognition(modelHandle, event);
+                    logVoidReturn("onPhraseRecognition", modelHandle, event);
+                } catch (Exception e) {
+                    logException("onPhraseRecognition", e, modelHandle, event);
+                    throw e;
+                }
+            }
+
+            @Override
+            public void onRecognitionAvailabilityChange(boolean available) throws RemoteException {
+                try {
+                    mCallbackDelegate.onRecognitionAvailabilityChange(available);
+                    logVoidReturn("onRecognitionAvailabilityChange", available);
+                } catch (Exception e) {
+                    logException("onRecognitionAvailabilityChange", e, available);
+                    throw e;
+                }
+            }
+
+            @Override
+            public void onModuleDied() throws RemoteException {
+                try {
+                    mCallbackDelegate.onModuleDied();
+                    logVoidReturn("onModuleDied");
+                } catch (Exception e) {
+                    logException("onModuleDied", e);
+                    throw e;
+                }
+            }
+
+            private void logException(String methodName, Exception ex, Object... args) {
+                logExceptionWithObject(this, mOriginatorIdentity, methodName, ex, args);
+            }
+
+            private void logVoidReturn(String methodName, Object... args) {
+                logVoidReturnWithObject(this, mOriginatorIdentity, methodName, args);
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return mCallbackDelegate.asBinder();
+            }
+
+            // Override toString() in order to have the delegate's ID in it.
+            @Override
+            public String toString() {
+                return Objects.toString(mCallbackDelegate);
+            }
         }
     }
 
@@ -386,34 +400,37 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         return builder.toString();
     }
 
-    private void logReturnWithObject(@NonNull Object object, String methodName,
+    private void logReturnWithObject(@NonNull Object object, @Nullable Identity originatorIdentity,
+            String methodName,
             @Nullable Object retVal,
             @NonNull Object[] args) {
-        final String message = String.format("%s[this=%s, caller=%d/%d](%s) -> %s", methodName,
+        final String message = String.format("%s[this=%s, client=%s](%s) -> %s", methodName,
                 object,
-                Binder.getCallingUid(), Binder.getCallingPid(),
+                printObject(originatorIdentity),
                 printArgs(args),
                 printObject(retVal));
         Log.i(TAG, message);
         appendMessage(message);
     }
 
-    private void logVoidReturnWithObject(@NonNull Object object, @NonNull String methodName,
+    private void logVoidReturnWithObject(@NonNull Object object,
+            @Nullable Identity originatorIdentity, @NonNull String methodName,
             @NonNull Object[] args) {
-        final String message = String.format("%s[this=%s, caller=%d/%d](%s)", methodName,
+        final String message = String.format("%s[this=%s, client=%s](%s)", methodName,
                 object,
-                Binder.getCallingUid(), Binder.getCallingPid(),
+                printObject(originatorIdentity),
                 printArgs(args));
         Log.i(TAG, message);
         appendMessage(message);
     }
 
-    private void logExceptionWithObject(@NonNull Object object, @NonNull String methodName,
+    private void logExceptionWithObject(@NonNull Object object,
+            @Nullable Identity originatorIdentity, @NonNull String methodName,
             @NonNull Exception ex,
             Object[] args) {
-        final String message = String.format("%s[this=%s, caller=%d/%d](%s) threw", methodName,
+        final String message = String.format("%s[this=%s, client=%s](%s) threw", methodName,
                 object,
-                Binder.getCallingUid(), Binder.getCallingPid(),
+                printObject(originatorIdentity),
                 printArgs(args));
         Log.e(TAG, message, ex);
         appendMessage(message + " " + ex.toString());
@@ -429,7 +446,8 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         }
     }
 
-    @Override public void dump(PrintWriter pw) {
+    @Override
+    public void dump(PrintWriter pw) {
         pw.println();
         pw.println("=========================================");
         pw.println("Last events");

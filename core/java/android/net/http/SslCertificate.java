@@ -26,7 +26,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.android.internal.util.HexDump;
-import com.android.org.bouncycastle.asn1.x509.X509Name;
+import com.android.internal.org.bouncycastle.asn1.x509.X509Name;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;

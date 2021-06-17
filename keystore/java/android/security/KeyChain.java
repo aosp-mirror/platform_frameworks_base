@@ -15,10 +15,16 @@
  */
 package android.security;
 
+import static android.security.Credentials.ACTION_MANAGE_CREDENTIALS;
+
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -29,15 +35,18 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
+import android.system.keystore2.Domain;
+import android.system.keystore2.KeyDescriptor;
+import android.util.Log;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
 
@@ -102,6 +111,11 @@ import javax.security.auth.x500.X500Principal;
 public final class KeyChain {
 
     /**
+     * @hide
+     */
+    public static final String LOG = "KeyChain";
+
+    /**
      * @hide Also used by KeyChainService implementation
      */
     public static final String ACCOUNT_TYPE = "com.android.keychain";
@@ -120,6 +134,11 @@ public final class KeyChain {
      * Package name for the Certificate Installer.
      */
     private static final String CERT_INSTALLER_PACKAGE = "com.android.certinstaller";
+
+    /**
+     * Package name for Settings.
+     */
+    private static final String SETTINGS_PACKAGE = "com.android.settings";
 
     /**
      * Extra for use with {@link #ACTION_CHOOSER}
@@ -200,6 +219,20 @@ public final class KeyChain {
      */
     // Compatible with old android.security.Credentials.PKCS12
     public static final String EXTRA_PKCS12 = "PKCS12";
+
+    /**
+     * Extra used by {@link #createManageCredentialsIntent(AppUriAuthenticationPolicy)} to specify
+     * the authentication policy of the credential management app.
+     *
+     * <p>The authentication policy declares which alias for a private key and certificate pair
+     * should be used for authentication, given a list of apps and URIs.
+     *
+     * <p>The extra value should be a {@link AppUriAuthenticationPolicy}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_AUTHENTICATION_POLICY =
+            "android.security.extra.AUTHENTICATION_POLICY";
 
     /**
      * Broadcast Action: Indicates the trusted storage has changed. Sent when
@@ -386,6 +419,32 @@ public final class KeyChain {
     }
 
     /**
+     * Returns an {@code Intent} that should be used by an app to request to manage the user's
+     * credentials. This is limited to unmanaged devices. The authentication policy must be
+     * provided to be able to make this request successfully.
+     *
+     * <p> This intent should be started using {@link Activity#startActivityForResult(Intent, int)}
+     * to verify whether the request was successful and whether the user accepted or denied the
+     * request. If the user successfully receives and accepts the request, the result code will be
+     * {@link Activity#RESULT_OK}, otherwise the result code will be
+     * {@link Activity#RESULT_CANCELED}.
+     *
+     * <p> {@link KeyChain#isCredentialManagementApp(Context)} should be used to determine whether
+     * an app is already the credential management app.
+     *
+     * @param policy The authentication policy determines which alias for a private key and
+     *               certificate pair should be used for authentication.
+     */
+    @NonNull
+    public static Intent createManageCredentialsIntent(@NonNull AppUriAuthenticationPolicy policy) {
+        Intent intent = new Intent(ACTION_MANAGE_CREDENTIALS);
+        intent.setComponent(ComponentName.createRelative(SETTINGS_PACKAGE,
+                ".security.RequestManageCredentials"));
+        intent.putExtra(EXTRA_AUTHENTICATION_POLICY, policy);
+        return intent;
+    }
+
+    /**
      * Launches an {@code Activity} for the user to select the alias
      * for a private key and certificate pair for authentication. The
      * selected alias or null will be returned via the
@@ -535,8 +594,118 @@ public final class KeyChain {
         }
         intent.putExtra(EXTRA_ISSUERS, (Serializable) issuersList);
         // the PendingIntent is used to get calling package name
-        intent.putExtra(EXTRA_SENDER, PendingIntent.getActivity(activity, 0, new Intent(), 0));
+        intent.putExtra(EXTRA_SENDER, PendingIntent.getActivity(activity, 0, new Intent(),
+                PendingIntent.FLAG_IMMUTABLE));
         activity.startActivity(intent);
+    }
+
+    /**
+     * Check whether the caller is the credential management app {@code CredentialManagementApp}.
+     * The credential management app has the ability to manage the user's KeyChain credentials
+     * on unmanaged devices.
+     *
+     * <p> {@link KeyChain#createManageCredentialsIntent} should be used by an app to request to
+     * become the credential management app. The user must approve this request before the app can
+     * manage the user's credentials. There can only be one credential management on the device.
+     *
+     * @return {@code true} if the caller is the credential management app.
+     */
+    @WorkerThread
+    public static boolean isCredentialManagementApp(@NonNull Context context) {
+        boolean isCredentialManagementApp = false;
+        try (KeyChainConnection keyChainConnection = KeyChain.bind(context)) {
+            isCredentialManagementApp = keyChainConnection.getService()
+                    .isCredentialManagementApp(context.getPackageName());
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted while checking whether the caller is the "
+                    + "credential management app.", e);
+        } catch (SecurityException e) {
+            isCredentialManagementApp = false;
+        }
+        return isCredentialManagementApp;
+    }
+
+    /**
+     * Called by the credential management app to get the authentication policy
+     * {@link AppUriAuthenticationPolicy}.
+     *
+     * @return the credential management app's authentication policy.
+     * @throws SecurityException if the caller is not the credential management app.
+     */
+    @WorkerThread
+    @NonNull
+    public static AppUriAuthenticationPolicy getCredentialManagementAppPolicy(
+            @NonNull Context context) throws SecurityException {
+        AppUriAuthenticationPolicy policy = null;
+        try (KeyChainConnection keyChainConnection = KeyChain.bind(context)) {
+            policy = keyChainConnection.getService().getCredentialManagementAppPolicy();
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(
+                    "Interrupted while getting credential management app policy.", e);
+        }
+        return policy;
+    }
+
+    /**
+     * Set a credential management app. The credential management app has the ability to manage
+     * the user's KeyChain credentials on unmanaged devices.
+     *
+     * <p>There can only be one credential management on the device. If another app requests to
+     * become the credential management app, then the existing credential management app will
+     * no longer be able to manage credentials.
+     *
+     * @param packageName The package name of the credential management app
+     * @param authenticationPolicy The authentication policy of the credential management app. This
+     *                             policy determines which alias for a private key and certificate
+     *                             pair should be used for authentication.
+     * @return {@code true} if the credential management app was successfully added.
+     * @hide
+     */
+    @TestApi
+    @WorkerThread
+    @RequiresPermission(Manifest.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP)
+    public static boolean setCredentialManagementApp(@NonNull Context context,
+            @NonNull String packageName, @NonNull AppUriAuthenticationPolicy authenticationPolicy) {
+        try (KeyChainConnection keyChainConnection = KeyChain.bind(context)) {
+            keyChainConnection.getService()
+                    .setCredentialManagementApp(packageName, authenticationPolicy);
+            return true;
+        } catch (RemoteException | InterruptedException e) {
+            Log.w(LOG, "Set credential management app failed", e);
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
+
+    /**
+     * Called by the credential management app {@code CredentialManagementApp} to unregister as
+     * the credential management app and stop managing the user's credentials.
+     *
+     * <p> All credentials previously installed by the credential management app will be removed
+     * from the user's device.
+     *
+     * <p> An app holding {@code MANAGE_CREDENTIAL_MANAGEMENT_APP} permission can also call this
+     * method to remove the current credential management app, even if it's not the current
+     * credential management app itself.
+     *
+     * @return {@code true} if the credential management app was successfully removed.
+     */
+    @WorkerThread
+    @RequiresPermission(value = Manifest.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP,
+            conditional = true)
+    public static boolean removeCredentialManagementApp(@NonNull Context context) {
+        try (KeyChainConnection keyChainConnection = KeyChain.bind(context)) {
+            keyChainConnection.getService().removeCredentialManagementApp();
+            return true;
+        } catch (RemoteException | InterruptedException e) {
+            Log.w(LOG, "Remove credential management app failed", e);
+            Thread.currentThread().interrupt();
+            return false;
+        }
     }
 
     private static class AliasResponse extends IKeyChainAliasCallback.Stub {
@@ -584,6 +753,33 @@ public final class KeyChain {
         return null;
     }
 
+    /**
+     * This prefix is used to disambiguate grant aliase strings from normal key alias strings.
+     * Technically, a key alias string can use the same prefix. However, a collision does not
+     * lead to privilege escalation, because grants are access controlled in the Keystore daemon.
+     * @hide
+     */
+    public static final String GRANT_ALIAS_PREFIX = "ks2_keychain_grant_id:";
+
+    private static KeyDescriptor getGrantDescriptor(String keyid) {
+        KeyDescriptor result = new KeyDescriptor();
+        result.domain = Domain.GRANT;
+        result.blob = null;
+        result.alias = null;
+        try {
+            result.nspace = Long.parseUnsignedLong(
+                    keyid.substring(GRANT_ALIAS_PREFIX.length()), 16 /* radix */);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        return result;
+    }
+
+    /** @hide */
+    public static String getGrantString(KeyDescriptor key) {
+        return String.format(GRANT_ALIAS_PREFIX + "%016X", key.nspace);
+    }
+
     /** @hide */
     @Nullable @WorkerThread
     public static KeyPair getKeyPair(@NonNull Context context, @NonNull String alias)
@@ -607,13 +803,15 @@ public final class KeyChain {
 
         if (keyId == null) {
             return null;
-        } else {
-            try {
-                return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyPairFromKeystore(
-                        KeyStore.getInstance(), keyId, KeyStore.UID_SELF);
-            } catch (RuntimeException | UnrecoverableKeyException | KeyPermanentlyInvalidatedException e) {
-                throw new KeyChainException(e);
-            }
+        }
+
+        try {
+            return android.security.keystore2.AndroidKeyStoreProvider
+                    .loadAndroidKeyStoreKeyPairFromKeystore(
+                            KeyStore2.getInstance(),
+                            getGrantDescriptor(keyId));
+        } catch (UnrecoverableKeyException | KeyPermanentlyInvalidatedException e) {
+            throw new KeyChainException(e);
         }
     }
 
@@ -729,11 +927,8 @@ public final class KeyChain {
     @Deprecated
     public static boolean isBoundKeyAlgorithm(
             @NonNull @KeyProperties.KeyAlgorithmEnum String algorithm) {
-        if (!isKeyAlgorithmSupported(algorithm)) {
-            return false;
-        }
-
-        return KeyStore.getInstance().isHardwareBacked(algorithm);
+        // All supported algorithms are hardware backed. Individual keys may not be.
+        return true;
     }
 
     /** @hide */
@@ -815,10 +1010,74 @@ public final class KeyChain {
     @WorkerThread
     public static KeyChainConnection bindAsUser(@NonNull Context context, UserHandle user)
             throws InterruptedException {
+        return bindAsUser(context, null, user);
+    }
+
+    /**
+     * Returns a persistable grant string that allows WiFi stack to access the key using Keystore
+     * SSL engine.
+     *
+     * @return grant string or null if key is not granted or doesn't exist.
+     *
+     * The key should be granted to Process.WIFI_UID.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    @WorkerThread
+    public static String getWifiKeyGrantAsUser(
+            @NonNull Context context, @NonNull UserHandle user, @NonNull String alias) {
+        try (KeyChainConnection keyChainConnection =
+                     bindAsUser(context.getApplicationContext(), user)) {
+            return keyChainConnection.getService().getWifiKeyGrantAsUser(alias);
+        } catch (RemoteException | RuntimeException e) {
+            Log.i(LOG, "Couldn't get grant for wifi", e);
+            return null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.i(LOG, "Interrupted while getting grant for wifi", e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns whether the key is granted to WiFi stack.
+     * @hide
+     */
+    @SystemApi
+    @WorkerThread
+    public static boolean hasWifiKeyGrantAsUser(
+            @NonNull Context context, @NonNull UserHandle user, @NonNull String alias) {
+        try (KeyChainConnection keyChainConnection =
+                     bindAsUser(context.getApplicationContext(), user)) {
+            return keyChainConnection.getService().hasGrant(Process.WIFI_UID, alias);
+        } catch (RemoteException | RuntimeException e) {
+            Log.i(LOG, "Couldn't query grant for wifi", e);
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.i(LOG, "Interrupted while querying grant for wifi", e);
+            return false;
+        }
+    }
+
+    /**
+     * Bind to KeyChainService in the target user.
+     * Caller should call unbindService on the result when finished.
+     *
+     * @throws InterruptedException if interrupted during binding.
+     * @throws AssertionError if unable to bind to KeyChainService.
+     * @hide
+     */
+    public static KeyChainConnection bindAsUser(@NonNull Context context, @Nullable Handler handler,
+            UserHandle user) throws InterruptedException {
+
         if (context == null) {
             throw new NullPointerException("context == null");
         }
-        ensureNotOnMainThread(context);
+        if (handler == null) {
+            ensureNotOnMainThread(context);
+        }
         if (!UserManager.get(context).isUserUnlocked(user)) {
             throw new IllegalStateException("User must be unlocked");
         }
@@ -845,9 +1104,19 @@ public final class KeyChain {
         };
         Intent intent = new Intent(IKeyChainService.class.getName());
         ComponentName comp = intent.resolveSystemService(context.getPackageManager(), 0);
+        if (comp == null) {
+            throw new AssertionError("could not resolve KeyChainService");
+        }
         intent.setComponent(comp);
-        if (comp == null || !context.bindServiceAsUser(
-                intent, keyChainServiceConnection, Context.BIND_AUTO_CREATE, user)) {
+        final boolean bindSucceed;
+        if (handler != null) {
+            bindSucceed = context.bindServiceAsUser(
+                    intent, keyChainServiceConnection, Context.BIND_AUTO_CREATE, handler, user);
+        } else {
+            bindSucceed = context.bindServiceAsUser(
+                    intent, keyChainServiceConnection, Context.BIND_AUTO_CREATE, user);
+        }
+        if (!bindSucceed) {
             throw new AssertionError("could not bind to KeyChainService");
         }
         countDownLatch.await();

@@ -149,7 +149,7 @@ public class TrustAgentWrapper {
                         }
                         long expiration = SystemClock.elapsedRealtime() + duration;
                         mAlarmPendingIntent = PendingIntent.getBroadcast(mContext, 0, mAlarmIntent,
-                                PendingIntent.FLAG_CANCEL_CURRENT);
+                                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
                         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, expiration,
                                 mAlarmPendingIntent);
                     }

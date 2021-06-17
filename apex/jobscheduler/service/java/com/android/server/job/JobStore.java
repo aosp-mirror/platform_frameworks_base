@@ -36,6 +36,7 @@ import android.util.AtomicFile;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SystemConfigFileCommitEventLogger;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -102,6 +103,7 @@ public final class JobStore {
     private boolean mWriteInProgress;
 
     private static final Object sSingletonLock = new Object();
+    private final SystemConfigFileCommitEventLogger mEventLogger;
     private final AtomicFile mJobsFile;
     /** Handler backed by IoThread for writing to disk. */
     private final Handler mIoHandler = IoThread.getHandler();
@@ -141,7 +143,8 @@ public final class JobStore {
         File systemDir = new File(dataDir, "system");
         File jobDir = new File(systemDir, "job");
         jobDir.mkdirs();
-        mJobsFile = new AtomicFile(new File(jobDir, "jobs.xml"), "jobs");
+        mEventLogger = new SystemConfigFileCommitEventLogger("jobs");
+        mJobsFile = new AtomicFile(new File(jobDir, "jobs.xml"), mEventLogger);
 
         mJobSet = new JobSet();
 
@@ -251,11 +254,11 @@ public final class JobStore {
     }
 
     /**
-     * Remove the jobs of users not specified in the whitelist.
-     * @param whitelist Array of User IDs whose jobs are not to be removed.
+     * Remove the jobs of users not specified in the keepUserIds.
+     * @param keepUserIds Array of User IDs whose jobs should be kept and not removed.
      */
-    public void removeJobsOfNonUsers(int[] whitelist) {
-        mJobSet.removeJobsOfNonUsers(whitelist);
+    public void removeJobsOfUnlistedUsers(int[] keepUserIds) {
+        mJobSet.removeJobsOfUnlistedUsers(keepUserIds);
     }
 
     @VisibleForTesting
@@ -332,7 +335,7 @@ public final class JobStore {
                     Slog.v(TAG, "Scheduling persist of jobs to disk.");
                 }
                 mIoHandler.postDelayed(mWriteRunnable, JOB_PERSIST_DELAY);
-                mWriteScheduled = mWriteInProgress = true;
+                mWriteScheduled = true;
             }
         }
     }
@@ -350,7 +353,7 @@ public final class JobStore {
                 throw new IllegalStateException("An asynchronous write is already scheduled.");
             }
 
-            mWriteScheduled = mWriteInProgress = true;
+            mWriteScheduled = true;
             mWriteRunnable.run();
         }
     }
@@ -366,7 +369,7 @@ public final class JobStore {
         final long start = SystemClock.uptimeMillis();
         final long end = start + maxWaitMillis;
         synchronized (mWriteScheduleLock) {
-            while (mWriteInProgress) {
+            while (mWriteScheduled || mWriteInProgress) {
                 final long now = SystemClock.uptimeMillis();
                 if (now >= end) {
                     // still not done and we've hit the end; failure
@@ -401,6 +404,12 @@ public final class JobStore {
             // a bit of lock contention.
             synchronized (mWriteScheduleLock) {
                 mWriteScheduled = false;
+                if (mWriteInProgress) {
+                    // Another runnable is currently writing. Postpone this new write task.
+                    maybeWriteStatusToDiskAsync();
+                    return;
+                }
+                mWriteInProgress = true;
             }
             synchronized (mLock) {
                 // Clone the jobs so we can release the lock before writing.
@@ -426,7 +435,7 @@ public final class JobStore {
             int numSystemJobs = 0;
             int numSyncJobs = 0;
             try {
-                final long startTime = SystemClock.uptimeMillis();
+                mEventLogger.setStartTime(SystemClock.uptimeMillis());
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 XmlSerializer out = new FastXmlSerializer();
                 out.setOutput(baos, StandardCharsets.UTF_8.name());
@@ -459,7 +468,7 @@ public final class JobStore {
                 out.endDocument();
 
                 // Write out to disk in one fell swoop.
-                FileOutputStream fos = mJobsFile.startWrite(startTime);
+                FileOutputStream fos = mJobsFile.startWrite();
                 fos.write(baos.toByteArray());
                 mJobsFile.finishWrite(fos);
             } catch (IOException e) {
@@ -532,18 +541,23 @@ public final class JobStore {
         /**
          * Write out a tag with data identifying this job's constraints. If the constraint isn't here
          * it doesn't apply.
+         * TODO: b/183455312 Update this code to use proper serialization for NetworkRequest,
+         *       because currently store is not including everything (like, UIDs, bandwidth,
+         *       signal strength etc. are lost).
          */
         private void writeConstraintsToXml(XmlSerializer out, JobStatus jobStatus) throws IOException {
             out.startTag(null, XML_TAG_PARAMS_CONSTRAINTS);
             if (jobStatus.hasConnectivityConstraint()) {
                 final NetworkRequest network = jobStatus.getJob().getRequiredNetwork();
+                // STOPSHIP b/183071974: improve the scheme for backward compatibility and
+                // mainline cleanliness.
                 out.attribute(null, "net-capabilities", Long.toString(
-                        BitUtils.packBits(network.networkCapabilities.getCapabilities())));
+                        BitUtils.packBits(network.getCapabilities())));
                 out.attribute(null, "net-unwanted-capabilities", Long.toString(
-                        BitUtils.packBits(network.networkCapabilities.getUnwantedCapabilities())));
+                        BitUtils.packBits(network.getForbiddenCapabilities())));
 
                 out.attribute(null, "net-transport-types", Long.toString(
-                        BitUtils.packBits(network.networkCapabilities.getTransportTypes())));
+                        BitUtils.packBits(network.getTransportTypes())));
             }
             if (jobStatus.hasIdleConstraint()) {
                 out.attribute(null, "idle", Boolean.toString(true));
@@ -945,7 +959,7 @@ public final class JobStore {
                     appBucket, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
                     lastSuccessfulRunTime, lastFailedRunTime,
-                    (rtcIsGood) ? null : rtcRuntimes, internalFlags);
+                    (rtcIsGood) ? null : rtcRuntimes, internalFlags, /* dynamicConstraints */ 0);
             return js;
         }
 
@@ -963,22 +977,27 @@ public final class JobStore {
             String val;
 
             final String netCapabilities = parser.getAttributeValue(null, "net-capabilities");
-            final String netUnwantedCapabilities = parser.getAttributeValue(
+            final String netforbiddenCapabilities = parser.getAttributeValue(
                     null, "net-unwanted-capabilities");
             final String netTransportTypes = parser.getAttributeValue(null, "net-transport-types");
             if (netCapabilities != null && netTransportTypes != null) {
-                final NetworkRequest request = new NetworkRequest.Builder().build();
-                final long unwantedCapabilities = netUnwantedCapabilities != null
-                        ? Long.parseLong(netUnwantedCapabilities)
-                        : BitUtils.packBits(request.networkCapabilities.getUnwantedCapabilities());
-
+                final NetworkRequest.Builder builder = new NetworkRequest.Builder()
+                        .clearCapabilities();
+                final long forbiddenCapabilities = netforbiddenCapabilities != null
+                        ? Long.parseLong(netforbiddenCapabilities)
+                        : BitUtils.packBits(builder.build().getForbiddenCapabilities());
                 // We're okay throwing NFE here; caught by caller
-                request.networkCapabilities.setCapabilities(
-                        BitUtils.unpackBits(Long.parseLong(netCapabilities)),
-                        BitUtils.unpackBits(unwantedCapabilities));
-                request.networkCapabilities.setTransportTypes(
-                        BitUtils.unpackBits(Long.parseLong(netTransportTypes)));
-                jobBuilder.setRequiredNetwork(request);
+                for (int capability : BitUtils.unpackBits(Long.parseLong(netCapabilities))) {
+                    builder.addCapability(capability);
+                }
+                for (int forbiddenCapability : BitUtils.unpackBits(
+                        Long.parseLong(netforbiddenCapabilities))) {
+                    builder.addForbiddenCapability(forbiddenCapability);
+                }
+                for (int transport : BitUtils.unpackBits(Long.parseLong(netTransportTypes))) {
+                    builder.addTransportType(transport);
+                }
+                jobBuilder.setRequiredNetwork(builder.build());
             } else {
                 // Read legacy values
                 val = parser.getAttributeValue(null, "connectivity");
@@ -1142,15 +1161,14 @@ public final class JobStore {
         }
 
         /**
-         * Removes the jobs of all users not specified by the whitelist of user ids.
-         * This will remove jobs scheduled *by* non-existent users as well as jobs scheduled *for*
-         * non-existent users
+         * Removes the jobs of all users not specified by the keepUserIds of user ids.
+         * This will remove jobs scheduled *by* and *for* any unlisted users.
          */
-        public void removeJobsOfNonUsers(final int[] whitelist) {
+        public void removeJobsOfUnlistedUsers(final int[] keepUserIds) {
             final Predicate<JobStatus> noSourceUser =
-                    job -> !ArrayUtils.contains(whitelist, job.getSourceUserId());
+                    job -> !ArrayUtils.contains(keepUserIds, job.getSourceUserId());
             final Predicate<JobStatus> noCallingUser =
-                    job -> !ArrayUtils.contains(whitelist, job.getUserId());
+                    job -> !ArrayUtils.contains(keepUserIds, job.getUserId());
             removeAll(noSourceUser.or(noCallingUser));
         }
 

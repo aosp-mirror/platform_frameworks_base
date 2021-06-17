@@ -1,5 +1,6 @@
 LIBJNIGRAPHICS {
   global:
+    AImageDecoder_resultToString; # introduced=31
     AImageDecoder_createFromAAsset; # introduced=30
     AImageDecoder_createFromFd; # introduced=30
     AImageDecoder_createFromBuffer; # introduced=30
@@ -13,12 +14,25 @@ LIBJNIGRAPHICS {
     AImageDecoder_setTargetSize; # introduced=30
     AImageDecoder_computeSampledSize; # introduced=30
     AImageDecoder_setCrop; # introduced=30
+    AImageDecoder_isAnimated; # introduced=31
+    AImageDecoder_getRepeatCount; # introduced=31
+    AImageDecoder_advanceFrame; # introduced=31
+    AImageDecoder_rewind; # introduced=31
+    AImageDecoder_getFrameInfo; # introduced = 31
+    AImageDecoder_setInternallyHandleDisposePrevious; # introduced = 31
     AImageDecoderHeaderInfo_getWidth; # introduced=30
     AImageDecoderHeaderInfo_getHeight; # introduced=30
     AImageDecoderHeaderInfo_getMimeType; # introduced=30
     AImageDecoderHeaderInfo_getAlphaFlags; # introduced=30
     AImageDecoderHeaderInfo_getAndroidBitmapFormat; # introduced=30
     AImageDecoderHeaderInfo_getDataSpace; # introduced=30
+    AImageDecoderFrameInfo_create; # introduced = 31
+    AImageDecoderFrameInfo_delete; # introduced = 31
+    AImageDecoderFrameInfo_getDuration; # introduced = 31
+    AImageDecoderFrameInfo_getFrameRect; # introduced = 31
+    AImageDecoderFrameInfo_hasAlphaWithinBounds; # introduced = 31
+    AImageDecoderFrameInfo_getDisposeOp; # introduced = 31
+    AImageDecoderFrameInfo_getBlendOp; # introduced = 31
     AndroidBitmap_getInfo;
     AndroidBitmap_getDataSpace;
     AndroidBitmap_lockPixels;

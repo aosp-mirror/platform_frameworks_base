@@ -15,7 +15,6 @@
 package com.android.systemui.qs.customize;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.testing.AndroidTestingRunner;
@@ -31,6 +30,8 @@ import com.android.systemui.qs.QSTileHost;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 
@@ -40,17 +41,20 @@ import java.util.Collections;
 public class TileAdapterTest extends SysuiTestCase {
 
     private TileAdapter mTileAdapter;
+    @Mock
+    private QSTileHost mQSTileHost;
 
     @Before
     public void setup() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
         TestableLooper.get(this).runWithLooper(() -> mTileAdapter =
-                new TileAdapter(mContext, new UiEventLoggerFake()));
+                new TileAdapter(mContext, mQSTileHost, new UiEventLoggerFake()));
     }
 
     @Test
     public void testResetNotifiesHost() {
-        QSTileHost host = mock(QSTileHost.class);
-        mTileAdapter.resetTileSpecs(host, Collections.emptyList());
-        verify(host).changeTiles(any(), any());
+        mTileAdapter.resetTileSpecs(Collections.emptyList());
+        verify(mQSTileHost).changeTiles(any(), any());
     }
 }

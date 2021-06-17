@@ -276,7 +276,7 @@ public class JobStoreTest {
                 0 /* sourceUserId */, 0, "someTag",
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
-                persistedExecutionTimesUTC, 0 /* innerFlagg */);
+                persistedExecutionTimesUTC, 0 /* innerFlag */, 0 /* dynamicConstraints */);
 
         mTaskStoreUnderTest.add(js);
         waitForPendingIo();
@@ -374,7 +374,7 @@ public class JobStoreTest {
                 .setPersisted(true)
                 .setRequiredNetwork(new NetworkRequest.Builder()
                         .addCapability(NET_CAPABILITY_IMS)
-                        .addUnwantedCapability(NET_CAPABILITY_OEM_PAID)
+                        .addForbiddenCapability(NET_CAPABILITY_OEM_PAID)
                         .build())
                 .build());
     }
@@ -505,7 +505,7 @@ public class JobStoreTest {
                 first.getTransientExtras().toString(), second.getTransientExtras().toString());
 
         // Since people can forget to add tests here for new fields, do one last
-        // sanity check based on bits-on-wire equality.
+        // validity check based on bits-on-wire equality.
         final byte[] firstBytes = marshall(first);
         final byte[] secondBytes = marshall(second);
         if (!Arrays.equals(firstBytes, secondBytes)) {

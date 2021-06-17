@@ -39,8 +39,12 @@ import android.media.soundtrigger_middleware.RecognitionStatus;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundModelType;
 import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
+import android.os.HidlMemory;
 import android.os.HidlMemoryUtil;
+import android.os.ParcelFileDescriptor;
 
+import java.io.FileDescriptor;
+import java.io.IOException;
 import java.util.regex.Matcher;
 
 /**
@@ -196,8 +200,7 @@ class ConversionUtil {
         hidlModel.header.type = aidl2hidlSoundModelType(aidlModel.type);
         hidlModel.header.uuid = aidl2hidlUuid(aidlModel.uuid);
         hidlModel.header.vendorUuid = aidl2hidlUuid(aidlModel.vendorUuid);
-        hidlModel.data = HidlMemoryUtil.fileDescriptorToHidlMemory(aidlModel.data,
-                aidlModel.dataSize);
+        hidlModel.data = parcelFileDescriptorToHidlMemory(aidlModel.data, aidlModel.dataSize);
         return hidlModel;
     }
 
@@ -411,5 +414,32 @@ class ConversionUtil {
             aidlCapabilities |= AudioCapabilities.NOISE_SUPPRESSION;
         }
         return aidlCapabilities;
+    }
+
+    /**
+     * Convert an AIDL representation of a shared memory block (ParcelFileDescriptor + size) to the
+     * HIDL representation (HidlMemory). Will not change the incoming data or any ownership
+     * semantics, but rather duplicate the underlying FD.
+     *
+     * @param data     The incoming memory block. May be null if dataSize is 0.
+     * @param dataSize The number of bytes in the block.
+     * @return A HidlMemory representation of the memory block. Will be non-null even for an empty
+     *         block.
+     */
+    private static @NonNull
+    HidlMemory parcelFileDescriptorToHidlMemory(@Nullable ParcelFileDescriptor data, int dataSize) {
+        if (dataSize > 0) {
+            // Extract a dup of the underlying FileDescriptor out of data.
+            FileDescriptor fd = new FileDescriptor();
+            try {
+                ParcelFileDescriptor dup = data.dup();
+                fd.setInt$(dup.detachFd());
+                return HidlMemoryUtil.fileDescriptorToHidlMemory(fd, dataSize);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return HidlMemoryUtil.fileDescriptorToHidlMemory(null, 0);
+        }
     }
 }

@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -58,6 +59,7 @@ public abstract class Image implements AutoCloseable {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     protected Image() {
     }
 
@@ -198,6 +200,7 @@ public abstract class Image implements AutoCloseable {
      * @return The window transformation that needs to be applied for this frame.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract int getTransform();
 
     /**
@@ -205,8 +208,26 @@ public abstract class Image implements AutoCloseable {
      * @return The scaling mode that needs to be applied for this frame.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract int getScalingMode();
 
+    /**
+     * Get the fence file descriptor associated with this frame.
+     * @return The fence file descriptor for this frame.
+     * @hide
+     */
+    public int getFenceFd() {
+        return -1;
+    }
+
+    /**
+     * Get the number of planes.
+     * @return The number of expected planes.
+     * @hide
+     */
+    public int getPlaneCount() {
+        return -1;
+    }
     /**
      * Get the {@link android.hardware.HardwareBuffer HardwareBuffer} handle of the input image
      * intended for GPU and/or hardware access.
@@ -326,8 +347,9 @@ public abstract class Image implements AutoCloseable {
      * @return true if the image is attachable to a new owner, false if the image is still attached
      *         to its current owner, or the image is a stand-alone image and is not attachable to
      *         a new owner.
+     * @hide
      */
-    boolean isAttachable() {
+    public boolean isAttachable() {
         throwISEIfImageIsInvalid();
 
         return false;
@@ -387,6 +409,7 @@ public abstract class Image implements AutoCloseable {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
         protected Plane() {
         }
 

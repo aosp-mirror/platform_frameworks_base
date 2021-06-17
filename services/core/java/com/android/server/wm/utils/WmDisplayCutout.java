@@ -57,55 +57,6 @@ public class WmDisplayCutout {
     }
 
     /**
-     * Insets the reference frame of the cutout in the given directions.
-     *
-     * @return a copy of this instance which has been inset
-     * @hide
-     */
-    public WmDisplayCutout inset(int insetLeft, int insetTop, int insetRight, int insetBottom) {
-        DisplayCutout newInner = mInner.inset(insetLeft, insetTop, insetRight, insetBottom);
-
-        if (mInner == newInner) {
-            return this;
-        }
-
-        Size frame = mFrameSize == null ? null : new Size(
-                mFrameSize.getWidth() - insetLeft - insetRight,
-                mFrameSize.getHeight() - insetTop - insetBottom);
-
-        return new WmDisplayCutout(newInner, frame);
-    }
-
-    /**
-     * Recalculates the cutout relative to the given reference frame.
-     *
-     * The safe insets must already have been computed, e.g. with {@link #computeSafeInsets}.
-     *
-     * @return a copy of this instance with the safe insets recalculated
-     * @hide
-     */
-    public WmDisplayCutout calculateRelativeTo(Rect frame) {
-        if (mFrameSize == null) {
-            return this;
-        }
-        final int insetRight = mFrameSize.getWidth() - frame.right;
-        final int insetBottom = mFrameSize.getHeight() - frame.bottom;
-        if (frame.left == 0 && frame.top == 0 && insetRight == 0 && insetBottom == 0) {
-            return this;
-        }
-        if (frame.left >= mInner.getSafeInsetLeft()
-                && frame.top >= mInner.getSafeInsetTop()
-                && insetRight >= mInner.getSafeInsetRight()
-                && insetBottom >= mInner.getSafeInsetBottom()) {
-            return NO_CUTOUT;
-        }
-        if (mInner.isEmpty()) {
-            return this;
-        }
-        return inset(frame.left, frame.top, insetRight, insetBottom);
-    }
-
-    /**
      * Calculates the safe insets relative to the given display size.
      *
      * @return a copy of this instance with the safe insets calculated

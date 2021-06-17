@@ -22,6 +22,9 @@ LOCAL_JACK_FLAGS := --multi-dex native
 LOCAL_DX_FLAGS := --multi-dex
 
 LOCAL_PACKAGE_NAME := SystemUITests
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../NOTICE
 LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 

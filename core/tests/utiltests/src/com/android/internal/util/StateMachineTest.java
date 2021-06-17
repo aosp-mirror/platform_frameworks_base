@@ -16,26 +16,24 @@
 
 package com.android.internal.util;
 
-import java.util.Collection;
-import java.util.Iterator;
-
 import android.os.Debug;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.test.TestLooper;
-
-import android.test.suitebuilder.annotation.Suppress;
-import com.android.internal.util.State;
-import com.android.internal.util.StateMachine;
-import com.android.internal.util.StateMachine.LogRec;
-
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
+import com.android.internal.util.StateMachine.LogRec;
+
 import junit.framework.TestCase;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Test for StateMachine.
@@ -2012,5 +2010,13 @@ public class StateMachineTest extends TestCase {
 
     private static void tloge(String s) {
         Log.e(TAG, s);
+    }
+
+    public void testDumpDoesNotThrowNpeAfterQuit() {
+        final Hsm1 sm = Hsm1.makeHsm1();
+        sm.quitNow();
+        final StringWriter stringWriter = new StringWriter();
+        final PrintWriter printWriter = new PrintWriter(stringWriter);
+        sm.dump(null, printWriter, new String[0]);
     }
 }

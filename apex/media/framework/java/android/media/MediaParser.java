@@ -21,11 +21,16 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.media.MediaCodec.CryptoInfo;
+import android.media.metrics.LogSessionId;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
+
+import androidx.annotation.RequiresApi;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
@@ -74,6 +79,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -1066,6 +1072,7 @@ public final class MediaParser {
     private boolean mReleased;
 
     // MediaMetrics fields.
+    @Nullable private LogSessionId mLogSessionId;
     private final boolean mCreatedByName;
     private final SparseArray<Format> mTrackFormats;
     private String mLastObservedExceptionName;
@@ -1328,6 +1335,7 @@ public final class MediaParser {
                                 MEDIAMETRICS_PARAMETER_LIST_MAX_LENGTH));
 
         nativeSubmitMetrics(
+                SdkLevel.isAtLeastS() ? getLogSessionIdStringV31() : "",
                 mParserName,
                 mCreatedByName,
                 String.join(MEDIAMETRICS_ELEMENT_SEPARATOR, mParserNamesPool),
@@ -1339,6 +1347,17 @@ public final class MediaParser {
                 alteredParameters,
                 videoWidth,
                 videoHeight);
+    }
+
+    @RequiresApi(31)
+    public void setLogSessionId(@NonNull LogSessionId logSessionId) {
+        this.mLogSessionId = Objects.requireNonNull(logSessionId);
+    }
+
+    @RequiresApi(31)
+    @NonNull
+    public LogSessionId getLogSessionId() {
+        return mLogSessionId != null ? mLogSessionId : LogSessionId.LOG_SESSION_ID_NONE;
     }
 
     // Private methods.
@@ -1533,6 +1552,11 @@ public final class MediaParser {
 
     private String getStringParameter(String name, String defaultValue) {
         return (String) mParserParameters.getOrDefault(name, defaultValue);
+    }
+
+    @RequiresApi(31)
+    private String getLogSessionIdStringV31() {
+        return mLogSessionId != null ? mLogSessionId.getStringId() : "";
     }
 
     // Private classes.
@@ -2184,6 +2208,7 @@ public final class MediaParser {
     // Native methods.
 
     private native void nativeSubmitMetrics(
+            String logSessionId,
             String parserName,
             boolean createdByName,
             String parserPool,

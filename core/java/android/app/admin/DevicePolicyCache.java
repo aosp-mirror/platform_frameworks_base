@@ -51,6 +51,19 @@ public abstract class DevicePolicyCache {
     public abstract int getPasswordQuality(@UserIdInt int userHandle);
 
     /**
+     * Caches {@link DevicePolicyManager#getPermissionPolicy(android.content.ComponentName)} of
+     * the given user.
+     */
+    public abstract int getPermissionPolicy(@UserIdInt int userHandle);
+
+    /**
+     * Caches {@link DevicePolicyManager#canAdminGrantSensorsPermissionsForUser(int)} for the
+     * given user.
+     */
+    public abstract boolean canAdminGrantSensorsPermissionsForUser(@UserIdInt int userHandle);
+
+
+    /**
      * Empty implementation.
      */
     private static class EmptyDevicePolicyCache extends DevicePolicyCache {
@@ -65,6 +78,16 @@ public abstract class DevicePolicyCache {
         @Override
         public int getPasswordQuality(int userHandle) {
             return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+        }
+
+        @Override
+        public int getPermissionPolicy(int userHandle) {
+            return DevicePolicyManager.PERMISSION_POLICY_PROMPT;
+        }
+
+        @Override
+        public boolean canAdminGrantSensorsPermissionsForUser(int userHandle) {
+            return false;
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,133 +16,129 @@
 
 package com.android.server.location.gnss;
 
-import android.content.Context;
+import static com.android.server.location.gnss.GnssManagerService.TAG;
+
+import android.annotation.Nullable;
 import android.location.GnssAntennaInfo;
 import android.location.IGnssAntennaInfoListener;
-import android.os.Handler;
-import android.util.Log;
+import android.location.util.identity.CallerIdentity;
+import android.os.Binder;
+import android.os.IBinder;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.location.CallerIdentity;
-import com.android.server.location.RemoteListenerHelper;
+import com.android.server.location.gnss.hal.GnssNative;
+import com.android.server.location.listeners.BinderListenerRegistration;
+import com.android.server.location.listeners.ListenerMultiplexer;
+import com.android.server.location.listeners.ListenerRegistration;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
- * An base implementation for GNSS antenna info provider. It abstracts out the responsibility of
- * handling listeners, while still allowing technology specific implementations to be built.
- *
- * @hide
+ * Antenna info HAL module and listener multiplexer.
  */
-public abstract class GnssAntennaInfoProvider
-        extends RemoteListenerHelper<Void, IGnssAntennaInfoListener> {
-    private static final String TAG = "GnssAntennaInfoProvider";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-
-    private final GnssAntennaInfoProviderNative mNative;
-
-    private boolean mIsListeningStarted;
-
-    protected GnssAntennaInfoProvider(Context context, Handler handler) {
-        this(context, handler, new GnssAntennaInfoProviderNative());
-    }
-
-    @VisibleForTesting
-    public GnssAntennaInfoProvider(
-            Context context, Handler handler, GnssAntennaInfoProviderNative aNative) {
-        super(context, handler, TAG);
-        mNative = aNative;
-    }
-
-    void resumeIfStarted() {
-        if (DEBUG) {
-            Log.d(TAG, "resumeIfStarted");
-        }
-        if (mIsListeningStarted) {
-            mNative.startAntennaInfoListening();
-        }
-    }
-
-
-    @Override
-    public boolean isAvailableInPlatform() {
-        return mNative.isAntennaInfoSupported();
-    }
-
-    @Override
-    protected int registerWithService() {
-        boolean started = mNative.startAntennaInfoListening();
-        if (started) {
-            mIsListeningStarted = true;
-            return RemoteListenerHelper.RESULT_SUCCESS;
-        }
-        return RemoteListenerHelper.RESULT_INTERNAL_ERROR;
-    }
-
-    @Override
-    protected void unregisterFromService() {
-        boolean stopped = mNative.stopAntennaInfoListening();
-        if (stopped) {
-            mIsListeningStarted = false;
-        }
-    }
-
-    /** Handle GNSS capabilities update from the GNSS HAL implementation. */
-    public void onCapabilitiesUpdated(boolean isAntennaInfoSupported) {
-        setSupported(isAntennaInfoSupported);
-        updateResult();
-    }
-
-    /** Handle GNSS enabled changes.*/
-    public void onGpsEnabledChanged() {
-        tryUpdateRegistrationWithService();
-        updateResult();
-    }
-
-    @Override
-    protected ListenerOperation<IGnssAntennaInfoListener> getHandlerOperation(int result) {
-        return (IGnssAntennaInfoListener listener,
-                CallerIdentity callerIdentity) -> {
-                // Do nothing, as GnssAntennaInfo.Callback does not have an onStatusChanged method.
-        };
-    }
-
-    /** Handle Gnss Antenna Info report. */
-    public void onGnssAntennaInfoAvailable(final List<GnssAntennaInfo> gnssAntennaInfos) {
-        foreach((IGnssAntennaInfoListener listener, CallerIdentity callerIdentity) -> {
-            if (!hasPermission(mContext, callerIdentity)) {
-                logPermissionDisabledEventNotReported(
-                        TAG, callerIdentity.packageName, "GNSS antenna info");
-                return;
-            }
-            listener.onGnssAntennaInfoReceived(gnssAntennaInfos);
-        });
-    }
+public class GnssAntennaInfoProvider extends
+        ListenerMultiplexer<IBinder, IGnssAntennaInfoListener,
+                ListenerRegistration<IGnssAntennaInfoListener>, Void> implements
+        GnssNative.BaseCallbacks, GnssNative.AntennaInfoCallbacks {
 
     /**
-     * Wrapper class for native methods. This is mocked for testing.
+     * Registration object for GNSS listeners.
      */
-    @VisibleForTesting
-    public static class GnssAntennaInfoProviderNative {
+    protected class AntennaInfoListenerRegistration extends
+            BinderListenerRegistration<Void, IGnssAntennaInfoListener> {
 
-        public boolean isAntennaInfoSupported() {
-            return native_is_antenna_info_supported();
+        protected AntennaInfoListenerRegistration(CallerIdentity callerIdentity,
+                IGnssAntennaInfoListener listener) {
+            super(null, callerIdentity, listener);
         }
 
-        /** Start antenna info listening. */
-        public boolean startAntennaInfoListening() {
-            return native_start_antenna_info_listening();
-        }
-
-        /** Stop antenna info listening. */
-        public boolean stopAntennaInfoListening() {
-            return native_stop_antenna_info_listening();
+        @Override
+        protected GnssAntennaInfoProvider getOwner() {
+            return GnssAntennaInfoProvider.this;
         }
     }
 
-    private static native boolean native_is_antenna_info_supported();
+    private final GnssNative mGnssNative;
 
-    private static native boolean native_start_antenna_info_listening();
+    private volatile @Nullable List<GnssAntennaInfo> mAntennaInfos;
 
-    private static native boolean native_stop_antenna_info_listening();
+    GnssAntennaInfoProvider(GnssNative gnssNative) {
+        mGnssNative = gnssNative;
+        mGnssNative.addBaseCallbacks(this);
+        mGnssNative.addAntennaInfoCallbacks(this);
+    }
+
+    @Nullable List<GnssAntennaInfo> getAntennaInfos() {
+        return mAntennaInfos;
+    }
+
+    @Override
+    public String getTag() {
+        return TAG;
+    }
+
+    public boolean isSupported() {
+        return mGnssNative.isAntennaInfoSupported();
+    }
+
+    public void addListener(CallerIdentity callerIdentity, IGnssAntennaInfoListener listener) {
+        long identity = Binder.clearCallingIdentity();
+        try {
+            putRegistration(listener.asBinder(),
+                    new AntennaInfoListenerRegistration(callerIdentity, listener));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    public void removeListener(IGnssAntennaInfoListener listener) {
+        long identity = Binder.clearCallingIdentity();
+        try {
+            removeRegistration(listener.asBinder());
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    protected boolean registerWithService(Void merged,
+            Collection<ListenerRegistration<IGnssAntennaInfoListener>> listenerRegistrations) {
+        return true;
+    }
+
+    @Override
+    protected void unregisterWithService() {}
+
+    @Override
+    protected boolean isActive(ListenerRegistration<IGnssAntennaInfoListener> registration) {
+        return true;
+    }
+
+    @Override
+    protected Void mergeRegistrations(
+            Collection<ListenerRegistration<IGnssAntennaInfoListener>> listenerRegistrations) {
+        return null;
+    }
+
+    @Override
+    public void onHalStarted() {
+        mGnssNative.startAntennaInfoListening();
+    }
+
+    @Override
+    public void onHalRestarted() {
+        mGnssNative.startAntennaInfoListening();
+    }
+
+    @Override
+    public void onReportAntennaInfo(List<GnssAntennaInfo> antennaInfos) {
+        if (antennaInfos.equals(mAntennaInfos)) {
+            return;
+        }
+
+        mAntennaInfos = antennaInfos;
+        deliverToListeners(listener -> {
+            listener.onGnssAntennaInfoChanged(antennaInfos);
+        });
+    }
 }

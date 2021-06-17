@@ -22,6 +22,8 @@ import android.annotation.SystemApi;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
+
 /**
  * The HwAudioSource represents the audio playback directly from a source audio device.
  * It currently supports {@link HwAudioSource#start()} and {@link HwAudioSource#stop()} only
@@ -35,7 +37,13 @@ public class HwAudioSource extends PlayerBase {
     private final AudioDeviceInfo mAudioDeviceInfo;
     private final AudioAttributes mAudioAttributes;
 
-    private int mNativeHandle;
+    /**
+     * The value of the native handle encodes the HwAudioSource state.
+     * The native handle returned by {@link AudioSystem#startAudioSource} is either valid
+     * (aka > 0, so successfully started) or hosting an error code (negative).
+     * 0 corresponds to an untialized or stopped HwAudioSource.
+     */
+    private int mNativeHandle = 0;
 
     /**
      * Class constructor for a hardware audio source based player.
@@ -52,7 +60,7 @@ public class HwAudioSource extends PlayerBase {
         Preconditions.checkArgument(device.isSource(), "Requires a source device");
         mAudioDeviceInfo = device;
         mAudioAttributes = attributes;
-        baseRegisterPlayer();
+        baseRegisterPlayer(AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
     /**
@@ -127,29 +135,60 @@ public class HwAudioSource extends PlayerBase {
 
     /**
      * Starts the playback from {@link AudioDeviceInfo}.
+     * Starts does not return any error code, caller must check {@link HwAudioSource#isPlaying} to
+     * ensure the state of the HwAudioSource encoded in {@link mNativeHandle}.
      */
     public void start() {
         Preconditions.checkState(!isPlaying(), "HwAudioSource is currently playing");
-        baseStart();
         mNativeHandle = AudioSystem.startAudioSource(
                 mAudioDeviceInfo.getPort().activeConfig(),
                 mAudioAttributes);
+        if (isPlaying()) {
+            // FIXME: b/174876389 clean up device id reporting
+            baseStart(getDeviceId());
+        }
+    }
+
+    private int getDeviceId() {
+        ArrayList<AudioPatch> patches = new ArrayList<AudioPatch>();
+        if (AudioManager.listAudioPatches(patches) != AudioManager.SUCCESS) {
+            return 0;
+        }
+
+        for (int i = 0; i < patches.size(); i++) {
+            AudioPatch patch = patches.get(i);
+            AudioPortConfig[] sources = patch.sources();
+            AudioPortConfig[] sinks = patch.sinks();
+            if ((sources != null) && (sources.length > 0)) {
+                for (int c = 0;  c < sources.length; c++) {
+                    if (sources[c].port().id() == mAudioDeviceInfo.getId()) {
+                        return sinks[c].port().id();
+                    }
+                }
+            }
+        }
+        return 0;
     }
 
     /**
      * Checks whether the HwAudioSource player is playing.
+     * It checks the state of the HwAudioSource encoded in {@link HwAudioSource#isPlaying}.
+     * 0 corresponds to a stopped or uninitialized HwAudioSource.
+     * Negative value corresponds to a status reported by {@link AudioSystem#startAudioSource} to
+     * indicate a failure when trying to start the HwAudioSource.
+     *
      * @return true if currently playing, false otherwise
      */
     public boolean isPlaying() {
-        return mNativeHandle != 0;
+        return mNativeHandle > 0;
     }
 
     /**
      * Stops the playback from {@link AudioDeviceInfo}.
      */
     public void stop() {
-        baseStop();
         if (mNativeHandle > 0) {
+            baseStop();
             AudioSystem.stopAudioSource(mNativeHandle);
             mNativeHandle = 0;
         }

@@ -19,9 +19,11 @@ package android.print;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -32,7 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  * purposes. This meta-data is used by the platform and print services,
  * components that interact with printers. For example, this class
  * contains the number of pages contained in the document it describes and
- * this number of pages is shown to the user allowing him/her to select
+ * this number of pages is shown to the user allowing them to select
  * the range to print. Also a print service may optimize the printing
  * process based on the content type, such as document or photo.
  * <p>
@@ -235,7 +237,7 @@ public final class PrintDocumentInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

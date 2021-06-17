@@ -29,6 +29,5 @@
             android:paddingTop="12dp"
             android:textAppearance="?android:attr/textAppearanceButton"
             android:gravity="top|center_horizontal"
-            android:textColor="?attr/wallpaperTextColor"
             android:text="@string/empty_shade_text"/>
 </com.android.systemui.statusbar.EmptyShadeView>

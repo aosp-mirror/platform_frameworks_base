@@ -24,6 +24,7 @@ import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.keyvalue.KeyValueBackupReporter;
 import com.android.server.backup.keyvalue.KeyValueBackupTask;
 import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.utils.BackupEligibilityRules;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -63,7 +64,8 @@ public class ShadowKeyValueBackupTask {
             OnTaskFinishedListener listener,
             List<String> pendingFullBackups,
             boolean userInitiated,
-            boolean nonIncremental) {
+            boolean nonIncremental,
+            BackupEligibilityRules backupEligibilityRules) {
         mListener = listener;
         mQueue = queue;
         mPendingFullBackups = pendingFullBackups;

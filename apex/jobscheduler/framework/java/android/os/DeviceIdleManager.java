@@ -17,6 +17,8 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
@@ -27,7 +29,7 @@ import android.content.Context;
  *
  * @hide
  */
-@TestApi
+@SystemApi
 @SystemService(Context.DEVICE_IDLE_CONTROLLER)
 public class DeviceIdleManager {
     private final Context mContext;
@@ -46,9 +48,26 @@ public class DeviceIdleManager {
     }
 
     /**
+     * Ends any active idle session.
+     *
+     * @param reason The reason to end. Used for debugging purposes.
+     */
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public void endIdle(@NonNull String reason) {
+        try {
+            mService.exitIdle(reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @return package names the system has white-listed to opt out of power save restrictions,
      * except for device idle mode.
+     *
+     * @hide Should be migrated to PowerExemptionManager
      */
+    @TestApi
     public @NonNull String[] getSystemPowerWhitelistExceptIdle() {
         try {
             return mService.getSystemPowerWhitelistExceptIdle();
@@ -60,7 +79,10 @@ public class DeviceIdleManager {
     /**
      * @return package names the system has white-listed to opt out of power save restrictions for
      * all modes.
+     *
+     * @hide Should be migrated to PowerExemptionManager
      */
+    @TestApi
     public @NonNull String[] getSystemPowerWhitelist() {
         try {
             return mService.getSystemPowerWhitelist();

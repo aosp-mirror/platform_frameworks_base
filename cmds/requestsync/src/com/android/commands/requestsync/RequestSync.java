@@ -182,6 +182,8 @@ public class RequestSync {
                 mExtras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
             } else if (opt.equals("--rc") || opt.equals("--require-charging")) {
                 mExtras.putBoolean(ContentResolver.SYNC_EXTRAS_REQUIRE_CHARGING, true);
+            } else if (opt.equals("--ej") || opt.equals("--schedule-as-ej")) {
+                mExtras.putBoolean(ContentResolver.SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB, true);
             } else if (opt.equals("-e") || opt.equals("--es") || opt.equals("--extra-string")) {
                 final String key = nextArgRequired();
                 final String value = nextArgRequired();
@@ -294,9 +296,9 @@ public class RequestSync {
                 "       -a|--authority <AUTHORITY>\n" +
                 "    App-standby related options\n" +
                 "\n" +
-                "       -f|--foreground (cause WORKING_SET, FREQUENT sync adapters" +
-                        " to run immediately)\n" +
-                "       -F|--top (cause even RARE sync adapters to run immediately)\n" +
+                "       -f|--foreground (defeat app-standby job throttling," +
+                " but not battery saver)\n" +
+                "       -F|--top (defeat app-standby job throttling and battery saver)\n" +
                 "    ContentResolver extra options:\n" +
                 "      --is|--ignore-settings: Add SYNC_EXTRAS_IGNORE_SETTINGS\n" +
                 "      --ib|--ignore-backoff: Add SYNC_EXTRAS_IGNORE_BACKOFF\n" +

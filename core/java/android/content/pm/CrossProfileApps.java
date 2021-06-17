@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.AppOpsManager.Mode;
 import android.content.ComponentName;
@@ -119,8 +120,9 @@ public class CrossProfileApps {
      *        {@link #getTargetUserProfiles()} if different to the calling user, otherwise a
      *        {@link SecurityException} will be thrown.
      * @param callingActivity The activity to start the new activity from for the purposes of
-     *        deciding which task the new activity should belong to. If {@code null}, the activity
-     *        will always be started in a new task.
+     *        passing back any result and deciding which task the new activity should belong to. If
+     *        {@code null}, the activity will always be started in a new task and no result will be
+     *        returned.
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.INTERACT_ACROSS_PROFILES,
@@ -146,8 +148,9 @@ public class CrossProfileApps {
      *        {@link #getTargetUserProfiles()} if different to the calling user, otherwise a
      *        {@link SecurityException} will be thrown.
      * @param callingActivity The activity to start the new activity from for the purposes of
-     *        deciding which task the new activity should belong to. If {@code null}, the activity
-     *        will always be started in a new task.
+     *        passing back any result and deciding which task the new activity should belong to. If
+     *        {@code null}, the activity will always be started in a new task and no result will be
+     *        returned.
      * @param options The activity options or {@code null}. See {@link android.app.ActivityOptions}.
      */
     @RequiresPermission(anyOf = {
@@ -285,7 +288,7 @@ public class CrossProfileApps {
      * </ul>
      *
      * <p>Note that in order for the user to be able to grant the consent, the requesting package
-     * must be whitelisted by the admin or the OEM and installed in the other profile. If this is
+     * must be allowlisted by the admin or the OEM and installed in the other profile. If this is
      * not the case the user will be shown a message explaining why they can't grant the consent.
      *
      * <p>Note that user consent could already be granted if given a return value of {@code true}.
@@ -310,8 +313,8 @@ public class CrossProfileApps {
      * <li>{@link #getTargetUserProfiles()} returns a non-empty list for the calling user.</li>
      * <li>The user has previously consented to cross-profile communication for the calling
      * package.</li>
-     * <li>The calling package has either been whitelisted by default by the OEM or has been
-     * explicitly whitelisted by the admin via
+     * <li>The calling package has either been allowlisted by default by the OEM or has been
+     * explicitly allowlisted by the admin via
      * {@link android.app.admin.DevicePolicyManager#setCrossProfilePackages(ComponentName, Set)}.
      * </li>
      * </ul>
@@ -416,6 +419,7 @@ public class CrossProfileApps {
      *
      * @hide
      */
+    @TestApi
     public boolean canConfigureInteractAcrossProfiles(@NonNull String packageName) {
         try {
             return mService.canConfigureInteractAcrossProfiles(packageName);
@@ -430,10 +434,10 @@ public class CrossProfileApps {
      * other profile in the same profile group.
      *
      * <p>This differs from {@link #canConfigureInteractAcrossProfiles(String)} since it will
-     * not return {@code false} if the app is not whitelisted or not installed in the other profile.
+     * not return {@code false} if the app is not allowlisted or not installed in the other profile.
      *
      * <p>Note that platform-signed apps that are automatically granted the permission and are not
-     * whitelisted by the OEM will not be included in this list.
+     * allowlisted by the OEM will not be included in this list.
      *
      * @hide
      */

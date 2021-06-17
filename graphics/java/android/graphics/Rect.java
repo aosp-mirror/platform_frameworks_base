@@ -19,6 +19,7 @@ package android.graphics;
 import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -433,10 +434,10 @@ public final class Rect implements Parcelable {
 
     /**
      * Insets the rectangle on all sides specified by the dimensions of {@code insets}.
-     * @hide
+     *
      * @param insets The insets to inset the rect by.
      */
-    public void inset(Insets insets) {
+    public void inset(@NonNull Insets insets) {
         left += insets.left;
         top += insets.top;
         right -= insets.right;
@@ -445,7 +446,7 @@ public final class Rect implements Parcelable {
 
     /**
      * Insets the rectangle on all sides specified by the insets.
-     * @hide
+     *
      * @param left The amount to add from the rectangle's left
      * @param top The amount to add from the rectangle's top
      * @param right The amount to subtract from the rectangle's right
@@ -698,6 +699,40 @@ public final class Rect implements Parcelable {
             int temp = top;
             top = bottom;
             bottom = temp;
+        }
+    }
+
+    /**
+     * Splits this Rect into small rects of the same width.
+     * @hide
+     */
+    @TestApi
+    public void splitVertically(@NonNull Rect ...splits) {
+        final int count = splits.length;
+        final int splitWidth = width() / count;
+        for (int i = 0; i < count; i++) {
+            final Rect split = splits[i];
+            split.left = left + (splitWidth * i);
+            split.top = top;
+            split.right = split.left + splitWidth;
+            split.bottom = bottom;
+        }
+    }
+
+    /**
+     * Splits this Rect into small rects of the same height.
+     * @hide
+     */
+    @TestApi
+    public void splitHorizontally(@NonNull Rect ...outSplits) {
+        final int count = outSplits.length;
+        final int splitHeight = height() / count;
+        for (int i = 0; i < count; i++) {
+            final Rect split = outSplits[i];
+            split.left = left;
+            split.top = top + (splitHeight * i);
+            split.right = right;
+            split.bottom = split.top + splitHeight;
         }
     }
 

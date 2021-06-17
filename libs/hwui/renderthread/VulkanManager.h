@@ -17,6 +17,10 @@
 #ifndef VULKANMANAGER_H
 #define VULKANMANAGER_H
 
+#include <functional>
+#include <mutex>
+
+#include "vulkan/vulkan_core.h"
 #if !defined(VK_USE_PLATFORM_ANDROID_KHR)
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif
@@ -26,6 +30,21 @@
 #include <vk/GrVkBackendContext.h>
 #include <vk/GrVkExtensions.h>
 #include <vulkan/vulkan.h>
+
+// VK_ANDROID_frame_boundary is a bespoke extension defined by AGI
+// (https://github.com/google/agi) to enable profiling of apps rendering via
+// HWUI. This extension is not defined in Khronos, hence the need to declare it
+// manually here. There's a superseding extension (VK_EXT_frame_boundary) being
+// discussed in Khronos, but in the meantime we use the bespoke
+// VK_ANDROID_frame_boundary. This is a device extension that is implemented by
+// AGI's Vulkan capture layer, such that it is only supported by devices when
+// AGI is doing a capture of the app.
+//
+// TODO(b/182165045): use the Khronos blessed VK_EXT_frame_boudary once it has
+// landed in the spec.
+typedef void(VKAPI_PTR* PFN_vkFrameBoundaryANDROID)(VkDevice device, VkSemaphore semaphore,
+                                                    VkImage image);
+#define VK_ANDROID_FRAME_BOUNDARY_EXTENSION_NAME "VK_ANDROID_frame_boundary"
 
 #include "Frame.h"
 #include "IRenderPipeline.h"
@@ -43,10 +62,9 @@ class RenderThread;
 // This class contains the shared global Vulkan objects, such as VkInstance, VkDevice and VkQueue,
 // which are re-used by CanvasContext. This class is created once and should be used by all vulkan
 // windowing contexts. The VulkanManager must be initialized before use.
-class VulkanManager {
+class VulkanManager final : public RefBase {
 public:
-    explicit VulkanManager() {}
-    ~VulkanManager() { destroy(); }
+    static sp<VulkanManager> getInstance();
 
     // Sets up the vulkan context that is shared amonst all clients of the VulkanManager. This must
     // be call once before use of the VulkanManager. Multiple calls after the first will simiply
@@ -57,36 +75,48 @@ public:
     bool hasVkContext() { return mDevice != VK_NULL_HANDLE; }
 
     // Create and destroy functions for wrapping an ANativeWindow in a VulkanSurface
-    VulkanSurface* createSurface(ANativeWindow* window, ColorMode colorMode,
+    VulkanSurface* createSurface(ANativeWindow* window,
+                                 ColorMode colorMode,
                                  sk_sp<SkColorSpace> surfaceColorSpace,
-                                 SkColorType surfaceColorType, GrContext* grContext,
+                                 SkColorType surfaceColorType,
+                                 GrDirectContext* grContext,
                                  uint32_t extraBuffers);
     void destroySurface(VulkanSurface* surface);
 
     Frame dequeueNextBuffer(VulkanSurface* surface);
+    void finishFrame(SkSurface* surface);
     void swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect);
 
-    // Cleans up all the global state in the VulkanManger.
-    void destroy();
-
     // Inserts a wait on fence command into the Vulkan command buffer.
-    status_t fenceWait(int fence, GrContext* grContext);
+    status_t fenceWait(int fence, GrDirectContext* grContext);
 
     // Creates a fence that is signaled when all the pending Vulkan commands are finished on the
     // GPU.
-    status_t createReleaseFence(int* nativeFence, GrContext* grContext);
+    status_t createReleaseFence(int* nativeFence, GrDirectContext* grContext);
 
     // Returned pointers are owned by VulkanManager.
     // An instance of VkFunctorInitParams returned from getVkFunctorInitParams refers to
     // the internal state of VulkanManager: VulkanManager must be alive to use the returned value.
     VkFunctorInitParams getVkFunctorInitParams() const;
 
-    sk_sp<GrContext> createContext(const GrContextOptions& options);
+
+    enum class ContextType {
+        kRenderThread,
+        kUploadThread
+    };
+
+    // returns a Skia graphic context used to draw content on the specified thread
+    sk_sp<GrDirectContext> createContext(const GrContextOptions& options,
+                                         ContextType contextType = ContextType::kRenderThread);
 
     uint32_t getDriverVersion() const { return mDriverVersion; }
 
 private:
     friend class VulkanSurface;
+
+    explicit VulkanManager() {}
+    ~VulkanManager();
+
     // Sets up the VkInstance and VkDevice objects. Also fills out the passed in
     // VkPhysicalDeviceFeatures struct.
     void setupDevice(GrVkExtensions&, VkPhysicalDeviceFeatures2&);
@@ -145,16 +175,32 @@ private:
     VkPtr<PFN_vkDestroyFence> mDestroyFence;
     VkPtr<PFN_vkWaitForFences> mWaitForFences;
     VkPtr<PFN_vkResetFences> mResetFences;
+    VkPtr<PFN_vkFrameBoundaryANDROID> mFrameBoundaryANDROID;
 
     VkInstance mInstance = VK_NULL_HANDLE;
     VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
     VkDevice mDevice = VK_NULL_HANDLE;
 
     uint32_t mGraphicsQueueIndex;
+
+    std::mutex mGraphicsQueueMutex;
     VkQueue mGraphicsQueue = VK_NULL_HANDLE;
-    uint32_t mPresentQueueIndex;
-    VkQueue mPresentQueue = VK_NULL_HANDLE;
-    VkCommandPool mCommandPool = VK_NULL_HANDLE;
+
+    static VKAPI_ATTR VkResult interceptedVkQueueSubmit(VkQueue queue, uint32_t submitCount,
+                                                        const VkSubmitInfo* pSubmits,
+                                                        VkFence fence) {
+        sp<VulkanManager> manager = VulkanManager::getInstance();
+        std::lock_guard<std::mutex> lock(manager->mGraphicsQueueMutex);
+        return manager->mQueueSubmit(queue, submitCount, pSubmits, fence);
+    }
+
+    static VKAPI_ATTR VkResult interceptedVkQueueWaitIdle(VkQueue queue) {
+        sp<VulkanManager> manager = VulkanManager::getInstance();
+        std::lock_guard<std::mutex> lock(manager->mGraphicsQueueMutex);
+        return manager->mQueueWaitIdle(queue);
+    }
+
+    static GrVkGetProc sSkiaGetProp;
 
     // Variables saved to populate VkFunctorInitParams.
     static const uint32_t mAPIVersion = VK_MAKE_VERSION(1, 1, 0);
@@ -171,6 +217,11 @@ private:
     SwapBehavior mSwapBehavior = SwapBehavior::Discard;
     GrVkExtensions mExtensions;
     uint32_t mDriverVersion = 0;
+
+    VkSemaphore mSwapSemaphore = VK_NULL_HANDLE;
+    void* mDestroySemaphoreContext = nullptr;
+
+    std::mutex mInitializeLock;
 };
 
 } /* namespace renderthread */

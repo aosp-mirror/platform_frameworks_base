@@ -16,9 +16,9 @@
 
 package android.security;
 
-import android.app.KeyguardManager;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -77,8 +77,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     private final Date mStartDate;
 
     private final Date mEndDate;
-
-    private final int mFlags;
 
     /**
      * Parameter specification for the "{@code AndroidKeyPairGenerator}"
@@ -144,7 +142,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         mSerialNumber = serialNumber;
         mStartDate = startDate;
         mEndDate = endDate;
-        mFlags = flags;
     }
 
     /**
@@ -229,7 +226,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * @hide
      */
     public int getFlags() {
-        return mFlags;
+        return 0;
     }
 
     /**
@@ -243,9 +240,15 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * screen after boot.
      *
      * @see KeyguardManager#isDeviceSecure()
+     *
+     * @deprecated Encryption at rest is on by default. If extra binding to the lockscreen screen
+     *             credential is desired use
+     *             {@link KeyGenParameterSpec.Builder#setUserAuthenticationRequired(boolean)}.
+     *             This flag will be ignored from Android S.
      */
+    @Deprecated
     public boolean isEncryptionRequired() {
-        return (mFlags & KeyStore.FLAG_ENCRYPTED) != 0;
+        return false;
     }
 
     /**
@@ -291,8 +294,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         private Date mStartDate;
 
         private Date mEndDate;
-
-        private int mFlags;
 
         /**
          * Creates a new instance of the {@code Builder} with the given
@@ -431,10 +432,15 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * secure lock screen after boot.
          *
          * @see KeyguardManager#isDeviceSecure()
+         *
+         * @deprecated Data at rest encryption is enabled by default. If extra binding to the
+         *             lockscreen credential is desired, use
+         *             {@link KeyGenParameterSpec.Builder#setUserAuthenticationRequired(boolean)}.
+         *             This flag will be ignored from Android S.
          */
         @NonNull
+        @Deprecated
         public Builder setEncryptionRequired() {
-            mFlags |= KeyStore.FLAG_ENCRYPTED;
             return this;
         }
 
@@ -455,7 +461,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
                     mSerialNumber,
                     mStartDate,
                     mEndDate,
-                    mFlags);
+                    0);
         }
     }
 }

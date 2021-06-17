@@ -16,6 +16,8 @@
 
 package android.text;
 
+import static android.text.TextUtils.formatSimple;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -792,5 +794,83 @@ public class TextUtilsTest {
         assertEquals("ABC...", TextUtils.trimToLengthWithEllipsis("ABCDEF", 3));
         assertEquals("ABC", TextUtils.trimToLengthWithEllipsis("ABC", 3));
         assertEquals("", TextUtils.trimToLengthWithEllipsis("", 3));
+        assertNull(TextUtils.trimToLengthWithEllipsis(null, 3));
+    }
+
+    @Test
+    public void testFormatSimple_Types() {
+        assertEquals("true", formatSimple("%b", true));
+        assertEquals("false", formatSimple("%b", false));
+        assertEquals("true", formatSimple("%b", this));
+        assertEquals("false", formatSimple("%b", new Object[] { null }));
+
+        assertEquals("!", formatSimple("%c", '!'));
+
+        assertEquals("42", formatSimple("%d", 42));
+        assertEquals("281474976710656", formatSimple("%d", 281474976710656L));
+
+        assertEquals("3.14159", formatSimple("%f", 3.14159));
+        assertEquals("NaN", formatSimple("%f", Float.NaN));
+
+        assertEquals("example", formatSimple("%s", "example"));
+        assertEquals("null", formatSimple("%s", new Object[] { null }));
+
+        assertEquals("2a", formatSimple("%x", 42));
+        assertEquals("1000000000000", formatSimple("%x", 281474976710656L));
+
+        assertEquals("%", formatSimple("%%"));
+    }
+
+    @Test
+    public void testFormatSimple_Width() {
+        assertEquals("42", formatSimple("%1d", 42));
+        assertEquals("42", formatSimple("%2d", 42));
+        assertEquals(" 42", formatSimple("%3d", 42));
+        assertEquals("  42", formatSimple("%4d", 42));
+        assertEquals("  42  42", formatSimple("%4d%4d", 42, 42));
+        assertEquals(" -42", formatSimple("%4d", -42));
+        assertEquals("        42", formatSimple("%10d", 42));
+
+        assertEquals("42", formatSimple("%01d", 42));
+        assertEquals("42", formatSimple("%02d", 42));
+        assertEquals("042", formatSimple("%03d", 42));
+        assertEquals("0042", formatSimple("%04d", 42));
+        assertEquals("00420042", formatSimple("%04d%04d", 42, 42));
+        assertEquals("-042", formatSimple("%04d", -42));
+        assertEquals("0000000042", formatSimple("%010d", 42));
+    }
+
+    @Test
+    public void testFormatSimple_Empty() {
+        assertEquals("", formatSimple(""));
+    }
+
+    @Test
+    public void testFormatSimple_Typical() {
+        assertEquals("String foobar and %% number -42 together",
+                formatSimple("String %s%s and %%%% number %d%d together", "foo", "bar", -4, 2));
+    }
+
+    @Test
+    public void testFormatSimple_Advanced() {
+        assertEquals("000000000000002a.ext",
+                formatSimple("%016x.%s", 42, "ext"));
+        assertEquals("crtcl=0x002a:intrsv=Y:grnk=0x0018:gsmry=A:example:rnk=0x0000",
+                formatSimple("crtcl=0x%04x:intrsv=%c:grnk=0x%04x:gsmry=%c:%s:rnk=0x%04x",
+                        42, 'Y', 24, 'A', "example", 0));
+    }
+
+    @Test
+    public void testFormatSimple_Mismatch() {
+        try {
+            formatSimple("%s");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+        try {
+            formatSimple("%s", "foo", "bar");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
     }
 }

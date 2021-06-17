@@ -111,11 +111,11 @@ TEST(RenderNodeDrawable, renderPropTransform) {
             [](RenderProperties& properties) {
                 properties.setLeftTopRightBottom(10, 10, 110, 110);
 
-                SkMatrix staticMatrix = SkMatrix::MakeScale(1.2f, 1.2f);
+                SkMatrix staticMatrix = SkMatrix::Scale(1.2f, 1.2f);
                 properties.setStaticMatrix(&staticMatrix);
 
                 // ignored, since static overrides animation
-                SkMatrix animationMatrix = SkMatrix::MakeTrans(15, 15);
+                SkMatrix animationMatrix = SkMatrix::Translate(15, 15);
                 properties.setAnimationMatrix(&animationMatrix);
 
                 properties.setTranslationX(10);

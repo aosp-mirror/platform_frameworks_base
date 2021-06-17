@@ -410,7 +410,6 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
 
     /**
      * Add a {@link TestListener}
-     * @hide
      */
     protected void addTestListener(TestListener listener){
         if(mTestRunner!=null && listener!=null){

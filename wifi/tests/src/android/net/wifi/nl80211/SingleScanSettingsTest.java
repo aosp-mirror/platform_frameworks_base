@@ -74,6 +74,7 @@ public class SingleScanSettingsTest {
                 new ArrayList<>(Arrays.asList(mChannelSettings1, mChannelSettings2));
         scanSettings.hiddenNetworks =
                 new ArrayList<>(Arrays.asList(mHiddenNetwork1, mHiddenNetwork2));
+        scanSettings.enable6GhzRnr = true;
 
         Parcel parcel = Parcel.obtain();
         scanSettings.writeToParcel(parcel, 0);

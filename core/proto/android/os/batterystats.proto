@@ -642,7 +642,7 @@ message UidProto {
         message ReasonCount {
             option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-            optional android.app.job.StopReasonEnum name = 1;
+            optional android.app.job.InternalStopReasonEnum name = 1;
             optional int32 count = 2;
         }
         repeated ReasonCount reason_count = 2;

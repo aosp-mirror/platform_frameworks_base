@@ -23,7 +23,12 @@ package android.renderscript;
  * operations.
  *
  * Not intended for direct use.
+ *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public abstract class ScriptIntrinsic extends Script {
     ScriptIntrinsic(long id, RenderScript rs) {
         super(id, rs);

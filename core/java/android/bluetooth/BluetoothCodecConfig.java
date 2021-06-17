@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -208,7 +209,7 @@ public final class BluetoothCodecConfig implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof BluetoothCodecConfig) {
             BluetoothCodecConfig other = (BluetoothCodecConfig) o;
             return (other.mCodecType == mCodecType
@@ -644,8 +645,9 @@ public final class BluetoothCodecConfig implements Parcelable {
         if (other == null && mCodecType != other.mCodecType) {
             return false;
         }
-        // Currently we only care about the LDAC Playback Quality at CodecSpecific1
+        // Currently we only care about the AAC VBR and LDAC Playback Quality at CodecSpecific1
         switch (mCodecType) {
+            case SOURCE_CODEC_TYPE_AAC:
             case SOURCE_CODEC_TYPE_LDAC:
                 if (mCodecSpecific1 != other.mCodecSpecific1) {
                     return false;

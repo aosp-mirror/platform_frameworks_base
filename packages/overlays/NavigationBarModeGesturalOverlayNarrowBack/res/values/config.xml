@@ -54,4 +54,6 @@
          show. -->
     <bool name="config_navBarAlwaysShowOnSideEdgeGesture">true</bool>
 
+    <!-- If true, attach the navigation bar to the app during app transition -->
+    <bool name="config_attachNavBarToAppDuringTransition">true</bool>
 </resources>

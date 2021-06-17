@@ -26,10 +26,10 @@ import android.annotation.SystemApi;
 @SystemApi
 public class DvbcFrontendCapabilities extends FrontendCapabilities {
     private final int mModulationCap;
-    private final int mFecCap;
+    private final long mFecCap;
     private final int mAnnexCap;
 
-    private DvbcFrontendCapabilities(int modulationCap, int fecCap, int annexCap) {
+    private DvbcFrontendCapabilities(int modulationCap, long fecCap, int annexCap) {
         mModulationCap = modulationCap;
         mFecCap = fecCap;
         mAnnexCap = annexCap;
@@ -44,9 +44,24 @@ public class DvbcFrontendCapabilities extends FrontendCapabilities {
     }
     /**
      * Gets inner FEC capability.
+     *
+     * @deprecated Use {@link #getInnerFecCapability()} with long return value instead. This
+     *             function returns the correct cap value when the value is not bigger than the max
+     *             integer value. Otherwise it returns {@link FrontendSettings#FEC_UNDEFINED}.
      */
+    @Deprecated
     @FrontendSettings.InnerFec
     public int getFecCapability() {
+        if (mFecCap > Integer.MAX_VALUE) {
+            return (int) FrontendSettings.FEC_UNDEFINED;
+        }
+        return (int) mFecCap;
+    }
+    /**
+     * Gets code rate capability.
+     */
+    @FrontendSettings.InnerFec
+    public long getCodeRateCapability() {
         return mFecCap;
     }
     /**

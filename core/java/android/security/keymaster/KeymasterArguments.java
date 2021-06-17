@@ -17,6 +17,7 @@
 package android.security.keymaster;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -41,7 +42,7 @@ public class KeymasterArguments implements Parcelable {
 
     private List<KeymasterArgument> mArguments;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final @android.annotation.NonNull Parcelable.Creator<KeymasterArguments> CREATOR = new
             Parcelable.Creator<KeymasterArguments>() {
                 @Override
@@ -55,7 +56,7 @@ public class KeymasterArguments implements Parcelable {
                 }
             };
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public KeymasterArguments() {
         mArguments = new ArrayList<KeymasterArgument>();
     }
@@ -69,7 +70,7 @@ public class KeymasterArguments implements Parcelable {
      *
      * @throws IllegalArgumentException if {@code tag} is not an enum tag.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void addEnum(int tag, int value) {
         int tagType = KeymasterDefs.getTagType(tag);
         if ((tagType != KeymasterDefs.KM_ENUM) && (tagType != KeymasterDefs.KM_ENUM_REP)) {
@@ -141,7 +142,7 @@ public class KeymasterArguments implements Parcelable {
      * @throws IllegalArgumentException if {@code tag} is not an unsigned 32-bit int tag or if
      *         {@code value} is outside of the permitted range [0; 2^32).
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void addUnsignedInt(int tag, long value) {
         int tagType = KeymasterDefs.getTagType(tag);
         if ((tagType != KeymasterDefs.KM_UINT) && (tagType != KeymasterDefs.KM_UINT_REP)) {
@@ -178,7 +179,7 @@ public class KeymasterArguments implements Parcelable {
      * @throws IllegalArgumentException if {@code tag} is not an unsigned 64-bit long tag or if
      *         {@code value} is outside of the permitted range [0; 2^64).
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void addUnsignedLong(int tag, BigInteger value) {
         int tagType = KeymasterDefs.getTagType(tag);
         if ((tagType != KeymasterDefs.KM_ULONG) && (tagType != KeymasterDefs.KM_ULONG_REP)) {
@@ -364,7 +365,7 @@ public class KeymasterArguments implements Parcelable {
         out.writeTypedList(mArguments);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void readFromParcel(Parcel in) {
         in.readTypedList(mArguments, KeymasterArgument.CREATOR);
     }

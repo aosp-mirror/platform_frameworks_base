@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.policy;
 
 import android.annotation.Nullable;
 
-import com.android.systemui.DemoMode;
 import com.android.systemui.Dumpable;
+import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 import java.io.FileDescriptor;
@@ -43,6 +43,13 @@ public interface BatteryController extends DemoMode, Dumpable,
     boolean isPluggedIn();
 
     /**
+     * Returns {@code true} if the device is currently plugged in via wireless charger.
+     */
+    default boolean isPluggedInWireless() {
+        return false;
+    }
+
+    /**
      * Returns {@code true} if the device is currently in power save mode.
      */
     boolean isPowerSave();
@@ -56,6 +63,11 @@ public interface BatteryController extends DemoMode, Dumpable,
      * Initializes the class.
      */
     default void init() { }
+
+    /**
+     * Returns {@code true} if the device is currently in wireless charging mode.
+     */
+    default boolean isWirelessCharging() { return false; }
 
     /**
      * Returns {@code true} if reverse is supported.
@@ -74,6 +86,13 @@ public interface BatteryController extends DemoMode, Dumpable,
     default void setReverseState(boolean isReverse) {}
 
     /**
+     * Returns {@code true} if extreme battery saver is on.
+     */
+    default boolean isExtremeSaverOn() {
+        return false;
+    }
+
+    /**
      * A listener that will be notified whenever a change in battery level or power save mode has
      * occurred.
      */
@@ -85,7 +104,16 @@ public interface BatteryController extends DemoMode, Dumpable,
         default void onPowerSaveChanged(boolean isPowerSave) {
         }
 
+        default void onBatteryUnknownStateChanged(boolean isUnknown) {
+        }
+
         default void onReverseChanged(boolean isReverse, int level, String name) {
+        }
+
+        default void onExtremeBatterySaverChanged(boolean isExtreme) {
+        }
+
+        default void onWirelessChargingChanged(boolean isWirlessCharging) {
         }
     }
 

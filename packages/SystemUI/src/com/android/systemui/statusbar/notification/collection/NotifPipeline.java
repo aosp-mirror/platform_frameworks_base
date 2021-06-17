@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import androidx.annotation.Nullable;
+
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
@@ -23,7 +26,8 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
@@ -33,7 +37,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * The system that constructs the "shade list", the filtered, grouped, and sorted list of
@@ -68,7 +71,7 @@ import javax.inject.Singleton;
  *  9. OnBeforeRenderListListeners are fired ({@link #addOnBeforeRenderListListener})
  *  9. The list is handed off to the view layer to be rendered
  */
-@Singleton
+@SysUISingleton
 public class NotifPipeline implements CommonNotifCollection {
     private final NotifCollection mNotifCollection;
     private final ShadeListBuilder mShadeListBuilder;
@@ -88,6 +91,7 @@ public class NotifPipeline implements CommonNotifCollection {
      *
      * The returned collection is read-only, unsorted, unfiltered, and ungrouped.
      */
+    @Override
     public Collection<NotificationEntry> getAllNotifs() {
         return mNotifCollection.getAllNotifs();
     }
@@ -95,6 +99,14 @@ public class NotifPipeline implements CommonNotifCollection {
     @Override
     public void addCollectionListener(NotifCollectionListener listener) {
         mNotifCollection.addCollectionListener(listener);
+    }
+
+    /**
+     * Returns the NotificationEntry associated with [key].
+     */
+    @Nullable
+    public NotificationEntry getEntry(String key) {
+        return mNotifCollection.getEntry(key);
     }
 
     /**
@@ -154,10 +166,18 @@ public class NotifPipeline implements CommonNotifCollection {
      * Sections that are used to sort top-level entries.  If two entries have the same section,
      * NotifComparators are consulted. Sections from this list are called in order for each
      * notification passed through the pipeline. The first NotifSection to return true for
-     * {@link NotifSection#isInSection(ListEntry)} sets the entry as part of its Section.
+     * {@link NotifSectioner#isInSection(ListEntry)} sets the entry as part of its Section.
      */
-    public void setSections(List<NotifSection> sections) {
-        mShadeListBuilder.setSections(sections);
+    public void setSections(List<NotifSectioner> sections) {
+        mShadeListBuilder.setSectioners(sections);
+    }
+
+    /**
+     * StabilityManager that is used to determine whether to suppress group and section changes.
+     * This should only be set once.
+     */
+    public void setVisualStabilityManager(NotifStabilityManager notifStabilityManager) {
+        mShadeListBuilder.setNotifStabilityManager(notifStabilityManager);
     }
 
     /**

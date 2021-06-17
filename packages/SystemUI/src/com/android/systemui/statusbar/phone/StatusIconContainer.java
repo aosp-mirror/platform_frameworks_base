@@ -262,6 +262,25 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     }
 
     /**
+     * Returns the view corresponding to a particular slot.
+     *
+     * Use it solely to manipulate how it is presented.
+     * @param slot name of the slot to find. Names are defined in
+     *            {@link com.android.internal.R.config_statusBarIcons}
+     * @return a view for the slot if this container has it, else {@code null}
+     */
+    public View getViewForSlot(String slot) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child instanceof StatusIconDisplayable
+                    && ((StatusIconDisplayable) child).getSlot().equals(slot)) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Layout is happening from end -> start
      */
     private void calculateIconTranslations() {
@@ -271,7 +290,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         float contentStart = getPaddingStart();
         int childCount = getChildCount();
         // Underflow === don't show content until that index
-        if (DEBUG) android.util.Log.d(TAG, "calculateIconTranslations: start=" + translationX
+        if (DEBUG) Log.d(TAG, "calculateIconTranslations: start=" + translationX
                 + " width=" + width + " underflow=" + mNeedsUnderflow);
 
         // Collect all of the states which want to be visible

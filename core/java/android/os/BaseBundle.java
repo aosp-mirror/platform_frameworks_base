@@ -315,7 +315,7 @@ public class BaseBundle {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isParcelled() {
         return mParcelledData != null;
     }
@@ -1613,7 +1613,7 @@ public class BaseBundle {
             return;
         }
         int lengthPos = parcel.dataPosition();
-        parcel.writeInt(-1); // dummy, will hold length
+        parcel.writeInt(-1); // placeholder, will hold length
         parcel.writeInt(BUNDLE_MAGIC);
 
         int startPos = parcel.dataPosition();

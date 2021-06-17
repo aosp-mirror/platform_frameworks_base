@@ -51,15 +51,8 @@ public class ShortcutManagerTest10 extends BaseShortcutManagerTest {
         return request;
     }
 
-    public void testCreateShortcutResult_noDefaultLauncher() {
-        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
-            ShortcutInfo s1 = makeShortcut("s1");
-            assertNull(mManager.createShortcutResultIntent(s1));
-        });
-    }
-
     public void testCreateShortcutResult_validResult() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             ShortcutInfo s1 = makeShortcut("s1");
@@ -74,7 +67,7 @@ public class ShortcutManagerTest10 extends BaseShortcutManagerTest {
     }
 
     public void testCreateShortcutResult_alreadyPinned() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(makeShortcut("s1"))));
@@ -107,7 +100,7 @@ public class ShortcutManagerTest10 extends BaseShortcutManagerTest {
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s1"), HANDLE_USER_P0);
         });
 
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             ShortcutInfo s1 = makeShortcut("s1");
             Intent intent = mManager.createShortcutResultIntent(s1);
@@ -122,7 +115,7 @@ public class ShortcutManagerTest10 extends BaseShortcutManagerTest {
     }
 
     public void testCreateShortcutResult_defaultLauncherChanges() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             ShortcutInfo s1 = makeShortcut("s1");
@@ -130,7 +123,7 @@ public class ShortcutManagerTest10 extends BaseShortcutManagerTest {
             mRequest = verifyAndGetCreateShortcutResult(intent);
         });
 
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_2, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_2);
         // Verify that other launcher can't use this request
         runWithCaller(LAUNCHER_2, USER_0, () -> {
             assertFalse(mRequest.isValid());
@@ -166,7 +159,8 @@ public class ShortcutManagerTest10 extends BaseShortcutManagerTest {
 
     public void testStartConfigActivity_defaultLauncher() {
         LauncherActivityInfo info = setupMockActivityInfo();
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        prepareIntentActivities(info.getComponentName());
+        setDefaultLauncher(USER_0, LAUNCHER_1);
         runWithCaller(LAUNCHER_1, USER_0, () ->
             assertNotNull(mLauncherApps.getShortcutConfigActivityIntent(info))
         );
@@ -174,7 +168,7 @@ public class ShortcutManagerTest10 extends BaseShortcutManagerTest {
 
     public void testStartConfigActivity_nonDefaultLauncher() {
         LauncherActivityInfo info = setupMockActivityInfo();
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
         runWithCaller(LAUNCHER_2, USER_0, () ->
             assertExpectException(SecurityException.class, null, () ->
                     mLauncherApps.getShortcutConfigActivityIntent(info))

@@ -15,14 +15,14 @@
  */
 package com.android.server.wm;
 
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 
 import android.graphics.GraphicBuffer;
-import android.view.Surface;
+import android.hardware.HardwareBuffer;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
-import com.android.server.protolog.common.ProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 
 import java.util.function.Function;
 
@@ -40,9 +40,9 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
     private int mHeight;
 
     TaskScreenshotAnimatable(Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory,
-            Task task, SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer) {
-        GraphicBuffer buffer = screenshotBuffer == null
-                ? null : screenshotBuffer.getGraphicBuffer();
+            Task task, SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer) {
+        HardwareBuffer buffer = screenshotBuffer == null
+                ? null : screenshotBuffer.getHardwareBuffer();
         mTask = task;
         mWidth = (buffer != null) ? buffer.getWidth() : 1;
         mHeight = (buffer != null) ? buffer.getHeight() : 1;
@@ -51,16 +51,16 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
                         task, mWidth, mHeight);
         mSurfaceControl = surfaceControlFactory.apply(new SurfaceSession())
                 .setName("RecentTaskScreenshotSurface")
-                .setBufferSize(mWidth, mHeight)
+                .setBLASTLayer()
                 .setCallsite("TaskScreenshotAnimatable")
                 .build();
         if (buffer != null) {
-            final Surface surface = new Surface();
-            surface.copyFrom(mSurfaceControl);
-            surface.attachAndQueueBufferWithColorSpace(buffer, screenshotBuffer.getColorSpace());
-            surface.release();
+            GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(buffer);
+            getPendingTransaction().setBuffer(mSurfaceControl, graphicBuffer);
+            getPendingTransaction().setColorSpace(mSurfaceControl,
+                    screenshotBuffer.getColorSpace());
             final float scale = 1.0f * mTask.getBounds().width() / mWidth;
-            mSurfaceControl.setMatrix(scale, 0, 0, scale);
+            getPendingTransaction().setMatrix(mSurfaceControl, scale, 0, 0, scale);
         }
         getPendingTransaction().show(mSurfaceControl);
     }

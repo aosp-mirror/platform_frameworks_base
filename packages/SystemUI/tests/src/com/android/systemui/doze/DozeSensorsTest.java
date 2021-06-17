@@ -16,14 +16,15 @@
 
 package com.android.systemui.doze;
 
+import static com.android.systemui.doze.DozeLog.REASON_SENSOR_TAP;
 import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_LOCK_SCREEN;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -32,7 +33,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.AlarmManager;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -43,11 +43,13 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeSensors.TriggerSensor;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.ProximitySensor;
+import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import org.junit.Before;
@@ -64,8 +66,6 @@ import java.util.function.Consumer;
 public class DozeSensorsTest extends SysuiTestCase {
 
     @Mock
-    private AlarmManager mAlarmManager;
-    @Mock
     private AsyncSensorManager mSensorManager;
     @Mock
     private DozeParameters mDozeParameters;
@@ -78,16 +78,18 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Mock
     private Consumer<Boolean> mProxCallback;
     @Mock
-    private AlwaysOnDisplayPolicy mAlwaysOnDisplayPolicy;
-    @Mock
     private TriggerSensor mTriggerSensor;
     @Mock
     private DozeLog mDozeLog;
     @Mock
+    private AuthController mAuthController;
+    @Mock
     private ProximitySensor mProximitySensor;
+    private FakeSettings mFakeSettings = new FakeSettings();
     private SensorManagerPlugin.SensorEventListener mWakeLockScreenListener;
     private TestableLooper mTestableLooper;
     private DozeSensors mDozeSensors;
+    private TriggerSensor mSensorTap;
 
     @Before
     public void setUp() {
@@ -111,7 +113,7 @@ public class DozeSensorsTest extends SysuiTestCase {
 
     @Test
     public void testSensorDebounce() {
-        mDozeSensors.setListening(true);
+        mDozeSensors.setListening(true, true);
 
         mWakeLockScreenListener.onSensorChanged(mock(SensorManagerPlugin.SensorEvent.class));
         mTestableLooper.processAllMessages();
@@ -129,7 +131,7 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Test
     public void testSetListening_firstTrue_registerSettingsObserver() {
         verify(mSensorManager, never()).registerListener(any(), any(Sensor.class), anyInt());
-        mDozeSensors.setListening(true);
+        mDozeSensors.setListening(true, true);
 
         verify(mTriggerSensor).registerSettingsObserver(any(ContentObserver.class));
     }
@@ -137,25 +139,10 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Test
     public void testSetListening_twiceTrue_onlyRegisterSettingsObserverOnce() {
         verify(mSensorManager, never()).registerListener(any(), any(Sensor.class), anyInt());
-        mDozeSensors.setListening(true);
-        mDozeSensors.setListening(true);
+        mDozeSensors.setListening(true, true);
+        mDozeSensors.setListening(true, true);
 
         verify(mTriggerSensor, times(1)).registerSettingsObserver(any(ContentObserver.class));
-    }
-
-    @Test
-    public void testSetPaused_doesntPause_sensors() {
-        verify(mSensorManager, never()).registerListener(any(), any(Sensor.class), anyInt());
-        mDozeSensors.setListening(true);
-        verify(mTriggerSensor).setListening(eq(true));
-
-        clearInvocations(mTriggerSensor);
-        mDozeSensors.setPaused(true);
-        verify(mTriggerSensor).setListening(eq(true));
-
-        clearInvocations(mTriggerSensor);
-        mDozeSensors.setListening(false);
-        verify(mTriggerSensor).setListening(eq(false));
     }
 
     @Test
@@ -165,20 +152,40 @@ public class DozeSensorsTest extends SysuiTestCase {
         verify(mTriggerSensor).setListening(false);
     }
 
+    @Test
+    public void testRegisterSensorsUsingProx() {
+        // GIVEN we only should register sensors using prox when not in low-powered mode / off
+        // and the single tap sensor uses the proximity sensor
+        when(mDozeParameters.getSelectivelyRegisterSensorsUsingProx()).thenReturn(true);
+        when(mDozeParameters.singleTapUsesProx()).thenReturn(true);
+        TestableDozeSensors dozeSensors = new TestableDozeSensors();
+
+        // THEN on initialization, the tap sensor isn't requested
+        assertFalse(mSensorTap.mRequested);
+
+        // WHEN we're now in a low powered state
+        dozeSensors.setListening(true, true, true);
+
+        // THEN the tap sensor is registered
+        assertTrue(mSensorTap.mRequested);
+    }
+
     private class TestableDozeSensors extends DozeSensors {
 
         TestableDozeSensors() {
-            super(getContext(), mAlarmManager, mSensorManager, mDozeParameters,
+            super(getContext(), mSensorManager, mDozeParameters,
                     mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
-                    mProximitySensor);
+                    mProximitySensor, mFakeSettings, mAuthController);
             for (TriggerSensor sensor : mSensors) {
                 if (sensor instanceof PluginSensor
                         && ((PluginSensor) sensor).mPluginSensor.getType()
                         == TYPE_WAKE_LOCK_SCREEN) {
                     mWakeLockScreenListener = (PluginSensor) sensor;
+                } else if (sensor.mPulseReason == REASON_SENSOR_TAP) {
+                    mSensorTap = sensor;
                 }
             }
-            mSensors = new TriggerSensor[] {mTriggerSensor};
+            mSensors = new TriggerSensor[] {mTriggerSensor, mSensorTap};
         }
     }
 }

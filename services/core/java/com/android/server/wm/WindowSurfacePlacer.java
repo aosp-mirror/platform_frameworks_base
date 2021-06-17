@@ -43,8 +43,7 @@ class WindowSurfacePlacer {
     private int mLayoutRepeatCount;
 
     static final int SET_UPDATE_ROTATION                = 1 << 0;
-    static final int SET_ORIENTATION_CHANGE_COMPLETE    = 1 << 2;
-    static final int SET_WALLPAPER_ACTION_PENDING       = 1 << 3;
+    static final int SET_WALLPAPER_ACTION_PENDING       = 1 << 1;
 
     private boolean mTraversalScheduled;
     private int mDeferDepth = 0;

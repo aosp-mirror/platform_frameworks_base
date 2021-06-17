@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -179,7 +180,7 @@ public abstract class ImsVideoCallProvider {
      * Returns binder object which can be used across IPC methods.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final IImsVideoCallProvider getInterface() {
         return mBinder;
     }

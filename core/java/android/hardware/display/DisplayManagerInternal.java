@@ -47,22 +47,40 @@ public abstract class DisplayManagerInternal {
      * begins adjusting the power state to match what was requested.
      * </p>
      *
+     * @param groupId The identifier for the display group being requested to change power state
      * @param request The requested power state.
-     * @param waitForNegativeProximity If true, issues a request to wait for
+     * @param waitForNegativeProximity If {@code true}, issues a request to wait for
      * negative proximity before turning the screen back on, assuming the screen
      * was turned off by the proximity sensor.
-     * @return True if display is ready, false if there are important changes that must
-     * be made asynchronously (such as turning the screen on), in which case the caller
-     * should grab a wake lock, watch for {@link DisplayPowerCallbacks#onStateChanged()}
-     * then try the request again later until the state converges.
+     * @return {@code true} if display group is ready, {@code false} if there are important
+     * changes that must be made asynchronously (such as turning the screen on), in which case
+     * the caller should grab a wake lock, watch for {@link DisplayPowerCallbacks#onStateChanged}
+     * then try the request again later until the state converges. If the provided {@code groupId}
+     * cannot be found then {@code true} will be returned.
      */
-    public abstract boolean requestPowerState(DisplayPowerRequest request,
+    public abstract boolean requestPowerState(int groupId, DisplayPowerRequest request,
             boolean waitForNegativeProximity);
 
     /**
-     * Returns true if the proximity sensor screen-off function is available.
+     * Returns {@code true} if the proximity sensor screen-off function is available.
      */
     public abstract boolean isProximitySensorAvailable();
+
+    /**
+     * Registers a display group listener which will be informed of the addition, removal, or change
+     * of display groups.
+     *
+     * @param listener The listener to register.
+     */
+    public abstract void registerDisplayGroupListener(DisplayGroupListener listener);
+
+    /**
+     * Unregisters a display group listener which will be informed of the addition, removal, or
+     * change of display groups.
+     *
+     * @param listener The listener to unregister.
+     */
+    public abstract void unregisterDisplayGroupListener(DisplayGroupListener listener);
 
     /**
      * Screenshot for internal system-only use such as rotation, etc.  This method includes
@@ -72,7 +90,7 @@ public abstract class DisplayManagerInternal {
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotGraphicBuffer systemScreenshot(int displayId);
+    public abstract SurfaceControl.ScreenshotHardwareBuffer systemScreenshot(int displayId);
 
     /**
      * General screenshot functionality that excludes secure layers and applies appropriate
@@ -81,7 +99,7 @@ public abstract class DisplayManagerInternal {
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotGraphicBuffer userScreenshot(int displayId);
+    public abstract SurfaceControl.ScreenshotHardwareBuffer userScreenshot(int displayId);
 
     /**
      * Returns information about the specified logical display.
@@ -172,6 +190,8 @@ public abstract class DisplayManagerInternal {
      * has a preference.
      * @param requestedModeId The preferred mode id for the top-most visible window that has a
      * preference.
+     * @param requestedMaxRefreshRate The preferred highest refresh rate for the top-most visible
+     *                                window that has a preference.
      * @param requestedMinimalPostProcessing The preferred minimal post processing setting for the
      * display. This is true when there is at least one visible window that wants minimal post
      * processng on.
@@ -179,8 +199,8 @@ public abstract class DisplayManagerInternal {
      * prior to call to performTraversalInTransactionFromWindowManager.
      */
     public abstract void setDisplayProperties(int displayId, boolean hasContent,
-            float requestedRefreshRate, int requestedModeId, boolean requestedMinimalPostProcessing,
-            boolean inTraversal);
+            float requestedRefreshRate, int requestedModeId, float requestedMaxRefreshRate,
+            boolean requestedMinimalPostProcessing, boolean inTraversal);
 
     /**
      * Applies an offset to the contents of a display, for example to avoid burn-in.
@@ -258,6 +278,19 @@ public abstract class DisplayManagerInternal {
     @Nullable
     public abstract DisplayedContentSample getDisplayedContentSample(
             int displayId, long maxFrames, long timestamp);
+
+    /**
+     * Temporarily ignore proximity-sensor-based display behavior until there is a change
+     * to the proximity sensor state. This allows the display to turn back on even if something
+     * is obstructing the proximity sensor.
+     */
+    public abstract void ignoreProximitySensorUntilChanged();
+
+    /**
+     * Returns the refresh rate switching type.
+     */
+    @DisplayManager.SwitchingType
+    public abstract int getRefreshRateSwitchingType();
 
     /**
      * Describes the requested power state of the display.
@@ -365,7 +398,7 @@ public abstract class DisplayManagerInternal {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             return o instanceof DisplayPowerRequest
                     && equals((DisplayPowerRequest)o);
         }
@@ -438,7 +471,7 @@ public abstract class DisplayManagerInternal {
         void onStateChanged();
         void onProximityPositive();
         void onProximityNegative();
-        void onDisplayStateChange(int state); // one of the Display state constants
+        void onDisplayStateChange(boolean allInactive, boolean allOff);
 
         void acquireSuspendBlocker();
         void releaseSuspendBlocker();
@@ -451,5 +484,47 @@ public abstract class DisplayManagerInternal {
      */
     public interface DisplayTransactionListener {
         void onDisplayTransaction(Transaction t);
+    }
+
+    /**
+     * Called when there are changes to {@link com.android.server.display.DisplayGroup
+     * DisplayGroups}.
+     */
+    public interface DisplayGroupListener {
+        /**
+         * A new display group with the provided {@code groupId} was added.
+         *
+         * <ol>
+         *     <li>The {@code groupId} is applied to all appropriate {@link Display displays}.
+         *     <li>This method is called.
+         *     <li>{@link android.hardware.display.DisplayManager.DisplayListener DisplayListeners}
+         *     are informed of any corresponding changes.
+         * </ol>
+         */
+        void onDisplayGroupAdded(int groupId);
+
+        /**
+         * The display group with the provided {@code groupId} was removed.
+         *
+         * <ol>
+         *     <li>All affected {@link Display displays} have their group IDs updated appropriately.
+         *     <li>{@link android.hardware.display.DisplayManager.DisplayListener DisplayListeners}
+         *     are informed of any corresponding changes.
+         *     <li>This method is called.
+         * </ol>
+         */
+        void onDisplayGroupRemoved(int groupId);
+
+        /**
+         * The display group with the provided {@code groupId} has changed.
+         *
+         * <ol>
+         *     <li>All affected {@link Display displays} have their group IDs updated appropriately.
+         *     <li>{@link android.hardware.display.DisplayManager.DisplayListener DisplayListeners}
+         *     are informed of any corresponding changes.
+         *     <li>This method is called.
+         * </ol>
+         */
+        void onDisplayGroupChanged(int groupId);
     }
 }

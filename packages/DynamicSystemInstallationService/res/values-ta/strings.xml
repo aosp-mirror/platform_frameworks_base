@@ -13,4 +13,5 @@
     <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"மீண்டும் தொடங்கு"</string>
     <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"Dynamic system நிராகரிக்கப்பட்டது"</string>
     <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"Dynamic systemமை மீண்டும் தொடங்கவோ ஏற்றவோ முடியவில்லை"</string>
+    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"Dynamic systemமை முடக்க இயலவில்லை"</string>
 </resources>

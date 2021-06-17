@@ -127,6 +127,13 @@ public interface ClockPlugin extends Plugin {
     default void onTimeZoneChanged(TimeZone timeZone) {}
 
     /**
+     * Notifies that the time format has changed.
+     *
+     * @param timeFormat "12" for 12-hour format, "24" for 24-hour format
+     */
+    default void onTimeFormatChanged(String timeFormat) {}
+
+    /**
      * Indicates whether the keyguard status area (date) should be shown below
      * the clock.
      */

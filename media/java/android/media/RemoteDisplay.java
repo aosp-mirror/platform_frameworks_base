@@ -17,6 +17,7 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Handler;
 import android.view.Surface;
 
@@ -127,7 +128,7 @@ public final class RemoteDisplay {
     }
 
     // Called from native.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void notifyDisplayConnected(final Surface surface,
             final int width, final int height, final int flags, final int session) {
         mHandler.post(new Runnable() {
@@ -139,7 +140,7 @@ public final class RemoteDisplay {
     }
 
     // Called from native.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void notifyDisplayDisconnected() {
         mHandler.post(new Runnable() {
             @Override
@@ -150,7 +151,7 @@ public final class RemoteDisplay {
     }
 
     // Called from native.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void notifyDisplayError(final int error) {
         mHandler.post(new Runnable() {
             @Override

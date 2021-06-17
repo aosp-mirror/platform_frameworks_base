@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration description="Config for ActivityManager native test cases">
+    <option name="test-suite-tag" value="apct" />
+    <option name="test-suite-tag" value="apct-native" />
+    <option name="config-descriptor:metadata" key="component" value="framework" />
+    <option name="config-descriptor:metadata" key="parameter" value="instant_app" />
+    <option name="config-descriptor:metadata" key="parameter" value="multi_abi" />
+    <option name="config-descriptor:metadata" key="parameter" value="secondary_user" />
+
+    <!-- Force root to allow registering UidImportanceListener from native test -->
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer">
+        <option name="force-root" value="true" />
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="input keyevent KEYCODE_WAKEUP" />
+        <option name="run-command" value="wm dismiss-keyguard" />
+    </target_preparer>
+    <!-- Install the helper apk -->
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true" />
+        <option name="test-file-name" value="UidImportanceHelperApp.apk" />
+    </target_preparer>
+
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+        <option name="cleanup" value="true" />
+        <option name="push" value="ActivityManagerNativeTestCases->/data/local/tmp/ActivityManagerNativeTestCases" />
+        <option name="append-bitness" value="true" />
+    </target_preparer>
+
+    <test class="com.android.tradefed.testtype.GTest" >
+        <option name="native-test-device-path" value="/data/local/tmp" />
+        <option name="module-name" value="ActivityManagerNativeTestCases" />
+        <option name="runtime-hint" value="1m" />
+    </test>
+
+    <!-- Controller that will skip the module if a native bridge situation is detected -->
+    <!-- For example: module wants to run arm and device is x86 -->
+    <object type="module_controller" class="com.android.tradefed.testtype.suite.module.NativeBridgeModuleController" />
+</configuration>

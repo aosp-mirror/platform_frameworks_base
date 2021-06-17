@@ -46,8 +46,8 @@ public class DevicePolicyEventLoggerTest {
                 .setTimePeriod(1234L);
         assertThat(eventLogger.getEventId()).isEqualTo(5);
         assertThat(eventLogger.getBoolean()).isTrue();
-        assertThat(eventLogger.getStringArray())
-                .isEqualTo(new String[] {"string1", "string2", "string3"});
+        assertThat(eventLogger.getStringArray()).asList()
+            .containsExactly("string1", "string2", "string3");
         assertThat(eventLogger.getAdminPackageName()).isEqualTo("com.test.package");
         assertThat(eventLogger.getInt()).isEqualTo(4321);
         assertThat(eventLogger.getTimePeriod()).isEqualTo(1234L);
@@ -57,23 +57,22 @@ public class DevicePolicyEventLoggerTest {
     public void testStrings() {
         assertThat(DevicePolicyEventLogger
                 .createEvent(0)
-                .setStrings("string1", "string2", "string3").getStringArray())
-                .isEqualTo(new String[] {"string1", "string2", "string3"});
+                .setStrings("string1", "string2", "string3").getStringArray()).asList()
+                        .containsExactly("string1", "string2", "string3").inOrder();
 
         assertThat(DevicePolicyEventLogger
                 .createEvent(0)
                 .setStrings("string1", new String[] {"string2", "string3"}).getStringArray())
-                .isEqualTo(new String[] {"string1", "string2", "string3"});
+                        .asList().containsExactly("string1", "string2", "string3").inOrder();
 
         assertThat(DevicePolicyEventLogger
                 .createEvent(0)
                 .setStrings("string1", "string2", new String[] {"string3"}).getStringArray())
-                .isEqualTo(new String[] {"string1", "string2", "string3"});
-
+                        .asList().containsExactly("string1", "string2", "string3").inOrder();
         assertThat(DevicePolicyEventLogger
                 .createEvent(0)
-                .setStrings((String) null).getStringArray())
-                .isEqualTo(new String[] {null});
+                .setStrings((String) null).getStringArray()).asList()
+                        .containsExactly((String) null);
 
         assertThat(DevicePolicyEventLogger
                 .createEvent(0)
@@ -106,8 +105,8 @@ public class DevicePolicyEventLoggerTest {
                 .createEvent(0);
         assertThat(eventLogger.getEventId()).isEqualTo(0);
         assertThat(eventLogger.getBoolean()).isFalse();
-        assertThat(eventLogger.getStringArray()).isEqualTo(null);
-        assertThat(eventLogger.getAdminPackageName()).isEqualTo(null);
+        assertThat(eventLogger.getStringArray()).isNull();
+        assertThat(eventLogger.getAdminPackageName()).isNull();
         assertThat(eventLogger.getInt()).isEqualTo(0);
         assertThat(eventLogger.getTimePeriod()).isEqualTo(0L);
     }

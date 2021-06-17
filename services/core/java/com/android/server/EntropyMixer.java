@@ -16,12 +16,6 @@
 
 package com.android.server;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,10 +27,15 @@ import android.os.Message;
 import android.os.SystemProperties;
 import android.util.Slog;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 /**
  * A service designed to load and periodically save &quot;randomness&quot;
- * for the Linux kernel RNG and to mix in data from Hardware RNG (if present)
- * into the Linux RNG.
+ * for the Linux kernel RNG.
  *
  * <p>When a Linux system starts up, the entropy pool associated with
  * {@code /dev/random} may be in a fairly predictable state.  Applications which
@@ -45,16 +44,9 @@ import android.util.Slog;
  * this effect, it's helpful to carry the entropy pool information across
  * shutdowns and startups.
  *
- * <p>On systems with Hardware RNG (/dev/hw_random), a block of output from HW
- * RNG is mixed into the Linux RNG on EntropyMixer's startup and whenever
- * EntropyMixer periodically runs to save a block of output from Linux RNG on
- * disk. This mixing is done in a way that does not increase the Linux RNG's
- * entropy estimate is not increased. This is to avoid having to trust/verify
- * the quality and authenticity of the &quot;randomness&quot; of the HW RNG.
- *
- * <p>This class was modeled after the script in
- * <a href="http://www.kernel.org/doc/man-pages/online/pages/man4/random.4.html">man
- * 4 random</a>.
+ * <p>This class was modeled after the script in the
+ * <a href="https://man7.org/linux/man-pages/man4/random.4.html">
+ * random(4) manual page</a>.
  */
 public class EntropyMixer extends Binder {
     private static final String TAG = "EntropyMixer";
@@ -64,7 +56,6 @@ public class EntropyMixer extends Binder {
     private static final long START_NANOTIME = System.nanoTime();
 
     private final String randomDevice;
-    private final String hwRandomDevice;
     private final String entropyFile;
 
     /**
@@ -80,7 +71,6 @@ public class EntropyMixer extends Binder {
                 Slog.e(TAG, "Will not process invalid message");
                 return;
             }
-            addHwRandomEntropy();
             writeEntropy();
             scheduleEntropyWriter();
         }
@@ -94,25 +84,21 @@ public class EntropyMixer extends Binder {
     };
 
     public EntropyMixer(Context context) {
-        this(context, getSystemDir() + "/entropy.dat", "/dev/urandom", "/dev/hw_random");
+        this(context, getSystemDir() + "/entropy.dat", "/dev/urandom");
     }
 
     /** Test only interface, not for public use */
     public EntropyMixer(
             Context context,
             String entropyFile,
-            String randomDevice,
-            String hwRandomDevice) {
+            String randomDevice) {
         if (randomDevice == null) { throw new NullPointerException("randomDevice"); }
-        if (hwRandomDevice == null) { throw new NullPointerException("hwRandomDevice"); }
         if (entropyFile == null) { throw new NullPointerException("entropyFile"); }
 
         this.randomDevice = randomDevice;
-        this.hwRandomDevice = hwRandomDevice;
         this.entropyFile = entropyFile;
         loadInitialEntropy();
         addDeviceSpecificEntropy();
-        addHwRandomEntropy();
         writeEntropy();
         scheduleEntropyWriter();
         IntentFilter broadcastFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
@@ -189,23 +175,6 @@ public class EntropyMixer extends Binder {
             if (out != null) {
                 out.close();
             }
-        }
-    }
-
-    /**
-     * Mixes in the output from HW RNG (if present) into the Linux RNG.
-     */
-    private void addHwRandomEntropy() {
-        if (!new File(hwRandomDevice).exists()) {
-            // HW RNG not present/exposed -- ignore
-            return;
-        }
-
-        try {
-            RandomBlock.fromFile(hwRandomDevice).toFile(randomDevice, false);
-            Slog.i(TAG, "Added HW RNG output to entropy pool");
-        } catch (IOException e) {
-            Slog.w(TAG, "Failed to add HW RNG output to entropy pool", e);
         }
     }
 

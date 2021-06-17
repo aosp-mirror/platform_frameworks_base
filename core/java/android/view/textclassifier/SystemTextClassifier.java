@@ -89,7 +89,7 @@ public final class SystemTextClassifier implements TextClassifier {
         try {
             request.setSystemTextClassifierMetadata(mSystemTcMetadata);
             final BlockingCallback<TextSelection> callback =
-                    new BlockingCallback<>("textselection");
+                    new BlockingCallback<>("textselection", mSettings);
             mManagerService.onSuggestSelection(mSessionId, request, callback);
             final TextSelection selection = callback.get();
             if (selection != null) {
@@ -112,7 +112,7 @@ public final class SystemTextClassifier implements TextClassifier {
         try {
             request.setSystemTextClassifierMetadata(mSystemTcMetadata);
             final BlockingCallback<TextClassification> callback =
-                    new BlockingCallback<>("textclassification");
+                    new BlockingCallback<>("textclassification", mSettings);
             mManagerService.onClassifyText(mSessionId, request, callback);
             final TextClassification classification = callback.get();
             if (classification != null) {
@@ -142,7 +142,7 @@ public final class SystemTextClassifier implements TextClassifier {
         try {
             request.setSystemTextClassifierMetadata(mSystemTcMetadata);
             final BlockingCallback<TextLinks> callback =
-                    new BlockingCallback<>("textlinks");
+                    new BlockingCallback<>("textlinks", mSettings);
             mManagerService.onGenerateLinks(mSessionId, request, callback);
             final TextLinks links = callback.get();
             if (links != null) {
@@ -193,7 +193,7 @@ public final class SystemTextClassifier implements TextClassifier {
         try {
             request.setSystemTextClassifierMetadata(mSystemTcMetadata);
             final BlockingCallback<TextLanguage> callback =
-                    new BlockingCallback<>("textlanguage");
+                    new BlockingCallback<>("textlanguage", mSettings);
             mManagerService.onDetectLanguage(mSessionId, request, callback);
             final TextLanguage textLanguage = callback.get();
             if (textLanguage != null) {
@@ -213,7 +213,7 @@ public final class SystemTextClassifier implements TextClassifier {
         try {
             request.setSystemTextClassifierMetadata(mSystemTcMetadata);
             final BlockingCallback<ConversationActions> callback =
-                    new BlockingCallback<>("conversation-actions");
+                    new BlockingCallback<>("conversation-actions", mSettings);
             mManagerService.onSuggestConversationActions(mSessionId, request, callback);
             final ConversationActions conversationActions = callback.get();
             if (conversationActions != null) {
@@ -279,8 +279,8 @@ public final class SystemTextClassifier implements TextClassifier {
             extends ITextClassifierCallback.Stub {
         private final ResponseReceiver<T> mReceiver;
 
-        BlockingCallback(String name) {
-            mReceiver = new ResponseReceiver<>(name);
+        BlockingCallback(String name, TextClassificationConstants settings) {
+            mReceiver = new ResponseReceiver<>(name, settings);
         }
 
         @Override
@@ -303,10 +303,12 @@ public final class SystemTextClassifier implements TextClassifier {
 
         private final CountDownLatch mLatch = new CountDownLatch(1);
         private final String mName;
+        private final TextClassificationConstants mSettings;
         private T mResponse;
 
-        private ResponseReceiver(String name) {
+        private ResponseReceiver(String name, TextClassificationConstants settings) {
             mName = name;
+            mSettings = settings;
         }
 
         public void onSuccess(T response) {
@@ -327,7 +329,9 @@ public final class SystemTextClassifier implements TextClassifier {
             // NOTE that TextClassifier calls should preferably always be called on a worker thread.
             if (Looper.myLooper() != Looper.getMainLooper()) {
                 try {
-                    boolean success = mLatch.await(2, TimeUnit.SECONDS);
+                    boolean success = mLatch.await(
+                            mSettings.getSystemTextClassifierApiTimeoutInSecond(),
+                            TimeUnit.SECONDS);
                     if (!success) {
                         Log.w(LOG_TAG, "Timeout in ResponseReceiver.get(): " + mName);
                     }

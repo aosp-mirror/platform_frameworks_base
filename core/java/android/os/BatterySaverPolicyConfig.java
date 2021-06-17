@@ -42,7 +42,6 @@ public final class BatterySaverPolicyConfig implements Parcelable {
     private final boolean mDisableAod;
     private final boolean mDisableLaunchBoost;
     private final boolean mDisableOptionalSensors;
-    private final boolean mDisableSoundTrigger;
     private final boolean mDisableVibration;
     private final boolean mEnableAdjustBrightness;
     private final boolean mEnableDataSaver;
@@ -52,6 +51,7 @@ public final class BatterySaverPolicyConfig implements Parcelable {
     private final boolean mForceAllAppsStandby;
     private final boolean mForceBackgroundCheck;
     private final int mLocationMode;
+    private final int mSoundTriggerMode;
 
     private BatterySaverPolicyConfig(Builder in) {
         mAdjustBrightnessFactor = Math.max(0, Math.min(in.mAdjustBrightnessFactor, 1f));
@@ -64,7 +64,6 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         mDisableAod = in.mDisableAod;
         mDisableLaunchBoost = in.mDisableLaunchBoost;
         mDisableOptionalSensors = in.mDisableOptionalSensors;
-        mDisableSoundTrigger = in.mDisableSoundTrigger;
         mDisableVibration = in.mDisableVibration;
         mEnableAdjustBrightness = in.mEnableAdjustBrightness;
         mEnableDataSaver = in.mEnableDataSaver;
@@ -75,6 +74,8 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         mForceBackgroundCheck = in.mForceBackgroundCheck;
         mLocationMode = Math.max(PowerManager.MIN_LOCATION_MODE,
                 Math.min(in.mLocationMode, PowerManager.MAX_LOCATION_MODE));
+        mSoundTriggerMode = Math.max(PowerManager.MIN_SOUND_TRIGGER_MODE,
+                Math.min(in.mSoundTriggerMode, PowerManager.MAX_SOUND_TRIGGER_MODE));
     }
 
     private BatterySaverPolicyConfig(Parcel in) {
@@ -99,7 +100,6 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         mDisableAod = in.readBoolean();
         mDisableLaunchBoost = in.readBoolean();
         mDisableOptionalSensors = in.readBoolean();
-        mDisableSoundTrigger = in.readBoolean();
         mDisableVibration = in.readBoolean();
         mEnableAdjustBrightness = in.readBoolean();
         mEnableDataSaver = in.readBoolean();
@@ -110,6 +110,8 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         mForceBackgroundCheck = in.readBoolean();
         mLocationMode = Math.max(PowerManager.MIN_LOCATION_MODE,
                 Math.min(in.readInt(), PowerManager.MAX_LOCATION_MODE));
+        mSoundTriggerMode = Math.max(PowerManager.MIN_SOUND_TRIGGER_MODE,
+                Math.min(in.readInt(), PowerManager.MAX_SOUND_TRIGGER_MODE));
     }
 
     public static final @android.annotation.NonNull Creator<BatterySaverPolicyConfig> CREATOR =
@@ -149,7 +151,6 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         dest.writeBoolean(mDisableAod);
         dest.writeBoolean(mDisableLaunchBoost);
         dest.writeBoolean(mDisableOptionalSensors);
-        dest.writeBoolean(mDisableSoundTrigger);
         dest.writeBoolean(mDisableVibration);
         dest.writeBoolean(mEnableAdjustBrightness);
         dest.writeBoolean(mEnableDataSaver);
@@ -159,6 +160,7 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         dest.writeBoolean(mForceAllAppsStandby);
         dest.writeBoolean(mForceBackgroundCheck);
         dest.writeInt(mLocationMode);
+        dest.writeInt(mSoundTriggerMode);
     }
 
     @NonNull
@@ -184,7 +186,7 @@ public final class BatterySaverPolicyConfig implements Parcelable {
                 + "launch_boost_disabled=" + mDisableLaunchBoost + ","
                 + "optional_sensors_disabled=" + mDisableOptionalSensors + ","
                 + "quick_doze_enabled=" + mEnableQuickDoze + ","
-                + "soundtrigger_disabled=" + mDisableSoundTrigger + ","
+                + "soundtrigger_mode=" + mSoundTriggerMode + ","
                 + "vibration_disabled=" + mDisableVibration + ","
                 + sb.toString();
     }
@@ -243,11 +245,21 @@ public final class BatterySaverPolicyConfig implements Parcelable {
     }
 
     /**
+     * Get the SoundTrigger mode while in Battery Saver.
+     */
+    @PowerManager.SoundTriggerPowerSaveMode
+    public int getSoundTriggerMode() {
+        return mSoundTriggerMode;
+    }
+
+    /**
      * Whether or not to disable {@link android.hardware.soundtrigger.SoundTrigger}
      * while in Battery Saver.
+     * @deprecated Use {@link #getSoundTriggerMode()} instead.
      */
+    @Deprecated
     public boolean getDisableSoundTrigger() {
-        return mDisableSoundTrigger;
+        return mSoundTriggerMode == PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED;
     }
 
     /** Whether or not to disable vibration while in Battery Saver. */
@@ -315,7 +327,6 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         private boolean mDisableAod = false;
         private boolean mDisableLaunchBoost = false;
         private boolean mDisableOptionalSensors = false;
-        private boolean mDisableSoundTrigger = false;
         private boolean mDisableVibration = false;
         private boolean mEnableAdjustBrightness = false;
         private boolean mEnableDataSaver = false;
@@ -325,8 +336,41 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         private boolean mForceAllAppsStandby = false;
         private boolean mForceBackgroundCheck = false;
         private int mLocationMode = PowerManager.LOCATION_MODE_NO_CHANGE;
+        private int mSoundTriggerMode = PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED;
 
         public Builder() {
+        }
+
+        /**
+         * Creates a Builder prepopulated with the values from the passed in
+         * {@link BatterySaverPolicyConfig}.
+         */
+        public Builder(@NonNull BatterySaverPolicyConfig batterySaverPolicyConfig) {
+            mAdjustBrightnessFactor = batterySaverPolicyConfig.getAdjustBrightnessFactor();
+            mAdvertiseIsEnabled = batterySaverPolicyConfig.getAdvertiseIsEnabled();
+            mDeferFullBackup = batterySaverPolicyConfig.getDeferFullBackup();
+            mDeferKeyValueBackup = batterySaverPolicyConfig.getDeferKeyValueBackup();
+
+            for (String key :
+                    batterySaverPolicyConfig.getDeviceSpecificSettings().keySet()) {
+                mDeviceSpecificSettings.put(key,
+                        batterySaverPolicyConfig.getDeviceSpecificSettings().get(key));
+            }
+
+            mDisableAnimation = batterySaverPolicyConfig.getDisableAnimation();
+            mDisableAod = batterySaverPolicyConfig.getDisableAod();
+            mDisableLaunchBoost = batterySaverPolicyConfig.getDisableLaunchBoost();
+            mDisableOptionalSensors = batterySaverPolicyConfig.getDisableOptionalSensors();
+            mDisableVibration = batterySaverPolicyConfig.getDisableVibration();
+            mEnableAdjustBrightness = batterySaverPolicyConfig.getEnableAdjustBrightness();
+            mEnableDataSaver = batterySaverPolicyConfig.getEnableDataSaver();
+            mEnableFirewall = batterySaverPolicyConfig.getEnableFirewall();
+            mEnableNightMode = batterySaverPolicyConfig.getEnableNightMode();
+            mEnableQuickDoze = batterySaverPolicyConfig.getEnableQuickDoze();
+            mForceAllAppsStandby = batterySaverPolicyConfig.getForceAllAppsStandby();
+            mForceBackgroundCheck = batterySaverPolicyConfig.getForceBackgroundCheck();
+            mLocationMode = batterySaverPolicyConfig.getLocationMode();
+            mSoundTriggerMode = batterySaverPolicyConfig.getSoundTriggerMode();
         }
 
         /**
@@ -416,10 +460,26 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         /**
          * Set whether or not to disable  {@link android.hardware.soundtrigger.SoundTrigger}
          * while in Battery Saver.
+         * @deprecated Use {@link #setSoundTriggerMode(int)} instead.
          */
+        @Deprecated
         @NonNull
         public Builder setDisableSoundTrigger(boolean disableSoundTrigger) {
-            mDisableSoundTrigger = disableSoundTrigger;
+            if (disableSoundTrigger) {
+                mSoundTriggerMode = PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED;
+            } else {
+                mSoundTriggerMode = PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED;
+            }
+            return this;
+        }
+
+        /**
+         * Set the SoundTrigger mode while in Battery Saver.
+         */
+        @NonNull
+        public Builder setSoundTriggerMode(
+                @PowerManager.SoundTriggerPowerSaveMode int soundTriggerMode) {
+            mSoundTriggerMode = soundTriggerMode;
             return this;
         }
 

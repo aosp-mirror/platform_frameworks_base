@@ -22,6 +22,8 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.graphics.Color;
 
+import com.android.internal.graphics.cam.Cam;
+
 /**
  * Copied from: frameworks/support/core-utils/java/android/support/v4/graphics/ColorUtils.java
  *
@@ -330,6 +332,35 @@ public final class ColorUtils {
         b = constrain(b, 0, 255);
 
         return Color.rgb(r, g, b);
+    }
+
+    /**
+     * Convert the ARGB color to a color appearance model.
+     *
+     * The color appearance model is based on CAM16 hue and chroma, using L*a*b*'s L* as the
+     * third dimension.
+     *
+     * @param color the ARGB color to convert. The alpha component is ignored.
+     */
+    public static Cam colorToCAM(@ColorInt int color) {
+        return Cam.fromInt(color);
+    }
+
+    /**
+     * Convert a color appearance model representation to an ARGB color.
+     *
+     * Note: the returned color may have a lower chroma than requested. Whether a chroma is
+     * available depends on luminance. For example, there's no such thing as a high chroma light
+     * red, due to the limitations of our eyes and/or physics. If the requested chroma is
+     * unavailable, the highest possible chroma at the requested luminance is returned.
+     *
+     * @param hue hue, in degrees, in CAM coordinates
+     * @param chroma chroma in CAM coordinates.
+     * @param lstar perceptual luminance, L* in L*a*b*
+     */
+    @ColorInt
+    public static int CAMToColor(float hue, float chroma, float lstar) {
+        return Cam.getInt(hue, chroma, lstar);
     }
 
     /**

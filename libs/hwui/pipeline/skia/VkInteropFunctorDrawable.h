@@ -16,10 +16,11 @@
 
 #pragma once
 
-#include "FunctorDrawable.h"
-
-#include <ui/GraphicBuffer.h>
+#include <android/hardware_buffer.h>
+#include <utils/NdkUtils.h>
 #include <utils/RefBase.h>
+
+#include "FunctorDrawable.h"
 
 namespace android {
 namespace uirenderer {
@@ -34,7 +35,7 @@ class VkInteropFunctorDrawable : public FunctorDrawable {
 public:
     using FunctorDrawable::FunctorDrawable;
 
-    virtual ~VkInteropFunctorDrawable();
+    virtual ~VkInteropFunctorDrawable() {}
 
     static void vkInvokeFunctor(Functor* functor);
 
@@ -45,7 +46,7 @@ protected:
 
 private:
     // Variables below describe/store temporary offscreen buffer used for Vulkan pipeline.
-    sp<GraphicBuffer> mFrameBuffer;
+    UniqueAHardwareBuffer mFrameBuffer;
     SkImageInfo mFBInfo;
 };
 

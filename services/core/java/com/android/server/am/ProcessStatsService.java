@@ -71,33 +71,62 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
     final ActivityManagerService mAm;
     final File mBaseDir;
-    ProcessStats mProcessStats;
+
+    // Note: The locking order of the below 3 locks should be:
+    // mLock, mPendingWriteLock, mFileLock
+
+    // The lock object to protect the internal state/structures
+    final Object mLock = new Object();
+
+    // The lock object to protect the access to pending writes
+    final Object mPendingWriteLock = new Object();
+
+    // The lock object to protect the access to all of the file read/write
+    final ReentrantLock mFileLock = new ReentrantLock();
+
+    @GuardedBy("mLock")
+    final ProcessStats mProcessStats;
+
+    @GuardedBy("mFileLock")
     AtomicFile mFile;
+
+    @GuardedBy("mLock")
     boolean mCommitPending;
+
+    @GuardedBy("mLock")
     boolean mShuttingDown;
+
+    @GuardedBy("mLock")
     int mLastMemOnlyState = -1;
     boolean mMemFactorLowered;
 
-    final ReentrantLock mWriteLock = new ReentrantLock();
-    final Object mPendingWriteLock = new Object();
+    @GuardedBy("mPendingWriteLock")
     AtomicFile mPendingWriteFile;
+
+    @GuardedBy("mPendingWriteLock")
     Parcel mPendingWrite;
+
+    @GuardedBy("mPendingWriteLock")
     boolean mPendingWriteCommitted;
+
+    @GuardedBy("mLock")
     long mLastWriteTime;
 
     /** For CTS to inject the screen state. */
-    @GuardedBy("mAm")
+    @GuardedBy("mLock")
     Boolean mInjectedScreenState;
 
     public ProcessStatsService(ActivityManagerService am, File file) {
         mAm = am;
         mBaseDir = file;
         mBaseDir.mkdirs();
-        mProcessStats = new ProcessStats(true);
-        updateFile();
+        synchronized (mLock) {
+            mProcessStats = new ProcessStats(true);
+            updateFileLocked();
+        }
         SystemProperties.addChangeCallback(new Runnable() {
             @Override public void run() {
-                synchronized (mAm) {
+                synchronized (mLock) {
                     if (mProcessStats.evaluateSystemProperties(false)) {
                         mProcessStats.mFlags |= ProcessStats.FLAG_SYSPROPS;
                         writeStateLocked(true, true);
@@ -121,32 +150,33 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
-    @GuardedBy("mAm")
-    public void updateProcessStateHolderLocked(ProcessStats.ProcessStateHolder holder,
+    @GuardedBy("mLock")
+    void updateProcessStateHolderLocked(ProcessStats.ProcessStateHolder holder,
             String packageName, int uid, long versionCode, String processName) {
         holder.pkg = mProcessStats.getPackageStateLocked(packageName, uid, versionCode);
         holder.state = mProcessStats.getProcessStateLocked(holder.pkg, processName);
     }
 
-    @GuardedBy("mAm")
-    public ProcessState getProcessStateLocked(String packageName,
+    @GuardedBy("mLock")
+    ProcessState getProcessStateLocked(String packageName,
             int uid, long versionCode, String processName) {
         return mProcessStats.getProcessStateLocked(packageName, uid, versionCode, processName);
     }
 
-    @GuardedBy("mAm")
-    public ServiceState getServiceStateLocked(String packageName, int uid,
+    ServiceState getServiceState(String packageName, int uid,
             long versionCode, String processName, String className) {
-        return mProcessStats.getServiceStateLocked(packageName, uid, versionCode, processName,
-                className);
+        synchronized (mLock) {
+            return mProcessStats.getServiceStateLocked(packageName, uid, versionCode, processName,
+                    className);
+        }
     }
 
-    public boolean isMemFactorLowered() {
+    boolean isMemFactorLowered() {
         return mMemFactorLowered;
     }
 
-    @GuardedBy("mAm")
-    public boolean setMemFactorLocked(int memFactor, boolean screenOn, long now) {
+    @GuardedBy("mLock")
+    boolean setMemFactorLocked(int memFactor, boolean screenOn, long now) {
         mMemFactorLowered = memFactor < mLastMemOnlyState;
         mLastMemOnlyState = memFactor;
         if (mInjectedScreenState != null) {
@@ -184,24 +214,24 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return false;
     }
 
-    @GuardedBy("mAm")
-    public int getMemFactorLocked() {
+    @GuardedBy("mLock")
+    int getMemFactorLocked() {
         return mProcessStats.mMemFactor != ProcessStats.STATE_NOTHING ? mProcessStats.mMemFactor : 0;
     }
 
-    @GuardedBy("mAm")
-    public void addSysMemUsageLocked(long cachedMem, long freeMem, long zramMem, long kernelMem,
+    @GuardedBy("mLock")
+    void addSysMemUsageLocked(long cachedMem, long freeMem, long zramMem, long kernelMem,
             long nativeMem) {
         mProcessStats.addSysMemUsage(cachedMem, freeMem, zramMem, kernelMem, nativeMem);
     }
 
-    @GuardedBy("mAm")
-    public void updateTrackingAssociationsLocked(int curSeq, long now) {
+    @GuardedBy("mLock")
+    void updateTrackingAssociationsLocked(int curSeq, long now) {
         mProcessStats.updateTrackingAssociationsLocked(curSeq, now);
     }
 
-    @GuardedBy("mAm")
-    public boolean shouldWriteNowLocked(long now) {
+    @GuardedBy("mLock")
+    boolean shouldWriteNowLocked(long now) {
         if (now > (mLastWriteTime+WRITE_PERIOD)) {
             if (SystemClock.elapsedRealtime()
                     > (mProcessStats.mTimePeriodStartRealtime+ProcessStats.COMMIT_PERIOD) &&
@@ -214,25 +244,27 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return false;
     }
 
-    @GuardedBy("mAm")
-    public void shutdownLocked() {
+    void shutdown() {
         Slog.w(TAG, "Writing process stats before shutdown...");
-        mProcessStats.mFlags |= ProcessStats.FLAG_SHUTDOWN;
-        writeStateSyncLocked();
-        mShuttingDown = true;
+        synchronized (mLock) {
+            mProcessStats.mFlags |= ProcessStats.FLAG_SHUTDOWN;
+            writeStateSyncLocked();
+            mShuttingDown = true;
+        }
     }
 
-    @GuardedBy("mAm")
-    public void writeStateAsyncLocked() {
-        writeStateLocked(false);
+    void writeStateAsync() {
+        synchronized (mLock) {
+            writeStateLocked(false);
+        }
     }
 
-    @GuardedBy("mAm")
-    public void writeStateSyncLocked() {
+    @GuardedBy("mLock")
+    private void writeStateSyncLocked() {
         writeStateLocked(true);
     }
 
-    @GuardedBy("mAm")
+    @GuardedBy("mLock")
     private void writeStateLocked(boolean sync) {
         if (mShuttingDown) {
             return;
@@ -242,8 +274,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         writeStateLocked(sync, commitPending);
     }
 
-    @GuardedBy("mAm")
-    public void writeStateLocked(boolean sync, final boolean commit) {
+    @GuardedBy("mLock")
+    private void writeStateLocked(boolean sync, final boolean commit) {
         final long totalTime;
         synchronized (mPendingWriteLock) {
             final long now = SystemClock.uptimeMillis();
@@ -255,13 +287,13 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     mProcessStats.mFlags |= ProcessStats.FLAG_COMPLETE;
                 }
                 mProcessStats.writeToParcel(mPendingWrite, 0);
-                mPendingWriteFile = new AtomicFile(mFile.getBaseFile());
+                mPendingWriteFile = new AtomicFile(getCurrentFile());
                 mPendingWriteCommitted = commit;
             }
             if (commit) {
                 mProcessStats.resetSafely();
-                updateFile();
-                mAm.requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
+                updateFileLocked();
+                scheduleRequestPssAllProcs(true, false);
             }
             mLastWriteTime = SystemClock.uptimeMillis();
             totalTime = SystemClock.uptimeMillis() - now;
@@ -279,14 +311,38 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         performWriteState(totalTime);
     }
 
-    private void updateFile() {
-        mFile = new AtomicFile(new File(mBaseDir, STATE_FILE_PREFIX
-                + mProcessStats.mTimePeriodStartClockStr + STATE_FILE_SUFFIX));
+    private void scheduleRequestPssAllProcs(boolean always, boolean memLowered) {
+        mAm.mHandler.post(() -> {
+            synchronized (mAm.mProcLock) {
+                mAm.mAppProfiler.requestPssAllProcsLPr(
+                        SystemClock.uptimeMillis(), always, memLowered);
+            }
+        });
+    }
+
+    @GuardedBy("mLock")
+    private void updateFileLocked() {
+        mFileLock.lock();
+        try {
+            mFile = new AtomicFile(new File(mBaseDir, STATE_FILE_PREFIX
+                    + mProcessStats.mTimePeriodStartClockStr + STATE_FILE_SUFFIX));
+        } finally {
+            mFileLock.unlock();
+        }
         mLastWriteTime = SystemClock.uptimeMillis();
     }
 
-    void performWriteState(long initialTime) {
-        if (DEBUG) Slog.d(TAG, "Performing write to " + mFile.getBaseFile());
+    private File getCurrentFile() {
+        mFileLock.lock();
+        try {
+            return mFile.getBaseFile();
+        } finally {
+            mFileLock.unlock();
+        }
+    }
+
+    private void performWriteState(long initialTime) {
+        if (DEBUG) Slog.d(TAG, "Performing write to " + getCurrentFile());
         Parcel data;
         AtomicFile file;
         synchronized (mPendingWriteLock) {
@@ -298,7 +354,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             }
             mPendingWrite = null;
             mPendingWriteFile = null;
-            mWriteLock.lock();
+            mFileLock.lock();
         }
 
         final long startTime = SystemClock.uptimeMillis();
@@ -316,13 +372,13 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             file.failWrite(stream);
         } finally {
             data.recycle();
-            trimHistoricStatesWriteLocked();
-            mWriteLock.unlock();
+            trimHistoricStatesWriteLF();
+            mFileLock.unlock();
         }
     }
 
-    @GuardedBy("mAm")
-    boolean readLocked(ProcessStats stats, AtomicFile file) {
+    @GuardedBy("mFileLock")
+    private boolean readLF(ProcessStats stats, AtomicFile file) {
         try {
             FileInputStream stream = file.openRead();
             stats.read(stream);
@@ -387,7 +443,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return true;
     }
 
-    private ArrayList<String> getCommittedFiles(int minNum, boolean inclCurrent,
+    @GuardedBy("mFileLock")
+    private ArrayList<String> getCommittedFilesLF(int minNum, boolean inclCurrent,
             boolean inclCheckedIn) {
         File[] files = mBaseDir.listFiles();
         if (files == null || files.length <= minNum) {
@@ -414,9 +471,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return filesArray;
     }
 
-    @GuardedBy("mAm")
-    public void trimHistoricStatesWriteLocked() {
-        ArrayList<String> filesArray = getCommittedFiles(MAX_HISTORIC_STATES, false, true);
+    @GuardedBy("mFileLock")
+    private void trimHistoricStatesWriteLF() {
+        ArrayList<String> filesArray = getCommittedFilesLF(MAX_HISTORIC_STATES, false, true);
         if (filesArray == null) {
             return;
         }
@@ -427,8 +484,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
-    @GuardedBy("mAm")
-    boolean dumpFilteredProcessesCsvLocked(PrintWriter pw, String header,
+    @GuardedBy("mLock")
+    private boolean dumpFilteredProcessesCsvLocked(PrintWriter pw, String header,
             boolean sepScreenStates, int[] screenStates, boolean sepMemStates, int[] memStates,
             boolean sepProcStates, int[] procStates, long now, String reqPackage) {
         ArrayList<ProcessState> procs = mProcessStats.collectProcessesLocked(
@@ -502,20 +559,21 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return res;
     }
 
+    @Override
     public byte[] getCurrentStats(List<ParcelFileDescriptor> historic) {
         mAm.mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_USAGE_STATS, null);
         Parcel current = Parcel.obtain();
-        synchronized (mAm) {
+        synchronized (mLock) {
             long now = SystemClock.uptimeMillis();
             mProcessStats.mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
             mProcessStats.mTimePeriodEndUptime = now;
             mProcessStats.writeToParcel(current, now, 0);
         }
-        mWriteLock.lock();
+        mFileLock.lock();
         try {
             if (historic != null) {
-                ArrayList<String> files = getCommittedFiles(0, false, true);
+                ArrayList<String> files = getCommittedFilesLF(0, false, true);
                 if (files != null) {
                     for (int i=files.size()-1; i>=0; i--) {
                         try {
@@ -529,7 +587,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 }
             }
         } finally {
-            mWriteLock.unlock();
+            mFileLock.unlock();
         }
         return current.marshall();
     }
@@ -563,9 +621,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 android.Manifest.permission.PACKAGE_USAGE_STATS, null);
 
         long newHighWaterMark = highWaterMarkMs;
-        mWriteLock.lock();
+        mFileLock.lock();
         try {
-            ArrayList<String> files = getCommittedFiles(0, false, true);
+            ArrayList<String> files = getCommittedFilesLF(0, false, true);
             if (files != null) {
                 String highWaterMarkStr =
                         DateFormat.format("yyyy-MM-dd-HH-mm-ss", highWaterMarkMs).toString();
@@ -612,7 +670,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         } catch (IOException e) {
             Slog.w(TAG, "Failure opening procstat file", e);
         } finally {
-            mWriteLock.unlock();
+            mFileLock.unlock();
         }
         return newHighWaterMark;
     }
@@ -625,7 +683,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return mAm.mConstants.MIN_ASSOC_LOG_DURATION;
     }
 
-    private ParcelFileDescriptor protoToParcelFileDescriptor(ProcessStats stats, int section)
+    private static ParcelFileDescriptor protoToParcelFileDescriptor(ProcessStats stats, int section)
             throws IOException {
         final ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
         Thread thr = new Thread("ProcessStats pipe output") {
@@ -645,12 +703,13 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return fds[0];
     }
 
+    @Override
     public ParcelFileDescriptor getStatsOverTime(long minTime) {
         mAm.mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_USAGE_STATS, null);
         Parcel current = Parcel.obtain();
         long curTime;
-        synchronized (mAm) {
+        synchronized (mLock) {
             long now = SystemClock.uptimeMillis();
             mProcessStats.mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
             mProcessStats.mTimePeriodEndUptime = now;
@@ -658,11 +717,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             curTime = mProcessStats.mTimePeriodEndRealtime
                     - mProcessStats.mTimePeriodStartRealtime;
         }
-        mWriteLock.lock();
+        mFileLock.lock();
         try {
             if (curTime < minTime) {
                 // Need to add in older stats to reach desired time.
-                ArrayList<String> files = getCommittedFiles(0, false, true);
+                ArrayList<String> files = getCommittedFilesLF(0, false, true);
                 if (files != null && files.size() > 0) {
                     current.setDataPosition(0);
                     ProcessStats stats = ProcessStats.CREATOR.createFromParcel(current);
@@ -673,7 +732,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         AtomicFile file = new AtomicFile(new File(files.get(i)));
                         i--;
                         ProcessStats moreStats = new ProcessStats(false);
-                        readLocked(moreStats, file);
+                        readLF(moreStats, file);
                         if (moreStats.mReadError == null) {
                             stats.add(moreStats);
                             StringBuilder sb = new StringBuilder();
@@ -712,13 +771,14 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         } catch (IOException e) {
             Slog.w(TAG, "Failed building output pipe", e);
         } finally {
-            mWriteLock.unlock();
+            mFileLock.unlock();
         }
         return null;
     }
 
+    @Override
     public int getCurrentMemoryState() {
-        synchronized (mAm) {
+        synchronized (mLock) {
             return mLastMemOnlyState;
         }
     }
@@ -795,7 +855,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         if (!com.android.internal.util.DumpUtils.checkDumpAndUsageStatsPermission(mAm.mContext,
                 TAG, pw)) return;
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             if (args.length > 0) {
                 if ("--proto".equals(args[0])) {
@@ -947,7 +1007,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 } else if ("--current".equals(arg)) {
                     currentOnly = true;
                 } else if ("--commit".equals(arg)) {
-                    synchronized (mAm) {
+                    synchronized (mLock) {
                         mProcessStats.mFlags |= ProcessStats.FLAG_COMPLETE;
                         writeStateLocked(true, true);
                         pw.println("Process stats committed.");
@@ -962,54 +1022,60 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     }
                     section = parseSectionOptions(args[i]);
                 } else if ("--clear".equals(arg)) {
-                    synchronized (mAm) {
+                    synchronized (mLock) {
                         mProcessStats.resetSafely();
-                        mAm.requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
-                        ArrayList<String> files = getCommittedFiles(0, true, true);
-                        if (files != null) {
-                            for (int fi=0; fi<files.size(); fi++) {
-                                (new File(files.get(fi))).delete();
+                        scheduleRequestPssAllProcs(true, false);
+                        mFileLock.lock();
+                        try {
+                            ArrayList<String> files = getCommittedFilesLF(0, true, true);
+                            if (files != null) {
+                                for (int fi = files.size() - 1; fi >= 0; fi--) {
+                                    (new File(files.get(fi))).delete();
+                                }
                             }
+                        } finally {
+                            mFileLock.unlock();
                         }
                         pw.println("All process stats cleared.");
                         quit = true;
                     }
                 } else if ("--write".equals(arg)) {
-                    synchronized (mAm) {
+                    synchronized (mLock) {
                         writeStateSyncLocked();
                         pw.println("Process stats written.");
                         quit = true;
                     }
                 } else if ("--read".equals(arg)) {
-                    synchronized (mAm) {
-                        readLocked(mProcessStats, mFile);
-                        pw.println("Process stats read.");
-                        quit = true;
+                    synchronized (mLock) {
+                        mFileLock.lock();
+                        try {
+                            readLF(mProcessStats, mFile);
+                            pw.println("Process stats read.");
+                            quit = true;
+                        } finally {
+                            mFileLock.unlock();
+                        }
                     }
                 } else if ("--start-testing".equals(arg)) {
-                    synchronized (mAm) {
-                        mAm.setTestPssMode(true);
-                        pw.println("Started high frequency sampling.");
-                        quit = true;
-                    }
+                    mAm.mAppProfiler.setTestPssMode(true);
+                    pw.println("Started high frequency sampling.");
+                    quit = true;
                 } else if ("--stop-testing".equals(arg)) {
-                    synchronized (mAm) {
-                        mAm.setTestPssMode(false);
-                        pw.println("Stopped high frequency sampling.");
-                        quit = true;
-                    }
+                    mAm.mAppProfiler.setTestPssMode(false);
+                    pw.println("Stopped high frequency sampling.");
+                    quit = true;
                 } else if ("--pretend-screen-on".equals(arg)) {
-                    synchronized (mAm) {
+                    synchronized (mLock) {
                         mInjectedScreenState = true;
                     }
                     quit = true;
                 } else if ("--pretend-screen-off".equals(arg)) {
-                    synchronized (mAm) {
+                    synchronized (mLock) {
                         mInjectedScreenState = false;
                     }
                     quit = true;
                 } else if ("--stop-pretend-screen".equals(arg)) {
-                    synchronized (mAm) {
+                    synchronized (mLock) {
                         mInjectedScreenState = null;
                     }
                     quit = true;
@@ -1060,7 +1126,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 }
             }
             pw.println();
-            synchronized (mAm) {
+            synchronized (mLock) {
                 dumpFilteredProcessesCsvLocked(pw, null,
                         csvSepScreenStats, csvScreenStats, csvSepMemStats, csvMemStats,
                         csvSepProcStats, csvProcStats, now, reqPackage);
@@ -1090,14 +1156,26 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             return;
         } else if (lastIndex > 0) {
             pw.print("LAST STATS AT INDEX "); pw.print(lastIndex); pw.println(":");
-            ArrayList<String> files = getCommittedFiles(0, false, true);
-            if (lastIndex >= files.size()) {
-                pw.print("Only have "); pw.print(files.size()); pw.println(" data sets");
-                return;
+
+            ArrayList<String> files;
+            AtomicFile file;
+            ProcessStats processStats;
+
+            mFileLock.lock();
+            try {
+                files = getCommittedFilesLF(0, false, true);
+                if (lastIndex >= files.size()) {
+                    pw.print("Only have "); pw.print(files.size()); pw.println(" data sets");
+                    return;
+                }
+                file = new AtomicFile(new File(files.get(lastIndex)));
+                processStats = new ProcessStats(false);
+                readLF(processStats, file);
+            } finally {
+                mFileLock.unlock();
             }
-            AtomicFile file = new AtomicFile(new File(files.get(lastIndex)));
-            ProcessStats processStats = new ProcessStats(false);
-            readLocked(processStats, file);
+
+            // No lock is needed now, since only us have the access to the 'processStats'.
             if (processStats.mReadError != null) {
                 if (isCheckin || isCompact) pw.print("err,");
                 pw.print("Failure reading "); pw.print(files.get(lastIndex));
@@ -1118,7 +1196,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     processStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpDetails,
                             dumpAll, activeOnly, section);
                     if (dumpAll) {
-                        pw.print("  mFile="); pw.println(mFile.getBaseFile());
+                        pw.print("  mFile="); pw.println(getCurrentFile());
                     }
                 } else {
                     processStats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
@@ -1129,9 +1207,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
         boolean sepNeeded = false;
         if ((dumpAll || isCheckin) && !currentOnly) {
-            mWriteLock.lock();
+            mFileLock.lock();
             try {
-                ArrayList<String> files = getCommittedFiles(0, false, !isCheckin);
+                ArrayList<String> files = getCommittedFilesLF(0, false, !isCheckin);
                 if (files != null) {
                     int start = isCheckin ? 0 : (files.size() - maxNum);
                     if (start < 0) {
@@ -1142,7 +1220,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         try {
                             AtomicFile file = new AtomicFile(new File(files.get(i)));
                             ProcessStats processStats = new ProcessStats(false);
-                            readLocked(processStats, file);
+                            readLF(processStats, file);
                             if (processStats.mReadError != null) {
                                 if (isCheckin || isCompact) pw.print("err,");
                                 pw.print("Failure reading "); pw.print(files.get(i));
@@ -1188,11 +1266,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     }
                 }
             } finally {
-                mWriteLock.unlock();
+                mFileLock.unlock();
             }
         }
         if (!isCheckin) {
-            synchronized (mAm) {
+            synchronized (mLock) {
                 if (isCompact) {
                     mProcessStats.dumpCheckinLocked(pw, reqPackage, section);
                 } else {
@@ -1204,7 +1282,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         mProcessStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpDetails,
                                 dumpAll, activeOnly, section);
                         if (dumpAll) {
-                            pw.print("  mFile="); pw.println(mFile.getBaseFile());
+                            pw.print("  mFile="); pw.println(getCurrentFile());
                         }
                     } else {
                         mProcessStats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
@@ -1249,7 +1327,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
         // dump current procstats
         long now;
-        synchronized (mAm) {
+        synchronized (mLock) {
             now = SystemClock.uptimeMillis();
             final long token = proto.start(ProcessStatsServiceDumpProto.PROCSTATS_NOW);
             mProcessStats.dumpDebug(proto, now, ProcessStats.REPORT_ALL);

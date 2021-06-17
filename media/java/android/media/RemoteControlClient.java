@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
 import android.media.session.PlaybackState;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -47,7 +48,7 @@ import android.util.Log;
  * // build the PendingIntent for the remote control client
  * Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
  * mediaButtonIntent.setComponent(myEventReceiver);
- * PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, mediaButtonIntent, 0);
+ * PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, mediaButtonIntent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
  * // create and register the remote control client
  * RemoteControlClient myRemoteControlClient = new RemoteControlClient(mediaPendingIntent);
  * myAudioManager.registerRemoteControlClient(myRemoteControlClient);</pre>
@@ -816,7 +817,7 @@ import android.util.Log;
      * position updates. The playback position being "readable" is considered from the application's
      * point of view.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int MEDIA_POSITION_READABLE = 1 << 0;
     /**
      * @hide
@@ -824,7 +825,7 @@ import android.util.Log;
      * playback position updates. The playback position being "writable"
      * is considered from the application's point of view.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int MEDIA_POSITION_WRITABLE = 1 << 1;
 
     /** @hide */

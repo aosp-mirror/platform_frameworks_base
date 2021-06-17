@@ -23,6 +23,7 @@ import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -41,8 +42,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
+import android.telephony.TelephonyCallback;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -53,7 +53,6 @@ import android.widget.BaseAdapter;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.UserIcons;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.systemui.Dumpable;
 import com.android.systemui.GuestResumeSessionReceiver;
@@ -62,12 +61,15 @@ import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.qs.tiles.UserDetailView;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.telephony.TelephonyListenerManager;
+import com.android.systemui.user.CreateUserActivity;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -76,12 +78,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
+import javax.inject.Provider;
 
 /**
  * Keeps a list of all users on the device for user switching.
  */
-@Singleton
+@SysUISingleton
 public class UserSwitcherController implements Dumpable {
 
     public static final float USER_SWITCH_ENABLED_ALPHA = 1.0f;
@@ -98,12 +100,13 @@ public class UserSwitcherController implements Dumpable {
     protected final Context mContext;
     protected final UserManager mUserManager;
     private final ArrayList<WeakReference<BaseUserAdapter>> mAdapters = new ArrayList<>();
-    private final GuestResumeSessionReceiver mGuestResumeSessionReceiver
-            = new GuestResumeSessionReceiver();
+    private final GuestResumeSessionReceiver mGuestResumeSessionReceiver;
     private final KeyguardStateController mKeyguardStateController;
     protected final Handler mHandler;
     private final ActivityStarter mActivityStarter;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final TelephonyListenerManager mTelephonyListenerManager;
+    private final IActivityTaskManager mActivityTaskManager;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     private Dialog mExitGuestDialog;
@@ -111,20 +114,29 @@ public class UserSwitcherController implements Dumpable {
     private int mLastNonGuestUser = UserHandle.USER_SYSTEM;
     private boolean mResumeUserOnGuestLogout = true;
     private boolean mSimpleUserSwitcher;
-    private boolean mAddUsersWhenLocked;
+    // When false, there won't be any visual affordance to add a new user from the keyguard even if
+    // the user is unlocked
+    private boolean mAddUsersFromLockScreen;
     private boolean mPauseRefreshUsers;
     private int mSecondaryUser = UserHandle.USER_NULL;
     private Intent mSecondaryUserServiceIntent;
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
     private final UiEventLogger mUiEventLogger;
+    public final DetailAdapter mUserDetailAdapter;
 
     @Inject
     public UserSwitcherController(Context context, KeyguardStateController keyguardStateController,
             @Main Handler handler, ActivityStarter activityStarter,
-            BroadcastDispatcher broadcastDispatcher, UiEventLogger uiEventLogger) {
+            BroadcastDispatcher broadcastDispatcher, UiEventLogger uiEventLogger,
+            TelephonyListenerManager telephonyListenerManager,
+            IActivityTaskManager activityTaskManager, UserDetailAdapter userDetailAdapter) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
+        mTelephonyListenerManager = telephonyListenerManager;
+        mActivityTaskManager = activityTaskManager;
         mUiEventLogger = uiEventLogger;
+        mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(mUiEventLogger);
+        mUserDetailAdapter = userDetailAdapter;
         if (!UserManager.isGuestUserEphemeral()) {
             mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
         }
@@ -200,13 +212,13 @@ public class UserSwitcherController implements Dumpable {
         }
         mForcePictureLoadForUserId.clear();
 
-        final boolean addUsersWhenLocked = mAddUsersWhenLocked;
+        final boolean addUsersWhenLocked = mAddUsersFromLockScreen;
         new AsyncTask<SparseArray<Bitmap>, Void, ArrayList<UserRecord>>() {
             @SuppressWarnings("unchecked")
             @Override
             protected ArrayList<UserRecord> doInBackground(SparseArray<Bitmap>... params) {
                 final SparseArray<Bitmap> bitmaps = params[0];
-                List<UserInfo> infos = mUserManager.getUsers(true);
+                List<UserInfo> infos = mUserManager.getAliveUsers();
                 if (infos == null) {
                     return null;
                 }
@@ -363,7 +375,7 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
-    public void switchTo(UserRecord record) {
+    private void onUserListItemClicked(UserRecord record) {
         int id;
         if (record.isGuest && record.info == null) {
             // No guest user. Create one.
@@ -380,6 +392,7 @@ public class UserSwitcherController implements Dumpable {
                 // haven't reloaded the user list yet.
                 return;
             }
+            mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_ADD);
             id = guest.id;
         } else if (record.isAddUser) {
             showAddUserDialog();
@@ -408,19 +421,6 @@ public class UserSwitcherController implements Dumpable {
         switchToUserId(id);
     }
 
-    public void switchTo(int userId) {
-        final int count = mUsers.size();
-        for (int i = 0; i < count; ++i) {
-            UserRecord record = mUsers.get(i);
-            if (record.info != null && record.info.id == userId) {
-                switchTo(record);
-                return;
-            }
-        }
-
-        Log.e(TAG, "Couldn't switch to user, id=" + userId);
-    }
-
     protected void switchToUserId(int id) {
         try {
             pauseRefreshUsers();
@@ -430,7 +430,7 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
-    private void showExitGuestDialog(int id) {
+    protected void showExitGuestDialog(int id) {
         int newId = UserHandle.USER_SYSTEM;
         if (mResumeUserOnGuestLogout && mLastNonGuestUser != UserHandle.USER_SYSTEM) {
             UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
@@ -463,18 +463,15 @@ public class UserSwitcherController implements Dumpable {
     }
 
     private void listenForCallState() {
-        final TelephonyManager tele =
-            (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        if (tele != null) {
-            tele.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
-        }
+        mTelephonyListenerManager.addCallStateListener(mPhoneStateListener);
     }
 
-    private final PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+    private final TelephonyCallback.CallStateListener mPhoneStateListener =
+            new TelephonyCallback.CallStateListener() {
         private int mCallState;
 
         @Override
-        public void onCallStateChanged(int state, String incomingNumber) {
+        public void onCallStateChanged(int state) {
             if (mCallState == state) return;
             if (DEBUG) Log.v(TAG, "Call state changed: " + state);
             mCallState = state;
@@ -563,7 +560,7 @@ public class UserSwitcherController implements Dumpable {
     private final ContentObserver mSettingsObserver = new ContentObserver(new Handler()) {
         public void onChange(boolean selfChange) {
             mSimpleUserSwitcher = shouldUseSimpleUserSwitcher();
-            mAddUsersWhenLocked = Settings.Global.getInt(mContext.getContentResolver(),
+            mAddUsersFromLockScreen = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0;
             refreshUsers(UserHandle.USER_NULL);
         };
@@ -581,11 +578,13 @@ public class UserSwitcherController implements Dumpable {
         pw.println("mSimpleUserSwitcher=" + mSimpleUserSwitcher);
     }
 
-    public String getCurrentUserName(Context context) {
+    /** Returns the name of the current user of the phone. */
+    public String getCurrentUserName() {
         if (mUsers.isEmpty()) return null;
         UserRecord item = mUsers.get(0);
         if (item == null || item.info == null) return null;
-        if (item.isGuest) return context.getString(com.android.settingslib.R.string.guest_nickname);
+        if (item.isGuest) return mContext.getString(
+                com.android.settingslib.R.string.guest_nickname);
         return item.info.name;
     }
 
@@ -614,51 +613,38 @@ public class UserSwitcherController implements Dumpable {
             controller.addAdapter(new WeakReference<>(this));
         }
 
+        protected ArrayList<UserRecord> getUsers() {
+            return mController.getUsers();
+        }
+
         public int getUserCount() {
-            boolean secureKeyguardShowing = mKeyguardStateController.isShowing()
-                    && mKeyguardStateController.isMethodSecure()
-                    && !mKeyguardStateController.canDismissLockScreen();
-            if (!secureKeyguardShowing) {
-                return mController.getUsers().size();
-            }
-            // The lock screen is secure and showing. Filter out restricted records.
-            final int N = mController.getUsers().size();
-            int count = 0;
-            for (int i = 0; i < N; i++) {
-                if (mController.getUsers().get(i).isGuest) continue;
-                if (mController.getUsers().get(i).isRestricted) {
-                    break;
-                } else {
-                    count++;
-                }
-            }
-            return count;
+            return countUsers(false);
         }
 
         @Override
         public int getCount() {
-            boolean secureKeyguardShowing = mKeyguardStateController.isShowing()
-                    && mKeyguardStateController.isMethodSecure()
-                    && !mKeyguardStateController.canDismissLockScreen();
-            if (!secureKeyguardShowing) {
-                return mController.getUsers().size();
-            }
-            // The lock screen is secure and showing. Filter out restricted records.
-            final int N = mController.getUsers().size();
+            return countUsers(true);
+        }
+
+        private int countUsers(boolean includeGuest) {
+            boolean keyguardShowing = mKeyguardStateController.isShowing();
+            final int userSize = getUsers().size();
             int count = 0;
-            for (int i = 0; i < N; i++) {
-                if (mController.getUsers().get(i).isRestricted) {
-                    break;
-                } else {
-                    count++;
+            for (int i = 0; i < userSize; i++) {
+                if (getUsers().get(i).isGuest && !includeGuest) {
+                    continue;
                 }
+                if (getUsers().get(i).isRestricted && keyguardShowing) {
+                    break;
+                }
+                count++;
             }
             return count;
         }
 
         @Override
         public UserRecord getItem(int position) {
-            return mController.getUsers().get(position);
+            return getUsers().get(position);
         }
 
         @Override
@@ -666,8 +652,11 @@ public class UserSwitcherController implements Dumpable {
             return position;
         }
 
-        public void switchTo(UserRecord record) {
-            mController.switchTo(record);
+        /**
+         * It handles click events on user list items.
+         */
+        public void onUserListItemClicked(UserRecord record) {
+            mController.onUserListItemClicked(record);
         }
 
         public String getName(Context context, UserRecord item) {
@@ -798,8 +787,18 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
-    public final DetailAdapter userDetailAdapter = new DetailAdapter() {
+    public static class UserDetailAdapter implements DetailAdapter {
         private final Intent USER_SETTINGS_INTENT = new Intent(Settings.ACTION_USER_SETTINGS);
+
+        private final Context mContext;
+        private final Provider<UserDetailView.Adapter> mUserDetailViewAdapterProvider;
+
+        @Inject
+        UserDetailAdapter(Context context,
+                Provider<UserDetailView.Adapter> userDetailViewAdapterProvider) {
+            mContext = context;
+            mUserDetailViewAdapterProvider = userDetailViewAdapterProvider;
+        }
 
         @Override
         public CharSequence getTitle() {
@@ -811,7 +810,7 @@ public class UserSwitcherController implements Dumpable {
             UserDetailView v;
             if (!(convertView instanceof UserDetailView)) {
                 v = UserDetailView.inflate(context, parent, false);
-                v.createAndSetAdapter(UserSwitcherController.this, mUiEventLogger);
+                v.setAdapter(mUserDetailViewAdapterProvider.get());
             } else {
                 v = (UserDetailView) convertView;
             }
@@ -822,6 +821,11 @@ public class UserSwitcherController implements Dumpable {
         @Override
         public Intent getSettingsIntent() {
             return USER_SETTINGS_INTENT;
+        }
+
+        @Override
+        public int getSettingsText() {
+            return R.string.quick_settings_more_user_settings;
         }
 
         @Override
@@ -895,6 +899,7 @@ public class UserSwitcherController implements Dumpable {
             if (which == BUTTON_NEGATIVE) {
                 cancel();
             } else {
+                mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
                 dismiss();
                 exitGuest(mGuestId, mTargetId);
             }
@@ -924,18 +929,33 @@ public class UserSwitcherController implements Dumpable {
                 if (ActivityManager.isUserAMonkey()) {
                     return;
                 }
-                UserInfo user = mUserManager.createUser(
-                        mContext.getString(R.string.user_new_user_name), 0 /* flags */);
-                if (user == null) {
-                    // Couldn't create user, most likely because there are too many, but we haven't
-                    // been able to reload the list yet.
-                    return;
+                Intent intent = CreateUserActivity.createIntentForStart(getContext());
+
+                // There are some differences between ActivityStarter and ActivityTaskManager in
+                // terms of how they start an activity. ActivityStarter hides the notification bar
+                // before starting the activity to make sure nothing is in front of the new
+                // activity. ActivityStarter also tries to unlock the device if it's locked.
+                // When locked with PIN/pattern/password then it shows the prompt, if there are no
+                // security steps then it dismisses the keyguard and then starts the activity.
+                // ActivityTaskManager doesn't hide the notification bar or unlocks the device, but
+                // it can start an activity on top of the locked screen.
+                if (!mKeyguardStateController.isUnlocked()
+                        && !mKeyguardStateController.canDismissLockScreen()) {
+                    // Device is locked and can't be unlocked without a PIN/pattern/password so we
+                    // need to use ActivityTaskManager to start the activity on top of the locked
+                    // screen.
+                    try {
+                        mActivityTaskManager.startActivity(null,
+                                mContext.getBasePackageName(), mContext.getAttributionTag(), intent,
+                                intent.resolveTypeIfNeeded(mContext.getContentResolver()), null,
+                                null, 0, 0, null, null);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "Couldn't start create user activity", e);
+                    }
+                } else {
+                    mActivityStarter.startActivity(intent, true);
                 }
-                int id = user.id;
-                Bitmap icon = UserIcons.convertToBitmap(UserIcons.getDefaultUserIcon(
-                        mContext.getResources(), id, /* light= */ false));
-                mUserManager.setUserIcon(id, icon);
-                switchToUserId(id);
             }
         }
     }

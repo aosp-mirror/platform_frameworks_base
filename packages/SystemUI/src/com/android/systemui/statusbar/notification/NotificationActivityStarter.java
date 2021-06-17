@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification;
 
 import android.content.Intent;
 import android.service.notification.StatusBarNotification;
+import android.view.View;
 
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -33,7 +34,8 @@ public interface NotificationActivityStarter {
     void startNotificationGutsIntent(Intent intent, int appUid,
             ExpandableNotificationRow row);
 
-    void startHistoryIntent(boolean showHistory);
+    /** Called when the user clicks "Manage" or "History" in the Shade. */
+    void startHistoryIntent(View view, boolean showHistory);
 
     default boolean isCollapsingToShowActivityOverLockscreen() {
         return false;

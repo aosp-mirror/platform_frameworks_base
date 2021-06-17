@@ -18,8 +18,8 @@ package com.android.systemui.statusbar;
 
 import android.view.View;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 /**
@@ -105,9 +105,7 @@ public class CrossFadeHelper {
             }
         } else if (view.getLayerType() == View.LAYER_TYPE_HARDWARE
                 && view.getTag(R.id.cross_fade_layer_type_changed_tag) != null) {
-            if (view.getTag(R.id.cross_fade_layer_type_changed_tag) != null) {
-                view.setLayerType(View.LAYER_TYPE_NONE, null);
-            }
+            view.setLayerType(View.LAYER_TYPE_NONE, null);
         }
     }
 

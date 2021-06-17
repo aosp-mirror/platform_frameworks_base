@@ -182,14 +182,18 @@ static bool getAppInfo(const String8& path, AppInfo& outInfo) {
                 if (type >= Res_value::TYPE_FIRST_INT && type <= Res_value::TYPE_LAST_INT) {
                     outInfo.minSdkVersion = xml.getAttributeData(idx);
                 } else if (type == Res_value::TYPE_STRING) {
-                    String8 minSdk8(xml.getStrings().string8ObjectAt(idx));
-                    char* endPtr;
-                    int minSdk = strtol(minSdk8.string(), &endPtr, 10);
-                    if (endPtr != minSdk8.string() + minSdk8.size()) {
-                        fprintf(stderr, "warning: failed to parse android:minSdkVersion '%s'\n",
-                                minSdk8.string());
+                    auto minSdk8 = xml.getStrings().string8ObjectAt(idx);
+                    if (!minSdk8.has_value()) {
+                        fprintf(stderr, "warning: failed to retrieve android:minSdkVersion.\n");
                     } else {
-                        outInfo.minSdkVersion = minSdk;
+                        char *endPtr;
+                        int minSdk = strtol(minSdk8->string(), &endPtr, 10);
+                        if (endPtr != minSdk8->string() + minSdk8->size()) {
+                            fprintf(stderr, "warning: failed to parse android:minSdkVersion '%s'\n",
+                                    minSdk8->string());
+                        } else {
+                            outInfo.minSdkVersion = minSdk;
+                        }
                     }
                 } else {
                     fprintf(stderr, "warning: unrecognized value for android:minSdkVersion.\n");

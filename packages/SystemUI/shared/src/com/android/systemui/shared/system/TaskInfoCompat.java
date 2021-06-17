@@ -17,8 +17,11 @@
 package com.android.systemui.shared.system;
 
 import android.app.ActivityManager;
+import android.app.PictureInPictureParams;
 import android.app.TaskInfo;
 import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
+import android.graphics.Rect;
 
 public class TaskInfoCompat {
 
@@ -34,6 +37,10 @@ public class TaskInfoCompat {
         return info.configuration.windowConfiguration.getWindowingMode();
     }
 
+    public static Rect getWindowConfigurationBounds(TaskInfo info) {
+        return info.configuration.windowConfiguration.getBounds();
+    }
+
     public static boolean supportsSplitScreenMultiWindow(TaskInfo info) {
         return info.supportsSplitScreenMultiWindow;
     }
@@ -44,5 +51,17 @@ public class TaskInfoCompat {
 
     public static ActivityManager.TaskDescription getTaskDescription(TaskInfo info) {
         return info.taskDescription;
+    }
+
+    public static ActivityInfo getTopActivityInfo(TaskInfo info) {
+        return info.topActivityInfo;
+    }
+
+    public static boolean isAutoEnterPipEnabled(PictureInPictureParams params) {
+        return params.isAutoEnterEnabled();
+    }
+
+    public static Rect getPipSourceRectHint(PictureInPictureParams params) {
+        return params.getSourceRectHint();
     }
 }

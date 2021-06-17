@@ -200,7 +200,7 @@ skip_bytes(int fd, ssize_t size, char* scratch, int scratchSize)
 
 static int
 skip_unknown_field(int fd, uint64_t tag, char* scratch, int scratchSize) {
-    bool done;
+    bool done = false;
     int err;
     uint64_t size;
     switch (tag & 0x7) {

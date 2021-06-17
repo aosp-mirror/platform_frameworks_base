@@ -29,9 +29,9 @@
         android:id="@android:id/widget_frame"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:paddingHorizontal="20dp"
         android:gravity="center"
         android:minWidth="56dp"
-        android:layout_marginEnd="16dp"
         android:orientation="vertical"/>
 
     <LinearLayout
@@ -58,16 +58,15 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:paddingTop="16dp"
-        android:paddingBottom="16dp">
+        android:paddingBottom="16dp"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
         <TextView
             android:id="@android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceListItem"
-            android:ellipsize="marquee"
-            android:fadingEdge="horizontal"/>
+            android:maxLines="2"
+            android:textAppearance="?android:attr/textAppearanceListItem"/>
 
         <LinearLayout
             android:id="@+id/summary_container"
@@ -92,16 +91,33 @@
                 android:textAlignment="viewEnd"
                 android:textColor="?android:attr/textColorSecondary"
                 android:maxLines="1"
+                android:visibility="gone"
                 android:ellipsize="end"/>
         </LinearLayout>
-        <ProgressBar
-            android:id="@android:id/progress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:max="100"
-            android:visibility="gone"/>
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/radio_extra_widget_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <View
+            android:layout_width=".75dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="?android:attr/dividerVertical" />
+        <ImageView
+            android:id="@+id/radio_extra_widget"
+            android:layout_width="match_parent"
+            android:minWidth="@dimen/two_target_min_width"
+            android:layout_height="fill_parent"
+            android:src="@drawable/ic_settings_accent"
+            android:contentDescription="@string/settings_label"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:layout_gravity="center"
+            android:background="?android:attr/selectableItemBackground" />
+    </LinearLayout>
 </LinearLayout>

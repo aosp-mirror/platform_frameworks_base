@@ -273,7 +273,7 @@ public class SyncStatusInfo implements Parcelable {
                     totalStats.numSyncs - totalStats.numSourceLocal - totalStats.numSourcePoll
                             - totalStats.numSourceOther
                             - totalStats.numSourceUser;
-            if (totalStats.numSourcePeriodic < 0) { // Sanity check.
+            if (totalStats.numSourcePeriodic < 0) { // Consistency check.
                 totalStats.numSourcePeriodic = 0;
             }
         } else {

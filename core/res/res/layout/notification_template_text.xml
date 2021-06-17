@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2016 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +13,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<com.android.internal.widget.ImageFloatingTextView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.ImageFloatingTextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Widget.DeviceDefault.Notification.Text"
     android:id="@+id/text"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/notification_text_height"
     android:layout_gravity="top"
     android:layout_marginTop="@dimen/notification_text_margin_top"
     android:ellipsize="marquee"

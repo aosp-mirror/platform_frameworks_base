@@ -16,9 +16,13 @@
 
 package com.android.server;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.os.UserManager;
+
+import com.android.server.SystemService.TargetUser;
 
 class BluetoothService extends SystemService {
     private BluetoothManagerService mBluetoothManagerService;
@@ -52,16 +56,16 @@ class BluetoothService extends SystemService {
     }
 
     @Override
-    public void onSwitchUser(int userHandle) {
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         if (!mInitialized) {
             initialize();
         } else {
-            mBluetoothManagerService.handleOnSwitchUser(userHandle);
+            mBluetoothManagerService.handleOnSwitchUser(to.getUserIdentifier());
         }
     }
 
     @Override
-    public void onUnlockUser(int userHandle) {
-        mBluetoothManagerService.handleOnUnlockUser(userHandle);
+    public void onUserUnlocking(@NonNull TargetUser user) {
+        mBluetoothManagerService.handleOnUnlockUser(user.getUserIdentifier());
     }
 }

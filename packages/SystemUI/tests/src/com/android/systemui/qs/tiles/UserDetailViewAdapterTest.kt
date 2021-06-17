@@ -28,6 +28,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.UserIcons
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import org.junit.Assert.assertEquals
@@ -53,6 +54,7 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
     @Mock private lateinit var mInflatedUserDetailItemView: UserDetailItemView
     @Mock private lateinit var mUserInfo: UserInfo
     @Mock private lateinit var mLayoutInflater: LayoutInflater
+    private var falsingManagerFake: FalsingManagerFake = FalsingManagerFake()
     private lateinit var adapter: UserDetailView.Adapter
     private lateinit var uiEventLogger: UiEventLoggerFake
     private lateinit var mPicture: Bitmap
@@ -65,7 +67,9 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE, mLayoutInflater)
         `when`(mLayoutInflater.inflate(anyInt(), any(ViewGroup::class.java), anyBoolean()))
                 .thenReturn(mInflatedUserDetailItemView)
-        adapter = UserDetailView.Adapter(mContext, mUserSwitcherController, uiEventLogger)
+        `when`(mParent.context).thenReturn(mContext)
+        adapter = UserDetailView.Adapter(mContext, mUserSwitcherController, uiEventLogger,
+                falsingManagerFake)
         mPicture = UserIcons.convertToBitmap(mContext.getDrawable(R.drawable.ic_avatar_user))
     }
 

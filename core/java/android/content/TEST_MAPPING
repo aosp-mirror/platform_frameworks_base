@@ -1,0 +1,55 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsContentTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "include-filter": "android.content.wm.cts"
+        }
+      ],
+      "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java"]
+    },
+    {
+      "name": "CtsOsTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "include-filter": "android.os.cts.StrictModeTest"
+        }
+      ],
+      "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java"]
+    },
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "include-filter": "android.content.ContextTest"
+        },
+        {
+          "include-filter": "android.content.ComponentCallbacksControllerTest"
+        }
+      ],
+      "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java", "(/|^)ComponentCallbacksController.java"]
+    }
+  ]
+}

@@ -35,22 +35,22 @@ public final class InputApplicationHandle {
     public final @NonNull String name;
 
     // Dispatching timeout.
-    public final long dispatchingTimeoutNanos;
+    public final long dispatchingTimeoutMillis;
 
-    public final IBinder token;
+    public final @NonNull IBinder token;
 
     private native void nativeDispose();
 
     public InputApplicationHandle(@NonNull IBinder token, @NonNull String name,
-            long dispatchingTimeoutNanos) {
+            long dispatchingTimeoutMillis) {
         this.token = token;
         this.name = name;
-        this.dispatchingTimeoutNanos = dispatchingTimeoutNanos;
+        this.dispatchingTimeoutMillis = dispatchingTimeoutMillis;
     }
 
     public InputApplicationHandle(InputApplicationHandle handle) {
         this.token = handle.token;
-        this.dispatchingTimeoutNanos = handle.dispatchingTimeoutNanos;
+        this.dispatchingTimeoutMillis = handle.dispatchingTimeoutMillis;
         this.name = handle.name;
     }
 

@@ -57,6 +57,64 @@ public final class AudioPresentation {
     /** @hide */
     @IntDef(
         value = {
+        CONTENT_UNKNOWN,
+        CONTENT_MAIN,
+        CONTENT_MUSIC_AND_EFFECTS,
+        CONTENT_VISUALLY_IMPAIRED,
+        CONTENT_HEARING_IMPAIRED,
+        CONTENT_DIALOG,
+        CONTENT_COMMENTARY,
+        CONTENT_EMERGENCY,
+        CONTENT_VOICEOVER,
+    })
+
+    /**
+     * The ContentClassifier int definitions represent the AudioPresentation content
+     * classifier (as per TS 103 190-1 v1.2.1 4.3.3.8.1)
+    */
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ContentClassifier {}
+
+    /**
+     * Audio presentation classifier: Unknown.
+     */
+    public static final int CONTENT_UNKNOWN                 = -1;
+    /**
+     * Audio presentation classifier: Complete main.
+     */
+    public static final int CONTENT_MAIN                    = 0;
+    /**
+     * Audio presentation content classifier: Music and effects.
+     */
+    public static final int CONTENT_MUSIC_AND_EFFECTS       = 1;
+    /**
+     * Audio presentation content classifier: Visually impaired.
+     */
+    public static final int CONTENT_VISUALLY_IMPAIRED       = 2;
+    /**
+     * Audio presentation content classifier: Hearing impaired.
+     */
+    public static final int CONTENT_HEARING_IMPAIRED        = 3;
+    /**
+     * Audio presentation content classifier: Dialog.
+     */
+    public static final int CONTENT_DIALOG                  = 4;
+    /**
+     * Audio presentation content classifier: Commentary.
+     */
+    public static final int CONTENT_COMMENTARY              = 5;
+    /**
+     * Audio presentation content classifier: Emergency.
+     */
+    public static final int CONTENT_EMERGENCY               = 6;
+    /**
+     * Audio presentation content classifier: Voice over.
+     */
+    public static final int CONTENT_VOICEOVER               = 7;
+
+    /** @hide */
+    @IntDef(
+        value = {
             MASTERING_NOT_INDICATED,
             MASTERED_FOR_STEREO,
             MASTERED_FOR_SURROUND,

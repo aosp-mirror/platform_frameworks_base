@@ -20,6 +20,7 @@
 #include <fstream>
 #include <memory>
 #include <ostream>
+#include <string>
 #include <vector>
 
 #include "Commands.h"
@@ -33,13 +34,14 @@
 #include "idmap2/PolicyUtils.h"
 #include "idmap2/SysTrace.h"
 
-using android::ApkAssets;
 using android::base::StringPrintf;
 using android::idmap2::BinaryStreamVisitor;
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Error;
 using android::idmap2::Idmap;
+using android::idmap2::OverlayResourceContainer;
 using android::idmap2::Result;
+using android::idmap2::TargetResourceContainer;
 using android::idmap2::Unit;
 using android::idmap2::utils::kIdmapCacheDir;
 using android::idmap2::utils::kIdmapFilePermissionMask;
@@ -90,9 +92,9 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
     fulfilled_policies |= PolicyFlags::PUBLIC;
   }
 
-  const std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
-  if (!target_apk) {
-    return Error("failed to load apk %s", target_apk_path.c_str());
+  const auto target = TargetResourceContainer::FromPath(target_apk_path);
+  if (!target) {
+    return Error("failed to load target '%s'", target_apk_path.c_str());
   }
 
   std::vector<std::string> idmap_paths;
@@ -104,16 +106,17 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
       continue;
     }
 
-    if (!Verify(idmap_path, target_apk_path, overlay_apk_path, fulfilled_policies,
+    // TODO(b/175014391): Support multiple overlay tags in OverlayConfig
+    if (!Verify(idmap_path, target_apk_path, overlay_apk_path, "", fulfilled_policies,
                 !ignore_overlayable)) {
-      const std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
-      if (!overlay_apk) {
+      const auto overlay = OverlayResourceContainer::FromPath(overlay_apk_path);
+      if (!overlay) {
         LOG(WARNING) << "failed to load apk " << overlay_apk_path.c_str();
         continue;
       }
 
       const auto idmap =
-          Idmap::FromApkAssets(*target_apk, *overlay_apk, fulfilled_policies, !ignore_overlayable);
+          Idmap::FromContainers(**target, **overlay, "", fulfilled_policies, !ignore_overlayable);
       if (!idmap) {
         LOG(WARNING) << "failed to create idmap";
         continue;

@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -37,6 +38,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -219,11 +221,11 @@ public final class NetworkStats implements Parcelable {
      * generated.
      */
     private long elapsedRealtime;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int size;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int capacity;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private String[] iface;
     @UnsupportedAppUsage
     private int[] uid;
@@ -231,21 +233,21 @@ public final class NetworkStats implements Parcelable {
     private int[] set;
     @UnsupportedAppUsage
     private int[] tag;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int[] metered;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int[] roaming;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int[] defaultNetwork;
     @UnsupportedAppUsage
     private long[] rxBytes;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long[] rxPackets;
     @UnsupportedAppUsage
     private long[] txBytes;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long[] txPackets;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long[] operations;
 
     /**
@@ -258,7 +260,7 @@ public final class NetworkStats implements Parcelable {
     @SystemApi
     public static class Entry {
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public String iface;
         /** @hide */
         @UnsupportedAppUsage
@@ -267,7 +269,7 @@ public final class NetworkStats implements Parcelable {
         @UnsupportedAppUsage
         public int set;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int tag;
         /**
          * Note that this is only populated w/ the default value when read from /proc or written
@@ -294,20 +296,20 @@ public final class NetworkStats implements Parcelable {
         @UnsupportedAppUsage
         public long rxBytes;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long rxPackets;
         /** @hide */
         @UnsupportedAppUsage
         public long txBytes;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long txPackets;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long operations;
 
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Entry() {
             this(IFACE_ALL, UID_ALL, SET_DEFAULT, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
         }
@@ -411,7 +413,7 @@ public final class NetworkStats implements Parcelable {
 
         /** @hide */
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o instanceof Entry) {
                 final Entry e = (Entry) o;
                 return uid == e.uid && set == e.set && tag == e.tag && metered == e.metered
@@ -454,7 +456,7 @@ public final class NetworkStats implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public NetworkStats(Parcel parcel) {
         elapsedRealtime = parcel.readLong();
         size = parcel.readInt();
@@ -1422,11 +1424,11 @@ public final class NetworkStats implements Parcelable {
      * @hide
      */
     public void migrateTun(int tunUid, @NonNull String tunIface,
-            @NonNull String[] underlyingIfaces) {
+            @NonNull List<String> underlyingIfaces) {
         // Combined usage by all apps using VPN.
         final Entry tunIfaceTotal = new Entry();
         // Usage by VPN, grouped by its {@code underlyingIfaces}.
-        final Entry[] perInterfaceTotal = new Entry[underlyingIfaces.length];
+        final Entry[] perInterfaceTotal = new Entry[underlyingIfaces.size()];
         // Usage by VPN, summed across all its {@code underlyingIfaces}.
         final Entry underlyingIfacesTotal = new Entry();
 
@@ -1467,7 +1469,7 @@ public final class NetworkStats implements Parcelable {
      *     {@code underlyingIfaces}
      */
     private void tunAdjustmentInit(int tunUid, @NonNull String tunIface,
-            @NonNull String[] underlyingIfaces, @NonNull Entry tunIfaceTotal,
+            @NonNull List<String> underlyingIfaces, @NonNull Entry tunIfaceTotal,
             @NonNull Entry[] perInterfaceTotal, @NonNull Entry underlyingIfacesTotal) {
         final Entry recycle = new Entry();
         for (int i = 0; i < size; i++) {
@@ -1487,8 +1489,8 @@ public final class NetworkStats implements Parcelable {
 
             if (recycle.uid == tunUid) {
                 // Add up traffic through tunUid's underlying interfaces.
-                for (int j = 0; j < underlyingIfaces.length; j++) {
-                    if (Objects.equals(underlyingIfaces[j], recycle.iface)) {
+                for (int j = 0; j < underlyingIfaces.size(); j++) {
+                    if (Objects.equals(underlyingIfaces.get(j), recycle.iface)) {
                         perInterfaceTotal[j].add(recycle);
                         underlyingIfacesTotal.add(recycle);
                         break;
@@ -1514,12 +1516,12 @@ public final class NetworkStats implements Parcelable {
      *     underlyingIfaces}
      */
     private Entry[] addTrafficToApplications(int tunUid, @NonNull String tunIface,
-            @NonNull String[] underlyingIfaces, @NonNull Entry tunIfaceTotal,
+            @NonNull List<String> underlyingIfaces, @NonNull Entry tunIfaceTotal,
             @NonNull Entry[] perInterfaceTotal, @NonNull Entry underlyingIfacesTotal) {
         // Traffic that should be moved off of each underlying interface for tunUid (see
         // deductTrafficFromVpnApp below).
-        final Entry[] moved = new Entry[underlyingIfaces.length];
-        for (int i = 0; i < underlyingIfaces.length; i++) {
+        final Entry[] moved = new Entry[underlyingIfaces.size()];
+        for (int i = 0; i < underlyingIfaces.size(); i++) {
             moved[i] = new Entry();
         }
 
@@ -1581,8 +1583,8 @@ public final class NetworkStats implements Parcelable {
             }
             // In a second pass, distribute these values across interfaces in the proportion that
             // each interface represents of the total traffic of the underlying interfaces.
-            for (int j = 0; j < underlyingIfaces.length; j++) {
-                tmpEntry.iface = underlyingIfaces[j];
+            for (int j = 0; j < underlyingIfaces.size(); j++) {
+                tmpEntry.iface = underlyingIfaces.get(j);
                 tmpEntry.rxBytes = 0;
                 // Reset 'set' to correct value since it gets updated when adding debug info below.
                 tmpEntry.set = set[i];
@@ -1637,14 +1639,14 @@ public final class NetworkStats implements Parcelable {
 
     private void deductTrafficFromVpnApp(
             int tunUid,
-            @NonNull String[] underlyingIfaces,
+            @NonNull List<String> underlyingIfaces,
             @NonNull Entry[] moved) {
-        for (int i = 0; i < underlyingIfaces.length; i++) {
+        for (int i = 0; i < underlyingIfaces.size(); i++) {
             moved[i].uid = tunUid;
             // Add debug info
             moved[i].set = SET_DBG_VPN_OUT;
             moved[i].tag = TAG_NONE;
-            moved[i].iface = underlyingIfaces[i];
+            moved[i].iface = underlyingIfaces.get(i);
             moved[i].metered = METERED_ALL;
             moved[i].roaming = ROAMING_ALL;
             moved[i].defaultNetwork = DEFAULT_NETWORK_ALL;
@@ -1657,7 +1659,7 @@ public final class NetworkStats implements Parcelable {
             // METERED_NO, which should be the case as it comes directly from the /proc file.
             // We only blend in the roaming data after applying these adjustments, by checking the
             // NetworkIdentity of the underlying iface.
-            final int idxVpnBackground = findIndex(underlyingIfaces[i], tunUid, SET_DEFAULT,
+            final int idxVpnBackground = findIndex(underlyingIfaces.get(i), tunUid, SET_DEFAULT,
                             TAG_NONE, METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO);
             if (idxVpnBackground != -1) {
                 // Note - tunSubtract also updates moved[i]; whatever traffic that's left is removed
@@ -1665,7 +1667,7 @@ public final class NetworkStats implements Parcelable {
                 tunSubtract(idxVpnBackground, this, moved[i]);
             }
 
-            final int idxVpnForeground = findIndex(underlyingIfaces[i], tunUid, SET_FOREGROUND,
+            final int idxVpnForeground = findIndex(underlyingIfaces.get(i), tunUid, SET_FOREGROUND,
                             TAG_NONE, METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO);
             if (idxVpnForeground != -1) {
                 tunSubtract(idxVpnForeground, this, moved[i]);

@@ -41,6 +41,7 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
+import android.os.Vibrator;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
@@ -84,6 +85,7 @@ public class RankingHelperTest extends UiServiceTestCase {
     @Mock Context mContext;
     @Mock ZenModeHelper mMockZenModeHelper;
     @Mock RankingConfig mConfig;
+    @Mock Vibrator mVibrator;
 
     private NotificationManager.Policy mTestNotificationPolicy;
     private Notification mNotiGroupGSortA;
@@ -125,6 +127,7 @@ public class RankingHelperTest extends UiServiceTestCase {
                 InstrumentationRegistry.getContext().getContentResolver());
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getApplicationInfo()).thenReturn(legacy);
+        when(mContext.getSystemService(Vibrator.class)).thenReturn(mVibrator);
         TestableContentResolver contentResolver = getContext().getContentResolver();
         contentResolver.setFallbackToExisting(false);
 
@@ -132,11 +135,11 @@ public class RankingHelperTest extends UiServiceTestCase {
         when(testContentProvider.getIContentProvider()).thenReturn(mTestIContentProvider);
         contentResolver.addProvider(TEST_AUTHORITY, testContentProvider);
 
-        when(mTestIContentProvider.canonicalize(any(), any(), eq(SOUND_URI)))
+        when(mTestIContentProvider.canonicalize(any(), eq(SOUND_URI)))
                 .thenReturn(CANONICAL_SOUND_URI);
-        when(mTestIContentProvider.canonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
+        when(mTestIContentProvider.canonicalize(any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(CANONICAL_SOUND_URI);
-        when(mTestIContentProvider.uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
+        when(mTestIContentProvider.uncanonicalize(any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(SOUND_URI);
 
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,

@@ -355,7 +355,7 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 latch.countDown();
             }
         };
-        return requestSessionCommon(pw, latch, () -> mService.destroySessions(userId, receiver));
+        return requestSessionCommon(pw, latch, () -> mService.removeAllSessions(userId, receiver));
     }
 
     private int requestList(PrintWriter pw) {

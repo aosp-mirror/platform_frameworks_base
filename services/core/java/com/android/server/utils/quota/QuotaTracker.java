@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArrayMap;
@@ -41,7 +42,6 @@ import android.util.quota.QuotaTrackerProto;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemServiceManager;
@@ -58,7 +58,7 @@ import java.util.PriorityQueue;
  * of quota until it is below that limit again. Limits are applied according to the category
  * the UPTC is placed in. Categories are basic constructs to apply different limits to
  * different groups of UPTCs. For example, standby buckets can be a set of categories, or
- * foreground & background could be two categories. If every UPTC should have the limits
+ * foreground & background could be two categories. If every UPTC should have the same limits
  * applied, then only one category is needed.
  *
  * Note: all limits are enforced per category unless explicitly stated otherwise.
@@ -95,7 +95,7 @@ abstract class QuotaTracker {
 
     /** "Free quota status" for apps. */
     @GuardedBy("mLock")
-    private final SparseArrayMap<Boolean> mFreeQuota = new SparseArrayMap<>();
+    private final SparseArrayMap<String, Boolean> mFreeQuota = new SparseArrayMap<>();
 
     private final AlarmManager mAlarmManager;
     protected final Context mContext;
@@ -132,7 +132,7 @@ abstract class QuotaTracker {
                 case Intent.ACTION_PACKAGE_FULLY_REMOVED:
                     final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                     synchronized (mLock) {
-                        onAppRemovedLocked(getPackageName(intent), uid);
+                        onAppRemovedLocked(UserHandle.getUserId(uid), getPackageName(intent));
                     }
                     break;
                 case Intent.ACTION_USER_REMOVED:
@@ -149,9 +149,13 @@ abstract class QuotaTracker {
     @VisibleForTesting
     static final long MAX_WINDOW_SIZE_MS = 30 * 24 * 60 * MINUTE_IN_MILLIS; // 1 month
 
-    /** The minimum time any window size can be. */
+    /**
+     * The minimum time any window size can be. A minimum window size helps to avoid CPU
+     * churn/looping in cases where there are registered listeners for when UPTCs go in and out of
+     * quota.
+     */
     @VisibleForTesting
-    static final long MIN_WINDOW_SIZE_MS = 30_000; // 30 seconds
+    static final long MIN_WINDOW_SIZE_MS = 20_000;
 
     QuotaTracker(@NonNull Context context, @NonNull Categorizer categorizer,
             @NonNull Injector injector) {
@@ -354,21 +358,20 @@ abstract class QuotaTracker {
     }
 
     @GuardedBy("mLock")
-    abstract void handleRemovedAppLocked(String packageName, int uid);
+    abstract void handleRemovedAppLocked(int userId, @NonNull String packageName);
 
     @GuardedBy("mLock")
-    private void onAppRemovedLocked(String packageName, int uid) {
+    void onAppRemovedLocked(final int userId, @NonNull String packageName) {
         if (packageName == null) {
             Slog.wtf(TAG, "Told app removed but given null package name.");
             return;
         }
-        final int userId = UserHandle.getUserId(uid);
 
         mInQuotaAlarmListener.removeAlarmsLocked(userId, packageName);
 
         mFreeQuota.delete(userId, packageName);
 
-        handleRemovedAppLocked(packageName, uid);
+        handleRemovedAppLocked(userId, packageName);
     }
 
     @GuardedBy("mLock")
@@ -622,6 +625,9 @@ abstract class QuotaTracker {
 
     /** Dump state in text format. */
     public void dump(final IndentingPrintWriter pw) {
+        pw.println("QuotaTracker:");
+        pw.increaseIndent();
+
         synchronized (mLock) {
             pw.println("Is enabled: " + mIsEnabled);
             pw.println("Is global quota free: " + mIsQuotaFree);
@@ -646,6 +652,8 @@ abstract class QuotaTracker {
             }
             pw.decreaseIndent();
         }
+
+        pw.decreaseIndent();
     }
 
     /**

@@ -91,7 +91,7 @@ TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
             nonAaptAttrRef="@id/id"
             class="hello" />)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   xml::Element* view_el = doc->root.get();
@@ -144,7 +144,7 @@ TEST_F(XmlReferenceLinkerTest, PrivateSymbolsAreNotLinked) {
       <View xmlns:android="http://schemas.android.com/apk/res/android"
           android:colorAccent="@android:color/hidden" />)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_FALSE(linker.Consume(context_.get(), doc.get()));
 }
 
@@ -153,7 +153,7 @@ TEST_F(XmlReferenceLinkerTest, PrivateSymbolsAreLinkedWhenReferenceHasStarPrefix
     <View xmlns:android="http://schemas.android.com/apk/res/android"
           android:colorAccent="@*android:color/hidden" />)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 }
 
@@ -162,7 +162,7 @@ TEST_F(XmlReferenceLinkerTest, LinkMangledAttributes) {
       <View xmlns:support="http://schemas.android.com/apk/res/com.android.support"
           support:colorAccent="#ff0000" />)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   xml::Element* view_el = doc->root.get();
@@ -181,7 +181,7 @@ TEST_F(XmlReferenceLinkerTest, LinkAutoResReference) {
       <View xmlns:app="http://schemas.android.com/apk/res-auto"
           app:colorAccent="@app:color/red" />)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   xml::Element* view_el = doc->root.get();
@@ -203,7 +203,7 @@ TEST_F(XmlReferenceLinkerTest, LinkViewWithShadowedPackageAlias) {
         <View xmlns:app="http://schemas.android.com/apk/res/com.app.test" app:attr="@app:id/id"/>
       </View>)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   xml::Element* view_el = doc->root.get();
@@ -239,7 +239,7 @@ TEST_F(XmlReferenceLinkerTest, LinkViewWithLocalPackageAndAliasOfTheSameName) {
       <View xmlns:android="http://schemas.android.com/apk/res/com.app.test"
           android:attr="@id/id"/>)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   xml::Element* view_el = doc->root.get();
@@ -261,7 +261,7 @@ TEST_F(XmlReferenceLinkerTest, AddAngleOnGradientForAndroidQ) {
   std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
     <gradient />)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   xml::Element* gradient_el = doc->root.get();
@@ -283,7 +283,7 @@ TEST_F(XmlReferenceLinkerTest, DoNotOverwriteAngleOnGradientForAndroidQ) {
   <gradient xmlns:android="http://schemas.android.com/apk/res/android"
       android:angle="90"/>)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   xml::Element* gradient_el = doc->root.get();
@@ -305,7 +305,7 @@ TEST_F(XmlReferenceLinkerTest, DoNotOverwriteAngleOnGradientForPostAndroidQ) {
   <gradient xmlns:android="http://schemas.android.com/apk/res/android" />)");
   context_->SetMinSdkVersion(30);
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   xml::Element* gradient_el = doc->root.get();

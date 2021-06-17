@@ -1,5 +1,6 @@
 package com.android.internal.widget;
 
+import android.annotation.NonNull;
 import android.os.AsyncTask;
 
 import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
@@ -41,11 +42,11 @@ public final class LockPatternChecker {
         /**
          * Invoked when a security verification is finished.
          *
-         * @param attestation The attestation that the challenge was verified, or null.
+         * @param response The response, optionally containing Gatekeeper HAT or Gatekeeper Password
          * @param throttleTimeoutMs The amount of time in ms to wait before reattempting
-         * the call. Only non-0 if attestation is null.
+         * the call. Only non-0 if the response is {@link VerifyCredentialResponse#RESPONSE_RETRY}.
          */
-        void onVerified(byte[] attestation, int throttleTimeoutMs);
+        void onVerified(@NonNull VerifyCredentialResponse response, int throttleTimeoutMs);
     }
 
     /**
@@ -53,33 +54,27 @@ public final class LockPatternChecker {
      *
      * @param utils The LockPatternUtils instance to use.
      * @param credential The credential to check.
-     * @param challenge The challenge to verify against the credential.
      * @param userId The user to check against the credential.
+     * @param flags See {@link LockPatternUtils.VerifyFlag}
      * @param callback The callback to be invoked with the verification result.
      */
     public static AsyncTask<?, ?, ?> verifyCredential(final LockPatternUtils utils,
             final LockscreenCredential credential,
-            final long challenge,
             final int userId,
+            final @LockPatternUtils.VerifyFlag int flags,
             final OnVerifyCallback callback) {
         // Create a copy of the credential since checking credential is asynchrounous.
         final LockscreenCredential credentialCopy = credential.duplicate();
-        AsyncTask<Void, Void, byte[]> task = new AsyncTask<Void, Void, byte[]>() {
-            private int mThrottleTimeout;
-
+        AsyncTask<Void, Void, VerifyCredentialResponse> task =
+                new AsyncTask<Void, Void, VerifyCredentialResponse>() {
             @Override
-            protected byte[] doInBackground(Void... args) {
-                try {
-                    return utils.verifyCredential(credentialCopy, challenge, userId);
-                } catch (RequestThrottledException ex) {
-                    mThrottleTimeout = ex.getTimeoutMs();
-                    return null;
-                }
+            protected VerifyCredentialResponse doInBackground(Void... args) {
+                return utils.verifyCredential(credentialCopy, userId, flags);
             }
 
             @Override
-            protected void onPostExecute(byte[] result) {
-                callback.onVerified(result, mThrottleTimeout);
+            protected void onPostExecute(@NonNull VerifyCredentialResponse result) {
+                callback.onVerified(result, result.getTimeout());
                 credentialCopy.zeroize();
             }
 
@@ -141,33 +136,27 @@ public final class LockPatternChecker {
      *
      * @param utils The LockPatternUtils instance to use.
      * @param credential The credential to check.
-     * @param challenge The challenge to verify against the credential.
      * @param userId The user to check against the credential.
+     * @param flags See {@link LockPatternUtils.VerifyFlag}
      * @param callback The callback to be invoked with the verification result.
      */
     public static AsyncTask<?, ?, ?> verifyTiedProfileChallenge(final LockPatternUtils utils,
             final LockscreenCredential credential,
-            final long challenge,
             final int userId,
+            final @LockPatternUtils.VerifyFlag int flags,
             final OnVerifyCallback callback) {
-        // Create a copy of the credential since checking credential is asynchrounous.
+        // Create a copy of the credential since checking credential is asynchronous.
         final LockscreenCredential credentialCopy = credential.duplicate();
-        AsyncTask<Void, Void, byte[]> task = new AsyncTask<Void, Void, byte[]>() {
-            private int mThrottleTimeout;
-
+        AsyncTask<Void, Void, VerifyCredentialResponse> task =
+                new AsyncTask<Void, Void, VerifyCredentialResponse>() {
             @Override
-            protected byte[] doInBackground(Void... args) {
-                try {
-                    return utils.verifyTiedProfileChallenge(credentialCopy, challenge, userId);
-                } catch (RequestThrottledException ex) {
-                    mThrottleTimeout = ex.getTimeoutMs();
-                    return null;
-                }
+            protected VerifyCredentialResponse doInBackground(Void... args) {
+                return utils.verifyTiedProfileChallenge(credentialCopy, userId, flags);
             }
 
             @Override
-            protected void onPostExecute(byte[] result) {
-                callback.onVerified(result, mThrottleTimeout);
+            protected void onPostExecute(@NonNull VerifyCredentialResponse response) {
+                callback.onVerified(response, response.getTimeout());
                 credentialCopy.zeroize();
             }
 

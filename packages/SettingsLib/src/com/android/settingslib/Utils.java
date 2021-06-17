@@ -1,6 +1,7 @@
 package com.android.settingslib;
 
 import android.annotation.ColorInt;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -13,12 +14,19 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.media.AudioManager;
-import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.net.TetheringManager;
+import android.net.vcn.VcnTransportInfo;
+import android.net.wifi.WifiInfo;
 import android.os.BatteryManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -28,6 +36,11 @@ import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
+
+import androidx.annotation.NonNull;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
@@ -49,11 +62,19 @@ public class Utils {
     private static String sSharedSystemSharedLibPackageName;
 
     static final int[] WIFI_PIE = {
-            com.android.internal.R.drawable.ic_wifi_signal_0,
-            com.android.internal.R.drawable.ic_wifi_signal_1,
-            com.android.internal.R.drawable.ic_wifi_signal_2,
-            com.android.internal.R.drawable.ic_wifi_signal_3,
-            com.android.internal.R.drawable.ic_wifi_signal_4
+        com.android.internal.R.drawable.ic_wifi_signal_0,
+        com.android.internal.R.drawable.ic_wifi_signal_1,
+        com.android.internal.R.drawable.ic_wifi_signal_2,
+        com.android.internal.R.drawable.ic_wifi_signal_3,
+        com.android.internal.R.drawable.ic_wifi_signal_4
+    };
+
+    static final int[] SHOW_X_WIFI_PIE = {
+        R.drawable.ic_show_x_wifi_signal_0,
+        R.drawable.ic_show_x_wifi_signal_1,
+        R.drawable.ic_show_x_wifi_signal_2,
+        R.drawable.ic_show_x_wifi_signal_3,
+        R.drawable.ic_show_x_wifi_signal_4
     };
 
     public static void updateLocationEnabled(Context context, boolean enabled, int userId,
@@ -70,10 +91,10 @@ public class Utils {
      * Return string resource that best describes combination of tethering
      * options available on this device.
      */
-    public static int getTetheringLabel(ConnectivityManager cm) {
-        String[] usbRegexs = cm.getTetherableUsbRegexs();
-        String[] wifiRegexs = cm.getTetherableWifiRegexs();
-        String[] bluetoothRegexs = cm.getTetherableBluetoothRegexs();
+    public static int getTetheringLabel(TetheringManager tm) {
+        String[] usbRegexs = tm.getTetherableUsbRegexs();
+        String[] wifiRegexs = tm.getTetherableWifiRegexs();
+        String[] bluetoothRegexs = tm.getTetherableBluetoothRegexs();
 
         boolean usbAvailable = usbRegexs.length != 0;
         boolean wifiAvailable = wifiRegexs.length != 0;
@@ -183,18 +204,23 @@ public class Utils {
             statusString = res.getString(R.string.battery_info_status_full);
         } else {
             if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-                switch (batteryStatus.getChargingSpeed(context)) {
-                    case BatteryStatus.CHARGING_FAST:
-                        statusString = res.getString(R.string.battery_info_status_charging_fast);
-                        break;
-                    case BatteryStatus.CHARGING_SLOWLY:
-                        statusString = res.getString(R.string.battery_info_status_charging_slow);
-                        break;
-                    default:
-                        statusString = res.getString(R.string.battery_info_status_charging);
-                        break;
+                if (batteryStatus.isPluggedInWired()) {
+                    switch (batteryStatus.getChargingSpeed(context)) {
+                        case BatteryStatus.CHARGING_FAST:
+                            statusString = res.getString(
+                                    R.string.battery_info_status_charging_fast);
+                            break;
+                        case BatteryStatus.CHARGING_SLOWLY:
+                            statusString = res.getString(
+                                    R.string.battery_info_status_charging_slow);
+                            break;
+                        default:
+                            statusString = res.getString(R.string.battery_info_status_charging);
+                            break;
+                    }
+                } else {
+                    statusString = res.getString(R.string.battery_info_status_charging_wireless);
                 }
-
             } else if (status == BatteryManager.BATTERY_STATUS_DISCHARGING) {
                 statusString = res.getString(R.string.battery_info_status_discharging);
             } else if (status == BatteryManager.BATTERY_STATUS_NOT_CHARGING) {
@@ -295,6 +321,36 @@ public class Utils {
     }
 
     /**
+    * Create a color matrix suitable for a ColorMatrixColorFilter that modifies only the color but
+    * preserves the alpha for a given drawable
+    * @param color
+    * @return a color matrix that uses the source alpha and given color
+    */
+    public static ColorMatrix getAlphaInvariantColorMatrixForColor(@ColorInt int color) {
+        int r = Color.red(color);
+        int g = Color.green(color);
+        int b = Color.blue(color);
+
+        ColorMatrix cm = new ColorMatrix(new float[] {
+                0, 0, 0, 0, r,
+                0, 0, 0, 0, g,
+                0, 0, 0, 0, b,
+                0, 0, 0, 1, 0 });
+
+        return cm;
+    }
+
+    /**
+     * Create a ColorMatrixColorFilter to tint a drawable but retain its alpha characteristics
+     *
+     * @return a ColorMatrixColorFilter which changes the color of the output but is invariant on
+     * the source alpha
+     */
+    public static ColorFilter getAlphaInvariantColorFilterForColor(@ColorInt int color) {
+        return new ColorMatrixColorFilter(getAlphaInvariantColorMatrixForColor(color));
+    }
+
+    /**
      * Determine whether a package is a "system package", in which case certain things (like
      * disabling notifications or disabling the package altogether) should be disallowed.
      */
@@ -353,10 +409,22 @@ public class Utils {
      * @throws IllegalArgumentException if an invalid RSSI level is given.
      */
     public static int getWifiIconResource(int level) {
+        return getWifiIconResource(false /* showX */, level);
+    }
+
+    /**
+     * Returns the Wifi icon resource for a given RSSI level.
+     *
+     * @param showX True if a connected Wi-Fi network has the problem which should show Pie+x
+     *              signal icon to users.
+     * @param level The number of bars to show (0-4)
+     * @throws IllegalArgumentException if an invalid RSSI level is given.
+     */
+    public static int getWifiIconResource(boolean showX, int level) {
         if (level < 0 || level >= WIFI_PIE.length) {
             throw new IllegalArgumentException("No Wifi icon found for level: " + level);
         }
-        return WIFI_PIE[level];
+        return showX ? SHOW_X_WIFI_PIE[level] : WIFI_PIE[level];
     }
 
     public static int getDefaultStorageManagerDaysToRetain(Resources resources) {
@@ -376,8 +444,7 @@ public class Utils {
     }
 
     public static boolean isWifiOnly(Context context) {
-        return !context.getSystemService(ConnectivityManager.class)
-                .isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        return !context.getSystemService(TelephonyManager.class).isDataCapable();
     }
 
     /** Returns if the automatic storage management feature is turned on or not. **/
@@ -483,5 +550,43 @@ public class Utils {
                 || (networkRegWlan.getRegistrationState()
                 == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING);
         return !isInIwlan;
+    }
+
+    /**
+     * Returns a bitmap with rounded corner.
+     *
+     * @param context application context.
+     * @param source bitmap to apply round corner.
+     * @param cornerRadius corner radius value.
+     */
+    public static Bitmap convertCornerRadiusBitmap(@NonNull Context context,
+            @NonNull Bitmap source, @NonNull float cornerRadius) {
+        final Bitmap roundedBitmap = Bitmap.createBitmap(source.getWidth(), source.getHeight(),
+                Bitmap.Config.ARGB_8888);
+        final RoundedBitmapDrawable drawable =
+                RoundedBitmapDrawableFactory.create(context.getResources(), source);
+        drawable.setAntiAlias(true);
+        drawable.setCornerRadius(cornerRadius);
+        final Canvas canvas = new Canvas(roundedBitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return roundedBitmap;
+    }
+
+    /**
+     * Returns the WifiInfo for the underlying WiFi network of the VCN network, returns null if the
+     * input NetworkCapabilities is not for a VCN network with underlying WiFi network.
+     *
+     * @param networkCapabilities NetworkCapabilities of the network.
+     */
+    @Nullable
+    public static WifiInfo tryGetWifiInfoForVcn(NetworkCapabilities networkCapabilities) {
+        if (networkCapabilities.getTransportInfo() == null
+                || !(networkCapabilities.getTransportInfo() instanceof VcnTransportInfo)) {
+            return null;
+        }
+        VcnTransportInfo vcnTransportInfo =
+                (VcnTransportInfo) networkCapabilities.getTransportInfo();
+        return vcnTransportInfo.getWifiInfo();
     }
 }

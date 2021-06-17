@@ -31,7 +31,8 @@ namespace uirenderer {
  */
 class AutoBackendTextureRelease final {
 public:
-    AutoBackendTextureRelease(GrContext* context, AHardwareBuffer* buffer);
+    AutoBackendTextureRelease(GrDirectContext* context,
+                              AHardwareBuffer* buffer);
 
     const GrBackendTexture& getTexture() const { return mBackendTexture; }
 
@@ -42,9 +43,13 @@ public:
 
     inline sk_sp<SkImage> getImage() const { return mImage; }
 
-    void makeImage(AHardwareBuffer* buffer, android_dataspace dataspace, GrContext* context);
+    void makeImage(AHardwareBuffer* buffer,
+                   android_dataspace dataspace,
+                   GrDirectContext* context);
 
-    void newBufferContent(GrContext* context);
+    void newBufferContent(GrDirectContext* context);
+
+    void releaseQueueOwnership(GrDirectContext* context);
 
 private:
     // The only way to invoke dtor is with unref, when mUsageCount is 0.

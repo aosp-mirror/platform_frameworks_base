@@ -17,7 +17,7 @@
 package com.android.server.pm.parsing
 
 import android.content.pm.PackageManager
-import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.LargeTest
 import com.google.common.truth.Expect
 import org.junit.Rule
@@ -27,7 +27,7 @@ import org.junit.Test
  * Collects APKs from the device and verifies that the new parsing behavior outputs
  * the same exposed Info object as the old parsing logic.
  */
-@Presubmit
+@Postsubmit
 class AndroidPackageParsingEquivalenceTest : AndroidPackageParsingTestBase() {
 
     @get:Rule

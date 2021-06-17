@@ -173,7 +173,7 @@ final class TvRemoteProviderWatcher {
             return false;
         }
 
-        // Check if package name is white-listed here.
+        // Check if package name is allowlisted here.
         if (!mUnbundledServicePackages.contains(serviceInfo.packageName)) {
             Slog.w(TAG, "Ignoring atv remote provider service because the package has not "
                     + "been set and/or whitelisted: "

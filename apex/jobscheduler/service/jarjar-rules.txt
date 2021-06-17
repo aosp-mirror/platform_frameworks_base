@@ -1,0 +1,18 @@
+# Rename all com.android.internal.util classes to prevent class name collisions
+# between this module and the other versions of the utility classes linked into
+# the framework.
+
+# These must be kept in sync with the framework-jobscheduler-shared-srcs filegroup.
+rule com.android.internal.util.ArrayUtils* com.android.internal.util.jobs.ArrayUtils@1
+rule com.android.internal.util.BitUtils* com.android.internal.util.jobs.BitUtils@1
+rule com.android.internal.util.CollectionUtils* com.android.internal.util.jobs.CollectionUtils@1
+rule com.android.internal.util.ConcurrentUtils* com.android.internal.util.jobs.ConcurrentUtils@1
+rule com.android.internal.util.DumpUtils* com.android.internal.util.jobs.DumpUtils@1
+rule com.android.internal.util.FastPrintWriter* com.android.internal.util.jobs.FastPrintWriter@1
+rule com.android.internal.util.FastXmlSerializer* com.android.internal.util.jobs.FastXmlSerializer@1
+rule com.android.internal.util.FunctionalUtils* com.android.internal.util.jobs.FunctionalUtils@1
+rule com.android.internal.util.ParseUtils* com.android.internal.util.jobs.ParseUtils@1
+rule com.android.internal.util.Preconditions* com.android.internal.util.jobs.Preconditions@1
+rule com.android.internal.util.RingBufferIndices* com.android.internal.util.jobs.RingBufferIndices@1
+rule com.android.internal.util.StatLogger* com.android.internal.util.jobs.StatLogger@1
+rule com.android.internal.util.XmlUtils* com.android.internal.util.jobs.XmlUtils@1

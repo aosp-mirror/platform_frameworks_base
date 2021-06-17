@@ -24,81 +24,7 @@
     android:theme="@style/Theme.DeviceDefault.Notification"
     >
 
-    <FrameLayout
-        android:id="@+id/conversation_icon_container"
-        android:layout_width="@dimen/conversation_content_start"
-        android:layout_height="wrap_content"
-        android:gravity="start|top"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-    >
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:layout_gravity="top|center_horizontal"
-        >
-
-            <!-- Big icon: 52x52, 12dp padding left + top, 16dp padding right -->
-            <com.android.internal.widget.CachingIconView
-                android:id="@+id/conversation_icon"
-                android:layout_width="@dimen/conversation_avatar_size"
-                android:layout_height="@dimen/conversation_avatar_size"
-                android:scaleType="centerCrop"
-                android:importantForAccessibility="no"
-            />
-
-            <ViewStub
-                android:layout="@layout/conversation_face_pile_layout"
-                android:layout_width="@dimen/conversation_avatar_size"
-                android:layout_height="@dimen/conversation_avatar_size"
-                android:id="@+id/conversation_face_pile"
-                />
-
-            <FrameLayout
-                android:id="@+id/conversation_icon_badge"
-                android:layout_width="@dimen/conversation_icon_size_badged"
-                android:layout_height="@dimen/conversation_icon_size_badged"
-                android:layout_marginLeft="@dimen/conversation_badge_side_margin"
-                android:layout_marginTop="@dimen/conversation_badge_side_margin"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-            >
-                <com.android.internal.widget.CachingIconView
-                    android:id="@+id/conversation_icon_badge_bg"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:src="@drawable/conversation_badge_background"
-                    android:forceHasOverlappingRendering="false"
-                    android:scaleType="center"
-                />
-                <com.android.internal.widget.CachingIconView
-                    android:id="@+id/icon"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="4dp"
-                    android:layout_gravity="center"
-                    android:forceHasOverlappingRendering="false"
-                />
-                <com.android.internal.widget.CachingIconView
-                    android:id="@+id/conversation_icon_badge_ring"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="@drawable/conversation_badge_ring"
-                    android:visibility="gone"
-                    android:forceHasOverlappingRendering="false"
-                    android:clipToPadding="false"
-                    android:scaleType="center"
-                />
-            </FrameLayout>
-        </FrameLayout>
-    </FrameLayout>
+    <include layout="@layout/notification_template_conversation_icon_container" />
 
     <!-- Wraps entire "expandable" notification -->
     <com.android.internal.widget.RemeasuringLinearLayout
@@ -131,144 +57,13 @@
 
                 <!-- Use layout_marginStart instead of paddingStart to work around strange
                      measurement behavior on lower display densities. -->
-                <LinearLayout
-                    android:id="@+id/conversation_header"
+                <include
+                    layout="@layout/notification_template_conversation_header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingTop="16dp"
                     android:layout_marginBottom="2dp"
                     android:layout_marginStart="@dimen/conversation_content_start"
-                >
-                    <TextView
-                        android:id="@+id/conversation_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
-                        android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
-                        android:textSize="16sp"
-                        android:singleLine="true"
-                        android:layout_weight="1"
-                        />
-
-                    <TextView
-                        android:id="@+id/app_name_divider"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?attr/notificationHeaderTextAppearance"
-                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
-                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
-                        android:text="@string/notification_header_divider_symbol"
-                        android:layout_gravity="center"
-                        android:paddingTop="1sp"
-                        android:singleLine="true"
-                        android:visibility="gone"
                     />
-
-                    <!-- App Name -->
-                    <com.android.internal.widget.ObservableTextView
-                        android:id="@+id/app_name_text"
-                        android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Info"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
-                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
-                        android:paddingTop="1sp"
-                        android:singleLine="true"
-                        android:visibility="gone"
-                    />
-
-                    <TextView
-                        android:id="@+id/time_divider"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?attr/notificationHeaderTextAppearance"
-                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
-                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
-                        android:text="@string/notification_header_divider_symbol"
-                        android:layout_gravity="center"
-                        android:paddingTop="1sp"
-                        android:singleLine="true"
-                        android:visibility="gone"
-                    />
-
-                    <DateTimeView
-                        android:id="@+id/time"
-                        android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
-                        android:paddingTop="1sp"
-                        android:showRelative="true"
-                        android:singleLine="true"
-                        android:visibility="gone"
-                    />
-
-                    <ImageView
-                        android:id="@+id/alerted_icon"
-                        android:layout_width="@dimen/notification_alerted_size"
-                        android:layout_height="@dimen/notification_alerted_size"
-                        android:layout_gravity="center"
-                        android:layout_marginStart="4dp"
-                        android:paddingTop="2dp"
-                        android:scaleType="fitCenter"
-                        android:visibility="gone"
-                        android:contentDescription="@string/notification_alerted_content_description"
-                        android:src="@drawable/ic_notifications_alerted"/>
-
-                    <ImageView
-                        android:id="@+id/profile_badge"
-                        android:layout_width="@dimen/notification_badge_size"
-                        android:layout_height="@dimen/notification_badge_size"
-                        android:layout_gravity="center"
-                        android:layout_marginStart="4dp"
-                        android:paddingTop="2dp"
-                        android:scaleType="fitCenter"
-                        android:visibility="gone"
-                        android:contentDescription="@string/notification_work_profile_content_description"
-                    />
-                    <LinearLayout
-                        android:id="@+id/app_ops"
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:paddingTop="3dp"
-                        android:layout_marginStart="2dp"
-                        android:background="?android:selectableItemBackgroundBorderless"
-                        android:orientation="horizontal" >
-                        <ImageView
-                            android:layout_marginStart="4dp"
-                            android:id="@+id/camera"
-                            android:layout_width="?attr/notificationHeaderIconSize"
-                            android:layout_height="?attr/notificationHeaderIconSize"
-                            android:src="@drawable/ic_camera"
-                            android:visibility="gone"
-                            android:focusable="false"
-                            android:contentDescription="@string/notification_appops_camera_active"
-                            />
-                        <ImageView
-                            android:id="@+id/mic"
-                            android:layout_width="?attr/notificationHeaderIconSize"
-                            android:layout_height="?attr/notificationHeaderIconSize"
-                            android:src="@drawable/ic_mic"
-                            android:layout_marginStart="4dp"
-                            android:visibility="gone"
-                            android:focusable="false"
-                            android:contentDescription="@string/notification_appops_microphone_active"
-                            />
-                        <ImageView
-                            android:id="@+id/overlay"
-                            android:layout_width="?attr/notificationHeaderIconSize"
-                            android:layout_height="?attr/notificationHeaderIconSize"
-                            android:src="@drawable/ic_alert_window_layer"
-                            android:layout_marginStart="4dp"
-                            android:visibility="gone"
-                            android:focusable="false"
-                            android:contentDescription="@string/notification_appops_overlay_active"
-                            />
-                    </LinearLayout>
-                </LinearLayout>
 
                 <!-- Messages -->
                 <com.android.internal.widget.MessagingLinearLayout
@@ -307,13 +102,12 @@
             collapsed layout while the parent makes sure that we're never laid out bigger
             than the messaging content.-->
         <LinearLayout
-            android:id="@+id/expand_button_inner_container"
+            android:id="@+id/expand_button_touch_container"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/conversation_expand_button_size"
-            android:paddingStart="16dp"
+            android:layout_height="@dimen/conversation_expand_button_height"
             android:orientation="horizontal"
             android:layout_gravity="end|top"
-            android:paddingEnd="@dimen/notification_content_margin_end"
+            android:paddingEnd="0dp"
             android:clipToPadding="false"
             android:clipChildren="false"
             >
@@ -323,35 +117,16 @@
                 android:forceHasOverlappingRendering="false"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginEnd="11dp"
+                android:layout_marginStart="@dimen/conversation_image_start_margin"
                 android:spacing="0dp"
                 android:layout_gravity="center"
                 android:clipToPadding="false"
                 android:clipChildren="false"
                 />
-            <!-- Unread Count -->
-            <TextView
-                android:id="@+id/conversation_unread_count"
-                android:layout_width="33sp"
+            <include layout="@layout/notification_expand_button"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="11dp"
                 android:layout_gravity="center"
-                android:gravity="center"
-                android:padding="2dp"
-                android:visibility="gone"
-                android:textAppearance="@style/TextAppearance.DeviceDefault.Notification"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                android:background="@drawable/conversation_unread_bg"
-                />
-            <com.android.internal.widget.NotificationExpandButton
-                android:id="@+id/expand_button"
-                android:layout_width="@dimen/notification_header_expand_icon_size"
-                android:layout_height="@dimen/notification_header_expand_icon_size"
-                android:layout_gravity="center"
-                android:drawable="@drawable/ic_expand_notification"
-                android:clickable="false"
-                android:importantForAccessibility="no"
                 />
         </LinearLayout>
     </FrameLayout>

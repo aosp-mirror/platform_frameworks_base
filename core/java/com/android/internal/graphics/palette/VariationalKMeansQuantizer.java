@@ -70,10 +70,9 @@ public class VariationalKMeansQuantizer implements Quantizer {
      *
      * @param pixels Pixels to quantize.
      * @param maxColors Maximum number of clusters to extract.
-     * @param filters Colors that should be ignored
      */
     @Override
-    public void quantize(int[] pixels, int maxColors, Palette.Filter[] filters) {
+    public void quantize(int[] pixels, int maxColors) {
         // Start by converting all colors to HSL.
         // HLS is way more meaningful for clustering than RGB.
         final float[] hsl = {0, 0, 0};
@@ -111,16 +110,18 @@ public class VariationalKMeansQuantizer implements Quantizer {
 
         // Convert data to final format, de-normalizing the hue.
         mQuantizedColors = new ArrayList<>();
+        float[] mHsl = new float[3];
         for (KMeans.Mean mean : optimalMeans) {
             if (mean.getItems().size() == 0) {
                 continue;
             }
             float[] centroid = mean.getCentroid();
-            mQuantizedColors.add(new Palette.Swatch(new float[]{
-                    centroid[0] * 360f,
-                    centroid[1],
-                    centroid[2]
-            }, mean.getItems().size()));
+
+            mHsl[0] = centroid[0] * 360f;
+            mHsl[1] = centroid[1];
+            mHsl[2] = centroid[2];
+            int color = ColorUtils.HSLToColor(mHsl);
+            mQuantizedColors.add(new Palette.Swatch(color, mean.getItems().size()));
         }
     }
 

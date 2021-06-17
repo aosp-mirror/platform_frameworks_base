@@ -89,8 +89,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testIsRequestPinShortcutSupported() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
-        setDefaultLauncher(USER_10, mMainActivityFetcher.apply(LAUNCHER_2, USER_10));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
+        setDefaultLauncher(USER_10, LAUNCHER_2);
 
         Pair<ComponentName, Integer> actual;
         // User 0
@@ -167,7 +167,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
 
     public void testRequestPinShortcut_notSupported() {
         // User-0's launcher has no confirmation activity.
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         mPinConfirmActivityFetcher = (packageName, userId) ->
                 !LAUNCHER_2.equals(packageName)
@@ -220,7 +220,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testNotForeground() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             makeCallerBackground();
@@ -249,8 +249,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
      * - Shortcut doesn't pre-exist.
      */
     private void checkRequestPinShortcut(@Nullable IntentSender resultIntent) {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
-        setDefaultLauncher(USER_10, mMainActivityFetcher.apply(LAUNCHER_2, USER_10));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
+        setDefaultLauncher(USER_10, LAUNCHER_2);
 
         final Icon res32x32 = Icon.createWithResource(getTestContext(), R.drawable.black_32x32);
 
@@ -324,7 +324,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     private IntentSender makeResultIntent() {
-        return PendingIntent.getActivity(getTestContext(), 0, new Intent(), 0).getIntentSender();
+        return PendingIntent.getActivity(getTestContext(), 0, new Intent(), PendingIntent.FLAG_MUTABLE_UNAUDITED).getIntentSender();
     }
 
     public void testRequestPinShortcut_withCallback() {
@@ -332,8 +332,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testRequestPinShortcut_explicitTargetActivity() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
-        setDefaultLauncher(USER_10, mMainActivityFetcher.apply(LAUNCHER_2, USER_10));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
+        setDefaultLauncher(USER_10, LAUNCHER_2);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             ShortcutInfo s1 = makeShortcutWithActivity("s1",
@@ -388,7 +388,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testRequestPinShortcut_wrongTargetActivity() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             // Create dynamic shortcut
@@ -406,8 +406,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testRequestPinShortcut_noTargetActivity_noMainActivity() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
-        setDefaultLauncher(USER_10, mMainActivityFetcher.apply(LAUNCHER_2, USER_10));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
+        setDefaultLauncher(USER_10, LAUNCHER_2);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             /// Create a shortcut with no target activity.
@@ -471,7 +471,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testRequestPinShortcut_dynamicExists() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         final Icon res32x32 = Icon.createWithResource(getTestContext(), R.drawable.black_32x32);
 
@@ -529,7 +529,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testRequestPinShortcut_manifestExists() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             publishManifestShortcutsAsCaller(R.xml.shortcut_1);
@@ -586,7 +586,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testRequestPinShortcut_dynamicExists_alreadyPinned() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         final Icon res32x32 = Icon.createWithResource(getTestContext(), R.drawable.black_32x32);
 
@@ -671,7 +671,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testRequestPinShortcut_manifestExists_alreadyPinned() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             publishManifestShortcutsAsCaller(R.xml.shortcut_1);
@@ -753,7 +753,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testRequestPinShortcut_wasDynamic_alreadyPinned() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(makeShortcut("s1"))));
@@ -781,7 +781,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testRequestPinShortcut_wasDynamic_disabled_alreadyPinned() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(makeShortcut("s1"))));
@@ -812,7 +812,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testRequestPinShortcut_wasManifest_alreadyPinned() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             publishManifestShortcutsAsCaller(R.xml.shortcut_1);
@@ -854,7 +854,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s1"), HANDLE_USER_P0);
         });
 
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             assertWith(getCallerShortcuts())
@@ -916,7 +916,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("ms1"), HANDLE_USER_P0);
         });
 
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             assertWith(getCallerShortcuts())
@@ -975,7 +975,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
      * the existing one.
      */
     public void testRequestPinShortcut_launcherAlreadyHasPinned() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(makeShortcut("s1"), makeShortcut("s2"))));
@@ -1037,7 +1037,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
      * When trying to pin an existing shortcut, the new fields shouldn't override existing fields.
      */
     public void testRequestPinShortcut_dynamicExists_titleWontChange() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         final Icon res32x32 = Icon.createWithResource(getTestContext(), R.drawable.black_32x32);
 
@@ -1102,7 +1102,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
      * When trying to pin an existing shortcut, the new fields shouldn't override existing fields.
      */
     public void testRequestPinShortcut_manifestExists_titleWontChange() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             publishManifestShortcutsAsCaller(R.xml.shortcut_1);
@@ -1169,7 +1169,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
      * has a partial shortcut, accept() should fail.
      */
     public void testRequestPinShortcut_dynamicExists_thenRemoved_error() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             // Create dynamic shortcut
@@ -1227,7 +1227,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
      * has all the mandatory fields, we can go ahead and still publish it.
      */
     public void testRequestPinShortcut_dynamicExists_thenRemoved_okay() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             // Create dynamic shortcut
@@ -1283,7 +1283,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
      * has a partial shortcut, accept() should fail.
      */
     public void testRequestPinShortcut_manifestExists_thenRemoved_error() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             publishManifestShortcutsAsCaller(R.xml.shortcut_1);
@@ -1340,7 +1340,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
      * has all the mandatory fields, we can go ahead and still publish it.
      */
     public void testRequestPinShortcut_manifestExists_thenRemoved_okay() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             publishManifestShortcutsAsCaller(R.xml.shortcut_1);
@@ -1400,7 +1400,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
      * has a partial shortcut, accept() should fail.
      */
     public void testRequestPinShortcut_dynamicExists_thenDisabled_error() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             ShortcutInfo s1 = makeShortcut("s1");
@@ -1414,7 +1414,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
 
         // Then, pin by another launcher and disable it.
         // We have to pin it here so that disable() won't remove it.
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_2, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_2);
         runWithCaller(LAUNCHER_2, USER_0, () -> {
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s1"), HANDLE_USER_P0);
         });
@@ -1426,7 +1426,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .areAllDisabled();
         });
 
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             // Check the intent passed to startActivityAsUser().
             final ArgumentCaptor<Intent> intent = ArgumentCaptor.forClass(Intent.class);
@@ -1474,7 +1474,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
      * has a partial shortcut, accept() should fail.
      */
     public void testRequestPinShortcut_manifestExists_thenDisabled_error() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             publishManifestShortcutsAsCaller(R.xml.shortcut_1);
@@ -1487,7 +1487,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
 
         // Then, pin by another launcher and disable it.
         // We have to pin it here so that disable() won't remove it.
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_2, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_2);
         runWithCaller(LAUNCHER_2, USER_0, () -> {
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("ms1"), HANDLE_USER_P0);
         });
@@ -1500,7 +1500,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .areAllDisabled();
         });
 
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             // Check the intent passed to startActivityAsUser().
             final ArgumentCaptor<Intent> intent = ArgumentCaptor.forClass(Intent.class);
@@ -1546,7 +1546,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     public void testRequestPinShortcut_wrongLauncherCannotAccept() {
-        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_0, LAUNCHER_1);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             ShortcutInfo s1 = makeShortcut("s1");

@@ -23,6 +23,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.InflateException;
 
@@ -50,7 +51,7 @@ public final class DrawableInflater {
             new HashMap<>();
 
     private final Resources mRes;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final ClassLoader mClassLoader;
 
     /**

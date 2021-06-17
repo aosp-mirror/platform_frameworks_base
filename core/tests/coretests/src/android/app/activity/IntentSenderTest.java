@@ -32,7 +32,7 @@ public class IntentSenderTest extends BroadcastTest {
         registerMyReceiver(new IntentFilter(BROADCAST_REGISTERED), PERMISSION_GRANTED);
         addIntermediate("after-register");
         PendingIntent is = PendingIntent.getBroadcast(getContext(), 0,
-                makeBroadcastIntent(BROADCAST_REGISTERED), 0);
+                makeBroadcastIntent(BROADCAST_REGISTERED), PendingIntent.FLAG_MUTABLE_UNAUDITED);
         is.send();
         waitForResultOrThrow(BROADCAST_TIMEOUT);
         is.cancel();
@@ -52,7 +52,7 @@ public class IntentSenderTest extends BroadcastTest {
             }
         };
 
-        PendingIntent is = PendingIntent.getBroadcast(getContext(), 0, intent, 0);
+        PendingIntent is = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
         is.send(Activity.RESULT_CANCELED, finish, null);
         waitForResultOrThrow(BROADCAST_TIMEOUT);
         is.cancel();
@@ -61,7 +61,7 @@ public class IntentSenderTest extends BroadcastTest {
     public void testLocalReceivePermissionGranted() throws Exception {
         setExpectedReceivers(new String[]{RECEIVER_LOCAL});
         PendingIntent is = PendingIntent.getBroadcast(getContext(), 0,
-                makeBroadcastIntent(BROADCAST_LOCAL_GRANTED), 0);
+                makeBroadcastIntent(BROADCAST_LOCAL_GRANTED), PendingIntent.FLAG_MUTABLE_UNAUDITED);
         is.send();
         waitForResultOrThrow(BROADCAST_TIMEOUT);
         is.cancel();
@@ -79,7 +79,7 @@ public class IntentSenderTest extends BroadcastTest {
             }
         };
 
-        PendingIntent is = PendingIntent.getBroadcast(getContext(), 0, intent, 0);
+        PendingIntent is = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
         is.send(Activity.RESULT_CANCELED, finish, null);
         waitForResultOrThrow(BROADCAST_TIMEOUT);
         is.cancel();

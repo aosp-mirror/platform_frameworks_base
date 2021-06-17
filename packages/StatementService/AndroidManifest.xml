@@ -14,40 +14,62 @@
      limitations under the License.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.statementservice"
-        android:versionCode="1"
-        android:versionName="1.0">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.android.statementservice"
+    android:versionCode="1"
+    android:versionName="1.0">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
     <uses-permission android:name="android.permission.INTENT_FILTER_VERIFICATION_AGENT"/>
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION"/>
 
     <application
-            android:label="@string/service_name"
-            android:allowBackup="false">
-        <uses-library android:name="org.apache.http.legacy" />
-        <service
-                android:name=".DirectStatementService"
-                android:exported="false">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="com.android.statementservice.aosp.service.CHECK_ACTION"/>
-            </intent-filter>
-        </service>
+        android:label="@string/service_name"
+        android:allowBackup="false"
+        android:name=".StatementServiceApplication"
+        >
 
         <receiver
-                android:name=".IntentFilterVerificationReceiver"
-                android:permission="android.permission.BIND_INTENT_FILTER_VERIFIER">
-            <!-- Set the priority 1 so newer implementation can have higher priority. -->
-            <intent-filter
-                    android:priority="1">
+            android:name=".domain.BootCompletedReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".domain.DomainVerificationReceiverV1"
+            android:permission="android.permission.BIND_INTENT_FILTER_VERIFIER"
+            android:exported="true"
+            >
+            <intent-filter android:priority="1">
                 <action android:name="android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION"/>
                 <data android:mimeType="application/vnd.android.package-archive"/>
             </intent-filter>
         </receiver>
 
+        <!--
+            v2 receiver remains disabled assuming the device ships its own updated version.
+            If necessary, this can be enabled using shell.
+        -->
+        <receiver
+            android:name=".domain.DomainVerificationReceiverV2"
+            android:permission="android.permission.BIND_DOMAIN_VERIFICATION_AGENT"
+            android:directBootAware="true"
+            android:exported="true"
+            android:enabled="false"
+            >
+            <intent-filter android:priority="1">
+                <action android:name="android.intent.action.DOMAINS_NEED_VERIFICATION"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

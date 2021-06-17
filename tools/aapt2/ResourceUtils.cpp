@@ -628,7 +628,7 @@ uint32_t AndroidTypeToAttributeTypeMask(uint16_t type) {
 
 std::unique_ptr<Item> TryParseItemForAttribute(
     const StringPiece& value, uint32_t type_mask,
-    const std::function<void(const ResourceName&)>& on_create_reference) {
+    const std::function<bool(const ResourceName&)>& on_create_reference) {
   using android::ResTable_map;
 
   auto null_or_empty = TryParseNullOrEmpty(value);
@@ -639,8 +639,11 @@ std::unique_ptr<Item> TryParseItemForAttribute(
   bool create = false;
   auto reference = TryParseReference(value, &create);
   if (reference) {
+    reference->type_flags = type_mask;
     if (create && on_create_reference) {
-      on_create_reference(reference->name.value());
+      if (!on_create_reference(reference->name.value())) {
+        return {};
+      }
     }
     return std::move(reference);
   }
@@ -689,7 +692,7 @@ std::unique_ptr<Item> TryParseItemForAttribute(
  */
 std::unique_ptr<Item> TryParseItemForAttribute(
     const StringPiece& str, const Attribute* attr,
-    const std::function<void(const ResourceName&)>& on_create_reference) {
+    const std::function<bool(const ResourceName&)>& on_create_reference) {
   using android::ResTable_map;
 
   const uint32_t type_mask = attr->type_mask;
@@ -740,7 +743,7 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
   if (type == ResourceType::kId) {
     if (res_value.dataType != android::Res_value::TYPE_REFERENCE &&
         res_value.dataType != android::Res_value::TYPE_DYNAMIC_REFERENCE) {
-      // plain "id" resources are actually encoded as dummy values (aapt1 uses an empty string,
+      // plain "id" resources are actually encoded as unused values (aapt1 uses an empty string,
       // while aapt2 uses a false boolean).
       return util::make_unique<Id>();
     }
@@ -751,10 +754,12 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
   switch (res_value.dataType) {
     case android::Res_value::TYPE_STRING: {
       const std::string str = util::GetString(src_pool, data);
-      const android::ResStringPool_span* spans = src_pool.styleAt(data);
+      auto spans_result = src_pool.styleAt(data);
 
       // Check if the string has a valid style associated with it.
-      if (spans != nullptr && spans->name.index != android::ResStringPool_span::END) {
+      if (spans_result.has_value() &&
+          (*spans_result)->name.index != android::ResStringPool_span::END) {
+        const android::ResStringPool_span* spans = spans_result->unsafe_ptr();
         StyleString style_str = {str};
         while (spans->name.index != android::ResStringPool_span::END) {
           style_str.spans.push_back(Span{util::GetString(src_pool, spans->name.index),

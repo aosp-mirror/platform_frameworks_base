@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2019 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <Spinner
+            android:id="@+id/spinnerBehavior"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp" />
+
+        <ToggleButton
+            android:id="@+id/toggleButtonStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Status Bars Toggle Button"
+            android:textOff="Status Bars Invisible"
+            android:textOn="Status Bars Visible" />
+
+        <SeekBar
+            android:id="@+id/seekBarStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
+            android:max="10000"
+            android:progress="10000" />
+
+        <ToggleButton
+            android:id="@+id/toggleButtonNavigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Navigation Bars Toggle Button"
+            android:textOff="Navigation Bars Invisible"
+            android:textOn="Navigation Bars Visible" />
+
+        <SeekBar
+            android:id="@+id/seekBarNavigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
+            android:max="10000"
+            android:progress="10000" />
+
+        <ToggleButton
+            android:id="@+id/toggleButtonIme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="IME Toggle Button"
+            android:textOff="IME Invisible"
+            android:textOn="IME Visible" />
+
+        <SeekBar
+            android:id="@+id/seekBarIme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
+            android:max="10000"
+            android:progress="0" />
+
+        <TextView
+            android:id="@+id/textViewControllableInsets"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp" />
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="For testing IME..."
+            android:inputType="text"
+            android:text="" />
+
+    </LinearLayout>
+
+</ScrollView>

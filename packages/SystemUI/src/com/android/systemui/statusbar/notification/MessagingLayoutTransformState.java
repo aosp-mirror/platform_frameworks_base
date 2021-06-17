@@ -29,7 +29,7 @@ import com.android.internal.widget.MessagingImageMessage;
 import com.android.internal.widget.MessagingLinearLayout;
 import com.android.internal.widget.MessagingMessage;
 import com.android.internal.widget.MessagingPropertyAnimator;
-import com.android.systemui.Interpolators;
+import com.android.systemui.animation.Interpolators;
 
 import java.util.ArrayList;
 import java.util.HashMap;

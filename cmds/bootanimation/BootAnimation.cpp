@@ -34,6 +34,7 @@
 #include <cutils/atomic.h>
 #include <cutils/properties.h>
 
+#include <android/imagedecoder.h>
 #include <androidfw/AssetManager.h>
 #include <binder/IPCThreadState.h>
 #include <utils/Errors.h>
@@ -42,7 +43,7 @@
 
 #include <android-base/properties.h>
 
-#include <ui/DisplayConfig.h>
+#include <ui/DisplayMode.h>
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
@@ -51,14 +52,6 @@
 #include <gui/DisplayEventReceiver.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
-
-// TODO: Fix Skia.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <SkBitmap.h>
-#include <SkImage.h>
-#include <SkStream.h>
-#pragma GCC diagnostic pop
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -71,6 +64,8 @@
 #define STRTO(x) STR(x)
 
 namespace android {
+
+using ui::DisplayMode;
 
 static const char OEM_BOOTANIMATION_FILE[] = "/oem/media/bootanimation.zip";
 static const char PRODUCT_BOOTANIMATION_DARK_FILE[] = "/product/media/bootanimation-dark.zip";
@@ -92,6 +87,8 @@ static const char SYSTEM_TIME_DIR_NAME[] = "time";
 static const char SYSTEM_TIME_DIR_PATH[] = "/data/system/time";
 static const char CLOCK_FONT_ASSET[] = "images/clock_font.png";
 static const char CLOCK_FONT_ZIP_NAME[] = "clock_font.png";
+static const char PROGRESS_FONT_ASSET[] = "images/progress_font.png";
+static const char PROGRESS_FONT_ZIP_NAME[] = "progress_font.png";
 static const char LAST_TIME_CHANGED_FILE_NAME[] = "last_time_change";
 static const char LAST_TIME_CHANGED_FILE_PATH[] = "/data/system/time/last_time_change";
 static const char ACCURATE_TIME_FLAG_FILE_NAME[] = "time_is_accurate";
@@ -107,6 +104,7 @@ static constexpr size_t FONT_NUM_ROWS = FONT_NUM_CHARS / FONT_NUM_COLS;
 static const int TEXT_CENTER_VALUE = INT_MAX;
 static const int TEXT_MISSING_VALUE = INT_MIN;
 static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
+static const char PROGRESS_PROP_NAME[] = "service.bootanim.progress";
 static const char DISPLAYS_PROP_NAME[] = "persist.service.bootanim.displays";
 static const int ANIM_ENTRY_NAME_MAX = ANIM_PATH_MAX + 1;
 static constexpr size_t TEXT_POS_LEN_MAX = 16;
@@ -114,8 +112,8 @@ static constexpr size_t TEXT_POS_LEN_MAX = 16;
 // ---------------------------------------------------------------------------
 
 BootAnimation::BootAnimation(sp<Callbacks> callbacks)
-        : Thread(false), mClockEnabled(true), mTimeIsAccurate(false), mTimeFormat12Hour(false),
-        mTimeCheckThread(nullptr), mCallbacks(callbacks), mLooper(new Looper(false)) {
+        : Thread(false), mLooper(new Looper(false)), mClockEnabled(true), mTimeIsAccurate(false),
+        mTimeFormat12Hour(false), mTimeCheckThread(nullptr), mCallbacks(callbacks) {
     mSession = new SurfaceComposerClient();
 
     std::string powerCtl = android::base::GetProperty("sys.powerctl", "");
@@ -165,22 +163,51 @@ void BootAnimation::binderDied(const wp<IBinder>&) {
     requestExit();
 }
 
+static void* decodeImage(const void* encodedData, size_t dataLength, AndroidBitmapInfo* outInfo) {
+    AImageDecoder* decoder = nullptr;
+    AImageDecoder_createFromBuffer(encodedData, dataLength, &decoder);
+    if (!decoder) {
+        return nullptr;
+    }
+
+    const AImageDecoderHeaderInfo* info = AImageDecoder_getHeaderInfo(decoder);
+    outInfo->width = AImageDecoderHeaderInfo_getWidth(info);
+    outInfo->height = AImageDecoderHeaderInfo_getHeight(info);
+    outInfo->format = AImageDecoderHeaderInfo_getAndroidBitmapFormat(info);
+    outInfo->stride = AImageDecoder_getMinimumStride(decoder);
+    outInfo->flags = 0;
+
+    const size_t size = outInfo->stride * outInfo->height;
+    void* pixels = malloc(size);
+    int result = AImageDecoder_decodeImage(decoder, pixels, outInfo->stride, size);
+    AImageDecoder_delete(decoder);
+
+    if (result != ANDROID_IMAGE_DECODER_SUCCESS) {
+        free(pixels);
+        return nullptr;
+    }
+    return pixels;
+}
+
 status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
         const char* name) {
     Asset* asset = assets.open(name, Asset::ACCESS_BUFFER);
     if (asset == nullptr)
         return NO_INIT;
-    SkBitmap bitmap;
-    sk_sp<SkData> data = SkData::MakeWithoutCopy(asset->getBuffer(false),
-            asset->getLength());
-    sk_sp<SkImage> image = SkImage::MakeFromEncoded(data);
-    image->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);
+
+    AndroidBitmapInfo bitmapInfo;
+    void* pixels = decodeImage(asset->getBuffer(false), asset->getLength(), &bitmapInfo);
+    auto pixelDeleter = std::unique_ptr<void, decltype(free)*>{ pixels, free };
+
     asset->close();
     delete asset;
 
-    const int w = bitmap.width();
-    const int h = bitmap.height();
-    const void* p = bitmap.getPixels();
+    if (!pixels) {
+        return NO_INIT;
+    }
+
+    const int w = bitmapInfo.width;
+    const int h = bitmapInfo.height;
 
     GLint crop[4] = { 0, h, w, -h };
     texture->w = w;
@@ -189,22 +216,22 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
     glGenTextures(1, &texture->name);
     glBindTexture(GL_TEXTURE_2D, texture->name);
 
-    switch (bitmap.colorType()) {
-        case kAlpha_8_SkColorType:
+    switch (bitmapInfo.format) {
+        case ANDROID_BITMAP_FORMAT_A_8:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, w, h, 0, GL_ALPHA,
-                    GL_UNSIGNED_BYTE, p);
+                    GL_UNSIGNED_BYTE, pixels);
             break;
-        case kARGB_4444_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGBA_4444:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-                    GL_UNSIGNED_SHORT_4_4_4_4, p);
+                    GL_UNSIGNED_SHORT_4_4_4_4, pixels);
             break;
-        case kN32_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGBA_8888:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-                    GL_UNSIGNED_BYTE, p);
+                    GL_UNSIGNED_BYTE, pixels);
             break;
-        case kRGB_565_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGB_565:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-                    GL_UNSIGNED_SHORT_5_6_5, p);
+                    GL_UNSIGNED_SHORT_5_6_5, pixels);
             break;
         default:
             break;
@@ -220,20 +247,21 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
 }
 
 status_t BootAnimation::initTexture(FileMap* map, int* width, int* height) {
-    SkBitmap bitmap;
-    sk_sp<SkData> data = SkData::MakeWithoutCopy(map->getDataPtr(),
-            map->getDataLength());
-    sk_sp<SkImage> image = SkImage::MakeFromEncoded(data);
-    image->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);
+    AndroidBitmapInfo bitmapInfo;
+    void* pixels = decodeImage(map->getDataPtr(), map->getDataLength(), &bitmapInfo);
+    auto pixelDeleter = std::unique_ptr<void, decltype(free)*>{ pixels, free };
 
     // FileMap memory is never released until application exit.
     // Release it now as the texture is already loaded and the memory used for
     // the packed resource can be released.
     delete map;
 
-    const int w = bitmap.width();
-    const int h = bitmap.height();
-    const void* p = bitmap.getPixels();
+    if (!pixels) {
+        return NO_INIT;
+    }
+
+    const int w = bitmapInfo.width;
+    const int h = bitmapInfo.height;
 
     GLint crop[4] = { 0, h, w, -h };
     int tw = 1 << (31 - __builtin_clz(w));
@@ -241,28 +269,28 @@ status_t BootAnimation::initTexture(FileMap* map, int* width, int* height) {
     if (tw < w) tw <<= 1;
     if (th < h) th <<= 1;
 
-    switch (bitmap.colorType()) {
-        case kN32_SkColorType:
+    switch (bitmapInfo.format) {
+        case ANDROID_BITMAP_FORMAT_RGBA_8888:
             if (!mUseNpotTextures && (tw != w || th != h)) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA,
                         GL_UNSIGNED_BYTE, nullptr);
                 glTexSubImage2D(GL_TEXTURE_2D, 0,
-                        0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, p);
+                        0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
             } else {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-                        GL_UNSIGNED_BYTE, p);
+                        GL_UNSIGNED_BYTE, pixels);
             }
             break;
 
-        case kRGB_565_SkColorType:
+        case ANDROID_BITMAP_FORMAT_RGB_565:
             if (!mUseNpotTextures && (tw != w || th != h)) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB,
                         GL_UNSIGNED_SHORT_5_6_5, nullptr);
                 glTexSubImage2D(GL_TEXTURE_2D, 0,
-                        0, 0, w, h, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, p);
+                        0, 0, w, h, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels);
             } else {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-                        GL_UNSIGNED_SHORT_5_6_5, p);
+                        GL_UNSIGNED_SHORT_5_6_5, pixels);
             }
             break;
         default:
@@ -319,14 +347,14 @@ public:
                         continue;
                     }
 
-                    DisplayConfig displayConfig;
-                    const status_t error = SurfaceComposerClient::getActiveDisplayConfig(
-                        mBootAnimation->mDisplayToken, &displayConfig);
+                    DisplayMode displayMode;
+                    const status_t error = SurfaceComposerClient::getActiveDisplayMode(
+                        mBootAnimation->mDisplayToken, &displayMode);
                     if (error != NO_ERROR) {
-                        SLOGE("Can't get active display configuration.");
+                        SLOGE("Can't get active display mode.");
                     }
-                    mBootAnimation->resizeSurface(displayConfig.resolution.getWidth(),
-                        displayConfig.resolution.getHeight());
+                    mBootAnimation->resizeSurface(displayMode.resolution.getWidth(),
+                        displayMode.resolution.getHeight());
                 }
             }
         } while (numEvents > 0);
@@ -375,15 +403,15 @@ status_t BootAnimation::readyToRun() {
     if (mDisplayToken == nullptr)
         return NAME_NOT_FOUND;
 
-    DisplayConfig displayConfig;
+    DisplayMode displayMode;
     const status_t error =
-            SurfaceComposerClient::getActiveDisplayConfig(mDisplayToken, &displayConfig);
+            SurfaceComposerClient::getActiveDisplayMode(mDisplayToken, &displayMode);
     if (error != NO_ERROR)
         return error;
 
     mMaxWidth = android::base::GetIntProperty("ro.surface_flinger.max_graphics_width", 0);
     mMaxHeight = android::base::GetIntProperty("ro.surface_flinger.max_graphics_height", 0);
-    ui::Size resolution = displayConfig.resolution;
+    ui::Size resolution = displayMode.resolution;
     resolution = limitSurfaceSize(resolution.width, resolution.height);
     // create the native surface
     sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
@@ -394,7 +422,7 @@ status_t BootAnimation::readyToRun() {
     // this guest property specifies multi-display IDs to show the boot animation
     // multiple ids can be set with comma (,) as separator, for example:
     // setprop persist.boot.animation.displays 19260422155234049,19261083906282754
-    Vector<uint64_t> physicalDisplayIds;
+    Vector<PhysicalDisplayId> physicalDisplayIds;
     char displayValue[PROPERTY_VALUE_MAX] = "";
     property_get(DISPLAYS_PROP_NAME, displayValue, "");
     bool isValid = displayValue[0] != '\0';
@@ -412,7 +440,7 @@ status_t BootAnimation::readyToRun() {
     }
     if (isValid) {
         std::istringstream stream(displayValue);
-        for (PhysicalDisplayId id; stream >> id; ) {
+        for (PhysicalDisplayId id; stream >> id.value; ) {
             physicalDisplayIds.add(id);
             if (stream.peek() == ',')
                 stream.ignore();
@@ -459,6 +487,8 @@ status_t BootAnimation::readyToRun() {
     mFlingerSurface = s;
     mTargetInset = -1;
 
+    projectSceneToWindow();
+
     // Register a display event receiver
     mDisplayEventReceiver = std::make_unique<DisplayEventReceiver>();
     status_t status = mDisplayEventReceiver->initCheck();
@@ -468,6 +498,16 @@ status_t BootAnimation::readyToRun() {
             new DisplayEventCallback(this), nullptr);
 
     return NO_ERROR;
+}
+
+void BootAnimation::projectSceneToWindow() {
+    glViewport(0, 0, mWidth, mHeight);
+    glScissor(0, 0, mWidth, mHeight);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrthof(0, static_cast<float>(mWidth), 0, static_cast<float>(mHeight), -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
 void BootAnimation::resizeSurface(int newWidth, int newHeight) {
@@ -494,8 +534,8 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
         SLOGE("Can't make the new surface current. Error %d", eglGetError());
         return;
     }
-    glViewport(0, 0, mWidth, mHeight);
-    glScissor(0, 0, mWidth, mHeight);
+
+    projectSceneToWindow();
 
     mSurface = surface;
 }
@@ -570,6 +610,7 @@ bool BootAnimation::threadLoop() {
         result = movie();
     }
 
+    mCallbacks->shutdown();
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(mDisplay, mContext);
     eglDestroySurface(mDisplay, mSurface);
@@ -656,7 +697,6 @@ void BootAnimation::checkExit() {
     int exitnow = atoi(value);
     if (exitnow) {
         requestExit();
-        mCallbacks->shutdown();
     }
 }
 
@@ -776,6 +816,37 @@ status_t BootAnimation::initFont(Font* font, const char* fallback) {
     return status;
 }
 
+void BootAnimation::fadeFrame(const int frameLeft, const int frameBottom, const int frameWidth,
+                              const int frameHeight, const Animation::Part& part,
+                              const int fadedFramesCount) {
+    glEnable(GL_BLEND);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glDisable(GL_TEXTURE_2D);
+    // avoid creating a hole due to mixing result alpha with GL_REPLACE texture
+    glBlendFuncSeparateOES(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
+
+    const float alpha = static_cast<float>(fadedFramesCount) / part.framesToFadeCount;
+    glColor4f(part.backgroundColor[0], part.backgroundColor[1], part.backgroundColor[2], alpha);
+
+    const float frameStartX = static_cast<float>(frameLeft);
+    const float frameStartY = static_cast<float>(frameBottom);
+    const float frameEndX = frameStartX + frameWidth;
+    const float frameEndY = frameStartY + frameHeight;
+    const GLfloat frameRect[] = {
+        frameStartX, frameStartY,
+        frameEndX,   frameStartY,
+        frameEndX,   frameEndY,
+        frameStartX, frameEndY
+    };
+    glVertexPointer(2, GL_FLOAT, 0, frameRect);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisable(GL_BLEND);
+}
+
 void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* x, int* y) {
     glEnable(GL_BLEND);  // Allow us to draw on top of the animation
     glBindTexture(GL_TEXTURE_2D, font.texture.name);
@@ -848,6 +919,18 @@ void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos) 
     drawText(out, font, false, &x, &y);
 }
 
+void BootAnimation::drawProgress(int percent, const Font& font, const int xPos, const int yPos) {
+    static constexpr int PERCENT_LENGTH = 5;
+
+    char percentBuff[PERCENT_LENGTH];
+    // ';' has the ascii code just after ':', and the font resource contains '%'
+    // for that ascii code.
+    sprintf(percentBuff, "%d;", percent);
+    int x = xPos;
+    int y = yPos;
+    drawText(percentBuff, font, false, &x, &y);
+}
+
 bool BootAnimation::parseAnimationDesc(Animation& animation)  {
     String8 desString;
 
@@ -867,23 +950,41 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
         int height = 0;
         int count = 0;
         int pause = 0;
+        int progress = 0;
+        int framesToFadeCount = 0;
         char path[ANIM_ENTRY_NAME_MAX];
         char color[7] = "000000"; // default to black if unspecified
         char clockPos1[TEXT_POS_LEN_MAX + 1] = "";
         char clockPos2[TEXT_POS_LEN_MAX + 1] = "";
-
         char pathType;
-        if (sscanf(l, "%d %d %d", &width, &height, &fps) == 3) {
-            // SLOGD("> w=%d, h=%d, fps=%d", width, height, fps);
+
+        int nextReadPos;
+
+        int topLineNumbers = sscanf(l, "%d %d %d %d", &width, &height, &fps, &progress);
+        if (topLineNumbers == 3 || topLineNumbers == 4) {
+            // SLOGD("> w=%d, h=%d, fps=%d, progress=%d", width, height, fps, progress);
             animation.width = width;
             animation.height = height;
             animation.fps = fps;
-        } else if (sscanf(l, " %c %d %d %" STRTO(ANIM_PATH_MAX) "s #%6s %16s %16s",
-                          &pathType, &count, &pause, path, color, clockPos1, clockPos2) >= 4) {
-            //SLOGD("> type=%c, count=%d, pause=%d, path=%s, color=%s, clockPos1=%s, clockPos2=%s",
-            //    pathType, count, pause, path, color, clockPos1, clockPos2);
+            if (topLineNumbers == 4) {
+              animation.progressEnabled = (progress != 0);
+            } else {
+              animation.progressEnabled = false;
+            }
+        } else if (sscanf(l, "%c %d %d %" STRTO(ANIM_PATH_MAX) "s%n",
+                          &pathType, &count, &pause, path, &nextReadPos) >= 4) {
+            if (pathType == 'f') {
+                sscanf(l + nextReadPos, " %d #%6s %16s %16s", &framesToFadeCount, color, clockPos1,
+                       clockPos2);
+            } else {
+                sscanf(l + nextReadPos, " #%6s %16s %16s", color, clockPos1, clockPos2);
+            }
+            // SLOGD("> type=%c, count=%d, pause=%d, path=%s, framesToFadeCount=%d, color=%s, "
+            //       "clockPos1=%s, clockPos2=%s",
+            //       pathType, count, pause, path, framesToFadeCount, color, clockPos1, clockPos2);
             Animation::Part part;
             part.playUntilComplete = pathType == 'c';
+            part.framesToFadeCount = framesToFadeCount;
             part.count = count;
             part.pause = pause;
             part.path = path;
@@ -902,6 +1003,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
             // SLOGD("> SYSTEM");
             Animation::Part part;
             part.playUntilComplete = false;
+            part.framesToFadeCount = 0;
             part.count = 1;
             part.pause = 0;
             part.audioData = nullptr;
@@ -941,6 +1043,14 @@ bool BootAnimation::preloadZip(Animation& animation) {
                 FileMap* map = zip->createEntryFileMap(entry);
                 if (map) {
                     animation.clockFont.map = map;
+                }
+                continue;
+            }
+
+            if (entryName == PROGRESS_FONT_ZIP_NAME) {
+                FileMap* map = zip->createEntryFileMap(entry);
+                if (map) {
+                    animation.progressFont.map = map;
                 }
                 continue;
             }
@@ -1076,6 +1186,8 @@ bool BootAnimation::movie() {
         mClockEnabled = clockFontInitialized;
     }
 
+    initFont(&mAnimation->progressFont, PROGRESS_FONT_ASSET);
+
     if (mClockEnabled && !updateIsTimeAccurate()) {
         mTimeCheckThread = new TimeCheckThread(this);
         mTimeCheckThread->run("BootAnimation::TimeCheckThread", PRIORITY_NORMAL);
@@ -1098,12 +1210,23 @@ bool BootAnimation::movie() {
     return false;
 }
 
+bool BootAnimation::shouldStopPlayingPart(const Animation::Part& part,
+                                          const int fadedFramesCount,
+                                          const int lastDisplayedProgress) {
+    // stop playing only if it is time to exit and it's a partial part which has been faded out
+    return exitPending() && !part.playUntilComplete && fadedFramesCount >= part.framesToFadeCount &&
+        (lastDisplayedProgress == 0 || lastDisplayedProgress == 100);
+}
+
 bool BootAnimation::playAnimation(const Animation& animation) {
     const size_t pcount = animation.parts.size();
     nsecs_t frameDuration = s2ns(1) / animation.fps;
 
     SLOGD("%sAnimationShownTiming start time: %" PRId64 "ms", mShuttingDown ? "Shutdown" : "Boot",
             elapsedRealtime());
+
+    int fadedFramesCount = 0;
+    int lastDisplayedProgress = 0;
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
@@ -1117,10 +1240,9 @@ bool BootAnimation::playAnimation(const Animation& animation) {
             continue; //to next part
         }
 
-        for (int r=0 ; !part.count || r<part.count ; r++) {
-            // Exit any non playuntil complete parts immediately
-            if(exitPending() && !part.playUntilComplete)
-                break;
+        // process the part not only while the count allows but also if already fading
+        for (int r=0 ; !part.count || r<part.count || fadedFramesCount > 0 ; r++) {
+            if (shouldStopPlayingPart(part, fadedFramesCount, lastDisplayedProgress)) break;
 
             mCallbacks->playPart(i, part, r);
 
@@ -1130,7 +1252,15 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     part.backgroundColor[2],
                     1.0f);
 
-            for (size_t j=0 ; j<fcount && (!exitPending() || part.playUntilComplete) ; j++) {
+            // For the last animation, if we have progress indicator from
+            // the system, display it.
+            int currentProgress = android::base::GetIntProperty(PROGRESS_PROP_NAME, 0);
+            bool displayProgress = animation.progressEnabled &&
+                (i == (pcount -1)) && currentProgress != 0;
+
+            for (size_t j=0 ; j<fcount ; j++) {
+                if (shouldStopPlayingPart(part, fadedFramesCount, lastDisplayedProgress)) break;
+
                 processDisplayEvents();
 
                 const int animationX = (mWidth - animation.width) / 2;
@@ -1169,11 +1299,39 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 }
                 // specify the y center as ceiling((mHeight - frame.trimHeight) / 2)
                 // which is equivalent to mHeight - (yc + frame.trimHeight)
-                glDrawTexiOES(xc, mHeight - (yc + frame.trimHeight),
-                              0, frame.trimWidth, frame.trimHeight);
+                const int frameDrawY = mHeight - (yc + frame.trimHeight);
+                glDrawTexiOES(xc, frameDrawY, 0, frame.trimWidth, frame.trimHeight);
+
+                // if the part hasn't been stopped yet then continue fading if necessary
+                if (exitPending() && part.hasFadingPhase()) {
+                    fadeFrame(xc, frameDrawY, frame.trimWidth, frame.trimHeight, part,
+                              ++fadedFramesCount);
+                    if (fadedFramesCount >= part.framesToFadeCount) {
+                        fadedFramesCount = MAX_FADED_FRAMES_COUNT; // no more fading
+                    }
+                }
+
                 if (mClockEnabled && mTimeIsAccurate && validClock(part)) {
                     drawClock(animation.clockFont, part.clockPosX, part.clockPosY);
                 }
+
+                if (displayProgress) {
+                    int newProgress = android::base::GetIntProperty(PROGRESS_PROP_NAME, 0);
+                    // In case the new progress jumped suddenly, still show an
+                    // increment of 1.
+                    if (lastDisplayedProgress != 100) {
+                      // Artificially sleep 1/10th a second to slow down the animation.
+                      usleep(100000);
+                      if (lastDisplayedProgress < newProgress) {
+                        lastDisplayedProgress++;
+                      }
+                    }
+                    // Put the progress percentage right below the animation.
+                    int posY = animation.height / 3;
+                    int posX = TEXT_CENTER_VALUE;
+                    drawProgress(lastDisplayedProgress, animation.progressFont, posX, posY);
+                }
+
                 handleViewport(frameDuration);
 
                 eglSwapBuffers(mDisplay, mSurface);
@@ -1198,11 +1356,15 @@ bool BootAnimation::playAnimation(const Animation& animation) {
 
             usleep(part.pause * ns2us(frameDuration));
 
-            // For infinite parts, we've now played them at least once, so perhaps exit
-            if(exitPending() && !part.count && mCurrentInset >= mTargetInset)
-                break;
+            if (exitPending() && !part.count && mCurrentInset >= mTargetInset &&
+                !part.hasFadingPhase()) {
+                if (lastDisplayedProgress != 0 && lastDisplayedProgress != 100) {
+                    android::base::SetProperty(PROGRESS_PROP_NAME, "100");
+                    continue;
+                }
+                break; // exit the infinite non-fading part when it has been played at least once
+            }
         }
-
     }
 
     // Free textures created for looping parts now that the animation is done.

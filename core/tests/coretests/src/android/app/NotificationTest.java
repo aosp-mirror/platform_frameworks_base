@@ -16,7 +16,13 @@
 
 package android.app;
 
-import static com.android.internal.util.ContrastColorUtil.satisfiesTextContrast;
+import static androidx.core.graphics.ColorUtils.calculateContrast;
+
+import static com.android.compatibility.common.util.SystemUtil.runShellCommand;
+
+import static com.google.common.truth.Truth.assertThat;
+
+import static junit.framework.Assert.fail;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -29,9 +35,10 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
+import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Icon;
-import android.media.session.MediaSession;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -62,7 +69,7 @@ public class NotificationTest {
     public void testColorizedByPermission() {
         Notification n = new Notification.Builder(mContext, "test")
                 .setFlag(Notification.FLAG_CAN_COLORIZE, true)
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .build();
         assertTrue(n.isColorized());
 
@@ -73,7 +80,7 @@ public class NotificationTest {
 
         n = new Notification.Builder(mContext, "test")
                 .setFlag(Notification.FLAG_CAN_COLORIZE, false)
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .build();
         assertFalse(n.isColorized());
     }
@@ -82,7 +89,7 @@ public class NotificationTest {
     public void testColorizedByForeground() {
         Notification n = new Notification.Builder(mContext, "test")
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .build();
         assertTrue(n.isColorized());
 
@@ -93,26 +100,9 @@ public class NotificationTest {
 
         n = new Notification.Builder(mContext, "test")
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, false)
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .build();
         assertFalse(n.isColorized());
-    }
-
-    @Test
-    public void testColorSatisfiedWhenBgDarkTextDarker() {
-        Notification.Builder builder = getMediaNotification();
-        Notification n = builder.build();
-
-        assertTrue(n.isColorized());
-
-        // An initial guess where the foreground color is actually darker than an already dark bg
-        int backgroundColor = 0xff585868;
-        int initialForegroundColor = 0xff505868;
-        builder.setColorPalette(backgroundColor, initialForegroundColor);
-        int primaryTextColor = builder.getPrimaryTextColor(builder.mParams);
-        assertTrue(satisfiesTextContrast(primaryTextColor, backgroundColor));
-        int secondaryTextColor = builder.getSecondaryTextColor(builder.mParams);
-        assertTrue(satisfiesTextContrast(secondaryTextColor, backgroundColor));
     }
 
     @Test
@@ -186,8 +176,8 @@ public class NotificationTest {
 
     @Test
     public void allPendingIntents_recollectedAfterReusingBuilder() {
-        PendingIntent intent1 = PendingIntent.getActivity(mContext, 0, new Intent("test1"), 0);
-        PendingIntent intent2 = PendingIntent.getActivity(mContext, 0, new Intent("test2"), 0);
+        PendingIntent intent1 = PendingIntent.getActivity(mContext, 0, new Intent("test1"), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        PendingIntent intent2 = PendingIntent.getActivity(mContext, 0, new Intent("test2"), PendingIntent.FLAG_MUTABLE_UNAUDITED);
 
         Notification.Builder builder = new Notification.Builder(mContext, "channel");
         builder.setContentIntent(intent1);
@@ -206,7 +196,7 @@ public class NotificationTest {
 
     @Test
     public void allPendingIntents_containsCustomRemoteViews() {
-        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent("test"), 0);
+        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent("test"), PendingIntent.FLAG_MUTABLE_UNAUDITED);
 
         RemoteViews contentView = new RemoteViews(mContext.getPackageName(), 0 /* layoutId */);
         contentView.setOnClickPendingIntent(1 /* id */, intent);
@@ -343,13 +333,142 @@ public class NotificationTest {
         assertNull(clone.getLocusId());
     }
 
-    private Notification.Builder getMediaNotification() {
-        MediaSession session = new MediaSession(mContext, "test");
-        return new Notification.Builder(mContext, "color")
-                .setSmallIcon(com.android.internal.R.drawable.emergency_icon)
-                .setContentTitle("Title")
-                .setContentText("Text")
-                .setStyle(new Notification.MediaStyle().setMediaSession(session.getSessionToken()));
+    @Test
+    public void testColors_ensureColors_dayMode_producesValidPalette() {
+        Notification.Colors c = new Notification.Colors();
+        boolean colorized = false;
+        boolean nightMode = false;
+        resolveColorsInNightMode(nightMode, c, Color.BLUE, colorized);
+        assertValid(c);
+    }
+
+    @Test
+    public void testColors_ensureColors_nightMode_producesValidPalette() {
+        Notification.Colors c = new Notification.Colors();
+        boolean colorized = false;
+        boolean nightMode = true;
+        resolveColorsInNightMode(nightMode, c, Color.BLUE, colorized);
+        assertValid(c);
+    }
+
+    @Test
+    public void testColors_ensureColors_colorized_producesValidPalette_default() {
+        validateColorizedPaletteForColor(Notification.COLOR_DEFAULT);
+    }
+
+    @Test
+    public void testColors_ensureColors_colorized_producesValidPalette_blue() {
+        validateColorizedPaletteForColor(Color.BLUE);
+    }
+
+    @Test
+    public void testColors_ensureColors_colorized_producesValidPalette_red() {
+        validateColorizedPaletteForColor(Color.RED);
+    }
+
+    @Test
+    public void testColors_ensureColors_colorized_producesValidPalette_white() {
+        validateColorizedPaletteForColor(Color.WHITE);
+    }
+
+    @Test
+    public void testColors_ensureColors_colorized_producesValidPalette_black() {
+        validateColorizedPaletteForColor(Color.BLACK);
+    }
+
+    public void validateColorizedPaletteForColor(int rawColor) {
+        Notification.Colors cDay = new Notification.Colors();
+        Notification.Colors cNight = new Notification.Colors();
+        boolean colorized = true;
+
+        resolveColorsInNightMode(false, cDay, rawColor, colorized);
+        resolveColorsInNightMode(true, cNight, rawColor, colorized);
+
+        if (rawColor != Notification.COLOR_DEFAULT) {
+            assertEquals(rawColor, cDay.getBackgroundColor());
+            assertEquals(rawColor, cNight.getBackgroundColor());
+        }
+
+        assertValid(cDay);
+        assertValid(cNight);
+
+        if (rawColor != Notification.COLOR_DEFAULT) {
+            // When a color is provided, night mode should have no effect on the notification
+            assertEquals(cDay.getBackgroundColor(), cNight.getBackgroundColor());
+            assertEquals(cDay.getPrimaryTextColor(), cNight.getPrimaryTextColor());
+            assertEquals(cDay.getSecondaryTextColor(), cNight.getSecondaryTextColor());
+            assertEquals(cDay.getPrimaryAccentColor(), cNight.getPrimaryAccentColor());
+            assertEquals(cDay.getSecondaryAccentColor(), cNight.getSecondaryAccentColor());
+            assertEquals(cDay.getProtectionColor(), cNight.getProtectionColor());
+            assertEquals(cDay.getContrastColor(), cNight.getContrastColor());
+            assertEquals(cDay.getRippleAlpha(), cNight.getRippleAlpha());
+        }
+    }
+
+    private void assertValid(Notification.Colors c) {
+        // Assert that all colors are populated
+        assertThat(c.getBackgroundColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getProtectionColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getPrimaryTextColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getSecondaryTextColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getPrimaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getSecondaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getErrorColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getContrastColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getRippleAlpha()).isAtLeast(0x00);
+        assertThat(c.getRippleAlpha()).isAtMost(0xff);
+
+        // Assert that various colors have sufficient contrast
+        assertContrastIsAtLeast(c.getPrimaryTextColor(), c.getBackgroundColor(), 4.5);
+        assertContrastIsAtLeast(c.getSecondaryTextColor(), c.getBackgroundColor(), 4.5);
+        assertContrastIsAtLeast(c.getPrimaryAccentColor(), c.getBackgroundColor(), 4.5);
+        assertContrastIsAtLeast(c.getErrorColor(), c.getBackgroundColor(), 4.5);
+        assertContrastIsAtLeast(c.getContrastColor(), c.getBackgroundColor(), 4.5);
+
+        // This accent color is only used for emphasized buttons
+        assertContrastIsAtLeast(c.getSecondaryAccentColor(), c.getBackgroundColor(), 1);
+    }
+
+    private void assertContrastIsAtLeast(int foreground, int background, double minContrast) {
+        try {
+            assertThat(calculateContrast(foreground, background)).isAtLeast(minContrast);
+        } catch (AssertionError e) {
+            throw new AssertionError(
+                    String.format("Insufficient contrast: foreground=#%08x background=#%08x",
+                            foreground, background), e);
+        }
+    }
+
+    private void resolveColorsInNightMode(boolean nightMode, Notification.Colors c, int rawColor,
+            boolean colorized) {
+        runInNightMode(nightMode,
+                () -> c.resolvePalette(mContext, rawColor, colorized, nightMode));
+    }
+
+    private void runInNightMode(boolean nightMode, Runnable task) {
+        final String initialNightMode = changeNightMode(nightMode);
+        try {
+            Configuration currentConfig = mContext.getResources().getConfiguration();
+            boolean isNightMode = (currentConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                    == Configuration.UI_MODE_NIGHT_YES;
+            assertEquals(nightMode, isNightMode);
+            task.run();
+        } finally {
+            runShellCommand("cmd uimode night " + initialNightMode);
+        }
+    }
+
+
+    // Change the night mode and return the previous mode
+    private String changeNightMode(boolean nightMode) {
+        final String nightModeText = runShellCommand("cmd uimode night");
+        final String[] nightModeSplit = nightModeText.split(":");
+        if (nightModeSplit.length != 2) {
+            fail("Failed to get initial night mode value from " + nightModeText);
+        }
+        String previousMode = nightModeSplit[1].trim();
+        runShellCommand("cmd uimode night " + (nightMode ? "yes" : "no"));
+        return previousMode;
     }
 
     /**

@@ -22,7 +22,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.app.ActivityThread;
+import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.media.metrics.LogSessionId;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
@@ -35,12 +40,17 @@ import dalvik.system.CloseGuard;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.time.Instant;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,7 +58,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 
 /**
  * MediaDrm can be used to obtain keys for decrypting protected media streams, in
@@ -142,6 +151,7 @@ public final class MediaDrm implements AutoCloseable {
     private static final String PERMISSION = android.Manifest.permission.ACCESS_DRM_CERTIFICATES;
 
     private long mNativeContext;
+    private final String mAppPackageName;
 
     /**
      * Specify no certificate type
@@ -279,16 +289,380 @@ public final class MediaDrm implements AutoCloseable {
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
+        mAppPackageName = ActivityThread.currentOpPackageName();
         native_setup(new WeakReference<MediaDrm>(this),
-                getByteArrayFromUUID(uuid),  ActivityThread.currentOpPackageName());
+                getByteArrayFromUUID(uuid), mAppPackageName);
 
         mCloseGuard.open("release");
     }
 
     /**
-     * Thrown when an unrecoverable failure occurs during a MediaDrm operation.
-     * Extends java.lang.IllegalStateException with the addition of an error
+     * Error codes that may be returned from {@link
+     * MediaDrmStateException#getErrorCode()} and {@link
+     * MediaCodec.CryptoException#getErrorCode()}
+     * <p>
+     * The description of each error code includes steps that may be taken to
+     * resolve the error condition. For some errors however, a recovery action
+     * cannot be predetermined. The description of those codes refers to a
+     * general strategy for handling the error condition programmatically, which
+     * is to try the following in listed order until successful:
+     * <ol>
+     * <li> retry the operation </li>
+     * <li> if the operation is related to a session, {@link
+     * #closeSession(byte[]) close} the session, {@link #openSession() open} a
+     * new session, and retry the operation </li>
+     * <li> {@link #close() close} the {@link MediaDrm} instance and any other
+     * related components such as the {@link MediaCodec codec} and retry
+     * playback, or </li>
+     * <li> try using a different configuration of the {@link MediaDrm} plugin,
+     * such as a different {@link #openSession(int) security level}. </li>
+     * </ol>
+     * <p>
+     * If the problem still persists after all the aforementioned steps, please
+     * report the failure to the {@link MediaDrm} plugin vendor along with the
+     * {@link LogMessage log messages} returned by {@link
+     * MediaDrm#getLogMessages()}, and a bugreport if possible.
+     */
+    public final static class ErrorCodes {
+        private ErrorCodes() {}
+
+        /**
+         * ERROR_UNKNOWN is used where no other defined error code is applicable
+         * to the current failure.
+         * <p>
+         * Please see the general error handling strategy for unexpected errors
+         * described in {@link ErrorCodes}.
+         */
+        public static final int ERROR_UNKNOWN = 0;
+
+        /**
+         * The requested key was not found when trying to perform a decrypt
+         * operation.
+         * <p>
+         * The operation can be retried after adding the correct decryption key.
+         */
+        public static final int ERROR_NO_KEY = 1;
+
+        /**
+         * The key used for decryption is no longer valid due to license term
+         * expiration.
+         * <p>
+         * The operation can be retried after updating the expired keys.
+         */
+        public static final int ERROR_KEY_EXPIRED = 2;
+
+        /**
+         * A required crypto resource was not able to be allocated while
+         * attempting the requested operation.
+         * <p>
+         * The operation can be retried if the app is able to release resources.
+         */
+        public static final int ERROR_RESOURCE_BUSY = 3;
+
+        /**
+         * The output protection levels supported by the device are not
+         * sufficient to meet the requirements set by the content owner in the
+         * license policy.
+         */
+        public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4;
+
+        /**
+         * Decryption was attempted on a session that is not opened, which could
+         * be due to a failure to open the session, closing the session
+         * prematurely, the session being reclaimed by the resource manager, or
+         * a non-existent session id.
+         */
+        public static final int ERROR_SESSION_NOT_OPENED = 5;
+
+        /**
+         * An operation was attempted that could not be supported by the crypto
+         * system of the device in its current configuration.
+         * <p>
+         * This may occur when the license policy requires device security
+         * features that aren't supported by the device, or due to an internal
+         * error in the crypto system that prevents the specified security
+         * policy from being met.
+         */
+        public static final int ERROR_UNSUPPORTED_OPERATION = 6;
+
+        /**
+         * The security level of the device is not sufficient to meet the
+         * requirements set by the content owner in the license policy.
+         */
+        public static final int ERROR_INSUFFICIENT_SECURITY = 7;
+
+        /**
+         * The video frame being decrypted exceeds the size of the device's
+         * protected output buffers.
+         * <p>
+         * When encountering this error the app should try playing content
+         * of a lower resolution or skipping the problematic frame.
+         */
+        public static final int ERROR_FRAME_TOO_LARGE = 8;
+
+        /**
+         * The session state has been invalidated. This can occur on devices
+         * that are not capable of retaining crypto session state across device
+         * suspend/resume.
+         * <p>
+         * The session must be closed and a new session opened to resume
+         * operation.
+         */
+        public static final int ERROR_LOST_STATE = 9;
+
+        /**
+         * Certificate is malformed or is of the wrong type.
+         * <p>
+         * Ensure the certificate provided by the app or returned from the
+         * license server is valid. Check with the {@link MediaDrm} plugin
+         * vendor for the expected certificate format.
+         */
+        public static final int ERROR_CERTIFICATE_MALFORMED = 10;
+
+        /**
+         * Certificate has not been set.
+         * <p>
+         * Ensure the certificate has been provided by the app. Check with the
+         * {@link MediaDrm} plugin vendor for the expected method to provide
+         * {@link MediaDrm} a certificate.
+         */
+        public static final int ERROR_CERTIFICATE_MISSING = 11;
+
+        /**
+         * An error happened within the crypto library used by the drm plugin.
+         */
+        public static final int ERROR_CRYPTO_LIBRARY = 12;
+
+        /**
+         * Unexpected error reported by the device OEM subsystem.
+         * <p>
+         * Please see the general error handling strategy for unexpected errors
+         * described in {@link ErrorCodes}.
+         */
+        public static final int ERROR_GENERIC_OEM = 13;
+
+        /**
+         * Unexpected internal failure in {@link MediaDrm}/{@link MediaCrypto}.
+         * <p>
+         * Please see the general error handling strategy for unexpected errors
+         * described in {@link ErrorCodes}.
+         */
+        public static final int ERROR_GENERIC_PLUGIN = 14;
+
+        /**
+         * The init data parameter passed to {@link MediaDrm#getKeyRequest} is
+         * empty or invalid.
+         * <p>
+         * Init data is typically obtained from {@link
+         * MediaExtractor#getPsshInfo()} or {@link
+         * MediaExtractor#getDrmInitData()}. Check with the {@link MediaDrm}
+         * plugin vendor for the expected init data format.
+         */
+        public static final int ERROR_INIT_DATA = 15;
+
+        /**
+         * Either the key was not loaded from the license before attempting the
+         * operation, or the key ID parameter provided by the app is incorrect.
+         * <p>
+         * Ensure the proper keys are in the license, and check the key ID
+         * parameter provided by the app is correct. Check with the {@link
+         * MediaDrm} plugin vendor for the expected license format.
+         */
+        public static final int ERROR_KEY_NOT_LOADED = 16;
+
+        /**
+         * The license response was empty, fields are missing or otherwise
+         * unable to be parsed or decrypted.
+         * <p>
+         * Check for mistakes such as empty or overwritten buffers. Otherwise,
+         * check with the {@link MediaDrm} plugin vendor for the expected
+         * license format.
+         */
+        public static final int ERROR_LICENSE_PARSE = 17;
+
+        /**
+         * The operation (e.g. to renew or persist a license) is prohibited by
+         * the license policy.
+         * <p>
+         * Check the license policy configuration on the license server.
+         */
+        public static final int ERROR_LICENSE_POLICY = 18;
+
+        /**
+         * Failed to generate a release request because a field in the offline
+         * license is empty or malformed.
+         * <p>
+         * The license can't be released on the server, but the app may remove
+         * the offline license explicitly using {@link
+         * MediaDrm#removeOfflineLicense}.
+         */
+        public static final int ERROR_LICENSE_RELEASE = 19;
+
+        /**
+         * The license server detected an error in the license request.
+         * <p>
+         * Check for errors on the license server.
+         */
+        public static final int ERROR_LICENSE_REQUEST_REJECTED = 20;
+
+        /**
+         * Failed to restore an offline license because a field in the offline
+         * license is empty or malformed.
+         * <p>
+         * Try requesting the license again if the device is online.
+         */
+        public static final int ERROR_LICENSE_RESTORE = 21;
+
+        /**
+         * Offline license is in an invalid state for the attempted operation.
+         * <p>
+         * Check the sequence of API calls made that can affect offline license
+         * state. For example, this could happen when the app attempts to
+         * restore a license after it has been released.
+         */
+        public static final int ERROR_LICENSE_STATE = 22;
+
+        /**
+         * Failure in the media framework.
+         * <p>
+         * Try releasing media resources (e.g. {@link MediaCodec}, {@link
+         * MediaDrm}), and restarting playback.
+         */
+        public static final int ERROR_MEDIA_FRAMEWORK = 23;
+
+        /**
+         * Error loading the provisioned certificate.
+         * <p>
+         * Re-provisioning may resolve the problem; check with the {@link
+         * MediaDrm} plugin vendor for re-provisioning instructions. Otherwise,
+         * using a different security level may resolve the issue.
+         */
+        public static final int ERROR_PROVISIONING_CERTIFICATE = 24;
+
+        /**
+         * Required steps were not performed before provisioning was attempted.
+         * <p>
+         * Ask the {@link MediaDrm} plugin vendor for situations where this
+         * error may occur.
+         */
+        public static final int ERROR_PROVISIONING_CONFIG = 25;
+
+        /**
+         * The provisioning response was empty, fields are missing or otherwise
+         * unable to be parsed.
+         * <p>
+         * Check for mistakes such as empty or overwritten buffers. Otherwise,
+         * check with the {@link MediaDrm} plugin vendor for the expected
+         * provisioning response format.
+         */
+        public static final int ERROR_PROVISIONING_PARSE = 26;
+
+        /**
+         * The provisioning server detected an error in the provisioning
+         * request.
+         * <p>
+         * Check for errors on the provisioning server.
+         */
+        public static final int ERROR_PROVISIONING_REQUEST_REJECTED = 27;
+
+        /**
+         * Provisioning failed in a way that is likely to succeed on a
+         * subsequent attempt.
+         * <p>
+         * The app should retry the operation.
+         */
+        public static final int ERROR_PROVISIONING_RETRY = 28;
+
+        /**
+         * This indicates that apps using MediaDrm sessions are
+         * temporarily exceeding the capacity of available crypto
+         * resources.
+         * <p>
+         * The app should retry the operation later.
+         */
+        public static final int ERROR_RESOURCE_CONTENTION = 29;
+
+        /**
+         * Failed to generate a secure stop request because a field in the
+         * stored license is empty or malformed.
+         * <p>
+         * The secure stop can't be released on the server, but the app may
+         * remove it explicitly using {@link MediaDrm#removeSecureStop}.
+         */
+        public static final int ERROR_SECURE_STOP_RELEASE = 30;
+
+        /**
+         * The plugin was unable to read data from the filesystem.
+         * <p>
+         * Please see the general error handling strategy for unexpected errors
+         * described in {@link ErrorCodes}.
+         */
+        public static final int ERROR_STORAGE_READ = 31;
+
+        /**
+         * The plugin was unable to write data to the filesystem.
+         * <p>
+         * Please see the general error handling strategy for unexpected errors
+         * described in {@link ErrorCodes}.
+         */
+        public static final int ERROR_STORAGE_WRITE = 32;
+
+        /**
+         * {@link MediaCodec#queueSecureInputBuffer} called with 0 subsamples.
+         * <p>
+         * Check the {@link MediaCodec.CryptoInfo} object passed to {@link
+         * MediaCodec#queueSecureInputBuffer}.
+         */
+        public static final int ERROR_ZERO_SUBSAMPLES = 33;
+
+    }
+
+    /** @hide */
+    @IntDef({
+        ErrorCodes.ERROR_NO_KEY,
+        ErrorCodes.ERROR_KEY_EXPIRED,
+        ErrorCodes.ERROR_RESOURCE_BUSY,
+        ErrorCodes.ERROR_INSUFFICIENT_OUTPUT_PROTECTION,
+        ErrorCodes.ERROR_SESSION_NOT_OPENED,
+        ErrorCodes.ERROR_UNSUPPORTED_OPERATION,
+        ErrorCodes.ERROR_INSUFFICIENT_SECURITY,
+        ErrorCodes.ERROR_FRAME_TOO_LARGE,
+        ErrorCodes.ERROR_LOST_STATE,
+        ErrorCodes.ERROR_CERTIFICATE_MALFORMED,
+        ErrorCodes.ERROR_CERTIFICATE_MISSING,
+        ErrorCodes.ERROR_CRYPTO_LIBRARY,
+        ErrorCodes.ERROR_GENERIC_OEM,
+        ErrorCodes.ERROR_GENERIC_PLUGIN,
+        ErrorCodes.ERROR_INIT_DATA,
+        ErrorCodes.ERROR_KEY_NOT_LOADED,
+        ErrorCodes.ERROR_LICENSE_PARSE,
+        ErrorCodes.ERROR_LICENSE_POLICY,
+        ErrorCodes.ERROR_LICENSE_RELEASE,
+        ErrorCodes.ERROR_LICENSE_REQUEST_REJECTED,
+        ErrorCodes.ERROR_LICENSE_RESTORE,
+        ErrorCodes.ERROR_LICENSE_STATE,
+        ErrorCodes.ERROR_MEDIA_FRAMEWORK,
+        ErrorCodes.ERROR_PROVISIONING_CERTIFICATE,
+        ErrorCodes.ERROR_PROVISIONING_CONFIG,
+        ErrorCodes.ERROR_PROVISIONING_PARSE,
+        ErrorCodes.ERROR_PROVISIONING_REQUEST_REJECTED,
+        ErrorCodes.ERROR_PROVISIONING_RETRY,
+        ErrorCodes.ERROR_SECURE_STOP_RELEASE,
+        ErrorCodes.ERROR_STORAGE_READ,
+        ErrorCodes.ERROR_STORAGE_WRITE,
+        ErrorCodes.ERROR_ZERO_SUBSAMPLES
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaDrmErrorCode {}
+
+    /**
+     * Thrown when a general failure occurs during a MediaDrm operation.
+     * Extends {@link IllegalStateException} with the addition of an error
      * code that may be useful in diagnosing the failure.
+     * <p>
+     * Please refer to {@link ErrorCodes} for the general error handling
+     * strategy and details about each possible return value from {@link
+     * MediaDrmStateException#getErrorCode()}.
      */
     public static final class MediaDrmStateException extends java.lang.IllegalStateException {
         private final int mErrorCode;
@@ -309,12 +683,27 @@ public final class MediaDrm implements AutoCloseable {
         }
 
         /**
-         * Retrieve the associated error code
+         * Returns error code associated with this {@link
+         * MediaDrmStateException}.
+         * <p>
+         * Please refer to {@link ErrorCodes} for the general error handling
+         * strategy and details about each possible return value.
          *
-         * @hide
+         * @return an error code defined in {@link MediaDrm.ErrorCodes}.
          */
+        @MediaDrmErrorCode
         public int getErrorCode() {
             return mErrorCode;
+        }
+
+        /**
+         * Returns true if the {@link MediaDrmStateException} is a transient
+         * issue, perhaps due to resource constraints, and that the operation
+         * (e.g. provisioning) may succeed on a subsequent attempt.
+         */
+        public boolean isTransient() {
+            return mErrorCode == ErrorCodes.ERROR_PROVISIONING_RETRY
+                    || mErrorCode == ErrorCodes.ERROR_RESOURCE_CONTENTION;
         }
 
         /**
@@ -330,7 +719,13 @@ public final class MediaDrm implements AutoCloseable {
     }
 
     /**
-     * Thrown when an error occurs in any method that has a session context.
+     * {@link SessionException} is a misnomer because it may occur in methods
+     * <b>without</b> a session context.
+     * <p>
+     * A {@link SessionException} is most likely to be thrown when an operation
+     * failed in a way that is likely to succeed on a subsequent attempt; call
+     * {@link #isTransient()} to determine whether the app should retry the
+     * failing operation.
      */
     public static final class SessionException extends RuntimeException {
         public SessionException(int errorCode, @Nullable String detailMessage) {
@@ -340,6 +735,7 @@ public final class MediaDrm implements AutoCloseable {
 
         /**
          * The SessionException has an unknown error code.
+         * @deprecated Unused.
          */
         public static final int ERROR_UNKNOWN = 0;
 
@@ -347,6 +743,10 @@ public final class MediaDrm implements AutoCloseable {
          * This indicates that apps using MediaDrm sessions are
          * temporarily exceeding the capacity of available crypto
          * resources. The app should retry the operation later.
+         *
+         * @deprecated Please use {@link #isTransient()} instead of comparing
+         * the return value of {@link #getErrorCode()} against
+         * {@link SessionException#ERROR_RESOURCE_CONTENTION}.
          */
         public static final int ERROR_RESOURCE_CONTENTION = 1;
 
@@ -359,10 +759,24 @@ public final class MediaDrm implements AutoCloseable {
 
         /**
          * Retrieve the error code associated with the SessionException
+         *
+         * @deprecated Please use {@link #isTransient()} instead of comparing
+         * the return value of {@link #getErrorCode()} against
+         * {@link SessionException#ERROR_RESOURCE_CONTENTION}.
          */
         @SessionErrorCode
         public int getErrorCode() {
             return mErrorCode;
+        }
+
+        /**
+         * Returns true if the {@link SessionException} is a transient
+         * issue, perhaps due to resource constraints, and that the operation
+         * (e.g. provisioning, generating requests) may succeed on a subsequent
+         * attempt.
+         */
+        public boolean isTransient() {
+            return mErrorCode == ERROR_RESOURCE_CONTENTION;
         }
 
         private final int mErrorCode;
@@ -963,14 +1377,30 @@ public final class MediaDrm implements AutoCloseable {
      * a session
      */
     @NonNull
-    public native byte[] openSession(@SecurityLevel int level) throws
+    public byte[] openSession(@SecurityLevel int level) throws
+            NotProvisionedException, ResourceBusyException {
+        byte[] sessionId = openSessionNative(level);
+        mPlaybackComponentMap.put(ByteBuffer.wrap(sessionId), new PlaybackComponent(sessionId));
+        return sessionId;
+    }
+
+    @NonNull
+    private native byte[] openSessionNative(int level) throws
             NotProvisionedException, ResourceBusyException;
 
     /**
      * Close a session on the MediaDrm object that was previously opened
      * with {@link #openSession}.
      */
-    public native void closeSession(@NonNull byte[] sessionId);
+    public void closeSession(@NonNull byte[] sessionId) {
+        closeSessionNative(sessionId);
+        mPlaybackComponentMap.remove(ByteBuffer.wrap(sessionId));
+    }
+
+    private native void closeSessionNative(@NonNull byte[] sessionId);
+
+    private final Map<ByteBuffer, PlaybackComponent> mPlaybackComponentMap
+            = new ConcurrentHashMap<>();
 
     /**
      * This key request type species that the keys will be for online use, they will
@@ -1126,12 +1556,78 @@ public final class MediaDrm implements AutoCloseable {
      * problem with the certifcate
      */
     @NonNull
-    public native KeyRequest getKeyRequest(
+    public KeyRequest getKeyRequest(
+            @NonNull byte[] scope, @Nullable byte[] init,
+            @Nullable String mimeType, @KeyType int keyType,
+            @Nullable HashMap<String, String> optionalParameters)
+            throws NotProvisionedException {
+        HashMap<String, String> internalParams;
+        if (optionalParameters == null) {
+            internalParams = new HashMap<>();
+        } else {
+            internalParams = new HashMap<>(optionalParameters);
+        }
+        byte[] rawBytes = getNewestAvailablePackageCertificateRawBytes();
+        byte[] hashBytes = null;
+        if (rawBytes != null) {
+            hashBytes = getDigestBytes(rawBytes, "SHA-256");
+        }
+        if (hashBytes != null) {
+            Base64.Encoder encoderB64 = Base64.getEncoder();
+            String hashBytesB64 = encoderB64.encodeToString(hashBytes);
+            internalParams.put("package_certificate_hash_bytes", hashBytesB64);
+        }
+        return getKeyRequestNative(scope, init, mimeType, keyType, internalParams);
+    }
+
+    @Nullable
+    private byte[] getNewestAvailablePackageCertificateRawBytes() {
+        Application application = ActivityThread.currentApplication();
+        if (application == null) {
+            Log.w(TAG, "pkg cert: Application is null");
+            return null;
+        }
+        PackageManager pm = application.getPackageManager();
+        if (pm == null) {
+            Log.w(TAG, "pkg cert: PackageManager is null");
+            return null;
+        }
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = pm.getPackageInfo(mAppPackageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, mAppPackageName, e);
+        }
+        if (packageInfo == null || packageInfo.signingInfo == null) {
+            Log.w(TAG, "pkg cert: PackageInfo or SigningInfo is null");
+            return null;
+        }
+        Signature[] signers = packageInfo.signingInfo.getApkContentsSigners();
+        if (signers != null && signers.length == 1) {
+            return signers[0].toByteArray();
+        }
+        Log.w(TAG, "pkg cert: " + signers.length + " signers");
+        return null;
+    }
+
+    @Nullable
+    private static byte[] getDigestBytes(@NonNull byte[] rawBytes, @NonNull String algorithm) {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
+            return messageDigest.digest(rawBytes);
+        } catch (NoSuchAlgorithmException e) {
+            Log.w(TAG, algorithm, e);
+        }
+        return null;
+    }
+
+    @NonNull
+    private native KeyRequest getKeyRequestNative(
             @NonNull byte[] scope, @Nullable byte[] init,
             @Nullable String mimeType, @KeyType int keyType,
             @Nullable HashMap<String, String> optionalParameters)
             throws NotProvisionedException;
-
 
     /**
      * A key response is received from the license server by the app, then it is
@@ -1993,6 +2489,39 @@ public final class MediaDrm implements AutoCloseable {
         return signRSANative(this, sessionId, algorithm, wrappedKey, message);
     }
 
+    /**
+     * Query if the crypto scheme requires the use of a secure decoder
+     * to decode data of the given mime type at the default security level.
+     * The default security level is defined as the highest security level
+     * supported on the device.
+     *
+     * @param mime The mime type of the media data. Please use {@link
+     *             #isCryptoSchemeSupported(UUID, String)} to query mime type support separately;
+     *             for unsupported mime types the return value of {@link
+     *             #requiresSecureDecoder(String)} is crypto scheme dependent.
+     */
+    public boolean requiresSecureDecoder(@NonNull String mime) {
+        return requiresSecureDecoder(mime, getMaxSecurityLevel());
+    }
+
+    /**
+     * Query if the crypto scheme requires the use of a secure decoder
+     * to decode data of the given mime type at the given security level.
+     *
+     * @param mime The mime type of the media data. Please use {@link
+     *             #isCryptoSchemeSupported(UUID, String, int)} to query mime type support
+     *             separately; for unsupported mime types the return value of {@link
+     *             #requiresSecureDecoder(String, int)} is crypto scheme dependent.
+     * @param level a security level between {@link #SECURITY_LEVEL_SW_SECURE_CRYPTO}
+     *              and {@link #SECURITY_LEVEL_HW_SECURE_ALL}. Otherwise the special value
+     *              {@link #getMaxSecurityLevel()} is also permitted;
+     *              use {@link #getMaxSecurityLevel()} to indicate the maximum security level
+     *              supported by the device.
+     * @throws IllegalArgumentException if the requested security level is none of the documented
+     * values for the parameter {@code level}.
+     */
+    public native boolean requiresSecureDecoder(@NonNull String mime, @SecurityLevel int level);
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -2029,6 +2558,7 @@ public final class MediaDrm implements AutoCloseable {
         mCloseGuard.close();
         if (mClosed.compareAndSet(false, true)) {
             native_release();
+            mPlaybackComponentMap.clear();
         }
     }
 
@@ -2402,5 +2932,136 @@ public final class MediaDrm implements AutoCloseable {
          */
         public static final String EVENT_SESSION_RECLAIMED_COUNT
             = "drm.mediadrm.event.SESSION_RECLAIMED.count";
+    }
+
+    /**
+     * Obtain a {@link PlaybackComponent} associated with a DRM session.
+     * Call {@link PlaybackComponent#setLogSessionId(LogSessionId)} on
+     * the returned object to associate a playback session with the DRM session.
+     *
+     * @param sessionId a DRM session ID obtained from {@link #openSession()}
+     * @return a {@link PlaybackComponent} associated with the session,
+     * or {@code null} if the session is closed or does not exist.
+     * @see PlaybackComponent
+     */
+    @Nullable
+    public PlaybackComponent getPlaybackComponent(@NonNull byte[] sessionId) {
+        if (sessionId == null) {
+            throw new IllegalArgumentException("sessionId is null");
+        }
+        return mPlaybackComponentMap.get(ByteBuffer.wrap(sessionId));
+    }
+
+    private native void setPlaybackId(byte[] sessionId, String logSessionId);
+
+    /** This class contains the Drm session ID and log session ID */
+    public final class PlaybackComponent {
+        private final byte[] mSessionId;
+        @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
+
+        /** @hide */
+        public PlaybackComponent(byte[] sessionId) {
+            mSessionId = sessionId;
+        }
+
+
+        /**
+         * Gets the {@link LogSessionId}.
+         */
+        public void setLogSessionId(@NonNull LogSessionId logSessionId) {
+            Objects.requireNonNull(logSessionId);
+            if (logSessionId.getStringId() == null) {
+                throw new IllegalArgumentException("playbackId is null");
+            }
+            MediaDrm.this.setPlaybackId(mSessionId, logSessionId.getStringId());
+            mLogSessionId = logSessionId;
+        }
+
+
+        /**
+         * Returns the {@link LogSessionId}.
+         */
+        @NonNull public LogSessionId getLogSessionId() {
+            return mLogSessionId;
+        }
+    }
+
+    /**
+     * Returns recent {@link LogMessage LogMessages} associated with this {@link MediaDrm}
+     * instance.
+     */
+    @NonNull
+    public native List<LogMessage> getLogMessages();
+
+    /**
+     * A {@link LogMessage} records an event in the {@link MediaDrm} framework
+     * or vendor plugin.
+     */
+    public static final class LogMessage {
+        private final long timestampMillis;
+        private final int priority;
+        private final String message;
+
+        /**
+         * Timing of the recorded event measured in milliseconds since the Epoch,
+         * 1970-01-01 00:00:00 +0000 (UTC).
+         */
+        public final long getTimestampMillis() { return timestampMillis; }
+
+        /**
+         * Priority of the recorded event.
+         * <p>
+         * Possible priority constants are defined in {@link Log}, e.g.:
+         * <ul>
+         *     <li>{@link Log#ASSERT}</li>
+         *     <li>{@link Log#ERROR}</li>
+         *     <li>{@link Log#WARN}</li>
+         *     <li>{@link Log#INFO}</li>
+         *     <li>{@link Log#DEBUG}</li>
+         *     <li>{@link Log#VERBOSE}</li>
+         * </ul>
+         */
+        @Log.Level
+        public final int getPriority() { return priority; }
+
+        /**
+         * Description of the recorded event.
+         */
+        @NonNull
+        public final String getMessage() { return message; }
+
+        private LogMessage(long timestampMillis, int priority, String message) {
+            this.timestampMillis = timestampMillis;
+            if (priority < Log.VERBOSE || priority > Log.ASSERT) {
+                throw new IllegalArgumentException("invalid log priority " + priority);
+            }
+            this.priority = priority;
+            this.message = message;
+        }
+
+        private char logPriorityChar() {
+            switch (priority) {
+                case Log.VERBOSE:
+                    return 'V';
+                case Log.DEBUG:
+                    return 'D';
+                case Log.INFO:
+                    return 'I';
+                case Log.WARN:
+                    return 'W';
+                case Log.ERROR:
+                    return 'E';
+                case Log.ASSERT:
+                    return 'F';
+                default:
+            }
+            return 'U';
+        }
+
+        @Override
+        public String toString() {
+            return String.format("LogMessage{%s %c %s}",
+                    Instant.ofEpochMilli(timestampMillis), logPriorityChar(), message);
+        }
     }
 }

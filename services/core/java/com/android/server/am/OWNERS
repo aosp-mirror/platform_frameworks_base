@@ -20,14 +20,23 @@ ogunwale@google.com
 # Permissions & Packages
 svetoslavganov@google.com
 toddke@google.com
+patb@google.com
 
 # Battery Stats
 joeo@google.com
+per-file BatteryStats* = file:/BATTERY_STATS_OWNERS
+per-file BatteryExternalStats* = file:/BATTERY_STATS_OWNERS
 
 # Londoners
 michaelwr@google.com
 narayan@google.com
 
+# Voice Interaction
+per-file *Assist* = file:/core/java/android/service/voice/OWNERS
+per-file *Voice* = file:/core/java/android/service/voice/OWNERS
+
 per-file SettingsToPropertiesMapper.java = omakoto@google.com, svetoslavganov@google.com, yamasani@google.com
 
 per-file CarUserSwitchingDialog.java = keunyoung@google.com, felipeal@google.com, gurunagarajan@google.com
+
+per-file ContentProviderHelper.java = varunshah@google.com, omakoto@google.com, jsharkey@google.com, yamasani@google.com

@@ -25,21 +25,19 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
-import com.android.internal.util.FastXmlSerializer;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,8 +137,7 @@ final class AdditionalSubtypeUtils {
         final AtomicFile subtypesFile = getAdditionalSubtypeFile(inputMethodDir);
         try {
             fos = subtypesFile.startWrite();
-            final XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            final TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, NODE_SUBTYPES);
@@ -157,20 +154,17 @@ final class AdditionalSubtypeUtils {
                     final InputMethodSubtype subtype = subtypesList.get(i);
                     out.startTag(null, NODE_SUBTYPE);
                     if (subtype.hasSubtypeId()) {
-                        out.attribute(null, ATTR_IME_SUBTYPE_ID,
-                                String.valueOf(subtype.getSubtypeId()));
+                        out.attributeInt(null, ATTR_IME_SUBTYPE_ID, subtype.getSubtypeId());
                     }
-                    out.attribute(null, ATTR_ICON, String.valueOf(subtype.getIconResId()));
-                    out.attribute(null, ATTR_LABEL, String.valueOf(subtype.getNameResId()));
+                    out.attributeInt(null, ATTR_ICON, subtype.getIconResId());
+                    out.attributeInt(null, ATTR_LABEL, subtype.getNameResId());
                     out.attribute(null, ATTR_IME_SUBTYPE_LOCALE, subtype.getLocale());
                     out.attribute(null, ATTR_IME_SUBTYPE_LANGUAGE_TAG,
                             subtype.getLanguageTag());
                     out.attribute(null, ATTR_IME_SUBTYPE_MODE, subtype.getMode());
                     out.attribute(null, ATTR_IME_SUBTYPE_EXTRA_VALUE, subtype.getExtraValue());
-                    out.attribute(null, ATTR_IS_AUXILIARY,
-                            String.valueOf(subtype.isAuxiliary() ? 1 : 0));
-                    out.attribute(null, ATTR_IS_ASCII_CAPABLE,
-                            String.valueOf(subtype.isAsciiCapable() ? 1 : 0));
+                    out.attributeInt(null, ATTR_IS_AUXILIARY, subtype.isAuxiliary() ? 1 : 0);
+                    out.attributeInt(null, ATTR_IS_ASCII_CAPABLE, subtype.isAsciiCapable() ? 1 : 0);
                     out.endTag(null, NODE_SUBTYPE);
                 }
                 out.endTag(null, NODE_IMI);
@@ -207,8 +201,7 @@ final class AdditionalSubtypeUtils {
             return;
         }
         try (FileInputStream fis = subtypesFile.openRead()) {
-            final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser parser = Xml.resolvePullParser(fis);
             int type = parser.getEventType();
             // Skip parsing until START_TAG
             while (true) {
@@ -243,10 +236,8 @@ final class AdditionalSubtypeUtils {
                         Slog.w(TAG, "IME uninstalled or not valid.: " + currentImiId);
                         continue;
                     }
-                    final int icon = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_ICON));
-                    final int label = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_LABEL));
+                    final int icon = parser.getAttributeInt(null, ATTR_ICON);
+                    final int label = parser.getAttributeInt(null, ATTR_LABEL);
                     final String imeSubtypeLocale =
                             parser.getAttributeValue(null, ATTR_IME_SUBTYPE_LOCALE);
                     final String languageTag =
@@ -269,10 +260,10 @@ final class AdditionalSubtypeUtils {
                             .setSubtypeExtraValue(imeSubtypeExtraValue)
                             .setIsAuxiliary(isAuxiliary)
                             .setIsAsciiCapable(isAsciiCapable);
-                    final String subtypeIdString =
-                            parser.getAttributeValue(null, ATTR_IME_SUBTYPE_ID);
-                    if (subtypeIdString != null) {
-                        builder.setSubtypeId(Integer.parseInt(subtypeIdString));
+                    final int subtypeId = parser.getAttributeInt(null, ATTR_IME_SUBTYPE_ID,
+                            InputMethodSubtype.SUBTYPE_ID_NONE);
+                    if (subtypeId != InputMethodSubtype.SUBTYPE_ID_NONE) {
+                        builder.setSubtypeId(subtypeId);
                     }
                     tempSubtypesArray.add(builder.build());
                 }

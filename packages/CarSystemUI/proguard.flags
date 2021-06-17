@@ -1,4 +1,0 @@
--keep class com.android.systemui.CarSystemUIFactory
--keep class com.android.car.notification.headsup.animationhelper.**
-
--include ../SystemUI/proguard.flags

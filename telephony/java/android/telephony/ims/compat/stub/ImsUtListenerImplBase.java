@@ -17,6 +17,7 @@
 package android.telephony.ims.compat.stub;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.ims.ImsCallForwardInfo;
@@ -40,7 +41,7 @@ import com.android.ims.internal.IImsUtListener;
 
 public class ImsUtListenerImplBase extends IImsUtListener.Stub {
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ImsUtListenerImplBase() {
     }
 

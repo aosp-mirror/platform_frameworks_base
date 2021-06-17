@@ -20,8 +20,9 @@
 #include <utils/RefBase.h>
 #include <utils/Looper.h>
 
-#include <android/graphics/bitmap.h>
 #include <gui/SurfaceComposerClient.h>
+
+#include "SpriteIcon.h"
 
 namespace android {
 
@@ -47,35 +48,6 @@ struct SpriteTransformationMatrix {
 
     inline bool operator!= (const SpriteTransformationMatrix& other) {
         return !(*this == other);
-    }
-};
-
-/*
- * Icon that a sprite displays, including its hotspot.
- */
-struct SpriteIcon {
-    inline SpriteIcon() : style(0), hotSpotX(0), hotSpotY(0) { }
-    inline SpriteIcon(const graphics::Bitmap& bitmap, int32_t style, float hotSpotX, float hotSpotY) :
-            bitmap(bitmap), style(style), hotSpotX(hotSpotX), hotSpotY(hotSpotY) { }
-
-    graphics::Bitmap bitmap;
-    int32_t style;
-    float hotSpotX;
-    float hotSpotY;
-
-    inline SpriteIcon copy() const {
-        return SpriteIcon(bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888), style, hotSpotX, hotSpotY);
-    }
-
-    inline void reset() {
-        bitmap.reset();
-        style = 0;
-        hotSpotX = 0;
-        hotSpotY = 0;
-    }
-
-    inline bool isValid() const {
-        return bitmap.isValid() && !bitmap.isEmpty();
     }
 };
 

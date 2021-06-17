@@ -22,32 +22,32 @@
 
 namespace aapt {
 
-struct Dummy {
-  Dummy() {
+struct Fake {
+  Fake() {
     data = new int;
     *data = 1;
-    std::cerr << "Construct Dummy{0x" << (void*)this << "} with data=0x"
+    std::cerr << "Construct Fake{0x" << (void*)this << "} with data=0x"
               << (void*)data << std::endl;
   }
 
-  Dummy(const Dummy& rhs) {
+  Fake(const Fake& rhs) {
     data = nullptr;
     if (rhs.data) {
       data = new int;
       *data = *rhs.data;
     }
-    std::cerr << "CopyConstruct Dummy{0x" << (void*)this << "} from Dummy{0x"
+    std::cerr << "CopyConstruct Fake{0x" << (void*)this << "} from Fake{0x"
               << (const void*)&rhs << "}" << std::endl;
   }
 
-  Dummy(Dummy&& rhs) {
+  Fake(Fake&& rhs) {
     data = rhs.data;
     rhs.data = nullptr;
-    std::cerr << "MoveConstruct Dummy{0x" << (void*)this << "} from Dummy{0x"
+    std::cerr << "MoveConstruct Fake{0x" << (void*)this << "} from Fake{0x"
               << (const void*)&rhs << "}" << std::endl;
   }
 
-  Dummy& operator=(const Dummy& rhs) {
+  Fake& operator=(const Fake& rhs) {
     delete data;
     data = nullptr;
 
@@ -55,22 +55,22 @@ struct Dummy {
       data = new int;
       *data = *rhs.data;
     }
-    std::cerr << "CopyAssign Dummy{0x" << (void*)this << "} from Dummy{0x"
+    std::cerr << "CopyAssign Fake{0x" << (void*)this << "} from Fake{0x"
               << (const void*)&rhs << "}" << std::endl;
     return *this;
   }
 
-  Dummy& operator=(Dummy&& rhs) {
+  Fake& operator=(Fake&& rhs) {
     delete data;
     data = rhs.data;
     rhs.data = nullptr;
-    std::cerr << "MoveAssign Dummy{0x" << (void*)this << "} from Dummy{0x"
+    std::cerr << "MoveAssign Fake{0x" << (void*)this << "} from Fake{0x"
               << (const void*)&rhs << "}" << std::endl;
     return *this;
   }
 
-  ~Dummy() {
-    std::cerr << "Destruct Dummy{0x" << (void*)this << "} with data=0x"
+  ~Fake() {
+    std::cerr << "Destruct Fake{0x" << (void*)this << "} with data=0x"
               << (void*)data << std::endl;
     delete data;
   }
@@ -100,15 +100,15 @@ TEST(MaybeTest, MakeSomething) {
 }
 
 TEST(MaybeTest, Lifecycle) {
-  Maybe<Dummy> val = make_nothing<Dummy>();
+  Maybe<Fake> val = make_nothing<Fake>();
 
-  Maybe<Dummy> val2 = make_value(Dummy());
+  Maybe<Fake> val2 = make_value(Fake());
 }
 
 TEST(MaybeTest, MoveAssign) {
-  Maybe<Dummy> val;
+  Maybe<Fake> val;
   {
-    Maybe<Dummy> val2 = Dummy();
+    Maybe<Fake> val2 = Fake();
     val = std::move(val2);
   }
 }

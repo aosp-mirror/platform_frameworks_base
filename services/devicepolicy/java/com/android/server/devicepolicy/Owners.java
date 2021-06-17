@@ -16,9 +16,13 @@
 
 package com.android.server.devicepolicy;
 
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
+
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManagerInternal;
+import android.app.admin.DevicePolicyManager.DeviceOwnerType;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
@@ -30,34 +34,35 @@ import android.os.Environment;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import libcore.io.IoUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -92,10 +97,14 @@ class Owners {
     private static final String TAG_PROFILE_OWNER = "profile-owner";
     // Holds "context" for device-owner, this must not be show up before device-owner.
     private static final String TAG_DEVICE_OWNER_CONTEXT = "device-owner-context";
+    private static final String TAG_DEVICE_OWNER_TYPE = "device-owner-type";
+    private static final String TAG_DEVICE_OWNER_PROTECTED_PACKAGES =
+            "device-owner-protected-packages";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_PACKAGE = "package";
     private static final String ATTR_COMPONENT_NAME = "component";
+    private static final String ATTR_SIZE = "size";
     private static final String ATTR_REMOTE_BUGREPORT_URI = "remoteBugreportUri";
     private static final String ATTR_REMOTE_BUGREPORT_HASH = "remoteBugreportHash";
     private static final String ATTR_USERID = "userId";
@@ -108,6 +117,7 @@ class Owners {
     // New attribute for profile owner of organization-owned device.
     private static final String ATTR_PROFILE_OWNER_OF_ORG_OWNED_DEVICE =
             "isPoOrganizationOwnedDevice";
+    private static final String ATTR_DEVICE_OWNER_TYPE_VALUE = "value";
 
     private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
@@ -119,6 +129,11 @@ class Owners {
 
     // Internal state for the device owner package.
     private OwnerInfo mDeviceOwner;
+
+    // Device owner type for a managed device.
+    private final ArrayMap<String, Integer> mDeviceOwnerTypes = new ArrayMap<>();
+
+    private final ArrayMap<String, List<String>> mDeviceOwnerProtectedPackages = new ArrayMap<>();
 
     private int mDeviceOwnerUserId = UserHandle.USER_NULL;
 
@@ -169,7 +184,7 @@ class Owners {
             // First, try to read from the legacy file.
             final File legacy = getLegacyConfigFile();
 
-            final List<UserInfo> users = mUserManager.getUsers(true);
+            final List<UserInfo> users = mUserManager.getAliveUsers();
 
             if (readLegacyOwnerFileLocked(legacy)) {
                 if (DEBUG) {
@@ -205,7 +220,14 @@ class Owners {
             }
             pushToPackageManagerLocked();
             pushToActivityTaskManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
+
+            for (ArrayMap.Entry<String, List<String>> entry :
+                    mDeviceOwnerProtectedPackages.entrySet()) {
+                mPackageManagerInternal.setDeviceOwnerProtectedPackages(
+                        entry.getKey(), entry.getValue());
+            }
         }
     }
 
@@ -220,12 +242,34 @@ class Owners {
     }
 
     private void pushToActivityTaskManagerLocked() {
-        final int uid = mDeviceOwner != null ? mPackageManagerInternal.getPackageUid(
-                mDeviceOwner.packageName,
-                PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES, mDeviceOwnerUserId)
-                : Process.INVALID_UID;
-        mActivityTaskManagerInternal.setDeviceOwnerUid(uid);
-        mActivityManagerInternal.setDeviceOwnerUid(uid);
+        mActivityTaskManagerInternal.setDeviceOwnerUid(getDeviceOwnerUidLocked());
+    }
+
+    private void pushToActivityManagerLocked() {
+        mActivityManagerInternal.setDeviceOwnerUid(getDeviceOwnerUidLocked());
+
+        final ArraySet<Integer> profileOwners = new ArraySet<>();
+        for (int poi = mProfileOwners.size() - 1; poi >= 0; poi--) {
+            final int userId = mProfileOwners.keyAt(poi);
+            final int profileOwnerUid = mPackageManagerInternal.getPackageUid(
+                    mProfileOwners.valueAt(poi).packageName,
+                    PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES,
+                    userId);
+            if (profileOwnerUid >= 0) {
+                profileOwners.add(profileOwnerUid);
+            }
+        }
+        mActivityManagerInternal.setProfileOwnerUid(profileOwners);
+    }
+
+    int getDeviceOwnerUidLocked() {
+        if (mDeviceOwner != null) {
+            return mPackageManagerInternal.getPackageUid(mDeviceOwner.packageName,
+                    PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES,
+                    mDeviceOwnerUserId);
+        } else {
+            return Process.INVALID_UID;
+        }
     }
 
     String getDeviceOwnerPackageName() {
@@ -303,18 +347,27 @@ class Owners {
             mUserManagerInternal.setDeviceManaged(true);
             pushToPackageManagerLocked();
             pushToActivityTaskManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
 
     void clearDeviceOwner() {
         synchronized (mLock) {
+            mDeviceOwnerTypes.remove(mDeviceOwner.packageName);
+            List<String> protectedPackages =
+                    mDeviceOwnerProtectedPackages.remove(mDeviceOwner.packageName);
+            if (protectedPackages != null) {
+                mPackageManagerInternal.setDeviceOwnerProtectedPackages(
+                        mDeviceOwner.packageName, new ArrayList<>());
+            }
             mDeviceOwner = null;
             mDeviceOwnerUserId = UserHandle.USER_NULL;
 
             mUserManagerInternal.setDeviceManaged(false);
             pushToPackageManagerLocked();
             pushToActivityTaskManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -327,6 +380,7 @@ class Owners {
                     /* remoteBugreportHash =*/ null, /* isOrganizationOwnedDevice =*/ false));
             mUserManagerInternal.setUserManaged(userId, true);
             pushToPackageManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -336,6 +390,7 @@ class Owners {
             mProfileOwners.remove(userId);
             mUserManagerInternal.setUserManaged(userId, false);
             pushToPackageManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -349,20 +404,36 @@ class Owners {
                     ownerInfo.isOrganizationOwnedDevice);
             mProfileOwners.put(userId, newOwnerInfo);
             pushToPackageManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
 
     void transferDeviceOwnership(ComponentName target) {
         synchronized (mLock) {
+            Integer previousDeviceOwnerType = mDeviceOwnerTypes.remove(mDeviceOwner.packageName);
+            List<String> previousProtectedPackages =
+                    mDeviceOwnerProtectedPackages.remove(mDeviceOwner.packageName);
+            if (previousProtectedPackages != null) {
+                mPackageManagerInternal.setDeviceOwnerProtectedPackages(
+                        mDeviceOwner.packageName, new ArrayList<>());
+            }
             // We don't set a name because it's not used anyway.
             // See DevicePolicyManagerService#getDeviceOwnerName
             mDeviceOwner = new OwnerInfo(null, target,
                     mDeviceOwner.userRestrictionsMigrated, mDeviceOwner.remoteBugreportUri,
                     mDeviceOwner.remoteBugreportHash, /* isOrganizationOwnedDevice =*/
                     mDeviceOwner.isOrganizationOwnedDevice);
+            if (previousDeviceOwnerType != null) {
+                mDeviceOwnerTypes.put(mDeviceOwner.packageName, previousDeviceOwnerType);
+            }
+            if (previousProtectedPackages != null) {
+                mDeviceOwnerProtectedPackages.put(
+                        mDeviceOwner.packageName, previousProtectedPackages);
+            }
             pushToPackageManagerLocked();
             pushToActivityTaskManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -404,6 +475,23 @@ class Owners {
             return mProfileOwners.keySet();
         }
     }
+
+    List<OwnerDto> listAllOwners() {
+        List<OwnerDto> owners = new ArrayList<>();
+        synchronized (mLock) {
+            if (mDeviceOwner != null) {
+                owners.add(new OwnerDto(mDeviceOwnerUserId, mDeviceOwner.admin,
+                        /* isDeviceOwner= */ true));
+            }
+            for (int i = 0; i < mProfileOwners.size(); i++) {
+                int userId = mProfileOwners.keyAt(i);
+                OwnerInfo info = mProfileOwners.valueAt(i);
+                owners.add(new OwnerDto(userId, info.admin, /* isDeviceOwner= */ false));
+            }
+        }
+        return owners;
+    }
+
 
     SystemUpdatePolicy getSystemUpdatePolicy() {
         synchronized (mLock) {
@@ -523,7 +611,7 @@ class Owners {
         }
     }
 
-    /** Sets the user restrictions migrated flag, and also writes to the file.  */
+    /** Sets the user restrictions migrated flag, and also writes to the file. */
     void setProfileOwnerUserRestrictionsMigrated(int userId) {
         synchronized (mLock) {
             OwnerInfo profileOwner = mProfileOwners.get(userId);
@@ -534,8 +622,10 @@ class Owners {
         }
     }
 
-    /** Sets the indicator that the profile owner manages an organization-owned device,
-     * then write to file. */
+    /**
+     * Sets the indicator that the profile owner manages an organization-owned device,
+     * then write to file.
+     */
     void markProfileOwnerOfOrganizationOwnedDevice(int userId) {
         synchronized (mLock) {
             OwnerInfo profileOwner = mProfileOwners.get(userId);
@@ -549,6 +639,64 @@ class Owners {
         }
     }
 
+    void setDeviceOwnerType(String packageName, @DeviceOwnerType int deviceOwnerType) {
+        synchronized (mLock) {
+            if (!hasDeviceOwner()) {
+                Slog.e(TAG, "Attempting to set a device owner type when there is no device owner");
+                return;
+            } else if (isDeviceOwnerTypeSetForDeviceOwner(packageName)) {
+                Slog.e(TAG, "Device owner type for " + packageName + " has already been set");
+                return;
+            }
+
+            mDeviceOwnerTypes.put(packageName, deviceOwnerType);
+            writeDeviceOwner();
+        }
+    }
+
+    @DeviceOwnerType
+    int getDeviceOwnerType(String packageName) {
+        synchronized (mLock) {
+            if (isDeviceOwnerTypeSetForDeviceOwner(packageName)) {
+                return mDeviceOwnerTypes.get(packageName);
+            }
+            return DEVICE_OWNER_TYPE_DEFAULT;
+        }
+    }
+
+    boolean isDeviceOwnerTypeSetForDeviceOwner(String packageName) {
+        synchronized (mLock) {
+            return !mDeviceOwnerTypes.isEmpty() && mDeviceOwnerTypes.containsKey(packageName);
+        }
+    }
+
+    void setDeviceOwnerProtectedPackages(String packageName, List<String> protectedPackages) {
+        synchronized (mLock) {
+            if (!hasDeviceOwner()) {
+                Slog.e(TAG,
+                        "Attempting to set device owner protected packages when there is no "
+                                + "device owner");
+                return;
+            } else if (!mDeviceOwner.packageName.equals(packageName)) {
+                Slog.e(TAG, "Attempting to set device owner protected packages when the provided "
+                        + "package name " + packageName
+                        + " does not match the device owner package name");
+                return;
+            }
+
+            mDeviceOwnerProtectedPackages.put(packageName, protectedPackages);
+            mPackageManagerInternal.setDeviceOwnerProtectedPackages(packageName, protectedPackages);
+            writeDeviceOwner();
+        }
+    }
+
+    List<String> getDeviceOwnerProtectedPackages(String packageName) {
+        synchronized (mLock) {
+            return mDeviceOwnerProtectedPackages.containsKey(packageName)
+                    ? mDeviceOwnerProtectedPackages.get(packageName) : Collections.emptyList();
+        }
+    }
+
     private boolean readLegacyOwnerFileLocked(File file) {
         if (!file.exists()) {
             // Already migrated or the device has no owners.
@@ -556,11 +704,10 @@ class Owners {
         }
         try {
             InputStream input = new AtomicFile(file).openRead();
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(input, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(input);
             int type;
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT) {
-                if (type!=XmlPullParser.START_TAG) {
+            while ((type = parser.next()) != TypedXmlPullParser.END_DOCUMENT) {
+                if (type != TypedXmlPullParser.START_TAG) {
                     continue;
                 }
 
@@ -579,7 +726,7 @@ class Owners {
                     String profileOwnerName = parser.getAttributeValue(null, ATTR_NAME);
                     String profileOwnerComponentStr =
                             parser.getAttributeValue(null, ATTR_COMPONENT_NAME);
-                    int userId = Integer.parseInt(parser.getAttributeValue(null, ATTR_USERID));
+                    int userId = parser.getAttributeInt(null, ATTR_USERID);
                     OwnerInfo profileOwnerInfo = null;
                     if (profileOwnerComponentStr != null) {
                         ComponentName admin = ComponentName.unflattenFromString(
@@ -610,7 +757,7 @@ class Owners {
                 }
             }
             input.close();
-        } catch (XmlPullParserException|IOException e) {
+        } catch (XmlPullParserException | IOException e) {
             Slog.e(TAG, "Error parsing device-owner file", e);
         }
         return true;
@@ -668,9 +815,7 @@ class Owners {
         try {
             final SparseIntArray owners = new SparseIntArray();
             if (mDeviceOwner != null) {
-                final int uid = mPackageManagerInternal.getPackageUid(mDeviceOwner.packageName,
-                        PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES,
-                        mDeviceOwnerUserId);
+                final int uid = getDeviceOwnerUidLocked();
                 if (uid >= 0) {
                     owners.put(mDeviceOwnerUserId, uid);
                 }
@@ -698,6 +843,7 @@ class Owners {
     public void systemReady() {
         synchronized (mLock) {
             mSystemReady = true;
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -735,8 +881,7 @@ class Owners {
             FileOutputStream outputStream = null;
             try {
                 outputStream = f.startWrite();
-                final XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(outputStream, StandardCharsets.UTF_8.name());
+                final TypedXmlSerializer out = Xml.resolveSerializer(outputStream);
 
                 // Root tag
                 out.startDocument(null, true);
@@ -776,17 +921,16 @@ class Owners {
             InputStream input = null;
             try {
                 input = f.openRead();
-                final XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(input, StandardCharsets.UTF_8.name());
+                final TypedXmlPullParser parser = Xml.resolvePullParser(input);
 
                 int type;
                 int depth = 0;
-                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                while ((type = parser.next()) != TypedXmlPullParser.END_DOCUMENT) {
                     switch (type) {
-                        case XmlPullParser.START_TAG:
+                        case TypedXmlPullParser.START_TAG:
                             depth++;
                             break;
-                        case XmlPullParser.END_TAG:
+                        case TypedXmlPullParser.END_TAG:
                             depth--;
                             // fallthrough
                         default:
@@ -813,9 +957,9 @@ class Owners {
             }
         }
 
-        abstract void writeInner(XmlSerializer out) throws IOException;
+        abstract void writeInner(TypedXmlSerializer out) throws IOException;
 
-        abstract boolean readInner(XmlPullParser parser, int depth, String tag);
+        abstract boolean readInner(TypedXmlPullParser parser, int depth, String tag);
     }
 
     private class DeviceOwnerReadWriter extends FileReadWriter {
@@ -831,12 +975,37 @@ class Owners {
         }
 
         @Override
-        void writeInner(XmlSerializer out) throws IOException {
+        void writeInner(TypedXmlSerializer out) throws IOException {
             if (mDeviceOwner != null) {
                 mDeviceOwner.writeToXml(out, TAG_DEVICE_OWNER);
                 out.startTag(null, TAG_DEVICE_OWNER_CONTEXT);
-                out.attribute(null, ATTR_USERID, String.valueOf(mDeviceOwnerUserId));
+                out.attributeInt(null, ATTR_USERID, mDeviceOwnerUserId);
                 out.endTag(null, TAG_DEVICE_OWNER_CONTEXT);
+
+            }
+
+            if (!mDeviceOwnerTypes.isEmpty()) {
+                for (ArrayMap.Entry<String, Integer> entry : mDeviceOwnerTypes.entrySet()) {
+                    out.startTag(null, TAG_DEVICE_OWNER_TYPE);
+                    out.attribute(null, ATTR_PACKAGE, entry.getKey());
+                    out.attributeInt(null, ATTR_DEVICE_OWNER_TYPE_VALUE, entry.getValue());
+                    out.endTag(null, TAG_DEVICE_OWNER_TYPE);
+                }
+            }
+
+            if (!mDeviceOwnerProtectedPackages.isEmpty()) {
+                for (ArrayMap.Entry<String, List<String>> entry :
+                        mDeviceOwnerProtectedPackages.entrySet()) {
+                    List<String> protectedPackages = entry.getValue();
+
+                    out.startTag(null, TAG_DEVICE_OWNER_PROTECTED_PACKAGES);
+                    out.attribute(null, ATTR_PACKAGE, entry.getKey());
+                    out.attributeInt(null, ATTR_SIZE, protectedPackages.size());
+                    for (int i = 0, size = protectedPackages.size(); i < size; i++) {
+                        out.attribute(null, ATTR_NAME + i, protectedPackages.get(i));
+                    }
+                    out.endTag(null, TAG_DEVICE_OWNER_PROTECTED_PACKAGES);
+                }
             }
 
             if (mSystemUpdatePolicy != null) {
@@ -863,7 +1032,7 @@ class Owners {
         }
 
         @Override
-        boolean readInner(XmlPullParser parser, int depth, String tag) {
+        boolean readInner(TypedXmlPullParser parser, int depth, String tag) {
             if (depth > 2) {
                 return true; // Ignore
             }
@@ -873,13 +1042,8 @@ class Owners {
                     mDeviceOwnerUserId = UserHandle.USER_SYSTEM; // Set default
                     break;
                 case TAG_DEVICE_OWNER_CONTEXT: {
-                    final String userIdString =
-                            parser.getAttributeValue(null, ATTR_USERID);
-                    try {
-                        mDeviceOwnerUserId = Integer.parseInt(userIdString);
-                    } catch (NumberFormatException e) {
-                        Slog.e(TAG, "Error parsing user-id " + userIdString);
-                    }
+                    mDeviceOwnerUserId = parser.getAttributeInt(null, ATTR_USERID,
+                            mDeviceOwnerUserId);
                     break;
                 }
                 case TAG_DEVICE_INITIALIZER:
@@ -904,6 +1068,21 @@ class Owners {
                         }
                     }
                     break;
+                case TAG_DEVICE_OWNER_TYPE:
+                    String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+                    int deviceOwnerType = parser.getAttributeInt(null, ATTR_DEVICE_OWNER_TYPE_VALUE,
+                            DEVICE_OWNER_TYPE_DEFAULT);
+                    mDeviceOwnerTypes.put(packageName, deviceOwnerType);
+                    break;
+                case TAG_DEVICE_OWNER_PROTECTED_PACKAGES:
+                    packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+                    int protectedPackagesSize = parser.getAttributeInt(null, ATTR_SIZE, 0);
+                    List<String> protectedPackages = new ArrayList<>();
+                    for (int i = 0; i < protectedPackagesSize; i++) {
+                        protectedPackages.add(parser.getAttributeValue(null, ATTR_NAME + i));
+                    }
+                    mDeviceOwnerProtectedPackages.put(packageName, protectedPackages);
+                    break;
                 default:
                     Slog.e(TAG, "Unexpected tag: " + tag);
                     return false;
@@ -927,7 +1106,7 @@ class Owners {
         }
 
         @Override
-        void writeInner(XmlSerializer out) throws IOException {
+        void writeInner(TypedXmlSerializer out) throws IOException {
             final OwnerInfo profileOwner = mProfileOwners.get(mUserId);
             if (profileOwner != null) {
                 profileOwner.writeToXml(out, TAG_PROFILE_OWNER);
@@ -935,7 +1114,7 @@ class Owners {
         }
 
         @Override
-        boolean readInner(XmlPullParser parser, int depth, String tag) {
+        boolean readInner(TypedXmlPullParser parser, int depth, String tag) {
             if (depth > 2) {
                 return true; // Ignore
             }
@@ -985,7 +1164,7 @@ class Owners {
             this.isOrganizationOwnedDevice = isOrganizationOwnedDevice;
         }
 
-        public void writeToXml(XmlSerializer out, String tag) throws IOException {
+        public void writeToXml(TypedXmlSerializer out, String tag) throws IOException {
             out.startTag(null, tag);
             out.attribute(null, ATTR_PACKAGE, packageName);
             if (name != null) {
@@ -994,8 +1173,7 @@ class Owners {
             if (admin != null) {
                 out.attribute(null, ATTR_COMPONENT_NAME, admin.flattenToString());
             }
-            out.attribute(null, ATTR_USER_RESTRICTIONS_MIGRATED,
-                    String.valueOf(userRestrictionsMigrated));
+            out.attributeBoolean(null, ATTR_USER_RESTRICTIONS_MIGRATED, userRestrictionsMigrated);
             if (remoteBugreportUri != null) {
                 out.attribute(null, ATTR_REMOTE_BUGREPORT_URI, remoteBugreportUri);
             }
@@ -1003,13 +1181,13 @@ class Owners {
                 out.attribute(null, ATTR_REMOTE_BUGREPORT_HASH, remoteBugreportHash);
             }
             if (isOrganizationOwnedDevice) {
-                out.attribute(null, ATTR_PROFILE_OWNER_OF_ORG_OWNED_DEVICE,
-                        String.valueOf(isOrganizationOwnedDevice));
+                out.attributeBoolean(null, ATTR_PROFILE_OWNER_OF_ORG_OWNED_DEVICE,
+                        isOrganizationOwnedDevice);
             }
             out.endTag(null, tag);
         }
 
-        public static OwnerInfo readFromXml(XmlPullParser parser) {
+        public static OwnerInfo readFromXml(TypedXmlPullParser parser) {
             final String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
             final String name = parser.getAttributeValue(null, ATTR_NAME);
             final String componentName =
@@ -1055,6 +1233,24 @@ class Owners {
             pw.println("name=" + name);
             pw.println("package=" + packageName);
             pw.println("isOrganizationOwnedDevice=" + isOrganizationOwnedDevice);
+        }
+    }
+
+    /**
+     * Data-transfer object used by {@link DevicePolicyManagerServiceShellCommand}.
+     */
+    static final class OwnerDto {
+        public final @UserIdInt int userId;
+        public final ComponentName admin;
+        public final boolean isDeviceOwner;
+        public final boolean isProfileOwner;
+        public boolean isAffiliated;
+
+        private OwnerDto(@UserIdInt int userId, ComponentName admin, boolean isDeviceOwner) {
+            this.userId = userId;
+            this.admin = Objects.requireNonNull(admin, "admin must not be null");
+            this.isDeviceOwner = isDeviceOwner;
+            this.isProfileOwner = !isDeviceOwner;
         }
     }
 

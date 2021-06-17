@@ -22,6 +22,9 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 public class BenchmarkResults {
+    /** If the test fails, output this value as a signal of the failure. */
+    public static final long DECLARED_VALUE_IF_ERROR_MS = -10;
+
     private final ArrayList<Long> mResults = new ArrayList<>();
 
     public void addDuration(long duration) {
@@ -39,6 +42,28 @@ public class BenchmarkResults {
         stats.putDouble("Mean (ms)", mean());
         stats.putDouble("Median (ms)", median());
         stats.putDouble("Sigma (ms)", standardDeviation());
+        return stats;
+    }
+
+    /**
+     * Same as {@link #getStatsToReport()} but for failure,
+     * using {@link #DECLARED_VALUE_IF_ERROR_MS}.
+     */
+    public static Bundle getFailedStatsToReport() {
+        final Bundle stats = new Bundle();
+        stats.putDouble("Mean (ms)", DECLARED_VALUE_IF_ERROR_MS);
+        return stats;
+    }
+
+    /**
+     * Same as {@link #getStatsToLog()} but for failure,
+     * using {@link #DECLARED_VALUE_IF_ERROR_MS}.
+     */
+    public static Bundle getFailedStatsToLog() {
+        final Bundle stats = new Bundle();
+        stats.putDouble("Mean (ms)", DECLARED_VALUE_IF_ERROR_MS);
+        stats.putDouble("Median (ms)", DECLARED_VALUE_IF_ERROR_MS);
+        stats.putDouble("Sigma (ms)", DECLARED_VALUE_IF_ERROR_MS);
         return stats;
     }
 

@@ -57,7 +57,8 @@ public class MmsManager {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is broadcast when the message
      *                   is successfully sent, or failed
      * @param messageId an id that uniquely identifies the message requested to be sent.
-     *                  Used for logging and diagnostics purposes. The id may be 0.
+     *                  Used for logging and diagnostics purposes. The id may be 0. The messageId
+     *                  can be found in radio logs from logcat.
      */
     public void sendMultimediaMessage(int subId, @NonNull Uri contentUri,
             @Nullable String locationUrl, @Nullable Bundle configOverrides,
@@ -87,8 +88,8 @@ public class MmsManager {
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
      * @param messageId an id that uniquely identifies the message requested to be downloaded.
-     *                  Used for logging and diagnostics purposes. The id may be 0.
-     *  downloaded.
+     *                  Used for logging and diagnostics purposes. The id may be 0. The messageId
+     *                  can be found in radio logs from logcat.
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
      */
     public void downloadMultimediaMessage(int subId, @NonNull String locationUrl,

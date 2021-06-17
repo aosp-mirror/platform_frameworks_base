@@ -16,6 +16,8 @@
 
 package com.android.statementservice.retriever;
 
+import com.android.statementservice.utils.StatementUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,7 +36,8 @@ import java.util.Locale;
  * "sha256_cert_fingerprints": ["[SHA256 fingerprint of signing cert]", "[additional cert]", ...] }
  *
  * <p>For example, { "namespace": "android_app", "package_name": "com.test.mytestapp",
- * "sha256_cert_fingerprints": ["24:D9:B4:57:A6:42:FB:E6:E5:B8:D6:9E:7B:2D:C2:D1:CB:D1:77:17:1D:7F:D4:A9:16:10:11:AB:92:B9:8F:3F"]
+ * "sha256_cert_fingerprints": ["24:D9:B4:57:A6:42:FB:E6:E5:B8:D6:9E:7B:2D:C2:D1:CB:D1:77:17:1D
+ * :7F:D4:A9:16:10:11:AB:92:B9:8F:3F"]
  * }
  *
  * <p>Given a signed APK, Java 7's commandline keytool can compute the fingerprint using:
@@ -43,7 +46,7 @@ import java.util.Locale;
  * <p>Each entry in "sha256_cert_fingerprints" is a colon-separated hex string (e.g. 14:6D:E9:...)
  * representing the certificate SHA-256 fingerprint.
  */
-/* package private */ final class AndroidAppAsset extends AbstractAsset {
+public final class AndroidAppAsset extends AbstractAsset {
 
     private static final String MISSING_FIELD_FORMAT_STRING = "Expected %s to be set.";
     private static final String MISSING_APPCERTS_FORMAT_STRING =
@@ -65,9 +68,10 @@ import java.util.Locale;
     public String toJson() {
         AssetJsonWriter writer = new AssetJsonWriter();
 
-        writer.writeFieldLower(Utils.NAMESPACE_FIELD, Utils.NAMESPACE_ANDROID_APP);
-        writer.writeFieldLower(Utils.ANDROID_APP_ASSET_FIELD_PACKAGE_NAME, mPackageName);
-        writer.writeArrayUpper(Utils.ANDROID_APP_ASSET_FIELD_CERT_FPS, mCertFingerprints);
+        writer.writeFieldLower(StatementUtils.NAMESPACE_FIELD,
+                StatementUtils.NAMESPACE_ANDROID_APP);
+        writer.writeFieldLower(StatementUtils.ANDROID_APP_ASSET_FIELD_PACKAGE_NAME, mPackageName);
+        writer.writeArrayUpper(StatementUtils.ANDROID_APP_ASSET_FIELD_CERT_FPS, mCertFingerprints);
 
         return writer.closeAndGetString();
     }
@@ -114,17 +118,17 @@ import java.util.Locale;
      */
     public static AndroidAppAsset create(JSONObject asset)
             throws AssociationServiceException {
-        String packageName = asset.optString(Utils.ANDROID_APP_ASSET_FIELD_PACKAGE_NAME);
+        String packageName = asset.optString(StatementUtils.ANDROID_APP_ASSET_FIELD_PACKAGE_NAME);
         if (packageName.equals("")) {
             throw new AssociationServiceException(String.format(MISSING_FIELD_FORMAT_STRING,
-                    Utils.ANDROID_APP_ASSET_FIELD_PACKAGE_NAME));
+                    StatementUtils.ANDROID_APP_ASSET_FIELD_PACKAGE_NAME));
         }
 
-        JSONArray certArray = asset.optJSONArray(Utils.ANDROID_APP_ASSET_FIELD_CERT_FPS);
+        JSONArray certArray = asset.optJSONArray(StatementUtils.ANDROID_APP_ASSET_FIELD_CERT_FPS);
         if (certArray == null || certArray.length() == 0) {
             throw new AssociationServiceException(
                     String.format(MISSING_APPCERTS_FORMAT_STRING,
-                            Utils.ANDROID_APP_ASSET_FIELD_CERT_FPS));
+                            StatementUtils.ANDROID_APP_ASSET_FIELD_CERT_FPS));
         }
         List<String> certFingerprints = new ArrayList<>(certArray.length());
         for (int i = 0; i < certArray.length(); i++) {
@@ -133,7 +137,7 @@ import java.util.Locale;
             } catch (JSONException e) {
                 throw new AssociationServiceException(
                         String.format(APPCERT_NOT_STRING_FORMAT_STRING,
-                                Utils.ANDROID_APP_ASSET_FIELD_CERT_FPS));
+                                StatementUtils.ANDROID_APP_ASSET_FIELD_CERT_FPS));
             }
         }
 
@@ -143,7 +147,7 @@ import java.util.Locale;
     /**
      * Creates a new AndroidAppAsset.
      *
-     * @param packageName the package name of the Android app.
+     * @param packageName      the package name of the Android app.
      * @param certFingerprints at least one of the Android app signing certificate sha-256
      *                         fingerprint.
      */

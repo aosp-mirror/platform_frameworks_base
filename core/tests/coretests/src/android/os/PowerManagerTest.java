@@ -16,6 +16,9 @@
 
 package android.os;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -37,6 +40,7 @@ import java.util.concurrent.Executors;
 
 public class PowerManagerTest extends AndroidTestCase {
 
+    private static final String TAG = "PowerManagerTest";
     private PowerManager mPm;
     private UiDevice mUiDevice;
     private Executor mExec = Executors.newSingleThreadExecutor();
@@ -45,6 +49,23 @@ public class PowerManagerTest extends AndroidTestCase {
     @Mock
     private PowerManager.OnThermalStatusChangedListener mListener2;
     private static final long CALLBACK_TIMEOUT_MILLI_SEC = 5000;
+    private native Parcel nativeObtainWorkSourceParcel(int[] uids, String[] names);
+    private native void nativeUnparcelAndVerifyWorkSource(Parcel parcel, int[] uids,
+            String[] names);
+    private native Parcel nativeObtainPowerSaveStateParcel(boolean batterySaverEnabled,
+            boolean globalBatterySaverEnabled, int locationMode, int soundTriggerMode,
+            float brightnessFactor);
+    private native void nativeUnparcelAndVerifyPowerSaveState(Parcel parcel,
+            boolean batterySaverEnabled, boolean globalBatterySaverEnabled,
+            int locationMode, int soundTriggerMode, float brightnessFactor);
+    private native Parcel nativeObtainBSPConfigParcel(BatterySaverPolicyConfig bs,
+            String[] keys, String[] values);
+    private native void nativeUnparcelAndVerifyBSPConfig(Parcel parcel, BatterySaverPolicyConfig bs,
+            String[] keys, String[] values);
+
+    static {
+        System.loadLibrary("powermanagertest_jni");
+    }
 
     /**
      * Setup any common data for the upcoming tests.
@@ -277,4 +298,248 @@ public class PowerManagerTest extends AndroidTestCase {
         } catch (UnsupportedOperationException expected) {
         }
     }
+
+    /**
+     * Helper function to obtain a WorkSource object as parcel from native, with
+     * specified uids and names and verify the WorkSource object created from the parcel.
+     */
+    private void unparcelWorkSourceFromNativeAndVerify(int[] uids, String[] names) {
+        // Obtain WorkSource as parcel from native, with uids and names.
+        Parcel wsParcel = nativeObtainWorkSourceParcel(uids, names);
+        WorkSource ws = WorkSource.CREATOR.createFromParcel(wsParcel);
+        if (uids == null)  {
+            assertEquals(ws.size(), 0);
+        } else {
+            assertEquals(uids.length, ws.size());
+            for (int i = 0; i < ws.size(); i++) {
+                assertEquals(ws.getUid(i), uids[i]);
+            }
+        }
+        if (names != null)  {
+            for (int i = 0; i < names.length; i++) {
+                assertEquals(ws.getName(i), names[i]);
+            }
+        }
+    }
+
+    /**
+     * Helper function to send a WorkSource as parcel from java to native.
+     * Native will verify the WorkSource in native is expected.
+     */
+    private void parcelWorkSourceToNativeAndVerify(int[] uids, String[] names) {
+        WorkSource ws = new WorkSource();
+        if (uids != null) {
+            if (names == null) {
+                for (int i = 0; i < uids.length; i++) {
+                    ws.add(uids[i]);
+                }
+            } else {
+                assertEquals(uids.length, names.length);
+                for (int i = 0; i < uids.length; i++) {
+                    ws.add(uids[i], names[i]);
+                }
+            }
+        }
+        Parcel wsParcel = Parcel.obtain();
+        ws.writeToParcel(wsParcel, 0 /* flags */);
+        wsParcel.setDataPosition(0);
+        //Set the WorkSource as parcel to native and verify.
+        nativeUnparcelAndVerifyWorkSource(wsParcel, uids, names);
+    }
+
+    /**
+     * Helper function to obtain a PowerSaveState as parcel from native, with
+     * specified parameters, and verify the PowerSaveState object created from the parcel.
+     */
+    private void unparcelPowerSaveStateFromNativeAndVerify(boolean batterySaverEnabled,
+            boolean globalBatterySaverEnabled, int locationMode, int soundTriggerMode,
+            float brightnessFactor) {
+        // Obtain PowerSaveState as parcel from native, with parameters.
+        Parcel psParcel = nativeObtainPowerSaveStateParcel(batterySaverEnabled,
+                 globalBatterySaverEnabled, locationMode, soundTriggerMode, brightnessFactor);
+        // Verify the parcel.
+        PowerSaveState ps = PowerSaveState.CREATOR.createFromParcel(psParcel);
+        assertEquals(ps.batterySaverEnabled, batterySaverEnabled);
+        assertEquals(ps.globalBatterySaverEnabled, globalBatterySaverEnabled);
+        assertEquals(ps.locationMode, locationMode);
+        assertEquals(ps.soundTriggerMode, soundTriggerMode);
+        assertEquals(ps.brightnessFactor, brightnessFactor, 0.01f);
+    }
+
+    /**
+     * Helper function to send a PowerSaveState as parcel to native, with
+     * specified parameters. Native will verify the PowerSaveState in native is expected.
+     */
+    private void parcelPowerSaveStateToNativeAndVerify(boolean batterySaverEnabled,
+            boolean globalBatterySaverEnabled, int locationMode, int soundTriggerMode,
+            float brightnessFactor) {
+        Parcel psParcel = Parcel.obtain();
+        // PowerSaveState API blocks Builder.build(), generate a parcel instead of object.
+        PowerSaveState ps = new PowerSaveState.Builder()
+                .setBatterySaverEnabled(batterySaverEnabled)
+                .setGlobalBatterySaverEnabled(globalBatterySaverEnabled)
+                .setLocationMode(locationMode)
+                .setBrightnessFactor(brightnessFactor).build();
+        ps.writeToParcel(psParcel, 0 /* flags */);
+        psParcel.setDataPosition(0);
+        //Set the PowerSaveState as parcel to native and verify in native space.
+        nativeUnparcelAndVerifyPowerSaveState(psParcel, batterySaverEnabled,
+                globalBatterySaverEnabled, locationMode, soundTriggerMode, brightnessFactor);
+    }
+
+    /**
+     * Helper function to obtain a BatterySaverPolicyConfig as parcel from native, with
+     * specified parameters, and verify the BatterySaverPolicyConfig object created from the parcel.
+     */
+    private void unparcelBatterySaverPolicyFromNativeAndVerify(BatterySaverPolicyConfig bsIn) {
+        // Obtain BatterySaverPolicyConfig as parcel from native, with parameters.
+        String[] keys = bsIn.getDeviceSpecificSettings().keySet().toArray(
+                    new String[bsIn.getDeviceSpecificSettings().keySet().size()]);
+        String[] values = bsIn.getDeviceSpecificSettings().values().toArray(
+                    new String[bsIn.getDeviceSpecificSettings().values().size()]);
+        Parcel bsParcel = nativeObtainBSPConfigParcel(bsIn, keys, values);
+        BatterySaverPolicyConfig bsOut =
+                BatterySaverPolicyConfig.CREATOR.createFromParcel(bsParcel);
+        assertEquals(bsIn.toString(), bsOut.toString());
+    }
+
+    /**
+     * Helper function to send a BatterySaverPolicyConfig as parcel to native, with
+     * specified parameters.
+     * Native will verify BatterySaverPolicyConfig from native is expected.
+     */
+    private void parcelBatterySaverPolicyConfigToNativeAndVerify(BatterySaverPolicyConfig bsIn) {
+        Parcel bsParcel = Parcel.obtain();
+        bsIn.writeToParcel(bsParcel, 0 /* flags */);
+        bsParcel.setDataPosition(0);
+        // Set the BatterySaverPolicyConfig as parcel to native.
+        String[] keys = bsIn.getDeviceSpecificSettings().keySet().toArray(
+                    new String[bsIn.getDeviceSpecificSettings().keySet().size()]);
+        String[] values = bsIn.getDeviceSpecificSettings().values().toArray(
+                    new String[bsIn.getDeviceSpecificSettings().values().size()]);
+        // Set the BatterySaverPolicyConfig as parcel to native and verify in native space.
+        nativeUnparcelAndVerifyBSPConfig(bsParcel, bsIn, keys, values);
+    }
+
+    /**
+     * Confirm that we can pass WorkSource from native to Java.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testWorkSourceNativeToJava() {
+        final int[] uids1 = {1000};
+        final int[] uids2 = {1000, 2000};
+        final String[] names1 = {"testWorkSource1"};
+        final String[] names2 = {"testWorkSource1", "testWorkSource2"};
+        unparcelWorkSourceFromNativeAndVerify(null /* uids */, null /* names */);
+        unparcelWorkSourceFromNativeAndVerify(uids1, null /* names */);
+        unparcelWorkSourceFromNativeAndVerify(uids2, null /* names */);
+        unparcelWorkSourceFromNativeAndVerify(null /* uids */, names1);
+        unparcelWorkSourceFromNativeAndVerify(uids1, names1);
+        unparcelWorkSourceFromNativeAndVerify(uids2, names2);
+    }
+
+    /**
+     * Confirm that we can pass WorkSource from Java to native.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testWorkSourceJavaToNative() {
+        final int[] uids1 = {1000};
+        final int[] uids2 = {1000, 2000};
+        final String[] names1 = {"testGetWorkSource1"};
+        final String[] names2 = {"testGetWorkSource1", "testGetWorkSource2"};
+        parcelWorkSourceToNativeAndVerify(null /* uids */, null /* names */);
+        parcelWorkSourceToNativeAndVerify(uids1, null /* names */);
+        parcelWorkSourceToNativeAndVerify(uids2, null /* names */);
+        parcelWorkSourceToNativeAndVerify(uids1, names1);
+        parcelWorkSourceToNativeAndVerify(uids2, names2);
+    }
+
+    /**
+     * Confirm that we can pass PowerSaveState from native to Java.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testPowerSaveStateNativeToJava() {
+        unparcelPowerSaveStateFromNativeAndVerify(false /* batterySaverEnabled */,
+                false /* globalBatterySaverEnabled */,
+                PowerManager.LOCATION_MODE_FOREGROUND_ONLY,
+                PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY,
+                0.3f /* brightnessFactor */);
+        unparcelPowerSaveStateFromNativeAndVerify(true /* batterySaverEnabled */,
+                true  /* globalBatterySaverEnabled */,
+                PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF,
+                PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED,
+                0.5f /* brightnessFactor */);
+    }
+
+    /**
+     * Confirm that we can pass PowerSaveState from Java to native.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testSetPowerSaveStateJavaToNative() {
+        parcelPowerSaveStateToNativeAndVerify(false /* batterySaverEnabled */,
+                false /* globalBatterySaverEnabled */,
+                PowerManager.LOCATION_MODE_FOREGROUND_ONLY,
+                PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY,
+                0.3f /* brightnessFactor */);
+        parcelPowerSaveStateToNativeAndVerify(true /* batterySaverEnabled */,
+                true  /* globalBatterySaverEnabled */,
+                PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF,
+                PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED,
+                0.5f /* brightnessFactor */);
+    }
+
+    /**
+     * Confirm that we can pass BatterySaverPolicyConfig from native to Java.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testBatterySaverPolicyConfigNativeToJava() {
+        BatterySaverPolicyConfig bs1 = new BatterySaverPolicyConfig.Builder()
+                .setAdjustBrightnessFactor(0.55f)
+                .setAdvertiseIsEnabled(true)
+                .setDeferFullBackup(true)
+                .setForceBackgroundCheck(true)
+                .setLocationMode(PowerManager.LOCATION_MODE_FOREGROUND_ONLY).build();
+        BatterySaverPolicyConfig bs2 = new BatterySaverPolicyConfig.Builder()
+                .setAdjustBrightnessFactor(0.55f)
+                .setAdvertiseIsEnabled(true)
+                .setLocationMode(PowerManager.LOCATION_MODE_FOREGROUND_ONLY)
+                .addDeviceSpecificSetting("Key1" /* key */, "Value1" /* value */)
+                .addDeviceSpecificSetting("Key2" /* key */, "Value2" /* value */)
+                .setDeferFullBackup(true).build();
+
+        unparcelBatterySaverPolicyFromNativeAndVerify(bs1);
+        unparcelBatterySaverPolicyFromNativeAndVerify(bs2);
+    }
+
+    /**
+     * Confirm that we can pass BatterySaverPolicyConfig from Java to native.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testBatterySaverPolicyConfigFromJavaToNative() {
+        BatterySaverPolicyConfig bs1 = new BatterySaverPolicyConfig.Builder()
+                .setAdjustBrightnessFactor(0.55f)
+                .setAdvertiseIsEnabled(true)
+                .setDeferFullBackup(true).build();
+        BatterySaverPolicyConfig bs2 = new BatterySaverPolicyConfig.Builder()
+                .setAdjustBrightnessFactor(0.55f)
+                .setAdvertiseIsEnabled(true)
+                .addDeviceSpecificSetting("Key1" /* key */, "Value1" /* value */)
+                .addDeviceSpecificSetting("Key2" /* key */, "Value2" /* value */)
+                .setDeferFullBackup(true).build();
+        parcelBatterySaverPolicyConfigToNativeAndVerify(bs1);
+        parcelBatterySaverPolicyConfigToNativeAndVerify(bs2);
+    }
+
 }

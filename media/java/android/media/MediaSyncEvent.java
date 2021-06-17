@@ -16,6 +16,13 @@
 
 package android.media;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.Objects;
+
 /**
  * The MediaSyncEvent class defines events that can be used to synchronize playback or capture
  * actions between different players and recorders.
@@ -24,7 +31,7 @@ package android.media;
  * The audio session ID is retrieved from a player (e.g {@link MediaPlayer}, {@link AudioTrack} or
  * {@link ToneGenerator}) by use of the getAudioSessionId() method.
  */
-public class MediaSyncEvent {
+public class MediaSyncEvent implements Parcelable {
 
     /**
      * No sync event specified. When used with a synchronized playback or capture method, the
@@ -39,8 +46,16 @@ public class MediaSyncEvent {
      * {@link #setAudioSessionId(int)} method.
      */
     public static final int SYNC_EVENT_PRESENTATION_COMPLETE =
-                                                    AudioSystem.SYNC_EVENT_PRESENTATION_COMPLETE;
+            AudioSystem.SYNC_EVENT_PRESENTATION_COMPLETE;
 
+    /**
+     * @hide
+     * Used when sharing audio history between AudioRecord instances.
+     * See {@link AudioRecord.Builder#setSharedAudioEvent(MediaSyncEvent).
+     */
+    @SystemApi
+    public static final int SYNC_EVENT_SHARE_AUDIO_HISTORY =
+            AudioSystem.SYNC_EVENT_SHARE_AUDIO_HISTORY;
 
     /**
      * Creates a synchronization event of the sepcified type.
@@ -112,11 +127,86 @@ public class MediaSyncEvent {
 
     private static boolean isValidType(int type) {
         switch (type) {
-        case SYNC_EVENT_NONE:
-        case SYNC_EVENT_PRESENTATION_COMPLETE:
-            return true;
-        default:
-            return false;
+            case SYNC_EVENT_NONE:
+            case SYNC_EVENT_PRESENTATION_COMPLETE:
+            case SYNC_EVENT_SHARE_AUDIO_HISTORY:
+                return true;
+            default:
+                return false;
         }
     }
+
+    // Parcelable implementation
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        Objects.requireNonNull(dest);
+        dest.writeInt(mType);
+        dest.writeInt(mAudioSession);
+    }
+
+    private MediaSyncEvent(Parcel in) {
+        mType = in.readInt();
+        mAudioSession = in.readInt();
+    }
+
+    public static final @NonNull Parcelable.Creator<MediaSyncEvent> CREATOR =
+            new Parcelable.Creator<MediaSyncEvent>() {
+        /**
+         * Rebuilds an MediaSyncEvent previously stored with writeToParcel().
+         * @param p Parcel object to read the MediaSyncEvent from
+         * @return a new MediaSyncEvent created from the data in the parcel
+         */
+        public MediaSyncEvent createFromParcel(Parcel p) {
+            return new MediaSyncEvent(p);
+        }
+        public MediaSyncEvent[] newArray(int size) {
+            return new MediaSyncEvent[size];
+        }
+    };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MediaSyncEvent that = (MediaSyncEvent) o;
+        return ((mType == that.mType)
+                && (mAudioSession == that.mAudioSession));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mType, mAudioSession);
+    }
+
+    @Override
+    public String toString() {
+        return new String("MediaSyncEvent:"
+                + " type=" + typeToString(mType)
+                + " session=" + mAudioSession);
+    }
+
+    /**
+     * Returns the string representation for the type.
+     * @param type one of the {@link MediaSyncEvent} type constants
+     * @hide
+     */
+    public static @NonNull String typeToString(int type) {
+        switch (type) {
+            case SYNC_EVENT_NONE:
+                return "SYNC_EVENT_NONE";
+            case SYNC_EVENT_PRESENTATION_COMPLETE:
+                return "SYNC_EVENT_PRESENTATION_COMPLETE";
+            case SYNC_EVENT_SHARE_AUDIO_HISTORY:
+                return "SYNC_EVENT_SHARE_AUDIO_HISTORY";
+            default:
+                return "unknown event type " + type;
+        }
+    }
+
 }

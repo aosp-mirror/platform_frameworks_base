@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
+import android.app.UiModeManager;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.app.usage.UsageStatsManagerInternal;
@@ -55,10 +56,13 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 
 import com.android.server.AppStateTracker;
+import com.android.server.AppStateTrackerImpl;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.PowerAllowlistInternal;
 import com.android.server.SystemServiceManager;
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 
 import org.junit.After;
@@ -84,7 +88,7 @@ public class JobSchedulerServiceTest {
     private class TestJobSchedulerService extends JobSchedulerService {
         TestJobSchedulerService(Context context) {
             super(context);
-            mAppStateTracker = mock(AppStateTracker.class);
+            mAppStateTracker = mock(AppStateTrackerImpl.class);
         }
 
         @Override
@@ -112,7 +116,7 @@ public class JobSchedulerServiceTest {
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
         when(mContext.getString(anyInt())).thenReturn("some_test_string");
         // Called in BackgroundJobsController constructor.
-        doReturn(mock(AppStateTracker.class))
+        doReturn(mock(AppStateTrackerImpl.class))
                 .when(() -> LocalServices.getService(AppStateTracker.class));
         // Called in BatteryController constructor.
         doReturn(mock(BatteryManagerInternal.class))
@@ -125,6 +129,9 @@ public class JobSchedulerServiceTest {
         // Called in DeviceIdleJobsController constructor.
         doReturn(mock(DeviceIdleInternal.class))
                 .when(() -> LocalServices.getService(DeviceIdleInternal.class));
+        // Used in JobConcurrencyManager.
+        doReturn(mock(UserManagerInternal.class))
+                .when(() -> LocalServices.getService(UserManagerInternal.class));
         // Used in JobStatus.
         doReturn(mock(PackageManagerInternal.class))
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
@@ -132,6 +139,8 @@ public class JobSchedulerServiceTest {
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         when(mContext.getResources()).thenReturn(mock(Resources.class));
         // Called in QuotaController constructor.
+        doReturn(mock(PowerAllowlistInternal.class))
+                .when(() -> LocalServices.getService(PowerAllowlistInternal.class));
         IActivityManager activityManager = ActivityManager.getService();
         spyOn(activityManager);
         try {
@@ -146,6 +155,8 @@ public class JobSchedulerServiceTest {
         JobSchedulerService.sSystemClock = Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC);
+        // Called by DeviceIdlenessTracker
+        when(mContext.getSystemService(UiModeManager.class)).thenReturn(mock(UiModeManager.class));
 
         mService = new TestJobSchedulerService(mContext);
     }

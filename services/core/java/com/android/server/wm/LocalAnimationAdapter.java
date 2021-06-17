@@ -126,7 +126,7 @@ class LocalAnimationAdapter implements AnimationAdapter {
         /**
          * @return {@code true} if we need to wake-up SurfaceFlinger earlier during this animation.
          *
-         * @see Transaction#setEarlyWakeup
+         * @see Transaction#setEarlyWakeupStart and Transaction#setEarlyWakeupEnd
          */
         default boolean needsEarlyWakeup() { return false; }
 

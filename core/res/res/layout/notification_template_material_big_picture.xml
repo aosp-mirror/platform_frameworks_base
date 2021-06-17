@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2014 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,61 +14,80 @@
   ~ limitations under the License
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:tag="bigPicture"
     android:clipChildren="false"
     >
+
     <include layout="@layout/notification_template_header" />
+
     <include layout="@layout/notification_template_right_icon" />
+
     <LinearLayout
-            android:id="@+id/notification_action_list_margin_target"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="top"
-            android:layout_marginTop="@dimen/notification_content_margin_top"
-            android:clipToPadding="false"
-            android:orientation="vertical"
-            >
+        android:id="@+id/notification_action_list_margin_target"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="top"
+        android:layout_marginTop="@dimen/notification_content_margin_top"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        >
+
         <LinearLayout
             android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/notification_content_margin_start"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
-            android:orientation="vertical">
-            <include layout="@layout/notification_template_part_line1"/>
-            <include layout="@layout/notification_template_progress"
-                     android:layout_width="match_parent"
-                     android:layout_height="@dimen/notification_progress_bar_height"
-                     android:layout_marginTop="@dimen/notification_progress_margin_top"/>
-            <include layout="@layout/notification_template_text"/>
-        </LinearLayout>
-        <ImageView
-                android:id="@+id/big_picture"
+            android:orientation="vertical"
+            >
+
+            <include layout="@layout/notification_template_part_line1" />
+
+            <include
+                layout="@layout/notification_template_progress"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:adjustViewBounds="true"
-                android:layout_weight="1"
-                android:layout_marginTop="13dp"
-                android:layout_marginStart="@dimen/notification_content_margin_start"
-                android:layout_marginEnd="@dimen/notification_content_margin_end"
-                android:scaleType="centerCrop"
+                android:layout_height="@dimen/notification_progress_bar_height"
+                android:layout_marginTop="@dimen/notification_progress_margin_top"
                 />
 
-        <ViewStub android:layout="@layout/notification_material_reply_text"
-                android:id="@+id/notification_material_reply_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
-        <include layout="@layout/notification_template_smart_reply_container"
+            <include layout="@layout/notification_template_text_multiline" />
+        </LinearLayout>
+
+        <com.android.internal.widget.BigPictureNotificationImageView
+            android:id="@+id/big_picture"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:adjustViewBounds="true"
+            android:layout_weight="1"
+            android:layout_marginTop="13dp"
+            android:layout_marginStart="@dimen/notification_content_margin_start"
+            android:layout_marginEnd="@dimen/notification_content_margin_end"
+            android:background="@drawable/notification_big_picture_outline"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"
+            />
+
+        <ViewStub
+            android:layout="@layout/notification_material_reply_text"
+            android:id="@+id/notification_material_reply_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+        <include
+            layout="@layout/notification_template_smart_reply_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/notification_content_margin_start"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
-            android:layout_marginTop="@dimen/notification_content_margin" />
+            android:layout_marginTop="@dimen/notification_content_margin"
+            />
+
         <include layout="@layout/notification_material_action_list" />
     </LinearLayout>
 </FrameLayout>

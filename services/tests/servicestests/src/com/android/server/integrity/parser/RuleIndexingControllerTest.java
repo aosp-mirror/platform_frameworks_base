@@ -25,6 +25,8 @@ import static com.android.server.integrity.utils.TestUtils.getValueBits;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.testng.Assert.assertThrows;
+
 import android.content.integrity.AppInstallMetadata;
 
 import org.junit.Test;
@@ -161,6 +163,22 @@ public class RuleIndexingControllerTest {
                         new RuleIndexRange(100, 500),
                         new RuleIndexRange(500, 900),
                         new RuleIndexRange(900, 945));
+    }
+
+    @Test
+    public void verifyIndexingFileIsCorrupt() throws IOException {
+        byte[] stringBytes =
+                getBytes(
+                        getKeyValueString(START_INDEXING_KEY, 100)
+                                + getKeyValueString("ccc", 200)
+                                + getKeyValueString(END_INDEXING_KEY, 300)
+                                + getKeyValueString(END_INDEXING_KEY, 900));
+        ByteBuffer rule = ByteBuffer.allocate(stringBytes.length);
+        rule.put(stringBytes);
+        InputStream inputStream = new ByteArrayInputStream(rule.array());
+
+        assertThrows(IllegalStateException.class,
+                () -> new RuleIndexingController(inputStream));
     }
 
     private static InputStream obtainDefaultIndexingMapForTest() {

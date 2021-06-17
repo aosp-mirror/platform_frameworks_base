@@ -202,10 +202,11 @@ static void android_media_MediaCrypto_native_setup(
     uuid = NULL;
 
     if (err != OK) {
-        jniThrowException(
+        std::string strerr(StrCryptoError(err));
+        jniThrowExceptionFmt(
                 env,
                 "android/media/MediaCryptoException",
-                "Failed to instantiate crypto object.");
+                "Failed to instantiate crypto object: %s", strerr.c_str());
         return;
     }
 
@@ -295,7 +296,8 @@ static void android_media_MediaCrypto_setMediaDrmSession(
         } else if (err == NO_INIT) {
             msg += ": crypto plugin not initialized";
         } else {
-            msg.appendFormat(": general failure (%d)", err);
+            std::string strerr(StrCryptoError(err));
+            msg.appendFormat(": general failure (%s)", strerr.c_str());
         }
         jniThrowException(env, "android/media/MediaCryptoException", msg.string());
     }

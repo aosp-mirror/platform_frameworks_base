@@ -145,7 +145,6 @@ public class Lnb implements AutoCloseable {
 
     private static final String TAG = "Lnb";
 
-    int mId;
     LnbCallback mCallback;
     Executor mExecutor;
     Tuner mTuner;
@@ -162,9 +161,7 @@ public class Lnb implements AutoCloseable {
     private Boolean mIsClosed = false;
     private final Object mLock = new Object();
 
-    private Lnb(int id) {
-        mId = id;
-    }
+    private Lnb() {}
 
     void setCallback(Executor executor, @Nullable LnbCallback callback, Tuner tuner) {
         mCallback = callback;

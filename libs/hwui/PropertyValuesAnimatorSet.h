@@ -44,7 +44,7 @@ private:
 };
 
 // TODO: This class should really be named VectorDrawableAnimator
-class ANDROID_API PropertyValuesAnimatorSet : public BaseRenderNodeAnimator {
+class PropertyValuesAnimatorSet : public BaseRenderNodeAnimator {
 public:
     friend class PropertyAnimatorSetListener;
     PropertyValuesAnimatorSet();

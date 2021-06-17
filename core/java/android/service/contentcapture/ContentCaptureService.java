@@ -229,7 +229,7 @@ public abstract class ContentCaptureService extends Service {
     /**
      * Explicitly limits content capture to the given packages and activities.
      *
-     * <p>To reset the whitelist, call it passing {@code null} to both arguments.
+     * <p>To reset the allowlist, call it passing {@code null} to both arguments.
      *
      * <p>Useful when the service wants to restrict content capture to a category of apps, like
      * chat apps. For example, if the service wants to support view captures on all activities of
@@ -364,7 +364,7 @@ public abstract class ContentCaptureService extends Service {
      * Notifies the service of an activity-level event that is not associated with a session.
      *
      * <p>This method can be used to track some high-level events for all activities, even those
-     * that are not whitelisted for Content Capture.
+     * that are not allowlisted for Content Capture.
      *
      * @param event high-level activity event
      */

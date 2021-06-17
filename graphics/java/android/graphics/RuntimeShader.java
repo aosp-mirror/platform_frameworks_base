@@ -17,7 +17,6 @@
 package android.graphics;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -33,13 +32,12 @@ public class RuntimeShader extends Shader {
                 RuntimeShader.class.getClassLoader(), nativeGetFinalizer());
     }
 
-    private byte[] mUniforms;
     private boolean mIsOpaque;
 
     /**
-     * Current native shader factory instance.
+     * Current native shader builder instance.
      */
-    private long mNativeInstanceRuntimeShaderFactory;
+    private long mNativeInstanceRuntimeShaderBuilder;
 
     /**
      * Creates a new RuntimeShader.
@@ -49,42 +47,86 @@ public class RuntimeShader extends Shader {
      *                 on number of uniforms declared by sksl.
      * @param isOpaque True if all pixels have alpha 1.0f.
      */
-    public RuntimeShader(@NonNull String sksl, @Nullable byte[] uniforms, boolean isOpaque) {
-        this(sksl, uniforms, isOpaque, ColorSpace.get(ColorSpace.Named.SRGB));
-    }
-
-    private RuntimeShader(@NonNull String sksl, @Nullable byte[] uniforms, boolean isOpaque,
-            ColorSpace colorSpace) {
-        super(colorSpace);
-        mUniforms = uniforms;
+    public RuntimeShader(@NonNull String sksl, boolean isOpaque) {
+        super(ColorSpace.get(ColorSpace.Named.SRGB));
         mIsOpaque = isOpaque;
-        mNativeInstanceRuntimeShaderFactory = nativeCreateShaderFactory(sksl);
-        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this,
-                mNativeInstanceRuntimeShaderFactory);
+        mNativeInstanceRuntimeShaderBuilder = nativeCreateBuilder(sksl);
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(
+                this, mNativeInstanceRuntimeShaderBuilder);
     }
 
     /**
-     * Sets new value for shader parameters.
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than float then an
+     * IllegalArgumentException is thrown.
      *
-     * @param uniforms Array of parameters passed by the SKSL shader. Array size depends
-     *                 on number of uniforms declared by mSksl.
+     * @param uniformName name matching the uniform declared in the SKSL shader
+     * @param value
      */
-    public void updateUniforms(@Nullable byte[] uniforms) {
-        mUniforms = uniforms;
+    public void setUniform(@NonNull String uniformName, float value) {
+        setUniform(uniformName, new float[] {value});
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than float2/vec2 then an
+     * IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the uniform declared in the SKSL shader
+     * @param value1
+     * @param value2
+     */
+    public void setUniform(@NonNull String uniformName, float value1, float value2) {
+        setUniform(uniformName, new float[] {value1, value2});
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than a vecN/floatN where N is
+     * the size of the values array then an IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the uniform declared in the SKSL shader
+     * @param values
+     */
+    public void setUniform(@NonNull String uniformName, float[] values) {
+        nativeUpdateUniforms(mNativeInstanceRuntimeShaderBuilder, uniformName, values);
         discardNativeInstance();
     }
 
-    @Override
-    long createNativeInstance(long nativeMatrix) {
-        return nativeCreate(mNativeInstanceRuntimeShaderFactory, nativeMatrix, mUniforms,
-                colorSpace().getNativeInstance(), mIsOpaque);
+    /**
+     * Sets the uniform shader that is declares as input to this shader.  If the shader does not
+     * have a uniform shader with that name then an IllegalArgumentException is thrown.
+     *
+     * @param shaderName name matching the uniform declared in the SKSL shader
+     * @param shader shader passed into the SKSL shader for sampling
+     */
+    public void setInputShader(@NonNull String shaderName, @NonNull Shader shader) {
+        nativeUpdateShader(
+                    mNativeInstanceRuntimeShaderBuilder, shaderName, shader.getNativeInstance());
+        discardNativeInstance();
     }
 
-    private static native long nativeCreate(long shaderFactory, long matrix, byte[] inputs,
-            long colorSpaceHandle, boolean isOpaque);
+    /** @hide */
+    @Override
+    protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
+        return nativeCreateShader(mNativeInstanceRuntimeShaderBuilder, nativeMatrix, mIsOpaque);
+    }
 
-    private static native long nativeCreateShaderFactory(String sksl);
+    public long getNativeShaderBuilder() {
+        return mNativeInstanceRuntimeShaderBuilder;
+    }
+
+    public boolean isOpaque() {
+        return mIsOpaque;
+    }
 
     private static native long nativeGetFinalizer();
+    private static native long nativeCreateBuilder(String sksl);
+    private static native long nativeCreateShader(
+            long shaderBuilder, long matrix, boolean isOpaque);
+    private static native void nativeUpdateUniforms(
+            long shaderBuilder, String uniformName, float[] uniforms);
+    private static native void nativeUpdateShader(
+            long shaderBuilder, String shaderName, long shader);
 }
 

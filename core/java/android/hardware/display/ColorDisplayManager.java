@@ -357,6 +357,18 @@ public final class ColorDisplayManager {
     }
 
     /**
+     * Returns whether the specified color mode is part of the standard set.
+     *
+     * @hide
+     */
+    public static boolean isStandardColorMode(int mode) {
+        return mode == ColorDisplayManager.COLOR_MODE_NATURAL
+                || mode == ColorDisplayManager.COLOR_MODE_BOOSTED
+                || mode == ColorDisplayManager.COLOR_MODE_SATURATED
+                || mode == ColorDisplayManager.COLOR_MODE_AUTOMATIC;
+    }
+
+    /**
      * Returns whether the device has a wide color gamut display.
      *
      * @hide
@@ -426,6 +438,56 @@ public final class ColorDisplayManager {
     }
 
     /**
+     * Enables or disables reduce bright colors.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
+    public boolean setReduceBrightColorsActivated(boolean activated) {
+        return mManager.setReduceBrightColorsActivated(activated);
+    }
+
+    /**
+     * Returns whether reduce bright colors is currently enabled.
+     *
+     * @hide
+     */
+    public boolean isReduceBrightColorsActivated() {
+        return mManager.isReduceBrightColorsActivated();
+    }
+
+    /**
+     * Set the strength level of bright color reduction to apply to the display.
+     *
+     * @param strength 0-100 (inclusive), where 100 is full strength
+     * @return whether the change was applied successfully
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
+    public boolean setReduceBrightColorsStrength(@IntRange(from = 0, to = 100) int strength) {
+        return mManager.setReduceBrightColorsStrength(strength);
+    }
+
+    /**
+     * Gets the strength of the bright color reduction transform.
+     *
+     * @hide
+     */
+    public int getReduceBrightColorsStrength() {
+        return mManager.getReduceBrightColorsStrength();
+    }
+
+    /**
+     * Gets the brightness impact of the bright color reduction transform, as in the factor by which
+     * the current brightness (in nits) should be multiplied to obtain the brightness offset 'b'.
+     *
+     * @hide
+     */
+    public float getReduceBrightColorsOffsetFactor() {
+        return mManager.getReduceBrightColorsOffsetFactor();
+    }
+
+    /**
      * Returns {@code true} if Night Display is supported by the device.
      *
      * @hide
@@ -463,6 +525,35 @@ public final class ColorDisplayManager {
      */
     public static boolean isDisplayWhiteBalanceAvailable(Context context) {
         return context.getResources().getBoolean(R.bool.config_displayWhiteBalanceAvailable);
+    }
+
+    /**
+     * Returns {@code true} if reduce bright colors is supported by the device.
+     *
+     * @hide
+     */
+    public static boolean isReduceBrightColorsAvailable(Context context) {
+        return context.getResources().getBoolean(R.bool.config_reduceBrightColorsAvailable);
+    }
+
+    /**
+     * Returns the minimum allowed brightness reduction strength in percentage when activated.
+     *
+     * @hide
+     */
+    public static int getMinimumReduceBrightColorsStrength(Context context) {
+        return context.getResources()
+                .getInteger(R.integer.config_reduceBrightColorsStrengthMin);
+    }
+
+    /**
+     * Returns the maximum allowed brightness reduction strength in percentage when activated.
+     *
+     * @hide
+     */
+    public static int getMaximumReduceBrightColorsStrength(Context context) {
+        return context.getResources()
+                .getInteger(R.integer.config_reduceBrightColorsStrengthMax);
     }
 
     /**
@@ -661,6 +752,46 @@ public final class ColorDisplayManager {
         boolean setDisplayWhiteBalanceEnabled(boolean enabled) {
             try {
                 return mCdm.setDisplayWhiteBalanceEnabled(enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        boolean isReduceBrightColorsActivated() {
+            try {
+                return mCdm.isReduceBrightColorsActivated();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        boolean setReduceBrightColorsActivated(boolean activated) {
+            try {
+                return mCdm.setReduceBrightColorsActivated(activated);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        int getReduceBrightColorsStrength() {
+            try {
+                return mCdm.getReduceBrightColorsStrength();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        boolean setReduceBrightColorsStrength(int strength) {
+            try {
+                return mCdm.setReduceBrightColorsStrength(strength);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        float getReduceBrightColorsOffsetFactor() {
+            try {
+                return mCdm.getReduceBrightColorsOffsetFactor();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

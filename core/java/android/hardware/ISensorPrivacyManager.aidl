@@ -24,12 +24,28 @@ interface ISensorPrivacyManager {
     // the ones in
     //   frameworks/native/libs/sensorprivacy/aidl/android/hardware/ISensorPrivacyManager.aidl
     // =============== Beginning of transactions used on native side as well ======================
+    boolean supportsSensorToggle(int sensor);
+
     void addSensorPrivacyListener(in ISensorPrivacyListener listener);
+
+    void addIndividualSensorPrivacyListener(int userId, int sensor,
+            in ISensorPrivacyListener listener);
 
     void removeSensorPrivacyListener(in ISensorPrivacyListener listener);
 
+    void removeIndividualSensorPrivacyListener(int sensor, in ISensorPrivacyListener listener);
+
     boolean isSensorPrivacyEnabled();
 
+    boolean isIndividualSensorPrivacyEnabled(int userId, int sensor);
+
     void setSensorPrivacy(boolean enable);
+
+    void setIndividualSensorPrivacy(int userId, int sensor, boolean enable);
+
+    void setIndividualSensorPrivacyForProfileGroup(int userId, int sensor, boolean enable);
     // =============== End of transactions used on native side as well ============================
+
+    void suppressIndividualSensorPrivacyReminders(int userId, String packageName, IBinder token,
+            boolean suppress);
 }
