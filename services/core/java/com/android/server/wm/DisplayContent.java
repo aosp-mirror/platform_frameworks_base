@@ -358,13 +358,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean mIsSizeForced = false;
 
     /**
-     * Overridden display size and metrics to activity window bounds. Set via
-     * "adb shell wm set-sandbox-display-apis". Default to true, since only disable for debugging.
-     * @see WindowManagerService#setSandboxDisplayApis(int, boolean)
-     */
-    private boolean mSandboxDisplayApis = true;
-
-    /**
      * Overridden display density for current user. Initialized with {@link #mInitialDisplayDensity}
      * but can be set from Settings or via shell command "adb shell wm density".
      * @see WindowManagerService#setForcedDisplayDensityForUser(int, int, int)
@@ -5808,21 +5801,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     public boolean providesMaxBounds() {
         return true;
-    }
-
-    /**
-     * Sets if Display APIs should be sandboxed to the activity window bounds.
-     */
-    void setSandboxDisplayApis(boolean sandboxDisplayApis) {
-        mSandboxDisplayApis = sandboxDisplayApis;
-    }
-
-    /**
-     * Returns {@code true} is Display APIs should be sandboxed to the activity window bounds,
-     * {@code false} otherwise. Default to true, unless set for debugging purposes.
-     */
-    boolean sandboxDisplayApis() {
-        return mSandboxDisplayApis;
     }
 
     /** The entry for proceeding to handle {@link #mFixedRotationLaunchingApp}. */

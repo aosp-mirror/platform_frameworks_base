@@ -5391,25 +5391,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setSandboxDisplayApis(int displayId, boolean sandboxDisplayApis) {
-        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
-        }
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                if (displayContent != null) {
-                    displayContent.setSandboxDisplayApis(sandboxDisplayApis);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     /** The global settings only apply to default display. */
     private boolean applyForcedPropertiesForDefaultDisplay() {
         boolean changed = false;

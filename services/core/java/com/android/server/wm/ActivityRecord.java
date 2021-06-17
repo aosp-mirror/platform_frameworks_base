@@ -7529,10 +7529,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (getUid() == SYSTEM_UID) {
             return false;
         }
-        // Do not sandbox to activity window bounds if the feature is disabled.
-        if (mDisplayContent != null && !mDisplayContent.sandboxDisplayApis()) {
-            return false;
-        }
         // Never apply sandboxing to an app that should be explicitly excluded from the config.
         if (info != null && info.neverSandboxDisplayApis()) {
             return false;
