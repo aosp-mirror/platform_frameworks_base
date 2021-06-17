@@ -8030,6 +8030,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             inForeground = true;
             receiverComponent = resolveDelegateReceiver(
                 DELEGATION_SECURITY_LOGGING, action, userId);
+            // STOPSHIP(b/185004808): remove excessive log.
+            Slogf.d(LOG_TAG, "Delegate for security logs broadcast: " + receiverComponent);
         }
         if (receiverComponent == null) {
             receiverComponent = getOwnerComponent(userId);
