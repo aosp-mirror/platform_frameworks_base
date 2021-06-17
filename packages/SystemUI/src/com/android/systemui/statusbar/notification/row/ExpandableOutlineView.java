@@ -71,21 +71,19 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private int mBackgroundTop;
 
     /**
-     * {@code true} if the children views of the {@link ExpandableOutlineView} are translated when
+     * {@code false} if the children views of the {@link ExpandableOutlineView} are translated when
      * it is moved. Otherwise, the translation is set on the {@code ExpandableOutlineView} itself.
      */
-    protected boolean mShouldTranslateContents;
-    private boolean mTopAmountRounded;
-    private float mDistanceToTopRoundness = -1;
+    protected boolean mDismissUsingRowTranslationX = true;
     private float[] mTmpCornerRadii = new float[8];
 
     private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
         public void getOutline(View view, Outline outline) {
             if (!mCustomOutline && getCurrentTopRoundness() == 0.0f
-                    && getCurrentBottomRoundness() == 0.0f && !mAlwaysRoundBothCorners
-                    && !mTopAmountRounded) {
-                int translation = mShouldTranslateContents ? (int) getTranslation() : 0;
+                    && getCurrentBottomRoundness() == 0.0f && !mAlwaysRoundBothCorners) {
+                // Only when translating just the contents, does the outline need to be shifted.
+                int translation = !mDismissUsingRowTranslationX ? (int) getTranslation() : 0;
                 int left = Math.max(translation, 0);
                 int top = mClipTopAmount + mBackgroundTop;
                 int right = getWidth() + Math.min(translation, 0);
@@ -110,7 +108,9 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         float topRoundness = mAlwaysRoundBothCorners
                 ? mOutlineRadius : getCurrentBackgroundRadiusTop();
         if (!mCustomOutline) {
-            int translation = mShouldTranslateContents && !ignoreTranslation
+            // The outline just needs to be shifted if we're translating the contents. Otherwise
+            // it's already in the right place.
+            int translation = !mDismissUsingRowTranslationX && !ignoreTranslation
                     ? (int) getTranslation() : 0;
             int halfExtraWidth = (int) (mExtraWidthForClipping / 2.0f);
             left = Math.max(translation, 0) - halfExtraWidth;
@@ -168,32 +168,14 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         canvas.save();
-        Path intersectPath = null;
-        if (mTopAmountRounded && topAmountNeedsClipping()) {
-            int left = (int) (- mExtraWidthForClipping / 2.0f);
-            int top = (int) (mClipTopAmount - mDistanceToTopRoundness);
-            int right = getWidth() + (int) (mExtraWidthForClipping + left);
-            int bottom = (int) Math.max(mMinimumHeightForClipping,
-                    Math.max(getActualHeight() - mClipBottomAmount, top + mOutlineRadius));
-            getRoundedRectPath(left, top, right, bottom, mOutlineRadius, 0.0f, mClipPath);
-            intersectPath = mClipPath;
-        }
-        boolean clipped = false;
         if (childNeedsClipping(child)) {
             Path clipPath = getCustomClipPath(child);
             if (clipPath == null) {
                 clipPath = getClipPath(false /* ignoreTranslation */);
             }
             if (clipPath != null) {
-                if (intersectPath != null) {
-                    clipPath.op(intersectPath, Path.Op.INTERSECT);
-                }
                 canvas.clipPath(clipPath);
-                clipped = true;
             }
-        }
-        if (!clipped && intersectPath != null) {
-            canvas.clipPath(intersectPath);
         }
         boolean result = super.drawChild(canvas, child, drawingTime);
         canvas.restore();
@@ -212,32 +194,19 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         invalidate();
     }
 
-    @Override
-    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
-        super.setDistanceToTopRoundness(distanceToTopRoundness);
-        if (distanceToTopRoundness != mDistanceToTopRoundness) {
-            mTopAmountRounded = distanceToTopRoundness >= 0;
-            mDistanceToTopRoundness = distanceToTopRoundness;
-            applyRoundness();
-        }
-    }
-
     protected boolean childNeedsClipping(View child) {
         return false;
     }
 
-    public boolean topAmountNeedsClipping() {
-        return true;
-    }
-
     protected boolean isClippingNeeded() {
-        return mAlwaysRoundBothCorners || mCustomOutline || getTranslation() != 0 ;
+        // When translating the contents instead of the overall view, we need to make sure we clip
+        // rounded to the contents.
+        boolean forTranslation = getTranslation() != 0 && !mDismissUsingRowTranslationX;
+        return mAlwaysRoundBothCorners || mCustomOutline || forTranslation;
     }
 
     private void initDimens() {
         Resources res = getResources();
-        mShouldTranslateContents =
-                res.getBoolean(R.bool.config_translateNotificationContentsOnSwipe);
         mOutlineRadius = res.getDimension(R.dimen.notification_shadow_radius);
         mAlwaysRoundBothCorners = res.getBoolean(R.bool.config_clipNotificationsToOutline);
         if (!mAlwaysRoundBothCorners) {
@@ -272,11 +241,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     }
 
     public float getCurrentBackgroundRadiusTop() {
-        // If this view is top amount notification view, it should always has round corners on top.
-        // It will be applied with applyRoundness()
-        if (mTopAmountRounded) {
-            return mOutlineRadius;
-        }
         return getCurrentTopRoundness() * mOutlineRadius;
     }
 
@@ -382,9 +346,25 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         }
     }
 
+    /**
+     * Set the dismiss behavior of the view.
+     * @param usingRowTranslationX {@code true} if the view should translate using regular
+     *                                          translationX, otherwise the contents will be
+     *                                          translated.
+     */
+    public void setDismissUsingRowTranslationX(boolean usingRowTranslationX) {
+        mDismissUsingRowTranslationX = usingRowTranslationX;
+    }
+
     @Override
     public int getOutlineTranslation() {
-        return mCustomOutline ? mOutlineRect.left : (int) getTranslation();
+        if (mCustomOutline) {
+            return mOutlineRect.left;
+        }
+        if (mDismissUsingRowTranslationX) {
+            return 0;
+        }
+        return (int) getTranslation();
     }
 
     public void updateOutline() {

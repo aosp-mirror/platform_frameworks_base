@@ -18,5 +18,6 @@
     <privapp-permissions package="com.android.car.cluster.home">
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.car.permission.CAR_INSTRUMENT_CLUSTER_CONTROL"/>
+        <permission name="android.car.permission.CAR_MONITOR_INPUT"/>
     </privapp-permissions>
 </permissions>

@@ -75,7 +75,6 @@ public class AmbientState {
     private int mExpandAnimationTopChange;
     private ExpandableNotificationRow mExpandingNotification;
     private float mHideAmount;
-    private float mNotificationScrimTop;
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
     private float mDozeAmount = 0.0f;
@@ -254,20 +253,6 @@ public class AmbientState {
     /** Returns the hide ratio of the status bar */
     public float getHideAmount() {
         return mHideAmount;
-    }
-
-    /**
-     * Set y position of top of notifications background scrim, relative to top of screen.
-     */
-    public void setNotificationScrimTop(float notificationScrimTop) {
-        mNotificationScrimTop = notificationScrimTop;
-    }
-
-    /**
-     * @return Y position of top of notifications background scrim, relative to top of screen.
-     */
-    public float getNotificationScrimTop() {
-        return mNotificationScrimTop;
     }
 
     public void setHideSensitive(boolean hideSensitive) {

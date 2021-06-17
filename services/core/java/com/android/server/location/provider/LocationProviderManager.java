@@ -1407,12 +1407,16 @@ public class LocationProviderManager extends
         return mName;
     }
 
+    public AbstractLocationProvider.State getState() {
+        return mProvider.getState();
+    }
+
     public @Nullable CallerIdentity getIdentity() {
-        return mProvider.getIdentity();
+        return mProvider.getState().identity;
     }
 
     public @Nullable ProviderProperties getProperties() {
-        return mProvider.getProperties();
+        return mProvider.getState().properties;
     }
 
     public boolean hasProvider() {
@@ -2403,7 +2407,7 @@ public class LocationProviderManager extends
         Preconditions.checkArgument(userId >= 0);
 
         boolean enabled = mState == STATE_STARTED
-                && mProvider.isAllowed()
+                && mProvider.getState().allowed
                 && mSettingsHelper.isLocationEnabled(userId);
 
         int index = mEnabled.indexOfKey(userId);

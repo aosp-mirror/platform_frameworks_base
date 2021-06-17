@@ -238,7 +238,9 @@ class ActivityLaunchAnimator(
              * during the animation.
              */
             @JvmStatic
-            fun fromView(view: View): Controller = GhostedViewLaunchAnimatorController(view)
+            fun fromView(view: View, cujType: Int? = null): Controller {
+                return GhostedViewLaunchAnimatorController(view, cujType)
+            }
         }
 
         /**

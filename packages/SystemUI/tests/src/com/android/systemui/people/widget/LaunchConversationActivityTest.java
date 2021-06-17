@@ -49,6 +49,7 @@ import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubble;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -213,6 +214,7 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
         verify(mBubblesManager, never()).expandStackAndSelectBubble(any(NotificationEntry.class));
     }
 
+    @Ignore
     @Test
     public void testBubbleWithNoNotifOpensBubble() throws Exception {
         Bubble bubble = mock(Bubble.class);
