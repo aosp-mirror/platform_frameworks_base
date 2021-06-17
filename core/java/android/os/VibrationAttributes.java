@@ -63,6 +63,11 @@ public final class VibrationAttributes implements Parcelable {
     public @interface Usage{}
 
     /**
+     * Vibration usage filter value to match all usages.
+     * @hide
+     */
+    public static final int USAGE_FILTER_MATCH_ALL = -1;
+    /**
      * Vibration usage class value to use when the vibration usage class is unknown.
      */
     public static final int USAGE_CLASS_UNKNOWN = 0x0;
