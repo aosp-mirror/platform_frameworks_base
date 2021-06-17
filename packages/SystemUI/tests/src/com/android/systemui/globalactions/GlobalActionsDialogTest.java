@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -124,6 +125,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock GlobalActionsPanelPlugin.PanelViewController mWalletController;
     @Mock private Handler mHandler;
     @Mock private UserTracker mUserTracker;
+    @Mock private PackageManager mPackageManager;
     @Mock private SecureSettings mSecureSettings;
     @Mock private StatusBar mStatusBar;
 
@@ -136,6 +138,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
+        when(mResources.getConfiguration()).thenReturn(
+                getContext().getResources().getConfiguration());
 
         mGlobalActionsDialog = new GlobalActionsDialog(mContext,
                 mWindowManagerFuncs,
@@ -167,6 +171,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mRingerModeTracker,
                 mSysUiState,
                 mHandler,
+                mPackageManager,
                 mStatusBar
         );
         mGlobalActionsDialog.setZeroDialogPressDelayForTesting();
