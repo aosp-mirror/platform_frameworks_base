@@ -80,6 +80,17 @@ public class Installer extends SystemService {
     /** Indicates that dexopt may be run with different performance / priority tuned for restore */
     public static final int DEXOPT_FOR_RESTORE = 1 << 13; // TODO(b/135202722): remove
 
+    /** The result of the profile analysis indicating that the app should be optimized. */
+    public static final int PROFILE_ANALYSIS_OPTIMIZE = 1;
+    /** The result of the profile analysis indicating that the app should not be optimized. */
+    public static final int PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA = 2;
+    /**
+     * The result of the profile analysis indicating that the app should not be optimized because
+     * the profiles are empty.
+     */
+    public static final int PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES = 3;
+
+
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
     public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
     public static final int FLAG_STORAGE_EXTERNAL = IInstalld.FLAG_STORAGE_EXTERNAL;
@@ -496,9 +507,18 @@ public class Installer extends SystemService {
         }
     }
 
-    public boolean mergeProfiles(int uid, String packageName, String profileName)
+    /**
+     * Analyzes the ART profiles of the given package, possibly merging the information
+     * into the reference profile. Returns whether or not we should optimize the package
+     * based on how much information is in the profile.
+     *
+     * @return one of {@link #PROFILE_ANALYSIS_OPTIMIZE},
+     *         {@link #PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA},
+     *         {@link #PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES}
+     */
+    public int mergeProfiles(int uid, String packageName, String profileName)
             throws InstallerException {
-        if (!checkBeforeRemote()) return false;
+        if (!checkBeforeRemote()) return PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
         try {
             return mInstalld.mergeProfiles(uid, packageName, profileName);
         } catch (Exception e) {
