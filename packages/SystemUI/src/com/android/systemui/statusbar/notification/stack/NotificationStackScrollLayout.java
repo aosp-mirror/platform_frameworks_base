@@ -648,6 +648,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mController.hasActiveClearableNotifications(ROWS_ALL);
         RemoteInputController remoteInputController = mRemoteInputManager.getController();
         boolean showFooterView = (showDismissView || mController.hasActiveNotifications())
+                && mEmptyShadeView.getVisibility() == GONE
                 && mStatusBarState != StatusBarState.KEYGUARD
                 && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
                 && (remoteInputController == null || !remoteInputController.isRemoteInputActive());
