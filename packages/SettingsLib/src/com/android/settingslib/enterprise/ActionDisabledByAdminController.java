@@ -16,6 +16,7 @@
 
 package com.android.settingslib.enterprise;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -60,7 +61,8 @@ public interface ActionDisabledByAdminController {
      * Returns a listener for handling positive button clicks
      */
     @Nullable
-    default DialogInterface.OnClickListener getPositiveButtonListener() {
+    default DialogInterface.OnClickListener getPositiveButtonListener(@NonNull Context context,
+            @NonNull RestrictedLockUtils.EnforcedAdmin enforcedAdmin) {
         return null;
     }
 }
