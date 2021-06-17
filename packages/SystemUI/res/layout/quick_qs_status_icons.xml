@@ -59,11 +59,16 @@
         android:visibility="gone"
         />
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/rightLayout"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:gravity="center_vertical|end"
+        android:gravity="end"
+        >
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical|end"
         >
         <com.android.systemui.statusbar.phone.StatusIconContainer
             android:id="@+id/statusIcons"
@@ -80,4 +85,6 @@
             android:paddingEnd="2dp" />
 
     </LinearLayout>
+    </FrameLayout>
+
 </LinearLayout>
