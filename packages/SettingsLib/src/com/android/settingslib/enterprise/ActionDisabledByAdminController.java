@@ -18,6 +18,7 @@ package com.android.settingslib.enterprise;
 
 import android.annotation.UserIdInt;
 import android.content.Context;
+import android.content.DialogInterface;
 
 import androidx.annotation.Nullable;
 
@@ -54,4 +55,12 @@ public interface ActionDisabledByAdminController {
      * Updates the enforced admin
      */
     void updateEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin, @UserIdInt int adminUserId);
+
+    /**
+     * Returns a listener for handling positive button clicks
+     */
+    @Nullable
+    default DialogInterface.OnClickListener getPositiveButtonListener() {
+        return null;
+    }
 }
