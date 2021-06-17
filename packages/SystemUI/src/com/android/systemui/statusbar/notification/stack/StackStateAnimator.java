@@ -392,7 +392,7 @@ public class StackStateAnimator {
                         0, () -> removeTransientView(changingView), null);
             } else if (event.animationType ==
                 NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
-                if (Math.abs(changingView.getTranslation()) == changingView.getWidth()
+                if (mHostLayout.isFullySwipedOut(changingView)
                         && changingView.getTransientContainer() != null) {
                     changingView.getTransientContainer().removeTransientView(changingView);
                 }

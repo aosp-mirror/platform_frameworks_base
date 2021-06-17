@@ -31,6 +31,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.IVibratorManager;
@@ -98,13 +99,17 @@ public class VibrationThreadTest {
     private IBatteryStats mIBatteryStatsMock;
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
+    private DeviceVibrationEffectAdapter mEffectAdapter;
     private PowerManager.WakeLock mWakeLock;
     private TestLooper mTestLooper;
 
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
-        mWakeLock = InstrumentationRegistry.getContext().getSystemService(
+
+        Context context = InstrumentationRegistry.getContext();
+        mEffectAdapter = new DeviceVibrationEffectAdapter(context);
+        mWakeLock = context.getSystemService(
                 PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
 
         mockVibrators(VIBRATOR_ID);
@@ -985,8 +990,8 @@ public class VibrationThreadTest {
     }
 
     private VibrationThread startThreadAndDispatcher(Vibration vib) {
-        VibrationThread thread = new VibrationThread(vib, createVibratorControllers(), mWakeLock,
-                mIBatteryStatsMock, mThreadCallbacks);
+        VibrationThread thread = new VibrationThread(vib, mEffectAdapter,
+                createVibratorControllers(), mWakeLock, mIBatteryStatsMock, mThreadCallbacks);
         doAnswer(answer -> {
             thread.vibratorComplete(answer.getArgument(0));
             return null;

@@ -312,6 +312,7 @@ private:
     bool mExpectSurfaceStats = false;
 
     std::function<void(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
+    void cleanupResources();
 };
 
 } /* namespace renderthread */

@@ -53,14 +53,18 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.DisplayAddress;
+import android.view.IRemoteAnimationFinishedCallback;
+import android.view.IRemoteAnimationRunner;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.RemoteAnimationTarget;
 import android.view.ScrollCaptureResponse;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -104,6 +108,31 @@ public class ScreenshotController {
 
     private ScrollCaptureResponse mLastScrollCaptureResponse;
     private ListenableFuture<ScrollCaptureResponse> mLastScrollCaptureRequest;
+
+    /**
+     * This is effectively a no-op, but we need something non-null to pass in, in order to
+     * successfully override the pending activity entrance animation.
+     */
+    static final IRemoteAnimationRunner.Stub SCREENSHOT_REMOTE_RUNNER =
+            new IRemoteAnimationRunner.Stub() {
+                @Override
+                public void onAnimationStart(
+                        @WindowManager.TransitionOldType int transit,
+                        RemoteAnimationTarget[] apps,
+                        RemoteAnimationTarget[] wallpapers,
+                        RemoteAnimationTarget[] nonApps,
+                        final IRemoteAnimationFinishedCallback finishedCallback) {
+                    try {
+                        finishedCallback.onAnimationFinished();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error finishing screenshot remote animation", e);
+                    }
+                }
+
+                @Override
+                public void onAnimationCancelled() {
+                }
+            };
 
     /**
      * POD used in the AsyncTask which saves an image in the background.
@@ -182,6 +211,7 @@ public class ScreenshotController {
     static final String ACTION_TYPE_SHARE = "Share";
     static final String ACTION_TYPE_EDIT = "Edit";
     static final String EXTRA_SMART_ACTIONS_ENABLED = "android:smart_actions_enabled";
+    static final String EXTRA_OVERRIDE_TRANSITION = "android:screenshot_override_transition";
     static final String EXTRA_ACTION_INTENT = "android:screenshot_action_intent";
 
     static final String SCREENSHOT_URI_ID = "android:screenshot_uri_id";
@@ -542,7 +572,7 @@ public class ScreenshotController {
                             mScreenshotHandler.postDelayed(this::requestScrollCapture, 150);
                             mScreenshotView.updateDisplayCutoutMargins(
                                     mWindowManager.getCurrentWindowMetrics().getWindowInsets()
-                                        .getDisplayCutout());
+                                            .getDisplayCutout());
                         }
                     });
         });

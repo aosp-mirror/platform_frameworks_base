@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * Adapter that converts ramp segments that to a sequence of fixed step segments.
  *
- * <p>This leaves the list unchanged if the device have compose PWLE capability.
+ * <p>This leaves the list unchanged if the device has compose PWLE capability.
  */
 final class RampToStepAdapter implements VibrationEffectAdapters.SegmentsAdapter<VibratorInfo> {
 
