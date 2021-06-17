@@ -34,6 +34,7 @@ import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.view.KeyEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -57,6 +58,7 @@ import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
+import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
@@ -250,6 +252,15 @@ public final class WMShell extends SystemUI
                     mSysUiState.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
                             false).commitUpdate(DEFAULT_DISPLAY);
                 });
+            }
+        });
+
+        oneHanded.registerEventCallback(new OneHandedEventCallback() {
+            @Override
+            public void notifyExpandNotification() {
+                mSysUiMainExecutor.execute(
+                        () -> mCommandQueue.handleSystemKey(
+                                KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN));
             }
         });
 
