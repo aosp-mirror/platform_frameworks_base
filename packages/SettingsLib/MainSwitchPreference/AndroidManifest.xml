@@ -19,7 +19,7 @@
           package="com.android.settingslib.widget">
 
     <uses-sdk
-        android:minSdkVersion="21"
+        android:minSdkVersion="28"
         android:targetSdkVersion="31"/>
 
 </manifest>
