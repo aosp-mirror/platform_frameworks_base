@@ -2515,7 +2515,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
             if (winAnimator.mSurfaceController != null) {
-                win.calculateSurfaceBounds(win.getAttrs(), mTmpRect);
+                win.calculateSurfaceBounds(win.getLayoutingAttrs(
+                        win.getWindowConfiguration().getRotation()), mTmpRect);
                 outSurfaceSize.set(mTmpRect.width(), mTmpRect.height());
             }
             getInsetsSourceControls(win, outActiveControls);
