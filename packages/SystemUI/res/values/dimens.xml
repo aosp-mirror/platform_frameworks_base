@@ -918,6 +918,7 @@
 
     <dimen name="keyguard_affordance_fixed_height">48dp</dimen>
     <dimen name="keyguard_affordance_fixed_width">48dp</dimen>
+    <dimen name="keyguard_affordance_fixed_radius">24dp</dimen>
 
     <dimen name="keyguard_affordance_horizontal_offset">32dp</dimen>
     <dimen name="keyguard_affordance_vertical_offset">32dp</dimen>

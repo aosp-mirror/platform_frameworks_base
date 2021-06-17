@@ -51,6 +51,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.TaskInfo;
+import android.app.TaskStackBuilder;
 import android.app.UiModeManager;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
@@ -694,6 +695,7 @@ public class StatusBar extends SystemUI implements
     private boolean mIsOccluded;
     private boolean mWereIconsJustHidden;
     private boolean mBouncerWasShowingWhenHidden;
+    private boolean mIsLaunchingActivityOverLockscreen;
 
     // Notifies StatusBarKeyguardViewManager every time the keyguard transition is over,
     // this animation is tied to the scrim for historic reasons.
@@ -1995,10 +1997,77 @@ public class StatusBar extends SystemUI implements
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade,
-            ActivityLaunchAnimator.Controller animationController) {
-        startActivityDismissingKeyguard(intent, false, dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            boolean showOverLockscreenWhenLocked) {
+        // Make sure that we dismiss the keyguard if it is directly dismissable or when we don't
+        // want to show the activity above it.
+        if (mKeyguardStateController.isUnlocked() || !showOverLockscreenWhenLocked) {
+            startActivityDismissingKeyguard(intent, false, dismissShade,
                 false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
                 0 /* flags */, animationController);
+            return;
+        }
+
+        boolean animate =
+                animationController != null && shouldAnimateLaunch(true /* isActivityIntent */,
+                        showOverLockscreenWhenLocked);
+
+        ActivityLaunchAnimator.Controller controller = null;
+        if (animate) {
+            // Wrap the animation controller to dismiss the shade and set
+            // mIsLaunchingActivityOverLockscreen during the animation.
+            ActivityLaunchAnimator.Controller delegate = wrapAnimationController(
+                    animationController, dismissShade);
+            controller = new DelegateLaunchAnimatorController(delegate) {
+                @Override
+                public void onIntentStarted(boolean willAnimate) {
+                    getDelegate().onIntentStarted(willAnimate);
+
+                    if (willAnimate) {
+                        StatusBar.this.mIsLaunchingActivityOverLockscreen = true;
+                    }
+                }
+
+                @Override
+                public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
+                    // Set mIsLaunchingActivityOverLockscreen to false before actually finishing the
+                    // animation so that we can assume that mIsLaunchingActivityOverLockscreen
+                    // being true means that we will collapse the shade (or at least run the
+                    // post collapse runnables) later on.
+                    StatusBar.this.mIsLaunchingActivityOverLockscreen = false;
+                    getDelegate().onLaunchAnimationEnd(isExpandingFullyAbove);
+                }
+
+                @Override
+                public void onLaunchAnimationCancelled() {
+                    // Set mIsLaunchingActivityOverLockscreen to false before actually finishing the
+                    // animation so that we can assume that mIsLaunchingActivityOverLockscreen
+                    // being true means that we will collapse the shade (or at least run the
+                    // post collapse runnables) later on.
+                    StatusBar.this.mIsLaunchingActivityOverLockscreen = false;
+                    getDelegate().onLaunchAnimationCancelled();
+                }
+            };
+        } else if (dismissShade) {
+            // The animation will take care of dismissing the shade at the end of the animation. If
+            // we don't animate, collapse it directly.
+            collapseShade();
+        }
+
+        mActivityLaunchAnimator.startIntentWithAnimation(controller, animate,
+                intent.getPackage(), showOverLockscreenWhenLocked, (adapter) -> TaskStackBuilder
+                        .create(mContext)
+                        .addNextIntent(intent)
+                        .startActivities(getActivityOptions(getDisplayId(), adapter),
+                                UserHandle.CURRENT));
+    }
+
+    /**
+     * Whether we are currently animating an activity launch above the lockscreen (occluding
+     * activity).
+     */
+    public boolean isLaunchingActivityOverLockscreen() {
+        return mIsLaunchingActivityOverLockscreen;
     }
 
     @Override
@@ -2159,21 +2228,28 @@ public class StatusBar extends SystemUI implements
      *
      * Note: This method must be called *before* dismissing the keyguard.
      */
-    public boolean shouldAnimateLaunch(boolean isActivityIntent) {
+    public boolean shouldAnimateLaunch(boolean isActivityIntent, boolean showOverLockscreen) {
         // TODO(b/184121838): Support launch animations when occluded.
         if (isOccluded()) {
             return false;
         }
 
-        // Always animate if we are unlocked.
-        if (!mKeyguardStateController.isShowing()) {
+        // Always animate if we are not showing the keyguard or if we animate over the lockscreen
+        // (without unlocking it).
+        if (showOverLockscreen || !mKeyguardStateController.isShowing()) {
             return true;
         }
 
-        // If we are locked, only animate if remote unlock animations are enabled. We also don't
-        // animate non-activity launches as they can break the animation.
+        // If we are locked and have to dismiss the keyguard, only animate if remote unlock
+        // animations are enabled. We also don't animate non-activity launches as they can break the
+        // animation.
         // TODO(b/184121838): Support non activity launches on the lockscreen.
         return isActivityIntent && KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation;
+    }
+
+    /** Whether we should animate an activity launch. */
+    public boolean shouldAnimateLaunch(boolean isActivityIntent) {
+        return shouldAnimateLaunch(isActivityIntent, false /* showOverLockscreen */);
     }
 
     public boolean isDeviceInVrMode() {
