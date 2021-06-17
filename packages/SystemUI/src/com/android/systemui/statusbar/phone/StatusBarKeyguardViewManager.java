@@ -192,6 +192,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private Runnable mKeyguardGoneCancelAction;
+    private boolean mDismissActionWillAnimateOnKeyguard;
     private final ArrayList<Runnable> mAfterKeyguardGoneRunnables = new ArrayList<>();
 
     // Dismiss action to be launched when we stop dozing or the keyguard is gone.
@@ -447,6 +448,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
             mAfterKeyguardGoneAction = r;
             mKeyguardGoneCancelAction = cancelAction;
+            mDismissActionWillAnimateOnKeyguard = r != null && r.willRunAnimationOnKeyguard();
 
             // If there is an an alternate auth interceptor (like the UDFPS), show that one instead
             // of the bouncer.
@@ -625,9 +627,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mBouncer.startPreHideAnimation(finishRunnable);
             mStatusBar.onBouncerPreHideAnimation();
 
-            // startPreHideAnimation() will change the visibility of the bouncer, so we have to
-            // make sure to update its state.
-            updateStates();
+            // We update the state (which will show the keyguard) only if an animation will run on
+            // the keyguard. If there is no animation, we wait before updating the state so that we
+            // go directly from bouncer to launcher/app.
+            if (mDismissActionWillAnimateOnKeyguard) {
+                updateStates();
+            }
         } else if (finishRunnable != null) {
             finishRunnable.run();
         }
@@ -798,6 +803,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mAfterKeyguardGoneAction = null;
         }
         mKeyguardGoneCancelAction = null;
+        mDismissActionWillAnimateOnKeyguard = false;
         for (int i = 0; i < mAfterKeyguardGoneRunnables.size(); i++) {
             mAfterKeyguardGoneRunnables.get(i).run();
         }
@@ -866,6 +872,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             return; // allow bouncer to trigger saved actions
         }
         mAfterKeyguardGoneAction = null;
+        mDismissActionWillAnimateOnKeyguard = false;
         if (mKeyguardGoneCancelAction != null) {
             mKeyguardGoneCancelAction.run();
             mKeyguardGoneCancelAction = null;

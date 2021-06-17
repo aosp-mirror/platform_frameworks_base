@@ -57,6 +57,11 @@ import java.util.Map;
 
 /** This tests AppSearchImpl when it's running with a platform-backed VisibilityStore. */
 public class AppSearchImplPlatformTest {
+    /**
+     * Always trigger optimize in this class. OptimizeStrategy will be tested in its own test class.
+     */
+    private static final OptimizeStrategy ALWAYS_OPTIMIZE = optimizeInfo -> true;
+
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
     private final Map<UserHandle, PackageManager> mMockPackageManagers = new ArrayMap<>();
     private Context mContext;
@@ -88,7 +93,8 @@ public class AppSearchImplPlatformTest {
                 AppSearchImpl.create(
                         mTemporaryFolder.newFolder(),
                         mContext,
-                        /*logger=*/ null);
+                        /*logger=*/ null,
+                        ALWAYS_OPTIMIZE);
 
         mGlobalQuerierUid =
                 mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);

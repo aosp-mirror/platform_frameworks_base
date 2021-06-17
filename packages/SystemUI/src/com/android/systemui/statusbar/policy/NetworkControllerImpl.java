@@ -796,6 +796,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController controller = mMobileSignalControllers.valueAt(i);
             controller.setConfiguration(mConfig);
+            if (mProviderModel) {
+                controller.refreshCallIndicator(mCallbackHandler);
+            }
         }
         refreshLocale();
     }

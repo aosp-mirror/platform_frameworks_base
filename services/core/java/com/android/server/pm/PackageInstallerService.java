@@ -626,7 +626,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
 
         boolean isApex = (params.installFlags & PackageManager.INSTALL_APEX) != 0;
-        if (params.isStaged || isApex) {
+        if (isApex) {
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGE_UPDATES)
+                    == PackageManager.PERMISSION_DENIED
+                    && mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
+                    == PackageManager.PERMISSION_DENIED) {
+                throw new SecurityException("Not allowed to perform APEX updates");
+            }
+        } else if (params.isStaged) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES, TAG);
         }
 
@@ -1108,6 +1115,17 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             throw new SecurityException("Caller not allowed to unlimite silent updates");
         }
         mSilentUpdatePolicy.setAllowUnlimitedSilentUpdates(installerPackageName);
+    }
+
+    /**
+     * Set the silent updates throttle time in seconds.
+     */
+    @Override
+    public void setSilentUpdatesThrottleTime(long throttleTimeInSeconds) {
+        if (!isCalledBySystemOrShell(Binder.getCallingUid())) {
+            throw new SecurityException("Caller not allowed to set silent updates throttle time");
+        }
+        mSilentUpdatePolicy.setSilentUpdatesThrottleTime(throttleTimeInSeconds);
     }
 
     private static int getSessionCount(SparseArray<PackageInstallerSession> sessions,

@@ -330,30 +330,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
     }
 
-    @Override
-    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
-        super.setDistanceToTopRoundness(distanceToTopRoundness);
-        mBackgroundNormal.setDistanceToTopRoundness(distanceToTopRoundness);
-    }
-
-    /** Sets whether this view is the last notification in a section. */
-    @Override
-    public void setLastInSection(boolean lastInSection) {
-        if (lastInSection != mLastInSection) {
-            super.setLastInSection(lastInSection);
-            mBackgroundNormal.setLastInSection(lastInSection);
-        }
-    }
-
-    /** Sets whether this view is the first notification in a section. */
-    @Override
-    public void setFirstInSection(boolean firstInSection) {
-        if (firstInSection != mFirstInSection) {
-            super.setFirstInSection(firstInSection);
-            mBackgroundNormal.setFirstInSection(firstInSection);
-        }
-    }
-
     /**
      * Set an override tint color that is used for the background.
      *

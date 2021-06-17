@@ -1000,16 +1000,15 @@ public class LauncherAppsService extends SystemService {
             intents[0].setSourceBounds(sourceBounds);
 
             // Replace theme for splash screen
-            final int splashScreenThemeResId =
-                    mShortcutServiceInternal.getShortcutStartingThemeResId(getCallingUserId(),
+            final String splashScreenThemeResName =
+                    mShortcutServiceInternal.getShortcutStartingThemeResName(getCallingUserId(),
                             callingPackage, packageName, shortcutId, targetUserId);
-            if (splashScreenThemeResId != 0) {
+            if (splashScreenThemeResName != null && !splashScreenThemeResName.isEmpty()) {
                 if (startActivityOptions == null) {
                     startActivityOptions = new Bundle();
                 }
-                startActivityOptions.putInt(KEY_SPLASH_SCREEN_THEME, splashScreenThemeResId);
+                startActivityOptions.putString(KEY_SPLASH_SCREEN_THEME, splashScreenThemeResName);
             }
-
             return startShortcutIntentsAsPublisher(
                     intents, packageName, featureId, startActivityOptions, targetUserId);
         }

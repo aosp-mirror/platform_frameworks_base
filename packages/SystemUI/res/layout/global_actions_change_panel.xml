@@ -14,8 +14,17 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<ImageView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/global_actions_change_button"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"/>
+    android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/global_actions_change_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/global_actions_change_description" />
+    <ImageView
+        android:id="@+id/global_actions_change_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>
