@@ -479,6 +479,11 @@ public class ScreenshotView extends FrameLayout implements
         final PointF finalPos = new PointF(targetPosition.exactCenterX(),
                 targetPosition.exactCenterY());
 
+        // Shift to screen coordinates so that the animation runs on top of the entire screen,
+        // including e.g. bars covering the display cutout.
+        int[] locInScreen = mScreenshotPreview.getLocationOnScreen();
+        startPos.offset(targetPosition.left - locInScreen[0], targetPosition.top - locInScreen[1]);
+
         if (DEBUG_ANIM) {
             Log.d(TAG, "toCorner: startPos=" + startPos);
             Log.d(TAG, "toCorner: finalPos=" + finalPos);
