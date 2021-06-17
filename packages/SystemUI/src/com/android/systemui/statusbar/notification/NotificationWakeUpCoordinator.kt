@@ -264,7 +264,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onStateChanged(newState: Int) {
-        if (unlockedScreenOffAnimationController.shouldPlayScreenOffAnimation()) {
+        if (dozeParameters.shouldControlUnlockedScreenOff()) {
             if (unlockedScreenOffAnimationController.isScreenOffAnimationPlaying() &&
                     state == StatusBarState.KEYGUARD &&
                     newState == StatusBarState.SHADE) {
