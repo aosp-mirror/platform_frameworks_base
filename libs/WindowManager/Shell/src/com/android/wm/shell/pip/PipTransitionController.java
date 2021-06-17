@@ -101,6 +101,15 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /**
+     * Called to inform the transition that the animation should start with the assumption that
+     * PiP is not animating from its original bounds, but rather a continuation of another
+     * animation. For example, gesture navigation would first fade out the PiP activity, and the
+     * transition should be responsible to animate in (such as fade in) the PiP.
+     */
+    public void setIsFullAnimation(boolean isFullAnimation) {
+    }
+
+    /**
      * Called when the Shell wants to starts a transition/animation.
      */
     public void startTransition(Rect destinationBounds, WindowContainerTransaction out) {
