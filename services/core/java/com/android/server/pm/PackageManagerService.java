@@ -11524,8 +11524,31 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return;
         }
+        final List<String> names = new ArrayList<>();
+        final List<ProviderInfo> infos = new ArrayList<>();
+        final int callingUserId = UserHandle.getCallingUserId();
         mComponentResolver.querySyncProviders(
-                outNames, outInfo, mSafeMode, UserHandle.getCallingUserId());
+                names, infos, mSafeMode, callingUserId);
+        synchronized (mLock) {
+            for (int i = infos.size() - 1; i >= 0; i--) {
+                final ProviderInfo providerInfo = infos.get(i);
+                final PackageSetting ps = mSettings.getPackageLPr(providerInfo.packageName);
+                final ComponentName component =
+                        new ComponentName(providerInfo.packageName, providerInfo.name);
+                if (!shouldFilterApplicationLocked(ps, Binder.getCallingUid(), component,
+                        TYPE_PROVIDER, callingUserId)) {
+                    continue;
+                }
+                infos.remove(i);
+                names.remove(i);
+            }
+        }
+        if (!names.isEmpty()) {
+            outNames.addAll(names);
+        }
+        if (!infos.isEmpty()) {
+            outInfo.addAll(infos);
+        }
     }
 
     @Override
