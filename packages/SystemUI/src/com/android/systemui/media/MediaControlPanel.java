@@ -46,6 +46,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -468,7 +469,8 @@ public class MediaControlPanel {
             TransitionLayout player) {
         // TODO(b/174236650): Make sure that the carousel indicator also fades out.
         // TODO(b/174236650): Instrument the animation to measure jank.
-        return new GhostedViewLaunchAnimatorController(player) {
+        return new GhostedViewLaunchAnimatorController(player,
+                InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER) {
             @Override
             protected float getCurrentTopCornerRadius() {
                 return ((IlluminationDrawable) player.getBackground()).getCornerRadius();

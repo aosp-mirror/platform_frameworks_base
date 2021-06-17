@@ -150,6 +150,14 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     }
 
     /**
+     * @see StartingSurfaceDrawer#onAppSplashScreenViewRemoved(int)
+     */
+    public void onAppSplashScreenViewRemoved(int taskId) {
+        mSplashScreenExecutor.execute(
+                () -> mStartingSurfaceDrawer.onAppSplashScreenViewRemoved(taskId));
+    }
+
+    /**
      * Called when the content of a task is ready to show, starting window can be removed.
      */
     public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,

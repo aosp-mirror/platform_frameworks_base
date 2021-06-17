@@ -74,8 +74,10 @@ import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.GestureDetector;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -119,6 +121,7 @@ import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.scrim.ScrimDrawable;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -227,6 +230,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
     protected Handler mMainHandler;
     private int mSmallestScreenWidthDp;
+    private final StatusBar mStatusBar;
 
     @VisibleForTesting
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
@@ -320,7 +324,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
             UiEventLogger uiEventLogger,
-            RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler) {
+            RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler,
+            StatusBar statusBar) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -349,6 +354,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mSysUiState = sysUiState;
         mMainHandler = handler;
         mSmallestScreenWidthDp = mContext.getResources().getConfiguration().smallestScreenWidthDp;
+        mStatusBar = statusBar;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -387,6 +393,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
     protected UiEventLogger getEventLogger() {
         return mUiEventLogger;
+    }
+
+    protected StatusBar getStatusBar() {
+        return mStatusBar;
     }
 
     /**
@@ -621,7 +631,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mAdapter, mOverflowAdapter,
                 mDepthController, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
-                mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter, mUiEventLogger);
+                mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter, mUiEventLogger,
+                mStatusBar);
 
         dialog.setOnDismissListener(this);
         dialog.setOnShowListener(this);
@@ -2095,8 +2106,52 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         private Dialog mPowerOptionsDialog;
         protected final Runnable mOnRotateCallback;
         private UiEventLogger mUiEventLogger;
+        private GestureDetector mGestureDetector;
+        private StatusBar mStatusBar;
 
         protected ViewGroup mContainer;
+
+        @VisibleForTesting
+        protected GestureDetector.SimpleOnGestureListener mGestureListener =
+                new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onDown(MotionEvent e) {
+                        // All gestures begin with this message, so continue listening
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onSingleTapConfirmed(MotionEvent e) {
+                        // Close without opening shade
+                        mUiEventLogger.log(GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
+                        cancel();
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+                            float distanceY) {
+                        if (distanceY < 0 && distanceY > distanceX
+                                && e1.getY() <= mStatusBar.getStatusBarHeight()) {
+                            // Downwards scroll from top
+                            openShadeAndDismiss();
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                            float velocityY) {
+                        if (velocityY > 0 && Math.abs(velocityY) > Math.abs(velocityX)
+                                && e1.getY() <= mStatusBar.getStatusBarHeight()) {
+                            // Downwards fling from top
+                            openShadeAndDismiss();
+                            return true;
+                        }
+                        return false;
+                    }
+                };
 
         ActionsDialogLite(Context context, int themeRes, MyAdapter adapter,
                 MyOverflowAdapter overflowAdapter,
@@ -2104,7 +2159,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
                 SysUiState sysuiState, Runnable onRotateCallback, boolean keyguardShowing,
-                MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger) {
+                MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger,
+                StatusBar statusBar) {
             super(context, themeRes);
             mContext = context;
             mAdapter = adapter;
@@ -2118,6 +2174,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mOnRotateCallback = onRotateCallback;
             mKeyguardShowing = keyguardShowing;
             mUiEventLogger = uiEventLogger;
+            mStatusBar = statusBar;
+
+            mGestureDetector = new GestureDetector(mContext, mGestureListener);
 
             // Window initialization
             Window window = getWindow();
@@ -2137,6 +2196,23 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             setTitle(R.string.global_actions);
 
             initializeLayout();
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            return mGestureDetector.onTouchEvent(event) || super.onTouchEvent(event);
+        }
+
+        private void openShadeAndDismiss() {
+            mUiEventLogger.log(GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
+            if (mStatusBar.isKeyguardShowing()) {
+                // match existing lockscreen behavior to open QS when swiping from status bar
+                mStatusBar.animateExpandSettingsPanel(null);
+            } else {
+                // otherwise, swiping down should expand notification shade
+                mStatusBar.animateExpandNotificationsPanel();
+            }
+            dismiss();
         }
 
         private ListPopupWindow createPowerOverflowPopup() {
@@ -2187,9 +2263,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
             mContainer = findViewById(com.android.systemui.R.id.global_actions_container);
-            mContainer.setOnClickListener(v -> {
-                mUiEventLogger.log(GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
-                cancel();
+            mContainer.setOnTouchListener((v, event) -> {
+                mGestureDetector.onTouchEvent(event);
+                return v.onTouchEvent(event);
             });
 
             View overflowButton = findViewById(
