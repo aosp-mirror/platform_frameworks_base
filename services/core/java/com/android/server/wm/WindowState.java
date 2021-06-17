@@ -1729,6 +1729,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord != null ? mActivityRecord.getTask() : null;
     }
 
+    @Nullable TaskFragment getTaskFragment() {
+        return mActivityRecord != null ? mActivityRecord.getTaskFragment() : null;
+    }
+
     @Nullable Task getRootTask() {
         final Task task = getTask();
         if (task != null) {
@@ -2908,9 +2912,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // means we need to intercept touches outside of that window. The dim layer
                 // user associated with the window (task or root task) will give us the good
                 // bounds, as they would be used to display the dim layer.
-                final Task task = getTask();
-                if (task != null) {
-                    task.getDimBounds(mTmpRect);
+                final TaskFragment taskFragment = getTaskFragment();
+                if (taskFragment != null) {
+                    final Task task = taskFragment.asTask();
+                    if (task != null) {
+                        task.getDimBounds(mTmpRect);
+                    } else {
+                        mTmpRect.set(taskFragment.getBounds());
+                    }
                 } else if (getRootTask() != null) {
                     getRootTask().getDimBounds(mTmpRect);
                 }
