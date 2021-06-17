@@ -20,12 +20,18 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.util.Range;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.PowerCalculator;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -77,6 +83,34 @@ public final class BatteryUsageStats implements Parcelable {
     public static final int AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT = 2;
 
     private static final int STATSD_PULL_ATOM_MAX_BYTES = 45000;
+
+    // XML tags and attributes for BatteryUsageStats persistence
+    static final String XML_TAG_BATTERY_USAGE_STATS = "battery_usage_stats";
+    static final String XML_TAG_AGGREGATE = "aggregate";
+    static final String XML_TAG_UID = "uid";
+    static final String XML_TAG_USER = "user";
+    static final String XML_TAG_POWER_COMPONENTS = "power_components";
+    static final String XML_TAG_COMPONENT = "component";
+    static final String XML_TAG_CUSTOM_COMPONENT = "custom_component";
+    static final String XML_ATTR_ID = "id";
+    static final String XML_ATTR_UID = "uid";
+    static final String XML_ATTR_USER_ID = "user_id";
+    static final String XML_ATTR_SCOPE = "scope";
+    static final String XML_ATTR_PREFIX_CUSTOM_COMPONENT = "custom_component_";
+    static final String XML_ATTR_START_TIMESTAMP = "start_timestamp";
+    static final String XML_ATTR_END_TIMESTAMP = "end_timestamp";
+    static final String XML_ATTR_POWER = "power";
+    static final String XML_ATTR_DURATION = "duration";
+    static final String XML_ATTR_MODEL = "model";
+    static final String XML_ATTR_BATTERY_CAPACITY = "battery_capacity";
+    static final String XML_ATTR_DISCHARGE_PERCENT = "discharge_pct";
+    static final String XML_ATTR_DISCHARGE_LOWER = "discharge_lower";
+    static final String XML_ATTR_DISCHARGE_UPPER = "discharge_upper";
+    static final String XML_ATTR_BATTERY_REMAINING = "battery_remaining";
+    static final String XML_ATTR_CHARGE_REMAINING = "charge_remaining";
+    static final String XML_ATTR_HIGHEST_DRAIN_PACKAGE = "highest_drain_package";
+    static final String XML_ATTR_TIME_IN_FOREGROUND = "time_in_foreground";
+    static final String XML_ATTR_TIME_IN_BACKGROUND = "time_in_background";
 
     private final int mDischargePercentage;
     private final double mBatteryCapacityMah;
@@ -574,6 +608,109 @@ public final class BatteryUsageStats implements Parcelable {
             consumer.dump(pw);
             pw.println();
         }
+    }
+
+    /** Serializes this object to XML */
+    public void writeXml(TypedXmlSerializer serializer) throws IOException {
+        serializer.startTag(null, XML_TAG_BATTERY_USAGE_STATS);
+
+        for (int i = 0; i < mCustomPowerComponentNames.length; i++) {
+            serializer.attribute(null, XML_ATTR_PREFIX_CUSTOM_COMPONENT + i,
+                    mCustomPowerComponentNames[i]);
+        }
+
+        serializer.attributeLong(null, XML_ATTR_START_TIMESTAMP, mStatsStartTimestampMs);
+        serializer.attributeLong(null, XML_ATTR_END_TIMESTAMP, mStatsEndTimestampMs);
+        serializer.attributeLong(null, XML_ATTR_DURATION, mStatsDurationMs);
+        serializer.attributeDouble(null, XML_ATTR_BATTERY_CAPACITY, mBatteryCapacityMah);
+        serializer.attributeInt(null, XML_ATTR_DISCHARGE_PERCENT, mDischargePercentage);
+        serializer.attributeDouble(null, XML_ATTR_DISCHARGE_LOWER, mDischargedPowerLowerBound);
+        serializer.attributeDouble(null, XML_ATTR_DISCHARGE_UPPER, mDischargedPowerUpperBound);
+        serializer.attributeLong(null, XML_ATTR_BATTERY_REMAINING, mBatteryTimeRemainingMs);
+        serializer.attributeLong(null, XML_ATTR_CHARGE_REMAINING, mChargeTimeRemainingMs);
+
+        for (int scope = 0; scope < BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT;
+                scope++) {
+            mAggregateBatteryConsumers[scope].writeToXml(serializer, scope);
+        }
+        for (UidBatteryConsumer consumer : mUidBatteryConsumers) {
+            consumer.writeToXml(serializer);
+        }
+        for (UserBatteryConsumer consumer : mUserBatteryConsumers) {
+            consumer.writeToXml(serializer);
+        }
+        serializer.endTag(null, XML_TAG_BATTERY_USAGE_STATS);
+    }
+
+    /** Parses an XML representation of BatteryUsageStats */
+    public static BatteryUsageStats createFromXml(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        Builder builder = null;
+        int eventType = parser.getEventType();
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG
+                    && parser.getName().equals(XML_TAG_BATTERY_USAGE_STATS)) {
+                List<String> customComponentNames = new ArrayList<>();
+                int i = 0;
+                while (true) {
+                    int index = parser.getAttributeIndex(null,
+                            XML_ATTR_PREFIX_CUSTOM_COMPONENT + i);
+                    if (index == -1) {
+                        break;
+                    }
+                    customComponentNames.add(parser.getAttributeValue(index));
+                    i++;
+                }
+
+                builder = new Builder(
+                        customComponentNames.toArray(new String[0]), true);
+
+                builder.setStatsStartTimestamp(
+                        parser.getAttributeLong(null, XML_ATTR_START_TIMESTAMP));
+                builder.setStatsEndTimestamp(
+                        parser.getAttributeLong(null, XML_ATTR_END_TIMESTAMP));
+                builder.setStatsDuration(
+                        parser.getAttributeLong(null, XML_ATTR_DURATION));
+                builder.setBatteryCapacity(
+                        parser.getAttributeDouble(null, XML_ATTR_BATTERY_CAPACITY));
+                builder.setDischargePercentage(
+                        parser.getAttributeInt(null, XML_ATTR_DISCHARGE_PERCENT));
+                builder.setDischargedPowerRange(
+                        parser.getAttributeDouble(null, XML_ATTR_DISCHARGE_LOWER),
+                        parser.getAttributeDouble(null, XML_ATTR_DISCHARGE_UPPER));
+                builder.setBatteryTimeRemainingMs(
+                        parser.getAttributeLong(null, XML_ATTR_BATTERY_REMAINING));
+                builder.setChargeTimeRemainingMs(
+                        parser.getAttributeLong(null, XML_ATTR_CHARGE_REMAINING));
+
+                eventType = parser.next();
+                break;
+            }
+            eventType = parser.next();
+        }
+
+        if (builder == null) {
+            throw new XmlPullParserException("No root element");
+        }
+
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG) {
+                switch (parser.getName()) {
+                    case XML_TAG_AGGREGATE:
+                        AggregateBatteryConsumer.parseXml(parser, builder);
+                        break;
+                    case XML_TAG_UID:
+                        UidBatteryConsumer.createFromXml(parser, builder);
+                        break;
+                    case XML_TAG_USER:
+                        UserBatteryConsumer.createFromXml(parser, builder);
+                        break;
+                }
+            }
+            eventType = parser.next();
+        }
+
+        return builder.build();
     }
 
     /**
