@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -29,11 +30,13 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.View.VISIBLE;
+import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -83,10 +86,12 @@ import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IWindow;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
@@ -131,6 +136,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     DisplayInfo mDisplayInfo = new DisplayInfo();
     DisplayContent mDefaultDisplay;
+
+    static final int STATUS_BAR_HEIGHT = 10;
+    static final int NAV_BAR_HEIGHT = 15;
 
     /**
      * It is {@link #mDefaultDisplay} by default. If the test class or method is annotated with
@@ -268,6 +276,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_STATUS_BAR)) {
             mStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "mStatusBarWindow");
+            if (INSETS_LAYOUT_GENERALIZATION) {
+                mStatusBarWindow.mAttrs.height = STATUS_BAR_HEIGHT;
+                mStatusBarWindow.mAttrs.gravity = Gravity.TOP;
+                mStatusBarWindow.mAttrs.layoutInDisplayCutoutMode =
+                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+                mStatusBarWindow.setRequestedSize(WindowManager.LayoutParams.MATCH_PARENT,
+                        STATUS_BAR_HEIGHT);
+            }
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_NOTIFICATION_SHADE)) {
             mNotificationShadeWindow = createCommonWindow(null, TYPE_NOTIFICATION_SHADE,
@@ -275,6 +291,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_NAVIGATION_BAR)) {
             mNavBarWindow = createCommonWindow(null, TYPE_NAVIGATION_BAR, "mNavBarWindow");
+            if (INSETS_LAYOUT_GENERALIZATION) {
+                mNavBarWindow.mAttrs.height = NAV_BAR_HEIGHT;
+                mNavBarWindow.mAttrs.gravity = Gravity.BOTTOM;
+                mNavBarWindow.mAttrs.paramsForRotation = new WindowManager.LayoutParams[4];
+                for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+                    mNavBarWindow.mAttrs.paramsForRotation[rot] =
+                            getNavBarLayoutParamsForRotation(rot);
+                }
+            }
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_DOCK_DIVIDER)) {
             mDockedDividerWindow = createCommonWindow(null, TYPE_DOCK_DIVIDER,
@@ -300,6 +325,37 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // Adding a display will cause freezing the display. Make sure to wait until it's
         // unfrozen to not run into race conditions with the tests.
         waitUntilHandlersIdle();
+    }
+
+    private WindowManager.LayoutParams getNavBarLayoutParamsForRotation(int rotation) {
+        int width = WindowManager.LayoutParams.MATCH_PARENT;
+        int height = WindowManager.LayoutParams.MATCH_PARENT;
+        int gravity = Gravity.BOTTOM;
+        if (INSETS_LAYOUT_GENERALIZATION) {
+            switch (rotation) {
+                case ROTATION_UNDEFINED:
+                case Surface.ROTATION_0:
+                case Surface.ROTATION_180:
+                    height = NAV_BAR_HEIGHT;
+                    break;
+                case Surface.ROTATION_90:
+                    gravity = Gravity.RIGHT;
+                    width = NAV_BAR_HEIGHT;
+                    break;
+                case Surface.ROTATION_270:
+                    gravity = Gravity.LEFT;
+                    width = NAV_BAR_HEIGHT;
+                    break;
+            }
+        }
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR);
+        lp.width = width;
+        lp.height = height;
+        if (INSETS_LAYOUT_GENERALIZATION) {
+            lp.gravity = gravity;
+        }
+        return lp;
     }
 
     void beforeCreateTestDisplay() {

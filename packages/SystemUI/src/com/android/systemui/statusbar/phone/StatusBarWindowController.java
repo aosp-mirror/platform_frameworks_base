@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
@@ -34,6 +36,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.IWindowManager;
+import android.view.Surface;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
@@ -118,27 +121,70 @@ public class StatusBarWindowController {
         // Now that the status bar window encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
         // hardware-accelerated.
-        mLp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                mBarHeight,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                        | WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
-                PixelFormat.TRANSLUCENT);
-        mLp.privateFlags |= PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
-        mLp.token = new Binder();
-        mLp.gravity = Gravity.TOP;
-        mLp.setFitInsetsTypes(0 /* types */);
-        mLp.setTitle("StatusBar");
-        mLp.packageName = mContext.getPackageName();
-        mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        mLp = getBarLayoutParams(mContext.getDisplay().getRotation());
 
         mWindowManager.addView(mStatusBarView, mLp);
         mLpChanged.copyFrom(mLp);
 
         mContentInsetsProvider.addCallback(this::calculateStatusBarLocationsForAllRotations);
         calculateStatusBarLocationsForAllRotations();
+    }
+
+    private WindowManager.LayoutParams getBarLayoutParams(int rotation) {
+        WindowManager.LayoutParams lp = getBarLayoutParamsForRotation(rotation);
+        lp.paramsForRotation = new WindowManager.LayoutParams[4];
+        for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+            lp.paramsForRotation[rot] = getBarLayoutParamsForRotation(rot);
+        }
+        return lp;
+    }
+
+    private WindowManager.LayoutParams getBarLayoutParamsForRotation(int rotation) {
+        int height = mBarHeight;
+        if (INSETS_LAYOUT_GENERALIZATION) {
+            Rect displayBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+            int defaultAndUpsideDownHeight;
+            int theOtherHeight;
+            if (displayBounds.width() > displayBounds.height()) {
+                defaultAndUpsideDownHeight = mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height_landscape);
+                theOtherHeight = mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height_portrait);
+            } else {
+                defaultAndUpsideDownHeight = mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height_portrait);
+                theOtherHeight = mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height_landscape);
+            }
+            switch (rotation) {
+                case ROTATION_UNDEFINED:
+                case Surface.ROTATION_0:
+                case Surface.ROTATION_180:
+                    height = defaultAndUpsideDownHeight;
+                    break;
+                case Surface.ROTATION_90:
+                case Surface.ROTATION_270:
+                    height = theOtherHeight;
+                    break;
+            }
+        }
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                height,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                        | WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+                PixelFormat.TRANSLUCENT);
+        lp.privateFlags |= PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
+        lp.token = new Binder();
+        lp.gravity = Gravity.TOP;
+        lp.setFitInsetsTypes(0 /* types */);
+        lp.setTitle("StatusBar");
+        lp.packageName = mContext.getPackageName();
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        return lp;
+
     }
 
     private void calculateStatusBarLocationsForAllRotations() {
