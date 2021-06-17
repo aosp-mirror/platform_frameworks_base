@@ -23,10 +23,12 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.containsType;
+import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
@@ -67,6 +69,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -199,6 +202,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private Bundle mSavedState;
     private NavigationBarView mNavigationBarView;
+    private NavigationBarFrame mFrame;
 
     private @WindowVisibleState int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
@@ -489,34 +493,17 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     }
 
     public View createView(Bundle savedState) {
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
-                WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                        | WindowManager.LayoutParams.FLAG_SLIPPERY,
-                PixelFormat.TRANSLUCENT);
-        lp.token = new Binder();
-        lp.accessibilityTitle = mContext.getString(R.string.nav_bar);
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
-        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        lp.windowAnimations = 0;
-        lp.setTitle("NavigationBar" + mContext.getDisplayId());
-        lp.setFitInsetsTypes(0 /* types */);
-        lp.setTrustedOverlay();
-
-        NavigationBarFrame frame = (NavigationBarFrame) LayoutInflater.from(mContext).inflate(
+        mFrame = (NavigationBarFrame) LayoutInflater.from(mContext).inflate(
                 R.layout.navigation_bar_window, null);
-        View barView = LayoutInflater.from(frame.getContext()).inflate(
-                R.layout.navigation_bar, frame);
+        View barView = LayoutInflater.from(mFrame.getContext()).inflate(
+                R.layout.navigation_bar, mFrame);
         barView.addOnAttachStateChangeListener(this);
         mNavigationBarView = barView.findViewById(R.id.navigation_bar_view);
 
         if (DEBUG) Log.v(TAG, "addNavigationBar: about to add " + barView);
-        mContext.getSystemService(WindowManager.class).addView(frame, lp);
+        mContext.getSystemService(WindowManager.class).addView(mFrame,
+                getBarLayoutParams(mContext.getResources().getConfiguration().windowConfiguration
+                        .getRotation()));
         mDisplayId = mContext.getDisplayId();
         mIsOnDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
 
@@ -670,6 +657,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mHandler.removeCallbacks(mAutoDim);
         mHandler.removeCallbacks(mOnVariableDurationHomeLongClick);
         mHandler.removeCallbacks(mEnableLayoutTransitions);
+        mFrame = null;
         mNavigationBarView = null;
         mOrientationHandle = null;
     }
@@ -688,6 +676,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
      * Called when a non-reloading configuration change happens and we need to update.
      */
     public void onConfigurationChanged(Configuration newConfig) {
+        final int rotation = newConfig.windowConfiguration.getRotation();
         final Locale locale = mContext.getResources().getConfiguration().locale;
         final int ld = TextUtils.getLayoutDirectionFromLocale(locale);
         if (!locale.equals(mLocale) || ld != mLayoutDirection) {
@@ -701,9 +690,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             refreshLayout(ld);
         }
 
-        repositionNavigationBar();
+        repositionNavigationBar(rotation);
         if (canShowSecondaryHandle()) {
-            int rotation = newConfig.windowConfiguration.getRotation();
             if (rotation != mCurrentRotation) {
                 mCurrentRotation = rotation;
                 orientSecondaryHomeHandle();
@@ -1068,13 +1056,12 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 || (mDisabledFlags1 & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 
-    private void repositionNavigationBar() {
-        if (!mNavigationBarView.isAttachedToWindow()) return;
+    private void repositionNavigationBar(int rotation) {
+        if (mNavigationBarView == null || !mNavigationBarView.isAttachedToWindow()) return;
 
         prepareNavigationBarView();
 
-        mWindowManager.updateViewLayout((View) mNavigationBarView.getParent(),
-                ((View) mNavigationBarView.getParent()).getLayoutParams());
+        mWindowManager.updateViewLayout(mFrame, getBarLayoutParams(rotation));
     }
 
     private void updateScreenPinningGestures() {
@@ -1509,13 +1496,94 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final NavigationBarA11yHelper.NavA11yEventListener mAccessibilityListener =
             this::updateAccessibilityServicesState;
 
+    private WindowManager.LayoutParams getBarLayoutParams(int rotation) {
+        WindowManager.LayoutParams lp = getBarLayoutParamsForRotation(rotation);
+        lp.paramsForRotation = new WindowManager.LayoutParams[4];
+        for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+            lp.paramsForRotation[rot] = getBarLayoutParamsForRotation(rot);
+        }
+        return lp;
+    }
+
+    private WindowManager.LayoutParams getBarLayoutParamsForRotation(int rotation) {
+        int width = WindowManager.LayoutParams.MATCH_PARENT;
+        int height = WindowManager.LayoutParams.MATCH_PARENT;
+        int insetsHeight = -1;
+        int gravity = Gravity.BOTTOM;
+        if (INSETS_LAYOUT_GENERALIZATION) {
+            boolean navBarCanMove = true;
+            if (mWindowManager != null && mWindowManager.getCurrentWindowMetrics() != null) {
+                Rect displaySize = mWindowManager.getCurrentWindowMetrics().getBounds();
+                navBarCanMove = displaySize.width() != displaySize.height()
+                        && mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_navBarCanMove);
+            }
+            if (!navBarCanMove) {
+                height = mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.navigation_bar_frame_height);
+                insetsHeight = mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.navigation_bar_height);
+            } else {
+                switch (rotation) {
+                    case ROTATION_UNDEFINED:
+                    case Surface.ROTATION_0:
+                    case Surface.ROTATION_180:
+                        height = mContext.getResources().getDimensionPixelSize(
+                                com.android.internal.R.dimen.navigation_bar_frame_height);
+                        insetsHeight = mContext.getResources().getDimensionPixelSize(
+                                com.android.internal.R.dimen.navigation_bar_height);
+                        break;
+                    case Surface.ROTATION_90:
+                        gravity = Gravity.RIGHT;
+                        width = mContext.getResources().getDimensionPixelSize(
+                                com.android.internal.R.dimen.navigation_bar_width);
+                        break;
+                    case Surface.ROTATION_270:
+                        gravity = Gravity.LEFT;
+                        width = mContext.getResources().getDimensionPixelSize(
+                                com.android.internal.R.dimen.navigation_bar_width);
+                        break;
+                }
+            }
+        }
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                width,
+                height,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
+                WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                        | WindowManager.LayoutParams.FLAG_SLIPPERY,
+                PixelFormat.TRANSLUCENT);
+        if (INSETS_LAYOUT_GENERALIZATION) {
+            lp.gravity = gravity;
+            if (insetsHeight != -1) {
+                lp.providedInternalInsets = Insets.of(0, height - insetsHeight, 0, 0);
+            } else {
+                lp.providedInternalInsets = Insets.NONE;
+            }
+        }
+        lp.token = new Binder();
+        lp.accessibilityTitle = mContext.getString(R.string.nav_bar);
+        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        lp.windowAnimations = 0;
+        lp.setTitle("NavigationBar" + mContext.getDisplayId());
+        lp.setFitInsetsTypes(0 /* types */);
+        lp.setTrustedOverlay();
+        return lp;
+    }
+
     private boolean canShowSecondaryHandle() {
         return mNavBarMode == NAV_BAR_MODE_GESTURAL && mOrientationHandle != null;
     }
 
     private final Consumer<Integer> mRotationWatcher = rotation -> {
-        if (mNavigationBarView.needsReorient(rotation)) {
-            repositionNavigationBar();
+        if (mNavigationBarView != null
+                && mNavigationBarView.needsReorient(rotation)) {
+            repositionNavigationBar(rotation);
         }
     };
 
