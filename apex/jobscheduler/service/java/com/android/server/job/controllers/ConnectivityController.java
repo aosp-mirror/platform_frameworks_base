@@ -633,10 +633,15 @@ public final class ConnectivityController extends RestrictingController implemen
         }
     }
 
-    private static boolean isRelaxedSatisfied(JobStatus jobStatus, Network network,
+    private boolean isRelaxedSatisfied(JobStatus jobStatus, Network network,
             NetworkCapabilities capabilities, Constants constants) {
         // Only consider doing this for unrestricted prefetching jobs
         if (!jobStatus.getJob().isPrefetch() || jobStatus.getStandbyBucket() == RESTRICTED_INDEX) {
+            return false;
+        }
+        final long estDownloadBytes = jobStatus.getEstimatedNetworkDownloadBytes();
+        if (estDownloadBytes <= 0) {
+            // Need to at least know the estimated download bytes for a prefetch job.
             return false;
         }
 
@@ -644,12 +649,18 @@ public final class ConnectivityController extends RestrictingController implemen
         final NetworkCapabilities.Builder builder =
                 copyCapabilities(jobStatus.getJob().getRequiredNetwork());
         builder.removeCapability(NET_CAPABILITY_NOT_METERED);
-        if (builder.build().satisfiedByNetworkCapabilities(capabilities)) {
-            // TODO: treat this as "maybe" response; need to check quotas
-            return jobStatus.getFractionRunTime() > constants.CONN_PREFETCH_RELAX_FRAC;
-        } else {
-            return false;
+        if (builder.build().satisfiedByNetworkCapabilities(capabilities)
+                && jobStatus.getFractionRunTime() > constants.CONN_PREFETCH_RELAX_FRAC) {
+            final long opportunisticQuotaBytes =
+                    mNetPolicyManagerInternal.getSubscriptionOpportunisticQuota(
+                            network, NetworkPolicyManagerInternal.QUOTA_TYPE_JOBS);
+            final long estUploadBytes = jobStatus.getEstimatedNetworkUploadBytes();
+            final long estimatedBytes = estDownloadBytes
+                    + (estUploadBytes == JobInfo.NETWORK_BYTES_UNKNOWN ? 0 : estUploadBytes);
+            return opportunisticQuotaBytes >= estimatedBytes;
         }
+
+        return false;
     }
 
     @VisibleForTesting

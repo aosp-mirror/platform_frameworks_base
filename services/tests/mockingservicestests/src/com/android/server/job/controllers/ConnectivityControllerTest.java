@@ -299,7 +299,16 @@ public class ConnectivityControllerTest {
         final JobStatus earlyPrefetch = createJobStatus(job, now - 1000, now + 2000);
         final JobStatus latePrefetch = createJobStatus(job, now - 2000, now + 1000);
 
+        job.setEstimatedNetworkBytes(JobInfo.NETWORK_BYTES_UNKNOWN, DataUnit.MEBIBYTES.toBytes(1));
+        final JobStatus latePrefetchUnknownDown = createJobStatus(job, now - 2000, now + 1000);
+        job.setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), JobInfo.NETWORK_BYTES_UNKNOWN);
+        final JobStatus latePrefetchUnknownUp = createJobStatus(job, now - 2000, now + 1000);
+
         final ConnectivityController controller = new ConnectivityController(mService);
+
+        when(mNetPolicyManagerInternal.getSubscriptionOpportunisticQuota(
+                any(), eq(NetworkPolicyManagerInternal.QUOTA_TYPE_JOBS)))
+                .thenReturn(0L);
 
         // Unmetered network is whenever
         {
@@ -312,9 +321,11 @@ public class ConnectivityControllerTest {
             assertTrue(controller.isSatisfied(late, net, caps, mConstants));
             assertTrue(controller.isSatisfied(earlyPrefetch, net, caps, mConstants));
             assertTrue(controller.isSatisfied(latePrefetch, net, caps, mConstants));
+            assertTrue(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
+            assertTrue(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
         }
 
-        // Metered network is only when prefetching and late
+        // Metered network is only when prefetching, late, and in opportunistic quota
         {
             final Network net = mock(Network.class);
             final NetworkCapabilities caps = createCapabilitiesBuilder()
@@ -323,7 +334,17 @@ public class ConnectivityControllerTest {
             assertFalse(controller.isSatisfied(early, net, caps, mConstants));
             assertFalse(controller.isSatisfied(late, net, caps, mConstants));
             assertFalse(controller.isSatisfied(earlyPrefetch, net, caps, mConstants));
+            assertFalse(controller.isSatisfied(latePrefetch, net, caps, mConstants));
+            assertFalse(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
+            assertFalse(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
+
+            when(mNetPolicyManagerInternal.getSubscriptionOpportunisticQuota(
+                    any(), eq(NetworkPolicyManagerInternal.QUOTA_TYPE_JOBS)))
+                    .thenReturn(9876543210L);
             assertTrue(controller.isSatisfied(latePrefetch, net, caps, mConstants));
+            // Only relax restrictions when we at least know the estimated download bytes.
+            assertFalse(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
+            assertTrue(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
         }
     }
 
