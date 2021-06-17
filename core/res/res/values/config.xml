@@ -4985,6 +4985,10 @@
     <!-- Default value for Settings.ASSIST_TOUCH_GESTURE_ENABLED -->
     <bool name="config_assistTouchGestureEnabledDefault">true</bool>
 
+    <!-- The maximum byte size of the information contained in the bundle of
+    HotwordDetectedResult. -->
+    <integer translatable="false" name="config_hotwordDetectedResultMaxBundleSize">0</integer>
+
     <!-- The amount of dimming to apply to wallpapers with mid range luminance. 0 displays
          the wallpaper at full brightness. 1 displays the wallpaper as fully black. -->
     <item name="config_wallpaperDimAmount" format="float" type="dimen">0.05</item>
