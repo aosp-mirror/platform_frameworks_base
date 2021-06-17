@@ -84,6 +84,7 @@ import android.app.PendingIntent;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DevicePolicyManagerLiteInternal;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.SystemUpdatePolicy;
@@ -280,6 +281,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void initializeDpms() {
         // Need clearCallingIdentity() to pass permission checks.
         final long ident = mContext.binder.clearCallingIdentity();
+        LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
         dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);
@@ -369,10 +371,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(false);
 
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+        LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
         new DevicePolicyManagerServiceTestable(getServices(), mContext);
 
         // If the device has no DPMS feature, it shouldn't register the local service.
         assertThat(LocalServices.getService(DevicePolicyManagerInternal.class)).isNull();
+
+        // But should still register the lite one
+        assertThat(LocalServices.getService(DevicePolicyManagerLiteInternal.class)).isNotNull();
     }
 
     @Test

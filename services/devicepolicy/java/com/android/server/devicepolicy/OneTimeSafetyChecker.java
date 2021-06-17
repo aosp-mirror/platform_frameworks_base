@@ -21,7 +21,7 @@ import static android.app.admin.DevicePolicyManager.operationToString;
 
 import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.app.admin.DevicePolicyManager.OperationSafetyReason;
-import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DevicePolicyManagerLiteInternal;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.os.Handler;
 import android.os.Looper;
@@ -80,8 +80,8 @@ final class OneTimeSafetyChecker implements DevicePolicySafetyChecker {
                     + ", should be " + operationToString(mOperation));
         }
         String reasonName = operationSafetyReasonToString(reason);
-        DevicePolicyManagerInternal dpmi = LocalServices
-                .getService(DevicePolicyManagerInternal.class);
+        DevicePolicyManagerLiteInternal dpmi = LocalServices
+                .getService(DevicePolicyManagerLiteInternal.class);
 
         Slog.i(TAG, "notifying " + reasonName + " is UNSAFE");
         dpmi.notifyUnsafeOperationStateChanged(this, reason, /* isSafe= */ false);
