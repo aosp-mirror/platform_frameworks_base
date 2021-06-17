@@ -88,6 +88,8 @@ public class IpClientManager {
         } catch (RemoteException e) {
             log("Error confirming IpClient configuration", e);
             return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
