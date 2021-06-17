@@ -53,7 +53,7 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
     @FloatRange(from = 0.0, to = 1.0)
     private static final float DEFAULT_POSITION_X_PERCENT = 1.0f;
     @FloatRange(from = 0.0, to = 1.0)
-    private static final float DEFAULT_POSITION_Y_PERCENT = 0.8f;
+    private static final float DEFAULT_POSITION_Y_PERCENT = 0.9f;
 
     private final Context mContext;
     private final AccessibilityFloatingMenuView mMenuView;

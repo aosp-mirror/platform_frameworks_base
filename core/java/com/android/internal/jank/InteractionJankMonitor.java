@@ -43,6 +43,10 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_QS_TILE;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_EXPAND_COLLAPSE_LOCK;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_APPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_DISAPPEAR;
@@ -53,6 +57,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_EXPAND;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_SCROLL_FLING;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -153,6 +158,11 @@ public class InteractionJankMonitor {
     public static final int CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET = 27;
     public static final int CUJ_SETTINGS_PAGE_SCROLL = 28;
     public static final int CUJ_LOCKSCREEN_UNLOCK_ANIMATION = 29;
+    public static final int CUJ_SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON = 30;
+    public static final int CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER = 31;
+    public static final int CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE = 32;
+    public static final int CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON = 33;
+    public static final int CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP = 34;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -191,6 +201,11 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_WIDGET,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_UNLOCK_ANIMATION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_QS_TILE,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -240,6 +255,11 @@ public class InteractionJankMonitor {
             CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET,
             CUJ_SETTINGS_PAGE_SCROLL,
             CUJ_LOCKSCREEN_UNLOCK_ANIMATION,
+            CUJ_SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON,
+            CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER,
+            CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE,
+            CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON,
+            CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -578,6 +598,16 @@ public class InteractionJankMonitor {
                 return "SETTINGS_PAGE_SCROLL";
             case CUJ_LOCKSCREEN_UNLOCK_ANIMATION:
                 return "LOCKSCREEN_UNLOCK_ANIMATION";
+            case CUJ_SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON:
+                return "SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON";
+            case CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER:
+                return "SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER";
+            case CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE:
+                return "SHADE_APP_LAUNCH_FROM_QS_TILE";
+            case CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON:
+                return "SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON";
+            case CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP:
+                return "STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP";
         }
         return "UNKNOWN";
     }

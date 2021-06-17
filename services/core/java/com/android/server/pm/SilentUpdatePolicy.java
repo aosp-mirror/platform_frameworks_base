@@ -33,7 +33,8 @@ import java.util.concurrent.TimeUnit;
  * in the {@link PackageInstallerSession}.
  */
 public class SilentUpdatePolicy {
-    // A throttle time to prevent the installer from silently updating the same app repeatedly.
+    // The default throttle time to prevent the installer from silently updating the same app
+    // repeatedly.
     private static final long SILENT_UPDATE_THROTTLE_TIME_MS = TimeUnit.SECONDS.toMillis(30);
 
     // Map to the uptime timestamp for each installer and app of the silent update.
@@ -43,6 +44,9 @@ public class SilentUpdatePolicy {
     // An installer allowed for the unlimited silent updates within the throttle time
     @GuardedBy("mSilentUpdateInfos")
     private String mAllowUnlimitedSilentUpdatesInstaller;
+
+    @GuardedBy("mSilentUpdateInfos")
+    private long mSilentUpdateThrottleTimeMs = SILENT_UPDATE_THROTTLE_TIME_MS;
 
     /**
      * Checks if the silent update is allowed by the given installer and app package name.
@@ -58,7 +62,11 @@ public class SilentUpdatePolicy {
             return true;
         }
         final long lastSilentUpdatedMs = getTimestampMs(installerPackageName, packageName);
-        return SystemClock.uptimeMillis() - lastSilentUpdatedMs > SILENT_UPDATE_THROTTLE_TIME_MS;
+        final long throttleTimeMs;
+        synchronized (mSilentUpdateInfos) {
+            throttleTimeMs = mSilentUpdateThrottleTimeMs;
+        }
+        return SystemClock.uptimeMillis() - lastSilentUpdatedMs > throttleTimeMs;
     }
 
     /**
@@ -99,11 +107,25 @@ public class SilentUpdatePolicy {
         }
     }
 
+    /**
+     * Set the silent updates throttle time in seconds.
+     *
+     * @param throttleTimeInSeconds The throttle time to set, or <code>-1</code> to restore the
+     *        value to the default.
+     */
+    void setSilentUpdatesThrottleTime(long throttleTimeInSeconds) {
+        synchronized (mSilentUpdateInfos) {
+            mSilentUpdateThrottleTimeMs = throttleTimeInSeconds >= 0
+                    ? TimeUnit.SECONDS.toMillis(throttleTimeInSeconds)
+                    : SILENT_UPDATE_THROTTLE_TIME_MS;
+        }
+    }
+
     private void pruneLocked(long uptime) {
         final int size = mSilentUpdateInfos.size();
         for (int i = size - 1; i >= 0; i--) {
             final long lastSilentUpdatedMs = mSilentUpdateInfos.valueAt(i);
-            if (uptime - lastSilentUpdatedMs > SILENT_UPDATE_THROTTLE_TIME_MS) {
+            if (uptime - lastSilentUpdatedMs > mSilentUpdateThrottleTimeMs) {
                 mSilentUpdateInfos.removeAt(i);
             }
         }

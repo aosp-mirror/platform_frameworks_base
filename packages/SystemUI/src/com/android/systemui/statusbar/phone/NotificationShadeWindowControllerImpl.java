@@ -435,7 +435,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             if (cb != null) {
                 cb.onStateChanged(mCurrentState.mKeyguardShowing,
                         mCurrentState.mKeyguardOccluded,
-                        mCurrentState.mBouncerShowing);
+                        mCurrentState.mBouncerShowing,
+                        mCurrentState.mDozing);
             }
         }
     }
