@@ -146,7 +146,7 @@ public class SystemVibratorManager extends VibratorManager {
 
     @Override
     public void cancel() {
-        cancelVibration(/* usageFilter= */ -1);
+        cancelVibration(VibrationAttributes.USAGE_FILTER_MATCH_ALL);
     }
 
     @Override
