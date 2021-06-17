@@ -5508,7 +5508,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSurfacePlacementNeeded = false;
         transformFrameToSurfacePosition(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top,
                 mSurfacePosition);
-        mSurfacePosition.offset(mXOffset, mYOffset);
+
+        if (mWallpaperScale != 1f) {
+            DisplayInfo displayInfo = getDisplayInfo();
+            Matrix matrix = mTmpMatrix;
+            matrix.setTranslate(mXOffset, mYOffset);
+            matrix.postScale(mWallpaperScale, mWallpaperScale, displayInfo.logicalWidth / 2f,
+                displayInfo.logicalHeight / 2f);
+            matrix.getValues(mTmpMatrixArray);
+            mSurfacePosition.offset(Math.round(mTmpMatrixArray[Matrix.MTRANS_X]),
+                Math.round(mTmpMatrixArray[Matrix.MTRANS_Y]));
+        } else {
+            mSurfacePosition.offset(mXOffset, mYOffset);
+        }
 
         // Freeze position while we're unrotated, so the surface remains at the position it was
         // prior to the rotation.
