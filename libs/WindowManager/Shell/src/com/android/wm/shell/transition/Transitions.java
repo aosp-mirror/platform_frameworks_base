@@ -77,8 +77,11 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Transition type for launching 2 tasks simultaneously. */
     public static final int TRANSIT_SPLIT_SCREEN_PAIR_OPEN = TRANSIT_FIRST_CUSTOM + 2;
 
-    /** Transition type for exiting PIP via the Shell, either via Expand or Dismiss. */
+    /** Transition type for exiting PIP via the Shell, via pressing the expand button. */
     public static final int TRANSIT_EXIT_PIP = TRANSIT_FIRST_CUSTOM + 3;
+
+    /** Transition type for removing PIP via the Shell, either via Dismiss bubble or Close. */
+    public static final int TRANSIT_REMOVE_PIP = TRANSIT_FIRST_CUSTOM + 4;
 
     private final WindowOrganizer mOrganizer;
     private final Context mContext;

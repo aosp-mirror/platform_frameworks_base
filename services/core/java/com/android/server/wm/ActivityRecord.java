@@ -4530,6 +4530,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    boolean getDeferHidingClient() {
+        return mDeferHidingClient;
+    }
+
     @Override
     boolean isVisible() {
         // If the activity isn't hidden then it is considered visible and there is no need to check
@@ -5248,13 +5252,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     supportsEnterPipOnTaskSwitch = false;
                     break;
                 case RESUMED:
-                    // If the app is capable of entering PIP, we should try pausing it now
-                    // so it can PIP correctly.
-                    if (deferHidingClient) {
-                        getTaskFragment().startPausing(false /* uiSleeping */,
-                                null /* resuming */, "makeInvisible");
-                        break;
-                    }
                 case INITIALIZING:
                 case PAUSING:
                 case PAUSED:

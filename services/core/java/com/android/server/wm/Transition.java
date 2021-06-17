@@ -300,6 +300,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         for (int i = 0; i < mParticipants.size(); ++i) {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
             if (ar != null && !ar.isVisibleRequested()) {
+                // If activity is capable of entering PiP, give it a chance to enter it now.
+                if (ar.getDeferHidingClient() && ar.getTask() != null) {
+                    mController.mAtm.mTaskSupervisor.mUserLeaving = true;
+                    ar.getTaskFragment().startPausing(false /* uiSleeping */, null /* resuming */,
+                            "finishTransition");
+                    mController.mAtm.mTaskSupervisor.mUserLeaving = false;
+                }
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "  Commit activity becoming invisible: %s", ar);
                 ar.commitVisibility(false /* visible */, false /* performLayout */);
