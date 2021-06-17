@@ -39,6 +39,8 @@ interface IAccessibilityServiceConnection {
 
     void setServiceInfo(in AccessibilityServiceInfo info);
 
+    void setAttributionTag(in String attributionTag);
+
     String[] findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
         long accessibilityNodeId, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int flags, long threadId,

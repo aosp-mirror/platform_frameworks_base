@@ -2405,6 +2405,14 @@ public abstract class AccessibilityService extends Service {
                     if (connection != null) {
                         AccessibilityInteractionClient.getInstance(mContext).addConnection(
                                 mConnectionId, connection);
+                        if (mContext != null) {
+                            try {
+                                connection.setAttributionTag(mContext.getAttributionTag());
+                            } catch (RemoteException re) {
+                                Log.w(LOG_TAG, "Error while setting attributionTag", re);
+                                re.rethrowFromSystemServer();
+                            }
+                        }
                         mCallback.init(mConnectionId, windowToken);
                         mCallback.onServiceConnected();
                     } else {
