@@ -1111,6 +1111,11 @@ public class RippleDrawable extends LayerDrawable {
         if (mState.mRippleStyle == STYLE_SOLID) {
             mMaskCanvas.translate(left, top);
         }
+        if (mState.mRippleStyle == STYLE_PATTERNED) {
+            for (int i = 0; i < mRunningAnimations.size(); i++) {
+                mRunningAnimations.get(i).getProperties().getShader().setShader(mMaskShader);
+            }
+        }
     }
 
     private int getMaskType() {
