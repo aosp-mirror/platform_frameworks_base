@@ -337,6 +337,12 @@ public class RemoteTransitionCompat implements Parcelable {
                 Log.e(TAG, "Failed to detach the navigation bar from app", e);
             }
         }
+
+        /**
+         * @see IRecentsAnimationController#animateNavigationBarToApp(long)
+         */
+        @Override public void animateNavigationBarToApp(long duration) {
+        }
     }
 
 
