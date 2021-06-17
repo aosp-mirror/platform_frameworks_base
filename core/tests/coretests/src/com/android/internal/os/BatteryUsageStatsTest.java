@@ -30,6 +30,9 @@ import android.os.BatteryUsageStats;
 import android.os.Parcel;
 import android.os.UidBatteryConsumer;
 import android.os.UserBatteryConsumer;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
+import android.util.Xml;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -37,8 +40,11 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -155,6 +161,24 @@ public class BatteryUsageStatsTest {
         final BatteryUsageStats stats = buildBatteryUsageStats2(new String[] {"BAR"}).build();
 
         assertThrows(IllegalArgumentException.class, () -> builder.add(stats));
+    }
+
+    @Test
+    public void testXml() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        TypedXmlSerializer serializer = Xml.newBinarySerializer();
+        serializer.setOutput(out, StandardCharsets.UTF_8.name());
+        serializer.startDocument(null, true);
+        final BatteryUsageStats stats = buildBatteryUsageStats1(true).build();
+        stats.writeXml(serializer);
+        serializer.endDocument();
+
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        TypedXmlPullParser parser = Xml.newBinaryPullParser();
+        parser.setInput(in, StandardCharsets.UTF_8.name());
+        final BatteryUsageStats fromXml = BatteryUsageStats.createFromXml(parser);
+
+        assertBatteryUsageStats1(fromXml, true);
     }
 
     private BatteryUsageStats.Builder buildBatteryUsageStats1(boolean includeUserBatteryConsumer) {
