@@ -952,7 +952,8 @@ public final class Sensor {
     }
 
     /**
-     * @return name string of the sensor.
+     * @return name string of the sensor. The name is guaranteed to be unique
+     * for a particular sensor type.
      */
     public String getName() {
         return mName;
