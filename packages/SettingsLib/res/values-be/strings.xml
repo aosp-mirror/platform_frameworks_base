@@ -509,8 +509,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будзільнікі і напаміны"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Дазволіць усталёўваць будзільнікі і напаміны"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Будзільнікі і напаміны"</string>
-    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
-    <skip />
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Дазвольце гэтай праграме ўключаць будзільнікі і задаваць час дзеянняў. З такім дазволам праграма можа працаваць у фонавым рэжыме і ў выніку хутчэй разраджаць акумулятар.\n\nКалі вы не ўключыце гэты дазвол, існуючыя будзільнікі і запланаваны праграмай час падзей не будуць працаваць."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"расклад, будзільнік, напамін, гадзіннік"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Уключыць"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Уключэнне рэжыму \"Не турбаваць\""</string>
