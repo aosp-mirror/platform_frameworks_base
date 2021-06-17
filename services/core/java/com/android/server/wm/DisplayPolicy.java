@@ -313,7 +313,6 @@ public class DisplayPolicy {
     private WindowState mLastFocusedWindow;
 
     private WindowState mSystemUiControllingWindow;
-    private WindowState mNavBarColorWindowCandidate;
 
     private int mLastDisableFlags;
     private int mLastAppearance;
@@ -346,6 +345,8 @@ public class DisplayPolicy {
     private boolean mTopIsFullscreen;
     private boolean mForceStatusBar;
     private int mNavBarOpacityMode = NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED;
+    private boolean mForcingShowNavBar;
+    private int mForcingShowNavBarLayer;
     private boolean mForceShowSystemBars;
 
     private boolean mShowingDream;
@@ -1708,8 +1709,9 @@ public class DisplayPolicy {
         mTopFullscreenOpaqueOrDimmingWindowState = null;
         mTopDockedOpaqueWindowState = null;
         mTopDockedOpaqueOrDimmingWindowState = null;
-        mNavBarColorWindowCandidate = null;
         mForceStatusBar = false;
+        mForcingShowNavBar = false;
+        mForcingShowNavBarLayer = -1;
 
         mAllowLockscreenWhenOn = false;
         mShowingDream = false;
@@ -1729,6 +1731,11 @@ public class DisplayPolicy {
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": affectsSystemUi=" + affectsSystemUi);
         applyKeyguardPolicy(win, imeTarget);
         final int fl = attrs.flags;
+        if (mTopFullscreenOpaqueWindowState == null && affectsSystemUi
+                && attrs.type == TYPE_INPUT_METHOD) {
+            mForcingShowNavBar = true;
+            mForcingShowNavBarLayer = win.getSurfaceLayer();
+        }
 
         boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
                 && attrs.type < FIRST_SYSTEM_WINDOW;
@@ -1799,24 +1806,11 @@ public class DisplayPolicy {
             }
         }
 
+        // Check if the freeform window overlaps with the navigation bar area.
         final WindowState navBarWin = hasNavigationBar() ? mNavigationBar : null;
-        if (isOverlappingWithNavBar(win, navBarWin)) {
-            // Check if the freeform window overlaps with the navigation bar area.
-            if (!mIsFreeformWindowOverlappingWithNavBar && win.inFreeformWindowingMode()) {
-                mIsFreeformWindowOverlappingWithNavBar = true;
-            }
-            // Cache app window that overlaps with the navigation bar area to determine opacity and
-            // appearance of the navigation bar. We only need to cache one window because there
-            // should be only one overlapping window if it's not in gesture navigation mode; if it's
-            // in gesture navigation mode, the navigation bar will be NAV_BAR_FORCE_TRANSPARENT and
-            // its appearance won't be decided by overlapping windows.
-            if (mNavBarColorWindowCandidate == null && affectsSystemUi) {
-                if ((appWindow && attached == null && attrs.isFullscreen())
-                        || attrs.type == TYPE_VOICE_INTERACTION
-                        || win.isDimming()) {
-                    mNavBarColorWindowCandidate = win;
-                }
-            }
+        if (!mIsFreeformWindowOverlappingWithNavBar && win.inFreeformWindowingMode()
+                && isOverlappingWithNavBar(win, navBarWin)) {
+            mIsFreeformWindowOverlappingWithNavBar = true;
         }
 
         // Also keep track of any windows that are dimming but not necessarily fullscreen in the
@@ -2512,12 +2506,15 @@ public class DisplayPolicy {
                 mTopDockedOpaqueOrDimmingWindowState);
         final int disableFlags = win.getDisableFlags();
         final int opaqueAppearance = updateSystemBarsLw(win, disableFlags);
-        final WindowState navColorWin = chooseNavigationColorWindowLw(mNavBarColorWindowCandidate,
+        final WindowState navColorWin = chooseNavigationColorWindowLw(
+                mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState,
                 mDisplayContent.mInputMethodWindow, mNavigationBarPosition);
         final boolean isNavbarColorManagedByIme =
                 navColorWin != null && navColorWin == mDisplayContent.mInputMethodWindow;
-        final int appearance = updateLightNavigationBarLw(win.mAttrs.insetsFlags.appearance,
-                navColorWin) | opaqueAppearance;
+        final int appearance = updateLightNavigationBarLw(
+                win.mAttrs.insetsFlags.appearance, mTopFullscreenOpaqueWindowState,
+                mTopFullscreenOpaqueOrDimmingWindowState,
+                mDisplayContent.mInputMethodWindow, navColorWin) | opaqueAppearance;
         final int behavior = win.mAttrs.insetsFlags.behavior;
         final boolean isFullscreen = !win.getRequestedVisibility(ITYPE_STATUS_BAR)
                 || !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
@@ -2576,7 +2573,8 @@ public class DisplayPolicy {
 
     @VisibleForTesting
     @Nullable
-    static WindowState chooseNavigationColorWindowLw(WindowState candidate, WindowState imeWindow,
+    static WindowState chooseNavigationColorWindowLw(WindowState opaque,
+            WindowState opaqueOrDimming, WindowState imeWindow,
             @NavigationBarPosition int navBarPosition) {
         // If the IME window is visible and FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS is set, then IME
         // window can be navigation color window.
@@ -2585,37 +2583,49 @@ public class DisplayPolicy {
                 && navBarPosition == NAV_BAR_BOTTOM
                 && (imeWindow.mAttrs.flags
                         & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
+
+        if (opaque != null && opaqueOrDimming == opaque) {
+            // If the top fullscreen-or-dimming window is also the top fullscreen, respect it
+            // unless IME window is also eligible, since currently the IME window is always show
+            // above the opaque fullscreen app window, regardless of the IME target window.
+            // TODO(b/31559891): Maybe we need to revisit this condition once b/31559891 is fixed.
+            return imeWindowCanNavColorWindow ? imeWindow : opaque;
+        }
+
+        if (opaqueOrDimming == null || !opaqueOrDimming.isDimming()) {
+            // No dimming window is involved. Determine the result only with the IME window.
+            return imeWindowCanNavColorWindow ? imeWindow : null;
+        }
+
         if (!imeWindowCanNavColorWindow) {
-            // No IME window is involved. Determine the result only with candidate window.
-            return candidate;
+            // No IME window is involved. Determine the result only with opaqueOrDimming.
+            return opaqueOrDimming;
         }
 
-        if (candidate != null && candidate.isDimming()) {
-            // The IME window and the dimming window are competing. Check if the dimming window can
-            // be IME target or not.
-            if (LayoutParams.mayUseInputMethod(candidate.mAttrs.flags)) {
-                // The IME window is above the dimming window.
-                return imeWindow;
-            } else {
-                // The dimming window is above the IME window.
-                return candidate;
-            }
+        // The IME window and the dimming window are competing.  Check if the dimming window can be
+        // IME target or not.
+        if (LayoutParams.mayUseInputMethod(opaqueOrDimming.mAttrs.flags)) {
+            // The IME window is above the dimming window.
+            return imeWindow;
+        } else {
+            // The dimming window is above the IME window.
+            return opaqueOrDimming;
         }
-
-        return imeWindow;
     }
 
     @VisibleForTesting
-    int updateLightNavigationBarLw(int appearance, WindowState navColorWin) {
+    int updateLightNavigationBarLw(int appearance, WindowState opaque,
+            WindowState opaqueOrDimming, WindowState imeWindow, WindowState navColorWin) {
+
         if (navColorWin != null) {
-            if (navColorWin.isDimming()) {
-                // Clear the light flag for dimming window.
-                appearance &= ~APPEARANCE_LIGHT_NAVIGATION_BARS;
-            } else {
+            if (navColorWin == imeWindow || navColorWin == opaque) {
                 // Respect the light flag.
                 appearance &= ~APPEARANCE_LIGHT_NAVIGATION_BARS;
                 appearance |= navColorWin.mAttrs.insetsFlags.appearance
                         & APPEARANCE_LIGHT_NAVIGATION_BARS;
+            } else if (navColorWin == opaqueOrDimming && navColorWin.isDimming()) {
+                // Clear the light flag for dimming window.
+                appearance &= ~APPEARANCE_LIGHT_NAVIGATION_BARS;
             }
         }
         if (!isLightBarAllowed(navColorWin, ITYPE_NAVIGATION_BAR)) {
@@ -2744,10 +2754,13 @@ public class DisplayPolicy {
      */
     private int configureNavBarOpacity(int appearance, boolean multiWindowTaskVisible,
             boolean freeformRootTaskVisible) {
-        final boolean drawBackground = drawsBarBackground(mNavBarColorWindowCandidate);
+        final boolean fullscreenDrawsBackground =
+                drawsBarBackground(mTopFullscreenOpaqueWindowState);
+        final boolean dockedDrawsBackground =
+                drawsBarBackground(mTopDockedOpaqueWindowState);
 
         if (mNavBarOpacityMode == NAV_BAR_FORCE_TRANSPARENT) {
-            if (drawBackground) {
+            if (fullscreenDrawsBackground && dockedDrawsBackground) {
                 appearance = clearNavBarOpaqueFlag(appearance);
             }
         } else if (mNavBarOpacityMode == NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED) {
@@ -2755,7 +2768,7 @@ public class DisplayPolicy {
                 if (mIsFreeformWindowOverlappingWithNavBar) {
                     appearance = clearNavBarOpaqueFlag(appearance);
                 }
-            } else if (drawBackground) {
+            } else if (fullscreenDrawsBackground) {
                 appearance = clearNavBarOpaqueFlag(appearance);
             }
         } else if (mNavBarOpacityMode == NAV_BAR_TRANSLUCENT_WHEN_FREEFORM_OPAQUE_OTHERWISE) {
@@ -2764,7 +2777,8 @@ public class DisplayPolicy {
             }
         }
 
-        if (!isFullyTransparentAllowed(mNavBarColorWindowCandidate, TYPE_NAVIGATION_BAR)) {
+        if (!isFullyTransparentAllowed(mTopFullscreenOpaqueWindowState, TYPE_NAVIGATION_BAR)
+                || !isFullyTransparentAllowed(mTopDockedOpaqueWindowState, TYPE_NAVIGATION_BAR)) {
             appearance |= APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
         }
 
@@ -2941,6 +2955,11 @@ public class DisplayPolicy {
         if (mTopFullscreenOpaqueOrDimmingWindowState != null) {
             pw.print(prefix); pw.print("mTopFullscreenOpaqueOrDimmingWindowState=");
             pw.println(mTopFullscreenOpaqueOrDimmingWindowState);
+        }
+        if (mForcingShowNavBar) {
+            pw.print(prefix); pw.print("mForcingShowNavBar="); pw.println(mForcingShowNavBar);
+            pw.print(prefix); pw.print("mForcingShowNavBarLayer=");
+            pw.println(mForcingShowNavBarLayer);
         }
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.println(mTopIsFullscreen);
         pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
