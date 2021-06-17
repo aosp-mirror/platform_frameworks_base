@@ -64,6 +64,14 @@ class Ledger {
         return mCurrentBalance;
     }
 
+    @Nullable
+    Transaction getEarliestTransaction() {
+        if (mTransactions.size() > 0) {
+            return mTransactions.get(0);
+        }
+        return null;
+    }
+
     void recordTransaction(@NonNull Transaction transaction) {
         mTransactions.add(transaction);
         mCurrentBalance += transaction.delta;
@@ -97,6 +105,14 @@ class Ledger {
             mEarliestSumTime = windowStartTime;
         }
         return mCumulativeDeltaPerReason.get(eventId);
+    }
+
+    /** Deletes transactions that are older than {@code minAgeMs}. */
+    void removeOldTransactions(long minAgeMs) {
+        final long cutoff = System.currentTimeMillis() - minAgeMs;
+        while (mTransactions.get(0).endTimeMs <= cutoff) {
+            mTransactions.remove(0);
+        }
     }
 
     void dump(IndentingPrintWriter pw) {
