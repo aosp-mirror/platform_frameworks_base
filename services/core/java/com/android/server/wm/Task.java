@@ -974,10 +974,7 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void removeIfPossible(String reason) {
-        final boolean isRootTask = isRootTask();
-        if (!isRootTask) {
-            mAtmService.getLockTaskController().clearLockedTask(this);
-        }
+        mAtmService.getLockTaskController().clearLockedTask(this);
         if (shouldDeferRemoval()) {
             if (DEBUG_ROOT_TASK) Slog.i(TAG,
                     "removeTask:" + reason + " deferring removing taskId=" + mTaskId);
