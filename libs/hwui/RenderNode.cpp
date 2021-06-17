@@ -455,8 +455,7 @@ void RenderNode::destroyLayers() {
     if (hasLayer()) {
         this->setLayerSurface(nullptr);
     }
-    mSnapshotResult.snapshot = nullptr;
-    mTargetImageFilter = nullptr;
+
     if (mDisplayList) {
         mDisplayList.updateChildren([](RenderNode* child) { child->destroyLayers(); });
     }
