@@ -61,11 +61,12 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
 
     private DisplayLayout mDisplayLayout = new DisplayLayout();
 
-    private float mLastVisualOffset = 0;
     private final Rect mLastVisualDisplayBounds = new Rect();
     private final Rect mDefaultDisplayBounds = new Rect();
     private final OneHandedSettingsUtil mOneHandedSettingsUtil;
 
+    private boolean mIsReady;
+    private float mLastVisualOffset = 0;
     private int mEnterExitAnimationDurationMs;
 
     private ArrayMap<WindowContainerToken, SurfaceControl> mDisplayAreaTokenMap = new ArrayMap();
@@ -157,6 +158,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             final DisplayAreaAppearedInfo info = displayAreaInfos.get(i);
             onDisplayAreaAppeared(info.getDisplayAreaInfo(), info.getLeash());
         }
+        mIsReady = true;
         updateDisplayBounds();
         return displayAreaInfos;
     }
@@ -164,7 +166,12 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     @Override
     public void unregisterOrganizer() {
         super.unregisterOrganizer();
+        mIsReady = false;
         resetWindowsOffset();
+    }
+
+    boolean isReady() {
+        return mIsReady;
     }
 
     /**
@@ -312,6 +319,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         pw.println(mDisplayAreaTokenMap);
         pw.print(innerPrefix + "mDefaultDisplayBounds=");
         pw.println(mDefaultDisplayBounds);
+        pw.print(innerPrefix + "mIsReady=");
+        pw.println(mIsReady);
         pw.print(innerPrefix + "mLastVisualDisplayBounds=");
         pw.println(mLastVisualDisplayBounds);
         pw.print(innerPrefix + "mLastVisualOffset=");
