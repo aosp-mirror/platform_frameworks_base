@@ -249,6 +249,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         public void onStateChanged(int newState) {
             mStatusBarState = newState;
         }
+
+        @Override
+        public void onExpandedChanged(boolean isExpanded) {
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                if (cb != null) {
+                    cb.onShadeExpandedChanged(isExpanded);
+                }
+            }
+        }
     };
 
     HashMap<Integer, SimData> mSimDatas = new HashMap<>();
