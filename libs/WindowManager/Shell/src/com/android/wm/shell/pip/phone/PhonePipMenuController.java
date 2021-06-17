@@ -278,6 +278,10 @@ public class PhonePipMenuController implements PipMenuController {
             return;
         }
 
+        // Sync the menu bounds before showing it in case it is out of sync.
+        movePipMenu(null /* pipLeash */, null /* transaction */, stackBounds);
+        updateMenuBounds(stackBounds);
+
         mPipMenuView.showMenu(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay,
                 showResizeHandle);
     }
