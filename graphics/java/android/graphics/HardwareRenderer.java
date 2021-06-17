@@ -753,8 +753,12 @@ public class HardwareRenderer {
         nCancelLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
     }
 
+    private ASurfaceTransactionCallback mASurfaceTransactionCallback;
+
     /** @hide */
     public void setASurfaceTransactionCallback(ASurfaceTransactionCallback callback) {
+        // ensure callback is kept alive on the java side since weak ref is used in native code
+        mASurfaceTransactionCallback = callback;
         nSetASurfaceTransactionCallback(mNativeProxy, callback);
     }
 
