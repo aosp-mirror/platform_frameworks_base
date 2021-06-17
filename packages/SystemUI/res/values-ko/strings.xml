@@ -1034,6 +1034,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"화면 일부 확대"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"전환"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"접근성 동작이 접근성 버튼으로 대체되었습니다\n\n"<annotation id="link">"설정 보기"</annotation></string>
+    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
+    <skip />
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"버튼을 가장자리로 옮겨서 일시적으로 숨기세요"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"왼쪽 상단으로 이동"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"오른쪽 상단으로 이동"</string>
