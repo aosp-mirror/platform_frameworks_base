@@ -1034,6 +1034,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"સ્ક્રીનનો કોઈ ભાગ મોટો કરો"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"સ્વિચ"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ઍક્સેસિબિલિટી સંકેતને ઍક્સેસિબિલિટી બટન વડે બદલવામાં આવ્યા છે\n\n"<annotation id="link">"સેટિંગ જુઓ"</annotation></string>
+    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
+    <skip />
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"તેને હંગામી રૂપે ખસેડવા માટે બટનને કિનારી પર ખસેડો"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ઉપર ડાબે ખસેડો"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ઉપર જમણે ખસેડો"</string>
