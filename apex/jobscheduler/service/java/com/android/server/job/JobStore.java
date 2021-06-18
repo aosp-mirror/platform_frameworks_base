@@ -16,6 +16,9 @@
 
 package com.android.server.job;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED;
+import static android.net.NetworkCapabilities.TRANSPORT_TEST;
+
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.sSystemClock;
 
@@ -30,6 +33,7 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -63,6 +67,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -387,6 +392,36 @@ public final class JobStore {
     }
 
     /**
+     * Returns a single string representation of the contents of the specified intArray.
+     * If the intArray is [1, 2, 4] as the input, the return result will be the string "1,2,4".
+     */
+    @VisibleForTesting
+    static String intArrayToString(int[] values) {
+        final StringJoiner sj = new StringJoiner(",");
+        for (final int value : values) {
+            sj.add(String.valueOf(value));
+        }
+        return sj.toString();
+    }
+
+
+   /**
+    * Converts a string containing a comma-separated list of decimal representations
+    * of ints into an array of int. If the string is not correctly formatted,
+    * or if any value doesn't fit into an int, NumberFormatException is thrown.
+    */
+    @VisibleForTesting
+    static int[] stringToIntArray(String str) {
+        if (TextUtils.isEmpty(str)) return new int[0];
+        final String[] arr = str.split(",");
+        final int[] values = new int[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            values[i] = Integer.parseInt(arr[i]);
+        }
+        return values;
+    }
+
+    /**
      * Runnable that writes {@link #mJobSet} out to xml.
      * NOTE: This Runnable locks on mLock
      */
@@ -549,15 +584,12 @@ public final class JobStore {
             out.startTag(null, XML_TAG_PARAMS_CONSTRAINTS);
             if (jobStatus.hasConnectivityConstraint()) {
                 final NetworkRequest network = jobStatus.getJob().getRequiredNetwork();
-                // STOPSHIP b/183071974: improve the scheme for backward compatibility and
-                // mainline cleanliness.
-                out.attribute(null, "net-capabilities", Long.toString(
-                        BitUtils.packBits(network.getCapabilities())));
-                out.attribute(null, "net-unwanted-capabilities", Long.toString(
-                        BitUtils.packBits(network.getForbiddenCapabilities())));
-
-                out.attribute(null, "net-transport-types", Long.toString(
-                        BitUtils.packBits(network.getTransportTypes())));
+                out.attribute(null, "net-capabilities-csv", intArrayToString(
+                        network.getCapabilities()));
+                out.attribute(null, "net-forbidden-capabilities-csv", intArrayToString(
+                        network.getForbiddenCapabilities()));
+                out.attribute(null, "net-transport-types-csv", intArrayToString(
+                        network.getTransportTypes()));
             }
             if (jobStatus.hasIdleConstraint()) {
                 out.attribute(null, "idle", Boolean.toString(true));
@@ -831,7 +863,14 @@ public final class JobStore {
             } catch (NumberFormatException e) {
                 Slog.d(TAG, "Error reading constraints, skipping.");
                 return null;
+            } catch (XmlPullParserException e) {
+                Slog.d(TAG, "Error Parser Exception.", e);
+                return null;
+            } catch (IOException e) {
+                Slog.d(TAG, "Error I/O Exception.", e);
+                return null;
             }
+
             parser.next(); // Consume </constraints>
 
             // Read out execution parameters tag.
@@ -973,29 +1012,77 @@ public final class JobStore {
             return new JobInfo.Builder(jobId, cname);
         }
 
-        private void buildConstraintsFromXml(JobInfo.Builder jobBuilder, XmlPullParser parser) {
+        /**
+         * In S, there has been a change in format to make the code more robust and more
+         * maintainable.
+         * If the capabities are bits 4, 14, 15, the format in R, it is a long string as
+         * netCapabilitiesLong = '49168' from the old XML file attribute "net-capabilities".
+         * The format in S is the int array string as netCapabilitiesIntArray = '4,14,15'
+         * from the new XML file attribute "net-capabilities-array".
+         * For backward compatibility, when reading old XML the old format is still supported in
+         * reading, but in order to avoid issues with OEM-defined flags, the accepted capabilities
+         * are limited to that(maxNetCapabilityInR & maxTransportInR) defined in R.
+         */
+        private void buildConstraintsFromXml(JobInfo.Builder jobBuilder, XmlPullParser parser)
+                throws XmlPullParserException, IOException {
             String val;
+            String netCapabilitiesLong = null;
+            String netForbiddenCapabilitiesLong = null;
+            String netTransportTypesLong = null;
 
-            final String netCapabilities = parser.getAttributeValue(null, "net-capabilities");
-            final String netforbiddenCapabilities = parser.getAttributeValue(
-                    null, "net-unwanted-capabilities");
-            final String netTransportTypes = parser.getAttributeValue(null, "net-transport-types");
-            if (netCapabilities != null && netTransportTypes != null) {
+            final String netCapabilitiesIntArray = parser.getAttributeValue(
+                    null, "net-capabilities-csv");
+            final String netForbiddenCapabilitiesIntArray = parser.getAttributeValue(
+                    null, "net-forbidden-capabilities-csv");
+            final String netTransportTypesIntArray = parser.getAttributeValue(
+                    null, "net-transport-types-csv");
+            if (netCapabilitiesIntArray == null || netTransportTypesIntArray == null) {
+                netCapabilitiesLong = parser.getAttributeValue(null, "net-capabilities");
+                netForbiddenCapabilitiesLong = parser.getAttributeValue(
+                        null, "net-unwanted-capabilities");
+                netTransportTypesLong = parser.getAttributeValue(null, "net-transport-types");
+            }
+
+            if ((netCapabilitiesIntArray != null) && (netTransportTypesIntArray != null)) {
                 final NetworkRequest.Builder builder = new NetworkRequest.Builder()
                         .clearCapabilities();
-                final long forbiddenCapabilities = netforbiddenCapabilities != null
-                        ? Long.parseLong(netforbiddenCapabilities)
-                        : BitUtils.packBits(builder.build().getForbiddenCapabilities());
-                // We're okay throwing NFE here; caught by caller
-                for (int capability : BitUtils.unpackBits(Long.parseLong(netCapabilities))) {
+
+                for (int capability : stringToIntArray(netCapabilitiesIntArray)) {
                     builder.addCapability(capability);
                 }
-                for (int forbiddenCapability : BitUtils.unpackBits(
-                        Long.parseLong(netforbiddenCapabilities))) {
+
+                for (int forbiddenCapability : stringToIntArray(netForbiddenCapabilitiesIntArray)) {
                     builder.addForbiddenCapability(forbiddenCapability);
                 }
-                for (int transport : BitUtils.unpackBits(Long.parseLong(netTransportTypes))) {
+
+                for (int transport : stringToIntArray(netTransportTypesIntArray)) {
                     builder.addTransportType(transport);
+                }
+                jobBuilder.setRequiredNetwork(builder.build());
+            } else if (netCapabilitiesLong != null && netTransportTypesLong != null) {
+                final NetworkRequest.Builder builder = new NetworkRequest.Builder()
+                        .clearCapabilities();
+                final int maxNetCapabilityInR = NET_CAPABILITY_TEMPORARILY_NOT_METERED;
+                // We're okay throwing NFE here; caught by caller
+                for (int capability : BitUtils.unpackBits(Long.parseLong(
+                        netCapabilitiesLong))) {
+                    if (capability <= maxNetCapabilityInR) {
+                        builder.addCapability(capability);
+                    }
+                }
+                for (int forbiddenCapability : BitUtils.unpackBits(Long.parseLong(
+                        netForbiddenCapabilitiesLong))) {
+                    if (forbiddenCapability <= maxNetCapabilityInR) {
+                        builder.addForbiddenCapability(forbiddenCapability);
+                    }
+                }
+
+                final int maxTransportInR = TRANSPORT_TEST;
+                for (int transport : BitUtils.unpackBits(Long.parseLong(
+                        netTransportTypesLong))) {
+                    if (transport <= maxTransportInR) {
+                        builder.addTransportType(transport);
+                    }
                 }
                 jobBuilder.setRequiredNetwork(builder.build());
             } else {
