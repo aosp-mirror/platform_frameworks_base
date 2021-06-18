@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 -->
-<resources>
+<resources xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <drawable name="notification_number_text_color">#ffffffff</drawable>
     <drawable name="ticker_background_color">#ff1d1d1d</drawable>
     <drawable name="system_bar_background">@color/system_bar_background_opaque</drawable>
@@ -283,4 +283,16 @@
     <color name="wallet_card_border">#33FFFFFF</color>
 
     <color name="people_tile_background">@android:color/system_accent2_50</color>
+
+    <!-- Internet Dialog -->
+    <!-- Material next state on color-->
+    <color name="settingslib_state_on_color">?androidprv:attr/colorAccentPrimary</color>
+    <!-- Material next state off color-->
+    <color name="settingslib_state_off_color">?androidprv:attr/colorAccentSecondary</color>
+    <!-- Material next track on color-->
+    <color name="settingslib_track_on_color">?androidprv:attr/colorAccentPrimaryVariant</color>
+    <!-- Material next track off color-->
+    <color name="settingslib_track_off_color">?androidprv:attr/colorAccentSecondaryVariant</color>
+    <color name="connected_network_primary_color">#ff000000</color>
+    <color name="connected_network_tertiary_color">#808080</color>
 </resources>

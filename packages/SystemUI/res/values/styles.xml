@@ -884,4 +884,43 @@
     <style name="Wallet.Theme" parent="@android:style/Theme.DeviceDefault">
       <item name="android:colorBackground">@android:color/system_neutral1_900</item>
     </style>
+
+    <style name="Animation.InternetDialog" parent="@android:style/Animation.InputMethod">
+    </style>
+
+    <style name="Widget.SliceView.Panel">
+        <item name="titleSize">16sp</item>
+        <item name="rowStyle">@style/SliceRow</item>
+        <item name="android:background">?android:attr/colorBackgroundFloating</item>
+    </style>
+
+    <style name="SliceRow">
+        <!-- 2dp start padding for the start icon -->
+        <item name="titleItemStartPadding">2dp</item>
+        <item name="titleItemEndPadding">0dp</item>
+
+        <!-- Padding between content and the start icon is 14dp -->
+        <item name="contentStartPadding">14dp</item>
+        <!-- Padding between content and end items is 16dp -->
+        <item name="contentEndPadding">16dp</item>
+
+        <!-- Both side margins of end item are 16dp -->
+        <item name="endItemStartPadding">16dp</item>
+        <item name="endItemEndPadding">16dp</item>
+
+        <!-- Both side margins of bottom divider are 12dp -->
+        <item name="bottomDividerStartPadding">12dp</item>
+        <item name="bottomDividerEndPadding">12dp</item>
+
+        <item name="actionDividerHeight">32dp</item>
+    </style>
+
+    <style name="Theme.SystemUI.Dialog.Internet">
+        <item name="android:windowBackground">@drawable/internet_dialog_background</item>
+    </style>
+
+    <style name="MainSwitch.Settingslib" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:switchMinWidth">@dimen/settingslib_min_switch_width</item>
+    </style>
+
 </resources>

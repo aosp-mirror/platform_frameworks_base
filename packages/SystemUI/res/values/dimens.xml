@@ -1567,8 +1567,10 @@
     <!-- Signal icon in internet dialog -->
     <dimen name="signal_strength_icon_size">24dp</dimen>
 
+    <!-- Internet dialog related dimensions -->
+    <dimen name="internet_dialog_corner_radius">24dp</dimen>
+
     <!-- Size of internet dialog -->
-    <!-- Size of layout margin -->
     <dimen name="settingslib_switchbar_margin">16dp</dimen>
     <!-- Minimum width of switch -->
     <dimen name="settingslib_min_switch_width">48dp</dimen>
