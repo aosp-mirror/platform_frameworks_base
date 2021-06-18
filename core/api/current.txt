@@ -31070,8 +31070,8 @@ package android.os {
     ctor public Environment();
     method public static java.io.File getDataDirectory();
     method public static java.io.File getDownloadCacheDirectory();
-    method @Deprecated public static java.io.File getExternalStorageDirectory();
-    method @Deprecated public static java.io.File getExternalStoragePublicDirectory(String);
+    method public static java.io.File getExternalStorageDirectory();
+    method public static java.io.File getExternalStoragePublicDirectory(String);
     method public static String getExternalStorageState();
     method public static String getExternalStorageState(java.io.File);
     method @NonNull public static java.io.File getRootDirectory();
