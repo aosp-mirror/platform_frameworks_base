@@ -89,7 +89,7 @@ import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper()
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class GlobalActionsDialogTest extends SysuiTestCase {
     private GlobalActionsDialog mGlobalActionsDialog;
 
