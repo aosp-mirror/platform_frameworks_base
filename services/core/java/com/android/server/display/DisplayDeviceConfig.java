@@ -771,7 +771,7 @@ public class DisplayDeviceConfig {
                     + ", transition: " + transitionPoint
                     + ", timeWindow: " + timeWindowMillis + "ms"
                     + ", timeMax: " + timeMaxMillis + "ms"
-                    + ", timeMin: " + timeMinMillis
+                    + ", timeMin: " + timeMinMillis + "ms"
                     + "} ";
         }
     }
