@@ -52,6 +52,14 @@
       ]
     },
     {
+      "name": "GtsContentTestCases",
+      "options": [
+        {
+          "include-filter": "com.google.android.content.gts"
+        }
+      ]
+    },
+    {
       "name": "GtsSecurityHostTestCases",
       "options": [
         {
