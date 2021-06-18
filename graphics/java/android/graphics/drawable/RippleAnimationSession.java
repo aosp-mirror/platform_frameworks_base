@@ -60,6 +60,10 @@ public final class RippleAnimationSession {
         mForceSoftware = forceSoftware;
     }
 
+    boolean isForceSoftware() {
+        return mForceSoftware;
+    }
+
     @NonNull RippleAnimationSession enter(Canvas canvas) {
         mStartTime = AnimationUtils.currentAnimationTimeMillis();
         if (isHwAccelerated(canvas)) {
@@ -130,7 +134,6 @@ public final class RippleAnimationSession {
         return this;
     }
 
-
     private void exitHardware(RecordingCanvas canvas) {
         AnimationProperties<CanvasProperty<Float>, CanvasProperty<Paint>>
                 props = getCanvasProperties();
@@ -199,6 +202,15 @@ public final class RippleAnimationSession {
         startAnimation(expand, loop);
     }
 
+    void setRadius(float radius) {
+        mProperties.setRadius(radius);
+        mProperties.getShader().setRadius(radius);
+        if (mCanvasProperties != null) {
+            mCanvasProperties.setRadius(CanvasProperty.createFloat(radius));
+            mCanvasProperties.getShader().setRadius(radius);
+        }
+    }
+
     @NonNull AnimationProperties<Float, Paint> getProperties() {
         return mProperties;
     }
@@ -249,7 +261,7 @@ public final class RippleAnimationSession {
 
     static class AnimationProperties<FloatType, PaintType> {
         private final FloatType mProgress;
-        private final FloatType mMaxRadius;
+        private FloatType mMaxRadius;
         private final FloatType mNoisePhase;
         private final PaintType mPaint;
         private final RippleShader mShader;
@@ -271,6 +283,10 @@ public final class RippleAnimationSession {
 
         FloatType getProgress() {
             return mProgress;
+        }
+
+        void setRadius(FloatType radius) {
+            mMaxRadius = radius;
         }
 
         void setOrigin(FloatType x, FloatType y) {
