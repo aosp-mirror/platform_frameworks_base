@@ -51,11 +51,6 @@ public:
         return ret;
     }
 
-    void setExtraBufferCount(size_t extraBuffers) {
-        std::lock_guard _lock{mMutex};
-        mExtraBuffers = extraBuffers;
-    }
-
     bool didSetExtraBuffers() const {
         std::lock_guard _lock{mMutex};
         return mDidSetExtraBuffers;
@@ -73,7 +68,6 @@ private:
     base::unique_fd mReservedFenceFd;
     bool mHasDequeuedBuffer = false;
     int mBufferQueueState = OK;
-    size_t mExtraBuffers = 0;
     size_t mExpectedBufferCount = 0;
     bool mDidSetExtraBuffers = false;
 

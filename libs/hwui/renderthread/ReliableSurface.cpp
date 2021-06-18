@@ -278,7 +278,6 @@ int ReliableSurface::hook_query(const ANativeWindow *window, ANativeWindow_query
     int result = query(window, what, value);
     if (what == ANATIVEWINDOW_QUERY_MIN_UNDEQUEUED_BUFFERS && result == OK) {
         std::lock_guard _lock{rs->mMutex};
-        *value += rs->mExtraBuffers;
         rs->mExpectedBufferCount = *value + 2;
     }
     return result;
