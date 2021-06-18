@@ -46,6 +46,7 @@ import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -85,6 +86,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private final IQSTileService mService;
     private final TileServiceManager mServiceManager;
     private final int mUser;
+    private final CustomTileStatePersister mCustomTileStatePersister;
     private android.graphics.drawable.Icon mDefaultIcon;
     private CharSequence mDefaultLabel;
 
@@ -93,6 +95,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private boolean mListening;
     private boolean mIsTokenGranted;
     private boolean mIsShowingDialog;
+
+    private final TileServiceKey mKey;
 
     private CustomTile(
             QSHost host,
@@ -104,7 +108,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             String action,
-            Context userContext
+            Context userContext,
+            CustomTileStatePersister customTileStatePersister
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
@@ -113,15 +118,29 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mTile = new Tile();
         mUserContext = userContext;
         mUser = mUserContext.getUserId();
-        updateDefaultTileAndIcon();
+        mKey = new TileServiceKey(mComponent, mUser);
+
         mServiceManager = host.getTileServices().getTileWrapper(this);
+        mService = mServiceManager.getTileService();
+        mCustomTileStatePersister = customTileStatePersister;
+    }
+
+    @Override
+    protected void handleInitialize() {
+        updateDefaultTileAndIcon();
         if (mServiceManager.isToggleableTile()) {
             // Replace states with BooleanState
             resetStates();
         }
-
-        mService = mServiceManager.getTileService();
         mServiceManager.setTileChangeListener(this);
+        if (mServiceManager.isActiveTile()) {
+            Tile t = mCustomTileStatePersister.readState(mKey);
+            if (t != null) {
+                applyTileState(t, /* overwriteNulls */ false);
+                mServiceManager.clearPendingBind();
+                refreshState();
+            }
+        }
     }
 
     @Override
@@ -191,7 +210,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     @Override
     public void onTileChanged(ComponentName tile) {
-        updateDefaultTileAndIcon();
+        mHandler.post(this::updateDefaultTileAndIcon);
     }
 
     @Override
@@ -213,16 +232,44 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     }
 
     public Tile getQsTile() {
+        // TODO(b/191145007) Move to background thread safely
         updateDefaultTileAndIcon();
         return mTile;
     }
 
-    public void updateState(Tile tile) {
-        mTile.setIcon(tile.getIcon());
-        mTile.setLabel(tile.getLabel());
-        mTile.setSubtitle(tile.getSubtitle());
-        mTile.setContentDescription(tile.getContentDescription());
-        mTile.setStateDescription(tile.getStateDescription());
+    /**
+     * Update state of {@link this#mTile} from a remote {@link TileService}.
+     * @param tile tile populated with state to apply
+     */
+    public void updateTileState(Tile tile) {
+        // This comes from a binder call IQSService.updateQsTile
+        mHandler.post(() -> handleUpdateTileState(tile));
+    }
+
+    private void handleUpdateTileState(Tile tile) {
+        applyTileState(tile, /* overwriteNulls */ true);
+        if (mServiceManager.isActiveTile()) {
+            mCustomTileStatePersister.persistState(mKey, tile);
+        }
+    }
+
+    @WorkerThread
+    private void applyTileState(Tile tile, boolean overwriteNulls) {
+        if (tile.getIcon() != null || overwriteNulls) {
+            mTile.setIcon(tile.getIcon());
+        }
+        if (tile.getLabel() != null || overwriteNulls) {
+            mTile.setLabel(tile.getLabel());
+        }
+        if (tile.getSubtitle() != null || overwriteNulls) {
+            mTile.setSubtitle(tile.getSubtitle());
+        }
+        if (tile.getContentDescription() != null || overwriteNulls) {
+            mTile.setContentDescription(tile.getContentDescription());
+        }
+        if (tile.getStateDescription() != null || overwriteNulls) {
+            mTile.setStateDescription(tile.getStateDescription());
+        }
         mTile.setState(tile.getState());
     }
 
@@ -459,6 +506,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         final StatusBarStateController mStatusBarStateController;
         final ActivityStarter mActivityStarter;
         final QSLogger mQSLogger;
+        final CustomTileStatePersister mCustomTileStatePersister;
 
         Context mUserContext;
         String mSpec = "";
@@ -472,7 +520,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
                 MetricsLogger metricsLogger,
                 StatusBarStateController statusBarStateController,
                 ActivityStarter activityStarter,
-                QSLogger qsLogger
+                QSLogger qsLogger,
+                CustomTileStatePersister customTileStatePersister
         ) {
             mQSHostLazy = hostLazy;
             mBackgroundLooper = backgroundLooper;
@@ -482,6 +531,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             mStatusBarStateController = statusBarStateController;
             mActivityStarter = activityStarter;
             mQSLogger = qsLogger;
+            mCustomTileStatePersister = customTileStatePersister;
         }
 
         Builder setSpec(@NonNull String spec) {
@@ -509,7 +559,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
                     mActivityStarter,
                     mQSLogger,
                     action,
-                    mUserContext
+                    mUserContext,
+                    mCustomTileStatePersister
             );
         }
     }
