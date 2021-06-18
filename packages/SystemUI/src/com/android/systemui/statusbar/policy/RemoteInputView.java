@@ -336,7 +336,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         RemoteInput.addResultsToIntent(mRemoteInputs, fillInIntent,
                 results);
 
-        mEntry.remoteInputText = mEditText.getText();
+        mEntry.remoteInputText = mEditText.getText().toString();
         // TODO(b/188646667): store attachment to entry
         mEntry.remoteInputUri = null;
         mEntry.remoteInputMimeType = null;
