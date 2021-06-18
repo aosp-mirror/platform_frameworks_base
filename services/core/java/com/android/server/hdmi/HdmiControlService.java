@@ -2597,7 +2597,8 @@ public class HdmiControlService extends SystemService {
         return null;
     }
 
-    private void addHdmiControlStatusChangeListener(
+    @VisibleForTesting
+    void addHdmiControlStatusChangeListener(
             final IHdmiControlStatusChangeListener listener) {
         final HdmiControlStatusChangeListenerRecord record =
                 new HdmiControlStatusChangeListenerRecord(listener);
@@ -2933,13 +2934,17 @@ public class HdmiControlService extends SystemService {
                     } else {
                         mIsCecAvailable = true;
                     }
+                    if (!listeners.isEmpty()) {
+                        invokeHdmiControlStatusChangeListenerLocked(listeners,
+                                isEnabled, mIsCecAvailable);
+                    }
                 }
             });
         } else {
             mIsCecAvailable = false;
-        }
-        if (!listeners.isEmpty()) {
-            invokeHdmiControlStatusChangeListenerLocked(listeners, isEnabled, mIsCecAvailable);
+            if (!listeners.isEmpty()) {
+                invokeHdmiControlStatusChangeListenerLocked(listeners, isEnabled, mIsCecAvailable);
+            }
         }
     }
 
