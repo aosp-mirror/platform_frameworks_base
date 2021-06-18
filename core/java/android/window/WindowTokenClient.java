@@ -15,6 +15,11 @@
  */
 package android.window;
 
+import static android.window.ConfigurationHelper.diffPublicWithSizeBuckets;
+import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
+import static android.window.ConfigurationHelper.isDifferentDisplay;
+import static android.window.ConfigurationHelper.shouldUpdateResources;
+
 import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.app.IWindowToken;
@@ -33,7 +38,7 @@ import java.lang.ref.WeakReference;
  * {@link Context#getWindowContextToken() the token of non-Activity UI Contexts}.
  *
  * @see WindowContext
- * @see android.view.IWindowManager#registerWindowContextListener(IBinder, int, int, Bundle)
+ * @see android.view.IWindowManager#attachWindowContextToDisplayArea(IBinder, int, int, Bundle)
  *
  * @hide
  */
@@ -46,11 +51,13 @@ public class WindowTokenClient extends IWindowToken.Stub {
 
     private final ResourcesManager mResourcesManager = ResourcesManager.getInstance();
 
+    private final Configuration mConfiguration = new Configuration();
+
     /**
      * Attaches {@code context} to this {@link WindowTokenClient}. Each {@link WindowTokenClient}
      * can only attach one {@link Context}.
      * <p>This method must be called before invoking
-     * {@link android.view.IWindowManager#registerWindowContextListener(IBinder, int, int,
+     * {@link android.view.IWindowManager#attachWindowContextToDisplayArea(IBinder, int, int,
      * Bundle, boolean)}.<p/>
      *
      * @param context context to be attached
@@ -61,6 +68,7 @@ public class WindowTokenClient extends IWindowToken.Stub {
             throw new IllegalStateException("Context is already attached.");
         }
         mContextRef = new WeakReference<>(context);
+        mConfiguration.setTo(context.getResources().getConfiguration());
     }
 
     @Override
@@ -69,17 +77,34 @@ public class WindowTokenClient extends IWindowToken.Stub {
         if (context == null) {
             return;
         }
-        final int currentDisplayId = context.getDisplayId();
-        final boolean displayChanged = newDisplayId != currentDisplayId;
-        final Configuration config = context.getResources().getConfiguration();
-        final boolean configChanged = config.diff(newConfig) != 0;
-        if (displayChanged || configChanged) {
+        final boolean displayChanged = isDifferentDisplay(context.getDisplayId(), newDisplayId);
+        final boolean shouldUpdateResources = shouldUpdateResources(this, mConfiguration,
+                newConfig, newConfig /* overrideConfig */, displayChanged,
+                null /* configChanged */);
+
+        if (shouldUpdateResources) {
             // TODO(ag/9789103): update resource manager logic to track non-activity tokens
             mResourcesManager.updateResourcesForActivity(this, newConfig, newDisplayId);
+
             if (context instanceof WindowContext) {
                 ActivityThread.currentActivityThread().getHandler().post(
                         () -> ((WindowContext) context).dispatchConfigurationChanged(newConfig));
             }
+
+            // Dispatch onConfigurationChanged only if there's a significant public change to
+            // make it compatible with the original behavior.
+            final Configuration[] sizeConfigurations = context.getResources()
+                    .getSizeConfigurations();
+            final SizeConfigurationBuckets buckets = sizeConfigurations != null
+                    ? new SizeConfigurationBuckets(sizeConfigurations) : null;
+            final int diff = diffPublicWithSizeBuckets(mConfiguration, newConfig, buckets);
+
+            if (context instanceof WindowProviderService && diff != 0) {
+                ActivityThread.currentActivityThread().getHandler().post(() ->
+                        ((WindowProviderService) context).onConfigurationChanged(newConfig));
+            }
+            freeTextLayoutCachesIfNeeded(diff);
+            mConfiguration.setTo(newConfig);
         }
         if (displayChanged) {
             context.updateDisplay(newDisplayId);
