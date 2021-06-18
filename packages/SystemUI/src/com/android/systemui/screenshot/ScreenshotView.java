@@ -36,8 +36,10 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BlendMode;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Matrix;
@@ -257,10 +259,10 @@ public class ScreenshotView extends FrameLayout implements
     @Override // ViewTreeObserver.OnComputeInternalInsetsListener
     public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
         inoutInfo.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-        inoutInfo.touchableRegion.set(getTouchRegion());
+        inoutInfo.touchableRegion.set(getTouchRegion(true));
     }
 
-    private Region getTouchRegion() {
+    private Region getTouchRegion(boolean includeScrim) {
         Region touchRegion = new Region();
 
         final Rect tmpRect = new Rect();
@@ -272,6 +274,11 @@ public class ScreenshotView extends FrameLayout implements
         touchRegion.op(tmpRect, Region.Op.UNION);
         mDismissButton.getBoundsOnScreen(tmpRect);
         touchRegion.op(tmpRect, Region.Op.UNION);
+
+        if (includeScrim && mScrollingScrim.getVisibility() == View.VISIBLE) {
+            mScrollingScrim.getBoundsOnScreen(tmpRect);
+            touchRegion.op(tmpRect, Region.Op.UNION);
+        }
 
         if (QuickStepContract.isGesturalMode(mNavMode)) {
             final WindowManager wm = mContext.getSystemService(WindowManager.class);
@@ -296,7 +303,7 @@ public class ScreenshotView extends FrameLayout implements
                     if (ev instanceof MotionEvent) {
                         MotionEvent event = (MotionEvent) ev;
                         if (event.getActionMasked() == MotionEvent.ACTION_DOWN
-                                && !getTouchRegion().contains(
+                                && !getTouchRegion(false).contains(
                                 (int) event.getRawX(), (int) event.getRawY())) {
                             mCallbacks.onTouchOutside();
                         }
@@ -313,6 +320,10 @@ public class ScreenshotView extends FrameLayout implements
 
     @Override // ViewGroup
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        // scrolling scrim should not be swipeable; return early if we're on the scrim
+        if (!getTouchRegion(false).contains((int) ev.getRawX(), (int) ev.getRawY())) {
+            return false;
+        }
         // always pass through the down event so the swipe handler knows the initial state
         if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
             mSwipeDismissHandler.onTouch(this, ev);
@@ -372,10 +383,6 @@ public class ScreenshotView extends FrameLayout implements
 
     View getScreenshotPreview() {
         return mScreenshotPreview;
-    }
-
-    View getScrollablePreview() {
-        return mScrollablePreview;
     }
 
     /**
@@ -808,8 +815,9 @@ public class ScreenshotView extends FrameLayout implements
         anim.start();
     }
 
-    void prepareScrollingTransition(ScrollCaptureResponse response, Bitmap screenBitmap) {
-        mScrollingScrim.setImageBitmap(screenBitmap);
+    void prepareScrollingTransition(ScrollCaptureResponse response, Bitmap screenBitmap,
+            Bitmap newBitmap) {
+        mScrollingScrim.setImageBitmap(newBitmap);
         mScrollingScrim.setVisibility(View.VISIBLE);
         Rect scrollableArea = scrollableAreaOnScreen(response);
         float scale = mCornerSizeX
@@ -829,7 +837,19 @@ public class ScreenshotView extends FrameLayout implements
 
         mScrollablePreview.setImageBitmap(screenBitmap);
         mScrollablePreview.setVisibility(View.VISIBLE);
-        createScreenshotFadeDismissAnimation(true).start();
+        mDismissButton.setVisibility(View.GONE);
+        mActionsContainer.setVisibility(View.GONE);
+        mBackgroundProtection.setVisibility(View.GONE);
+        // set these invisible, but not gone, so that the views are laid out correctly
+        mActionsContainerBackground.setVisibility(View.INVISIBLE);
+        mScreenshotPreviewBorder.setVisibility(View.INVISIBLE);
+        mScreenshotPreview.setVisibility(View.INVISIBLE);
+        mScrollingScrim.setImageTintBlendMode(BlendMode.SRC_ATOP);
+        ValueAnimator anim = ValueAnimator.ofFloat(0, .3f);
+        anim.addUpdateListener(animation -> mScrollingScrim.setImageTintList(
+                ColorStateList.valueOf(Color.argb((float) animation.getAnimatedValue(), 0, 0, 0))));
+        anim.setDuration(200);
+        anim.start();
     }
 
     boolean isDismissing() {
@@ -910,6 +930,7 @@ public class ScreenshotView extends FrameLayout implements
                 mContext.getResources().getString(R.string.screenshot_preview_description));
         mScreenshotPreview.setOnClickListener(null);
         mShareChip.setOnClickListener(null);
+        mScrollingScrim.setVisibility(View.GONE);
         mEditChip.setOnClickListener(null);
         mShareChip.setIsPending(false);
         mEditChip.setIsPending(false);
@@ -932,7 +953,7 @@ public class ScreenshotView extends FrameLayout implements
             transition.action.actionIntent.send();
 
             // fade out non-preview UI
-            createScreenshotFadeDismissAnimation(false).start();
+            createScreenshotFadeDismissAnimation().start();
         } catch (PendingIntent.CanceledException e) {
             mPendingSharedTransition = false;
             if (transition.onCancelRunnable != null) {
@@ -970,7 +991,7 @@ public class ScreenshotView extends FrameLayout implements
         return animSet;
     }
 
-    ValueAnimator createScreenshotFadeDismissAnimation(boolean fadePreview) {
+    ValueAnimator createScreenshotFadeDismissAnimation() {
         ValueAnimator alphaAnim = ValueAnimator.ofFloat(0, 1);
         alphaAnim.addUpdateListener(animation -> {
             float alpha = 1 - animation.getAnimatedFraction();
@@ -979,9 +1000,6 @@ public class ScreenshotView extends FrameLayout implements
             mActionsContainer.setAlpha(alpha);
             mBackgroundProtection.setAlpha(alpha);
             mScreenshotPreviewBorder.setAlpha(alpha);
-            if (fadePreview) {
-                mScreenshotPreview.setAlpha(alpha);
-            }
         });
         alphaAnim.setDuration(600);
         return alphaAnim;
