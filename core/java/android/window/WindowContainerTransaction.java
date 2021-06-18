@@ -713,75 +713,91 @@ public final class WindowContainerTransaction implements Parcelable {
         private final int mType;
 
         // Container we are performing the operation on.
-        private final IBinder mContainer;
+        @Nullable
+        private IBinder mContainer;
 
         // If this is same as mContainer, then only change position, don't reparent.
-        private final IBinder mReparent;
+        @Nullable
+        private IBinder mReparent;
 
         // Moves/reparents to top of parent when {@code true}, otherwise moves/reparents to bottom.
-        private final boolean mToTop;
+        private boolean mToTop;
 
-        final private int[]  mWindowingModes;
-        final private int[] mActivityTypes;
+        @Nullable
+        private int[]  mWindowingModes;
 
-        private final Bundle mLaunchOptions;
+        @Nullable
+        private int[] mActivityTypes;
+
+        @Nullable
+        private Bundle mLaunchOptions;
 
         public static HierarchyOp createForReparent(
                 @NonNull IBinder container, @Nullable IBinder reparent, boolean toTop) {
-            return new HierarchyOp(HIERARCHY_OP_TYPE_REPARENT,
-                    container, reparent, null, null, toTop, null);
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_REPARENT)
+                    .setContainer(container)
+                    .setReparentContainer(reparent)
+                    .setToTop(toTop)
+                    .build();
         }
 
         public static HierarchyOp createForReorder(@NonNull IBinder container, boolean toTop) {
-            return new HierarchyOp(HIERARCHY_OP_TYPE_REORDER,
-                    container, container, null, null, toTop, null);
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_REORDER)
+                    .setContainer(container)
+                    .setReparentContainer(container)
+                    .setToTop(toTop)
+                    .build();
         }
 
         public static HierarchyOp createForChildrenTasksReparent(IBinder currentParent,
                 IBinder newParent, int[] windowingModes, int[] activityTypes, boolean onTop) {
-            return new HierarchyOp(HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT,
-                    currentParent, newParent, windowingModes, activityTypes, onTop, null);
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT)
+                    .setContainer(currentParent)
+                    .setReparentContainer(newParent)
+                    .setWindowingModes(windowingModes)
+                    .setActivityTypes(activityTypes)
+                    .setToTop(onTop)
+                    .build();
         }
 
         public static HierarchyOp createForSetLaunchRoot(IBinder container,
                 int[] windowingModes, int[] activityTypes) {
-            return new HierarchyOp(HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT,
-                    container, null, windowingModes, activityTypes, false, null);
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT)
+                    .setContainer(container)
+                    .setWindowingModes(windowingModes)
+                    .setActivityTypes(activityTypes)
+                    .build();
         }
 
         public static HierarchyOp createForAdjacentRoots(IBinder root1, IBinder root2) {
-            return new HierarchyOp(HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS,
-                    root1, root2, null, null, false, null);
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS)
+                    .setContainer(root1)
+                    .setReparentContainer(root2)
+                    .build();
         }
 
         /** Create a hierarchy op for launching a task. */
         public static HierarchyOp createForTaskLaunch(int taskId, @Nullable Bundle options) {
             final Bundle fullOptions = options == null ? new Bundle() : options;
             fullOptions.putInt(LAUNCH_KEY_TASK_ID, taskId);
-            return new HierarchyOp(HIERARCHY_OP_TYPE_LAUNCH_TASK, null, null, null, null, true,
-                    fullOptions);
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_LAUNCH_TASK)
+                    .setToTop(true)
+                    .setLaunchOptions(fullOptions)
+                    .build();
         }
 
         /** Create a hierarchy op for setting launch adjacent flag root. */
         public static HierarchyOp createForSetLaunchAdjacentFlagRoot(IBinder container,
                 boolean clearRoot) {
-            return new HierarchyOp(HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT, container, null,
-                    null, null, clearRoot, null);
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT)
+                    .setContainer(container)
+                    .setToTop(clearRoot)
+                    .build();
         }
 
-
-        private HierarchyOp(int type, @Nullable IBinder container, @Nullable IBinder reparent,
-                int[] windowingModes, int[] activityTypes, boolean toTop,
-                @Nullable Bundle launchOptions) {
+        /** Only creates through {@link Builder}. */
+        private HierarchyOp(int type) {
             mType = type;
-            mContainer = container;
-            mReparent = reparent;
-            mWindowingModes = windowingModes != null ?
-                    Arrays.copyOf(windowingModes, windowingModes.length) : null;
-            mActivityTypes = activityTypes != null ?
-                    Arrays.copyOf(activityTypes, activityTypes.length) : null;
-            mToTop = toTop;
-            mLaunchOptions = launchOptions;
         }
 
         public HierarchyOp(@NonNull HierarchyOp copy) {
@@ -902,5 +918,77 @@ public final class WindowContainerTransaction implements Parcelable {
                 return new HierarchyOp[size];
             }
         };
+
+        private static class Builder {
+
+            private final int mType;
+
+            @Nullable
+            private IBinder mContainer;
+
+            @Nullable
+            private IBinder mReparent;
+
+            private boolean mToTop;
+
+            @Nullable
+            private int[]  mWindowingModes;
+
+            @Nullable
+            private int[] mActivityTypes;
+
+            @Nullable
+            private Bundle mLaunchOptions;
+
+            Builder(int type) {
+                mType = type;
+            }
+
+            Builder setContainer(@Nullable IBinder container) {
+                mContainer = container;
+                return this;
+            }
+
+            Builder setReparentContainer(@Nullable IBinder reparentContainer) {
+                mReparent = reparentContainer;
+                return this;
+            }
+
+            Builder setToTop(boolean toTop) {
+                mToTop = toTop;
+                return this;
+            }
+
+            Builder setWindowingModes(@Nullable int[] windowingModes) {
+                mWindowingModes = windowingModes;
+                return this;
+            }
+
+            Builder setActivityTypes(@Nullable int[] activityTypes) {
+                mActivityTypes = activityTypes;
+                return this;
+            }
+
+            Builder setLaunchOptions(@Nullable Bundle launchOptions) {
+                mLaunchOptions = launchOptions;
+                return this;
+            }
+
+            HierarchyOp build() {
+                final HierarchyOp hierarchyOp = new HierarchyOp(mType);
+                hierarchyOp.mContainer = mContainer;
+                hierarchyOp.mReparent = mReparent;
+                hierarchyOp.mWindowingModes = mWindowingModes != null
+                        ? Arrays.copyOf(mWindowingModes, mWindowingModes.length)
+                        : null;
+                hierarchyOp.mActivityTypes = mActivityTypes != null
+                        ? Arrays.copyOf(mActivityTypes, mActivityTypes.length)
+                        : null;
+                hierarchyOp.mToTop = mToTop;
+                hierarchyOp.mLaunchOptions = mLaunchOptions;
+
+                return hierarchyOp;
+            }
+        }
     }
 }
