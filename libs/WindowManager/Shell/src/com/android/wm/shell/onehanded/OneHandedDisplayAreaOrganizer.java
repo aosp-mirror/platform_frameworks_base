@@ -191,8 +191,15 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 myUserId())) {
             return;
         }
+
         mDisplayLayout.rotateTo(context.getResources(), toRotation);
         updateDisplayBounds();
+
+        if (mOneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
+                context.getContentResolver(), myUserId())) {
+            // If current settings is swipe notification, skip finishOffset.
+            return;
+        }
         finishOffset(0, TRANSITION_DIRECTION_EXIT);
     }
 
