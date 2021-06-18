@@ -74,7 +74,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class QSTileImplTest extends SysuiTestCase {
 

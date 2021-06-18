@@ -47,7 +47,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper()
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class ScreenRecordTileTest extends SysuiTestCase {
 
