@@ -63,6 +63,7 @@ import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.stats.LoggerInstanceManager;
 import com.android.server.appsearch.stats.PlatformLogger;
 import com.android.server.appsearch.util.PackageUtil;
+import com.android.server.appsearch.visibilitystore.VisibilityStore;
 import com.android.server.usage.StorageStatsManagerLocal;
 import com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter;
 
@@ -218,11 +219,12 @@ public class AppSearchManagerService extends SystemService {
         UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
         try {
             if (isUserLocked(userHandle)) {
-                //TODO(b/186151459) clear the uninstalled package data when user is unlocked.
+                // We cannot access a locked user's directry and remove package data from it.
+                // We should remove those uninstalled package data when the user is unlocking.
                 return;
             }
+            // Only clear the package's data if AppSearch exists for this user.
             if (ImplInstanceManager.getAppSearchDir(userHandle).exists()) {
-                // Only clear the package's data if AppSearch exists for this user.
                 PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(mContext,
                         userHandle, AppSearchConfig.getInstance(EXECUTOR));
                 AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
@@ -239,9 +241,34 @@ public class AppSearchManagerService extends SystemService {
     @Override
     public void onUserUnlocking(@NonNull TargetUser user) {
         Objects.requireNonNull(user);
+        UserHandle userHandle = user.getUserHandle();
         synchronized (mUnlockedUsersLocked) {
-            mUnlockedUsersLocked.add(user.getUserHandle());
+            mUnlockedUsersLocked.add(userHandle);
         }
+        EXECUTOR.execute(() -> {
+            try {
+                // Only clear the package's data if AppSearch exists for this user.
+                if (ImplInstanceManager.getAppSearchDir(userHandle).exists()) {
+                    PlatformLogger logger = mLoggerInstanceManager.getOrCreatePlatformLogger(
+                            mContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
+                    AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
+                            userHandle, logger);
+                    List<PackageInfo> installedPackageInfos = mContext
+                            .createContextAsUser(userHandle, /*flags=*/0)
+                            .getPackageManager()
+                            .getInstalledPackages(/*flags=*/0);
+                    Set<String> packagesToKeep = new ArraySet<>(installedPackageInfos.size());
+                    for (int i = 0; i < installedPackageInfos.size(); i++) {
+                        packagesToKeep.add(installedPackageInfos.get(i).packageName);
+                    }
+                    packagesToKeep.add(VisibilityStore.PACKAGE_NAME);
+                    //TODO(b/145759910) clear visibility setting for package.
+                    impl.prunePackageData(packagesToKeep);
+                }
+            } catch (Throwable t) {
+                Log.e(TAG, "Unable to prune packages for " + user, t);
+            }
+        });
     }
 
     @Override
@@ -1255,9 +1282,6 @@ public class AppSearchManagerService extends SystemService {
      * @param callingUid The actual uid of the caller as determined by Binder.
      * @return the user handle that the call should run as. Will always be a concrete user.
      */
-    // TODO(b/173553485) verifying that the caller has permission to access target user's data
-    // TODO(b/173553485) Handle ACTION_USER_REMOVED broadcast
-    // TODO(b/173553485) Implement SystemService.onUserStopping()
     @NonNull
     private UserHandle handleIncomingUser(@NonNull UserHandle requestedUser, int callingUid) {
         int callingPid = Binder.getCallingPid();
