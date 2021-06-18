@@ -88,15 +88,10 @@ public class VisibilityStoreTest {
         };
 
         // Give ourselves global query permissions
-        AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(
-                        mTemporaryFolder.newFolder(),
-                        mContext,
-                        /*logger=*/ null,
-                        ALWAYS_OPTIMIZE);
-
+        AppSearchImpl appSearchImpl = AppSearchImpl.create(
+                mTemporaryFolder.newFolder(), /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
+        mVisibilityStore = VisibilityStore.create(appSearchImpl, mContext);
         mUid = mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
-        mVisibilityStore = appSearchImpl.getVisibilityStoreLocked();
     }
 
     /**
@@ -122,12 +117,28 @@ public class VisibilityStoreTest {
     }
 
     @Test
+    public void testDoesCallerHaveSystemAccess() {
+        PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
+        when(mockPackageManager
+                .checkPermission(READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName()))
+                .thenReturn(PERMISSION_GRANTED);
+        assertThat(mVisibilityStore.doesCallerHaveSystemAccess(mContext.getPackageName())).isTrue();
+
+        when(mockPackageManager
+                .checkPermission(READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName()))
+                .thenReturn(PERMISSION_DENIED);
+        assertThat(mVisibilityStore.doesCallerHaveSystemAccess(mContext.getPackageName()))
+                .isFalse();
+    }
+
+    @Test
     public void testSetVisibility_platformSurfaceable() throws Exception {
         // Make sure we have global query privileges
         PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
         when(mockPackageManager
                 .checkPermission(READ_GLOBAL_APP_SEARCH_DATA, mContext.getPackageName()))
                 .thenReturn(PERMISSION_GRANTED);
+        assertThat(mVisibilityStore.doesCallerHaveSystemAccess(mContext.getPackageName())).isTrue();
 
         mVisibilityStore.setVisibility(
                 "package",
@@ -140,16 +151,16 @@ public class VisibilityStoreTest {
                                 "package",
                                 "database",
                                 "prefix/schema1",
-                                mContext.getPackageName(),
-                                mUid))
+                                mUid,
+                                /*callerHasSystemAccess=*/ true))
                 .isFalse();
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package",
                                 "database",
                                 "prefix/schema2",
-                                mContext.getPackageName(),
-                                mUid))
+                                mUid,
+                                /*callerHasSystemAccess=*/ true))
                 .isFalse();
 
         // New .setVisibility() call completely overrides previous visibility settings.
@@ -165,24 +176,24 @@ public class VisibilityStoreTest {
                                 "package",
                                 "database",
                                 "prefix/schema1",
-                                mContext.getPackageName(),
-                                mUid))
+                                mUid,
+                                /*callerHasSystemAccess=*/ true))
                 .isFalse();
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package",
                                 "database",
                                 "prefix/schema2",
-                                mContext.getPackageName(),
-                                mUid))
+                                mUid,
+                                /*callerHasSystemAccess=*/ true))
                 .isTrue();
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package",
                                 "database",
                                 "prefix/schema3",
-                                mContext.getPackageName(),
-                                mUid))
+                                mUid,
+                                /*callerHasSystemAccess=*/ true))
                 .isFalse();
 
         // Everything defaults to visible again.
@@ -196,24 +207,24 @@ public class VisibilityStoreTest {
                                 "package",
                                 "database",
                                 "prefix/schema1",
-                                mContext.getPackageName(),
-                                mUid))
+                                mUid,
+                                /*callerHasSystemAccess=*/ true))
                 .isTrue();
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package",
                                 "database",
                                 "prefix/schema2",
-                                mContext.getPackageName(),
-                                mUid))
+                                mUid,
+                                /*callerHasSystemAccess=*/ true))
                 .isTrue();
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package",
                                 "database",
                                 "prefix/schema3",
-                                mContext.getPackageName(),
-                                mUid))
+                                mUid,
+                                /*callerHasSystemAccess=*/ true))
                 .isTrue();
     }
 
@@ -242,13 +253,19 @@ public class VisibilityStoreTest {
                 .thenReturn(PERMISSION_DENIED);
 
         // By default, a schema isn't package accessible.
-        assertThat(
-                        mVisibilityStore.isSchemaSearchableByCaller(
-                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                "prefix/schemaFoo",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isFalse();
-        assertThat(
-                        mVisibilityStore.isSchemaSearchableByCaller(
-                                "package", "database", "prefix/schemaBar", packageNameBar, uidBar))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                "prefix/schemaBar",
+                uidBar,
+                /*callerHasSystemAccess=*/ false))
                 .isFalse();
 
         // Grant package access
@@ -268,9 +285,12 @@ public class VisibilityStoreTest {
         when(mockPackageManager.hasSigningCertificate(
                 packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
                 .thenReturn(false);
-        assertThat(
-                        mVisibilityStore.isSchemaSearchableByCaller(
-                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                "prefix/schemaFoo",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isFalse();
 
         // Should fail if PackageManager doesn't think the package belongs to the uid
@@ -279,9 +299,12 @@ public class VisibilityStoreTest {
         when(mockPackageManager.hasSigningCertificate(
                 packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
                 .thenReturn(true);
-        assertThat(
-                        mVisibilityStore.isSchemaSearchableByCaller(
-                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                "prefix/schemaFoo",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isFalse();
 
         // But if uid and certificate match, then we should have access
@@ -290,9 +313,12 @@ public class VisibilityStoreTest {
         when(mockPackageManager.hasSigningCertificate(
                 packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
                 .thenReturn(true);
-        assertThat(
-                        mVisibilityStore.isSchemaSearchableByCaller(
-                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                "prefix/schemaFoo",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isTrue();
 
         when(mockPackageManager.getPackageUid(eq(packageNameBar), /*flags=*/ anyInt()))
@@ -300,9 +326,12 @@ public class VisibilityStoreTest {
         when(mockPackageManager.hasSigningCertificate(
                 packageNameBar, sha256CertBar, PackageManager.CERT_INPUT_SHA256))
                 .thenReturn(true);
-        assertThat(
-                        mVisibilityStore.isSchemaSearchableByCaller(
-                                "package", "database", "prefix/schemaBar", packageNameBar, uidBar))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                "prefix/schemaBar",
+                uidBar,
+                /*callerHasSystemAccess=*/ false))
                 .isTrue();
 
         // New .setVisibility() call completely overrides previous visibility settings. So
@@ -320,9 +349,12 @@ public class VisibilityStoreTest {
         when(mockPackageManager.hasSigningCertificate(
                 packageNameFoo, sha256CertFoo, PackageManager.CERT_INPUT_SHA256))
                 .thenReturn(true);
-        assertThat(
-                        mVisibilityStore.isSchemaSearchableByCaller(
-                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                "prefix/schemaFoo",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isTrue();
 
         when(mockPackageManager.getPackageUid(eq(packageNameBar), /*flags=*/ anyInt()))
@@ -330,9 +362,12 @@ public class VisibilityStoreTest {
         when(mockPackageManager.hasSigningCertificate(
                 packageNameBar, sha256CertBar, PackageManager.CERT_INPUT_SHA256))
                 .thenReturn(true);
-        assertThat(
-                        mVisibilityStore.isSchemaSearchableByCaller(
-                                "package", "database", "prefix/schemaBar", packageNameBar, uidBar))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                "prefix/schemaBar",
+                uidBar,
+                /*callerHasSystemAccess=*/ false))
                 .isFalse();
     }
 
@@ -363,9 +398,12 @@ public class VisibilityStoreTest {
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))));
 
         // If we can't verify the Foo package that has access, assume it doesn't have access.
-        assertThat(
-                        mVisibilityStore.isSchemaSearchableByCaller(
-                                "package", "database", "prefix/schemaFoo", packageNameFoo, uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                "prefix/schemaFoo",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isFalse();
     }
 
@@ -397,8 +435,8 @@ public class VisibilityStoreTest {
                                 /*packageName=*/ "",
                                 /*databaseName=*/ "",
                                 "schema",
-                                mContext.getPackageName(),
-                                mUid))
+                                mUid,
+                                /*callerHasSystemAccess=*/ true))
                 .isTrue();
 
         when(mockPackageManager.getPackageUid(eq(packageNameFoo), /*flags=*/ anyInt()))
@@ -411,8 +449,8 @@ public class VisibilityStoreTest {
                                 /*packageName=*/ "",
                                 /*databaseName=*/ "",
                                 "schema",
-                                packageNameFoo,
-                                uidFoo))
+                                uidFoo,
+                                /*callerHasSystemAccess=*/ false))
                 .isTrue();
     }
 
