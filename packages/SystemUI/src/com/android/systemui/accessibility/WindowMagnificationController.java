@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Matrix;
@@ -35,6 +36,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -76,6 +78,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         MirrorWindowControl.MirrorWindowDelegate, MagnificationGestureDetector.OnGestureListener {
 
     private static final String TAG = "WindowMagnificationController";
+    @SuppressWarnings("isloggabletaglength")
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG) || Build.IS_DEBUGGABLE;
     // Delay to avoid updating state description too frequently.
     private static final int UPDATE_STATE_DESCRIPTION_DELAY_MS = 100;
     // It should be consistent with the value defined in WindowMagnificationGestureHandler.
@@ -158,14 +162,15 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mRotation = display.getRotation();
 
         mWm = context.getSystemService(WindowManager.class);
-        mWindowBounds = mWm.getCurrentWindowMetrics().getBounds();
+        mWindowBounds = new Rect(mWm.getCurrentWindowMetrics().getBounds());
 
         mResources = mContext.getResources();
         mScale = mResources.getInteger(R.integer.magnification_default_scale);
         mBounceEffectDuration = mResources.getInteger(
                 com.android.internal.R.integer.config_shortAnimTime);
         updateDimensions();
-        setInitialStartBounds();
+        setMagnificationFrameWith(mWindowBounds, mWindowBounds.width() / 2,
+                mWindowBounds.height() / 2);
         computeBounceAnimationScale();
 
         mMirrorWindowControl = mirrorWindowControl;
@@ -286,18 +291,59 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      * @param configDiff a bit mask of the differences between the configurations
      */
     void onConfigurationChanged(int configDiff) {
+        if (DEBUG) {
+            Log.d(TAG, "onConfigurationChanged = " + Configuration.configurationDiffToString(
+                    configDiff));
+        }
+        if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
+            onRotate();
+        }
+
+        if ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0) {
+            updateAccessibilityWindowTitleIfNeeded();
+        }
+
+        boolean reCreateWindow = false;
         if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
             updateDimensions();
             computeBounceAnimationScale();
-            if (isWindowVisible()) {
-                deleteWindowMagnification();
-                enableWindowMagnification(Float.NaN, Float.NaN, Float.NaN);
-            }
-        } else if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
-            onRotate();
-        } else if ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0) {
-            updateAccessibilityWindowTitleIfNeeded();
+            reCreateWindow = true;
         }
+
+        if ((configDiff & ActivityInfo.CONFIG_SCREEN_SIZE) != 0) {
+            reCreateWindow |= handleScreenSizeChanged();
+        }
+
+        // Recreate the window again to correct the window appearance due to density or
+        // window size changed not caused by rotation.
+        if (isWindowVisible() && reCreateWindow) {
+            deleteWindowMagnification();
+            enableWindowMagnification(Float.NaN, Float.NaN, Float.NaN);
+        }
+    }
+
+    /**
+     * Calculates the magnification frame if the window bounds is changed.
+     * Note that the orientation also changes the wind bounds, so it should be handled first.
+     *
+     * @return {@code true} if the magnification frame is changed with the new window bounds.
+     */
+    private boolean handleScreenSizeChanged() {
+        final Rect oldWindowBounds = new Rect(mWindowBounds);
+        final Rect currentWindowBounds = mWm.getCurrentWindowMetrics().getBounds();
+
+        if (currentWindowBounds.equals(oldWindowBounds)) {
+            if (DEBUG) {
+                Log.d(TAG, "updateMagnificationFrame -- window bounds is not changed");
+            }
+            return false;
+        }
+        mWindowBounds.set(currentWindowBounds);
+        final float newCenterX = (getCenterX()) * mWindowBounds.width() / oldWindowBounds.width();
+        final float newCenterY = (getCenterY()) * mWindowBounds.height() / oldWindowBounds.height();
+        setMagnificationFrameWith(mWindowBounds, (int) newCenterX, (int) newCenterY);
+        calculateMagnificationFrameBoundary();
+        return true;
     }
 
     private void updateSystemUIStateIfNeeded() {
@@ -311,30 +357,42 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mWm.updateViewLayout(mMirrorView, params);
     }
 
-    /** Handles MirrorWindow position when the device rotation changed. */
+    /**
+     * Keep MirrorWindow position on the screen unchanged when device rotates 90° clockwise or
+     * anti-clockwise.
+     */
     private void onRotate() {
         final Display display = mContext.getDisplay();
         final int oldRotation = mRotation;
-        mWindowBounds = mWm.getCurrentWindowMetrics().getBounds();
-
-        setMagnificationFrameBoundary();
         mRotation = display.getRotation();
+        final int rotationDegree = getDegreeFromRotation(mRotation, oldRotation);
+        if (rotationDegree == 0 || rotationDegree == 180) {
+            Log.w(TAG, "onRotate -- rotate with the device. skip it");
+            return;
+        }
+        final Rect currentWindowBounds = new Rect(mWm.getCurrentWindowMetrics().getBounds());
+        if (currentWindowBounds.width() != mWindowBounds.height()
+                || currentWindowBounds.height() != mWindowBounds.width()) {
+            Log.w(TAG, "onRotate -- unexpected window height/width");
+            return;
+        }
+
+        mWindowBounds.set(currentWindowBounds);
+
+        calculateMagnificationFrameBoundary();
 
         if (!isWindowVisible()) {
             return;
         }
         // Keep MirrorWindow position on the screen unchanged when device rotates 90°
         // clockwise or anti-clockwise.
-        final int rotationDegree = getDegreeFromRotation(mRotation, oldRotation);
+
         final Matrix matrix = new Matrix();
         matrix.setRotate(rotationDegree);
         if (rotationDegree == 90) {
             matrix.postTranslate(mWindowBounds.width(), 0);
         } else if (rotationDegree == 270) {
             matrix.postTranslate(0, mWindowBounds.height());
-        } else {
-            Log.w(TAG, "Invalid rotation change. " + rotationDegree);
-            return;
         }
         // The rect of MirrorView is going to be transformed.
         LayoutParams params =
@@ -440,12 +498,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         }
     }
 
-    private void setInitialStartBounds() {
+    private void setMagnificationFrameWith(Rect windowBounds, int centerX, int centerY) {
         // Sets the initial frame area for the mirror and places it in the center of the display.
-        final int initSize = Math.min(mWindowBounds.width(), mWindowBounds.height()) / 2
+        final int initSize = Math.min(windowBounds.width(), windowBounds.height()) / 2
                 + 2 * mMirrorSurfaceMargin;
-        final int initX = mWindowBounds.width() / 2 - initSize / 2;
-        final int initY = mWindowBounds.height() / 2 - initSize / 2;
+        final int initX = centerX - initSize / 2;
+        final int initY = centerY - initSize / 2;
         mMagnificationFrame.set(initX, initY, initX + initSize, initY + initSize);
     }
 
@@ -553,7 +611,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mSourceBounds.set(left, top, right, bottom);
     }
 
-    private void setMagnificationFrameBoundary() {
+    private void calculateMagnificationFrameBoundary() {
         // Calculates width and height for magnification frame could exceed out the screen.
         // TODO : re-calculating again when scale is changed.
         // The half width of magnification frame.
@@ -644,7 +702,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 : centerY - mMagnificationFrame.exactCenterY();
         mScale = Float.isNaN(scale) ? mScale : scale;
 
-        setMagnificationFrameBoundary();
+        calculateMagnificationFrameBoundary();
         updateMagnificationFramePosition((int) offsetX, (int) offsetY);
         if (!isWindowVisible()) {
             createMirrorWindow();
@@ -764,6 +822,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         pw.println("      mOverlapWithGestureInsets:" + mOverlapWithGestureInsets);
         pw.println("      mScale:" + mScale);
         pw.println("      mMirrorViewBounds:" + (isWindowVisible() ? mMirrorViewBounds : "empty"));
+        pw.println("      mSourceBounds:"
+                 + (isWindowVisible() ? mSourceBounds : "empty"));
         pw.println("      mSystemGestureTop:" + mSystemGestureTop);
     }
 
