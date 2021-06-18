@@ -38,5 +38,5 @@ interface ActivityThreadInternal {
 
     Application getApplication();
 
-    ArrayList<ComponentCallbacks2> collectComponentCallbacks(boolean includeActivities);
+    ArrayList<ComponentCallbacks2> collectComponentCallbacks(boolean includeUiContexts);
 }
