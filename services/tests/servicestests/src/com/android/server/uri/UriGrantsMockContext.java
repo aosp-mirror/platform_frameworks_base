@@ -135,13 +135,28 @@ public class UriGrantsMockContext extends ContextWrapper {
 
             when(mPmInternal.resolveContentProvider(eq(PKG_CAMERA), anyInt(), eq(userId)))
                     .thenReturn(buildCameraProvider(userId));
+            when(mPmInternal.resolveContentProvider(eq(PKG_CAMERA), anyInt(), eq(userId),
+                    eq(UserHandle.getUid(userId, UID_CAMERA))))
+                    .thenReturn(buildCameraProvider(userId));
             when(mPmInternal.resolveContentProvider(eq(PKG_PRIVATE), anyInt(), eq(userId)))
+                    .thenReturn(buildPrivateProvider(userId));
+            when(mPmInternal.resolveContentProvider(eq(PKG_PRIVATE), anyInt(), eq(userId),
+                    eq(UserHandle.getUid(userId, UID_PRIVATE))))
                     .thenReturn(buildPrivateProvider(userId));
             when(mPmInternal.resolveContentProvider(eq(PKG_PUBLIC), anyInt(), eq(userId)))
                     .thenReturn(buildPublicProvider(userId));
+            when(mPmInternal.resolveContentProvider(eq(PKG_PUBLIC), anyInt(), eq(userId),
+                    eq(UserHandle.getUid(userId, UID_PUBLIC))))
+                    .thenReturn(buildPublicProvider(userId));
             when(mPmInternal.resolveContentProvider(eq(PKG_FORCE), anyInt(), eq(userId)))
                     .thenReturn(buildForceProvider(userId));
+            when(mPmInternal.resolveContentProvider(eq(PKG_FORCE), anyInt(), eq(userId),
+                    eq(UserHandle.getUid(userId, UID_FORCE))))
+                    .thenReturn(buildForceProvider(userId));
             when(mPmInternal.resolveContentProvider(eq(PKG_COMPLEX), anyInt(), eq(userId)))
+                    .thenReturn(buildComplexProvider(userId));
+            when(mPmInternal.resolveContentProvider(eq(PKG_COMPLEX), anyInt(), eq(userId),
+                    eq(UserHandle.getUid(userId, UID_COMPLEX))))
                     .thenReturn(buildComplexProvider(userId));
         }
     }

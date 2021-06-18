@@ -1061,6 +1061,12 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 PackageManager.GET_URI_PERMISSION_PATTERNS | pmFlags, userHandle);
     }
 
+    private ProviderInfo getProviderInfo(String authority, int userHandle, int pmFlags,
+            int callingUid) {
+        return mPmInternal.resolveContentProvider(authority,
+                PackageManager.GET_URI_PERMISSION_PATTERNS | pmFlags, userHandle, callingUid);
+    }
+
     /**
      * Check if the targetPkg can be granted permission to access uri by
      * the callingUid using the given modeFlags.  Throws a security exception
@@ -1106,7 +1112,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
         final String authority = grantUri.uri.getAuthority();
         final ProviderInfo pi = getProviderInfo(authority, grantUri.sourceUserId,
-                MATCH_DEBUG_TRIAGED_MISSING);
+                MATCH_DEBUG_TRIAGED_MISSING, callingUid);
         if (pi == null) {
             Slog.w(TAG, "No content provider found for permission check: " +
                     grantUri.uri.toSafeString());

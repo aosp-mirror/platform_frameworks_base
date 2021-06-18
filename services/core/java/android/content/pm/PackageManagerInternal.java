@@ -566,6 +566,12 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     public abstract ProviderInfo resolveContentProvider(String name, int flags, int userId);
 
     /**
+    * Resolves a content provider intent.
+    */
+    public abstract ProviderInfo resolveContentProvider(String name, int flags, int userId,
+            int callingUid);
+
+    /**
      * Track the creator of a new isolated uid.
      * @param isolatedUid The newly created isolated uid.
      * @param ownerUid The uid of the app that created the isolated process.
