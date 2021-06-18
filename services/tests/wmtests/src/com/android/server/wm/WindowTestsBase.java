@@ -861,6 +861,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private Bundle mIntentExtras;
         private boolean mOnTop = false;
         private ActivityInfo.WindowLayout mWindowLayout;
+        private boolean mVisible = true;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -986,6 +987,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        ActivityBuilder setVisible(boolean visible) {
+            mVisible = visible;
+            return this;
+        }
+
         ActivityRecord build() {
             SystemServicesTestRule.checkHoldsLock(mService.mGlobalLock);
             try {
@@ -1068,9 +1074,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     // root tasks (e.g. home root task).
                     mTask.moveToFront("createActivity");
                 }
-                // Make visible by default...
-                activity.mVisibleRequested = true;
-                activity.setVisible(true);
+                if (mVisible) {
+                    activity.mVisibleRequested = true;
+                    activity.setVisible(true);
+                }
             }
 
             final WindowProcessController wpc;
