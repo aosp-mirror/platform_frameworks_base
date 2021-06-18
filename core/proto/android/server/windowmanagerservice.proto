@@ -278,7 +278,7 @@ message PinnedTaskControllerProto {
 message TaskProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional WindowContainerProto window_container = 1;
+    optional WindowContainerProto window_container = 1 [deprecated=true];
     optional int32 id = 2;
     reserved 3; // activity
     optional bool fills_parent = 4;
@@ -295,12 +295,12 @@ message TaskProto {
     optional string real_activity = 13;
     optional string orig_activity = 14;
 
-    optional int32 display_id = 15;
+    optional int32 display_id = 15 [deprecated=true];
     optional int32 root_task_id = 16;
-    optional int32 activity_type = 17 [(.android.typedef) = "android.app.WindowConfiguration.ActivityType"];
+    optional int32 activity_type = 17 [(.android.typedef) = "android.app.WindowConfiguration.ActivityType", deprecated=true] ;
     optional int32 resize_mode = 18 [(.android.typedef) = "android.appwidget.AppWidgetProviderInfo.ResizeModeFlags"];
-    optional int32 min_width = 19;
-    optional int32 min_height = 20;
+    optional int32 min_width = 19 [deprecated=true];
+    optional int32 min_height = 20 [deprecated=true];
 
     optional .android.graphics.RectProto adjusted_bounds = 21;
     optional .android.graphics.RectProto last_non_fullscreen_bounds = 22;
@@ -312,6 +312,18 @@ message TaskProto {
     optional bool created_by_organizer = 28;
     optional string affinity = 29;
     optional bool has_child_pip_activity = 30;
+    optional TaskFragmentProto task_fragment = 31;
+}
+
+/* represents TaskFragment */
+message TaskFragmentProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional WindowContainerProto window_container = 1;
+    optional int32 display_id = 2;
+    optional int32 activity_type = 3 [(.android.typedef) = "android.app.WindowConfiguration.ActivityType"];
+    optional int32 min_width = 4;
+    optional int32 min_height = 5;
 }
 
 /* represents ActivityRecordProto */
@@ -493,6 +505,8 @@ message WindowContainerChildProto {
     optional WindowTokenProto window_token = 7;
     /* represents a WindowState child */
     optional WindowStateProto window = 8;
+    /* represents a WindowState child */
+    optional TaskFragmentProto task_fragment = 9;
 }
 
 /* represents ConfigurationContainer */
