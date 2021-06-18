@@ -78,33 +78,32 @@ public class ParsedServiceUtils {
 
             setExported = sa.hasValue(R.styleable.AndroidManifestService_exported);
             if (setExported) {
-                service.exported = sa.getBoolean(R.styleable.AndroidManifestService_exported,
-                        false);
+                service.setExported(sa.getBoolean(R.styleable.AndroidManifestService_exported,
+                        false));
             }
 
             String permission = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestService_permission, 0);
             service.setPermission(permission != null ? permission : pkg.getPermission());
 
-            service.foregroundServiceType = sa.getInt(
+            service.setForegroundServiceType(sa.getInt(
                     R.styleable.AndroidManifestService_foregroundServiceType,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
-
-            service.flags |= flag(ServiceInfo.FLAG_STOP_WITH_TASK,
-                    R.styleable.AndroidManifestService_stopWithTask, sa)
-                    | flag(ServiceInfo.FLAG_ISOLATED_PROCESS,
-                    R.styleable.AndroidManifestService_isolatedProcess, sa)
-                    | flag(ServiceInfo.FLAG_EXTERNAL_SERVICE,
-                    R.styleable.AndroidManifestService_externalService, sa)
-                    | flag(ServiceInfo.FLAG_USE_APP_ZYGOTE,
-                    R.styleable.AndroidManifestService_useAppZygote, sa)
-                    | flag(ServiceInfo.FLAG_SINGLE_USER,
-                    R.styleable.AndroidManifestService_singleUser, sa);
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE))
+                    .setFlags(service.getFlags() | (flag(ServiceInfo.FLAG_STOP_WITH_TASK,
+                            R.styleable.AndroidManifestService_stopWithTask, sa)
+                            | flag(ServiceInfo.FLAG_ISOLATED_PROCESS,
+                            R.styleable.AndroidManifestService_isolatedProcess, sa)
+                            | flag(ServiceInfo.FLAG_EXTERNAL_SERVICE,
+                            R.styleable.AndroidManifestService_externalService, sa)
+                            | flag(ServiceInfo.FLAG_USE_APP_ZYGOTE,
+                            R.styleable.AndroidManifestService_useAppZygote, sa)
+                            | flag(ServiceInfo.FLAG_SINGLE_USER,
+                            R.styleable.AndroidManifestService_singleUser, sa)));
 
             visibleToEphemeral = sa.getBoolean(
                     R.styleable.AndroidManifestService_visibleToInstantApps, false);
             if (visibleToEphemeral) {
-                service.flags |= ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP;
+                service.setFlags(service.getFlags() | ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP);
                 pkg.setVisibleToInstantApps(true);
             }
         } finally {
@@ -139,7 +138,7 @@ public class ParsedServiceUtils {
                     parseResult = intentResult;
                     if (intentResult.isSuccess()) {
                         ParsedIntentInfo intent = intentResult.getResult();
-                        service.order = Math.max(intent.getOrder(), service.order);
+                        service.setOrder(Math.max(intent.getOrder(), service.getOrder()));
                         service.addIntent(intent);
                     }
                     break;
@@ -172,7 +171,7 @@ public class ParsedServiceUtils {
                     return input.error(exportedCheckResult);
                 }
             }
-            service.exported = hasIntentFilters;
+            service.setExported(hasIntentFilters);
         }
 
         return input.success(service);

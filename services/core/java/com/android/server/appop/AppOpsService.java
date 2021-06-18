@@ -1816,13 +1816,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                     for (int attributionNum = 0; attributionNum < numAttributions;
                             attributionNum++) {
                         ParsedAttribution attribution = pkg.getAttributions().get(attributionNum);
-                        attributionTags.add(attribution.tag);
+                        attributionTags.add(attribution.getTag());
 
-                        int numInheritFrom = attribution.inheritFrom.size();
+                        int numInheritFrom = attribution.getInheritFrom().size();
                         for (int inheritFromNum = 0; inheritFromNum < numInheritFrom;
                                 inheritFromNum++) {
-                            dstAttributionTags.put(attribution.inheritFrom.get(inheritFromNum),
-                                    attribution.tag);
+                            dstAttributionTags.put(attribution.getInheritFrom().get(inheritFromNum),
+                                    attribution.getTag());
                         }
                     }
                 }
@@ -4616,7 +4616,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (pkg.getAttributions() != null) {
             int numAttributions = pkg.getAttributions().size();
             for (int i = 0; i < numAttributions; i++) {
-                if (pkg.getAttributions().get(i).tag.equals(attributionTag)) {
+                if (pkg.getAttributions().get(i).getTag().equals(attributionTag)) {
                     return true;
                 }
             }

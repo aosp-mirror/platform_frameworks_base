@@ -36,21 +36,21 @@ public class ParsedProvider extends ParsedMainComponent {
     @NonNull
     @DataClass.ParcelWith(ForInternedString.class)
     private String authority;
-    boolean syncable;
+    private boolean syncable;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String readPermission;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String writePermission;
-    boolean grantUriPermissions;
-    boolean forceUriPermissions;
-    boolean multiProcess;
-    int initOrder;
+    private boolean grantUriPermissions;
+    private boolean forceUriPermissions;
+    private boolean multiProcess;
+    private int initOrder;
     @Nullable
-    PatternMatcher[] uriPermissionPatterns;
+    private PatternMatcher[] uriPermissionPatterns;
     @Nullable
-    PathPermission[] pathPermissions;
+    private PathPermission[] pathPermissions;
 
     public ParsedProvider(ParsedProvider other) {
         super(other);
@@ -67,24 +67,58 @@ public class ParsedProvider extends ParsedMainComponent {
         this.pathPermissions = other.pathPermissions;
     }
 
-    public void setAuthority(String authority) {
+    public ParsedProvider setAuthority(String authority) {
         this.authority = TextUtils.safeIntern(authority);
+        return this;
     }
 
-    public void setSyncable(boolean syncable) {
+    public ParsedProvider setForceUriPermissions(boolean forceUriPermissions) {
+        this.forceUriPermissions = forceUriPermissions;
+        return this;
+    }
+
+    public ParsedProvider setGrantUriPermissions(boolean grantUriPermissions) {
+        this.grantUriPermissions = grantUriPermissions;
+        return this;
+    }
+
+    public ParsedProvider setInitOrder(int initOrder) {
+        this.initOrder = initOrder;
+        return this;
+    }
+
+    public ParsedProvider setMultiProcess(boolean multiProcess) {
+        this.multiProcess = multiProcess;
+        return this;
+    }
+
+    public ParsedProvider setPathPermissions(PathPermission[] pathPermissions) {
+        this.pathPermissions = pathPermissions;
+        return this;
+    }
+
+    public ParsedProvider setSyncable(boolean syncable) {
         this.syncable = syncable;
+        return this;
     }
 
-    public void setReadPermission(String readPermission) {
+    public ParsedProvider setReadPermission(String readPermission) {
         // Empty string must be converted to null
         this.readPermission = TextUtils.isEmpty(readPermission)
                 ? null : readPermission.intern();
+        return this;
     }
 
-    public void setWritePermission(String writePermission) {
+    public ParsedProvider setUriPermissionPatterns(PatternMatcher[] uriPermissionPatterns) {
+        this.uriPermissionPatterns = uriPermissionPatterns;
+        return this;
+    }
+
+    public ParsedProvider setWritePermission(String writePermission) {
         // Empty string must be converted to null
         this.writePermission = TextUtils.isEmpty(writePermission)
                 ? null : writePermission.intern();
+        return this;
     }
 
     public String toString() {

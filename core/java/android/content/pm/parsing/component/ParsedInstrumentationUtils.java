@@ -59,10 +59,10 @@ public class ParsedInstrumentationUtils {
             // @formatter:off
             // Note: don't allow this value to be a reference to a resource
             // that may change.
-            instrumentation.setTargetPackage(sa.getNonResourceString(R.styleable.AndroidManifestInstrumentation_targetPackage));
-            instrumentation.setTargetProcesses(sa.getNonResourceString(R.styleable.AndroidManifestInstrumentation_targetProcesses));
-            instrumentation.handleProfiling = sa.getBoolean(R.styleable.AndroidManifestInstrumentation_handleProfiling, false);
-            instrumentation.functionalTest = sa.getBoolean(R.styleable.AndroidManifestInstrumentation_functionalTest, false);
+            instrumentation.setTargetPackage(sa.getNonResourceString(R.styleable.AndroidManifestInstrumentation_targetPackage))
+                    .setTargetProcesses(sa.getNonResourceString(R.styleable.AndroidManifestInstrumentation_targetProcesses))
+                    .setHandleProfiling(sa.getBoolean(R.styleable.AndroidManifestInstrumentation_handleProfiling, false))
+                    .setFunctionalTest(sa.getBoolean(R.styleable.AndroidManifestInstrumentation_functionalTest, false));
             // @formatter:on
         } finally {
             sa.recycle();

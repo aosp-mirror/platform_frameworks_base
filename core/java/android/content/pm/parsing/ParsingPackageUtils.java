@@ -1298,8 +1298,8 @@ public class ParsingPackageUtils {
             final int size = usesPermissions.size();
             for (int i = 0; i < size; i++) {
                 final ParsedUsesPermission usesPermission = usesPermissions.get(i);
-                if (Objects.equals(usesPermission.name, name)) {
-                    if (usesPermission.usesPermissionFlags != usesPermissionFlags) {
+                if (Objects.equals(usesPermission.getName(), name)) {
+                    if (usesPermission.getUsesPermissionFlags() != usesPermissionFlags) {
                         return input.error("Conflicting uses-permissions flags: "
                                 + name + " in package: " + pkg.getPackageName() + " at: "
                                 + parser.getPositionDescription());
@@ -2798,8 +2798,8 @@ public class ParsingPackageUtils {
             if (pkg.getTargetSdkVersion() >= info.sdkVersion) {
                 break;
             }
-            if (!pkg.getRequestedPermissions().contains(info.name)) {
-                pkg.addImplicitPermission(info.name);
+            if (!pkg.getRequestedPermissions().contains(info.getName())) {
+                pkg.addImplicitPermission(info.getName());
             }
         }
     }

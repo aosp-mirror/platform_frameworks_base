@@ -306,8 +306,8 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     }
 
     @Override
-    public PackageImpl setCodePath(@NonNull String value) {
-        this.mPath = value;
+    public PackageImpl setPath(@NonNull String path) {
+        this.mPath = path;
         return this;
     }
 
@@ -381,8 +381,8 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     }
 
     @Override
-    public PackageImpl setBaseCodePath(@NonNull String baseCodePath) {
-        this.mBaseApkPath = TextUtils.safeIntern(baseCodePath);
+    public PackageImpl setBaseApkPath(@NonNull String baseApkPath) {
+        this.mBaseApkPath = TextUtils.safeIntern(baseApkPath);
         return this;
     }
 

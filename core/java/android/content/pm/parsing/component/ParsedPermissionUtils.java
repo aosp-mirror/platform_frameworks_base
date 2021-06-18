@@ -66,9 +66,8 @@ public class ParsedPermissionUtils {
             if (sa.hasValue(
                     R.styleable.AndroidManifestPermission_backgroundPermission)) {
                 if ("android".equals(packageName)) {
-                    permission.backgroundPermission = sa.getNonResourceString(
-                            R.styleable
-                                    .AndroidManifestPermission_backgroundPermission);
+                    permission.setBackgroundPermission(sa.getNonResourceString(
+                            R.styleable.AndroidManifestPermission_backgroundPermission));
                 } else {
                     Slog.w(TAG, packageName + " defines a background permission. Only the "
                             + "'android' package can do that.");
@@ -78,17 +77,14 @@ public class ParsedPermissionUtils {
             // Note: don't allow this value to be a reference to a resource
             // that may change.
             permission.setGroup(sa.getNonResourceString(
-                    R.styleable.AndroidManifestPermission_permissionGroup));
-
-            permission.requestRes = sa.getResourceId(
-                    R.styleable.AndroidManifestPermission_request, 0);
-
-            permission.protectionLevel = sa.getInt(
-                    R.styleable.AndroidManifestPermission_protectionLevel,
-                    PermissionInfo.PROTECTION_NORMAL);
-
-            permission.flags = sa.getInt(
-                    R.styleable.AndroidManifestPermission_permissionFlags, 0);
+                    R.styleable.AndroidManifestPermission_permissionGroup))
+                    .setRequestRes(sa.getResourceId(
+                            R.styleable.AndroidManifestPermission_request, 0))
+                    .setProtectionLevel(sa.getInt(
+                            R.styleable.AndroidManifestPermission_protectionLevel,
+                            PermissionInfo.PROTECTION_NORMAL))
+                    .setFlags(sa.getInt(
+                            R.styleable.AndroidManifestPermission_permissionFlags, 0));
 
             final int knownCertsResource = sa.getResourceId(
                     R.styleable.AndroidManifestPermission_knownCerts, 0);
@@ -108,7 +104,7 @@ public class ParsedPermissionUtils {
                         permission.setKnownCert(knownCert);
                     }
                 }
-                if (permission.knownCerts == null) {
+                if (permission.getKnownCerts() == null) {
                     Slog.w(TAG, packageName + " defines a knownSigner permission but"
                             + " the provided knownCerts resource is null");
                 }
@@ -124,12 +120,12 @@ public class ParsedPermissionUtils {
 
             // For now only platform runtime permissions can be restricted
             if (!permission.isRuntime() || !"android".equals(permission.getPackageName())) {
-                permission.flags &= ~PermissionInfo.FLAG_HARD_RESTRICTED;
-                permission.flags &= ~PermissionInfo.FLAG_SOFT_RESTRICTED;
+                permission.setFlags(permission.getFlags() & ~PermissionInfo.FLAG_HARD_RESTRICTED);
+                permission.setFlags(permission.getFlags() & ~PermissionInfo.FLAG_SOFT_RESTRICTED);
             } else {
                 // The platform does not get to specify conflicting permissions
-                if ((permission.flags & PermissionInfo.FLAG_HARD_RESTRICTED) != 0
-                        && (permission.flags & PermissionInfo.FLAG_SOFT_RESTRICTED) != 0) {
+                if ((permission.getFlags() & PermissionInfo.FLAG_HARD_RESTRICTED) != 0
+                        && (permission.getFlags() & PermissionInfo.FLAG_SOFT_RESTRICTED) != 0) {
                     throw new IllegalStateException("Permission cannot be both soft and hard"
                             + " restricted: " + permission.getName());
                 }
@@ -138,7 +134,8 @@ public class ParsedPermissionUtils {
             sa.recycle();
         }
 
-        permission.protectionLevel = PermissionInfo.fixProtectionLevel(permission.protectionLevel);
+        permission.setProtectionLevel(
+                PermissionInfo.fixProtectionLevel(permission.getProtectionLevel()));
 
         final int otherProtectionFlags = permission.getProtectionFlags()
                 & ~(PermissionInfo.PROTECTION_FLAG_APPOP | PermissionInfo.PROTECTION_FLAG_INSTANT
@@ -188,8 +185,8 @@ public class ParsedPermissionUtils {
                     + permission.getName());
         }
 
-        permission.protectionLevel = PermissionInfo.PROTECTION_NORMAL;
-        permission.tree = true;
+        permission.setProtectionLevel(PermissionInfo.PROTECTION_NORMAL)
+                .setTree(true);
 
         return ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, permission,
                 input);
@@ -219,12 +216,12 @@ public class ParsedPermissionUtils {
             }
 
             // @formatter:off
-            permissionGroup.requestDetailResourceId = sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_requestDetail, 0);
-            permissionGroup.backgroundRequestResourceId = sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_backgroundRequest, 0);
-            permissionGroup.backgroundRequestDetailResourceId = sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_backgroundRequestDetail, 0);
-            permissionGroup.requestRes = sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_request, 0);
-            permissionGroup.flags = sa.getInt(R.styleable.AndroidManifestPermissionGroup_permissionGroupFlags,0);
-            permissionGroup.priority = sa.getInt(R.styleable.AndroidManifestPermissionGroup_priority, 0);
+            permissionGroup.setRequestDetailResourceId(sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_requestDetail, 0))
+                    .setBackgroundRequestResourceId(sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_backgroundRequest, 0))
+                    .setBackgroundRequestDetailResourceId(sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_backgroundRequestDetail, 0))
+                    .setRequestRes(sa.getResourceId(R.styleable.AndroidManifestPermissionGroup_request, 0))
+                    .setPriority(sa.getInt(R.styleable.AndroidManifestPermissionGroup_priority, 0))
+                    .setFlags(sa.getInt(R.styleable.AndroidManifestPermissionGroup_permissionGroupFlags,0));
             // @formatter:on
         } finally {
             sa.recycle();

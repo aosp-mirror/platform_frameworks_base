@@ -56,40 +56,40 @@ class ParsedComponentUtils {
         }
 
         //noinspection ConstantConditions; null check done above with isEmpty
-        component.setName(className);
-        component.setPackageName(packageName);
+        component.setName(className)
+                .setPackageName(packageName);
 
         int roundIconVal = useRoundIcon ? array.getResourceId(roundIconAttr, 0) : 0;
         if (roundIconVal != 0) {
-            component.icon = roundIconVal;
-            component.nonLocalizedLabel = null;
+            component.setIcon(roundIconVal)
+                    .setNonLocalizedLabel(null);
         } else {
             int iconVal = array.getResourceId(iconAttr, 0);
             if (iconVal != 0) {
-                component.icon = iconVal;
-                component.nonLocalizedLabel = null;
+                component.setIcon(iconVal);
+                component.setNonLocalizedLabel(null);
             }
         }
 
         int logoVal = array.getResourceId(logoAttr, 0);
         if (logoVal != 0) {
-            component.logo = logoVal;
+            component.setLogo(logoVal);
         }
 
         int bannerVal = array.getResourceId(bannerAttr, 0);
         if (bannerVal != 0) {
-            component.banner = bannerVal;
+            component.setBanner(bannerVal);
         }
 
         if (descriptionAttr != null) {
-            component.descriptionRes = array.getResourceId(descriptionAttr, 0);
+            component.setDescriptionRes(array.getResourceId(descriptionAttr, 0));
         }
 
         TypedValue v = array.peekValue(labelAttr);
         if (v != null) {
-            component.labelRes = v.resourceId;
+            component.setLabelRes(v.resourceId);
             if (v.resourceId == 0) {
-                component.nonLocalizedLabel = v.coerceToString();
+                component.setNonLocalizedLabel(v.coerceToString());
             }
         }
 
@@ -105,9 +105,9 @@ class ParsedComponentUtils {
         }
         final Property property = result.getResult();
         if (property != null) {
-            component.metaData = property.toBundle(component.metaData);
+            component.setMetaData(property.toBundle(component.getMetaData()));
         }
-        return input.success(component.metaData);
+        return input.success(component.getMetaData());
     }
 
     static ParseResult<Property> addProperty(ParsedComponent component, ParsingPackage pkg,

@@ -31,16 +31,16 @@ public class ParsedMainComponent extends ParsedComponent {
 
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
-    private String processName;
-    boolean directBootAware;
-    boolean enabled = true;
-    boolean exported;
-    int order;
+    protected String processName;
+    protected boolean directBootAware;
+    protected boolean enabled = true;
+    protected boolean exported;
+    protected int order;
 
     @Nullable
-    String splitName;
+    protected String splitName;
     @Nullable
-    String[] attributionTags;
+    protected String[] attributionTags;
 
     public ParsedMainComponent() {
     }
@@ -54,6 +54,11 @@ public class ParsedMainComponent extends ParsedComponent {
         this.order = other.order;
         this.splitName = other.splitName;
         this.attributionTags = other.attributionTags;
+    }
+
+    public ParsedMainComponent setOrder(int order) {
+        this.order = order;
+        return this;
     }
 
     public ParsedMainComponent setProcessName(String processName) {
