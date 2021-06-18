@@ -249,6 +249,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         public void onStateChanged(int newState) {
             mStatusBarState = newState;
         }
+
+        @Override
+        public void onExpandedChanged(boolean isExpanded) {
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                if (cb != null) {
+                    cb.onShadeExpandedChanged(isExpanded);
+                }
+            }
+        }
     };
 
     HashMap<Integer, SimData> mSimDatas = new HashMap<>();
@@ -775,6 +785,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT
                 || msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
             mFingerprintLockedOut = true;
+            if (isUdfpsEnrolled()) {
+                updateFingerprintListeningState();
+            }
         }
 
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -2115,7 +2128,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 || (!getUserCanSkipBouncer(getCurrentUser())
                     && !isEncryptedOrLockdown(getCurrentUser())
                     && !userNeedsStrongAuth()
-                    && userDoesNotHaveTrust);
+                    && userDoesNotHaveTrust
+                    && !mFingerprintLockedOut);
         return shouldListenKeyguardState && shouldListenUserState && shouldListenBouncerState
                 && shouldListenUdfpsState;
     }
@@ -3259,6 +3273,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
             pw.println("    udfpsEnrolled=" + isUdfpsEnrolled());
+            pw.println("    mFingerprintLockedOut=" + mFingerprintLockedOut);
             pw.println("    enabledByUser=" + mBiometricEnabledForUser.get(userId));
             if (isUdfpsEnrolled()) {
                 pw.println("        shouldListenForUdfps=" + shouldListenForFingerprint(true));

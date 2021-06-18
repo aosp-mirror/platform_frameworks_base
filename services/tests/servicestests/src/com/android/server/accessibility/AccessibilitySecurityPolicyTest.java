@@ -595,7 +595,7 @@ public class AccessibilitySecurityPolicyTest {
         serviceInfo.permission = android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE;
         mA11ySecurityPolicy.canRegisterService(serviceInfo);
         verify(mMockAppOpsManager).noteOpNoThrow(AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE,
-                serviceInfo.applicationInfo.uid, serviceInfo.packageName);
+                serviceInfo.applicationInfo.uid, serviceInfo.packageName, null, null);
     }
 
     @Test

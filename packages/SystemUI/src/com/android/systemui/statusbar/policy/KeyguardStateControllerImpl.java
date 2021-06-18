@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.os.Trace;
 
 import androidx.annotation.VisibleForTesting;
@@ -31,6 +32,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 
@@ -50,6 +52,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private static final String AUTH_BROADCAST_KEY = "debug_trigger_auth";
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
+    private final Context mContext;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
@@ -100,6 +103,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     public KeyguardStateControllerImpl(Context context,
             KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils,
             SmartspaceTransitionController smartspaceTransitionController) {
+        mContext = context;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
@@ -240,6 +244,12 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     public boolean canPerformSmartSpaceTransition() {
         return canDismissLockScreen()
                 && mSmartspaceTransitionController.isSmartspaceTransitionPossible();
+    }
+
+    @Override
+    public boolean isKeyguardScreenRotationAllowed() {
+        return SystemProperties.getBoolean("lockscreen.rot_override", false)
+                || mContext.getResources().getBoolean(R.bool.config_enableLockScreenRotation);
     }
 
     @Override
