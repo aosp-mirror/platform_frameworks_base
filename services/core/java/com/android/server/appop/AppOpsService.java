@@ -4001,6 +4001,12 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void finishOperation(IBinder clientId, int code, int uid, String packageName,
             String attributionTag) {
+        mCheckOpsDelegateDispatcher.finishOperation(clientId, code, uid, packageName,
+                attributionTag);
+    }
+
+    private void finishOperationImpl(IBinder clientId, int code, int uid, String packageName,
+            String attributionTag) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
@@ -7505,6 +7511,29 @@ public class AppOpsService extends IAppOpsService.Stub {
                     startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                     skipProxyOperation, proxyAttributionFlags, proxiedAttributionFlsgs,
                     attributionChainId, AppOpsService.this::startProxyOperationImpl);
+        }
+
+        public void finishOperation(IBinder clientId, int code, int uid, String packageName,
+                String attributionTag) {
+            if (mPolicy != null) {
+                if (mCheckOpsDelegate != null) {
+                    mPolicy.finishOperation(clientId, code, uid, packageName, attributionTag,
+                            this::finishDelegateOperationImpl);
+                } else {
+                    mPolicy.finishOperation(clientId, code, uid, packageName, attributionTag,
+                            AppOpsService.this::finishOperationImpl);
+                }
+            } else if (mCheckOpsDelegate != null) {
+                finishDelegateOperationImpl(clientId, code, uid, packageName, attributionTag);
+            } else {
+                finishOperationImpl(clientId, code, uid, packageName, attributionTag);
+            }
+        }
+
+        private void finishDelegateOperationImpl(IBinder clientId, int code, int uid,
+                String packageName, String attributionTag) {
+            mCheckOpsDelegate.finishOperation(clientId, code, uid, packageName, attributionTag,
+                    AppOpsService.this::finishOperationImpl);
         }
 
         public void finishProxyOperation(int code,
