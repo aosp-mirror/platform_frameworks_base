@@ -1640,7 +1640,7 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Եթե միացնեք <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությունը, ձեր սարքը չի օգտագործի էկրանի կողպումը՝ տվյալների գաղտնագրումը բարելավելու համար:"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Ամբողջական վերահսկումն անհրաժեշտ է միայն այն հավելվածներին, որոնք օգնում են ձեզ հատուկ գործառույթներից օգտվելիս։"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Դիտել և կառավարել էկրանը"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Կարող է կարդալ էկրանի ողջ բովանդակությունը և ցուցադրել բովանդակություն այլ հավելվածների վրայից։"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Կարող է կարդալ էկրանի բովանդակությունն ու ցուցադրել այլ հավելվածներում։"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Դիտել և համակարգել գործողությունները"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Կարող է հետագծել ձեր գործողությունները հավելվածներում և սարքակազմի սենսորների վրա, ինչպես նաև հավելվածներում կատարել գործողություններ ձեր անունից։"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Թույլատրել"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Անհայտ դիմանկար"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Անհայտ բնապատկեր"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Չեղարկված է"</string>
@@ -1946,7 +1922,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"Լուսանկարներ և պատկերներ"</string>
     <string name="app_category_social" msgid="2278269325488344054">"Սոցցանցեր և հաղորդակցություն"</string>
     <string name="app_category_news" msgid="1172762719574964544">"Նորություններ և ամսագրեր"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"Քարտեզներ և նավիգացիա"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"Քարտեզներ և նավարկում"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Արդյունավետություն"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Սարքի հիշողություն"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB-ով վրիպազերծում"</string>
@@ -2014,7 +1990,7 @@
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> հավելվածն ուզում է ցուցադրել հատվածներ <xliff:g id="APP_2">%2$s</xliff:g> հավելվածից"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Փոփոխել"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Զանգերի և ծանուցումների համար թրթռոցը միացված է"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Զանգերի և ծանուցումների համար ձայնն անջատված է"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Զանգերի և ծանուցումների համար ձայնն անջատած է"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Համակարգի փոփոխություններ"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Չանհանգստացնել"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Այժմ «Չանհանգստացնել» ռեժիմում ծանուցումները թաքցվում են"</string>

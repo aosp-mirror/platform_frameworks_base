@@ -297,7 +297,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"தொடர்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"இருப்பிடம்"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"இந்தச் சாதனத்தின் இருப்பிடத்தை அறிந்து கொள்ள"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"கேலெண்டர்"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"கேலெண்டரை அணுகலாம்"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"மோனார்க்"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"குவார்டோ"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"பூல்ஸ்கேப்"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"அறியப்படாத நிலைபதிப்பு"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"அறியப்படாத நிலைபரப்பு"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ரத்துசெய்யப்பட்டது"</string>

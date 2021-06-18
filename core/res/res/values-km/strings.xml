@@ -1308,8 +1308,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"កំពុងសាកថ្ម​ឧបករណ៍​ដែលបានភ្ជាប់។ សូមចុចសម្រាប់​ជម្រើសបន្ថែម។"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"បាន​រកឃើញ​គ្រឿង​បរិក្ខារ​សំឡេង​អាណាឡូក"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ឧបករណ៍​ដែលភ្ជាប់​មក​ជាមួយ​មិនត្រូវគ្នា​ជាមួយ​ទូរសព្ទ​នេះទេ។ ចុច​ដើម្បី​ស្វែងយល់​បន្ថែម។"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"បាន​ភ្ជាប់​ការ​ជួសជុលតាម​ USB"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"ចុច​ដើម្បី​បិទ​ការជួសជុលតាម ​USB"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"បាន​ភ្ជាប់​ការ​កែ​កំហុសតាម​ USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"ចុច​ដើម្បី​បិទ​ការកែកំហុសតាម ​USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"ជ្រើស​រើស ដើម្បី​បិទ​ការ​កែ​កំហុសតាម USB ។"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"បានភ្ជាប់​ការជួសជុល​ដោយឥតខ្សែ"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ចុច ដើម្បី​បិទ​ការជួសជុល​ដោយឥតខ្សែ"</string>
@@ -1512,7 +1512,7 @@
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"ជម្រើស​ច្រើន​ទៀត"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="8490227947584914460">"ទំហំផ្ទុករួមខាងក្នុង"</string>
+    <string name="storage_internal" msgid="8490227947584914460">"ឧបករណ៍ផ្ទុកដែលចែករំលែកខាងក្នុង"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"កាត​អេសឌី"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"កាត SD <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"ឧបករណ៍ផ្ទុក USB"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"​មិន​ស្គាល់​បញ្ឈរ"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"មិន​ស្គាល់​ទេសភាព"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"បាន​បោះ​បង់​"</string>

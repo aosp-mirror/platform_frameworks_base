@@ -1105,7 +1105,7 @@
     <string name="redo" msgid="7231448494008532233">"ପୁଣି କରନ୍ତୁ"</string>
     <string name="autofill" msgid="511224882647795296">"ଅଟୋଫିଲ୍‌"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"ଟେକ୍ସଟ୍‍ ଚୟନ"</string>
-    <string name="addToDictionary" msgid="8041821113480950096">"ଶବ୍ଦକୋଷରେ ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="addToDictionary" msgid="8041821113480950096">"ଶବ୍ଦକୋଷରେ ଯୋଡ଼ନ୍ତୁ"</string>
     <string name="deleteText" msgid="4200807474529938112">"ଡିଲିଟ୍‍ କରନ୍ତୁ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ଇନପୁଟ୍ ପଦ୍ଧତି"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ଟେକ୍ସଟ୍‌ କାର୍ଯ୍ୟ"</string>
@@ -1623,7 +1623,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"ଆପଣ ଆପଣଙ୍କର ଅନଲକ୍ ପାଟର୍ନକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଆଙ୍କିଛନ୍ତି। <xliff:g id="NUMBER_1">%2$d</xliff:g> ଥର ଅସଫଳ ଚେଷ୍ଟା ପରେ, ଏକ ଇମେଲ୍ ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରି ଆପଣଙ୍କର Android TV ଡିଭାଇସ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବା ପାଇଁ କୁହାଯିବ। \n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ସେକେଣ୍ଡ ମଧ୍ୟରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"ଆପଣଙ୍କ ଅନଲକ୍‍ ପାଟର୍ନକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଅଙ୍କନ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ ପ୍ରୟାସ ପରେ ଏକ ଇମେଲ୍‍ ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରି ନିଜ ଫୋନ୍‌କୁ ଅନଲକ୍‌ କରିବା ପାଇଁ କୁହାଯିବ।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ବାହାର କରନ୍ତୁ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ମାତ୍ରା ବଢ଼ାଇ ସୁପାରିଶ ସ୍ତର ବଢ଼ାଉଛନ୍ତି? \n\n ଲମ୍ବା ସମୟ ପର୍ଯ୍ୟନ୍ତ ଉଚ୍ଚ ଶବ୍ଦରେ ଶୁଣିଲେ ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତି ଖରାପ ହୋଇପାରେ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ଆକ୍ସେସବିଲିଟି ଶର୍ଟକଟ୍‍ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ସର୍ଟକଟ୍ ଚାଲୁ ଥିବା ବେଳେ, ଉଭୟ ଭଲ୍ୟୁମ୍ ବଟନ୍ 3 ସେକେଣ୍ଡ ପାଇଁ ଦବାଇବା ଦ୍ୱାରା ଏକ ଆକ୍ସେସବିଲିଟି ଫିଚର୍ ଆରମ୍ଭ ହେବ।"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"ମୋନାର୍କ"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"କ୍ୱାର୍ଟୋ"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"ଅଜଣା ପୋର୍ଟ୍ରେଟ୍‍"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"ଅଜଣା ଲ୍ୟାଣ୍ଡସ୍କେପ୍‌"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ବାତିଲ୍‍ କରାଗଲା"</string>

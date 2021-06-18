@@ -97,9 +97,19 @@ class AppErrors {
      * a minimum amount of time; they are removed from it when they are
      * later restarted (hopefully due to some user action).  The value is the
      * time it was added to the list.
+     *
+     * Read access is UNLOCKED, and must either be based on a single lookup
+     * call on the current mBadProcesses instance, or a local copy of that
+     * reference must be made and the local copy treated as the source of
+     * truth.  Mutations are performed by synchronizing on mBadProcessLock,
+     * cloning the existing mBadProcesses instance, performing the mutation,
+     * then changing the volatile "live" mBadProcesses reference to point to the
+     * mutated version.  These operations are very rare compared to lookups:
+     * we intentionally trade additional cost for mutations for eliminating
+     * lock operations from the simple lookup cases.
      */
-    private final ProcessMap<BadProcessInfo> mBadProcesses = new ProcessMap<>();
-
+    private volatile ProcessMap<BadProcessInfo> mBadProcesses = new ProcessMap<>();
+    private final Object mBadProcessLock = new Object();
 
     AppErrors(Context context, ActivityManagerService service, PackageWatchdog watchdog) {
         context.assertRuntimeOverlayThemable();
@@ -109,7 +119,8 @@ class AppErrors {
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId, String dumpPackage) {
-        if (mProcessCrashTimes.getMap().isEmpty() && mBadProcesses.getMap().isEmpty()) {
+        final ProcessMap<BadProcessInfo> badProcesses = mBadProcesses;
+        if (mProcessCrashTimes.getMap().isEmpty() && badProcesses.getMap().isEmpty()) {
             return;
         }
 
@@ -144,8 +155,8 @@ class AppErrors {
 
         }
 
-        if (!mBadProcesses.getMap().isEmpty()) {
-            final ArrayMap<String, SparseArray<BadProcessInfo>> pmap = mBadProcesses.getMap();
+        if (!badProcesses.getMap().isEmpty()) {
+            final ArrayMap<String, SparseArray<BadProcessInfo>> pmap = badProcesses.getMap();
             final int processCount = pmap.size();
             for (int ip = 0; ip < processCount; ip++) {
                 final long btoken = proto.start(AppErrorsProto.BAD_PROCESSES);
@@ -209,9 +220,10 @@ class AppErrors {
             }
         }
 
-        if (!mBadProcesses.getMap().isEmpty()) {
+        final ProcessMap<BadProcessInfo> badProcesses = mBadProcesses;
+        if (!badProcesses.getMap().isEmpty()) {
             boolean printed = false;
-            final ArrayMap<String, SparseArray<BadProcessInfo>> pmap = mBadProcesses.getMap();
+            final ArrayMap<String, SparseArray<BadProcessInfo>> pmap = badProcesses.getMap();
             final int processCount = pmap.size();
             for (int ip = 0; ip < processCount; ip++) {
                 final String pname = pmap.keyAt(ip);
@@ -263,12 +275,27 @@ class AppErrors {
         return needSep;
     }
 
-    boolean isBadProcessLocked(ApplicationInfo info) {
-        return mBadProcesses.get(info.processName, info.uid) != null;
+    boolean isBadProcess(final String processName, final int uid) {
+        // NO LOCKING for the simple lookup
+        return mBadProcesses.get(processName, uid) != null;
     }
 
-    void clearBadProcessLocked(ApplicationInfo info) {
-        mBadProcesses.remove(info.processName, info.uid);
+    void clearBadProcess(final String processName, final int uid) {
+        synchronized (mBadProcessLock) {
+            final ProcessMap<BadProcessInfo> badProcesses = new ProcessMap<>();
+            badProcesses.putAll(mBadProcesses);
+            badProcesses.remove(processName, uid);
+            mBadProcesses = badProcesses;
+        }
+    }
+
+    void markBadProcess(final String processName, final int uid, BadProcessInfo info) {
+        synchronized (mBadProcessLock) {
+            final ProcessMap<BadProcessInfo> badProcesses = new ProcessMap<>();
+            badProcesses.putAll(mBadProcesses);
+            badProcesses.put(processName, uid, info);
+            mBadProcesses = badProcesses;
+        }
     }
 
     void resetProcessCrashTimeLocked(ApplicationInfo info) {
@@ -737,10 +764,10 @@ class AppErrors {
                         app.info.processName);
                 if (!app.isolated) {
                     // XXX We don't have a way to mark isolated processes
-                    // as bad, since they don't have a peristent identity.
-                    mBadProcesses.put(app.info.processName, app.uid,
+                    // as bad, since they don't have a persistent identity.
+                    markBadProcess(app.info.processName, app.uid,
                             new BadProcessInfo(now, shortMsg, longMsg, stackTrace));
-                    mProcessCrashTimes.remove(app.info.processName, app.uid);
+                    mProcessCrashTimes.remove(app.processName, app.uid);
                 }
                 app.bad = true;
                 app.removed = true;

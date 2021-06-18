@@ -103,7 +103,7 @@
     <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"डेटा"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"फ़ैक्स"</string>
-    <string name="serviceClassSMS" msgid="1547664561704509004">"एसएमएस"</string>
+    <string name="serviceClassSMS" msgid="1547664561704509004">"मैसेज (एसएमएस)"</string>
     <string name="serviceClassDataAsync" msgid="2029856900898545984">"Async"</string>
     <string name="serviceClassDataSync" msgid="7895071363569133704">"समन्वयन"</string>
     <string name="serviceClassPacket" msgid="1430642951399303804">"पैकेट"</string>
@@ -212,7 +212,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"वायरलेस चालू करें"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"वायरलेस बंद करें"</string>
     <string name="screen_lock" msgid="2072642720826409809">"स्‍क्रीन लॉक"</string>
-    <string name="power_off" msgid="4111692782492232778">"पावर बंद करें"</string>
+    <string name="power_off" msgid="4111692782492232778">"पावर बंद"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"रिंगर बंद"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"रिंगर कंपन (वाइब्रेशन)"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"रिंगर चालू"</string>
@@ -236,10 +236,10 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV डिवाइस में फ़ोन से जुड़े विकल्प"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"फ़ोन विकल्‍प"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"स्‍क्रीन लॉक"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"पावर बंद करें"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"पावर बंद"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"पावर"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"रीस्टार्ट करें"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"आपातकालीन"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"आपातकाल"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"गड़बड़ी की रिपोर्ट"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"सत्र खत्म करें"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"स्क्रीनशॉट"</string>
@@ -299,7 +299,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"इस डिवाइस की जगह तक पहुंचने दें"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"कैलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"अपने कैलेंडर को ऐक्सेस करने"</string>
-    <string name="permgrouplab_sms" msgid="795737735126084874">"एसएमएस"</string>
+    <string name="permgrouplab_sms" msgid="795737735126084874">"मैसेज (एसएमएस)"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"मैसेज (एसएमएस) भेजें और देखें"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"फ़ाइलें और मीडिया"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"अपने डिवाइस पर मौजूद फ़ोटो, मीडिया और फ़ाइलें ऐक्सेस करने की"</string>
@@ -1638,9 +1638,9 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"बंद है"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> को अपना डिवाइस पूरी तरह कंट्रोल करने की मंज़ूरी दें?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"अगर आप <xliff:g id="SERVICE">%1$s</xliff:g> को चालू करते हैं, तो डेटा को एन्क्रिप्ट (सुरक्षित) करने के तरीके को बेहतर बनाने के लिए आपका डिवाइस सेट किए गए स्क्रीन लॉक का इस्तेमाल नहीं करेगा."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"पूरी तरह कंट्रोल करने की अनुमति उन ऐप्लिकेशन के लिए ठीक है जो सुलभता से जुड़ी ज़रूरतों के लिए बने हैं, लेकिन ज़्यादातर ऐप्लिकेशन के लिए यह ठीक नहीं है."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन को देखें और कंट्रोल करें"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यह स्क्रीन पर दिखने वाली हर तरह के कॉन्टेंट को पढ़ सकता है और उसे दूसरे ऐप्लिकेशन पर दिखा सकता है."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"पूरी तरह नियंत्रित करने की अनुमति उन ऐप्लिकेशन के लिए ठीक है जो सुलभता से जुड़ी ज़रूरतों के लिए बने हैं, लेकिन ज़्यादातर ऐप्लिकेशन के लिए यह ठीक नहीं है."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन को देखें और नियंत्रित करें"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यह स्क्रीन पर दिखने वाली हर तरह की सामग्री को पढ़ सकता है और उसे दूसरे ऐप्लिकेशन पर दिखा सकता है."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"देखें और कार्रवाई करें"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यह आपके और किसी ऐप्लिकेशन या हार्डवेयर सेंसर के बीच होने वाले इंटरैक्शन को ट्रैक कर सकता है और आपकी तरफ़ से ऐप्लिकेशन के साथ इंटरैक्ट कर सकता है."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दें"</string>
@@ -1664,7 +1664,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"एक सुविधा से दूसरी सुविधा पर जाने के लिए, सुलभता बटन दबाकर रखें."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"एक सुविधा से दूसरी सुविधा पर जाने के लिए, स्क्रीन पर दो उंगलियों से ऊपर की ओर स्वाइप करें और थोड़ी देर तक उंगलियां स्क्रीन पर रखे रहें."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"एक सुविधा से दूसरी सुविधा पर जाने के लिए, स्क्रीन पर तीन उंगलियों से ऊपर की ओर स्वाइप करें और थोड़ी देर तक उंगलियां स्क्रीन पर रखे रहें."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ज़ूम करने की सुविधा"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"बड़ा करना"</string>
     <string name="user_switched" msgid="7249833311585228097">"मौजूदा उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> पर स्विच किया जा रहा है…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> द्वारा प्रस्‍थान किया जा रहा है…"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"मोनार्क"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"क्वार्टो"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"फ़ूल्ज़कैप"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"काहु"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"काकु2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"यौ4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"अज्ञात पोर्ट्रेट"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"अज्ञात लैंडस्केप"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"रद्द कर दी गई"</string>
@@ -1949,7 +1925,7 @@
     <string name="app_category_maps" msgid="6395725487922533156">"Maps और नेविगेशन ऐप्लिकेशन"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"उत्पादकता"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"डिवाइस में जगह"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करना"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB डीबग करना"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"घंटा"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"मिनट"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"समय सेट करें"</string>

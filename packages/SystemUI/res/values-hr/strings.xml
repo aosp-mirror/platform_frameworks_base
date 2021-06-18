@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dopusti"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje pogrešaka putem USB-a nije dopušteno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutačno prijavljen na ovaj uređaj ne može uključiti otklanjanje pogrešaka putem USB-a. Da biste upotrebljavali tu značajku, prijeđite na primarnog korisnika."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Želite li dopustiti bežično otklanjanje pogrešaka na ovoj mreži?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Dopuštate li bežično otklanjanje pogrešaka na ovoj mreži?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Naziv mreže (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fija (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Uvijek dopusti na ovoj mreži"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Dopusti"</string>
@@ -389,7 +389,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Svjetlina"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTOMATSKI"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Zamjena boja"</string>
-    <string name="quick_settings_color_space_label" msgid="537528291083575559">"Način korekcije boja"</string>
+    <string name="quick_settings_color_space_label" msgid="537528291083575559">"Način korekcije boje"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Više  postavki"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Gotovo"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Povezano"</string>
@@ -596,7 +596,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikacija je prikvačena"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite i zadržite Natrag i Pregled da biste ga otkvačili."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite gumbe Natrag i Početna i zadržite pritisak da biste ga otkvačili."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Aplikacija će ostati u prvom planu dok je ne otkvačite. Prijeđite prstom prema gore i zadržite da biste je otkvačili."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Prijeđite prstom prema gore i zadržite da biste ga otkvačili."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite i zadržite Pregled da biste ga otkvačili."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite gumb Početna i zadržite pritisak da biste ga otkvačili."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Osobni podaci mogu biti dostupni (na primjer kontakti i sadržaj e-pošte)."</string>
@@ -1039,7 +1039,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Prozor za povećavanje"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrole prozora za povećavanje"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Kontrole uređaja"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodajte kontrole za povezane uređaje"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodavanje kontrola za povezane uređaje"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Postavljanje kontrola uređaja"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Dulje pritisnite tipku za uključivanje/isključivanje da biste pristupili kontrolama"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Odabir aplikacije za dodavanje kontrola"</string>
@@ -1056,7 +1056,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"uklonili iz favorita"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Premjestite na položaj <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrole"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Odaberite kontrole kojima želite pristupati iz izbornika tipke za uključivanje/isključivanje"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Odaberite kontrole kojima želite pristupati iz izbornika napajanja"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Zadržite i povucite da biste promijenili raspored kontrola"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve su kontrole uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu spremljene"</string>

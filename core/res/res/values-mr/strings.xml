@@ -269,7 +269,7 @@
     <string name="notification_hidden_text" msgid="2835519769868187223">"नवीन सूचना"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"व्हर्च्युअल कीबोर्ड"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"वास्तविक कीबोर्ड"</string>
-    <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षा"</string>
+    <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षितता"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"कार मोड"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"खाते स्थिती"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"डेव्हलपर मेसेज"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"अज्ञात पोट्रेट"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"अज्ञात लँडस्केप"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"रद्द केले"</string>

@@ -148,6 +148,11 @@ public class CarKeyguardViewController extends OverlayViewController implements
     }
 
     @Override
+    protected int getFocusAreaViewId() {
+        return R.id.keyguard_container;
+    }
+
+    @Override
     protected boolean shouldShowNavigationBarInsets() {
         return true;
     }
@@ -233,9 +238,6 @@ public class CarKeyguardViewController extends OverlayViewController implements
     public void setOccluded(boolean occluded, boolean animate) {
         mIsOccluded = occluded;
         getOverlayViewGlobalStateController().setOccluded(occluded);
-        if (!occluded) {
-            reset(/* hideBouncerWhenShowing= */ false);
-        }
     }
 
     @Override

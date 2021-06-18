@@ -1638,10 +1638,10 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"OFF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vuoi consentire a <xliff:g id="SERVICE">%1$s</xliff:g> di avere il controllo totale del tuo dispositivo?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Se attivi <xliff:g id="SERVICE">%1$s</xliff:g>, il dispositivo non utilizzerà il blocco schermo per migliorare la crittografia dei dati."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Il controllo totale è appropriato per le app che rispondono alle tue esigenze di accessibilità, ma non per gran parte delle app."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Visualizzare e controllare lo schermo"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Il pieno controllo è appropriato per le app che rispondono alle tue esigenze di accessibilità, ma non per gran parte delle app."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Visualizza e controlla lo schermo"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Può leggere i contenuti presenti sullo schermo e mostrare i contenuti su altre app."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Visualizzare ed eseguire azioni"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Visualizza ed esegui azioni"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Può tenere traccia delle tue interazioni con un\'app o un sensore hardware e interagire con app per tuo conto."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Consenti"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Rifiuta"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Carta protocollo"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Verticale sconosciuto"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Orizzontale sconosciuto"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Annullato"</string>
@@ -1913,7 +1889,7 @@
     <string name="locale_search_menu" msgid="6258090710176422934">"Cerca"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"App non disponibile"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> non è al momento disponibile. Viene gestita tramite <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
-    <string name="app_suspended_more_details" msgid="211260942831587014">"Scopri di più"</string>
+    <string name="app_suspended_more_details" msgid="211260942831587014">"Ulteriori informazioni"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Riattiva app"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Attivare il profilo di lavoro?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Le tue app di lavoro, le notifiche, i dati e altri elementi del profilo di lavoro saranno attivati."</string>

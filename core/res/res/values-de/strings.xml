@@ -1638,7 +1638,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"AUS"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> die vollständige Kontrolle über dein Gerät geben?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Wenn du <xliff:g id="SERVICE">%1$s</xliff:g> aktivierst, verwendet dein Gerät nicht die Displaysperre, um die Datenverschlüsselung zu verbessern."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Die vollständige Kontrolle sollte nur für Apps aktiviert werden, die dir Zugang zu App-Funktionen erleichtern. Das ist in der Regel nur ein kleiner Teil der Apps."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Die vollständige Kontrolle sollte nur für die Apps aktiviert werden, die dir den Zugang zu den App-Funktionen erleichtern. Das ist in der Regel nur ein kleiner Teil der Apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Bildschirm aufrufen und steuern"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Die Funktion kann alle Inhalte auf dem Bildschirm lesen und diese Inhalte über andere Apps anzeigen."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Aktionen aufrufen und durchführen"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Unbekannt – Hochformat"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Unbekannt – Querformat"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Abgebrochen"</string>
@@ -1821,8 +1797,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie „Hey Google“ werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie „Hey Google“ werden abgeschaltet oder eingeschränkt"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
@@ -1958,7 +1934,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"In den Texteingabemodus wechseln, um die Uhrzeit einzugeben."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"In den Uhrzeitmodus wechseln, um die Uhrzeit einzugeben."</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Optionen für automatisches Ausfüllen"</string>
-    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Für „Automatisches Ausfüllen“ speichern"</string>
+    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Für \"Automatisches Ausfüllen\" speichern"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Inhalte können nicht automatisch ausgefüllt werden"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Keine Vorschläge für automatisches Ausfüllen"</string>
     <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">

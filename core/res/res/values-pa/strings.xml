@@ -297,7 +297,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ਟਿਕਾਣਾ"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ਇਸ ਡੀਵਾਈਸ ਦੇ ਨਿਰਧਾਰਤ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚੋ"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"ਕੈਲੰਡਰ"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਦੇਖੋ"</string>
@@ -1640,7 +1640,7 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ਜੇਕਰ ਤੁਸੀਂ <xliff:g id="SERVICE">%1$s</xliff:g> ਚਾਲੂ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਇਨਕ੍ਰਿਪਸ਼ਨ ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰੇਗਾ।"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ਪੂਰਾ ਕੰਟਰੋਲ ਉਹਨਾਂ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਹੈ ਜੋ ਪਹੁੰਚਯੋਗਤਾ ਸੰਬੰਧੀ ਲੋੜਾਂ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕਰਦੀਆਂ ਹਨ, ਪਰ ਜ਼ਿਆਦਾਤਰ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਨਹੀਂ ਹੁੰਦਾ।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ਸਕ੍ਰੀਨ ਨੂੰ ਦੇਖੋ ਅਤੇ ਕੰਟਰੋਲ ਕਰੋ"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ਇਹ ਸਕ੍ਰੀਨ \'ਤੇ ਸਾਰੀ ਸਮੱਗਰੀ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ ਦੂਜੀਆਂ ਐਪਾਂ ਦੇ ਉੱਪਰ ਦਿਖਾ ਸਕਦੀ ਹੈ।"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ਇਹ ਸਕ੍ਰੀਨ \'ਤੇ ਸਾਰੀ ਸਮੱਗਰੀ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ ਦੂਜੀਆਂ ਐਪਾਂ ਦੇ ਉੱਪਰ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ਕਾਰਵਾਈਆਂ ਦੇਖੋ ਅਤੇ ਕਰੋ"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ਇਹ ਕਿਸੇ ਐਪ ਜਾਂ ਹਾਰਡਵੇਅਰ ਸੈਂਸਰ ਦੇ ਨਾਲ ਤੁਹਾਡੀਆਂ ਅੰਤਰਕਿਰਿਆਵਾਂ ਨੂੰ ਟਰੈਕ ਕਰ ਸਕਦੀ ਹੈ, ਅਤੇ ਤੁਹਾਡੀ ਤਰਫ਼ੋਂ ਐਪਾਂ ਦੇ ਨਾਲ ਅੰਤਰਕਿਰਿਆ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ਕਰਨ ਦਿਓ"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"ਸਮਰਾਟ"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"ਚੁਪੱਤਰੀ"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"ਅਗਿਆਤ ਪੋਰਟਰੇਟ"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"ਅਗਿਆਤ ਲੈਂਡਸਕੇਪ"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ਰੱਦ ਕੀਤਾ ਗਿਆ"</string>
@@ -1906,7 +1882,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"ਕੀ <xliff:g id="APP">%1$s</xliff:g> ਨੂੰ <xliff:g id="ACCOUNT">%2$s</xliff:g> ਨਾਲ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਬਣਾਉਣ ਦੀ ਇਜਾਜ਼ਤ ਦੇਣੀ ਹੈ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ਇੱਕ ਭਾਸ਼ਾ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ਖੇਤਰ ਤਰਜੀਹ"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"ਭਾਸ਼ਾ ਦਾ ਨਾਮ ਟਾਈਪ ਕਰੋ"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"ਭਾਸ਼ਾ ਨਾਮ ਟਾਈਪ ਕਰੋ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ਸੁਝਾਈਆਂ ਗਈਆਂ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ਸਾਰੀਆਂ ਭਾਸ਼ਾਵਾਂ"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"ਸਾਰੇ ਖੇਤਰ"</string>
