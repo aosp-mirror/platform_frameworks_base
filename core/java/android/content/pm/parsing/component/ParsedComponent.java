@@ -172,7 +172,7 @@ public abstract class ParsedComponent implements Parcelable {
         this.packageName = sForInternedString.unparcel(in);
         this.intents = sForIntentInfos.unparcel(in);
         this.metaData = in.readBundle(boot);
-        this.mProperties = in.createTypedArrayMap(Property.CREATOR);
+        this.mProperties = in.readHashMap(boot);
     }
 
     @NonNull
