@@ -104,15 +104,14 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
             float percentDistanceFromCenter) {
         CharSequence centerCardText = getLabelText(centerCard);
         Drawable centerCardIcon = getHeaderIcon(mContext, centerCard);
-        if (!TextUtils.equals(mCenterCardText, centerCardText)) {
-            mCenterCardText = centerCardText;
+        renderActionButton(centerCard, mIsDeviceLocked, mIsUdfpsEnabled);
+        if (centerCard.isUiEquivalent(nextCard)) {
+            mCardLabel.setAlpha(1f);
+            mIcon.setAlpha(1f);
+            mActionButton.setAlpha(1f);
+        } else {
             mCardLabel.setText(centerCardText);
             mIcon.setImageDrawable(centerCardIcon);
-        }
-        renderActionButton(centerCard, mIsDeviceLocked, mIsUdfpsEnabled);
-        if (TextUtils.equals(centerCardText, getLabelText(nextCard))) {
-            mCardLabel.setAlpha(1f);
-        } else {
             mCardLabel.setAlpha(percentDistanceFromCenter);
             mIcon.setAlpha(percentDistanceFromCenter);
             mActionButton.setAlpha(percentDistanceFromCenter);
@@ -141,6 +140,7 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         mErrorView.setVisibility(GONE);
         mEmptyStateView.setVisibility(GONE);
         mIcon.setImageDrawable(getHeaderIcon(mContext, data.get(selectedIndex)));
+        mCardLabel.setText(getLabelText(data.get(selectedIndex)));
         renderActionButton(data.get(selectedIndex), isDeviceLocked, mIsUdfpsEnabled);
         if (shouldAnimate) {
             animateViewsShown(mIcon, mCardLabel, mActionButton);
@@ -248,20 +248,20 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     private void renderActionButton(
             WalletCardViewInfo walletCard, boolean isDeviceLocked, boolean isUdfpsEnabled) {
         CharSequence actionButtonText = getActionButtonText(walletCard);
-        if (!isUdfpsEnabled && isDeviceLocked) {
+        if (!isUdfpsEnabled && actionButtonText != null) {
             mActionButton.setVisibility(VISIBLE);
-            mActionButton.setText(R.string.wallet_action_button_label_unlock);
-            mActionButton.setOnClickListener(mDeviceLockedActionOnClickListener);
-        } else if (!isDeviceLocked && actionButtonText != null) {
             mActionButton.setText(actionButtonText);
-            mActionButton.setVisibility(VISIBLE);
-            mActionButton.setOnClickListener(v -> {
-                try {
-                    walletCard.getPendingIntent().send();
-                } catch (PendingIntent.CanceledException e) {
-                    Log.w(TAG, "Error sending pending intent for wallet card");
-                }
-            });
+            mActionButton.setOnClickListener(
+                    isDeviceLocked
+                            ? mDeviceLockedActionOnClickListener
+                            : v -> {
+                        try {
+                            walletCard.getPendingIntent().send();
+                        } catch (PendingIntent.CanceledException e) {
+                            Log.w(TAG, "Error sending pending intent for wallet card.");
+                        }
+                    }
+            );
         } else {
             mActionButton.setVisibility(GONE);
         }

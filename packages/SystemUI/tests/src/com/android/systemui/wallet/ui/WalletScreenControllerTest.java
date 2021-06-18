@@ -67,7 +67,6 @@ import java.util.Collections;
 @SmallTest
 public class WalletScreenControllerTest extends SysuiTestCase {
 
-    private static final int MAX_CARDS = 10;
     private static final int CARD_CAROUSEL_WIDTH = 10;
     private static final String CARD_ID_1 = "card_id_1";
     private static final String CARD_ID_2 = "card_id_2";
@@ -158,7 +157,7 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
         GetWalletCardsResponse response =
                 new GetWalletCardsResponse(
-                        Collections.singletonList(createWalletCard(mContext)), 0);
+                        Collections.singletonList(createLockedWalletCard(mContext)), 0);
 
         mController.queryWalletCards();
         mTestableLooper.processAllMessages();
@@ -403,6 +402,15 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         return new WalletCard.Builder(CARD_ID_2, createIcon(), "•••• 5678", pendingIntent)
                 .setCardIcon(createIcon())
                 .setCardLabel("Not set up\nVerify now")
+                .build();
+    }
+
+    private WalletCard createLockedWalletCard(Context context) {
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
+        return new WalletCard.Builder(CARD_ID_2, createIcon(), "•••• 5679", pendingIntent)
+                .setCardIcon(createIcon())
+                .setCardLabel("Locked\nUnlock to pay")
                 .build();
     }
 
