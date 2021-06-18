@@ -874,7 +874,7 @@
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"הצגת שעות, דקות ושניות"</item>
     <item msgid="1271006222031257266">"הצגת שעות ודקות (ברירת מחדל)"</item>
-    <item msgid="6135970080453877218">"לא להציג את הסמל הזה"</item>
+    <item msgid="6135970080453877218">"בלי הסמל הזה"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="7714004721411852551">"תמיד להציג באחוזים"</item>

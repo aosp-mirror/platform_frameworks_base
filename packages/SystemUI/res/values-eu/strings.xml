@@ -151,7 +151,7 @@
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Erabili PINa"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Erabili eredua"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Erabili pasahitza"</string>
-    <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN kodea ez da zuzena"</string>
+    <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PINa ez da zuzena"</string>
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Eredua ez da zuzena"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Pasahitza ez da zuzena"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Saiakera oker gehiegi egin dituzu.\nSaiatu berriro <xliff:g id="NUMBER">%d</xliff:g> segundo barru."</string>
