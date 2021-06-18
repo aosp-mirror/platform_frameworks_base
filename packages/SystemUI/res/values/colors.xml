@@ -93,7 +93,7 @@
     <color name="notification_material_background_dark_color">#ff333333</color>
 
     <!-- The color of the dividing line between grouped notifications. -->
-    <color name="notification_divider_color">#FF616161</color>
+    <color name="notification_divider_color">@*android:color/background_device_default_light</color>
 
     <!-- The color of the ripples on the untinted notifications -->
     <color name="notification_ripple_untinted_color">#28000000</color>

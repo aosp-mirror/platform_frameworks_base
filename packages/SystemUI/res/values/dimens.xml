@@ -685,7 +685,7 @@
     <dimen name="notification_shadow_radius">0dp</dimen>
 
     <!-- The alpha of the dividing line between child notifications of a notification group. -->
-    <item name="notification_divider_alpha" format="float" type="dimen">0.5</item>
+    <item name="notification_divider_alpha" format="float" type="dimen">1</item>
 
     <!-- The height of the divider between the individual notifications in a notification
          group. -->
