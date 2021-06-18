@@ -4814,8 +4814,15 @@ public class UserManagerService extends IUserManager.Stub {
         final int userSerial = userInfo.serialNumber;
         // Migrate only if build fingerprints mismatch
         boolean migrateAppsData = !Build.FINGERPRINT.equals(userInfo.lastLoggedInFingerprint);
+
+        final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("prepareUserData-" + userId);
         mUserDataPreparer.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_CE);
+        t.traceEnd();
+
+        t.traceBegin("reconcileAppsData-" + userId);
         mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE, migrateAppsData);
+        t.traceEnd();
     }
 
     /**
