@@ -23,6 +23,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
@@ -423,6 +424,7 @@ public class ParsedActivity extends ParsedMainComponent {
         }
     }
 
+    @NonNull
     public static final Parcelable.Creator<ParsedActivity> CREATOR = new Creator<ParsedActivity>() {
         @Override
         public ParsedActivity createFromParcel(Parcel source) {
@@ -511,10 +513,6 @@ public class ParsedActivity extends ParsedMainComponent {
     @Nullable
     public Float getMinAspectRatio() {
         return minAspectRatio;
-    }
-
-    public boolean getSupportsSizeChanges() {
-        return supportsSizeChanges;
     }
 
     @Nullable

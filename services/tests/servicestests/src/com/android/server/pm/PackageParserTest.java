@@ -949,7 +949,7 @@ public class PackageParserTest {
                 .addConfigPreference(new ConfigurationInfo())
                 .addReqFeature(new FeatureInfo())
                 .addFeatureGroup(new FeatureGroupInfo())
-                .setCompileSdkVersionCodename("foo23")
+                .setCompileSdkVersionCodeName("foo23")
                 .setCompileSdkVersion(100)
                 .setOverlayCategory("foo24")
                 .setOverlayIsStatic(true)

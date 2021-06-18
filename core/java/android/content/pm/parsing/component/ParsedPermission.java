@@ -16,6 +16,7 @@
 
 package android.content.pm.parsing.component;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PermissionInfo;
 import android.os.Parcel;
@@ -167,6 +168,7 @@ public class ParsedPermission extends ParsedComponent {
         this.knownCerts = sForStringSet.unparcel(in);
     }
 
+    @NonNull
     public static final Parcelable.Creator<ParsedPermission> CREATOR =
             new Parcelable.Creator<ParsedPermission>() {
                 @Override
