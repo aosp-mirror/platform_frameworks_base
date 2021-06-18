@@ -1221,6 +1221,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     TopResumedActivityChangeItem.obtain(onTop));
         } catch (RemoteException e) {
             // If process died, whatever.
+            Slog.w(TAG, "Failed to send top-resumed=" + onTop + " to " + this, e);
             return false;
         }
         return true;
