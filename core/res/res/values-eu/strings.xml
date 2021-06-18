@@ -866,11 +866,11 @@
     <string name="keyguard_password_enter_pin_code" msgid="6401406801060956153">"Idatzi PIN kodea"</string>
     <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"Idatzi PUKa eta PIN berria"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="2825313071899938305">"PUK kodea"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"PIN berria"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"PIN kode berria"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"Sakatu pasahitza idazteko"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"Idatzi desblokeatzeko pasahitza"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Idatzi desblokeatzeko PIN kodea"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"PIN kode okerra."</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Idatzi desblokeatzeko PINa"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"PIN kodea okerra da."</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"Desblokeatzeko, sakatu Menua eta, ondoren, 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"Larrialdietarako zenbakia"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"Ez dago zerbitzurik"</string>
@@ -1458,10 +1458,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Paketeak ezabatzeko eskatzea baimentzen die aplikazioei."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"eskatu bateria-optimizazioei ez ikusi egitea"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Bateriaren optimizazioei ez ikusi egiteko baimena eskatzea baimentzen die aplikazioei."</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"Kontsultatu pakete guztiak"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Instalatutako pakete guztiak ikusteko baimena ematen dio aplikazioari."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Sakatu birritan zooma kontrolatzeko"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Ezin izan da widgeta gehitu."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Joan"</string>
@@ -1649,14 +1647,14 @@
       <item quantity="one">Saiatu berriro segundo bat igarotakoan.</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Marraztu eredua"</string>
-    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Idatzi SIMaren PIN kodea"</string>
+    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Idatzi SIMaren PINa"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Idatzi PINa"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Idatzi pasahitza"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIMa desgaitu egin da. Jarraitzeko, idatzi PUK kodea. Xehetasunak lortzeko, jarri operadorearekin harremanetan."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Idatzi erabili nahi duzun PIN kodea"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Berretsi erabili nahi duzun PIN kodea"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM txartela desblokeatzen…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN okerra."</string>
+    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN kodea okerra da."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Idatzi 4 eta 8 zenbaki arteko PINa."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK kodeak 8 zenbaki izan behar ditu."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betiko desgaituko da SIMa."</string>
@@ -1835,13 +1833,13 @@
     <string name="reason_service_unavailable" msgid="5288405248063804713">"Inprimatze-zerbitzua ez dago gaituta"</string>
     <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g> zerbitzua instalatu da"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"Sakatu gaitzeko"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Idatzi administratzailearen PIN kodea"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Idatzi administratzailearen PINa"</string>
     <string name="restr_pin_enter_pin" msgid="373139384161304555">"Idatzi PINa"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"Okerra"</string>
     <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"Oraingo PINa"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"PIN berria"</string>
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Berretsi PIN berria"</string>
-    <string name="restr_pin_create_pin" msgid="917067613896366033">"Konfiguratu debekuak aldatu ahal izateko idatzi beharko den PIN kodea"</string>
+    <string name="restr_pin_create_pin" msgid="917067613896366033">"Konfiguratu debekuak aldatu ahal izateko idatzi beharko den PINa"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PINak ez datoz bat. Saiatu berriro."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINa laburregia da. Lau digitu izan behar ditu gutxienez."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
@@ -2168,11 +2166,11 @@
     <string name="miniresolver_open_in_work" msgid="152208044699347924">"Laneko profileko <xliff:g id="APP">%s</xliff:g> aplikazioan ireki nahi duzu?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Erabili arakatzaile pertsonala"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Erabili laneko arakatzailea"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIMaren sarearen bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIMaren sarearen bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIMaren sareko azpimultzoaren bidez desblokeatzeko PINa"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Enpresaren SIMaren bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"SIMaren zerbitzu-hornitzailearen bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"SIMaren bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Enpresaren SIMaren bidez desblokeatzeko PINa"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"SIMaren zerbitzu-hornitzailearen bidez desblokeatzeko PINa"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"SIMaren bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"Idatzi PUK kodea"</string>
@@ -2181,9 +2179,9 @@
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIMaren 1 motako sarearen bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIMaren 2 motako sarearen bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"HRPD sarearen bidez desblokeatzeko PINa"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"Enpresaren RUIMaren bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"RUIMaren zerbitzu-hornitzailearen bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"RUIMaren bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"Enpresaren RUIMaren bidez desblokeatzeko PINa"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"RUIMaren zerbitzu-hornitzailearen bidez desblokeatzeko PINa"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"RUIMaren bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"Idatzi PUK kodea"</string>
@@ -2191,8 +2189,8 @@
     <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"Idatzi PUK kodea"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"SPNaren bidez desblokeatzeko PINa"</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"Zerbitzu-hornitzailearen PLMN sare nagusi baliokidearen bidez desblokeatzeko PIN kodea"</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"ICCIDaren bidez desblokeatzeko PIN kodea"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"Zerbitzu-hornitzailearen PLMN sare nagusi baliokidearen bidez desblokeatzeko PINa"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"ICCIDaren bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPIaren bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"Sareko azpimultzoaren zerbitzu-hornitzailearen bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"SIMaren sarearen bidez desblokeatzeko eskatzen…"</string>

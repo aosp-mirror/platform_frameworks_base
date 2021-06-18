@@ -1458,10 +1458,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Consente a un\'applicazione di richiedere l\'eliminazione di pacchetti."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"richiesta di ignorare le ottimizzazioni della batteria"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Consente a un\'app di chiedere l\'autorizzazione a ignorare le ottimizzazioni della batteria per quell\'app."</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"Invio di query per tutti i pacchetti"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Consente a un\'app di visualizzare tutti i pacchetti installati."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Tocca due volte per il comando dello zoom"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Aggiunta del widget non riuscita."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Vai"</string>
@@ -1870,8 +1868,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminato dall\'amministratore"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"L\'opzione Risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, nonché alcuni effetti visivi, funzionalità e connessioni di rete."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"L\'opzione Risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, nonché alcuni effetti visivi, funzionalità e connessioni di rete."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Il risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, nonché alcuni effetti visivi, funzionalità e connessioni di rete."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Il risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, nonché alcuni effetti visivi, funzionalità e connessioni di rete."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Attiva"</string>
