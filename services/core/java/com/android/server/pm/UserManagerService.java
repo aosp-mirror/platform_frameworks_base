@@ -3902,6 +3902,17 @@ public class UserManagerService extends IUserManager.Stub {
                 isFirstBoot, isUpgrade, existingPackages);
     }
 
+    @Override
+    public String[] getPreInstallableSystemPackages(@NonNull String userType) {
+        checkManageOrCreateUsersPermission("getPreInstallableSystemPackages");
+        final Set<String> installableSystemPackages =
+                mSystemPackageInstaller.getInstallablePackagesForUserType(userType);
+        if (installableSystemPackages == null) {
+            return null;
+        }
+        return installableSystemPackages.toArray(new String[installableSystemPackages.size()]);
+    }
+
     private long getCreationTime() {
         final long now = System.currentTimeMillis();
         return (now > EPOCH_PLUS_30_YEARS) ? now : 0;
