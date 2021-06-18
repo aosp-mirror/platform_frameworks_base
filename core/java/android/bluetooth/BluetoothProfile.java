@@ -208,7 +208,6 @@ public interface BluetoothProfile {
     /**
      * LE Audio Device
      *
-     * @hide
      */
     int LE_AUDIO = 22;
 
