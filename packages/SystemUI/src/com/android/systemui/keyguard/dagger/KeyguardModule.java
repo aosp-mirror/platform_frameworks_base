@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -92,6 +93,7 @@ public class KeyguardModule {
             DumpManager dumpManager,
             PowerManager powerManager,
             TrustManager trustManager,
+            UserSwitcherController userSwitcherController,
             @UiBackground Executor uiBgExecutor,
             DeviceConfigProxy deviceConfig,
             NavigationModeController navigationModeController,
@@ -114,6 +116,7 @@ public class KeyguardModule {
                 uiBgExecutor,
                 powerManager,
                 trustManager,
+                userSwitcherController,
                 deviceConfig,
                 navigationModeController,
                 keyguardDisplayManager,
