@@ -16,20 +16,10 @@
 
 package com.android.settingslib.transition;
 
-import androidx.annotation.IntDef;
 import android.app.Activity;
-import android.content.Context;
-import android.util.Log;
-import android.view.Window;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 
-import androidx.core.os.BuildCompat;
+import androidx.annotation.IntDef;
 import androidx.fragment.app.Fragment;
-
-import com.google.android.material.transition.platform.FadeThroughProvider;
-import com.google.android.material.transition.platform.MaterialSharedAxis;
-import com.google.android.material.transition.platform.SlideDistanceProvider;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -59,31 +49,6 @@ public class SettingsTransitionHelper {
     public static final String EXTRA_PAGE_TRANSITION_TYPE = "page_transition_type";
 
     private static final String TAG = "SettingsTransitionHelper";
-    private static final long DURATION = 450L;
-    private static final float FADE_THROUGH_THRESHOLD = 0.22F;
-
-    private static MaterialSharedAxis createSettingsSharedAxis(Context context, boolean forward) {
-        final MaterialSharedAxis transition = new MaterialSharedAxis(MaterialSharedAxis.X, forward);
-        transition.excludeTarget(android.R.id.statusBarBackground, true);
-        transition.excludeTarget(android.R.id.navigationBarBackground, true);
-
-        final SlideDistanceProvider forwardDistanceProvider =
-                (SlideDistanceProvider) transition.getPrimaryAnimatorProvider();
-        final int distance = context.getResources().getDimensionPixelSize(
-                R.dimen.settings_shared_axis_x_slide_distance);
-        forwardDistanceProvider.setSlideDistance(distance);
-        transition.setDuration(DURATION);
-
-        final FadeThroughProvider fadeThroughProvider =
-                (FadeThroughProvider) transition.getSecondaryAnimatorProvider();
-        fadeThroughProvider.setProgressThreshold(FADE_THROUGH_THRESHOLD);
-
-        final Interpolator interpolator =
-                AnimationUtils.loadInterpolator(context, R.interpolator.fast_out_extra_slow_in);
-        transition.setInterpolator(interpolator);
-
-        return transition;
-    }
 
     /**
      * Apply the forward transition to the {@link Activity}, including Exit Transition and Enter
@@ -92,23 +57,16 @@ public class SettingsTransitionHelper {
      * The Exit Transition takes effect when leaving the page, while the Enter Transition is
      * triggered when the page is launched/entering.
      */
-    public static void applyForwardTransition(Activity activity) {
-        if (!isSettingsTransitionEnabled()) {
-            return;
-        }
-        if (activity == null) {
-            Log.w(TAG, "applyForwardTransition: Invalid activity!");
-            return;
-        }
-        final Window window = activity.getWindow();
-        if (window == null) {
-            Log.w(TAG, "applyForwardTransition: Invalid window!");
-            return;
-        }
-        final MaterialSharedAxis forward = createSettingsSharedAxis(activity, true);
-        window.setExitTransition(forward);
-        window.setEnterTransition(forward);
-    }
+    public static void applyForwardTransition(Activity activity) {}
+
+    /**
+     * Apply the forward transition to the {@link Fragment}, including Exit Transition and Enter
+     * Transition.
+     *
+     * The Exit Transition takes effect when leaving the page, while the Enter Transition is
+     * triggered when the page is launched/entering.
+     */
+    public static void applyForwardTransition(Fragment fragment) {}
 
     /**
      * Apply the backward transition to the {@link Activity}, including Return Transition and
@@ -118,43 +76,7 @@ public class SettingsTransitionHelper {
      * to close. Reenter Transition will be used to move Views in to the scene when returning from a
      * previously-started Activity.
      */
-    public static void applyBackwardTransition(Activity activity) {
-        if (!isSettingsTransitionEnabled()) {
-            return;
-        }
-        if (activity == null) {
-            Log.w(TAG, "applyBackwardTransition: Invalid activity!");
-            return;
-        }
-        final Window window = activity.getWindow();
-        if (window == null) {
-            Log.w(TAG, "applyBackwardTransition: Invalid window!");
-            return;
-        }
-        final MaterialSharedAxis backward = createSettingsSharedAxis(activity, false);
-        window.setReturnTransition(backward);
-        window.setReenterTransition(backward);
-    }
-
-    /**
-     * Apply the forward transition to the {@link Fragment}, including Exit Transition and Enter
-     * Transition.
-     *
-     * The Exit Transition takes effect when leaving the page, while the Enter Transition is
-     * triggered when the page is launched/entering.
-     */
-    public static void applyForwardTransition(Fragment fragment) {
-        if (!isSettingsTransitionEnabled()) {
-            return;
-        }
-        if (fragment == null) {
-            Log.w(TAG, "applyForwardTransition: Invalid fragment!");
-            return;
-        }
-        final MaterialSharedAxis forward = createSettingsSharedAxis(fragment.getContext(), true);
-        fragment.setExitTransition(forward);
-        fragment.setEnterTransition(forward);
-    }
+    public static void applyBackwardTransition(Activity activity) {}
 
     /**
      * Apply the backward transition to the {@link Fragment}, including Return Transition and
@@ -164,20 +86,5 @@ public class SettingsTransitionHelper {
      * to close. Reenter Transition will be used to move Views in to the scene when returning from a
      * previously-started Fragment.
      */
-    public static void applyBackwardTransition(Fragment fragment) {
-        if (!isSettingsTransitionEnabled()) {
-            return;
-        }
-        if (fragment == null) {
-            Log.w(TAG, "applyBackwardTransition: Invalid fragment!");
-            return;
-        }
-        final MaterialSharedAxis backward = createSettingsSharedAxis(fragment.getContext(), false);
-        fragment.setReturnTransition(backward);
-        fragment.setReenterTransition(backward);
-    }
-
-    private static boolean isSettingsTransitionEnabled() {
-        return BuildCompat.isAtLeastS();
-    }
+    public static void applyBackwardTransition(Fragment fragment) {}
 }
