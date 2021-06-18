@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
@@ -2524,6 +2525,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * @hide
      */
     public CellularBatteryStats getCellularBatteryStats() {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.UPDATE_DEVICE_STATS) == PERMISSION_DENIED) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.BATTERY_STATS, null);
+        }
+
         // Wait for the completion of pending works if there is any
         awaitCompletion();
         synchronized (mStats) {
@@ -2536,6 +2543,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * @hide
      */
     public WifiBatteryStats getWifiBatteryStats() {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.UPDATE_DEVICE_STATS) == PERMISSION_DENIED) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.BATTERY_STATS, null);
+        }
+
         // Wait for the completion of pending works if there is any
         awaitCompletion();
         synchronized (mStats) {
@@ -2548,6 +2561,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * @hide
      */
     public GpsBatteryStats getGpsBatteryStats() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BATTERY_STATS, null);
+
         // Wait for the completion of pending works if there is any
         awaitCompletion();
         synchronized (mStats) {
