@@ -73,6 +73,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseSetArray;
 import android.util.TimeUtils;
@@ -314,7 +315,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     /**
      * Which uids are currently performing backups, so we shouldn't allow their jobs to run.
      */
-    final SparseIntArray mBackingUpUids = new SparseIntArray();
+    private final SparseBooleanArray mBackingUpUids = new SparseBooleanArray();
 
     /**
      * Cache of debuggable app status.
@@ -2279,7 +2280,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         final boolean jobExists = mJobs.containsJob(job);
         final boolean userStarted = areUsersStartedLocked(job);
-        final boolean backingUp = mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0;
+        final boolean backingUp = mBackingUpUids.get(job.getSourceUid());
 
         if (DEBUG) {
             Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
@@ -2354,7 +2355,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         final boolean jobExists = mJobs.containsJob(job);
         final boolean userStarted = areUsersStartedLocked(job);
-        final boolean backingUp = mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0;
+        final boolean backingUp = mBackingUpUids.get(job.getSourceUid());
 
         if (DEBUG) {
             Slog.v(TAG, "areComponentsInPlaceLocked: " + job.toShortString()
@@ -2474,7 +2475,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // No need to actually do anything here, since for a full backup the
                 // activity manager will kill the process which will kill the job (and
                 // cause it to restart, but now it can't run).
-                mBackingUpUids.put(uid, uid);
+                mBackingUpUids.put(uid, true);
             }
         }
 
@@ -3123,7 +3124,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     printed = true;
                     pw.println("source-user-stopped");
                 }
-                if (mBackingUpUids.indexOfKey(js.getSourceUid()) >= 0) {
+                if (mBackingUpUids.get(js.getSourceUid())) {
                     if (printed) {
                         pw.print(" ");
                     }
@@ -3287,7 +3288,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pw.print(" !active=");
                     pw.print(!mConcurrencyManager.isJobRunningLocked(job));
                     pw.print(" !backingup=");
-                    pw.print(!(mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0));
+                    pw.print(!(mBackingUpUids.get(job.getSourceUid())));
                     pw.print(" comp=");
                     pw.print(isComponentUsable(job));
                     pw.println(")");
@@ -3544,7 +3545,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_CURRENTLY_ACTIVE,
                             mConcurrencyManager.isJobRunningLocked(job));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_UID_BACKING_UP,
-                            mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0);
+                            mBackingUpUids.get(job.getSourceUid()));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_COMPONENT_USABLE,
                             isComponentUsable(job));
 
