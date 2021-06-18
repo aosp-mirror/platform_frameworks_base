@@ -1586,7 +1586,8 @@ class ActivityStarter {
                         statusBar.collapsePanels();
                     }
                 }
-                if (result == START_SUCCESS || result == START_TASK_TO_FRONT) {
+                final boolean started = result == START_SUCCESS || result == START_TASK_TO_FRONT;
+                if (started) {
                     // The activity is started new rather than just brought forward, so record
                     // it as an existence change.
                     mService.getTransitionController().collectExistenceChange(r);
@@ -1594,7 +1595,7 @@ class ActivityStarter {
                 if (newTransition != null) {
                     mService.getTransitionController().requestStartTransition(newTransition,
                             mTargetTask, remoteTransition);
-                } else {
+                } else if (started) {
                     // Make the collecting transition wait until this request is ready.
                     mService.getTransitionController().setReady(false);
                 }
