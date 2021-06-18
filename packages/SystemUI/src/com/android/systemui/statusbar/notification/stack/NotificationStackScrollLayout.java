@@ -1185,7 +1185,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void updateStackPosition(boolean listenerNeedsAnimation) {
         // Consider interpolating from an mExpansionStartY for use on lockscreen and AOD
         float endTopPosition = mTopPadding + mExtraTopInsetForFullShadeTransition
-                + mAmbientState.getOverExpansion();
+                + mAmbientState.getOverExpansion()
+                - getCurrentOverScrollAmount(false /* top */);
         final float fraction = mAmbientState.getExpansionFraction();
         final float stackY = MathUtils.lerp(0, endTopPosition, fraction);
         mAmbientState.setStackY(stackY);
@@ -1907,6 +1908,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (onTop) {
                 notifyOverscrollTopListener(amount, isRubberbanded);
             }
+            updateStackPosition();
             requestChildrenUpdate();
         }
     }
