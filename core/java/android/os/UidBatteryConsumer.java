@@ -19,9 +19,16 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.text.TextUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.os.PowerCalculator;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -143,13 +150,65 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         return 0;
     }
 
+    /** Serializes this object to XML */
+    void writeToXml(TypedXmlSerializer serializer) throws IOException {
+        if (getConsumedPower() == 0) {
+            return;
+        }
+
+        serializer.startTag(null, BatteryUsageStats.XML_TAG_UID);
+        serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_UID, getUid());
+        if (!TextUtils.isEmpty(mPackageWithHighestDrain)) {
+            serializer.attribute(null, BatteryUsageStats.XML_ATTR_HIGHEST_DRAIN_PACKAGE,
+                    mPackageWithHighestDrain);
+        }
+        serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND,
+                mTimeInForegroundMs);
+        serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_BACKGROUND,
+                mTimeInBackgroundMs);
+        mPowerComponents.writeToXml(serializer);
+        serializer.endTag(null, BatteryUsageStats.XML_TAG_UID);
+    }
+
+    /** Parses an XML representation and populates the BatteryUsageStats builder */
+    static void createFromXml(TypedXmlPullParser parser, BatteryUsageStats.Builder builder)
+            throws XmlPullParserException, IOException {
+        final int uid = parser.getAttributeInt(null, BatteryUsageStats.XML_ATTR_UID);
+        final UidBatteryConsumer.Builder consumerBuilder =
+                builder.getOrCreateUidBatteryConsumerBuilder(uid);
+
+        int eventType = parser.getEventType();
+        if (eventType != XmlPullParser.START_TAG
+                || !parser.getName().equals(BatteryUsageStats.XML_TAG_UID)) {
+            throw new XmlPullParserException("Invalid XML parser state");
+        }
+
+        consumerBuilder.setPackageWithHighestDrain(
+                parser.getAttributeValue(null, BatteryUsageStats.XML_ATTR_HIGHEST_DRAIN_PACKAGE));
+        consumerBuilder.setTimeInStateMs(STATE_FOREGROUND,
+                parser.getAttributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND));
+        consumerBuilder.setTimeInStateMs(STATE_BACKGROUND,
+                parser.getAttributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_BACKGROUND));
+        while (!(eventType == XmlPullParser.END_TAG
+                && parser.getName().equals(BatteryUsageStats.XML_TAG_UID))
+                && eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG) {
+                if (parser.getName().equals(BatteryUsageStats.XML_TAG_POWER_COMPONENTS)) {
+                    PowerComponents.parseXml(parser, consumerBuilder.mPowerComponentsBuilder);
+                }
+            }
+            eventType = parser.next();
+        }
+    }
+
     /**
      * Builder for UidBatteryConsumer.
      */
     public static final class Builder extends BaseBuilder<Builder> {
+        private static final String PACKAGE_NAME_UNINITIALIZED = "";
         private final BatteryStats.Uid mBatteryStatsUid;
         private final int mUid;
-        private String mPackageWithHighestDrain;
+        private String mPackageWithHighestDrain = PACKAGE_NAME_UNINITIALIZED;
         public long mTimeInForegroundMs;
         public long mTimeInBackgroundMs;
         private boolean mExcludeFromBatteryUsageStats;
@@ -161,8 +220,19 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
             mUid = batteryStatsUid.getUid();
         }
 
+        public Builder(@NonNull String[] customPowerComponentNames, boolean includePowerModels,
+                int uid) {
+            super(customPowerComponentNames, includePowerModels);
+            mBatteryStatsUid = null;
+            mUid = uid;
+        }
+
         @NonNull
         public BatteryStats.Uid getBatteryStatsUid() {
+            if (mBatteryStatsUid == null) {
+                throw new IllegalStateException(
+                        "UidBatteryConsumer.Builder was initialized without a BatteryStats.Uid");
+            }
             return mBatteryStatsUid;
         }
 
@@ -176,7 +246,7 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
          */
         @NonNull
         public Builder setPackageWithHighestDrain(@Nullable String packageName) {
-            mPackageWithHighestDrain = packageName;
+            mPackageWithHighestDrain = TextUtils.nullIfEmpty(packageName);
             return this;
         }
 
@@ -208,6 +278,30 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         }
 
         /**
+         * Adds power and usage duration from the supplied UidBatteryConsumer.
+         */
+        public Builder add(UidBatteryConsumer consumer) {
+            mPowerComponentsBuilder.addPowerAndDuration(consumer.mPowerComponents);
+            mTimeInBackgroundMs += consumer.mTimeInBackgroundMs;
+            mTimeInForegroundMs += consumer.mTimeInForegroundMs;
+
+            if (mPackageWithHighestDrain == PACKAGE_NAME_UNINITIALIZED) {
+                mPackageWithHighestDrain = consumer.mPackageWithHighestDrain;
+            } else if (!TextUtils.equals(mPackageWithHighestDrain,
+                    consumer.mPackageWithHighestDrain)) {
+                // Consider combining two UidBatteryConsumers with this distribution
+                // of power drain between packages:
+                // (package1=100, package2=10) and (package1=100, package2=101).
+                // Since we don't know the actual power distribution between packages at this
+                // point, we have no way to correctly declare package1 as the winner.
+                // The naive logic of picking the consumer with the higher total consumed
+                // power would produce an incorrect result.
+                mPackageWithHighestDrain = null;
+            }
+            return this;
+        }
+
+        /**
          * Returns true if this UidBatteryConsumer must be excluded from the
          * BatteryUsageStats.
          */
@@ -220,6 +314,9 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
          */
         @NonNull
         public UidBatteryConsumer build() {
+            if (mPackageWithHighestDrain == PACKAGE_NAME_UNINITIALIZED) {
+                mPackageWithHighestDrain = null;
+            }
             return new UidBatteryConsumer(this);
         }
     }
