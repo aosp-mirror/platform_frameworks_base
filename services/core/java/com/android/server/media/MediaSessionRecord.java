@@ -986,6 +986,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public boolean sendMediaButton(String packageName, int pid, int uid,
                 boolean asSystemService, KeyEvent keyEvent, int sequenceId, ResultReceiver cb) {
             try {
+                if (KeyEvent.isMediaSessionKey(keyEvent.getKeyCode())) {
+                    final String reason = "action=" + KeyEvent.actionToString(keyEvent.getAction())
+                            + ";code=" + KeyEvent.keyCodeToString(keyEvent.getKeyCode());
+                    mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                            pid, uid, packageName, reason);
+                }
                 if (asSystemService) {
                     mCb.onMediaButton(mContext.getPackageName(), Process.myPid(),
                             Process.SYSTEM_UID, createMediaButtonIntent(keyEvent), sequenceId, cb);
@@ -1003,6 +1009,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public boolean sendMediaButton(String packageName, int pid, int uid,
                 boolean asSystemService, KeyEvent keyEvent) {
             try {
+                if (KeyEvent.isMediaSessionKey(keyEvent.getKeyCode())) {
+                    final String reason = "action=" + KeyEvent.actionToString(keyEvent.getAction())
+                            + ";code=" + KeyEvent.keyCodeToString(keyEvent.getKeyCode());
+                    mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                            pid, uid, packageName, reason);
+                }
                 if (asSystemService) {
                     mCb.onMediaButton(mContext.getPackageName(), Process.myPid(),
                             Process.SYSTEM_UID, createMediaButtonIntent(keyEvent), 0, null);

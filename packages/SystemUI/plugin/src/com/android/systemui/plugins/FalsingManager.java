@@ -30,7 +30,7 @@ import java.io.PrintWriter;
  */
 @ProvidesInterface(version = FalsingManager.VERSION)
 public interface FalsingManager {
-    int VERSION = 4;
+    int VERSION = 5;
 
     void onSuccessfulUnlock();
 
@@ -42,7 +42,8 @@ public interface FalsingManager {
 
     boolean isUnlockingDisabled();
 
-    boolean isFalseTouch();
+    /** Returns true if the gesture should be rejected. */
+    boolean isFalseTouch(int interactionType);
 
     void onNotificatonStopDraggingDown();
 

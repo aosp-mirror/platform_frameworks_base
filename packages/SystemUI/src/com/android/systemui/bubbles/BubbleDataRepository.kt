@@ -16,7 +16,6 @@
 package com.android.systemui.bubbles
 
 import android.annotation.SuppressLint
-import android.annotation.UserIdInt
 import android.content.pm.LauncherApps
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER
@@ -51,31 +50,31 @@ internal class BubbleDataRepository @Inject constructor(
      * Adds the bubble in memory, then persists the snapshot after adding the bubble to disk
      * asynchronously.
      */
-    fun addBubble(@UserIdInt userId: Int, bubble: Bubble) = addBubbles(userId, listOf(bubble))
+    fun addBubble(bubble: Bubble) = addBubbles(listOf(bubble))
 
     /**
      * Adds the bubble in memory, then persists the snapshot after adding the bubble to disk
      * asynchronously.
      */
-    fun addBubbles(@UserIdInt userId: Int, bubbles: List<Bubble>) {
+    fun addBubbles(bubbles: List<Bubble>) {
         if (DEBUG) Log.d(TAG, "adding ${bubbles.size} bubbles")
-        val entities = transform(userId, bubbles).also(volatileRepository::addBubbles)
+        val entities = transform(bubbles).also(volatileRepository::addBubbles)
         if (entities.isNotEmpty()) persistToDisk()
     }
 
     /**
      * Removes the bubbles from memory, then persists the snapshot to disk asynchronously.
      */
-    fun removeBubbles(@UserIdInt userId: Int, bubbles: List<Bubble>) {
+    fun removeBubbles(bubbles: List<Bubble>) {
         if (DEBUG) Log.d(TAG, "removing ${bubbles.size} bubbles")
-        val entities = transform(userId, bubbles).also(volatileRepository::removeBubbles)
+        val entities = transform(bubbles).also(volatileRepository::removeBubbles)
         if (entities.isNotEmpty()) persistToDisk()
     }
 
-    private fun transform(userId: Int, bubbles: List<Bubble>): List<BubbleEntity> {
+    private fun transform(bubbles: List<Bubble>): List<BubbleEntity> {
         return bubbles.mapNotNull { b ->
             BubbleEntity(
-                    userId,
+                    b.user.identifier,
                     b.packageName,
                     b.metadataShortcutId ?: return@mapNotNull null,
                     b.key,

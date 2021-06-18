@@ -16,6 +16,8 @@
 
 package com.android.systemui;
 
+import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -697,14 +699,15 @@ public class SwipeHelper implements Gefingerpoken {
         float translation = getTranslation(mCurrView);
         return ev.getActionMasked() == MotionEvent.ACTION_UP
                 && !mFalsingManager.isUnlockingDisabled()
-                && !isFalseGesture(ev) && (swipedFastEnough() || swipedFarEnough())
+                && !isFalseGesture() && (swipedFastEnough() || swipedFarEnough())
                 && mCallback.canChildBeDismissedInDirection(mCurrView, translation > 0);
     }
 
-    public boolean isFalseGesture(MotionEvent ev) {
+    /** Returns true if the gesture should be rejected. */
+    public boolean isFalseGesture() {
         boolean falsingDetected = mCallback.isAntiFalsingNeeded();
         if (mFalsingManager.isClassifierEnabled()) {
-            falsingDetected = falsingDetected && mFalsingManager.isFalseTouch();
+            falsingDetected = falsingDetected && mFalsingManager.isFalseTouch(NOTIFICATION_DISMISS);
         } else {
             falsingDetected = falsingDetected && !mTouchAboveFalsingThreshold;
         }
