@@ -65,11 +65,21 @@ package com.android.server.display.config {
     method public final void setValue(@NonNull java.math.BigDecimal);
   }
 
+  public class RefreshRateRange {
+    ctor public RefreshRateRange();
+    method public final java.math.BigInteger getMaximum();
+    method public final java.math.BigInteger getMinimum();
+    method public final void setMaximum(java.math.BigInteger);
+    method public final void setMinimum(java.math.BigInteger);
+  }
+
   public class SensorDetails {
     ctor public SensorDetails();
     method @Nullable public final String getName();
+    method @Nullable public final com.android.server.display.config.RefreshRateRange getRefreshRate();
     method @Nullable public final String getType();
     method public final void setName(@Nullable String);
+    method public final void setRefreshRate(@Nullable com.android.server.display.config.RefreshRateRange);
     method public final void setType(@Nullable String);
   }
 
