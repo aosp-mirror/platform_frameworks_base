@@ -1071,10 +1071,6 @@ public class NotificationStackScrollLayoutController {
         mView.setAlpha(alpha);
     }
 
-    public float getCurrentOverScrollAmount(boolean top) {
-        return mView.getCurrentOverScrollAmount(top);
-    }
-
     public float calculateAppearFraction(float height) {
         return mView.calculateAppearFraction(height);
     }
