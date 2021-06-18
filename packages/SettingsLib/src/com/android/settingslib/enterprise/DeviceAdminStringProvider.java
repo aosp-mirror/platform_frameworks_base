@@ -72,4 +72,14 @@ public interface DeviceAdminStringProvider {
      * a financed device.
      */
     String getDisabledByPolicyTitleForFinancedDevice();
+
+    /**
+     * Returns the dialog title for when biometrics require parental consent.
+     */
+    String getDisabledBiometricsParentConsentTitle();
+
+    /**
+     * Returns the dialog contents for when biometrics require parental consent.
+     */
+    String getDisabledBiometricsParentConsentContent();
 }

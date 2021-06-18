@@ -143,6 +143,7 @@
     <attr name="handleThickness" format="dimension" />
     <attr name="handleColor" format="color" />
     <attr name="scrimColor" format="color" />
+    <attr name="containerBackgroundColor" format="color" />
 
     <attr name="isVertical" format="boolean" />
 
@@ -178,6 +179,7 @@
         <attr name="handleThickness" />
         <attr name="handleColor" />
         <attr name="scrimColor" />
+        <attr name="containerBackgroundColor" />
     </declare-styleable>
 
     <declare-styleable name="MagnifierView">
