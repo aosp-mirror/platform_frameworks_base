@@ -21,12 +21,9 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
-
-import com.android.internal.util.FastMath;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -43,8 +40,7 @@ public final class ScrollCaptureTarget {
     private final int mHint;
     private Rect mScrollBounds;
 
-    private final float[] mTmpFloatArr = new float[2];
-    private final Matrix mMatrixViewLocalToWindow = new Matrix();
+    private final int[] mTmpIntArr = new int[2];
 
     public ScrollCaptureTarget(@NonNull View scrollTarget, @NonNull Rect localVisibleRect,
             @NonNull Point positionInWindow, @NonNull ScrollCaptureCallback callback) {
@@ -117,28 +113,15 @@ public final class ScrollCaptureTarget {
         }
     }
 
-    private static void zero(float[] pointArray) {
-        pointArray[0] = 0;
-        pointArray[1] = 0;
-    }
-
-    private static void roundIntoPoint(Point pointObj, float[] pointArray) {
-        pointObj.x = FastMath.round(pointArray[0]);
-        pointObj.y = FastMath.round(pointArray[1]);
-    }
-
     /**
-     * Refresh the local visible bounds and it's offset within the window, based on the current
+     * Refresh the local visible bounds and its offset within the window, based on the current
      * state of the {@code containing view}.
      */
     @UiThread
     public void updatePositionInWindow() {
-        mMatrixViewLocalToWindow.reset();
-        mContainingView.transformMatrixToGlobal(mMatrixViewLocalToWindow);
-
-        zero(mTmpFloatArr);
-        mMatrixViewLocalToWindow.mapPoints(mTmpFloatArr);
-        roundIntoPoint(mPositionInWindow, mTmpFloatArr);
+        mContainingView.getLocationInWindow(mTmpIntArr);
+        mPositionInWindow.x = mTmpIntArr[0];
+        mPositionInWindow.y = mTmpIntArr[1];
     }
 
     public String toString() {
