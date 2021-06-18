@@ -585,7 +585,8 @@ public final class NotificationRecord {
                     pw.println("null");
                 } else {
                     pw.print(val.getClass().getSimpleName());
-                    if (redact && (val instanceof CharSequence || val instanceof String)) {
+                    if (redact && (val instanceof CharSequence) && shouldRedactStringExtra(key)) {
+                        pw.print(String.format(" [length=%d]", ((CharSequence) val).length()));
                         // redact contents from bugreports
                     } else if (val instanceof Bitmap) {
                         pw.print(String.format(" (%dx%d)",
@@ -608,6 +609,19 @@ public final class NotificationRecord {
                 }
             }
             pw.println(prefix + "}");
+        }
+    }
+
+    private boolean shouldRedactStringExtra(String key) {
+        if (key == null) return true;
+        switch (key) {
+            // none of these keys contain user-related information; they do not need to be redacted
+            case Notification.EXTRA_SUBSTITUTE_APP_NAME:
+            case Notification.EXTRA_TEMPLATE:
+            case "android.support.v4.app.extra.COMPAT_TEMPLATE":
+                return false;
+            default:
+                return true;
         }
     }
 
