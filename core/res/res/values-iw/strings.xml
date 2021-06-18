@@ -2034,7 +2034,7 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="227760698553988751">"‏ניהול התצורה של כרטיס ה-SIM לא מתאים לזיהוי קולי"</string>
     <string name="mmcc_illegal_ms" msgid="7509650265233909445">"‏כרטיס ה-SIM לא מורשה לזיהוי קולי"</string>
     <string name="mmcc_illegal_me" msgid="6505557881889904915">"הטלפון לא מורשה לזיהוי קולי"</string>
-    <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> אינו מאושר לשימוש ברשת"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"‏ה-SIM <xliff:g id="SIMNUMBER">%d</xliff:g> לא אושר לשימוש ברשת"</string>
     <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"‏אין ניהול תצורה עבור SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"‏SIM‏ <xliff:g id="SIMNUMBER">%d</xliff:g> אינו מאושר לשימוש ברשת"</string>
     <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"‏SIM‏ <xliff:g id="SIMNUMBER">%d</xliff:g> אינו מאושר לשימוש ברשת"</string>

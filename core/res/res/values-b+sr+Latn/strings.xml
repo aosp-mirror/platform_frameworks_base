@@ -351,9 +351,9 @@
     <string name="permlab_receiveMms" msgid="4000650116674380275">"prijem tekstualnih poruka (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Dozvoljava aplikaciji da prima i obrađuje MMS poruke. To znači da aplikacija može da nadgleda ili briše poruke koje se šalju uređaju, a da vam ih ne prikaže."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Prosleđivanje poruka za mobilne uređaje na lokalitetu"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Dozvoljava aplikaciji da se vezuje za modul poruka za mobilne uređaje na lokalitetu da bi prosleđivala poruke za mobilne uređaje na lokalitetu onako kako su primljene. Obaveštenja poruka za mobilne uređaje na lokalitetu se na nekim lokacijama primaju kao upozorenja na hitne slučajeve. Zlonamerne aplikacije mogu da utiču na učinak ili ometaju rad uređaja kada se primi poruka o hitnom slučaju za mobilne uređaje na lokalitetu."</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Dozvoljava aplikaciji da se vezuje za modul poruka za mobilne uređaje na lokalitetu da bi prosleđivala poruke za mobilne uređaje na lokalitetu onako kako su primljene. Obaveštenja poruka za mobilne uređaje na lokalitetu se na nekim lokacijama primaju kao upozorenja na hitne slučajeve. Zlonamerne aplikacije mogu da utiču na performanse ili ometaju rad uređaja kada se primi poruka o hitnom slučaju za mobilne uređaje na lokalitetu."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"čitanje poruka info servisa"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Omogućava aplikaciji da čita poruke info servisa koje uređaj prima. Upozorenja info servisa se na nekim lokacijama primaju kao upozorenja na hitne slučajeve. Zlonamerne aplikacije mogu da utiču na učinak ili ometaju funkcionisanje uređaja kada se primi poruka info servisa o hitnom slučaju."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Omogućava aplikaciji da čita poruke info servisa koje uređaj prima. Upozorenja info servisa se na nekim lokacijama primaju kao upozorenja na hitne slučajeve. Zlonamerne aplikacije mogu da utiču na performanse ili ometaju funkcionisanje uređaja kada se primi poruka info servisa o hitnom slučaju."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"čitanje prijavljenih fidova"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"Dozvoljava aplikaciji da preuzima detalje o trenutno sinhronizovanim fidovima."</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"šalje i pregleda SMS poruke"</string>
@@ -1223,7 +1223,7 @@
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> je pokrenuta"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Dodirnite da biste se vratili u igru"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Odaberite igru"</string>
-    <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"Da bi učinak bio bolji, možete da otvorite samo jednu od ovih igara odjednom."</string>
+    <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"Da bi performanse bile bolje, može da bude otvorena samo jedna od ovih igara."</string>
     <string name="old_app_action" msgid="725331621042848590">"Nazad na <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_action" msgid="547772182913269801">"Otvori <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> će se zatvoriti bez čuvanja"</string>
@@ -1335,7 +1335,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Omogućen je režim probnog korišćenja"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Obavite resetovanje na fabrička podešavanja da biste onemogućili režim probnog korišćenja."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serijska konzola je omogućena"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Učinak je smanjen. Da biste onemogući konzolu, proverite pokretački program."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Performanse su smanjene. Da biste onemogući konzolu, proverite pokretački program."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Tečnost ili nečistoća u USB portu"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB port je automatski isključen. Dodirnite da biste saznali više."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Korišćenje USB porta je dozvoljeno"</string>
