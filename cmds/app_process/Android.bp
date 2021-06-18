@@ -29,7 +29,16 @@ cc_binary {
         },
     },
 
-    ldflags: ["-Wl,--export-dynamic"],
+    // Symbols exported from the executable in .dynsym interpose symbols in every
+    // linker namespace, including an app's classloader namespace. Provide this
+    // version script to prevent unwanted interposition.
+    //
+    // By default, the static linker doesn't export most of an executable's symbols,
+    // but it will export a symbol that appears to override a symbol in a needed DSO.
+    // This commonly happens with C++ vaguely-linked entities, such as template
+    // functions or type_info variables. Hence, a version script is needed even for
+    // an executable.
+    version_script: "version-script.txt",
 
     shared_libs: [
         "libandroid_runtime",

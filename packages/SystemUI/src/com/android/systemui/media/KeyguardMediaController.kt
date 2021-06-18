@@ -186,11 +186,9 @@ class KeyguardMediaController @Inject constructor(
     }
 
     private fun hideMediaPlayer() {
-        if (useSplitShade) {
-            setVisibility(splitShadeContainer, View.GONE)
-        } else {
-            setVisibility(singlePaneContainer, View.GONE)
-        }
+        // always hide splitShadeContainer as it's initially visible and may influence layout
+        setVisibility(splitShadeContainer, View.GONE)
+        setVisibility(singlePaneContainer, View.GONE)
     }
 
     private fun setVisibility(view: ViewGroup?, newVisibility: Int) {

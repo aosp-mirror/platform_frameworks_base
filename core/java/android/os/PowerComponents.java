@@ -19,11 +19,18 @@ import static android.os.BatteryConsumer.convertMahToDeciCoulombs;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.os.PowerCalculator;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * Contains details of battery attribution data broken down to individual power drain types
@@ -36,9 +43,12 @@ class PowerComponents {
             - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
 
     private final double mConsumedPowerMah;
+    @NonNull
     private final double[] mPowerComponentsMah;
+    @NonNull
     private final long[] mUsageDurationsMs;
     private final int mCustomPowerComponentCount;
+    @Nullable
     private final byte[] mPowerModels;
     // Not written to Parcel and must be explicitly restored during the parent object's unparceling
     private String[] mCustomPowerComponentNames;
@@ -49,7 +59,7 @@ class PowerComponents {
         mPowerComponentsMah = builder.mPowerComponentsMah;
         mUsageDurationsMs = builder.mUsageDurationsMs;
         mConsumedPowerMah = builder.getTotalPower();
-        mPowerModels = builder.mPowerModels;
+        mPowerModels = builder.getPowerModels();
     }
 
     PowerComponents(@NonNull Parcel source) {
@@ -146,9 +156,13 @@ class PowerComponents {
         }
     }
 
+    public boolean hasPowerModels() {
+        return mPowerModels != null;
+    }
+
     @BatteryConsumer.PowerModel
     int getPowerModel(@BatteryConsumer.PowerComponent int component) {
-        if (mPowerModels == null) {
+        if (!hasPowerModels()) {
             throw new IllegalStateException(
                     "Power model IDs were not requested in the BatteryUsageStatsQuery");
         }
@@ -294,10 +308,128 @@ class PowerComponents {
         return interestingData;
     }
 
+    void writeToXml(TypedXmlSerializer serializer) throws IOException {
+        serializer.startTag(null, BatteryUsageStats.XML_TAG_POWER_COMPONENTS);
+        for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
+                componentId++) {
+            final double powerMah = getConsumedPower(componentId);
+            final long durationMs = getUsageDurationMillis(componentId);
+            if (powerMah == 0 && durationMs == 0) {
+                continue;
+            }
+
+            serializer.startTag(null, BatteryUsageStats.XML_TAG_COMPONENT);
+            serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_ID, componentId);
+            if (powerMah != 0) {
+                serializer.attributeDouble(null, BatteryUsageStats.XML_ATTR_POWER, powerMah);
+            }
+            if (durationMs != 0) {
+                serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_DURATION, durationMs);
+            }
+            if (mPowerModels != null) {
+                serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_MODEL,
+                        mPowerModels[componentId]);
+            }
+            serializer.endTag(null, BatteryUsageStats.XML_TAG_COMPONENT);
+        }
+
+        final int customComponentEnd =
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + mCustomPowerComponentCount;
+        for (int componentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+                componentId < customComponentEnd;
+                componentId++) {
+            final double powerMah = getConsumedPowerForCustomComponent(componentId);
+            final long durationMs = getUsageDurationForCustomComponentMillis(componentId);
+            if (powerMah == 0 && durationMs == 0) {
+                continue;
+            }
+
+            serializer.startTag(null, BatteryUsageStats.XML_TAG_CUSTOM_COMPONENT);
+            serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_ID, componentId);
+            if (powerMah != 0) {
+                serializer.attributeDouble(null, BatteryUsageStats.XML_ATTR_POWER, powerMah);
+            }
+            if (durationMs != 0) {
+                serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_DURATION, durationMs);
+            }
+            serializer.endTag(null, BatteryUsageStats.XML_TAG_CUSTOM_COMPONENT);
+        }
+
+        serializer.endTag(null, BatteryUsageStats.XML_TAG_POWER_COMPONENTS);
+    }
+
+
+    static void parseXml(TypedXmlPullParser parser, PowerComponents.Builder builder)
+            throws XmlPullParserException, IOException {
+        int eventType = parser.getEventType();
+        if (eventType != XmlPullParser.START_TAG || !parser.getName().equals(
+                BatteryUsageStats.XML_TAG_POWER_COMPONENTS)) {
+            throw new XmlPullParserException("Invalid XML parser state");
+        }
+
+        while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(
+                BatteryUsageStats.XML_TAG_POWER_COMPONENTS))
+                && eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG) {
+                switch (parser.getName()) {
+                    case BatteryUsageStats.XML_TAG_COMPONENT: {
+                        int componentId = -1;
+                        double powerMah = 0;
+                        long durationMs = 0;
+                        int model = BatteryConsumer.POWER_MODEL_UNDEFINED;
+                        for (int i = 0; i < parser.getAttributeCount(); i++) {
+                            switch (parser.getAttributeName(i)) {
+                                case BatteryUsageStats.XML_ATTR_ID:
+                                    componentId = parser.getAttributeInt(i);
+                                    break;
+                                case BatteryUsageStats.XML_ATTR_POWER:
+                                    powerMah = parser.getAttributeDouble(i);
+                                    break;
+                                case BatteryUsageStats.XML_ATTR_DURATION:
+                                    durationMs = parser.getAttributeLong(i);
+                                    break;
+                                case BatteryUsageStats.XML_ATTR_MODEL:
+                                    model = parser.getAttributeInt(i);
+                                    break;
+                            }
+                        }
+                        builder.setConsumedPower(componentId, powerMah, model);
+                        builder.setUsageDurationMillis(componentId, durationMs);
+                        break;
+                    }
+                    case BatteryUsageStats.XML_TAG_CUSTOM_COMPONENT: {
+                        int componentId = -1;
+                        double powerMah = 0;
+                        long durationMs = 0;
+                        for (int i = 0; i < parser.getAttributeCount(); i++) {
+                            switch (parser.getAttributeName(i)) {
+                                case BatteryUsageStats.XML_ATTR_ID:
+                                    componentId = parser.getAttributeInt(i);
+                                    break;
+                                case BatteryUsageStats.XML_ATTR_POWER:
+                                    powerMah = parser.getAttributeDouble(i);
+                                    break;
+                                case BatteryUsageStats.XML_ATTR_DURATION:
+                                    durationMs = parser.getAttributeLong(i);
+                                    break;
+                            }
+                        }
+                        builder.setConsumedPowerForCustomComponent(componentId, powerMah);
+                        builder.setUsageDurationForCustomComponentMillis(componentId, durationMs);
+                        break;
+                    }
+                }
+            }
+            eventType = parser.next();
+        }
+    }
+
     /**
      * Builder for PowerComponents.
      */
     static final class Builder {
+        private static final byte POWER_MODEL_UNINITIALIZED = -1;
+
         private final double[] mPowerComponentsMah;
         private final String[] mCustomPowerComponentNames;
         private final long[] mUsageDurationsMs;
@@ -311,6 +443,7 @@ class PowerComponents {
             mUsageDurationsMs = new long[powerComponentCount];
             if (includePowerModels) {
                 mPowerModels = new byte[BatteryConsumer.POWER_COMPONENT_COUNT];
+                Arrays.fill(mPowerModels, POWER_MODEL_UNINITIALIZED);
             } else {
                 mPowerModels = null;
             }
@@ -412,12 +545,39 @@ class PowerComponents {
             return this;
         }
 
-        public void addPowerAndDuration(Builder other) {
+        public void addPowerAndDuration(PowerComponents.Builder other) {
+            addPowerAndDuration(other.mPowerComponentsMah, other.mUsageDurationsMs,
+                    other.mPowerModels);
+        }
+
+        public void addPowerAndDuration(PowerComponents other) {
+            addPowerAndDuration(other.mPowerComponentsMah, other.mUsageDurationsMs,
+                    other.mPowerModels);
+        }
+
+        private void addPowerAndDuration(double[] powerComponentsMah,
+                long[] usageDurationsMs, byte[] powerModels) {
+            if (mPowerComponentsMah.length != powerComponentsMah.length) {
+                throw new IllegalArgumentException(
+                        "Number of power components does not match: " + powerComponentsMah.length
+                                + ", expected: " + mPowerComponentsMah.length);
+            }
+
             for (int i = mPowerComponentsMah.length - 1; i >= 0; i--) {
-                mPowerComponentsMah[i] += other.mPowerComponentsMah[i];
+                mPowerComponentsMah[i] += powerComponentsMah[i];
             }
             for (int i = mUsageDurationsMs.length - 1; i >= 0; i--) {
-                mUsageDurationsMs[i] += other.mUsageDurationsMs[i];
+                mUsageDurationsMs[i] += usageDurationsMs[i];
+            }
+            if (mPowerModels != null && powerModels != null) {
+                for (int i = mPowerModels.length - 1; i >= 0; i--) {
+                    if (mPowerModels[i] == POWER_MODEL_UNINITIALIZED) {
+                        mPowerModels[i] = powerModels[i];
+                    } else if (mPowerModels[i] != powerModels[i]
+                            && powerModels[i] != POWER_MODEL_UNINITIALIZED) {
+                        mPowerModels[i] = BatteryConsumer.POWER_MODEL_UNDEFINED;
+                    }
+                }
             }
         }
 
@@ -431,6 +591,19 @@ class PowerComponents {
                 totalPowerMah += mPowerComponentsMah[i];
             }
             return totalPowerMah;
+        }
+
+        private byte[] getPowerModels() {
+            if (mPowerModels == null) {
+                return null;
+            }
+
+            byte[] powerModels = new byte[mPowerModels.length];
+            for (int i = mPowerModels.length - 1; i >= 0; i--) {
+                powerModels[i] = mPowerModels[i] != POWER_MODEL_UNINITIALIZED ? mPowerModels[i]
+                        : BatteryConsumer.POWER_MODEL_UNDEFINED;
+            }
+            return powerModels;
         }
 
         /**

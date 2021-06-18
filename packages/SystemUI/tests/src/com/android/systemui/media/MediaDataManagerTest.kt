@@ -9,8 +9,8 @@ import android.media.MediaDescription
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSession
-import android.provider.Settings
 import android.os.Bundle
+import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -20,6 +20,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.SbnBuilder
+import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
@@ -86,6 +87,8 @@ class MediaDataManagerTest : SysuiTestCase() {
     lateinit var mediaNotification: StatusBarNotification
     @Captor lateinit var mediaDataCaptor: ArgumentCaptor<MediaData>
     private val clock = FakeSystemClock()
+    @Mock private lateinit var tunerService: TunerService
+    @Captor lateinit var tunableCaptor: ArgumentCaptor<TunerService.Tunable>
 
     private val originalSmartspaceSetting = Settings.Secure.getInt(context.contentResolver,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 1)
@@ -114,8 +117,11 @@ class MediaDataManagerTest : SysuiTestCase() {
             smartspaceMediaDataProvider = smartspaceMediaDataProvider,
             useMediaResumption = true,
             useQsMediaPlayer = true,
-            systemClock = clock
+            systemClock = clock,
+            tunerService = tunerService
         )
+        verify(tunerService).addTunable(capture(tunableCaptor),
+                eq(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION))
         session = MediaSession(context, "MediaDataManagerTestSession")
         mediaNotification = SbnBuilder().run {
             setPkg(PACKAGE_NAME)
@@ -364,6 +370,9 @@ class MediaDataManagerTest : SysuiTestCase() {
     fun testOnSmartspaceMediaDataLoaded_hasNoneMediaTarget_callsRemoveListener() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
         smartspaceMediaDataProvider.onTargetsAvailable(listOf())
+        foregroundExecutor.advanceClockToLast()
+        foregroundExecutor.runAllReady()
+
         verify(listener).onSmartspaceMediaDataRemoved(eq(KEY_MEDIA_SMARTSPACE), eq(false))
     }
 
@@ -372,11 +381,31 @@ class MediaDataManagerTest : SysuiTestCase() {
         // WHEN media recommendation setting is off
         Settings.Secure.putInt(context.contentResolver,
                 Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 0)
+        tunableCaptor.value.onTuningChanged(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, "0")
+
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
 
         // THEN smartspace signal is ignored
         verify(listener, never())
                 .onSmartspaceMediaDataLoaded(anyObject(), anyObject(), anyBoolean())
+    }
+
+    @Test
+    fun testMediaRecommendationDisabled_removesSmartspaceData() {
+        // GIVEN a media recommendation card is present
+        smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        verify(listener).onSmartspaceMediaDataLoaded(eq(KEY_MEDIA_SMARTSPACE), anyObject(),
+                anyBoolean())
+
+        // WHEN the media recommendation setting is turned off
+        Settings.Secure.putInt(context.contentResolver,
+                Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 0)
+        tunableCaptor.value.onTuningChanged(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, "0")
+
+        // THEN listeners are notified
+        foregroundExecutor.advanceClockToLast()
+        foregroundExecutor.runAllReady()
+        verify(listener).onSmartspaceMediaDataRemoved(eq(KEY_MEDIA_SMARTSPACE), eq(true))
     }
 
     @Test
