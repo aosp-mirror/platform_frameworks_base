@@ -730,7 +730,7 @@ public class ResourcesManager {
      * @return true if activity resources override config matches the provided one or they are both
      *         null, false otherwise.
      */
-    boolean isSameResourcesOverrideConfig(@Nullable IBinder activityToken,
+    public boolean isSameResourcesOverrideConfig(@Nullable IBinder activityToken,
             @Nullable Configuration overrideConfig) {
         synchronized (mLock) {
             final ActivityResources activityResources
