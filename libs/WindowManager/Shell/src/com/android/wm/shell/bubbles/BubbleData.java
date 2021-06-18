@@ -73,6 +73,7 @@ public class BubbleData {
         boolean expandedChanged;
         boolean selectionChanged;
         boolean orderChanged;
+        boolean suppressedSummaryChanged;
         boolean expanded;
         @Nullable BubbleViewProvider selectedBubble;
         @Nullable Bubble addedBubble;
@@ -81,6 +82,7 @@ public class BubbleData {
         @Nullable Bubble removedOverflowBubble;
         @Nullable Bubble suppressedBubble;
         @Nullable Bubble unsuppressedBubble;
+        @Nullable String suppressedSummaryGroup;
         // Pair with Bubble and @DismissReason Integer
         final List<Pair<Bubble, Integer>> removedBubbles = new ArrayList<>();
 
@@ -103,7 +105,9 @@ public class BubbleData {
                     || removedOverflowBubble != null
                     || orderChanged
                     || suppressedBubble != null
-                    || unsuppressedBubble != null;
+                    || unsuppressedBubble != null
+                    || suppressedSummaryChanged
+                    || suppressedSummaryGroup != null;
         }
 
         void bubbleRemoved(Bubble bubbleToRemove, @DismissReason int reason) {
@@ -380,6 +384,9 @@ public class BubbleData {
      */
     void addSummaryToSuppress(String groupKey, String notifKey) {
         mSuppressedGroupKeys.put(groupKey, notifKey);
+        mStateChange.suppressedSummaryChanged = true;
+        mStateChange.suppressedSummaryGroup = groupKey;
+        dispatchPendingChanges();
     }
 
     /**
@@ -397,6 +404,9 @@ public class BubbleData {
      */
     void removeSuppressedSummary(String groupKey) {
         mSuppressedGroupKeys.remove(groupKey);
+        mStateChange.suppressedSummaryChanged = true;
+        mStateChange.suppressedSummaryGroup = groupKey;
+        dispatchPendingChanges();
     }
 
     /**
