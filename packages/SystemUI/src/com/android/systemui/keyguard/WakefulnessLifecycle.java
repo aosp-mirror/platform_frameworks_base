@@ -67,7 +67,7 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     @Nullable
     private final IWallpaperManager mWallpaperManagerService;
 
-    private int mWakefulness = WAKEFULNESS_ASLEEP;
+    private int mWakefulness = WAKEFULNESS_AWAKE;
 
     private @PowerManager.WakeReason int mLastWakeReason = PowerManager.WAKE_REASON_UNKNOWN;
 
