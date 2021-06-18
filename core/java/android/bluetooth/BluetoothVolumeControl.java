@@ -107,7 +107,6 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
         close();
     }
 
-    /*package*/
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public void close() {
         mProfileConnector.disconnect();
@@ -212,23 +211,6 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
     }
 
     /**
-     * Set priority of the profile
-     *
-     * <p> The device should already be paired.
-     * Priority can be one of {@link #PRIORITY_ON} or {@link #PRIORITY_OFF},
-     *
-     * @param device Paired bluetooth device
-     * @param priority
-     * @return true if priority is set, false on error
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public boolean setPriority(BluetoothDevice device, int priority) {
-        if (DBG) log("setPriority(" + device + ", " + priority + ")");
-        return setConnectionPolicy(device, BluetoothAdapter.priorityToConnectionPolicy(priority));
-    }
-
-    /**
      * Set connection policy of the profile
      *
      * <p> The device should already be paired.
@@ -260,22 +242,6 @@ public final class BluetoothVolumeControl implements BluetoothProfile, AutoClose
         }
         if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
-    }
-
-    /**
-     * Get the priority of the profile.
-     *
-     * <p> The priority can be any of:
-     * {@link #PRIORITY_OFF}, {@link #PRIORITY_ON}, {@link #PRIORITY_UNDEFINED}
-     *
-     * @param device Bluetooth device
-     * @return priority of the device
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public int getPriority(BluetoothDevice device) {
-        if (VDBG) log("getPriority(" + device + ")");
-        return BluetoothAdapter.connectionPolicyToPriority(getConnectionPolicy(device));
     }
 
     /**
