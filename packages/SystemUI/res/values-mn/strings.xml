@@ -1034,6 +1034,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Дэлгэцийн нэг хэсгийг томруулах"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Сэлгэх"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Хандалтын товчлуурыг хандалтын зангаагаар сольсон\n\n"<annotation id="link">"Тохиргоо харах"</annotation></string>
+    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
+    <skip />
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Үүнийг түр нуухын тулд товчлуурыг зах руу зөөнө үү"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Зүүн дээш зөөх"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Баруун дээш зөөх"</string>

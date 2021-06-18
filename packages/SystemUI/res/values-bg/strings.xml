@@ -1034,6 +1034,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Увеличаване на част от екрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Превключване"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Жестът за достъпност бе заменен от бутон\n\n"<annotation id="link">"Преглед на настройките"</annotation></string>
+    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
+    <skip />
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Преместете бутона до края, за да го скриете временно"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Преместване горе вляво"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Преместване горе вдясно"</string>
