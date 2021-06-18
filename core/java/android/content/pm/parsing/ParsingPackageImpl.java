@@ -1007,7 +1007,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         sForInternedStringList.parcel(this.requestedPermissions, dest, flags);
         sForInternedStringList.parcel(this.implicitPermissions, dest, flags);
         sForStringSet.parcel(this.upgradeKeySets, dest, flags);
-        dest.writeMap(this.keySetMapping);
+        ParsingPackageUtils.writeKeySetMapping(dest, this.keySetMapping);
         sForInternedStringList.parcel(this.protectedBroadcasts, dest, flags);
         dest.writeTypedList(this.activities);
         dest.writeTypedList(this.receivers);
@@ -1026,7 +1026,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeBoolean(this.use32BitAbi);
         dest.writeBoolean(this.visibleToInstantApps);
         dest.writeBoolean(this.forceQueryable);
-        dest.writeParcelableList(this.queriesIntents, flags);
+        dest.writeTypedList(this.queriesIntents, flags);
         sForInternedStringList.parcel(this.queriesPackages, dest, flags);
         sForInternedStringSet.parcel(this.queriesProviders, dest, flags);
         dest.writeString(this.appComponentFactory);
@@ -1169,7 +1169,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.requestedPermissions = sForInternedStringList.unparcel(in);
         this.implicitPermissions = sForInternedStringList.unparcel(in);
         this.upgradeKeySets = sForStringSet.unparcel(in);
-        this.keySetMapping = in.readHashMap(boot);
+        this.keySetMapping = ParsingPackageUtils.readKeySetMapping(in);
         this.protectedBroadcasts = sForInternedStringList.unparcel(in);
 
         this.activities = in.createTypedArrayList(ParsedActivity.CREATOR);
