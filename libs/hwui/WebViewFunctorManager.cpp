@@ -197,6 +197,8 @@ ASurfaceControl* WebViewFunctor::getSurfaceControl() {
     auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
     mSurfaceControl = funcs.createFunc(rootSurfaceControl, "Webview Overlay SurfaceControl");
     ASurfaceTransaction* transaction = funcs.transactionCreateFunc();
+    activeContext->prepareSurfaceControlForWebview();
+    funcs.transactionSetZOrderFunc(transaction, mSurfaceControl, -1);
     funcs.transactionSetVisibilityFunc(transaction, mSurfaceControl,
                                        ASURFACE_TRANSACTION_VISIBILITY_SHOW);
     funcs.transactionApplyFunc(transaction);
