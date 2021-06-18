@@ -20,7 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.robolectric.Robolectric.setupActivity;
+import static org.robolectric.Shadows.shadowOf;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
@@ -44,8 +47,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowDrawable;
+import org.robolectric.shadows.ShadowTouchDelegate;
 import org.robolectric.util.ReflectionHelpers;
 
 @RunWith(RobolectricTestRunner.class)
@@ -58,6 +61,9 @@ public class BannerMessagePreferenceTest {
 
     private boolean mClickListenerCalled = false;
     private final View.OnClickListener mClickListener = v -> mClickListenerCalled = true;
+    private final int mMinimumTargetSize =
+            RuntimeEnvironment.application.getResources()
+                    .getDimensionPixelSize(R.dimen.settingslib_preferred_minimum_touch_target);
 
     private static final int TEST_STRING_RES_ID =
             R.string.accessibility_banner_message_dismiss;
@@ -78,6 +84,23 @@ public class BannerMessagePreferenceTest {
 
         assertThat(((TextView) mRootView.findViewById(R.id.banner_title)).getText())
                 .isEqualTo("test");
+    }
+
+    @Test
+    public void onBindViewHolder_andOnLayoutView_dismissButtonTouchDelegate_isCorrectSize() {
+        assumeAndroidS();
+        mBannerPreference.setTitle("Title");
+        mBannerPreference.setDismissButtonOnClickListener(mClickListener);
+
+        mBannerPreference.onBindViewHolder(mHolder);
+        setupActivity(Activity.class).setContentView(mRootView);
+
+        assertThat(mRootView.getTouchDelegate()).isNotNull();
+        ShadowTouchDelegate delegate = shadowOf(mRootView.getTouchDelegate());
+        assertThat(delegate.getBounds().width()).isAtLeast(mMinimumTargetSize);
+        assertThat(delegate.getBounds().height()).isAtLeast(mMinimumTargetSize);
+        assertThat(delegate.getDelegateView())
+                .isEqualTo(mRootView.findViewById(R.id.banner_dismiss_btn));
     }
 
     @Test
@@ -157,7 +180,7 @@ public class BannerMessagePreferenceTest {
         mBannerPreference.onBindViewHolder(mHolder);
 
         ImageView mIcon = mRootView.findViewById(R.id.banner_icon);
-        ShadowDrawable shadowDrawable = Shadows.shadowOf(mIcon.getDrawable());
+        ShadowDrawable shadowDrawable = shadowOf(mIcon.getDrawable());
         assertThat(shadowDrawable.getCreatedFromResId())
                 .isEqualTo(R.drawable.settingslib_ic_cross);
     }
@@ -168,7 +191,7 @@ public class BannerMessagePreferenceTest {
         mBannerPreference.onBindViewHolder(mHolder);
 
         ImageView mIcon = mRootView.findViewById(R.id.banner_icon);
-        ShadowDrawable shadowDrawable = Shadows.shadowOf(mIcon.getDrawable());
+        ShadowDrawable shadowDrawable = shadowOf(mIcon.getDrawable());
         assertThat(shadowDrawable.getCreatedFromResId()).isEqualTo(R.drawable.ic_warning);
     }
 
@@ -478,11 +501,15 @@ public class BannerMessagePreferenceTest {
 
     private void assumeAndroidR() {
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 30);
+        ReflectionHelpers.setStaticField(Build.VERSION.class, "CODENAME", "R");
+        ReflectionHelpers.setStaticField(BannerMessagePreference.class, "IS_AT_LEAST_S", false);
         // Reset view holder to use correct layout.
     }
 
     private void assumeAndroidS() {
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 31);
+        ReflectionHelpers.setStaticField(Build.VERSION.class, "CODENAME", "S");
+        ReflectionHelpers.setStaticField(BannerMessagePreference.class, "IS_AT_LEAST_S", true);
         // Re-inflate view to update layout.
         setUpViewHolder();
     }
