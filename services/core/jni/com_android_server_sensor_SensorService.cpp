@@ -32,6 +32,7 @@
 
 namespace android {
 
+static JavaVM* sJvm = nullptr;
 static jmethodID sMethodIdOnProximityActive;
 
 class NativeSensorService {
@@ -93,8 +94,8 @@ NativeSensorService::ProximityActiveListenerDelegate::~ProximityActiveListenerDe
 }
 
 void NativeSensorService::ProximityActiveListenerDelegate::onProximityActive(bool isActive) {
-    AndroidRuntime::getJNIEnv()->CallVoidMethod(mListener, sMethodIdOnProximityActive,
-                                                static_cast<jboolean>(isActive));
+    auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
+    jniEnv->CallVoidMethod(mListener, sMethodIdOnProximityActive, static_cast<jboolean>(isActive));
 }
 
 static jlong startSensorServiceNative(JNIEnv* env, jclass, jobject listener) {
@@ -128,7 +129,8 @@ static const JNINativeMethod methods[] = {
 
 };
 
-int register_android_server_sensor_SensorService(JNIEnv* env) {
+int register_android_server_sensor_SensorService(JavaVM* vm, JNIEnv* env) {
+    sJvm = vm;
     jclass listenerClass = FindClassOrDie(env, PROXIMITY_ACTIVE_CLASS);
     sMethodIdOnProximityActive = GetMethodIDOrDie(env, listenerClass, "onProximityActive", "(Z)V");
     return jniRegisterNativeMethods(env, "com/android/server/sensors/SensorService", methods,
