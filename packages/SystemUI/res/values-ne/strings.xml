@@ -1034,6 +1034,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रिनको केही भाग म्याग्निफाइ गर्नुहोस्"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"बदल्नुहोस्"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"एक्सेसिबिलिटी इसाराका स्थानमा एक्सेसिबिलिटी बटन प्रयोग हुन थालेको छ\n\n"<annotation id="link">"सेटिङ हेर्नुहोस्"</annotation></string>
+    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
+    <skip />
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"यो बटन केही बेर नदेखिने पार्न किनारातिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"सिरानको बायाँतिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"सिरानको दायाँतिर सार्नुहोस्"</string>
