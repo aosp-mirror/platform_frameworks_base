@@ -2892,7 +2892,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // In case user assigned magnification to the given shortcut.
         if (targetName.equals(MAGNIFICATION_CONTROLLER_NAME)) {
             final boolean enabled = !getFullScreenMagnificationController().isMagnifying(displayId);
-            logAccessibilityShortcutActivated(MAGNIFICATION_COMPONENT_NAME, shortcutType, enabled);
+            logAccessibilityShortcutActivated(mContext, MAGNIFICATION_COMPONENT_NAME, shortcutType,
+                    enabled);
             sendAccessibilityButtonToInputFilter(displayId);
             return;
         }
@@ -2907,7 +2908,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         // In case user assigned an accessibility shortcut target to the given shortcut.
         if (performAccessibilityShortcutTargetActivity(displayId, targetComponentName)) {
-            logAccessibilityShortcutActivated(targetComponentName, shortcutType);
+            logAccessibilityShortcutActivated(mContext, targetComponentName, shortcutType);
             return;
         }
         // in case user assigned an accessibility service to the given shortcut.
@@ -2930,12 +2931,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 featureInfo.getSettingKey(), mCurrentUserId);
         // Assuming that the default state will be to have the feature off
         if (!TextUtils.equals(featureInfo.getSettingOnValue(), setting.read())) {
-            logAccessibilityShortcutActivated(assignedTarget, shortcutType, /* serviceEnabled= */
-                    true);
+            logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
+                    /* serviceEnabled= */ true);
             setting.write(featureInfo.getSettingOnValue());
         } else {
-            logAccessibilityShortcutActivated(assignedTarget, shortcutType, /* serviceEnabled= */
-                    false);
+            logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
+                    /* serviceEnabled= */ false);
             setting.write(featureInfo.getSettingOffValue());
         }
         return true;
@@ -2997,13 +2998,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if ((targetSdk <= Build.VERSION_CODES.Q && shortcutType == ACCESSIBILITY_SHORTCUT_KEY)
                     || (targetSdk > Build.VERSION_CODES.Q && !requestA11yButton)) {
                 if (serviceConnection == null) {
-                    logAccessibilityShortcutActivated(assignedTarget,
-                            shortcutType, /* serviceEnabled= */ true);
+                    logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
+                            /* serviceEnabled= */ true);
                     enableAccessibilityServiceLocked(assignedTarget, mCurrentUserId);
 
                 } else {
-                    logAccessibilityShortcutActivated(assignedTarget,
-                            shortcutType, /* serviceEnabled= */ false);
+                    logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
+                            /* serviceEnabled= */ false);
                     disableAccessibilityServiceLocked(assignedTarget, mCurrentUserId);
                 }
                 return true;
@@ -3024,8 +3025,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 return false;
             }
             // ServiceConnection means service enabled.
-            logAccessibilityShortcutActivated(assignedTarget, shortcutType, /* serviceEnabled= */
-                    true);
+            logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
+                    /* serviceEnabled= */ true);
             serviceConnection.notifyAccessibilityButtonClickedLocked(displayId);
             return true;
         }
