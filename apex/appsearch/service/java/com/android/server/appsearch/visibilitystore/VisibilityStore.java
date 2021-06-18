@@ -76,7 +76,7 @@ public class VisibilityStore {
      * These cannot have any of the special characters used by AppSearchImpl (e.g. {@code
      * AppSearchImpl#PACKAGE_DELIMITER} or {@code AppSearchImpl#DATABASE_DELIMITER}.
      */
-    @VisibleForTesting public static final String PACKAGE_NAME = "VS#Pkg";
+    public static final String PACKAGE_NAME = "VS#Pkg";
 
     @VisibleForTesting public static final String DATABASE_NAME = "VS#Db";
 
