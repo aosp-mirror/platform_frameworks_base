@@ -507,8 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म आणि रिमाइंडर"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म आणि रिमाइंडर सेट करण्याची अनुमती द्या"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"अलार्म आणि रिमाइंडर"</string>
-    <!-- no translation found for alarms_and_reminders_footer_title (6302587438389079695) -->
-    <skip />
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"या ॲपला अलार्म सेट करण्याची किंवा वेळेनुसार संवेदनशील असलेल्या कृती शेड्युल करण्याची अनुमती द्या. हे ॲपला बॅकग्राउंडमध्ये रन होऊ देते, ज्यामुळे जास्त बॅटरी वापरली जाऊ शकते.\n\nही परवानगी बंद असल्यास, सध्याचे अलार्म आणि या ॲपद्वारे शेड्युल केलेले वेळेवर आधारित इव्हेंट काम करणार नाहीत."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"शेड्युल, अलार्म, रिमाइंडर, घड्याळ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"सुरू करा"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"व्यत्यय आणू नका सुरू करा"</string>
