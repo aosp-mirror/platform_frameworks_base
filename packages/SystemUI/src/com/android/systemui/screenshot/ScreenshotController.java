@@ -573,6 +573,10 @@ public class ScreenshotController {
                             mScreenshotView.updateDisplayCutoutMargins(
                                     mWindowManager.getCurrentWindowMetrics().getWindowInsets()
                                             .getDisplayCutout());
+                            // screenshot animation calculations won't be valid anymore, so just end
+                            if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
+                                mScreenshotAnimation.end();
+                            }
                         }
                     });
         });
