@@ -40,6 +40,7 @@ import android.content.ContextWrapper;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
+import android.hardware.hdmi.IHdmiControlStatusChangeListener;
 import android.os.Binder;
 import android.os.IPowerManager;
 import android.os.IThermalService;
@@ -681,6 +682,100 @@ public class HdmiControlServiceTest {
         mTestLooper.dispatchAll();
         assertThat(mHdmiControlServiceSpy.getCecVersion()).isEqualTo(
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
+    }
+
+    @Test
+    public void initCec_statusListener_CecDisabled() {
+        HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
+
+        mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
+
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiControlStatusCallback.mCecEnabled).isFalse();
+        assertThat(hdmiControlStatusCallback.mCecAvailable).isFalse();
+    }
+
+    @Test
+    public void initCec_statusListener_CecEnabled_NoCecResponse() {
+        HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
+
+        mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
+
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mTestLooper.dispatchAll();
+        // Hit timeout twice due to retries
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiControlStatusCallback.mCecEnabled).isTrue();
+        assertThat(hdmiControlStatusCallback.mCecAvailable).isFalse();
+    }
+
+    @Test
+    public void initCec_statusListener_CecEnabled_CecAvailable_TvOn() {
+        HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
+        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
+        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(
+                Constants.ADDR_TV,
+                mHdmiControlServiceSpy.playback().mAddress, HdmiControlManager.POWER_STATUS_ON);
+        mNativeWrapper.onCecMessage(reportPowerStatus);
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiControlStatusCallback.mCecEnabled).isTrue();
+        assertThat(hdmiControlStatusCallback.mCecAvailable).isTrue();
+    }
+
+    @Test
+    public void initCec_statusListener_CecEnabled_CecAvailable_TvStandby() {
+        HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
+        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
+        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(
+                Constants.ADDR_TV,
+                mHdmiControlServiceSpy.playback().mAddress,
+                HdmiControlManager.POWER_STATUS_STANDBY);
+        mNativeWrapper.onCecMessage(reportPowerStatus);
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiControlStatusCallback.mCecEnabled).isTrue();
+        assertThat(hdmiControlStatusCallback.mCecAvailable).isTrue();
+    }
+
+    private static class HdmiControlStatusCallback extends IHdmiControlStatusChangeListener.Stub {
+        boolean mCecEnabled = false;
+        boolean mCecAvailable = false;
+
+        @Override
+        public void onStatusChange(int isCecEnabled, boolean isCecAvailable)
+                throws RemoteException {
+            mCecEnabled = isCecEnabled == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
+            mCecAvailable = isCecAvailable;
+        }
     }
 
     private static class VolumeControlFeatureCallback extends
