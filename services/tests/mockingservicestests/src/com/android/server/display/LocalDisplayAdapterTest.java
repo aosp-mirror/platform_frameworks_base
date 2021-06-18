@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -589,8 +590,8 @@ public class LocalDisplayAdapterTest {
                 new DisplayModeDirector.DesiredDisplayModeSpecs(
                         /*baseModeId*/ baseModeId,
                         /*allowGroupSwitching*/ false,
-                        new DisplayModeDirector.RefreshRateRange(60f, 60f),
-                        new DisplayModeDirector.RefreshRateRange(60f, 60f)
+                        new RefreshRateRange(60f, 60f),
+                        new RefreshRateRange(60f, 60f)
                 ));
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         verify(mSurfaceControlProxy).setDesiredDisplayModeSpecs(display.token,
@@ -624,8 +625,8 @@ public class LocalDisplayAdapterTest {
                 new DisplayModeDirector.DesiredDisplayModeSpecs(
                         /*baseModeId*/ baseModeId,
                         /*allowGroupSwitching*/ false,
-                        new DisplayModeDirector.RefreshRateRange(60f, 60f),
-                        new DisplayModeDirector.RefreshRateRange(60f, 60f)
+                        new RefreshRateRange(60f, 60f),
+                        new RefreshRateRange(60f, 60f)
                 ));
 
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
