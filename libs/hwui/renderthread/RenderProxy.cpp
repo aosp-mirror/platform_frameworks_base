@@ -319,6 +319,12 @@ void RenderProxy::setASurfaceTransactionCallback(
             [this, cb = callback]() { mContext->setASurfaceTransactionCallback(cb); });
 }
 
+void RenderProxy::setPrepareSurfaceControlForWebviewCallback(
+        const std::function<void()>& callback) {
+    mRenderThread.queue().post(
+            [this, cb = callback]() { mContext->setPrepareSurfaceControlForWebviewCallback(cb); });
+}
+
 void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
 }
