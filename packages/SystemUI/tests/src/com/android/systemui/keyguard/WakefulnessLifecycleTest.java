@@ -56,7 +56,7 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
 
     @Test
     public void baseState() throws Exception {
-        assertEquals(WakefulnessLifecycle.WAKEFULNESS_ASLEEP, mWakefulness.getWakefulness());
+        assertEquals(WakefulnessLifecycle.WAKEFULNESS_AWAKE, mWakefulness.getWakefulness());
 
         verifyNoMoreInteractions(mWakefulnessObserver);
     }
