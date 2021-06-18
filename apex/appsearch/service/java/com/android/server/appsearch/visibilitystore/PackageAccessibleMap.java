@@ -82,9 +82,4 @@ class PackageAccessibleMap {
         }
         return accessiblePackages;
     }
-
-    /** Discards all data in the map. */
-    public void clear() {
-        mMap.clear();
-    }
 }
