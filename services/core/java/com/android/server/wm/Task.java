@@ -109,16 +109,12 @@ import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
-import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
 import static com.android.server.wm.TaskProto.AFFINITY;
 import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.CREATED_BY_ORGANIZER;
-import static com.android.server.wm.TaskProto.DISPLAY_ID;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
 import static com.android.server.wm.TaskProto.HAS_CHILD_PIP_ACTIVITY;
 import static com.android.server.wm.TaskProto.LAST_NON_FULLSCREEN_BOUNDS;
-import static com.android.server.wm.TaskProto.MIN_HEIGHT;
-import static com.android.server.wm.TaskProto.MIN_WIDTH;
 import static com.android.server.wm.TaskProto.ORIG_ACTIVITY;
 import static com.android.server.wm.TaskProto.REAL_ACTIVITY;
 import static com.android.server.wm.TaskProto.RESIZE_MODE;
@@ -126,7 +122,7 @@ import static com.android.server.wm.TaskProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.TaskProto.ROOT_TASK_ID;
 import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
 import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
-import static com.android.server.wm.TaskProto.WINDOW_CONTAINER;
+import static com.android.server.wm.TaskProto.TASK_FRAGMENT;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.TASK;
@@ -2235,11 +2231,6 @@ class Task extends TaskFragment {
             mRootProcess.removeRecentTask(this);
             mRootProcess = null;
         }
-    }
-
-    int getDisplayId() {
-        final DisplayContent dc = getDisplayContent();
-        return dc != null ? dc.mDisplayId : INVALID_DISPLAY;
     }
 
     /** @return Id of root task. */
@@ -6066,10 +6057,8 @@ class Task extends TaskFragment {
         }
 
         final long token = proto.start(fieldId);
-        super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
 
         proto.write(TaskProto.ID, mTaskId);
-        proto.write(DISPLAY_ID, getDisplayId());
         proto.write(ROOT_TASK_ID, getRootTaskId());
 
         if (getTopResumedActivity() != null) {
@@ -6081,11 +6070,7 @@ class Task extends TaskFragment {
         if (origActivity != null) {
             proto.write(ORIG_ACTIVITY, origActivity.flattenToShortString());
         }
-        proto.write(ACTIVITY_TYPE, getActivityType());
         proto.write(RESIZE_MODE, mResizeMode);
-        proto.write(MIN_WIDTH, mMinWidth);
-        proto.write(MIN_HEIGHT, mMinHeight);
-
         proto.write(FILLS_PARENT, matchParentBounds());
         getRawBounds().dumpDebug(proto, BOUNDS);
 
@@ -6101,6 +6086,8 @@ class Task extends TaskFragment {
         proto.write(CREATED_BY_ORGANIZER, mCreatedByOrganizer);
         proto.write(AFFINITY, affinity);
         proto.write(HAS_CHILD_PIP_ACTIVITY, mChildPipActivity != null);
+
+        super.dumpDebug(proto, TASK_FRAGMENT, logLevel);
 
         proto.end(token);
     }
