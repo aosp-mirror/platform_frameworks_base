@@ -544,6 +544,8 @@ public class StatsPullAtomService extends SystemService {
                         return pullProcessDmabufMemory(atomTag, data);
                     case FrameworkStatsLog.SYSTEM_MEMORY:
                         return pullSystemMemory(atomTag, data);
+                    case FrameworkStatsLog.VMSTAT:
+                        return pullVmStat(atomTag, data);
                     case FrameworkStatsLog.TEMPERATURE:
                         synchronized (mTemperatureLock) {
                             return pullTemperatureLocked(atomTag, data);
@@ -842,6 +844,7 @@ public class StatsPullAtomService extends SystemService {
         registerProcessSystemIonHeapSize();
         registerSystemMemory();
         registerProcessDmabufMemory();
+        registerVmStat();
         registerTemperature();
         registerCoolingDevice();
         registerBinderCallsStats();
@@ -2270,6 +2273,27 @@ public class StatsPullAtomService extends SystemService {
                         metrics.gpuTotalUsageKb,
                         metrics.gpuPrivateAllocationsKb,
                         metrics.dmaBufTotalExportedKb));
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerVmStat() {
+        int tagId = FrameworkStatsLog.VMSTAT;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullVmStat(int atomTag, List<StatsEvent> pulledData) {
+        ProcfsMemoryUtil.VmStat vmStat = ProcfsMemoryUtil.readVmStat();
+        if (vmStat != null) {
+            pulledData.add(
+                    FrameworkStatsLog.buildStatsEvent(
+                            atomTag,
+                            vmStat.oomKillCount));
+        }
         return StatsManager.PULL_SUCCESS;
     }
 

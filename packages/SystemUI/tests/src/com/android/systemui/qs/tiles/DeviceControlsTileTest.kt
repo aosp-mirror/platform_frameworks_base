@@ -378,7 +378,10 @@ class DeviceControlsTileTest : SysuiTestCase() {
                 qsLogger,
                 controlsComponent,
                 keyguardStateController
-        )
+        ).also {
+            it.initialize()
+            testableLooper.processAllMessages()
+        }
     }
 }
 

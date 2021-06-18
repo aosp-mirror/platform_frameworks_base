@@ -2006,16 +2006,12 @@ public class AlarmManagerService extends SystemService {
                 windowLength = INTERVAL_DAY;
             } else if ((flags & FLAG_PRIORITIZE) == 0 && windowLength < minAllowedWindow) {
                 // Prioritized alarms are exempt from minimum window limits.
-                if (CompatChanges.isChangeEnabled(
+                if (!isExemptFromMinWindowRestrictions(callingUid) && CompatChanges.isChangeEnabled(
                         AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS, callingPackage,
                         UserHandle.getUserHandleForUid(callingUid))) {
                     Slog.w(TAG, "Window length " + windowLength + "ms too short; expanding to "
                             + minAllowedWindow + "ms.");
                     windowLength = minAllowedWindow;
-                } else {
-                    // TODO (b/185199076): Remove temporary log to catch breaking apps.
-                    Slog.wtf(TAG, "Short window " + windowLength + "ms specified by "
-                            + callingPackage);
                 }
             }
             maxElapsed = triggerElapsed + windowLength;
@@ -2406,6 +2402,13 @@ public class AlarmManagerService extends SystemService {
         }
         mStatLogger.logDurationStat(Stats.HAS_SCHEDULE_EXACT_ALARM, start);
         return hasPermission;
+    }
+
+    /**
+     * Returns true if the given uid can set window to be as small as it wants.
+     */
+    boolean isExemptFromMinWindowRestrictions(int uid) {
+        return isExemptFromExactAlarmPermission(uid);
     }
 
     /**
