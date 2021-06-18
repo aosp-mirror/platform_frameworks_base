@@ -61,7 +61,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
         return FlickerBuilder(instrumentation).apply {
             setup {
                 test {
-                    testApp.launchViaIntent()
+                    testApp.launchViaIntent(wmHelper)
                 }
                 eachRun {
                     testApp.openIME(device, wmHelper)
