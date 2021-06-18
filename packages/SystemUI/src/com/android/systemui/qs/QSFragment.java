@@ -539,8 +539,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     private void pinToBottom(float absoluteBottomPosition, MediaHost mediaHost, boolean expanded) {
         View hostView = mediaHost.getHostView();
-        // on keyguard we cross-fade to expanded, so no need to pin it.
-        if (mLastQSExpansion > 0 && !isKeyguardState()) {
+        // On keyguard we cross-fade to expanded, so no need to pin it.
+        // If the collapsed qs isn't visible, we also just keep it at the laid out position.
+        if (mLastQSExpansion > 0 && !isKeyguardState() && mQqsMediaHost.getVisible()) {
             float targetPosition = absoluteBottomPosition - getTotalBottomMargin(hostView)
                     - hostView.getHeight();
             float currentPosition = mediaHost.getCurrentBounds().top

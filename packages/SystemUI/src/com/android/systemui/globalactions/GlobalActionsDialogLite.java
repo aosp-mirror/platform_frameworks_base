@@ -177,6 +177,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final IDreamManager mDreamManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final LockPatternUtils mLockPatternUtils;
+    private final TelephonyListenerManager mTelephonyListenerManager;
     private final KeyguardStateController mKeyguardStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     protected final GlobalSettings mGlobalSettings;
@@ -307,24 +308,37 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
      * @param context everything needs a context :(
      */
     @Inject
-    public GlobalActionsDialogLite(Context context, GlobalActionsManager windowManagerFuncs,
-            AudioManager audioManager, IDreamManager iDreamManager,
-            DevicePolicyManager devicePolicyManager, LockPatternUtils lockPatternUtils,
+    public GlobalActionsDialogLite(
+            Context context,
+            GlobalActionsManager windowManagerFuncs,
+            AudioManager audioManager,
+            IDreamManager iDreamManager,
+            DevicePolicyManager devicePolicyManager,
+            LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
             TelephonyListenerManager telephonyListenerManager,
-            GlobalSettings globalSettings, SecureSettings secureSettings,
-            @Nullable Vibrator vibrator, @Main Resources resources,
+            GlobalSettings globalSettings,
+            SecureSettings secureSettings,
+            @Nullable Vibrator vibrator,
+            @Main Resources resources,
             ConfigurationController configurationController,
-            KeyguardStateController keyguardStateController, UserManager userManager,
-            TrustManager trustManager, IActivityManager iActivityManager,
-            @Nullable TelecomManager telecomManager, MetricsLogger metricsLogger,
-            NotificationShadeDepthController depthController, SysuiColorExtractor colorExtractor,
+            KeyguardStateController keyguardStateController,
+            UserManager userManager,
+            TrustManager trustManager,
+            IActivityManager iActivityManager,
+            @Nullable TelecomManager telecomManager,
+            MetricsLogger metricsLogger,
+            NotificationShadeDepthController depthController,
+            SysuiColorExtractor colorExtractor,
             IStatusBarService statusBarService,
             NotificationShadeWindowController notificationShadeWindowController,
             IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
             UiEventLogger uiEventLogger,
-            RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler,
+            RingerModeTracker ringerModeTracker,
+            SysUiState sysUiState,
+            @Main Handler handler,
+            PackageManager packageManager,
             StatusBar statusBar) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
@@ -332,6 +346,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mDreamManager = iDreamManager;
         mDevicePolicyManager = devicePolicyManager;
         mLockPatternUtils = lockPatternUtils;
+        mTelephonyListenerManager = telephonyListenerManager;
         mKeyguardStateController = keyguardStateController;
         mBroadcastDispatcher = broadcastDispatcher;
         mGlobalSettings = globalSettings;
@@ -353,7 +368,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mRingerModeTracker = ringerModeTracker;
         mSysUiState = sysUiState;
         mMainHandler = handler;
-        mSmallestScreenWidthDp = mContext.getResources().getConfiguration().smallestScreenWidthDp;
+        mSmallestScreenWidthDp = resources.getConfiguration().smallestScreenWidthDp;
         mStatusBar = statusBar;
 
         // receive broadcasts
@@ -363,11 +378,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         filter.addAction(TelephonyManager.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter);
 
-        mHasTelephony =
-                context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+        mHasTelephony = packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
 
         // get notified of phone state changes
-        telephonyListenerManager.addServiceStateListener(mPhoneStateListener);
+        mTelephonyListenerManager.addServiceStateListener(mPhoneStateListener);
         mGlobalSettings.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
@@ -385,6 +399,16 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mScreenshotHelper = new ScreenshotHelper(context);
 
         mConfigurationController.addCallback(this);
+    }
+
+    /**
+     * Clean up callbacks
+     */
+    public void destroy() {
+        mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
+        mTelephonyListenerManager.removeServiceStateListener(mPhoneStateListener);
+        mGlobalSettings.unregisterContentObserver(mAirplaneModeObserver);
+        mConfigurationController.removeCallback(this);
     }
 
     protected Context getContext() {
@@ -686,14 +710,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mDialog.refreshDialog();
         }
     }
-
-    /**
-     * Clean up callbacks
-     */
-    public void destroy() {
-        mConfigurationController.removeCallback(this);
-    }
-
     /**
      * Implements {@link GlobalActionsPanelPlugin.Callbacks#dismissGlobalActionsMenu()}, which is
      * called when the quick access wallet requests dismissal.
@@ -2015,7 +2031,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         }
     };
 
-    private ContentObserver mAirplaneModeObserver = new ContentObserver(mMainHandler) {
+    private final ContentObserver mAirplaneModeObserver = new ContentObserver(mMainHandler) {
         @Override
         public void onChange(boolean selfChange) {
             onAirplaneModeChanged();

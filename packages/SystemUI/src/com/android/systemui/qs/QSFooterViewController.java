@@ -74,7 +74,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     private final PageIndicator mPageIndicator;
     private final View mPowerMenuLite;
     private final boolean mShowPMLiteButton;
-    private GlobalActionsDialogLite mGlobalActionsDialog;
+    private final GlobalActionsDialogLite mGlobalActionsDialog;
     private final UiEventLogger mUiEventLogger;
 
     private final UserInfoController.OnUserInfoChangedListener mOnUserInfoChangedListener =

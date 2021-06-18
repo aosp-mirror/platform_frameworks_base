@@ -17,10 +17,13 @@
 package com.android.systemui.statusbar.policy
 
 import android.app.IActivityTaskManager
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.UserInfo
 import android.graphics.Bitmap
+import android.hardware.face.FaceManager
+import android.hardware.fingerprint.FingerprintManager
 import android.os.Handler
 import android.os.UserManager
 import android.testing.AndroidTestingRunner
@@ -47,6 +50,7 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyString
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
@@ -77,6 +81,10 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
         uiEventLogger = UiEventLoggerFake()
 
+        mContext.addMockSystemService(Context.FACE_SERVICE, mock(FaceManager::class.java))
+        mContext.addMockSystemService(Context.FINGERPRINT_SERVICE,
+                mock(FingerprintManager::class.java))
+
         userSwitcherController = UserSwitcherController(context,
                 userManager,
                 userTracker,
@@ -106,6 +114,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         `when`(userManager.createGuest(any(), anyString())).thenReturn(userInfo)
 
         userSwitcherController.onUserListItemClicked(emptyGuestUserRecord)
+        testableLooper.processAllMessages()
         assertEquals(1, uiEventLogger.numLogs())
         assertEquals(QSUserSwitcherEvent.QS_USER_GUEST_ADD.id, uiEventLogger.eventId(0))
     }

@@ -24,9 +24,13 @@ import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
+import com.android.systemui.statusbar.CircleReveal
+import com.android.systemui.statusbar.LiftReveal
+import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
+import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.StatusBar
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
@@ -49,10 +53,12 @@ class AuthRippleController @Inject constructor(
     private val commandRegistry: CommandRegistry,
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val bypassController: KeyguardBypassController,
+    private val biometricUnlockController: BiometricUnlockController,
     rippleView: AuthRippleView?
 ) : ViewController<AuthRippleView>(rippleView) {
     var fingerprintSensorLocation: PointF? = null
     private var faceSensorLocation: PointF? = null
+    private var circleReveal: LightRevealEffect? = null
 
     @VisibleForTesting
     public override fun onViewAttached() {
@@ -96,15 +102,47 @@ class AuthRippleController @Inject constructor(
 
     private fun showRipple() {
         notificationShadeWindowController.setForcePluginOpen(true, this)
-        mView.startRipple(Runnable {
-            notificationShadeWindowController.setForcePluginOpen(false, this)
-        })
+        val biometricUnlockMode = biometricUnlockController.mode
+        val useCircleReveal = circleReveal != null &&
+            (biometricUnlockMode == BiometricUnlockController.MODE_WAKE_AND_UNLOCK ||
+                biometricUnlockMode == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING ||
+                biometricUnlockMode == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_FROM_DREAM)
+        val lightRevealScrim = statusBar.lightRevealScrim
+        if (useCircleReveal) {
+            lightRevealScrim?.revealEffect = circleReveal!!
+        }
+
+        mView.startRipple(
+            /* end runnable */
+            Runnable {
+                notificationShadeWindowController.setForcePluginOpen(false, this)
+                if (useCircleReveal) {
+                    lightRevealScrim?.revealEffect = LiftReveal
+                }
+            },
+            /* circleReveal */
+            if (useCircleReveal) {
+                lightRevealScrim
+            } else {
+                null
+            }
+        )
     }
 
     fun updateSensorLocation() {
         fingerprintSensorLocation = authController.fingerprintSensorLocation
         faceSensorLocation = authController.faceAuthSensorLocation
-        statusBar.updateCircleReveal()
+        fingerprintSensorLocation?.let {
+            circleReveal = CircleReveal(
+                it.x,
+                it.y,
+                0f,
+                Math.max(
+                    Math.max(it.x, statusBar.displayWidth - it.x),
+                    Math.max(it.y, statusBar.displayHeight - it.y)
+                )
+            )
+        }
     }
 
     private fun updateRippleColor() {

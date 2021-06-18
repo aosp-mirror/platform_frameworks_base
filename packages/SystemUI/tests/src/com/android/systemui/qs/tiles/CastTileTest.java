@@ -112,10 +112,13 @@ public class CastTileTest extends SysuiTestCase {
                 mNetworkController,
                 mHotspotController
         );
+        mCastTile.initialize();
 
         // We are not setting the mocks to listening, so we trigger a first refresh state to
         // set the initial state
         mCastTile.refreshState();
+
+        mTestableLooper.processAllMessages();
 
         mCastTile.handleSetListening(true);
         ArgumentCaptor<NetworkController.SignalCallback> signalCallbackArgumentCaptor =
