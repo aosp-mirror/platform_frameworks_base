@@ -99,28 +99,23 @@ public class VisibilityStore {
     private final PackageAccessibleMap mPackageAccessibleMap = new PackageAccessibleMap();
 
     /**
-     * Creates an uninitialized VisibilityStore object. Callers must also call {@link #initialize()}
-     * before using the object.
+     * Creates and initializes VisibilityStore.
      *
      * @param appSearchImpl AppSearchImpl instance
      * @param userContext Context of the user that the call is being made as
      */
-    public VisibilityStore(@NonNull AppSearchImpl appSearchImpl, @NonNull Context userContext) {
-        mAppSearchImpl = Objects.requireNonNull(appSearchImpl);
-        mUserContext = Objects.requireNonNull(userContext);
+    @NonNull
+    public static VisibilityStore create(
+            @NonNull AppSearchImpl appSearchImpl, @NonNull Context userContext)
+            throws AppSearchException {
+        return new VisibilityStore(appSearchImpl, userContext);
     }
 
-    /**
-     * Initializes schemas and member variables to track visibility settings.
-     *
-     * <p>This is kept separate from the constructor because this will call methods on
-     * AppSearchImpl. Some may even then recursively call back into VisibilityStore (for example,
-     * {@link AppSearchImpl#setSchema} will call {@link #setVisibility}. We need to have both
-     * AppSearchImpl and VisibilityStore fully initialized for this call flow to work.
-     *
-     * @throws AppSearchException AppSearchException on AppSearchImpl error.
-     */
-    public void initialize() throws AppSearchException {
+    private VisibilityStore(@NonNull AppSearchImpl appSearchImpl, @NonNull Context userContext)
+            throws AppSearchException {
+        mAppSearchImpl = Objects.requireNonNull(appSearchImpl);
+        mUserContext = Objects.requireNonNull(userContext);
+
         GetSchemaResponse getSchemaResponse = mAppSearchImpl.getSchema(PACKAGE_NAME, DATABASE_NAME);
         boolean hasVisibilityType = false;
         boolean hasPackageAccessibleType = false;
@@ -142,6 +137,7 @@ public class VisibilityStore {
                     PACKAGE_NAME,
                     DATABASE_NAME,
                     Arrays.asList(VisibilityDocument.SCHEMA, PackageAccessibleDocument.SCHEMA),
+                    /*visibilityStore=*/ null,  // Avoid recursive calls
                     /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                     /*schemasPackageAccessible=*/ Collections.emptyMap(),
                     /*forceOverride=*/ false,
@@ -149,7 +145,6 @@ public class VisibilityStore {
         }
 
         // Populate visibility settings set
-        mNotPlatformSurfaceableMap.clear();
         for (Map.Entry<String, Set<String>> entry :
                 mAppSearchImpl.getPackageToDatabases().entrySet()) {
             String packageName = entry.getKey();
@@ -281,38 +276,45 @@ public class VisibilityStore {
     }
 
     /**
+     * Checks whether the given package has access to system-surfaceable schemas.
+     *
+     * @param callerPackageName Package name of the caller.
+     */
+    public boolean doesCallerHaveSystemAccess(@NonNull String callerPackageName) {
+        Objects.requireNonNull(callerPackageName);
+        return mUserContext.getPackageManager()
+                .checkPermission(READ_GLOBAL_APP_SEARCH_DATA, callerPackageName)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
      * Checks whether {@code prefixedSchema} can be searched over by the {@code callerUid}.
      *
      * @param packageName Package that owns the schema.
      * @param databaseName Database within the package that owns the schema.
      * @param prefixedSchema Prefixed schema type the caller is trying to access.
-     * @param callerPackageName Package name of the caller.
-     * @param callerUid Uid of the caller.
+     * @param callerUid UID of the client making the globalQuery call.
+     * @param callerHasSystemAccess Whether the caller has been identified as having
+     *                              access to schemas marked system surfaceable by {@link
+     *                              #doesCallerHaveSystemAccess}.
      */
     public boolean isSchemaSearchableByCaller(
             @NonNull String packageName,
             @NonNull String databaseName,
             @NonNull String prefixedSchema,
-            @NonNull String callerPackageName,
-            int callerUid) {
+            int callerUid,
+            boolean callerHasSystemAccess) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(databaseName);
         Objects.requireNonNull(prefixedSchema);
-        Objects.requireNonNull(callerPackageName);
 
         if (packageName.equals(PACKAGE_NAME)) {
             return false; // VisibilityStore schemas are for internal bookkeeping.
         }
 
-        // TODO(b/180058203): If we can cache or pass in that a caller has the
-        //  READ_GLOBAL_SEARCH_DATA permission, then we can save this package manager lookup for
-        //  each schema we may check in the loop.
-        if (mNotPlatformSurfaceableMap.isSchemaPlatformSurfaceable(
-                        packageName, databaseName, prefixedSchema)
-                && mUserContext
-                                .getPackageManager()
-                                .checkPermission(READ_GLOBAL_APP_SEARCH_DATA, callerPackageName)
-                        == PackageManager.PERMISSION_GRANTED) {
+        if (callerHasSystemAccess
+                && mNotPlatformSurfaceableMap.isSchemaPlatformSurfaceable(
+                packageName, databaseName, prefixedSchema)) {
             return true;
         }
 
@@ -370,16 +372,6 @@ public class VisibilityStore {
         }
         // If we can't verify the schema is package accessible, default to no access.
         return false;
-    }
-
-    /**
-     * Handles an {@code AppSearchImpl#reset()} by clearing any cached state.
-     *
-     * <p>{@link #initialize()} must be called after this.
-     */
-    public void handleReset() {
-        mNotPlatformSurfaceableMap.clear();
-        mPackageAccessibleMap.clear();
     }
 
     /**
