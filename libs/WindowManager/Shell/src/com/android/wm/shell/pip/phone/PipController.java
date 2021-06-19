@@ -67,6 +67,7 @@ import com.android.wm.shell.pip.IPip;
 import com.android.wm.shell.pip.IPipAnimationListener;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
@@ -528,6 +529,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void setPinnedStackAnimationType(int animationType) {
         mPipTaskOrganizer.setOneShotAnimationType(animationType);
+        mPipTransitionController.setIsFullAnimation(
+                animationType == PipAnimationController.ANIM_TYPE_BOUNDS);
     }
 
     private void setPinnedStackAnimationListener(IPipAnimationListener callback) {

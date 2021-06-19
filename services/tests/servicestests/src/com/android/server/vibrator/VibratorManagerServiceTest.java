@@ -234,7 +234,7 @@ public class VibratorManagerServiceTest {
         CombinedVibration effect = CombinedVibration.createParallel(
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
         vibrate(service, effect, HAPTIC_FEEDBACK_ATTRS);
-        service.cancelVibrate(/* usageFilter= */ -1, service);
+        service.cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, service);
 
         assertTrue(service.setAlwaysOnEffect(UID, PACKAGE_NAME, 1, effect, ALARM_ATTRS));
 
@@ -889,13 +889,13 @@ public class VibratorManagerServiceTest {
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
 
-        service.cancelVibrate(/* usageFilter= */ -1, service);
+        service.cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, service);
         assertFalse(service.isVibrating(1));
 
         vibrate(service, VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100), ALARM_ATTRS);
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
-        service.cancelVibrate(/* usageFilter= */ -1, service);
+        service.cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, service);
         assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
     }
 
@@ -921,6 +921,39 @@ public class VibratorManagerServiceTest {
         service.cancelVibrate(
                 VibrationAttributes.USAGE_CLASS_ALARM | ~VibrationAttributes.USAGE_CLASS_MASK,
                 service);
+        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+    }
+
+    @Test
+    public void cancelVibrate_withoutUnknownUsage_onlyStopsIfFilteringUnknownOrAllUsages()
+            throws Exception {
+        mockVibrators(1);
+        VibrationAttributes attrs = new VibrationAttributes.Builder()
+                .setUsage(VibrationAttributes.USAGE_UNKNOWN)
+                .build();
+        VibratorManagerService service = createSystemReadyService();
+
+        vibrate(service, VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100), attrs);
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        // Do not cancel UNKNOWN vibration when filter is being applied for other usages.
+        service.cancelVibrate(VibrationAttributes.USAGE_RINGTONE, service);
+        assertFalse(waitUntil(s -> !s.isVibrating(1), service, /* timeout= */ 50));
+
+        service.cancelVibrate(
+                VibrationAttributes.USAGE_CLASS_ALARM | ~VibrationAttributes.USAGE_CLASS_MASK,
+                service);
+        assertFalse(waitUntil(s -> !s.isVibrating(1), service, /* timeout= */ 50));
+
+        // Cancel UNKNOWN vibration when filtered for that vibration specifically.
+        service.cancelVibrate(VibrationAttributes.USAGE_UNKNOWN, service);
+        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        vibrate(service, VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100), attrs);
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        // Cancel UNKNOWN vibration when all vibrations are being cancelled.
+        service.cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, service);
         assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
     }
 

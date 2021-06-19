@@ -1250,6 +1250,8 @@ public class Vpn {
         updateState(DetailedState.CONNECTING, "agentConnect");
 
         final NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig.Builder()
+                .setLegacyType(ConnectivityManager.TYPE_VPN)
+                .setLegacyTypeName("VPN")
                 .setBypassableVpn(mConfig.allowBypass && !mLockdown)
                 .build();
 

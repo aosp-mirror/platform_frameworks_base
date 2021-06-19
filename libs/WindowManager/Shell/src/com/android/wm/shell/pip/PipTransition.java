@@ -18,6 +18,7 @@ package com.android.wm.shell.pip;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.WindowManager.TRANSIT_PIP;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
@@ -27,6 +28,7 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 
 import android.app.TaskInfo;
 import android.content.Context;
@@ -74,9 +76,27 @@ public class PipTransition extends PipTransitionController {
     }
 
     @Override
+    public void setIsFullAnimation(boolean isFullAnimation) {
+        setOneShotAnimationType(isFullAnimation ? ANIM_TYPE_BOUNDS : ANIM_TYPE_ALPHA);
+    }
+
+    /**
+     * Sets the preferred animation type for one time.
+     * This is typically used to set the animation type to
+     * {@link PipAnimationController#ANIM_TYPE_ALPHA}.
+     */
+    private void setOneShotAnimationType(@PipAnimationController.AnimationType int animationType) {
+        mOneShotAnimationType = animationType;
+    }
+
+    @Override
     public void startTransition(Rect destinationBounds, WindowContainerTransaction out) {
-        mExitDestinationBounds.set(destinationBounds);
-        mTransitions.startTransition(TRANSIT_EXIT_PIP, out, this);
+        if (destinationBounds != null) {
+            mExitDestinationBounds.set(destinationBounds);
+            mTransitions.startTransition(TRANSIT_EXIT_PIP, out, this);
+        } else {
+            mTransitions.startTransition(TRANSIT_REMOVE_PIP, out, this);
+        }
     }
 
     @Override
@@ -94,6 +114,14 @@ public class PipTransition extends PipTransitionController {
                     new Rect(mExitDestinationBounds));
             mExitDestinationBounds.setEmpty();
             return success;
+        }
+
+        if (info.getType() == TRANSIT_REMOVE_PIP) {
+            startTransaction.apply();
+            finishTransaction.setWindowCrop(info.getChanges().get(0).getLeash(),
+                    mPipBoundsState.getDisplayBounds());
+            finishCallback.onTransitionFinished(null, null);
+            return true;
         }
 
         // Search for an Enter PiP transition (along with a show wallpaper one)
@@ -129,13 +157,23 @@ public class PipTransition extends PipTransitionController {
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        return null;
+        if (request.getType() == TRANSIT_PIP) {
+            WindowContainerTransaction wct = new WindowContainerTransaction();
+            mPipTransitionState.setTransitionState(PipTransitionState.ENTRY_SCHEDULED);
+            final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
+            wct.setActivityWindowingMode(request.getTriggerTask().token, WINDOWING_MODE_UNDEFINED);
+            wct.setBounds(request.getTriggerTask().token, destinationBounds);
+            return wct;
+        } else {
+            return null;
+        }
     }
 
     @Override
     public void onFinishResize(TaskInfo taskInfo, Rect destinationBounds,
             @PipAnimationController.TransitionDirection int direction,
             SurfaceControl.Transaction tx) {
+
         if (isInPipDirection(direction)) {
             mPipTransitionState.setTransitionState(PipTransitionState.ENTERED_PIP);
         }
@@ -185,6 +223,9 @@ public class PipTransition extends PipTransitionController {
                     0 /* startingAngle */, Surface.ROTATION_0);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             startTransaction.setAlpha(leash, 0f);
+            // PiP menu is attached late in the process here to avoid any artifacts on the leash
+            // caused by addShellRoot when in gesture navigation mode.
+            mPipMenuController.attach(leash);
             animator = mPipAnimationController.getAnimator(taskInfo, leash, destinationBounds,
                     0f, 1f);
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;

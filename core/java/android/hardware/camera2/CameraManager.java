@@ -217,7 +217,7 @@ public final class CameraManager {
             @NonNull Map<String, SessionConfiguration> cameraIdAndSessionConfig)
             throws CameraAccessException {
         return CameraManagerGlobal.get().isConcurrentSessionConfigurationSupported(
-                cameraIdAndSessionConfig);
+                cameraIdAndSessionConfig, mContext.getApplicationInfo().targetSdkVersion);
     }
 
     /**
@@ -413,7 +413,8 @@ public final class CameraManager {
         try {
             for (String physicalCameraId : physicalCameraIds) {
                 CameraMetadataNative physicalCameraInfo =
-                        cameraService.getCameraCharacteristics(physicalCameraId);
+                        cameraService.getCameraCharacteristics(physicalCameraId,
+                                mContext.getApplicationInfo().targetSdkVersion);
                 StreamConfiguration[] configs = physicalCameraInfo.get(
                         CameraCharacteristics.
                                 SCALER_PHYSICAL_CAMERA_MULTI_RESOLUTION_STREAM_CONFIGURATIONS);
@@ -472,7 +473,8 @@ public final class CameraManager {
             try {
                 Size displaySize = getDisplaySize();
 
-                CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId);
+                CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId,
+                        mContext.getApplicationInfo().targetSdkVersion);
                 try {
                     info.setCameraId(Integer.parseInt(cameraId));
                 } catch (NumberFormatException e) {
@@ -590,7 +592,7 @@ public final class CameraManager {
                 }
                 cameraUser = cameraService.connectDevice(callbacks, cameraId,
                     mContext.getOpPackageName(),  mContext.getAttributionTag(), uid,
-                    oomScoreOffset);
+                    oomScoreOffset, mContext.getApplicationInfo().targetSdkVersion);
             } catch (ServiceSpecificException e) {
                 if (e.errorCode == ICameraService.ERROR_DEPRECATED_HAL) {
                     throw new AssertionError("Should've gone down the shim path");
@@ -1613,8 +1615,8 @@ public final class CameraManager {
         }
 
         public boolean isConcurrentSessionConfigurationSupported(
-                @NonNull Map<String, SessionConfiguration> cameraIdsAndSessionConfigurations)
-                throws CameraAccessException {
+                @NonNull Map<String, SessionConfiguration> cameraIdsAndSessionConfigurations,
+                int targetSdkVersion) throws CameraAccessException {
 
             if (cameraIdsAndSessionConfigurations == null) {
                 throw new IllegalArgumentException("cameraIdsAndSessionConfigurations was null");
@@ -1650,7 +1652,7 @@ public final class CameraManager {
                 }
                 try {
                     return mCameraService.isConcurrentSessionConfigurationSupported(
-                            cameraIdsAndConfigs);
+                            cameraIdsAndConfigs, targetSdkVersion);
                 } catch (ServiceSpecificException e) {
                    throwAsPublicException(e);
                 } catch (RemoteException e) {

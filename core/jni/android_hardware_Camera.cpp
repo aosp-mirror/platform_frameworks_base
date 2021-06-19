@@ -566,8 +566,9 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     env->ReleaseStringChars(clientPackageName,
                             reinterpret_cast<const jchar*>(rawClientName));
 
-    sp<Camera> camera =
-            Camera::connect(cameraId, clientName, Camera::USE_CALLING_UID, Camera::USE_CALLING_PID);
+    int targetSdkVersion = android_get_application_target_sdk_version();
+    sp<Camera> camera = Camera::connect(cameraId, clientName, Camera::USE_CALLING_UID,
+                                        Camera::USE_CALLING_PID, targetSdkVersion);
     if (camera == NULL) {
         return -EACCES;
     }
