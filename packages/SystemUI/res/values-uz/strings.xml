@@ -1034,6 +1034,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ekran qismini kattalashtirish"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Almashtirish"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Maxsus imkoniyatlar tugmasi maxsus imkoniyatlar ishorasini almashtirdi\n\n"<annotation id="link">"Sozlamalarni ochish"</annotation></string>
+    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
+    <skip />
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Vaqtinchalik berkitish uchun tugmani qirra tomon suring"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Yuqori chapga surish"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Yuqori oʻngga surish"</string>

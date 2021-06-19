@@ -1422,6 +1422,8 @@
     <string name="guest_new_guest">Add guest</string>
     <!-- Label for exiting and removing the guest session in the user switcher [CHAR LIMIT=35] -->
     <string name="guest_exit_guest">Remove guest</string>
+    <!-- Label for resetting guest session in the user switcher, which will remove all data from the current guest session [CHAR LIMIT=35] -->
+    <string name="guest_reset_guest">Reset guest</string>
     <!-- Name for the guest user [CHAR LIMIT=35] -->
     <string name="guest_nickname">Guest</string>
 
