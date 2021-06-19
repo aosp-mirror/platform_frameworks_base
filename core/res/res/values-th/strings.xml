@@ -658,7 +658,7 @@
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"ไอคอนใบหน้า"</string>
-    <string name="permlab_readSyncSettings" msgid="6250532864893156277">"อ่านการตั้งค่าการซิงค์แล้ว"</string>
+    <string name="permlab_readSyncSettings" msgid="6250532864893156277">"อ่านการตั้งค่าการซิงค์"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"อนุญาตให้แอปพลิเคชันอ่านการตั้งค่าการซิงค์ของบัญชี ตัวอย่างเช่น การอนุญาตนี้สามารถระบุได้ว่าแอปพลิเคชัน People ซิงค์กับบัญชีหรือไม่"</string>
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"สลับระหว่างเปิดและปิดการซิงค์"</string>
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงการตั้งค่าการซิงค์ของบัญชี ตัวอย่างเช่น สามารถใช้การอนุญาตเปิดใช้งานการซิงค์แอปพลิเคชัน People กับบัญชี"</string>
@@ -1019,7 +1019,7 @@
     <string name="text_copied" msgid="2531420577879738860">"คัดลอกข้อความไปยังคลิปบอร์ด"</string>
     <string name="copied" msgid="4675902854553014676">"คัดลอกแล้ว"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"วาง <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> จาก <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> แล้ว"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"วาง <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> จากคลิปบอร์ดแล้ว"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ได้วางข้อมูลจากคลิปบอร์ดแล้ว"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> วางข้อความที่คุณคัดลอก"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> วางรูปภาพที่คุณคัดลอก"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> วางเนื้อหาที่คุณคัดลอก"</string>
@@ -1458,10 +1458,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"อนุญาตให้แอปพลิเคชันขอการลบแพ็กเกจ"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ขอเพิกเฉยต่อการเพิ่มประสิทธิภาพแบตเตอรี่"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"อนุญาตให้แอปขอสิทธิ์เพิกเฉยต่อการเพิ่มประสิทธิภาพแบตเตอรี่สำหรับแอปนั้น"</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ค้นหาแพ็กเกจทั้งหมด"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"อนุญาตให้แอปดูแพ็กเกจที่ติดตั้งไว้ทั้งหมด"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ไม่สามารถเพิ่มวิดเจ็ต"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ไป"</string>

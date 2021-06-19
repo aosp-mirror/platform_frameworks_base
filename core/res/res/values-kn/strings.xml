@@ -1019,7 +1019,7 @@
     <string name="text_copied" msgid="2531420577879738860">"ಪಠ್ಯವನ್ನು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಲಾಗಿದೆ."</string>
     <string name="copied" msgid="4675902854553014676">"ನಕಲಿಸಲಾಗಿದೆ"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ಅನ್ನು <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ಅನ್ನು ನಿಮ್ಮ ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>, ನಿಮ್ಮ ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿನ ಡೇಟಾವನ್ನು ಅಂಟಿಸಿದೆ"</string>
     <string name="pasted_text" msgid="4298871641549173733">"ನೀವು ನಕಲಿಸಿರುವ ಪಠ್ಯವನ್ನು <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
     <string name="pasted_image" msgid="4729097394781491022">"ನೀವು ನಕಲಿಸಿರುವ ಚಿತ್ರವನ್ನು <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
     <string name="pasted_content" msgid="646276353060777131">"ನೀವು ನಕಲಿಸಿರುವ ವಿಷಯವನ್ನು <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ನಿಂದ ಅಂಟಿಸಲಾಗಿದೆ"</string>
@@ -1458,10 +1458,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ಪ್ಯಾಕೇಜ್‌ಗಳನ್ನು ಅಳಿಸುವುದಕ್ಕಾಗಿ ವಿನಂತಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ಬ್ಯಾಟರಿ ಆಪ್ಟಿಮೈಸೇಶನ್‌ಗಳನ್ನು ಕಡೆಗಣಿಸಲು ಕೇಳಿ"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಬ್ಯಾಟರಿ ಆಪ್ಟಿಮೈಸೇಶನ್‌ಗಳನ್ನು ಕಡೆಗಣಿಸುವುದಕ್ಕೆ ಅನುಮತಿಯನ್ನು ಕೇಳಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ಎಲ್ಲಾ ಪ್ಯಾಕೇಜ್‌ಗಳ ಕುರಿತಾದ ಮಾಹಿತಿಯನ್ನು ಕೇಳಿ"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ಎಲ್ಲಾ ಪ್ಯಾಕೇಜ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ಝೂಮ್‌ ನಿಯಂತ್ರಿಸಲು ಎರಡು ಬಾರಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ವಿಜೆಟ್ ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ಹೋಗು"</string>
