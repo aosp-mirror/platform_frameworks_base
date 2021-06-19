@@ -1019,7 +1019,7 @@
     <string name="text_copied" msgid="2531420577879738860">"clipboardထံ စာသားအားကူးယူမည်"</string>
     <string name="copied" msgid="4675902854553014676">"မိတ္တူကူးပြီးပါပြီ"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> မှ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> သို့ ကူးထည့်ထားသည်"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က ဒေတာကို သင့်ကလစ်ဘုတ်မှ ကူးထည့်ထားသည်"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင့်ကလစ်ဘုတ်မှ ကူးထည့်ထားသည်"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော စာသားကို ထည့်လိုက်သည်"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော ပုံကို ထည့်လိုက်သည်"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော အကြောင်းအရာကို ထည့်လိုက်သည်"</string>
@@ -1458,10 +1458,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"အပလီကေးရှင်းတစ်ခုအား ပက်ကေ့ဂျ်များကို ဖျက်ရန် တောင်းဆိုခွင့်ပေးပါ။"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ဘက်ထရီ ပိုမိုကောင်းမွန်အောင် ပြုလုပ်ခြင်းကို လျစ်လျူရှုရန် တောင်းဆိုပါ"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ဘက်ထရီ ပိုမိုကောင်းမွန်အောင် ပြုလုပ်ခြင်းကို လျစ်လျူရှုရန်အတွက် ခွင့်ပြုချက်တောင်းရန် အက်ပ်ကို ခွင့်ပြုပါ။"</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ပက်ကေ့ဂျ်အားလုံးကို မေးမြန်းခြင်း"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ထည့်သွင်းထားသော ပက်ကေ့ဂျ်အားလုံး ကြည့်ရန် အက်ပ်ကို ခွင့်ပြုပါ။"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ဇူးမ်အသုံးပြုရန် နှစ်ချက်တို့ပါ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ဝဒ်ဂျက်ထည့်လို့ မရပါ"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"သွားပါ"</string>

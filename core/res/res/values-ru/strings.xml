@@ -447,7 +447,7 @@
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Приложение сможет получать сведения о вашем точном местоположении, только когда используется. Для этого на устройстве должна быть включена геолокация. Учтите, что при этом заряд батареи может расходоваться быстрее."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"Доступ к приблизительному местоположению только в активном режиме"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Приложение сможет получать сведения о вашем приблизительном местоположении, только когда используется. Для этого на устройстве должна быть включена геолокация."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"доступ к геоданным в фоновом режиме"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"Доступ к геоданным в фоновом режиме"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Приложение сможет получать доступ к сведениям о местоположении, даже когда не используется."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"Изменение настроек аудио"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Приложение сможет изменять системные настройки звука, например уровень громкости и активный динамик."</string>
@@ -457,7 +457,7 @@
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Приложение может в любое время записывать аудио с помощью микрофона."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"Отправка команд SIM-карте"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Приложение сможет отправлять команды SIM-карте (данное разрешение представляет большую угрозу)."</string>
-    <string name="permlab_activityRecognition" msgid="1782303296053990884">"распознавать физическую активность"</string>
+    <string name="permlab_activityRecognition" msgid="1782303296053990884">"Распознавать физическую активность"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Приложение может распознавать физическую активность."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"Фото- и видеосъемка"</string>
     <string name="permdesc_camera" msgid="5240801376168647151">"Когда приложение используется, оно может делать фотографии и снимать видео с помощью камеры."</string>
@@ -512,8 +512,8 @@
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Приложение сможет получить список всех используемых на устройстве аккаунтов, в том числе созданных установленными приложениями."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"Просмотр сетевых подключений"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Приложение сможет просматривать информацию о сетевых подключениях, например о том, какие сети доступны и к каким из них вы подключены."</string>
-    <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"Неограниченный доступ к Интернету"</string>
-    <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"Приложение сможет создавать сетевые сокеты и использовать различные сетевые протоколы. Так как браузер и другие приложения обеспечивают средства для отправки данных в Интернет, это разрешение предоставлять не обязательно."</string>
+    <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"Неограниченный доступ к интернету"</string>
+    <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"Приложение сможет создавать сетевые сокеты и использовать различные сетевые протоколы. Так как браузер и другие приложения обеспечивают средства для отправки данных в интернет, это разрешение предоставлять не обязательно."</string>
     <string name="permlab_changeNetworkState" msgid="8945711637530425586">"Изменение сетевых настроек"</string>
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"Приложение сможет изменять состояние подключения к сети."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"Изменение подключения к компьютеру"</string>
@@ -540,9 +540,9 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Приложение сможет просматривать конфигурацию Bluetooth на планшетном ПК, а также запрашивать и подтверждать соединение с другими устройствами."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Приложение сможет просматривать конфигурацию Bluetooth на устройстве Android TV, а также запрашивать и подтверждать соединение с другими устройствами."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Приложение сможет просматривать конфигурацию Bluetooth на телефоне, а также запрашивать и подтверждать соединение с другими устройствами."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"находить устройства Bluetooth поблизости и подключаться к ним"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"Находить устройства Bluetooth и подключаться к ним"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Приложение сможет находить устройства Bluetooth поблизости и подключаться к ним."</string>
-    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"доступ к подключенным устройствам Bluetooth"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"Доступ к подключенным устройствам Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"У приложения будет доступ к подключенным устройствам Bluetooth."</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Передача рекламы на устройства Bluetooth рядом"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Приложение сможет передавать рекламу на устройства Bluetooth поблизости."</string>
@@ -568,7 +568,7 @@
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"Приложение сможет вносить изменения в вашу видеоколлекцию."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"изменение фотоколлекции"</string>
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Приложение сможет вносить изменения в вашу фотоколлекцию."</string>
-    <string name="permlab_mediaLocation" msgid="7368098373378598066">"доступ к геоданным в медиаколлекции"</string>
+    <string name="permlab_mediaLocation" msgid="7368098373378598066">"Доступ к геоданным в медиаколлекции"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Приложение получит доступ к геоданным в вашей медиаколлекции."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Использовать биометрию"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Использовать биометрию или блокировку экрана"</string>
@@ -1498,10 +1498,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Приложение сможет запрашивать разрешения на удаление пакетов."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"Без ограничения расхода батареи"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Разрешает приложению игнорировать ограничение на расход заряда батареи."</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"Запрос информации обо всех пакетах"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Приложение сможет просматривать все установленные пакеты."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Нажмите дважды для изменения масштаба"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Не удалось добавить виджет."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Выбрать"</string>
