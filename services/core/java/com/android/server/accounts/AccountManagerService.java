@@ -375,6 +375,9 @@ public class AccountManagerService
         // Cancel account request notification if a permission was preventing the account access
         mPackageManager.addOnPermissionsChangeListener(
                 (int uid) -> {
+            // Permission changes cause requires updating accounts cache.
+            AccountManager.invalidateLocalAccountsDataCaches();
+
             Account[] accounts = null;
             String[] packageNames = mPackageManager.getPackagesForUid(uid);
             if (packageNames != null) {

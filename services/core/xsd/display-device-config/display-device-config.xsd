@@ -129,14 +129,30 @@
     <xs:complexType name="sensorDetails">
         <xs:sequence>
             <xs:element type="xs:string" name="type" minOccurs="0" maxOccurs="1">
-                <xs:annotation name="nullable" />
+                <xs:annotation name="nullable"/>
                 <xs:annotation name="final"/>
             </xs:element>
             <xs:element type="xs:string" name="name" minOccurs="0" maxOccurs="1">
-                <xs:annotation name="nullable" />
+                <xs:annotation name="nullable"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="refreshRateRange" name="refreshRate" minOccurs="0" maxOccurs="1">
+                <xs:annotation name="nullable"/>
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
     </xs:complexType>
+
+    <xs:complexType name="refreshRateRange">
+        <xs:sequence>
+            <xs:element type="xs:nonNegativeInteger" name="minimum" minOccurs="1" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="xs:nonNegativeInteger" name="maximum" minOccurs="1" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
 
 </xs:schema>

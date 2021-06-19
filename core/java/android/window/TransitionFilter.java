@@ -18,6 +18,7 @@ package android.window;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
@@ -32,6 +33,18 @@ import android.os.Parcelable;
  * @hide
  */
 public final class TransitionFilter implements Parcelable {
+
+    /** The associated requirement doesn't care about the z-order. */
+    public static final int CONTAINER_ORDER_ANY = 0;
+    /** The associated requirement only matches the top-most (z-order) container. */
+    public static final int CONTAINER_ORDER_TOP = 1;
+
+    /** @hide */
+    @IntDef(prefix = { "CONTAINER_ORDER_" }, value = {
+            CONTAINER_ORDER_ANY,
+            CONTAINER_ORDER_TOP,
+    })
+    public @interface ContainerOrder {}
 
     /**
      * When non-null: this is a list of transition types that this filter applies to. This filter
@@ -126,6 +139,7 @@ public final class TransitionFilter implements Parcelable {
     public static final class Requirement implements Parcelable {
         public int mActivityType = ACTIVITY_TYPE_UNDEFINED;
         public int[] mModes = null;
+        public @ContainerOrder int mOrder = CONTAINER_ORDER_ANY;
 
         public Requirement() {
         }
@@ -133,6 +147,7 @@ public final class TransitionFilter implements Parcelable {
         private Requirement(Parcel in) {
             mActivityType = in.readInt();
             mModes = in.createIntArray();
+            mOrder = in.readInt();
         }
 
         /** Go through changes and find if at-least one change matches this filter */
@@ -141,6 +156,9 @@ public final class TransitionFilter implements Parcelable {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 if (!TransitionInfo.isIndependent(change, info)) {
                     // Only look at independent animating windows.
+                    continue;
+                }
+                if (mOrder == CONTAINER_ORDER_TOP && i > 0) {
                     continue;
                 }
                 if (mActivityType != ACTIVITY_TYPE_UNDEFINED) {
@@ -166,7 +184,7 @@ public final class TransitionFilter implements Parcelable {
 
         /** Check if the request matches this filter. It may generate false positives */
         boolean matches(@NonNull TransitionRequestInfo request) {
-            // Can't check modes since the transition hasn't been built at this point.
+            // Can't check modes/order since the transition hasn't been built at this point.
             if (mActivityType == ACTIVITY_TYPE_UNDEFINED) return true;
             return request.getTriggerTask() != null
                     && request.getTriggerTask().getActivityType() == mActivityType;
@@ -177,6 +195,7 @@ public final class TransitionFilter implements Parcelable {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(mActivityType);
             dest.writeIntArray(mModes);
+            dest.writeInt(mOrder);
         }
 
         @NonNull
@@ -209,7 +228,17 @@ public final class TransitionFilter implements Parcelable {
                     out.append((i == 0 ? "" : ",") + TransitionInfo.modeToString(mModes[i]));
                 }
             }
-            return out.append("]}").toString();
+            out.append("]").toString();
+            out.append(" order=" + containerOrderToString(mOrder));
+            return out.toString();
         }
+    }
+
+    private static String containerOrderToString(int order) {
+        switch (order) {
+            case CONTAINER_ORDER_ANY: return "ANY";
+            case CONTAINER_ORDER_TOP: return "TOP";
+        }
+        return "UNKNOWN(" + order + ")";
     }
 }

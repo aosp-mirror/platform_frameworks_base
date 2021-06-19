@@ -15,7 +15,7 @@
   limitations under the License.
   -->
 
-<LinearLayout
+<com.android.settingslib.widget.BannerMessageView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -23,6 +23,7 @@
     style="@style/Banner.Preference.SettingsLib">
 
     <RelativeLayout
+        android:id="@+id/top_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="8dp"
@@ -49,6 +50,7 @@
         android:id="@+id/banner_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingTop="0dp"
         android:paddingBottom="4dp"
         android:textAppearance="@style/Banner.Title.SettingsLib"/>
 
@@ -56,6 +58,7 @@
         android:id="@+id/banner_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingTop="0dp"
         android:paddingBottom="4dp"
         android:textAppearance="@style/Banner.Subtitle.SettingsLib"
         android:visibility="gone"/>
@@ -87,4 +90,4 @@
             android:layout_height="wrap_content"
             style="@style/Banner.ButtonText.SettingsLib"/>
     </LinearLayout>
-</LinearLayout>
+</com.android.settingslib.widget.BannerMessageView>

@@ -215,7 +215,9 @@ public interface BluetoothProfile {
     /**
      * Volume Control profile
      *
+     * @hide
      */
+    @SystemApi
     int VOLUME_CONTROL = 23;
 
     /**

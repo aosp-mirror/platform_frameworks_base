@@ -476,6 +476,9 @@ public final class ViewRootImpl implements ViewParent,
     protected final ViewFrameInfo mViewFrameInfo = new ViewFrameInfo();
     private final InputEventAssigner mInputEventAssigner = new InputEventAssigner();
 
+    // Set to true if mSurfaceControl is used for Webview Overlay
+    private boolean mIsForWebviewOverlay;
+
     /**
      * Update the Choreographer's FrameInfo object with the timing information for the current
      * ViewRootImpl instance. Erase the data in the current ViewFrameInfo to prepare for the next
@@ -1389,6 +1392,23 @@ public final class ViewRootImpl implements ViewParent,
         mAttachInfo.mThreadedRenderer.setASurfaceTransactionCallback(callback);
     }
 
+    /**
+     * Register a callback to be executed when Webview overlay needs a surface control.
+     * This callback will be executed on RenderThread worker thread, and released inside native code
+     * when CanvasContext is destroyed.
+     */
+    private void addPrepareSurfaceControlForWebviewCallback() {
+        HardwareRenderer.PrepareSurfaceControlForWebviewCallback callback = () -> {
+            // make mSurfaceControl transparent, so child surface controls are visible
+            if (mIsForWebviewOverlay) return;
+            synchronized (ViewRootImpl.this) {
+                mIsForWebviewOverlay = true;
+            }
+            mTransaction.setOpaque(mSurfaceControl, false).apply();
+        };
+        mAttachInfo.mThreadedRenderer.setPrepareSurfaceControlForWebviewCallback(callback);
+    }
+
     @UnsupportedAppUsage
     private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
         mAttachInfo.mHardwareAccelerated = false;
@@ -1433,6 +1453,7 @@ public final class ViewRootImpl implements ViewParent,
                     if (mHardwareRendererObserver != null) {
                         mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
                     }
+                    addPrepareSurfaceControlForWebviewCallback();
                     addASurfaceTransactionCallback();
                     mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
                 }
@@ -7758,6 +7779,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             if (mAttachInfo.mThreadedRenderer != null) {
+                addPrepareSurfaceControlForWebviewCallback();
                 addASurfaceTransactionCallback();
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
             }
@@ -7805,7 +7827,14 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        mTransaction.setOpaque(mSurfaceControl, opaque).apply();
+        synchronized (this) {
+            if (mIsForWebviewOverlay) {
+                mIsSurfaceOpaque = false;
+                return;
+            }
+            mTransaction.setOpaque(mSurfaceControl, opaque).apply();
+        }
+
         mIsSurfaceOpaque = opaque;
     }
 

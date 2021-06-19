@@ -135,7 +135,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private boolean mShowVolumeDialog;
     private boolean mShowSafetyWarning;
     private long mLastToggledRingerOn;
-    private boolean mDeviceInteractive;
+    private boolean mDeviceInteractive = true;
 
     private boolean mDestroyed;
     private VolumePolicy mVolumePolicy;

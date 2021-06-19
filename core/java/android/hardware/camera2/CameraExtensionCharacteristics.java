@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.extension.IAdvancedExtenderImpl;
 import android.hardware.camera2.extension.ICameraExtensionsProxyService;
@@ -32,6 +33,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.ConditionVariable;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.util.Log;
@@ -235,6 +237,19 @@ public final class CameraExtensionCharacteristics {
             if (mConnection == null) {
                 Intent intent = new Intent();
                 intent.setClassName(PROXY_PACKAGE_NAME, PROXY_SERVICE_NAME);
+                String vendorProxyPackage = SystemProperties.get(
+                    "ro.vendor.camera.extensions.package");
+                String vendorProxyService = SystemProperties.get(
+                    "ro.vendor.camera.extensions.service");
+                if (!vendorProxyPackage.isEmpty() && !vendorProxyService.isEmpty()) {
+                  Log.v(TAG,
+                      "Choosing the vendor camera extensions proxy package: "
+                      + vendorProxyPackage);
+                  Log.v(TAG,
+                      "Choosing the vendor camera extensions proxy service: "
+                      + vendorProxyService);
+                  intent.setClassName(vendorProxyPackage, vendorProxyService);
+                }
                 mInitFuture = new InitializerFuture();
                 mConnection = new ServiceConnection() {
                     @Override
@@ -255,9 +270,9 @@ public final class CameraExtensionCharacteristics {
                         }
                     }
                 };
-                ctx.bindService(intent, mConnection, Context.BIND_AUTO_CREATE |
-                        Context.BIND_IMPORTANT | Context.BIND_ABOVE_CLIENT |
-                        Context.BIND_NOT_VISIBLE);
+                ctx.bindService(intent, Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT |
+                        Context.BIND_ABOVE_CLIENT | Context.BIND_NOT_VISIBLE,
+                        android.os.AsyncTask.THREAD_POOL_EXECUTOR, mConnection);
 
                 try {
                     mInitFuture.get(PROXY_SERVICE_DELAY_MS, TimeUnit.MILLISECONDS);

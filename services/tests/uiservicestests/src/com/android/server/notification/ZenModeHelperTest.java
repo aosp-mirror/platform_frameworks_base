@@ -1597,7 +1597,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new ComponentName("android", "ScheduleConditionProvider"),
                 ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-        String id = mZenModeHelperSpy.addAutomaticZenRule(zenRule, "test");
+        String id = mZenModeHelperSpy.addAutomaticZenRule("android", zenRule, "test");
 
         assertTrue(id != null);
         ZenModeConfig.ZenRule ruleInConfig = mZenModeHelperSpy.mConfig.automaticRules.get(id);
@@ -1617,12 +1617,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new ComponentName("android", "ScheduleConditionProvider"),
                 sharedUri,
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-        String id = mZenModeHelperSpy.addAutomaticZenRule(zenRule, "test");
+        String id = mZenModeHelperSpy.addAutomaticZenRule("android", zenRule, "test");
         AutomaticZenRule zenRule2 = new AutomaticZenRule("name2",
                 new ComponentName("android", "ScheduleConditionProvider"),
                 sharedUri,
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-        String id2 = mZenModeHelperSpy.addAutomaticZenRule(zenRule2, "test");
+        String id2 = mZenModeHelperSpy.addAutomaticZenRule("android", zenRule2, "test");
 
         Condition condition = new Condition(sharedUri, "", Condition.STATE_TRUE);
         mZenModeHelperSpy.setAutomaticZenRuleState(sharedUri, condition);

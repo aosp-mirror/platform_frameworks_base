@@ -18,10 +18,14 @@ package com.android.server.tare;
 
 import static com.android.server.tare.EconomicPolicy.REGULATION_BASIC_INCOME;
 import static com.android.server.tare.EconomicPolicy.REGULATION_BIRTHRIGHT;
+import static com.android.server.tare.EconomicPolicy.TYPE_ACTION;
+import static com.android.server.tare.EconomicPolicy.TYPE_REWARD;
 import static com.android.server.tare.EconomicPolicy.eventToString;
+import static com.android.server.tare.EconomicPolicy.getEventType;
 import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
@@ -46,6 +50,7 @@ class Agent {
     private static final boolean DEBUG = InternalResourceService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
+    private final Object mLock;
     private final CompleteEconomicPolicy mCompleteEconomicPolicy;
     private final InternalResourceService mIrs;
 
@@ -57,6 +62,7 @@ class Agent {
 
     Agent(@NonNull InternalResourceService irs,
             @NonNull CompleteEconomicPolicy completeEconomicPolicy) {
+        mLock = irs.getLock();
         mIrs = irs;
         mCompleteEconomicPolicy = completeEconomicPolicy;
     }
@@ -75,11 +81,43 @@ class Agent {
 
     /** Get an app's current balance, factoring in any currently ongoing events. */
     @GuardedBy("mLock")
-    private long getBalanceLocked(final int userId, @NonNull final String pkgName) {
+    long getBalanceLocked(final int userId, @NonNull final String pkgName) {
         final Ledger ledger = getLedgerLocked(userId, pkgName);
         long balance = ledger.getCurrentBalance();
         // TODO: add ongoing events
         return balance;
+    }
+
+    @GuardedBy("mLock")
+    void noteInstantaneousEventLocked(final int userId, @NonNull final String pkgName,
+            final int eventId, @Nullable String tag) {
+        final long now = System.currentTimeMillis();
+        final Ledger ledger = getLedgerLocked(userId, pkgName);
+
+        final int eventType = getEventType(eventId);
+        switch (eventType) {
+            case TYPE_ACTION:
+                final long actionCost =
+                        mCompleteEconomicPolicy.getCostOfAction(eventId, userId, pkgName);
+
+                recordTransactionLocked(userId, pkgName, ledger,
+                        new Ledger.Transaction(now, now, eventId, tag, -actionCost));
+                break;
+
+            case TYPE_REWARD:
+                final EconomicPolicy.Reward reward = mCompleteEconomicPolicy.getReward(eventId);
+                if (reward != null) {
+                    final long rewardSum = ledger.get24HourSum(eventId, now);
+                    final long rewardVal = Math.max(0,
+                            Math.min(reward.maxDailyReward - rewardSum, reward.instantReward));
+                    recordTransactionLocked(userId, pkgName, ledger,
+                            new Ledger.Transaction(now, now, eventId, tag, rewardVal));
+                }
+                break;
+
+            default:
+                Slog.w(TAG, "Unsupported event type: " + eventType);
+        }
     }
 
     @GuardedBy("mLock")
