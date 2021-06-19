@@ -1034,6 +1034,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ekraanikuva osa suurendamine"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Vaheta"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Juurdepääsetavuse nupp asendas juurdepääsuliigutuse\n\n"<annotation id="link">"Vaadake seadeid"</annotation></string>
+    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
+    <skip />
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Teisaldage nupp serva, et see ajutiselt peita"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Teisalda üles vasakule"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Teisalda üles paremale"</string>

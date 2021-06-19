@@ -49,6 +49,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Handler;
 import android.os.Looper;
@@ -70,6 +72,8 @@ import com.android.server.LocalServices;
 import com.android.server.display.DisplayModeDirector.BrightnessObserver;
 import com.android.server.display.DisplayModeDirector.DesiredDisplayModeSpecs;
 import com.android.server.display.DisplayModeDirector.Vote;
+import com.android.server.sensors.SensorManagerInternal;
+import com.android.server.sensors.SensorManagerInternal.ProximityActiveListener;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.testutils.FakeDeviceConfigInterface;
 
@@ -105,6 +109,10 @@ public class DisplayModeDirectorTest {
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
     @Mock
     public StatusBarManagerInternal mStatusBarMock;
+    @Mock
+    public SensorManagerInternal mSensorManagerInternalMock;
+    @Mock
+    public DisplayManagerInternal mDisplayManagerInternalMock;
 
     @Before
     public void setUp() throws Exception {
@@ -117,6 +125,10 @@ public class DisplayModeDirectorTest {
 
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
         LocalServices.addService(StatusBarManagerInternal.class, mStatusBarMock);
+        LocalServices.removeServiceForTest(SensorManagerInternal.class);
+        LocalServices.addService(SensorManagerInternal.class, mSensorManagerInternalMock);
+        LocalServices.removeServiceForTest(DisplayManagerInternal.class);
+        LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
     }
 
     private DisplayModeDirector createDirectorFromRefreshRateArray(
@@ -1214,10 +1226,39 @@ public class DisplayModeDirectorTest {
         assertThat(desiredSpecs.baseModeId).isEqualTo(8);
     }
 
+    @Test
+    public void testProximitySensorVoting() throws Exception {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+        director.start(createMockSensorManager());
+
+        ArgumentCaptor<ProximityActiveListener> captor =
+                ArgumentCaptor.forClass(ProximityActiveListener.class);
+        verify(mSensorManagerInternalMock).addProximityActiveListener(any(Executor.class),
+                captor.capture());
+        ProximityActiveListener listener = captor.getValue();
+
+        // Verify that there is no proximity vote initially
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
+        assertNull(vote);
+
+        when(mDisplayManagerInternalMock.getRefreshRateForDisplayAndSensor(eq(DISPLAY_ID), eq(null),
+                  eq(Sensor.STRING_TYPE_PROXIMITY))).thenReturn(new RefreshRateRange(60, 60));
+
+        // Set the proximity to active and verify that we added a vote.
+        listener.onProximityActive(true);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
+        assertVoteForRefreshRate(vote, 60.f);
+
+        // Turn prox off and verify vote is gone.
+        listener.onProximityActive(false);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
+        assertNull(vote);
+    }
+
     private void assertVoteForRefreshRate(Vote vote, float refreshRate) {
         assertThat(vote).isNotNull();
-        final DisplayModeDirector.RefreshRateRange expectedRange =
-                new DisplayModeDirector.RefreshRateRange(refreshRate, refreshRate);
+        final RefreshRateRange expectedRange = new RefreshRateRange(refreshRate, refreshRate);
         assertThat(vote.refreshRateRange).isEqualTo(expectedRange);
     }
 

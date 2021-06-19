@@ -330,6 +330,11 @@ public:
         } else {
             mSkiaLayer.reset();
         }
+
+        // Clear out the previous snapshot and the image filter the previous
+        // snapshot was created with whenever the layer changes.
+        mSnapshotResult.snapshot = nullptr;
+        mTargetImageFilter = nullptr;
     }
 
     /**

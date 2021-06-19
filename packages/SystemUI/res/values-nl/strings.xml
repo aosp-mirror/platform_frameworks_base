@@ -1034,6 +1034,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Deel van het scherm vergroten"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Schakelen"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"De knop Toegankelijkheid vervangt het toegankelijkheidsgebaar\n\n"<annotation id="link">"Instellingen bekijken"</annotation></string>
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Je kunt overschakelen van het toegankelijkheidsgebaar naar een knop\n\n"<annotation id="link">"Instellingen"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Knop naar de rand verplaatsen om deze tijdelijk te verbergen"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Naar linksboven verplaatsen"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Naar rechtsboven verplaatsen"</string>

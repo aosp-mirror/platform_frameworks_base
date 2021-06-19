@@ -212,6 +212,12 @@ public:
 
     bool mergeTransaction(ASurfaceTransaction* transaction, ASurfaceControl* control);
 
+    void setPrepareSurfaceControlForWebviewCallback(const std::function<void()>& callback) {
+        mPrepareSurfaceControlForWebviewCallback = callback;
+    }
+
+    void prepareSurfaceControlForWebview();
+
     static CanvasContext* getActiveContext();
 
 private:
@@ -312,6 +318,8 @@ private:
     bool mExpectSurfaceStats = false;
 
     std::function<void(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
+    std::function<void()> mPrepareSurfaceControlForWebviewCallback;
+
     void cleanupResources();
 };
 

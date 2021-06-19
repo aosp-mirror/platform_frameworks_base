@@ -1034,6 +1034,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"放大局部螢幕畫面"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"切換"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"無障礙工具按鈕已取代無障礙手勢\n\n"<annotation id="link">"查看設定"</annotation></string>
+    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
+    <skip />
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"將按鈕移到邊緣處即可暫時隱藏"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"移到左上方"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"移到右上方"</string>
