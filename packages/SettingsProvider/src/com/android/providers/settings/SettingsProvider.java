@@ -5261,6 +5261,16 @@ public class SettingsProvider extends ContentProvider {
                                 getContext()
                                         .getResources()
                                         .getBoolean(R.bool.def_wearable_alternateLauncherEnabled));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.CARD_PREVIEW_MODE,
+                                Global.Wearable.CARD_PREVIEW_MODE_NORMAL);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.CORNER_ROUNDNESS,
+                                getContext()
+                                        .getResources()
+                                        .getInteger(
+                                                R.integer
+                                                        .def_wearable_squareScreenCornerRoundness));
 
                         // TODO(b/164398026): add necessary initialization logic for all entries.
                         currentVersion = 204;

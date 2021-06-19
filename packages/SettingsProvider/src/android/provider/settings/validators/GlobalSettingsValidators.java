@@ -248,6 +248,15 @@ public class GlobalSettingsValidators {
                         }));
         VALIDATORS.put(Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.ALTERNATE_LAUNCHER_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.CARD_PREVIEW_MODE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.CARD_PREVIEW_MODE_LOW),
+                            String.valueOf(Global.Wearable.CARD_PREVIEW_MODE_NORMAL),
+                            String.valueOf(Global.Wearable.CARD_PREVIEW_MODE_HIGH)
+                        }));
+        VALIDATORS.put(Global.Wearable.CORNER_ROUNDNESS, ANY_INTEGER_VALIDATOR);
     }
 }
 

@@ -626,7 +626,9 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.STEM_3_DEFAULT_DATA,
                     Settings.Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED,
                     Settings.Global.Wearable.WEAR_OS_VERSION_STRING,
-                    Settings.Global.Wearable.ALTERNATE_LAUNCHER_ENABLED);
+                    Settings.Global.Wearable.ALTERNATE_LAUNCHER_ENABLED,
+                    Settings.Global.Wearable.CARD_PREVIEW_MODE,
+                    Settings.Global.Wearable.CORNER_ROUNDNESS);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

@@ -394,10 +394,23 @@ final class InputMonitor {
     /**
      * Called when the current input focus changes.
      */
-    private void updateInputFocusRequest() {
+    private void updateInputFocusRequest(InputConsumerImpl recentsAnimationInputConsumer) {
         final WindowState focus = mDisplayContent.mCurrentFocus;
-        final IBinder focusToken = focus != null ? focus.mInputChannelToken : null;
+        // Request focus for the recents animation input consumer if an input consumer should
+        // be applied for the window.
+        if (recentsAnimationInputConsumer != null && focus != null) {
+            final RecentsAnimationController recentsAnimationController =
+                    mService.getRecentsAnimationController();
+            final boolean shouldApplyRecentsInputConsumer = recentsAnimationController != null
+                    && recentsAnimationController.shouldApplyInputConsumer(focus.mActivityRecord);
+            if (shouldApplyRecentsInputConsumer) {
+                requestFocus(recentsAnimationInputConsumer.mWindowHandle.token,
+                        recentsAnimationInputConsumer.mName);
+                return;
+            }
+        }
 
+        final IBinder focusToken = focus != null ? focus.mInputChannelToken : null;
         if (focusToken == null) {
             mInputFocus = null;
             return;
@@ -474,8 +487,6 @@ final class InputMonitor {
 
         boolean mInDrag;
 
-        private boolean mRecentsAnimationFocusOverride;
-
         private void updateInputWindows(boolean inDrag) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");
 
@@ -491,16 +502,8 @@ final class InputMonitor {
             mInDrag = inDrag;
 
             resetInputConsumers(mInputTransaction);
-            mRecentsAnimationFocusOverride = false;
             mDisplayContent.forAllWindows(this, true /* traverseTopToBottom */);
-
-            if (mRecentsAnimationFocusOverride) {
-                requestFocus(mRecentsAnimationInputConsumer.mWindowHandle.token,
-                        mRecentsAnimationInputConsumer.mName);
-            } else {
-                updateInputFocusRequest();
-            }
-
+            updateInputFocusRequest(mRecentsAnimationInputConsumer);
 
             if (!mUpdateInputWindowsImmediately) {
                 mDisplayContent.getPendingTransaction().merge(mInputTransaction);
@@ -538,7 +541,6 @@ final class InputMonitor {
                         mRecentsAnimationInputConsumer.mWindowHandle)) {
                     mRecentsAnimationInputConsumer.show(mInputTransaction, w.mActivityRecord);
                     mAddRecentsAnimationInputConsumerHandle = false;
-                    mRecentsAnimationFocusOverride = true;
                 }
             }
 
