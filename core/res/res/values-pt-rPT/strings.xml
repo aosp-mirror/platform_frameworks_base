@@ -1019,7 +1019,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Texto copiado para a área de transferência."</string>
     <string name="copied" msgid="4675902854553014676">"Copiado"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"A app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou da app <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou a partir da área de transferência"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"A app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou a partir da área de transferência"</string>
     <string name="pasted_text" msgid="4298871641549173733">"A app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou o texto que copiou"</string>
     <string name="pasted_image" msgid="4729097394781491022">"A app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou uma imagem que copiou"</string>
     <string name="pasted_content" msgid="646276353060777131">"A app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou o conteúdo que copiou"</string>

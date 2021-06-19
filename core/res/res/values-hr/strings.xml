@@ -1022,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Tekst kopiran u međuspremnik."</string>
     <string name="copied" msgid="4675902854553014676">"Kopirano"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"U aplikaciji <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> zalijepljen je sadržaj aplikacije <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Zalijepljen je sadržaj aplikacije <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Apl. <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> zalijepila je ovaj sadržaj iz međuspremnika"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Aplikacija <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> zalijepila je tekst koji ste kopirali"</string>
     <string name="pasted_image" msgid="4729097394781491022">"Aplikacija <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> zalijepila je sliku koju ste kopirali"</string>
     <string name="pasted_content" msgid="646276353060777131">"Aplikacija <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> zalijepila je ono što ste kopirali"</string>

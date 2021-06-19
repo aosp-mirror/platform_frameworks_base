@@ -1019,7 +1019,7 @@
     <string name="text_copied" msgid="2531420577879738860">"បាន​ចម្លង​អត្ថបទ​ទៅ​ក្ដារ​តម្បៀត​ខ្ទាស់។"</string>
     <string name="copied" msgid="4675902854553014676">"បា​នចម្លង"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូលពី <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​ពីឃ្លីបបត​របស់អ្នក"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"បានដាក់ចូល <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ពីឃ្លីបបត​របស់អ្នក"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​អត្ថបទ​ដែលអ្នក​បានចម្លង"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​រូបភាព​ដែលអ្នក​បានចម្លង"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​ខ្លឹមសារ​ដែលអ្នក​បានចម្លង"</string>
