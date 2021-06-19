@@ -1025,7 +1025,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Тэкст скапіраваны ў буфер абмену."</string>
     <string name="copied" msgid="4675902854553014676">"Скапіравана"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Праграма \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\" была ўстаўлена з праграмы \"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>\""</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Праграма (\"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\") уставіла даныя з буфера абмену"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Праграма \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\" уставіла даныя з буфера абмену"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Скапіраваны вамі тэкст устаўлены праграмай \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\""</string>
     <string name="pasted_image" msgid="4729097394781491022">"Скапіраваны вамі відарыс устаўлены праграмай \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\""</string>
     <string name="pasted_content" msgid="646276353060777131">"Скапіраванае вамі змесціва ўстаўлена праграмай \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\""</string>
