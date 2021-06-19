@@ -1019,7 +1019,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Teks na knipbord gekopieër."</string>
     <string name="copied" msgid="4675902854553014676">"Gekopieer"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> het uit <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> geplak"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> van jou knipbord af geplak"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> het van jou knipbord af geplak"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> het teks geplak wat jy gekopieer het"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> het \'n prent geplak wat jy gekopieer het"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> het inhoud geplak wat jy gekopieer het"</string>
