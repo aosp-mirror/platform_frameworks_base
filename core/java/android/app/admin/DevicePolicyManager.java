@@ -11871,7 +11871,19 @@ public class DevicePolicyManager {
     public boolean isAffiliatedUser() {
         throwIfParentInstance("isAffiliatedUser");
         try {
-            return mService.isAffiliatedUser();
+            return mService.isCallingUserAffiliated();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns whether target user is affiliated with the device.
+     */
+    public boolean isAffiliatedUser(@UserIdInt int userId) {
+        try {
+            return mService.isAffiliatedUser(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
