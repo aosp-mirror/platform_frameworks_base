@@ -22,6 +22,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.util.TimeUtils;
 import android.view.SurfaceControlHdrLayerInfoListener;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -189,6 +190,10 @@ class HighBrightnessModeController {
     }
 
     void dump(PrintWriter pw) {
+        mHandler.runWithScissors(() -> dumpLocal(pw), 1000);
+    }
+
+    private void dumpLocal(PrintWriter pw) {
         pw.println("HighBrightnessModeController:");
         pw.println("  mCurrentMin=" + getCurrentBrightnessMin());
         pw.println("  mCurrentMax=" + getCurrentBrightnessMax());
@@ -202,6 +207,29 @@ class HighBrightnessModeController {
         pw.println("  mIsHdrLayerPresent=" + mIsHdrLayerPresent);
         pw.println("  mBrightnessMin=" + mBrightnessMin);
         pw.println("  mBrightnessMax=" + mBrightnessMax);
+        pw.println("  mRunningStartTimeMillis=" + TimeUtils.formatUptime(mRunningStartTimeMillis));
+        pw.println("  mEvents=");
+        final long currentTime = mClock.uptimeMillis();
+        long lastStartTime = currentTime;
+        if (mRunningStartTimeMillis != -1) {
+            lastStartTime = dumpHbmEvent(pw, new HbmEvent(mRunningStartTimeMillis, currentTime));
+        }
+        for (HbmEvent event : mEvents) {
+            if (lastStartTime > event.endTimeMillis) {
+                pw.println("    event: [normal brightness]: "
+                        + TimeUtils.formatDuration(lastStartTime - event.endTimeMillis));
+            }
+            lastStartTime = dumpHbmEvent(pw, event);
+        }
+    }
+
+    private long dumpHbmEvent(PrintWriter pw, HbmEvent event) {
+        final long duration = event.endTimeMillis - event.startTimeMillis;
+        pw.println("    event: ["
+                + TimeUtils.formatUptime(event.startTimeMillis) + ", "
+                + TimeUtils.formatUptime(event.endTimeMillis) + "] ("
+                + TimeUtils.formatDuration(duration) + ")");
+        return event.startTimeMillis;
     }
 
     private boolean isCurrentlyAllowed() {

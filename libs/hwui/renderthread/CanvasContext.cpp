@@ -174,16 +174,12 @@ void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
     ATRACE_CALL();
 
     if (window) {
-        int extraBuffers = 0;
-        native_window_get_extra_buffer_count(window, &extraBuffers);
-
         mNativeSurface = std::make_unique<ReliableSurface>(window);
         mNativeSurface->init();
         if (enableTimeout) {
             // TODO: Fix error handling & re-shorten timeout
             ANativeWindow_setDequeueTimeout(window, 4000_ms);
         }
-        mNativeSurface->setExtraBufferCount(extraBuffers);
     } else {
         mNativeSurface = nullptr;
     }
@@ -197,6 +193,7 @@ void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
 
     if (surfaceControl == nullptr) {
         setASurfaceTransactionCallback(nullptr);
+        setPrepareSurfaceControlForWebviewCallback(nullptr);
     }
 
     if (mSurfaceControl != nullptr) {
@@ -916,6 +913,12 @@ bool CanvasContext::mergeTransaction(ASurfaceTransaction* transaction, ASurfaceC
     std::invoke(mASurfaceTransactionCallback, reinterpret_cast<int64_t>(transaction),
                 reinterpret_cast<int64_t>(control), getFrameNumber());
     return true;
+}
+
+void CanvasContext::prepareSurfaceControlForWebview() {
+    if (mPrepareSurfaceControlForWebviewCallback) {
+        std::invoke(mPrepareSurfaceControlForWebviewCallback);
+    }
 }
 
 } /* namespace renderthread */

@@ -937,17 +937,18 @@ public final class OobData implements Parcelable {
     }
 
     @NonNull
-    private String toHexString(@NonNull int b) {
+    private String toHexString(int b) {
         return toHexString(new byte[] {(byte) b});
     }
 
     @NonNull
-    private String toHexString(@NonNull byte b) {
+    private String toHexString(byte b) {
         return toHexString(new byte[] {b});
     }
 
     @NonNull
-    private String toHexString(@NonNull byte[] array) {
+    private String toHexString(byte[] array) {
+        if (array == null) return "null";
         StringBuilder builder = new StringBuilder(array.length * 2);
         for (byte b: array) {
             builder.append(String.format("%02x", b));

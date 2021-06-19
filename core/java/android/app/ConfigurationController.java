@@ -17,17 +17,16 @@
 package android.app;
 
 import static android.app.ActivityThread.DEBUG_CONFIGURATION;
+import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.HardwareRenderer;
 import android.inputmethodservice.InputMethodService;
 import android.os.Build;
@@ -228,7 +227,7 @@ class ConfigurationController {
         }
 
         final ArrayList<ComponentCallbacks2> callbacks =
-                mActivityThread.collectComponentCallbacks(false /* includeActivities */);
+                mActivityThread.collectComponentCallbacks(false /* includeUiContexts */);
 
         freeTextLayoutCachesIfNeeded(configDiff);
 
@@ -326,16 +325,4 @@ class ConfigurationController {
         return newConfig;
     }
 
-    /** Ask test layout engine to free its caches if there is a locale change. */
-    static void freeTextLayoutCachesIfNeeded(int configDiff) {
-        if (configDiff != 0) {
-            boolean hasLocaleConfigChange = ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0);
-            if (hasLocaleConfigChange) {
-                Canvas.freeTextLayoutCaches();
-                if (DEBUG_CONFIGURATION) {
-                    Slog.v(TAG, "Cleared TextLayout Caches");
-                }
-            }
-        }
-    }
 }

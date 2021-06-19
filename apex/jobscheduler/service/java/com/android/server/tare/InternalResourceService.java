@@ -233,7 +233,7 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             final int newBatteryLevel = getCurrentBatteryLevel();
             if (newBatteryLevel > mCurrentBatteryLevel) {
-                mAgent.distributeBasicIncomeLocked(mCurrentBatteryLevel);
+                mAgent.distributeBasicIncomeLocked(newBatteryLevel);
             }
             mCurrentBatteryLevel = newBatteryLevel;
         }
@@ -376,6 +376,9 @@ public class InternalResourceService extends SystemService {
         @Override
         public void noteInstantaneousEvent(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
+            synchronized (mLock) {
+                mAgent.noteInstantaneousEventLocked(userId, pkgName, eventId, tag);
+            }
         }
 
         @Override

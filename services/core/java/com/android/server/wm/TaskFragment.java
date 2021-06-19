@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
@@ -30,6 +31,7 @@ import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
+import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
@@ -51,6 +53,15 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_USER_
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.IdentifierProto.HASH_CODE;
+import static com.android.server.wm.IdentifierProto.TITLE;
+import static com.android.server.wm.IdentifierProto.USER_ID;
+import static com.android.server.wm.TaskFragmentProto.ACTIVITY_TYPE;
+import static com.android.server.wm.TaskFragmentProto.DISPLAY_ID;
+import static com.android.server.wm.TaskFragmentProto.MIN_HEIGHT;
+import static com.android.server.wm.TaskFragmentProto.MIN_WIDTH;
+import static com.android.server.wm.TaskFragmentProto.WINDOW_CONTAINER;
+import static com.android.server.wm.WindowContainerChildProto.TASK_FRAGMENT;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -68,6 +79,7 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -1457,7 +1469,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     private int getTaskId() {
-        return getTask().mTaskId;
+        return getTask() != null ? getTask().mTaskId : INVALID_TASK_ID;
     }
 
     private void resolveLeafOnlyOverrideConfigs(Configuration newParentConfig,
@@ -1928,5 +1940,40 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void dumpInner(String prefix, PrintWriter pw, boolean dumpAll, String dumpPackage) {
         pw.print(prefix); pw.print("* "); pw.println(this);
         pw.println(prefix + "  mBounds=" + getRequestedOverrideBounds());
+    }
+
+    @Override
+    void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(HASH_CODE, System.identityHashCode(this));
+        final ActivityRecord topActivity = topRunningActivity();
+        proto.write(USER_ID, topActivity != null ? topActivity.mUserId : USER_NULL);
+        proto.write(TITLE, topActivity != null ? topActivity.intent.getComponent()
+                .flattenToShortString() : "TaskFragment");
+        proto.end(token);
+    }
+
+    @Override
+    long getProtoFieldId() {
+        return TASK_FRAGMENT;
+    }
+
+    @Override
+    public void dumpDebug(ProtoOutputStream proto, long fieldId,
+            @WindowTraceLogLevel int logLevel) {
+        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            return;
+        }
+
+        final long token = proto.start(fieldId);
+
+        super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
+
+        proto.write(DISPLAY_ID, getDisplayId());
+        proto.write(ACTIVITY_TYPE, getActivityType());
+        proto.write(MIN_WIDTH, mMinWidth);
+        proto.write(MIN_HEIGHT, mMinHeight);
+
+        proto.end(token);
     }
 }

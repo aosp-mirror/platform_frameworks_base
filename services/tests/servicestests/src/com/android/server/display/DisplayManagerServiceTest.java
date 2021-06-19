@@ -64,6 +64,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.display.DisplayManagerService.SyncRoot;
 import com.android.server.lights.LightsManager;
+import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
@@ -150,6 +151,7 @@ public class DisplayManagerServiceTest {
     @Mock LightsManager mMockLightsManager;
     @Mock VirtualDisplayAdapter mMockVirtualDisplayAdapter;
     @Mock IBinder mMockDisplayToken;
+    @Mock SensorManagerInternal mMockSensorManagerInternal;
 
     @Before
     public void setUp() throws Exception {
@@ -161,6 +163,8 @@ public class DisplayManagerServiceTest {
         LocalServices.addService(WindowManagerInternal.class, mMockWindowManagerInternal);
         LocalServices.removeServiceForTest(LightsManager.class);
         LocalServices.addService(LightsManager.class, mMockLightsManager);
+        LocalServices.removeServiceForTest(SensorManagerInternal.class);
+        LocalServices.addService(SensorManagerInternal.class, mMockSensorManagerInternal);
 
         mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
