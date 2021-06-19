@@ -611,7 +611,7 @@
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"ไอคอนใบหน้า"</string>
-    <string name="permlab_readSyncSettings" msgid="6250532864893156277">"อ่านการตั้งค่าการซิงค์แล้ว"</string>
+    <string name="permlab_readSyncSettings" msgid="6250532864893156277">"อ่านการตั้งค่าการซิงค์"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"อนุญาตให้แอปพลิเคชันอ่านการตั้งค่าการซิงค์ของบัญชี ตัวอย่างเช่น การอนุญาตนี้สามารถระบุได้ว่าแอปพลิเคชัน People ซิงค์กับบัญชีหรือไม่"</string>
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"สลับระหว่างเปิดและปิดการซิงค์"</string>
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงการตั้งค่าการซิงค์ของบัญชี ตัวอย่างเช่น สามารถใช้การอนุญาตเปิดใช้งานการซิงค์แอปพลิเคชัน People กับบัญชี"</string>

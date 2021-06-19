@@ -1156,7 +1156,7 @@
     <string name="whichEditApplication" msgid="6191568491456092812">"Uređivanje pomoću aplikacije"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Uređivanje pomoću aplikacije %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"Uredi"</string>
-    <string name="whichSendApplication" msgid="4143847974460792029">"Dijeli"</string>
+    <string name="whichSendApplication" msgid="4143847974460792029">"Dijeljenje"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Dijeljenje pomoću aplikacije %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Dijeli"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"Pošalji aplikacijom"</string>

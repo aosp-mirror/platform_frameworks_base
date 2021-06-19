@@ -431,7 +431,7 @@
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Приложение сможет получать сведения о вашем точном местоположении, только когда используется. Для этого на устройстве должна быть включена геолокация. Учтите, что при этом заряд батареи может расходоваться быстрее."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"Доступ к приблизительному местоположению только в активном режиме"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Приложение сможет получать сведения о вашем приблизительном местоположении, только когда используется. Для этого на устройстве должна быть включена геолокация."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"доступ к геоданным в фоновом режиме"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"Доступ к геоданным в фоновом режиме"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Приложение сможет получать доступ к сведениям о местоположении, даже когда не используется."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"Изменение настроек аудио"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Приложение сможет изменять системные настройки звука, например уровень громкости и активный динамик."</string>
@@ -439,7 +439,7 @@
     <string name="permdesc_recordAudio" msgid="3976213377904701093">"Приложение может в любое время записывать аудио с помощью микрофона."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"Отправка команд SIM-карте"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Приложение сможет отправлять команды SIM-карте (данное разрешение представляет большую угрозу)."</string>
-    <string name="permlab_activityRecognition" msgid="1782303296053990884">"распознавать физическую активность"</string>
+    <string name="permlab_activityRecognition" msgid="1782303296053990884">"Распознавать физическую активность"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Приложение может распознавать физическую активность."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"Фото- и видеосъемка"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Приложение может в любое время делать фотографии и снимать видео с помощью камеры."</string>
@@ -492,8 +492,8 @@
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Приложение сможет получить список всех используемых на устройстве аккаунтов, в том числе созданных установленными приложениями."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"Просмотр сетевых подключений"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Приложение сможет просматривать информацию о сетевых подключениях, например о том, какие сети доступны и к каким из них вы подключены."</string>
-    <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"Неограниченный доступ к Интернету"</string>
-    <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"Приложение сможет создавать сетевые сокеты и использовать различные сетевые протоколы. Так как браузер и другие приложения обеспечивают средства для отправки данных в Интернет, это разрешение предоставлять не обязательно."</string>
+    <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"Неограниченный доступ к интернету"</string>
+    <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"Приложение сможет создавать сетевые сокеты и использовать различные сетевые протоколы. Так как браузер и другие приложения обеспечивают средства для отправки данных в интернет, это разрешение предоставлять не обязательно."</string>
     <string name="permlab_changeNetworkState" msgid="8945711637530425586">"Изменение сетевых настроек"</string>
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"Приложение сможет изменять состояние подключения к сети."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"Изменение подключения к компьютеру"</string>
@@ -540,7 +540,7 @@
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"Приложение сможет вносить изменения в вашу видеоколлекцию."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"изменение фотоколлекции"</string>
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Приложение сможет вносить изменения в вашу фотоколлекцию."</string>
-    <string name="permlab_mediaLocation" msgid="7368098373378598066">"доступ к геоданным в медиаколлекции"</string>
+    <string name="permlab_mediaLocation" msgid="7368098373378598066">"Доступ к геоданным в медиаколлекции"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Приложение получит доступ к геоданным в вашей медиаколлекции."</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Подтвердите, что это вы"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Биометрическое оборудование недоступно"</string>
