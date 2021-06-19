@@ -22,16 +22,16 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="514691256816366517">"Teklatu-babeslea"</string>
     <string name="keyguard_password_enter_pin_code" msgid="8582296866585566671">"Idatzi PIN kodea"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"Idatzi SIM txartelaren PUKa eta PIN berria"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"Idatzi SIMaren PUKa eta PIN kode berria"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="3529260761374385243">"SIM txartelaren PUK kodea"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"SIM txartelaren PIN berria"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"SIMaren PIN kode berria"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"Pasahitza idazteko, sakatu hau"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"Idatzi desblokeatzeko pasahitza"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"Idatzi desblokeatzeko PINa"</string>
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Idatzi PINa"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Marraztu eredua"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Idatzi pasahitza"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"PINa ez da zuzena."</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"PIN kodea okerra da."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Txartelak ez du balio."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Kargatuta"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hari gabe kargatzen"</string>
@@ -128,8 +128,8 @@
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Ez da ezagutu"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ez da ezagutu"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
-      <item quantity="other">Idatzi SIM txartelaren PIN kodea. <xliff:g id="NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu.</item>
-      <item quantity="one">Idatzi SIM txartelaren PIN kodea. <xliff:g id="NUMBER_0">%d</xliff:g> saiakera geratzen zaizu; oker idatziz gero, operadoreari eskatu beharko diozu gailua desblokeatzeko.</item>
+      <item quantity="other">Idatzi SIMaren PINa. <xliff:g id="NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu.</item>
+      <item quantity="one">Idatzi SIMaren PINa. <xliff:g id="NUMBER_0">%d</xliff:g> saiakera geratzen zaizu; oker idatziz gero, operadoreari eskatu beharko diozu gailua desblokeatzeko.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
       <item quantity="other">Desgaitu egin da SIM txartela. Aurrera egiteko, idatzi PUK kodea. <xliff:g id="_NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu SIM txartela betiko erabilgaitz geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.</item>
