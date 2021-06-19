@@ -24,6 +24,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -46,8 +48,13 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.Gravity;
+import android.view.InsetsState;
+import android.view.PrivacyIndicatorBounds;
+import android.view.RoundedCorners;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.ITransitionPlayer;
 
 import androidx.test.filters.SmallTest;
 
@@ -133,8 +140,9 @@ public class WallpaperControllerTests extends WindowTestsBase {
         int expectedWidth = (int) (wallpaperWidth * (displayHeight / (double) wallpaperHeight));
 
         // Check that the wallpaper is correctly scaled
-        assertEquals(new Rect(0, 0, expectedWidth, displayHeight), wallpaperWindow.getFrameLw());
-        Rect portraitFrame = wallpaperWindow.getFrameLw();
+        assertEquals(expectedWidth, wallpaperWindow.getFrame().width());
+        assertEquals(displayHeight, wallpaperWindow.getFrame().height());
+        Rect portraitFrame = wallpaperWindow.getFrame();
 
         // Rotate the display
         dc.getDisplayRotation().updateOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, true);
@@ -144,12 +152,13 @@ public class WallpaperControllerTests extends WindowTestsBase {
         Configuration config = new Configuration();
         final DisplayInfo info = dc.computeScreenConfiguration(config, Surface.ROTATION_0);
         final WmDisplayCutout cutout = dc.calculateDisplayCutoutForRotation(Surface.ROTATION_0);
-        final DisplayFrames displayFrames = new DisplayFrames(dc.getDisplayId(), info, cutout);
+        final DisplayFrames displayFrames = new DisplayFrames(dc.getDisplayId(), new InsetsState(),
+                info, cutout, RoundedCorners.NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds());
         wallpaperWindowToken.applyFixedRotationTransform(info, displayFrames, config);
 
         // Check that the wallpaper has the same frame in landscape than in portrait
         assertEquals(Configuration.ORIENTATION_LANDSCAPE, dc.getConfiguration().orientation);
-        assertEquals(portraitFrame, wallpaperWindow.getFrameLw());
+        assertEquals(portraitFrame, wallpaperWindow.getFrame());
     }
 
     @Test
@@ -203,7 +212,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         // value did, and we do dispatch the zoom to the wallpaper service
         dc.mWallpaperController.setWallpaperZoomOut(homeWindow, newZoom);
         assertEquals(newZoom, wallpaperWindow.mWallpaperZoomOut, .01f);
-        assertEquals(1f, wallpaperWindow.mWinAnimator.mWallpaperScale, .01f);
+        assertEquals(1f, wallpaperWindow.mWallpaperScale, .01f);
         verify(wallpaperWindow.mClient).dispatchWallpaperOffsets(anyFloat(), anyFloat(), anyFloat(),
                 anyFloat(), eq(newZoom), anyBoolean());
     }
@@ -270,6 +279,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_FULLSCREEN, token.getWindowingMode());
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testFixedRotationRecentsAnimatingTask() {
         final RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
@@ -293,10 +303,49 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertFalse(mAppWindow.mActivityRecord.hasFixedRotationTransform());
     }
 
+    @Test
+    public void testWallpaperTokenVisibility() {
+        final DisplayContent dc = mWm.mRoot.getDefaultDisplay();
+        final WallpaperWindowToken token = new WallpaperWindowToken(mWm, mock(IBinder.class),
+                true, dc, true /* ownerCanManageAppTokens */);
+        final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, token,
+                "wallpaperWindow");
+        wallpaperWindow.setHasSurface(true);
+
+        // Set-up mock shell transitions
+        final IBinder mockBinder = mock(IBinder.class);
+        final ITransitionPlayer mockPlayer = mock(ITransitionPlayer.class);
+        doReturn(mockBinder).when(mockPlayer).asBinder();
+        mWm.mAtmService.getTransitionController().registerTransitionPlayer(mockPlayer);
+
+        Transition transit =
+                mWm.mAtmService.getTransitionController().createTransition(TRANSIT_OPEN);
+
+        // wallpaper windows are immediately visible when set to visible even during a transition
+        token.setVisibility(true);
+        assertTrue(wallpaperWindow.isVisible());
+        assertTrue(token.isVisibleRequested());
+        assertTrue(token.isVisible());
+        mWm.mAtmService.getTransitionController().abort(transit);
+
+        // In a transition, setting invisible should ONLY set requestedVisible false; otherwise
+        // wallpaper should remain "visible" until transition is over.
+        transit = mWm.mAtmService.getTransitionController().createTransition(TRANSIT_CLOSE);
+        transit.start();
+        token.setVisibility(false);
+        assertTrue(wallpaperWindow.isVisible());
+        assertFalse(token.isVisibleRequested());
+        assertTrue(token.isVisible());
+
+        transit.onTransactionReady(transit.getSyncId(), mock(SurfaceControl.Transaction.class));
+        transit.finishTransition();
+        assertFalse(wallpaperWindow.isVisible());
+        assertFalse(token.isVisible());
+    }
+
     private WindowState createWallpaperTargetWindow(DisplayContent dc) {
-        final ActivityRecord homeActivity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                .setStack(dc.getDefaultTaskDisplayArea().getRootHomeTask())
-                .setCreateTask(true)
+        final ActivityRecord homeActivity = new ActivityBuilder(mWm.mAtmService)
+                .setTask(dc.getDefaultTaskDisplayArea().getRootHomeTask())
                 .build();
         homeActivity.setVisibility(true);
 

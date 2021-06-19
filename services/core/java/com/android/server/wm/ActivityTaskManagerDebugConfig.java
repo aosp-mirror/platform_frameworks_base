@@ -43,20 +43,10 @@ public class ActivityTaskManagerDebugConfig {
     // Enable all debug log categories for activities.
     private static final boolean DEBUG_ALL_ACTIVITIES = DEBUG_ALL || false;
 
-    static final boolean DEBUG_ADD_REMOVE = DEBUG_ALL_ACTIVITIES || false;
-    public static final boolean DEBUG_CONFIGURATION = DEBUG_ALL || false;
-    static final boolean DEBUG_CONTAINERS = DEBUG_ALL_ACTIVITIES || false;
-    static final boolean DEBUG_FOCUS = false;
-    static final boolean DEBUG_IMMERSIVE = DEBUG_ALL || false;
-    static final boolean DEBUG_LOCKTASK = DEBUG_ALL || false;
-    static final boolean DEBUG_PAUSE = DEBUG_ALL || false;
     static final boolean DEBUG_RECENTS = DEBUG_ALL || false;
     static final boolean DEBUG_RECENTS_TRIM_TASKS = DEBUG_RECENTS || false;
-    static final boolean DEBUG_SAVED_STATE = DEBUG_ALL_ACTIVITIES || false;
-    static final boolean DEBUG_STACK = DEBUG_ALL || false;
-    static final boolean DEBUG_STATES = DEBUG_ALL_ACTIVITIES || false;
+    static final boolean DEBUG_ROOT_TASK = DEBUG_ALL || false;
     public static final boolean DEBUG_SWITCH = DEBUG_ALL || false;
-    static final boolean DEBUG_TASKS = DEBUG_ALL || false;
     static final boolean DEBUG_TRANSITION = DEBUG_ALL || false;
     static final boolean DEBUG_VISIBILITY = DEBUG_ALL || false;
     static final boolean DEBUG_APP = DEBUG_ALL_ACTIVITIES || false;
@@ -83,7 +73,7 @@ public class ActivityTaskManagerDebugConfig {
     static final String POSTFIX_PAUSE = APPEND_CATEGORY_NAME ? "_Pause" : "";
     static final String POSTFIX_RECENTS = APPEND_CATEGORY_NAME ? "_Recents" : "";
     static final String POSTFIX_SAVED_STATE = APPEND_CATEGORY_NAME ? "_SavedState" : "";
-    static final String POSTFIX_STACK = APPEND_CATEGORY_NAME ? "_Stack" : "";
+    static final String POSTFIX_ROOT_TASK = APPEND_CATEGORY_NAME ? "_RootTask" : "";
     static final String POSTFIX_STATES = APPEND_CATEGORY_NAME ? "_States" : "";
     public static final String POSTFIX_SWITCH = APPEND_CATEGORY_NAME ? "_Switch" : "";
     static final String POSTFIX_TASKS = APPEND_CATEGORY_NAME ? "_Tasks" : "";

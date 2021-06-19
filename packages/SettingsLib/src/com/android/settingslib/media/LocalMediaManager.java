@@ -205,7 +205,6 @@ public class LocalMediaManager implements BluetoothCallback {
 
     void dispatchDeviceListUpdate() {
         final List<MediaDevice> mediaDevices = new ArrayList<>(mMediaDevices);
-        Collections.sort(mediaDevices, COMPARATOR);
         for (DeviceCallback callback : getCallbacks()) {
             callback.onDeviceListUpdate(mediaDevices);
         }
@@ -402,6 +401,20 @@ public class LocalMediaManager implements BluetoothCallback {
         return mPackageName;
     }
 
+    /**
+     * Returns {@code true} if needed to disable media output, otherwise returns {@code false}.
+     */
+    public boolean shouldDisableMediaOutput(String packageName) {
+        return mInfoMediaManager.shouldDisableMediaOutput(packageName);
+    }
+
+    /**
+     * Returns {@code true} if needed to enable volume seekbar, otherwise returns {@code false}.
+     */
+    public boolean shouldEnableVolumeSeekBar(RoutingSessionInfo sessionInfo) {
+        return mInfoMediaManager.shouldEnableVolumeSeekBar(sessionInfo);
+    }
+
     @VisibleForTesting
     MediaDevice updateCurrentConnectedDevice() {
         MediaDevice connectedDevice = null;
@@ -465,7 +478,17 @@ public class LocalMediaManager implements BluetoothCallback {
             synchronized (mMediaDevicesLock) {
                 mMediaDevices.clear();
                 mMediaDevices.addAll(devices);
-                mMediaDevices.addAll(buildDisconnectedBluetoothDevice());
+                Collections.sort(devices, COMPARATOR);
+                // Add disconnected bluetooth devices only when phone output device is available.
+                for (MediaDevice device : devices) {
+                    final int type = device.getDeviceType();
+                    if (type == MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE
+                            || type == MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE
+                            || type == MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE) {
+                        mMediaDevices.addAll(buildDisconnectedBluetoothDevice());
+                        break;
+                    }
+                }
             }
 
             final MediaDevice infoMediaDevice = mInfoMediaManager.getCurrentConnectedDevice();

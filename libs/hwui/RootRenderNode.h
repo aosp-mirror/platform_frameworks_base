@@ -27,16 +27,16 @@
 
 namespace android::uirenderer {
 
-class ANDROID_API RootRenderNode : public RenderNode {
+class RootRenderNode : public RenderNode {
 public:
-    ANDROID_API explicit RootRenderNode(std::unique_ptr<ErrorHandler> errorHandler)
+    explicit RootRenderNode(std::unique_ptr<ErrorHandler> errorHandler)
             : RenderNode(), mErrorHandler(std::move(errorHandler)) {}
 
-    ANDROID_API virtual ~RootRenderNode() {}
+    virtual ~RootRenderNode() {}
 
     virtual void prepareTree(TreeInfo& info) override;
 
-    ANDROID_API void attachAnimatingNode(RenderNode* animatingNode);
+    void attachAnimatingNode(RenderNode* animatingNode);
 
     void attachPendingVectorDrawableAnimators();
 
@@ -53,9 +53,9 @@ public:
 
     void pushStagingVectorDrawableAnimators(AnimationContext* context);
 
-    ANDROID_API void destroy();
+    void destroy();
 
-    ANDROID_API void addVectorDrawableAnimator(PropertyValuesAnimatorSet* anim);
+    void addVectorDrawableAnimator(PropertyValuesAnimatorSet* anim);
 
 private:
     const std::unique_ptr<ErrorHandler> mErrorHandler;
@@ -75,12 +75,11 @@ private:
 };
 
 #ifdef __ANDROID__ // Layoutlib does not support Animations
-class ANDROID_API ContextFactoryImpl : public IContextFactory {
+class ContextFactoryImpl : public IContextFactory {
 public:
-    ANDROID_API explicit ContextFactoryImpl(RootRenderNode* rootNode) : mRootNode(rootNode) {}
+    explicit ContextFactoryImpl(RootRenderNode* rootNode) : mRootNode(rootNode) {}
 
-    ANDROID_API virtual AnimationContext* createAnimationContext(
-            renderthread::TimeLord& clock) override;
+    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) override;
 
 private:
     RootRenderNode* mRootNode;

@@ -26,11 +26,14 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.R;
+import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
+import com.android.systemui.tests.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -85,28 +88,24 @@ public class CallbackHandlerTest extends SysuiTestCase {
         boolean out = true;
         String description = "Test";
         String secondaryLabel = "Secondary label";
-        mHandler.setWifiIndicators(enabled, status, qs, in, out, description, true, secondaryLabel);
+        WifiIndicators indicators = new WifiIndicators(
+                enabled, status, qs, in, out, description, true, secondaryLabel);
+        mHandler.setWifiIndicators(indicators);
         waitForCallbacks();
 
-        ArgumentCaptor<Boolean> enableArg = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<IconState> statusArg = ArgumentCaptor.forClass(IconState.class);
-        ArgumentCaptor<IconState> qsArg = ArgumentCaptor.forClass(IconState.class);
-        ArgumentCaptor<Boolean> inArg = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<Boolean> outArg = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<String> descArg = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<Boolean> isTransient = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<String> secondary = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(mSignalCallback).setWifiIndicators(enableArg.capture(),
-                statusArg.capture(), qsArg.capture(), inArg.capture(), outArg.capture(),
-                descArg.capture(), isTransient.capture(), secondary.capture());
-        assertEquals(enabled, (boolean) enableArg.getValue());
-        assertEquals(status, statusArg.getValue());
-        assertEquals(qs, qsArg.getValue());
-        assertEquals(in, (boolean) inArg.getValue());
-        assertEquals(out, (boolean) outArg.getValue());
-        assertEquals(description, descArg.getValue());
-        assertTrue(isTransient.getValue());
-        assertEquals(secondaryLabel, secondary.getValue());
+        ArgumentCaptor<WifiIndicators> indicatorArg =
+                ArgumentCaptor.forClass(WifiIndicators.class);
+        Mockito.verify(mSignalCallback).setWifiIndicators(indicatorArg.capture());
+        WifiIndicators expected = indicatorArg.getValue();
+
+        assertEquals(enabled, expected.enabled);
+        assertEquals(status, expected.statusIcon);
+        assertEquals(qs, expected.qsIcon);
+        assertEquals(in, expected.activityIn);
+        assertEquals(out, expected.activityOut);
+        assertEquals(description, expected.description);
+        assertTrue(expected.isTransient);
+        assertEquals(secondaryLabel, expected.statusLabel);
     }
 
     @Test
@@ -123,37 +122,30 @@ public class CallbackHandlerTest extends SysuiTestCase {
         boolean wide = true;
         int subId = 5;
         boolean roaming = true;
-        mHandler.setMobileDataIndicators(status, qs, type, qsType, in, out, typeDescription,
-                typeDescriptionHtml, description, wide, subId, roaming);
+        MobileDataIndicators indicators = new MobileDataIndicators(
+                status, qs, type, qsType, in, out, typeDescription,
+                typeDescriptionHtml, description, wide, subId, roaming, true);
+        mHandler.setMobileDataIndicators(indicators);
         waitForCallbacks();
 
-        ArgumentCaptor<IconState> statusArg = ArgumentCaptor.forClass(IconState.class);
-        ArgumentCaptor<IconState> qsArg = ArgumentCaptor.forClass(IconState.class);
-        ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<Integer> qsTypeIconArg = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<Boolean> inArg = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<Boolean> outArg = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<CharSequence> typeContentArg = ArgumentCaptor.forClass(CharSequence.class);
-        ArgumentCaptor<CharSequence> typeContentHtmlArg =
-                ArgumentCaptor.forClass(CharSequence.class);
-        ArgumentCaptor<CharSequence> descArg = ArgumentCaptor.forClass(CharSequence.class);
-        ArgumentCaptor<Boolean> wideArg = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<Integer> subIdArg = ArgumentCaptor.forClass(Integer.class);
-        Mockito.verify(mSignalCallback).setMobileDataIndicators(statusArg.capture(),
-                qsArg.capture(), typeIconArg.capture(), qsTypeIconArg.capture(), inArg.capture(),
-                outArg.capture(), typeContentArg.capture(), typeContentHtmlArg.capture(),
-                descArg.capture(), wideArg.capture(), subIdArg.capture(), eq(roaming));
-        assertEquals(status, statusArg.getValue());
-        assertEquals(qs, qsArg.getValue());
-        assertEquals(type, (int) typeIconArg.getValue());
-        assertEquals(qsType, (int) qsTypeIconArg.getValue());
-        assertEquals(in, (boolean) inArg.getValue());
-        assertEquals(out, (boolean) outArg.getValue());
-        assertEquals(typeDescription, typeContentArg.getValue());
-        assertEquals(typeDescriptionHtml, typeContentHtmlArg.getValue());
-        assertEquals(description, descArg.getValue());
-        assertEquals(wide, (boolean) wideArg.getValue());
-        assertEquals(subId, (int) subIdArg.getValue());
+        ArgumentCaptor<MobileDataIndicators> indicatorArg =
+                ArgumentCaptor.forClass(MobileDataIndicators.class);
+        Mockito.verify(mSignalCallback).setMobileDataIndicators(indicatorArg.capture());
+        MobileDataIndicators expected = indicatorArg.getValue();
+
+        assertEquals(status, expected.statusIcon);
+        assertEquals(qs, expected.qsIcon);
+        assertEquals(type, expected.statusType);
+        assertEquals(qsType, expected.qsType);
+        assertEquals(in, expected.activityIn);
+        assertEquals(out, expected.activityOut);
+        assertEquals(typeDescription, expected.typeContentDescription);
+        assertEquals(typeDescriptionHtml, expected.typeContentDescriptionHtml);
+        assertEquals(description, expected.description);
+        assertEquals(wide, expected.isWide);
+        assertEquals(subId, expected.subId);
+        assertTrue(expected.roaming);
+        assertTrue(expected.showTriangle);
     }
 
     @SuppressWarnings("unchecked")

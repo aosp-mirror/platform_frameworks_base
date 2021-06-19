@@ -21,6 +21,10 @@ import static java.util.stream.Collectors.toMap;
 import android.Manifest;
 import android.content.Context;
 import android.os.ISystemConfig;
+import android.util.ArraySet;
+import android.util.SparseArray;
+
+import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +67,22 @@ public class SystemConfigService extends SystemService {
                             + " READ_CARRIER_APP_INFO");
             return SystemConfig.getInstance()
                     .getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
+        }
+
+        @Override
+        public int[] getSystemPermissionUids(String permissionName) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS,
+                    "getSystemPermissionUids requires GET_RUNTIME_PERMISSIONS");
+            final List<Integer> uids = new ArrayList<>();
+            final SparseArray<ArraySet<String>> systemPermissions =
+                    SystemConfig.getInstance().getSystemPermissions();
+            for (int i = 0; i < systemPermissions.size(); i++) {
+                final ArraySet<String> permissions = systemPermissions.valueAt(i);
+                if (permissions != null && permissions.contains(permissionName)) {
+                    uids.add(systemPermissions.keyAt(i));
+                }
+            }
+            return ArrayUtils.convertToIntArray(uids);
         }
     };
 

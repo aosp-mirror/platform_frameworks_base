@@ -1,4 +1,4 @@
-# See system/core/logcat/event.logtags for a description of the format of this file.
+# See system/logging/logcat/event.logtags for a description of the format of this file.
 
 option java_package android.app.admin
 
@@ -39,3 +39,4 @@ option java_package android.app.admin
 210032 security_key_integrity_violation         (key_id|3),(uid|1)
 210033 security_cert_validation_failure         (reason|3)
 210034 security_camera_policy_set               (package|3),(admin_user|1),(target_user|1),(disabled|1)
+210035 security_password_complexity_required    (package|3),(admin_user|1),(target_user|1),(complexity|1)

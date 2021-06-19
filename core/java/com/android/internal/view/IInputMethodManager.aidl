@@ -24,6 +24,13 @@ import android.view.inputmethod.EditorInfo;
 import com.android.internal.view.InputBindResult;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
+import com.android.internal.inputmethod.IBooleanResultCallback;
+import com.android.internal.inputmethod.IInputBindResultResultCallback;
+import com.android.internal.inputmethod.IInputMethodInfoListResultCallback;
+import com.android.internal.inputmethod.IInputMethodSubtypeResultCallback;
+import com.android.internal.inputmethod.IInputMethodSubtypeListResultCallback;
+import com.android.internal.inputmethod.IIntResultCallback;
+import com.android.internal.inputmethod.IVoidResultCallback;
 
 /**
  * Public interface to the global input method manager, used by all client
@@ -34,47 +41,64 @@ interface IInputMethodManager {
             int untrustedDisplayId);
 
     // TODO: Use ParceledListSlice instead
-    List<InputMethodInfo> getInputMethodList(int userId);
+    oneway void getInputMethodList(int userId,
+            in IInputMethodInfoListResultCallback resultCallback);
     // TODO: Use ParceledListSlice instead
-    List<InputMethodInfo> getEnabledInputMethodList(int userId);
-    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
-            boolean allowsImplicitlySelectedSubtypes);
-    InputMethodSubtype getLastInputMethodSubtype();
+    oneway void getEnabledInputMethodList(int userId,
+            in IInputMethodInfoListResultCallback resultCallback);
+    oneway void getEnabledInputMethodSubtypeList(in String imiId,
+            boolean allowsImplicitlySelectedSubtypes,
+            in IInputMethodSubtypeListResultCallback resultCallback);
+    oneway void getLastInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
 
-    boolean showSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
-            in ResultReceiver resultReceiver);
-    boolean hideSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
-            in ResultReceiver resultReceiver);
+    oneway void showSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
+            in ResultReceiver resultReceiver, int reason, in IBooleanResultCallback resultCallback);
+    oneway void hideSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
+            in ResultReceiver resultReceiver, int reason, in IBooleanResultCallback resultCallback);
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'attribute' is non-null then also does startInput.
     // @NonNull
-    InputBindResult startInputOrWindowGainedFocus(
+    oneway void startInputOrWindowGainedFocus(
             /* @StartInputReason */ int startInputReason,
             in IInputMethodClient client, in IBinder windowToken,
             /* @StartInputFlags */ int startInputFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, in EditorInfo attribute, IInputContext inputContext,
             /* @InputConnectionInspector.MissingMethodFlags */ int missingMethodFlags,
-            int unverifiedTargetSdkVersion);
+            int unverifiedTargetSdkVersion,
+            in IInputBindResultResultCallback inputBindResult);
 
-    void showInputMethodPickerFromClient(in IInputMethodClient client,
-            int auxiliarySubtypeMode);
-    void showInputMethodPickerFromSystem(in IInputMethodClient client, int auxiliarySubtypeMode,
-            int displayId);
-    void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
-    boolean isInputMethodPickerShownForTest();
-    InputMethodSubtype getCurrentInputMethodSubtype();
-    void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
+    oneway void reportWindowGainedFocusAsync(
+            boolean nextFocusHasConnection, in IInputMethodClient client, in IBinder windowToken,
+            /* @StartInputFlags */ int startInputFlags,
+            /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
+            int windowFlags, int unverifiedTargetSdkVersion);
+
+    oneway void showInputMethodPickerFromClient(in IInputMethodClient client,
+            int auxiliarySubtypeMode, in IVoidResultCallback resultCallback);
+    oneway void showInputMethodPickerFromSystem(in IInputMethodClient client,
+            int auxiliarySubtypeMode, int displayId, in IVoidResultCallback resultCallback);
+    oneway void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client,
+            String topId, in IVoidResultCallback resultCallback);
+    oneway void isInputMethodPickerShownForTest(in IBooleanResultCallback resultCallback);
+    oneway void getCurrentInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
+    oneway void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes,
+            in IVoidResultCallback resultCallback);
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.
-    int getInputMethodWindowVisibleHeight();
+    oneway void getInputMethodWindowVisibleHeight(IIntResultCallback resultCallback);
 
-    void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
-            in float[] matrixValues);
-
-    oneway void reportPerceptible(in IBinder windowToken, boolean perceptible);
+    oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
     /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */
-    void removeImeSurface();
+    oneway void removeImeSurface(in IVoidResultCallback resultCallback);
     /** Remove the IME surface. Requires passing the currently focused window. */
-    void removeImeSurfaceFromWindow(in IBinder windowToken);
+    oneway void removeImeSurfaceFromWindowAsync(in IBinder windowToken);
+    oneway void startProtoDump(in byte[] protoDump, int source, String where,
+            in IVoidResultCallback resultCallback);
+    oneway void isImeTraceEnabled(in IBooleanResultCallback resultCallback);
+
+    // Starts an ime trace.
+    oneway void startImeTrace(in IVoidResultCallback resultCallback);
+    // Stops an ime trace.
+    oneway void stopImeTrace(in IVoidResultCallback resultCallback);
 }

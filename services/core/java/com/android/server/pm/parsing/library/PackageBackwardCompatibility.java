@@ -45,6 +45,9 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
     static {
         final List<PackageSharedLibraryUpdater> packageUpdaters = new ArrayList<>();
 
+        // Remove android.net.ipsec.ike library, it is added to boot classpath since Android S.
+        packageUpdaters.add(new AndroidNetIpSecIkeUpdater());
+
         // Remove com.google.android.maps library.
         packageUpdaters.add(new ComGoogleAndroidMapsUpdater());
 

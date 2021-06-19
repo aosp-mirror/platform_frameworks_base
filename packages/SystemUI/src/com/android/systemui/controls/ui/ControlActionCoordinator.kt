@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.ui
 
+import android.content.Context
 import android.service.controls.Control
 
 /**
@@ -23,6 +24,9 @@ import android.service.controls.Control
  * actions, haptic support, and all detail panels
  */
 interface ControlActionCoordinator {
+
+    // If launched from an Activity, continue within this stack
+    var activityContext: Context
 
     /**
      * Close any dialogs which may have been open

@@ -21,9 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
-import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
@@ -148,6 +146,13 @@ public interface KeyguardViewController {
     void startPreHideAnimation(Runnable finishRunnable);
 
     /**
+     * Blocks the current touch gesture from affecting the expansion amount of the notification
+     * panel. This is used after a completed unlock gesture to ignore further dragging before an
+     * ACTION_UP.
+     */
+    void blockPanelExpansionFromCurrentTouch();
+
+    /**
      * @return the ViewRootImpl of the View where the Keyguard is mounted.
      */
     ViewRootImpl getViewRootImpl();
@@ -180,22 +185,17 @@ public interface KeyguardViewController {
 
     /**
      * Registers the StatusBar to which this Keyguard View is mounted.
-     *
      * @param statusBar
      * @param container
      * @param notificationPanelViewController
      * @param biometricUnlockController
-     * @param dismissCallbackRegistry
-     * @param lockIconContainer
      * @param notificationContainer
      * @param bypassController
-     * @param falsingManager
      */
     void registerStatusBar(StatusBar statusBar,
             ViewGroup container,
             NotificationPanelViewController notificationPanelViewController,
             BiometricUnlockController biometricUnlockController,
-            DismissCallbackRegistry dismissCallbackRegistry,
-            ViewGroup lockIconContainer, View notificationContainer,
-            KeyguardBypassController bypassController, FalsingManager falsingManager);
+            View notificationContainer,
+            KeyguardBypassController bypassController);
 }

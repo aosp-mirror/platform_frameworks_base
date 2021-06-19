@@ -16,15 +16,186 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
+import static android.view.MotionEvent.ACTION_CANCEL;
+import static android.view.MotionEvent.ACTION_UP;
+
+import android.annotation.NonNull;
+import android.util.Log;
+import android.util.Slog;
+import android.view.MotionEvent;
+
 import com.android.server.accessibility.BaseEventStreamTransformation;
+
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * A base class that detects gestures and defines common methods for magnification.
  */
 public abstract class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
+    protected final String mLogTag = this.getClass().getSimpleName();
+    protected static final boolean DEBUG_ALL = Log.isLoggable("MagnificationGestureHandler",
+            Log.DEBUG);
+    protected static final boolean DEBUG_EVENT_STREAM = false | DEBUG_ALL;
+    private final Queue<MotionEvent> mDebugInputEventHistory;
+    private final Queue<MotionEvent> mDebugOutputEventHistory;
+
+    /**
+     * The logical display id.
+     */
+    protected final int mDisplayId;
+
+    /**
+     * {@code true} if this detector should be "triggerable" by some
+     * external shortcut invoking {@link #notifyShortcutTriggered},
+     * {@code false} if it should ignore such triggers.
+     */
+    protected final boolean mDetectShortcutTrigger;
+
+    /**
+     * {@code true} if this detector should detect and respond to triple-tap
+     * gestures for engaging and disengaging magnification,
+     * {@code false} if it should ignore such gestures
+     */
+    protected final boolean mDetectTripleTap;
+
+    /** Callback interface to report that magnification is interactive with a user. */
+    public interface Callback {
+        /**
+         * Called when the touch interaction is started by a user.
+         *
+         * @param displayId The logical display id
+         * @param mode The magnification mode
+         */
+        void onTouchInteractionStart(int displayId, int mode);
+
+        /**
+         * Called when the touch interaction is ended by a user.
+         *
+         * @param displayId The logical display id
+         * @param mode The magnification mode
+         */
+        void onTouchInteractionEnd(int displayId, int mode);
+
+        /**
+         * Called when the magnification shortcut is triggered by a user. The magnification
+         * shortcut can be accessibility button or volume shortcut.
+         *
+         * @param displayId The logical display id
+         * @param mode The magnification mode
+         */
+        void onShortcutTriggered(int displayId, int mode);
+
+        /**
+         * Called when the triple-tap gesture is handled. The magnification
+         * shortcut can be a triple-tap gesture or accessibility button.
+         * Called when the triple-tap gesture is handled
+         *
+         * @param displayId The logical display id
+         * @param mode The magnification mode
+         */
+        void onTripleTapped(int displayId, int mode);
+    }
+
+    protected final Callback mCallback;
+
+    protected MagnificationGestureHandler(int displayId, boolean detectTripleTap,
+            boolean detectShortcutTrigger,
+            @NonNull Callback callback) {
+        mDisplayId = displayId;
+        mDetectTripleTap = detectTripleTap;
+        mDetectShortcutTrigger = detectShortcutTrigger;
+        mCallback = callback;
+
+        mDebugInputEventHistory = DEBUG_EVENT_STREAM ? new ArrayDeque<>() : null;
+        mDebugOutputEventHistory = DEBUG_EVENT_STREAM ? new ArrayDeque<>() : null;
+    }
+
+    @Override
+    public final void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (DEBUG_ALL) {
+            Slog.i(mLogTag, "onMotionEvent(" + event + ")");
+        }
+        if (DEBUG_EVENT_STREAM) {
+            storeEventInto(mDebugInputEventHistory, event);
+        }
+        if (shouldDispatchTransformedEvent(event)) {
+            dispatchTransformedEvent(event, rawEvent, policyFlags);
+        } else {
+            onMotionEventInternal(event, rawEvent, policyFlags);
+
+            final int action = event.getAction();
+            if (action == MotionEvent.ACTION_DOWN) {
+                mCallback.onTouchInteractionStart(mDisplayId, getMode());
+            } else if (action == ACTION_UP || action == ACTION_CANCEL) {
+                mCallback.onTouchInteractionEnd(mDisplayId, getMode());
+            }
+        }
+    }
+
+    private boolean shouldDispatchTransformedEvent(MotionEvent event) {
+        if ((!mDetectTripleTap && !mDetectShortcutTrigger) || !event.isFromSource(
+                SOURCE_TOUCHSCREEN)) {
+            return true;
+        }
+        return false;
+    }
+
+    final void dispatchTransformedEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (DEBUG_EVENT_STREAM) {
+            storeEventInto(mDebugOutputEventHistory, event);
+            try {
+                super.onMotionEvent(event, rawEvent, policyFlags);
+                return;
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Exception downstream following input events: " + mDebugInputEventHistory
+                                + "\nTransformed into output events: " + mDebugOutputEventHistory,
+                        e);
+            }
+        }
+        super.onMotionEvent(event, rawEvent, policyFlags);
+    }
+
+    private static void storeEventInto(Queue<MotionEvent> queue, MotionEvent event) {
+        queue.add(MotionEvent.obtain(event));
+        // Prune old events
+        while (!queue.isEmpty() && (event.getEventTime() - queue.peek().getEventTime() > 5000)) {
+            queue.remove().recycle();
+        }
+    }
+
+    /**
+     * Called when this MagnificationGestureHandler handles the motion event.
+     */
+    abstract void onMotionEventInternal(MotionEvent event, MotionEvent rawEvent, int policyFlags);
+
     /**
      * Called when the shortcut target is magnification.
      */
-    public abstract void notifyShortcutTriggered();
+    public void notifyShortcutTriggered() {
+        if (DEBUG_ALL) {
+            Slog.i(mLogTag, "notifyShortcutTriggered():");
+        }
+        if (mDetectShortcutTrigger) {
+            handleShortcutTriggered();
+            mCallback.onShortcutTriggered(mDisplayId, getMode());
+        }
+    }
+
+    /**
+     * Handles shortcut triggered event.
+     */
+    abstract void handleShortcutTriggered();
+
+    /**
+     * Indicates the magnification mode.
+     *
+     * @return the magnification mode of the handler
+     * @see android.provider.Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+     * @see android.provider.Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+     */
+    public abstract int getMode();
 }

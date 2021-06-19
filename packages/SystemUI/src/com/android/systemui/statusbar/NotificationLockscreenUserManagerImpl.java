@@ -48,12 +48,12 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -65,13 +65,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles keeping track of the current user, profiles, and various things related to hiding
  * contents, redacting notifications, and the lockscreen.
  */
-@Singleton
+@SysUISingleton
 public class NotificationLockscreenUserManagerImpl implements
         Dumpable, NotificationLockscreenUserManager, StateListener {
     private static final String TAG = "LockscreenUserManager";
@@ -99,6 +98,7 @@ public class NotificationLockscreenUserManagerImpl implements
     private LockPatternUtils mLockPatternUtils;
     protected KeyguardManager mKeyguardManager;
     private int mState = StatusBarState.SHADE;
+    private List<KeyguardNotificationSuppressor> mKeyguardSuppressors = new ArrayList<>();
 
     protected final BroadcastReceiver mAllUsersReceiver = new BroadcastReceiver() {
         @Override
@@ -336,7 +336,7 @@ public class NotificationLockscreenUserManagerImpl implements
         }
         NotificationEntry visibleEntry = getEntryManager().getActiveNotificationUnfiltered(key);
         return isLockscreenPublicMode(mCurrentUserId) && visibleEntry != null
-                && visibleEntry.getRanking().getVisibilityOverride() == VISIBILITY_SECRET;
+                && visibleEntry.getRanking().getLockscreenVisibilityOverride() == VISIBILITY_SECRET;
     }
 
     public boolean shouldShowOnKeyguard(NotificationEntry entry) {
@@ -344,9 +344,13 @@ public class NotificationLockscreenUserManagerImpl implements
             Log.wtf(TAG, "mEntryManager was null!", new Throwable());
             return false;
         }
+        for (int i = 0; i < mKeyguardSuppressors.size(); i++) {
+            if (mKeyguardSuppressors.get(i).shouldSuppressOnKeyguard(entry)) {
+                return false;
+            }
+        }
         boolean exceedsPriorityThreshold;
-        if (NotificationUtils.useNewInterruptionModel(mContext)
-                && hideSilentNotificationsOnLockscreen()) {
+        if (hideSilentNotificationsOnLockscreen()) {
             exceedsPriorityThreshold =
                     entry.getBucket() == BUCKET_MEDIA_CONTROLS
                             || (entry.getBucket() != BUCKET_SILENT
@@ -515,7 +519,8 @@ public class NotificationLockscreenUserManagerImpl implements
         }
         NotificationEntry entry = getEntryManager().getActiveNotificationUnfiltered(key);
         return entry != null
-                && entry.getRanking().getVisibilityOverride() == Notification.VISIBILITY_PRIVATE;
+                && entry.getRanking().getLockscreenVisibilityOverride() 
+                == Notification.VISIBILITY_PRIVATE;
     }
 
     private void updateCurrentProfilesCache() {
@@ -619,6 +624,11 @@ public class NotificationLockscreenUserManagerImpl implements
     @Override
     public void addUserChangedListener(UserChangedListener listener) {
         mListeners.add(listener);
+    }
+
+    @Override
+    public void addKeyguardNotificationSuppressor(KeyguardNotificationSuppressor suppressor) {
+        mKeyguardSuppressors.add(suppressor);
     }
 
     @Override

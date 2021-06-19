@@ -20,6 +20,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.FloatArrayEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Matrix;
@@ -450,7 +451,7 @@ public class ChangeTransform extends Transition {
         }
 
         @Override
-        public boolean equals(Object that) {
+        public boolean equals(@Nullable Object that) {
             if (!(that instanceof Transforms)) {
                 return false;
             }

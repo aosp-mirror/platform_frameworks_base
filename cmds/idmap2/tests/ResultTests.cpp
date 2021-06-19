@@ -260,7 +260,8 @@ TEST(ResultTests, CascadeError) {
 
 struct NoCopyContainer {
   uint32_t value;  // NOLINT(misc-non-private-member-variables-in-classes)
-  DISALLOW_COPY_AND_ASSIGN(NoCopyContainer);
+  NoCopyContainer(const NoCopyContainer&) = delete;
+  NoCopyContainer& operator=(const NoCopyContainer&) = delete;
 };
 
 Result<std::unique_ptr<NoCopyContainer>> CreateNoCopyContainer(bool succeed) {

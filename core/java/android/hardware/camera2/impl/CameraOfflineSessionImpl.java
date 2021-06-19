@@ -147,7 +147,7 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
                     case CameraDeviceCallbacks.ERROR_CAMERA_BUFFER:
                         onCaptureErrorLocked(errorCode, resultExtras);
                         break;
-                    default:
+                    default: {
                         Runnable errorDispatch = new Runnable() {
                             @Override
                             public void run() {
@@ -164,6 +164,7 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
                         } finally {
                             Binder.restoreCallingIdentity(ident);
                         }
+                    }
                 }
             }
         }
@@ -333,7 +334,7 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
                 // Either send a partial result or the final capture completed result
                 if (isPartialResult) {
                     final CaptureResult resultAsCapture =
-                            new CaptureResult(result, request, resultExtras);
+                            new CaptureResult(mCameraId, result, request, resultExtras);
                     // Partial result
                     resultDispatch = new Runnable() {
                         @Override
@@ -348,7 +349,8 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
                                         CameraMetadataNative resultLocal =
                                                 new CameraMetadataNative(resultCopy);
                                         final CaptureResult resultInBatch = new CaptureResult(
-                                                resultLocal, holder.getRequest(i), resultExtras);
+                                                mCameraId, resultLocal, holder.getRequest(i),
+                                                resultExtras);
 
                                         final CaptureRequest cbRequest = holder.getRequest(i);
                                         callback.onCaptureProgressed(CameraOfflineSessionImpl.this,
@@ -371,8 +373,8 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
                     final Range<Integer> fpsRange =
                             request.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
                     final int subsequenceId = resultExtras.getSubsequenceId();
-                    final TotalCaptureResult resultAsCapture = new TotalCaptureResult(result,
-                            request, resultExtras, partialResults, holder.getSessionId(),
+                    final TotalCaptureResult resultAsCapture = new TotalCaptureResult(mCameraId,
+                            result, request, resultExtras, partialResults, holder.getSessionId(),
                             physicalResults);
                     // Final capture result
                     resultDispatch = new Runnable() {
@@ -392,9 +394,9 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
                                                 new CameraMetadataNative(resultCopy);
                                         // No logical multi-camera support for batched output mode.
                                         TotalCaptureResult resultInBatch = new TotalCaptureResult(
-                                            resultLocal, holder.getRequest(i), resultExtras,
-                                            partialResults, holder.getSessionId(),
-                                            new PhysicalCaptureResultInfo[0]);
+                                                mCameraId, resultLocal, holder.getRequest(i),
+                                                resultExtras, partialResults, holder.getSessionId(),
+                                                new PhysicalCaptureResultInfo[0]);
 
                                         final CaptureRequest cbRequest = holder.getRequest(i);
                                         callback.onCaptureCompleted(CameraOfflineSessionImpl.this,

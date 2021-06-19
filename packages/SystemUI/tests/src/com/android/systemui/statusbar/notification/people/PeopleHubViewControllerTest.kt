@@ -118,7 +118,7 @@ class PeopleHubViewControllerTest : SysuiTestCase() {
         val people = viewModel.people.toList()
         assertThat(people.size).isEqualTo(1)
         assertThat(people[0].name).isEqualTo("name")
-        assertThat(people[0].icon).isSameAs(fakePerson.avatar)
+        assertThat(people[0].icon).isSameInstanceAs(fakePerson.avatar)
 
         people[0].onClick()
 

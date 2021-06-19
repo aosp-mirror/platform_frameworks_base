@@ -418,7 +418,7 @@ public final class SearchableInfo implements Parcelable {
                     com.android.internal.R.styleable.SearchableActionKey_suggestActionMsgColumn);
             a.recycle();
 
-            // sanity check.
+            // validity check.
             if (mKeyCode == 0) {
                 throw new IllegalArgumentException("No keycode.");
             } else if ((mQueryActionMsg == null) && 

@@ -72,7 +72,7 @@ public final class ImsSsData implements Parcelable {
 
 
     /**@hide*/
-    @IntDef(flag = true, prefix = {"SS_"}, value = {
+    @IntDef(prefix = {"SS_"}, value = {
             SS_ACTIVATION,
             SS_DEACTIVATION,
             SS_INTERROGATION,
@@ -89,7 +89,7 @@ public final class ImsSsData implements Parcelable {
     public static final int SS_ERASURE = 4;
 
     /**@hide*/
-    @IntDef(flag = true, prefix = {"SS_"}, value = {
+    @IntDef(prefix = {"SS_"}, value = {
             SS_ALL_TELE_AND_BEARER_SERVICES,
             SS_ALL_TELESEVICES,
             SS_TELEPHONY,
@@ -190,7 +190,7 @@ public final class ImsSsData implements Parcelable {
     public static final int RESULT_SUCCESS = 0;
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "SS_" }, value = {
+    @IntDef(prefix = { "SS_" }, value = {
             SS_CFU,
             SS_CF_BUSY,
             SS_CF_NO_REPLY,

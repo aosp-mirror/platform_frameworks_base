@@ -46,8 +46,8 @@ public interface WindowInsetsAnimationControlListener {
      * to redraw because of an {@link EditorInfo} change, or when the window is starting up.
      *
      * @param controller The controller to control the inset animation.
-     * @param types The {@link InsetsType}s it was able to gain control over. Note that this may be
-     *              different than the types passed into
+     * @param types The {@link WindowInsets.Type}s it was able to gain control over. Note that this
+     *              may be different than the types passed into
      *              {@link WindowInsetsController#controlWindowInsetsAnimation} in case the window
      *              wasn't able to gain the controls because it wasn't the IME target or not
      *              currently the window that's controlling the system bars.

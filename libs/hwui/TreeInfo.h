@@ -98,6 +98,8 @@ public:
 
     const SkISize screenSize;
 
+    int stretchEffectCount = 0;
+
     struct Out {
         bool hasFunctors = false;
         // This is only updated if evaluateAnimations is true

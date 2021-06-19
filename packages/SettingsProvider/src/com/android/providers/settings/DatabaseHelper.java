@@ -846,8 +846,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
             try {
                 stmt = db.compileStatement("INSERT INTO system(name,value)"
                         + " VALUES(?,?);");
-                loadBooleanSetting(stmt, Settings.System.USER_ROTATION,
-                        R.integer.def_user_rotation); // should be zero degrees
+                loadIntegerSetting(stmt, Settings.System.USER_ROTATION,
+                        R.integer.def_user_rotation);
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
@@ -2265,6 +2265,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
             loadBooleanSetting(stmt, Settings.System.ACCELEROMETER_ROTATION,
                     R.bool.def_accelerometer_rotation);
 
+            loadIntegerSetting(stmt, Settings.System.USER_ROTATION, R.integer.def_user_rotation);
+
             loadDefaultHapticSettings(stmt);
 
             loadBooleanSetting(stmt, Settings.System.NOTIFICATION_LIGHT_PULSE,
@@ -2443,8 +2445,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
                     R.bool.def_auto_time_zone); // Sync timezone to NITZ
 
             loadSetting(stmt, Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
-                    ("1".equals(SystemProperties.get("ro.kernel.qemu")) ||
-                        res.getBoolean(R.bool.def_stay_on_while_plugged_in))
+                    ("1".equals(SystemProperties.get("ro.boot.qemu"))
+                        || res.getBoolean(R.bool.def_stay_on_while_plugged_in))
                      ? 1 : 0);
 
             loadIntegerSetting(stmt, Settings.Global.WIFI_SLEEP_POLICY,

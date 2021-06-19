@@ -80,7 +80,7 @@ public class ImeAwareEditText extends EditText {
 
     public void scheduleShowSoftInput() {
         final InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
-        if (imm.isActive(this)) {
+        if (imm.hasActiveInputConnection(this)) {
             // This means that ImeAwareEditText is already connected to the IME.
             // InputMethodManager#showSoftInput() is guaranteed to pass client-side focus check.
             mHasPendingShowSoftInputRequest = false;

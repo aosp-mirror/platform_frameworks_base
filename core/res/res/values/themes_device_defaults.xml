@@ -214,9 +214,30 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
         <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
         <item name="colorPopupBackground">?attr/colorBackgroundFloating</item>
+        <item name="panelColorBackground">?attr/colorBackgroundFloating</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
     </style>
 
     <style name="Theme.DeviceDefault" parent="Theme.DeviceDefaultBase" />
@@ -227,7 +248,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -255,7 +297,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -285,7 +348,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -314,7 +398,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -358,7 +463,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -379,7 +505,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -406,7 +553,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -434,7 +602,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -478,7 +667,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -507,7 +717,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -534,7 +765,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -563,7 +815,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -591,7 +864,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -619,7 +913,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -647,7 +962,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -675,7 +1011,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -707,7 +1064,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Text styles -->
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
@@ -736,7 +1114,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -762,7 +1161,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -942,9 +1362,30 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
         <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
         <item name="colorPopupBackground">?attr/colorBackgroundFloating</item>
+        <item name="panelColorBackground">?attr/colorBackgroundFloating</item>
     </style>
 
     <!-- Variant of the DeviceDefault (light) theme that has a solid (opaque) action bar with an
@@ -954,7 +1395,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -981,7 +1443,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1009,7 +1492,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1039,7 +1543,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1068,7 +1593,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1114,7 +1660,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
@@ -1134,7 +1701,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1164,7 +1752,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1195,7 +1804,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1227,7 +1857,26 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog.NoActionBar that has a fixed size. -->
@@ -1241,7 +1890,26 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
     </style>
 
     <!-- DeviceDefault light theme for a window that will be displayed either full-screen on smaller
@@ -1254,7 +1922,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1286,7 +1975,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1316,7 +2026,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1345,7 +2076,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1373,7 +2125,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1401,7 +2174,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1427,7 +2221,28 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1470,6 +2285,16 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings_light</item>
         <item name="colorSecondary">@color/secondary_device_default_settings_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
         <item name="colorEdgeEffect">@color/edge_effect_device_default_light</item>
 
@@ -1492,14 +2317,22 @@ easier.
         <item name="opacityListDivider">@color/list_divider_opacity_device_default_light</item>
     </style>
 
-    <!-- @hide DeviceDefault theme for a window that should use Settings theme colors
-         but has a full dark palette. ONLY USED FOR QUICK SETTINGS THEME -->
-    <style name="Theme.DeviceDefault.QuickSettings" parent="Theme.DeviceDefault.Light">
+    <style name="Theme.DeviceDefault.SystemUI" parent="Theme.DeviceDefault.Light">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_settings_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings_light</item>
         <item name="colorSecondary">@color/secondary_device_default_settings_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
         <item name="colorControlNormal">?attr/textColorPrimary</item>
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.Alert</item>
@@ -1517,17 +2350,24 @@ easier.
 
         <!-- Toolbar attributes -->
         <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
-
-        <!-- volume background -->
-        <item name="panelColorBackground">@color/primary_material_light</item>
     </style>
 
-    <style name="Theme.DeviceDefault.QuickSettings.Dialog" parent="Theme.DeviceDefault.Light.Dialog">
+    <style name="Theme.DeviceDefault.SystemUI.Dialog" parent="Theme.DeviceDefault.Light.Dialog">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_settings_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings_light</item>
         <item name="colorSecondary">@color/secondary_device_default_settings_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.Alert</item>
 
@@ -1546,7 +2386,28 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1573,7 +2434,28 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.Alert</item>
@@ -1610,7 +2492,28 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1640,7 +2543,28 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_light_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_light_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_light_device_default</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_light</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorSurfaceHeader">@color/surface_header_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1733,10 +2657,16 @@ easier.
 
     <style name="ThemeOverlay.DeviceDefault.Accent">
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
     </style>
 
     <style name="ThemeOverlay.DeviceDefault.Accent.Light">
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
     </style>
 
     <!-- Theme overlay that replaces colorAccent with the colorAccent from {@link #Theme_DeviceDefault_DayNight}. -->
@@ -1745,6 +2675,9 @@ easier.
 
     <style name="ThemeOverlay.DeviceDefault.Dark.ActionBar.Accent" parent="ThemeOverlay.Material.Dark.ActionBar">
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
     </style>
 
     <style name="Theme.DeviceDefault.Light.Dialog.Alert.UserSwitchingDialog" parent="Theme.DeviceDefault.NoActionBar.Fullscreen">

@@ -17,6 +17,8 @@
 package com.android.server.connectivity;
 
 import android.net.LinkProperties;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.metrics.DefaultNetworkEvent;
 import android.os.SystemClock;
 
@@ -61,7 +63,7 @@ public class DefaultNetworkMetrics {
     private int mLastTransports;
 
     public DefaultNetworkMetrics() {
-        newDefaultNetwork(creationTimeMs, null);
+        newDefaultNetwork(creationTimeMs, null, 0, false, null, null);
     }
 
     public synchronized void listEvents(PrintWriter pw) {
@@ -117,13 +119,21 @@ public class DefaultNetworkMetrics {
         mCurrentDefaultNetwork.validatedMs += timeMs - mLastValidationTimeMs;
     }
 
-    public synchronized void logDefaultNetworkEvent(
-            long timeMs, NetworkAgentInfo newNai, NetworkAgentInfo oldNai) {
-        logCurrentDefaultNetwork(timeMs, oldNai);
-        newDefaultNetwork(timeMs, newNai);
+    /**
+     * Logs a default network event.
+     * @see {IpConnectivityLog#logDefaultNetworkEvent}.
+     */
+    public synchronized void logDefaultNetworkEvent(long timeMs, Network defaultNetwork, int score,
+            boolean validated, LinkProperties lp, NetworkCapabilities nc,
+            Network previousDefaultNetwork, int previousScore, LinkProperties previousLp,
+            NetworkCapabilities previousNc) {
+        logCurrentDefaultNetwork(timeMs, previousDefaultNetwork, previousScore, previousLp,
+                previousNc);
+        newDefaultNetwork(timeMs, defaultNetwork, score, validated, lp, nc);
     }
 
-    private void logCurrentDefaultNetwork(long timeMs, NetworkAgentInfo oldNai) {
+    private void logCurrentDefaultNetwork(long timeMs, Network network, int score,
+            LinkProperties lp, NetworkCapabilities nc) {
         if (mIsCurrentlyValid) {
             updateValidationTime(timeMs);
         }
@@ -131,10 +141,10 @@ public class DefaultNetworkMetrics {
         ev.updateDuration(timeMs);
         ev.previousTransports = mLastTransports;
         // oldNai is null if the system had no default network before the transition.
-        if (oldNai != null) {
+        if (network != null) {
             // The system acquired a new default network.
-            fillLinkInfo(ev, oldNai);
-            ev.finalScore = oldNai.getCurrentScore();
+            fillLinkInfo(ev, network, lp, nc);
+            ev.finalScore = score;
         }
         // Only change transport of the previous default network if the event currently logged
         // corresponds to an existing default network, and not to the absence of a default network.
@@ -147,14 +157,15 @@ public class DefaultNetworkMetrics {
         mEventsLog.append(ev);
     }
 
-    private void newDefaultNetwork(long timeMs, NetworkAgentInfo newNai) {
+    private void newDefaultNetwork(long timeMs, Network network, int score, boolean validated,
+            LinkProperties lp, NetworkCapabilities nc) {
         DefaultNetworkEvent ev = new DefaultNetworkEvent(timeMs);
         ev.durationMs = timeMs;
         // newNai is null if the system has no default network after the transition.
-        if (newNai != null) {
-            fillLinkInfo(ev, newNai);
-            ev.initialScore = newNai.getCurrentScore();
-            if (newNai.lastValidated) {
+        if (network != null) {
+            fillLinkInfo(ev, network, lp, nc);
+            ev.initialScore = score;
+            if (validated) {
                 mIsCurrentlyValid = true;
                 mLastValidationTimeMs = timeMs;
             }
@@ -164,10 +175,10 @@ public class DefaultNetworkMetrics {
         mCurrentDefaultNetwork = ev;
     }
 
-    private static void fillLinkInfo(DefaultNetworkEvent ev, NetworkAgentInfo nai) {
-        LinkProperties lp = nai.linkProperties;
-        ev.netId = nai.network().netId;
-        ev.transports |= BitUtils.packBits(nai.networkCapabilities.getTransportTypes());
+    private static void fillLinkInfo(DefaultNetworkEvent ev, Network network, LinkProperties lp,
+            NetworkCapabilities nc) {
+        ev.netId = network.getNetId();
+        ev.transports |= BitUtils.packBits(nc.getTransportTypes());
         ev.ipv4 |= lp.hasIpv4Address() && lp.hasIpv4DefaultRoute();
         ev.ipv6 |= lp.hasGlobalIpv6Address() && lp.hasIpv6DefaultRoute();
     }

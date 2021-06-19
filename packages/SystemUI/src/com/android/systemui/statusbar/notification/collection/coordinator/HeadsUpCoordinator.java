@@ -21,14 +21,17 @@ import static com.android.systemui.statusbar.notification.interruption.HeadsUpCo
 
 import android.annotation.Nullable;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
+import com.android.systemui.statusbar.notification.collection.render.NodeController;
+import com.android.systemui.statusbar.notification.dagger.IncomingHeader;
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -37,7 +40,6 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Coordinates heads up notification (HUN) interactions with the notification pipeline based on
@@ -53,7 +55,7 @@ import javax.inject.Singleton;
  *
  * Note: The inflation callback in {@link PreparationCoordinator} handles showing HUNs.
  */
-@Singleton
+@SysUISingleton
 public class HeadsUpCoordinator implements Coordinator {
     private static final String TAG = "HeadsUpCoordinator";
 
@@ -61,6 +63,7 @@ public class HeadsUpCoordinator implements Coordinator {
     private final HeadsUpViewBinder mHeadsUpViewBinder;
     private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final NotificationRemoteInputManager mRemoteInputManager;
+    private final NodeController mIncomingHeaderController;
 
     // tracks the current HeadUpNotification reported by HeadsUpManager
     private @Nullable NotificationEntry mCurrentHun;
@@ -73,11 +76,13 @@ public class HeadsUpCoordinator implements Coordinator {
             HeadsUpManager headsUpManager,
             HeadsUpViewBinder headsUpViewBinder,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
-            NotificationRemoteInputManager remoteInputManager) {
+            NotificationRemoteInputManager remoteInputManager,
+            @IncomingHeader NodeController incomingHeaderController) {
         mHeadsUpManager = headsUpManager;
         mHeadsUpViewBinder = headsUpViewBinder;
         mNotificationInterruptStateProvider = notificationInterruptStateProvider;
         mRemoteInputManager = remoteInputManager;
+        mIncomingHeaderController = incomingHeaderController;
     }
 
     @Override
@@ -88,9 +93,8 @@ public class HeadsUpCoordinator implements Coordinator {
         pipeline.addNotificationLifetimeExtender(mLifetimeExtender);
     }
 
-    @Override
-    public NotifSection getSection() {
-        return mNotifSection;
+    public NotifSectioner getSectioner() {
+        return mNotifSectioner;
     }
 
     private void onHeadsUpViewBound(NotificationEntry entry) {
@@ -192,10 +196,16 @@ public class HeadsUpCoordinator implements Coordinator {
         }
     };
 
-    private final NotifSection mNotifSection = new NotifSection(TAG) {
+    private final NotifSectioner mNotifSectioner = new NotifSectioner("HeadsUp") {
         @Override
         public boolean isInSection(ListEntry entry) {
             return isCurrentlyShowingHun(entry);
+        }
+
+        @Nullable
+        @Override
+        public NodeController getHeaderNodeController() {
+            return mIncomingHeaderController;
         }
     };
 
@@ -205,10 +215,8 @@ public class HeadsUpCoordinator implements Coordinator {
         public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
             NotificationEntry newHUN = mHeadsUpManager.getTopEntry();
             if (!Objects.equals(mCurrentHun, newHUN)) {
-                endNotifLifetimeExtension();
                 mCurrentHun = newHUN;
-                mNotifPromoter.invalidateList();
-                mNotifSection.invalidateList();
+                endNotifLifetimeExtension();
             }
             if (!isHeadsUp) {
                 mHeadsUpViewBinder.unbindHeadsUpView(entry);

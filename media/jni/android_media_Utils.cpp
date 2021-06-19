@@ -69,6 +69,7 @@ bool isPossiblyYUV(PixelFormat format) {
         case HAL_PIXEL_FORMAT_RAW_OPAQUE:
         case HAL_PIXEL_FORMAT_BLOB:
         case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
+        case HAL_PIXEL_FORMAT_YCBCR_P010:
             return false;
 
         case HAL_PIXEL_FORMAT_YV12:
@@ -140,6 +141,27 @@ status_t getLockedImageInfo(LockedImage* buffer, int idx,
     fmt = applyFormatOverrides(fmt, containerFormat);
     switch (fmt) {
         case HAL_PIXEL_FORMAT_YCbCr_420_888:
+            // Width and height should be multiple of 2. Wrong dataSize would be returned otherwise.
+            if (buffer->width % 2 != 0) {
+                ALOGE("YCbCr_420_888: width (%d) should be a multiple of 2", buffer->width);
+                return BAD_VALUE;
+            }
+
+            if (buffer->height % 2 != 0) {
+                ALOGE("YCbCr_420_888: height (%d) should be a multiple of 2", buffer->height);
+                return BAD_VALUE;
+            }
+
+            if (buffer->width <= 0) {
+                ALOGE("YCbCr_420_888: width (%d) should be a > 0", buffer->width);
+                return BAD_VALUE;
+            }
+
+            if (buffer->height <= 0) {
+                ALOGE("YCbCr_420_888: height (%d) should be a > 0", buffer->height);
+                return BAD_VALUE;
+            }
+
             pData =
                 (idx == 0) ?
                     buffer->data :
@@ -160,6 +182,27 @@ status_t getLockedImageInfo(LockedImage* buffer, int idx,
             break;
         // NV21
         case HAL_PIXEL_FORMAT_YCrCb_420_SP:
+            // Width and height should be multiple of 2. Wrong dataSize would be returned otherwise.
+            if (buffer->width % 2 != 0) {
+                ALOGE("YCrCb_420_SP: width (%d) should be a multiple of 2", buffer->width);
+                return BAD_VALUE;
+            }
+
+            if (buffer->height % 2 != 0) {
+                ALOGE("YCrCb_420_SP: height (%d) should be a multiple of 2", buffer->height);
+                return BAD_VALUE;
+            }
+
+            if (buffer->width <= 0) {
+                ALOGE("YCrCb_420_SP: width (%d) should be a > 0", buffer->width);
+                return BAD_VALUE;
+            }
+
+            if (buffer->height <= 0) {
+                ALOGE("YCrCb_420_SP: height (%d) should be a > 0", buffer->height);
+                return BAD_VALUE;
+            }
+
             cr = buffer->data + (buffer->stride * buffer->height);
             cb = cr + 1;
             // only map until last pixel
@@ -178,6 +221,27 @@ status_t getLockedImageInfo(LockedImage* buffer, int idx,
             rStride = buffer->width;
             break;
         case HAL_PIXEL_FORMAT_YV12:
+            // Width and height should be multiple of 2. Wrong dataSize would be returned otherwise.
+            if (buffer->width % 2 != 0) {
+                ALOGE("YV12: width (%d) should be a multiple of 2", buffer->width);
+                return BAD_VALUE;
+            }
+
+            if (buffer->height % 2 != 0) {
+                ALOGE("YV12: height (%d) should be a multiple of 2", buffer->height);
+                return BAD_VALUE;
+            }
+
+            if (buffer->width <= 0) {
+                ALOGE("YV12: width (%d) should be a > 0", buffer->width);
+                return BAD_VALUE;
+            }
+
+            if (buffer->height <= 0) {
+                ALOGE("YV12: height (%d) should be a > 0", buffer->height);
+                return BAD_VALUE;
+            }
+
             // Y and C stride need to be 16 pixel aligned.
             LOG_ALWAYS_FATAL_IF(buffer->stride % 16,
                                 "Stride is not 16 pixel aligned %d", buffer->stride);
@@ -197,6 +261,32 @@ status_t getLockedImageInfo(LockedImage* buffer, int idx,
             dataSize = (idx == 0) ? ySize : cSize;
             pStride = 1;
             rStride = (idx == 0) ? buffer->stride : ALIGN(buffer->stride / 2, 16);
+            break;
+        case HAL_PIXEL_FORMAT_YCBCR_P010:
+            if (buffer->height % 2 != 0) {
+                ALOGE("YCBCR_P010: height (%d) should be a multiple of 2", buffer->height);
+                return BAD_VALUE;
+            }
+
+            if (buffer->width <= 0) {
+                ALOGE("YCBCR_P010: width (%d) should be a > 0", buffer->width);
+                return BAD_VALUE;
+            }
+
+            if (buffer->height <= 0) {
+                ALOGE("YCBCR_P010: height (%d) should be a > 0", buffer->height);
+                return BAD_VALUE;
+            }
+
+            ySize = (buffer->stride * 2) * buffer->height;
+            cSize = ySize / 2;
+            pStride = (idx == 0) ? 2 : 4;
+            cb = buffer->data + ySize;
+            cr = cb + 2;
+
+            pData = (idx == 0) ?  buffer->data : (idx == 1) ?  cb : cr;
+            dataSize = (idx == 0) ? ySize : cSize;
+            rStride = buffer->stride * 2;
             break;
         case HAL_PIXEL_FORMAT_Y8:
             // Single plane, 8bpp.
@@ -344,6 +434,11 @@ status_t lockImageFromBuffer(sp<GraphicBuffer> buffer, uint32_t inUsage,
     int flexFormat = format;
     if (isPossiblyYUV(format)) {
         res = buffer->lockAsyncYCbCr(inUsage, rect, &ycbcr, fenceFd);
+
+        if (res != OK) {
+            ALOGW("lockAsyncYCbCr failed with error %d", res);
+        }
+
         pData = ycbcr.y;
         flexFormat = HAL_PIXEL_FORMAT_YCbCr_420_888;
     }

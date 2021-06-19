@@ -17,6 +17,10 @@
 package android.content.pm;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
+
+import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -26,8 +30,16 @@ import java.io.IOException;
 
 /** @hide */
 public interface XmlSerializerAndParser<T> {
+    void writeAsXml(T item, TypedXmlSerializer out) throws IOException;
+    T createFromXml(TypedXmlPullParser parser) throws IOException, XmlPullParserException;
+
     @UnsupportedAppUsage
-    void writeAsXml(T item, XmlSerializer out) throws IOException;
+    default void writeAsXml(T item, XmlSerializer out) throws IOException {
+        writeAsXml(item, XmlUtils.makeTyped(out));
+    }
+
     @UnsupportedAppUsage
-    T createFromXml(XmlPullParser parser) throws IOException, XmlPullParserException;
+    default T createFromXml(XmlPullParser parser) throws IOException, XmlPullParserException {
+        return createFromXml(XmlUtils.makeTyped(parser));
+    }
 }

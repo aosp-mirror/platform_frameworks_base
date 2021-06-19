@@ -19,7 +19,7 @@
 
     <application android:hasCode="false" />
 
-    <uses-sdk android:targetSdkVersion="21"/>
+    <uses-sdk android:minSdkVersion="20" android:targetSdkVersion="21"/>
 
     <overlay android:targetPackage="android"
              android:targetName="TestResources" />

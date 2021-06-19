@@ -60,6 +60,10 @@ struct ManifestFixerOptions {
   // replace_version is set.
   Maybe<std::string> version_code_major_default;
 
+  // The revision code to set if 'android:revisionCode' is not defined in <manifest> or if
+  // replace_version is set.
+  Maybe<std::string> revision_code_default;
+
   // The version of the framework being compiled against to set for 'android:compileSdkVersion' in
   // the <manifest> tag.
   Maybe<std::string> compile_sdk_version;

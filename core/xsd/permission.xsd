@@ -98,6 +98,7 @@
     </xs:complexType>
     <xs:complexType name="allow-ignore-location-settings">
         <xs:attribute name="package" type="xs:string"/>
+        <xs:attribute name="attributionTag" type="xs:string"/>
     </xs:complexType>
     <xs:complexType name="allow-implicit-broadcast">
         <xs:attribute name="action" type="xs:string"/>

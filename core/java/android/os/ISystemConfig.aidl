@@ -35,4 +35,9 @@ interface ISystemConfig {
      * @see SystemConfigManager#getDisabledUntilUsedPreinstalledCarrierAssociatedAppEntries
      */
     Map getDisabledUntilUsedPreinstalledCarrierAssociatedAppEntries();
+
+    /**
+     * @see SystemConfigManager#getSystemPermissionUids
+     */
+    int[] getSystemPermissionUids(String permissionName);
 }

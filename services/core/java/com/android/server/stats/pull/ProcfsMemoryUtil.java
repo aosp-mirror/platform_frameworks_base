@@ -30,6 +30,9 @@ public final class ProcfsMemoryUtil {
             "RssAnon:",
             "VmSwap:"
     };
+    private static final String[] VMSTAT_KEYS = new String[] {
+            "oom_kill"
+    };
 
     private ProcfsMemoryUtil() {}
 
@@ -98,5 +101,23 @@ public final class ProcfsMemoryUtil {
         public int rssInKilobytes;
         public int anonRssInKilobytes;
         public int swapInKilobytes;
+    }
+
+    /** Reads and parses selected entries of /proc/vmstat. */
+    @Nullable
+    static VmStat readVmStat() {
+        long[] vmstat = new long[VMSTAT_KEYS.length];
+        vmstat[0] = -1;
+        Process.readProcLines("/proc/vmstat", VMSTAT_KEYS, vmstat);
+        if (vmstat[0] == -1) {
+            return null;
+        }
+        VmStat result = new VmStat();
+        result.oomKillCount = (int) vmstat[0];
+        return result;
+    }
+
+    static final class VmStat {
+        public int oomKillCount;
     }
 }

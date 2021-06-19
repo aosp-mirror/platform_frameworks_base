@@ -107,8 +107,8 @@ public final class InCallAdapter {
      *
      * @param callId The identifier of the call to transfer.
      * @param targetNumber The address to transfer to.
-     * @param isConfirmationRequired if {@code true} it will initiate ASSURED transfer,
-     * if {@code false}, it will initiate BLIND transfer.
+     * @param isConfirmationRequired if {@code true} it will initiate a confirmed transfer,
+     * if {@code false}, it will initiate unconfirmed transfer.
      */
     public void transferCall(@NonNull String callId, @NonNull Uri targetNumber,
             boolean isConfirmationRequired) {

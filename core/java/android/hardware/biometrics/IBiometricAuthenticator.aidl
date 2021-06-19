@@ -16,8 +16,12 @@
 
 package android.hardware.biometrics;
 
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.IInvalidationCallback;
+import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
+import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
 
@@ -28,21 +32,29 @@ import android.hardware.face.Face;
  */
 interface IBiometricAuthenticator {
 
+    // Creates a test session
+    ITestSession createTestSession(ITestSessionCallback callback, String opPackageName);
+
+    // Retrieve static sensor properties
+    SensorPropertiesInternal getSensorProperties(String opPackageName);
+
+    // Requests a proto dump of the sensor. See biometrics.proto
+    byte[] dumpSensorServiceStateProto(boolean clearSchedulerBuffer);
+
     // This method prepares the service to start authenticating, but doesn't start authentication.
     // This is protected by the MANAGE_BIOMETRIC signature permission. This method should only be
     // called from BiometricService. The additional uid, pid, userId arguments should be determined
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
-    void prepareForAuthentication(boolean requireConfirmation, IBinder token, long sessionId,
-            int userId, IBiometricServiceReceiverInternal wrapperReceiver, String opPackageName,
-            int cookie, int callingUid, int callingPid, int callingUserId);
+    void prepareForAuthentication(boolean requireConfirmation, IBinder token, long operationId,
+            int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
+            int cookie, boolean allowBackgroundAuthentication);
 
     // Starts authentication with the previously prepared client.
     void startPreparedClient(int cookie);
 
-    // Same as above, with extra arguments.
-    void cancelAuthenticationFromService(IBinder token, String opPackageName,
-            int callingUid, int callingPid, int callingUserId, boolean fromClient);
+    // Cancels authentication.
+    void cancelAuthenticationFromService(IBinder token, String opPackageName);
 
     // Determine if HAL is loaded and ready
     boolean isHardwareDetected(String opPackageName);
@@ -50,12 +62,16 @@ interface IBiometricAuthenticator {
     // Determine if a user has at least one enrolled face
     boolean hasEnrolledTemplates(int userId, String opPackageName);
 
-    // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetLockout(in byte [] token);
+    // Return the LockoutTracker status for the specified user
+    int getLockoutModeForUser(int userId);
 
-    // Explicitly set the active user (for enrolling work profile)
-    void setActiveUser(int uid);
+    // Request the authenticatorId to be invalidated for the specified user
+    void invalidateAuthenticatorId(int userId, IInvalidationCallback callback);
 
     // Gets the authenticator ID representing the current set of enrolled templates
     long getAuthenticatorId(int callingUserId);
+
+    // Requests the sensor to reset its lockout state
+    void resetLockout(IBinder token, String opPackageName, int userId,
+            in byte[] hardwareAuthToken);
 }

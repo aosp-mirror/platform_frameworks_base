@@ -78,6 +78,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -334,7 +335,8 @@ public class PackageManagerTests extends AndroidTestCase {
     private ParsingPackage parsePackage(Uri packageURI) {
         final String archiveFilePath = packageURI.getPath();
         ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefaultOneTime(
-                new File(archiveFilePath), 0 /*flags*/, false /*collectCertificates*/);
+                new File(archiveFilePath), 0 /*flags*/, Collections.emptyList(),
+                false /*collectCertificates*/);
         if (result.isError()) {
             throw new IllegalStateException(result.getErrorMessage(), result.getException());
         }
@@ -574,16 +576,16 @@ public class PackageManagerTests extends AndroidTestCase {
 
         InstallParams(String outFileName, int rawResId) throws PackageParserException {
             this.pkg = getParsedPackage(outFileName, rawResId);
-            this.packageURI = Uri.fromFile(new File(pkg.getCodePath()));
+            this.packageURI = Uri.fromFile(new File(pkg.getPath()));
         }
 
         InstallParams(ParsingPackage pkg) {
-            this.packageURI = Uri.fromFile(new File(pkg.getCodePath()));
+            this.packageURI = Uri.fromFile(new File(pkg.getPath()));
             this.pkg = pkg;
         }
 
         long getApkSize() {
-            File file = new File(pkg.getCodePath());
+            File file = new File(pkg.getPath());
             return file.length();
         }
     }
@@ -1003,7 +1005,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             cleanUpInstall(ip.pkg.getPackageName());
         } finally {
-            File outFile = new File(ip.pkg.getCodePath());
+            File outFile = new File(ip.pkg.getPath());
             if (outFile != null && outFile.exists()) {
                 outFile.delete();
             }
@@ -2921,7 +2923,7 @@ public class PackageManagerTests extends AndroidTestCase {
         assertFalse("BaseCodePath should not be registered", callback.mSuccess);
     }
 
-    // Verify thatmodules which are not own by the calling package are not registered.
+    // Verify that modules which are not own by the calling package are not registered.
     public void testRegisterDexModuleNotOwningModule() throws Exception {
         TestDexModuleRegisterCallback callback = new TestDexModuleRegisterCallback();
         String moduleBelongingToOtherPackage = "/data/user/0/com.google.android.gms/module.apk";
@@ -2974,6 +2976,13 @@ public class PackageManagerTests extends AndroidTestCase {
         assertEquals(nonExistentApk, callback.mDexModulePath);
         assertTrue(callback.waitTillDone());
         assertFalse("DexModule registration should fail", callback.mSuccess);
+    }
+
+    // If the module does not exist on disk we should get a failure.
+    public void testRegisterDexModuleNotExistsNoCallback() throws Exception {
+        ApplicationInfo info = getContext().getApplicationInfo();
+        String nonExistentApk = Paths.get(info.dataDir, "non-existent.apk").toString();
+        getPm().registerDexModule(nonExistentApk, null);
     }
 
     // Copied from com.android.server.pm.InstructionSets because we don't have access to it here.

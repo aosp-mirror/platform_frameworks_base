@@ -159,6 +159,7 @@ public final class FillEventHistory implements Parcelable {
                     FieldClassification.writeArrayToParcel(parcel,
                             event.mDetectedFieldClassifications);
                 }
+                parcel.writeInt(event.mSaveDialogNotShowReason);
             }
         }
     }
@@ -243,6 +244,40 @@ public final class FillEventHistory implements Parcelable {
         @Retention(RetentionPolicy.SOURCE)
         @interface EventIds{}
 
+        /** No reason for save dialog. */
+        public static final int NO_SAVE_UI_REASON_NONE = 0;
+
+        /** The SaveInfo associated with the FillResponse is null. */
+        public static final int NO_SAVE_UI_REASON_NO_SAVE_INFO = 1;
+
+        /** The service asked to delay save. */
+        public static final int NO_SAVE_UI_REASON_WITH_DELAY_SAVE_FLAG = 2;
+
+        /** There was empty value for required ids. */
+        public static final int NO_SAVE_UI_REASON_HAS_EMPTY_REQUIRED = 3;
+
+        /** No value has been changed. */
+        public static final int NO_SAVE_UI_REASON_NO_VALUE_CHANGED = 4;
+
+        /** Fields failed validation. */
+        public static final int NO_SAVE_UI_REASON_FIELD_VALIDATION_FAILED = 5;
+
+        /** All fields matched contents of datasets. */
+        public static final int NO_SAVE_UI_REASON_DATASET_MATCH = 6;
+
+        /** @hide */
+        @IntDef(prefix = { "NO_SAVE_UI_REASON_" }, value = {
+                NO_SAVE_UI_REASON_NONE,
+                NO_SAVE_UI_REASON_NO_SAVE_INFO,
+                NO_SAVE_UI_REASON_WITH_DELAY_SAVE_FLAG,
+                NO_SAVE_UI_REASON_HAS_EMPTY_REQUIRED,
+                NO_SAVE_UI_REASON_NO_VALUE_CHANGED,
+                NO_SAVE_UI_REASON_FIELD_VALIDATION_FAILED,
+                NO_SAVE_UI_REASON_DATASET_MATCH
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface NoSaveReason{}
+
         @EventIds private final int mEventType;
         @Nullable private final String mDatasetId;
         @Nullable private final Bundle mClientState;
@@ -260,6 +295,8 @@ public final class FillEventHistory implements Parcelable {
 
         @Nullable private final AutofillId[] mDetectedFieldIds;
         @Nullable private final FieldClassification[] mDetectedFieldClassifications;
+
+        @NoSaveReason private final int mSaveDialogNotShowReason;
 
         /**
          * Returns the type of the event.
@@ -448,6 +485,19 @@ public final class FillEventHistory implements Parcelable {
         }
 
         /**
+         * Returns the reason why a save dialog was not shown.
+         *
+         * <p><b>Note: </b>Only set on events of type {@link #TYPE_CONTEXT_COMMITTED}. For the other
+         * event types, the reason is set to NO_SAVE_UI_REASON_NONE.
+         *
+         * @return The reason why a save dialog was not shown.
+         */
+        @NoSaveReason
+        public int getNoSaveUiReason() {
+            return mSaveDialogNotShowReason;
+        }
+
+        /**
          * Creates a new event.
          *
          * @param eventType The type of the event
@@ -481,6 +531,48 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
                 @Nullable AutofillId[] detectedFieldIds,
                 @Nullable FieldClassification[] detectedFieldClassifications) {
+            this(eventType, datasetId, clientState, selectedDatasetIds, ignoredDatasetIds,
+                    changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
+                    manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
+                    NO_SAVE_UI_REASON_NONE);
+        }
+
+        /**
+         * Creates a new event.
+         *
+         * @param eventType The type of the event
+         * @param datasetId The dataset the event was on, or {@code null} if the event was on the
+         *                  whole response.
+         * @param clientState The client state associated with the event.
+         * @param selectedDatasetIds The ids of datasets selected by the user.
+         * @param ignoredDatasetIds The ids of datasets NOT select by the user.
+         * @param changedFieldIds The ids of fields changed by the user.
+         * @param changedDatasetIds The ids of the datasets that havd values matching the
+         * respective entry on {@code changedFieldIds}.
+         * @param manuallyFilledFieldIds The ids of fields that were manually entered by the user
+         * and belonged to datasets.
+         * @param manuallyFilledDatasetIds The ids of datasets that had values matching the
+         * respective entry on {@code manuallyFilledFieldIds}.
+         * @param detectedFieldClassifications the field classification matches.
+         * @param saveDialogNotShowReason The reason why a save dialog was not shown.
+         *
+         * @throws IllegalArgumentException If the length of {@code changedFieldIds} and
+         * {@code changedDatasetIds} doesn't match.
+         * @throws IllegalArgumentException If the length of {@code manuallyFilledFieldIds} and
+         * {@code manuallyFilledDatasetIds} doesn't match.
+         *
+         * @hide
+         */
+        public Event(int eventType, @Nullable String datasetId, @Nullable Bundle clientState,
+                @Nullable List<String> selectedDatasetIds,
+                @Nullable ArraySet<String> ignoredDatasetIds,
+                @Nullable ArrayList<AutofillId> changedFieldIds,
+                @Nullable ArrayList<String> changedDatasetIds,
+                @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
+                @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
+                @Nullable AutofillId[] detectedFieldIds,
+                @Nullable FieldClassification[] detectedFieldClassifications,
+                int saveDialogNotShowReason) {
             mEventType = Preconditions.checkArgumentInRange(eventType, 0, TYPE_DATASETS_SHOWN,
                     "eventType");
             mDatasetId = datasetId;
@@ -506,6 +598,10 @@ public final class FillEventHistory implements Parcelable {
 
             mDetectedFieldIds = detectedFieldIds;
             mDetectedFieldClassifications = detectedFieldClassifications;
+
+            mSaveDialogNotShowReason = Preconditions.checkArgumentInRange(saveDialogNotShowReason,
+                    NO_SAVE_UI_REASON_NONE, NO_SAVE_UI_REASON_DATASET_MATCH,
+                    "saveDialogNotShowReason");
         }
 
         @Override
@@ -521,6 +617,7 @@ public final class FillEventHistory implements Parcelable {
                     + ", detectedFieldIds=" + Arrays.toString(mDetectedFieldIds)
                     + ", detectedFieldClassifications ="
                         + Arrays.toString(mDetectedFieldClassifications)
+                    + ", saveDialogNotShowReason=" + mSaveDialogNotShowReason
                     + "]";
         }
     }
@@ -562,12 +659,14 @@ public final class FillEventHistory implements Parcelable {
                                 (detectedFieldIds != null)
                                 ? FieldClassification.readArrayFromParcel(parcel)
                                 : null;
+                        final int saveDialogNotShowReason = parcel.readInt();
 
                         selection.addEvent(new Event(eventType, datasetId, clientState,
                                 selectedDatasetIds, ignoredDatasets,
                                 changedFieldIds, changedDatasetIds,
                                 manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                                detectedFieldIds, detectedFieldClassifications));
+                                detectedFieldIds, detectedFieldClassifications,
+                                saveDialogNotShowReason));
                     }
                     return selection;
                 }
