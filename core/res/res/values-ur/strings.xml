@@ -1019,7 +1019,7 @@
     <string name="text_copied" msgid="2531420577879738860">"متن کو کلپ بورڈ پر کاپی کیا گیا۔"</string>
     <string name="copied" msgid="4675902854553014676">"کاپی ہو گیا"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> سے <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> میں پیسٹ کیا گیا"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> نے آپ کے کلپ بورڈ سے پپیسٹ کر دیا"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"‫<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> نے آپ کے کلپ بورڈ سے پپیسٹ کر دیا"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> نے آپ کا کاپی کردہ ٹیکسٹ پیسٹ کر دیا"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> نے آپ کی کاپی کردہ ایک تصویر پیسٹ کر دی"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> نے آپ کا کاپی کردہ مواد پیسٹ کر دیا"</string>
@@ -1458,10 +1458,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ایپلیکیشن کو پیکجز حذف کرنے کیلئے درخواست کرنے کی اجازت ہے۔"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"بیٹری کی بہتریاں نظر انداز کرنے کا پوچھیں"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"اس ایپ کیلئے ایک ایپ کو بیٹری کی کارکردگی  بہتر بنانے کو نظر انداز کرنے کی اجازت دیں۔"</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"سبھی پیکیجز سے متعلق استفسار کریں"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ایپ کو سبھی انسٹال کردہ پیکیجز دیکھنے کی اجازت دیتا ہے۔"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"زوم کنٹرول کیلئے دوبار تھپتھپائیں"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ویجٹس کو شامل نہیں کرسکا۔"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"جائیں"</string>

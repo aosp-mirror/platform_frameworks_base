@@ -1025,7 +1025,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Text bol skopírovaný do schránky."</string>
     <string name="copied" msgid="4675902854553014676">"Skopírované"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Aplikácia <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> prilepila údaje z aplikácie <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Aplikácia <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> bola prilepená zo schránky"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Aplikácia <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> vložila obsah zo schránky"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Aplikácia <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> prilepila text, ktorý ste skopírovali"</string>
     <string name="pasted_image" msgid="4729097394781491022">"Aplik. <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> prilepila obrázok, ktorý ste skopírovali"</string>
     <string name="pasted_content" msgid="646276353060777131">"Aplikácia <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> prilepila obsah, ktorý ste skopírovali"</string>
@@ -1498,10 +1498,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Umožňuje aplikácii vyžiadať odstránenie balíkov."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"požiadať o ignorovanie optimalizácií výdrže batérie"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Umožňuje aplikácii požiadať o povolenie ignorovať optimalizácie výdrže batérie pre danú aplikáciu."</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"dopytovať všetky balíky"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Povoľuje aplikácii čítať všetky nainštalované balíky."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Dvojitým klepnutím môžete ovládať priblíženie"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Miniaplikáciu sa nepodarilo pridať."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Hľadať"</string>

@@ -388,6 +388,15 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                                 mOrganizer.mTaskOrganizer, t);
                     }
                 }
+                if (mService.getTransitionController().isShellTransitionsEnabled()) {
+                    // dispose is only called outside of transitions (eg during unregister). Since
+                    // we "migrate" surfaces when replacing organizers, visibility gets delegated
+                    // to transitions; however, since there is no transition at this point, we have
+                    // to manually show the surface here.
+                    if (t.mTaskOrganizer != null && t.getSurfaceControl() != null) {
+                        t.getSyncTransaction().show(t.getSurfaceControl());
+                    }
+                }
             }
 
             // Remove organizer state after removing tasks so we get a chance to send
@@ -480,7 +489,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
-            synchronized (mGlobalLock) {
+            final ArrayList<TaskAppearedInfo> taskInfos = new ArrayList<>();
+            final Runnable withGlobalLock = () -> {
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Register task organizer=%s uid=%d",
                         organizer.asBinder(), uid);
                 if (!mTaskOrganizerStates.containsKey(organizer.asBinder())) {
@@ -489,10 +499,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                             new TaskOrganizerState(organizer, uid));
                 }
 
-                final ArrayList<TaskAppearedInfo> taskInfos = new ArrayList<>();
                 final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
                 mService.mRootWindowContainer.forAllTasks((task) -> {
-                    if (ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, task.getWindowingMode())) {
+                    if (ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES,
+                            task.getWindowingMode())) {
                         return;
                     }
 
@@ -502,11 +512,19 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     if (returnTask) {
                         SurfaceControl outSurfaceControl = state.addTaskWithoutCallback(task,
                                 "TaskOrganizerController.registerTaskOrganizer");
-                        taskInfos.add(new TaskAppearedInfo(task.getTaskInfo(), outSurfaceControl));
+                        taskInfos.add(
+                                new TaskAppearedInfo(task.getTaskInfo(), outSurfaceControl));
                     }
                 });
-                return new ParceledListSlice<>(taskInfos);
+            };
+            if (mService.getTransitionController().isShellTransitionsEnabled()) {
+                mService.getTransitionController().mRunningLock.runWhenIdle(1000, withGlobalLock);
+            } else {
+                synchronized (mGlobalLock) {
+                    withGlobalLock.run();
+                }
             }
+            return new ParceledListSlice<>(taskInfos);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
@@ -518,7 +536,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
-            synchronized (mGlobalLock) {
+            final Runnable withGlobalLock = () -> {
                 final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
                 if (state == null) {
                     return;
@@ -527,6 +545,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                         organizer.asBinder(), uid);
                 state.unlinkDeath();
                 state.dispose();
+            };
+            if (mService.getTransitionController().isShellTransitionsEnabled()) {
+                mService.getTransitionController().mRunningLock.runWhenIdle(1000, withGlobalLock);
+            } else {
+                synchronized (mGlobalLock) {
+                    withGlobalLock.run();
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

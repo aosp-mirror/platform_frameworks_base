@@ -1034,6 +1034,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"තිරයේ කොටසක් විශාලනය කරන්න"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ස්විචය"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ප්‍රවේශ්‍යතා බොත්තම ප්‍රවේශ්‍යතා ඉංගිතය ප්‍රතිස්ථාපනය කළේය\n\n"<annotation id="link">"සැකසීම් බලන්න"</annotation></string>
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"ඔබට ප්‍රවේශ්‍යතා ඉංගිතයෙන් බොත්තම් \n\n"<annotation id="link">"සැකසීම්වලට"</annotation>" මාරු විය හැකිය"</string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"එය තාවකාලිකව සැඟවීමට බොත්තම දාරයට ගෙන යන්න"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ඉහළ වමට ගෙන යන්න"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ඉහළ දකුණට ගෙන යන්න"</string>
