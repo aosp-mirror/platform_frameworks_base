@@ -480,8 +480,12 @@
     <string name="user_add_user" msgid="4336657383006913022">"Agregar usuario"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Usuario nuevo"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"¿Quitar invitado?"</string>
+    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
+    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Quitar"</string>
+    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
+    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Hola de nuevo, invitado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres retomar la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>
@@ -1034,8 +1038,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ampliar parte de la pantalla"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Botón"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"El botón de accesibilidad reemplaza el gesto de accesibilidad\n\n"<annotation id="link">"Ver configuración"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Puedes cambiar de un gesto a un botón de accesibilidad\n\n"<annotation id="link">"Configuración"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mueve el botón hacia el borde para ocultarlo temporalmente"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover arriba a la izquierda"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover arriba a la derecha"</string>
