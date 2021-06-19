@@ -399,7 +399,7 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Memungkinkan aplikasi membuat bagian dari dirinya sendiri terus-menerus berada dalam memori. Izin ini dapat membatasi memori yang tersedia untuk aplikasi lain sehingga menjadikan ponsel lambat."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"jalankan layanan di latar depan"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Mengizinkan aplikasi menggunakan layanan di latar depan."</string>
-    <string name="permlab_getPackageSize" msgid="375391550792886641">"mengukur ruang penyimpanan apl"</string>
+    <string name="permlab_getPackageSize" msgid="375391550792886641">"mengukur ruang penyimpanan aplikasi"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Mengizinkan apl mengambil kode, data, dan ukuran temboloknya"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"ubah setelan sistem"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"Mengizinkan apl memodifikasi data setelan sistem. Apl berbahaya dapat merusak konfigurasi sistem anda."</string>
@@ -437,7 +437,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Aplikasi ini dapat menambahkan, menghapus, atau mengubah acara kalender di ponsel. Aplikasi ini dapat mengirim pesan yang kelihatannya berasal dari pemilik kalender, atau mengubah acara tanpa memberi tahu pemilik."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"akses perintah penyedia lokasi ekstra"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Memungkinkan aplikasi mengakses perintah penyedia lokasi ekstra. Tindakan ini memungkinkan aplikasi mengganggu pengoperasian GPS atau sumber lokasi lain."</string>
-    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"akses lokasi pasti hanya saat di latar depan"</string>
+    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"akses lokasi akurat hanya saat di latar depan"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aplikasi ini bisa mendapatkan lokasi pasti Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi. Ini dapat meningkatkan penggunaan baterai."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"akses perkiraan lokasi hanya saat berada di latar depan"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aplikasi ini bisa mendapatkan perkiraan lokasi Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi."</string>
@@ -658,7 +658,7 @@
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikon wajah"</string>
-    <string name="permlab_readSyncSettings" msgid="6250532864893156277">"baca setelan sinkron"</string>
+    <string name="permlab_readSyncSettings" msgid="6250532864893156277">"baca setelan sinkronisasi"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Memungkinkan aplikasi membaca setelan sinkronisasi untuk sebuah akun. Misalnya, izin ini dapat menentukan apakah aplikasi Orang disinkronkan dengan sebuah akun."</string>
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"nyalakan dan matikan sinkronisasi"</string>
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Memungkinkan aplikasi mengubah setelan sinkronisasi untuk sebuah akun. Misalnya, izin ini dapat digunakan untuk mengaktifkan sinkronisasi dari aplikasi Orang dengan sebuah akun."</string>
@@ -1458,10 +1458,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Mengizinkan aplikasi meminta penghapusan paket."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"meminta mengabaikan pengoptimalan baterai"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Mengizinkan aplikasi meminta izin untuk mengabaikan pengoptimalan baterai bagi aplikasi tersebut."</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"mengkueri semua paket"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Mengizinkan aplikasi melihat semua paket yang diinstal."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Ketuk dua kali untuk kontrol perbesar/perkecil"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Tidak dapat menambahkan widget."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Buka"</string>

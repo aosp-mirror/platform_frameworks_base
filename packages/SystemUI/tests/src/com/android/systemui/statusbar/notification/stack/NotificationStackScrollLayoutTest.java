@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static android.provider.Settings.Secure.NOTIFICATION_HISTORY_ENABLED;
+import static android.view.View.GONE;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
@@ -316,6 +317,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void testUpdateFooter_oneClearableNotification() {
         setBarStateForTest(StatusBarState.SHADE);
 
+        when(mEmptyShadeView.getVisibility()).thenReturn(GONE);
         when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
                 .thenReturn(true);
         when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);
@@ -337,6 +339,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);
         when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
                 .thenReturn(false);
+        when(mEmptyShadeView.getVisibility()).thenReturn(GONE);
 
         FooterView view = mock(FooterView.class);
         mStackScroller.setFooterView(view);

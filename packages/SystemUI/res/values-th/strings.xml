@@ -1034,6 +1034,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ขยายบางส่วนของหน้าจอ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"เปลี่ยน"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ปุ่มการช่วยเหลือพิเศษแทนที่ท่าทางสัมผัสการช่วยเหลือพิเศษแล้ว\n\n"<annotation id="link">"ดูการตั้งค่า"</annotation></string>
+    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
+    <skip />
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ย้ายปุ่มไปที่ขอบเพื่อซ่อนชั่วคราว"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ย้ายไปด้านซ้ายบน"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ย้ายไปด้านขวาบน"</string>

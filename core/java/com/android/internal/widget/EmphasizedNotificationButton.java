@@ -40,6 +40,7 @@ import com.android.internal.R;
 @RemoteViews.RemoteView
 public class EmphasizedNotificationButton extends Button {
     private final RippleDrawable mRipple;
+    private final GradientDrawable mBackground;
     private boolean mPriority;
 
     public EmphasizedNotificationButton(Context context) {
@@ -57,9 +58,10 @@ public class EmphasizedNotificationButton extends Button {
     public EmphasizedNotificationButton(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        DrawableWrapper background = (DrawableWrapper) getBackground().mutate();
-        mRipple = (RippleDrawable) background.getDrawable();
+        mRipple = (RippleDrawable) getBackground();
         mRipple.mutate();
+        DrawableWrapper inset = (DrawableWrapper) mRipple.getDrawable(0);
+        mBackground = (GradientDrawable) inset.getDrawable();
     }
 
     @RemotableViewMethod
@@ -70,8 +72,7 @@ public class EmphasizedNotificationButton extends Button {
 
     @RemotableViewMethod
     public void setButtonBackground(ColorStateList color) {
-        GradientDrawable inner = (GradientDrawable) mRipple.getDrawable(0);
-        inner.setColor(color);
+        mBackground.setColor(color);
         invalidate();
     }
 

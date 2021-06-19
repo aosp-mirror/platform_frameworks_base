@@ -48,7 +48,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -65,13 +64,13 @@ import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
+import com.android.server.display.utils.SensorUtils;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceFactory;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceSettings;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
-import java.util.List;
 
 /**
  * Controls the power state of the display.
@@ -584,26 +583,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             adjustedNits[i] = mCdsi.getReduceBrightColorsAdjustedBrightnessNits(mNitsRange[i]);
         }
         mBrightnessMapper.recalculateSplines(mCdsi.isReduceBrightColorsActivated(), adjustedNits);
-    }
-
-    private Sensor findSensor(String sensorType, String sensorName, int fallbackType,
-            boolean useFallback) {
-        final boolean isNameSpecified = !TextUtils.isEmpty(sensorName);
-        final boolean isTypeSpecified = !TextUtils.isEmpty(sensorType);
-        List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
-        if (isNameSpecified || isTypeSpecified) {
-            for (Sensor sensor : sensors) {
-                if ((!isNameSpecified || sensorName.equals(sensor.getName()))
-                        && (!isTypeSpecified || sensorType.equals(sensor.getStringType()))) {
-                    return sensor;
-                }
-            }
-        }
-        if (useFallback) {
-            return mSensorManager.getDefaultSensor(fallbackType);
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -1654,24 +1633,23 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void loadAmbientLightSensor() {
-        DisplayDeviceConfig.SensorIdentifier lightSensor =
-                mDisplayDeviceConfig.getAmbientLightSensor();
-        String lightSensorName = lightSensor.name;
-        String lightSensorType = lightSensor.type;
-        mLightSensor = findSensor(lightSensorType, lightSensorName, Sensor.TYPE_LIGHT,
-                mDisplayId == Display.DEFAULT_DISPLAY);
+        DisplayDeviceConfig.SensorData lightSensor = mDisplayDeviceConfig.getAmbientLightSensor();
+        final int fallbackType = mDisplayId == Display.DEFAULT_DISPLAY
+                ? Sensor.TYPE_LIGHT : SensorUtils.NO_FALLBACK;
+        mLightSensor = SensorUtils.findSensor(mSensorManager, lightSensor.type, lightSensor.name,
+                fallbackType);
     }
 
     private void loadProximitySensor() {
         if (DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
             return;
         }
-        final DisplayDeviceConfig.SensorIdentifier proxSensor =
+        final DisplayDeviceConfig.SensorData proxSensor =
                 mDisplayDeviceConfig.getProximitySensor();
-        final String proxSensorName = proxSensor.name;
-        final String proxSensorType = proxSensor.type;
-        mProximitySensor = findSensor(proxSensorType, proxSensorName, Sensor.TYPE_PROXIMITY,
-                mDisplayId == Display.DEFAULT_DISPLAY);
+        final int fallbackType = mDisplayId == Display.DEFAULT_DISPLAY
+                ? Sensor.TYPE_PROXIMITY : SensorUtils.NO_FALLBACK;
+        mProximitySensor = SensorUtils.findSensor(mSensorManager, proxSensor.type, proxSensor.name,
+                fallbackType);
         if (mProximitySensor != null) {
             mProximityThreshold = Math.min(mProximitySensor.getMaximumRange(),
                     TYPICAL_PROXIMITY_THRESHOLD);

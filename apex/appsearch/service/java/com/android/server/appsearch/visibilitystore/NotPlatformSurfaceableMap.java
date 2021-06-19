@@ -73,9 +73,4 @@ class NotPlatformSurfaceableMap {
         // isn't one of those opt-outs, it's surfaceable.
         return !schemaTypes.contains(prefixedSchema);
     }
-
-    /** Discards all data in the map. */
-    public void clear() {
-        mMap.clear();
-    }
 }

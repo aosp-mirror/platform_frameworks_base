@@ -723,6 +723,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      *                    VibrationAttributes.USAGE_* values.
      */
     private boolean shouldCancelVibration(VibrationAttributes attrs, int usageFilter) {
+        if (attrs.getUsage() == VibrationAttributes.USAGE_UNKNOWN) {
+            // Special case, usage UNKNOWN would match all filters. Instead it should only match if
+            // it's cancelling that usage specifically, or if cancelling all usages.
+            return usageFilter == VibrationAttributes.USAGE_UNKNOWN
+                    || usageFilter == VibrationAttributes.USAGE_FILTER_MATCH_ALL;
+        }
         return (usageFilter & attrs.getUsage()) == attrs.getUsage();
     }
 
@@ -1535,7 +1541,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         private int runCancel() {
-            cancelVibrate(/* usageFilter= */ -1, mToken);
+            cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, mToken);
             return 0;
         }
 

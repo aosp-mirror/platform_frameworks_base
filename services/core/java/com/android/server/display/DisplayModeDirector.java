@@ -27,6 +27,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.net.Uri;
 import android.os.Handler;
@@ -51,6 +53,8 @@ import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.display.utils.AmbientFilter;
 import com.android.server.display.utils.AmbientFilterFactory;
+import com.android.server.sensors.SensorManagerInternal;
+import com.android.server.sensors.SensorManagerInternal.ProximityActiveListener;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.utils.DeviceConfigInterface;
 
@@ -85,8 +89,7 @@ public class DisplayModeDirector {
 
     private static final int INVALID_DISPLAY_MODE_ID = -1;
 
-    // The tolerance within which we consider something approximately equals.
-    private static final float FLOAT_TOLERANCE = 0.01f;
+    private static final float FLOAT_TOLERANCE = RefreshRateRange.FLOAT_TOLERANCE;
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -98,6 +101,7 @@ public class DisplayModeDirector {
     private final SettingsObserver mSettingsObserver;
     private final DisplayObserver mDisplayObserver;
     private final UdfpsObserver mUdfpsObserver;
+    private final SensorObserver mSensorObserver;
     private final DeviceConfigInterface mDeviceConfig;
     private final DeviceConfigDisplaySettings mDeviceConfigDisplaySettings;
 
@@ -139,6 +143,11 @@ public class DisplayModeDirector {
         mDisplayObserver = new DisplayObserver(context, handler);
         mBrightnessObserver = new BrightnessObserver(context, handler);
         mUdfpsObserver = new UdfpsObserver();
+        mSensorObserver = new SensorObserver(context, (displayId, priority, vote) -> {
+            synchronized (mLock) {
+                updateVoteLocked(displayId, priority, vote);
+            }
+        });
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
         mDeviceConfig = injector.getDeviceConfig();
         mAlwaysRespectAppRequest = false;
@@ -155,6 +164,7 @@ public class DisplayModeDirector {
         mSettingsObserver.observe();
         mDisplayObserver.observe();
         mBrightnessObserver.observe(sensorManager);
+        mSensorObserver.observe();
         synchronized (mLock) {
             // We may have a listener already registered before the call to start, so go ahead and
             // notify them to pick up our newly initialized state.
@@ -585,6 +595,7 @@ public class DisplayModeDirector {
             mAppRequestObserver.dumpLocked(pw);
             mBrightnessObserver.dumpLocked(pw);
             mUdfpsObserver.dumpLocked(pw);
+            mSensorObserver.dumpLocked(pw);
         }
     }
 
@@ -768,66 +779,6 @@ public class DisplayModeDirector {
     }
 
     /**
-     * Information about the min and max refresh rate DM would like to set the display to.
-     */
-    public static final class RefreshRateRange {
-        /**
-         * The lowest desired refresh rate.
-         */
-        public float min;
-        /**
-         * The highest desired refresh rate.
-         */
-        public float max;
-
-        public RefreshRateRange() {}
-
-        public RefreshRateRange(float min, float max) {
-            if (min < 0 || max < 0 || min > max + FLOAT_TOLERANCE) {
-                Slog.e(TAG, "Wrong values for min and max when initializing RefreshRateRange : "
-                        + min + " " + max);
-                this.min = this.max = 0;
-                return;
-            }
-            if (min > max) {
-                // Min and max are within epsilon of each other, but in the wrong order.
-                float t = min;
-                min = max;
-                max = t;
-            }
-            this.min = min;
-            this.max = max;
-        }
-
-        /**
-         * Checks whether the two objects have the same values.
-         */
-        @Override
-        public boolean equals(Object other) {
-            if (other == this) {
-                return true;
-            }
-
-            if (!(other instanceof RefreshRateRange)) {
-                return false;
-            }
-
-            RefreshRateRange refreshRateRange = (RefreshRateRange) other;
-            return (min == refreshRateRange.min && max == refreshRateRange.max);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(min, max);
-        }
-
-        @Override
-        public String toString() {
-            return "(" + min + " " + max + ")";
-        }
-    }
-
-    /**
      * Information about the desired display mode to be set by the system. Includes the base
      * mode ID and the primary and app request refresh rate ranges.
      *
@@ -987,9 +938,13 @@ public class DisplayModeDirector {
         // user seeing the display flickering when the switches occur.
         public static final int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 8;
 
+        // The proximity sensor needs the refresh rate to be locked in order to function, so this is
+        // set to a high priority.
+        public static final int PRIORITY_PROXIMITY = 9;
+
         // The Under-Display Fingerprint Sensor (UDFPS) needs the refresh rate to be locked in order
         // to function, so this needs to be the highest priority of all votes.
-        public static final int PRIORITY_UDFPS = 9;
+        public static final int PRIORITY_UDFPS = 10;
 
         // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
         // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
@@ -1086,6 +1041,8 @@ public class DisplayModeDirector {
                     return "PRIORITY_LOW_POWER_MODE";
                 case PRIORITY_UDFPS:
                     return "PRIORITY_UDFPS";
+                case PRIORITY_PROXIMITY:
+                    return "PRIORITY_PROXIMITY";
 
                 default:
                     return Integer.toString(priority);
@@ -2142,6 +2099,62 @@ public class DisplayModeDirector {
         }
     }
 
+    private static class SensorObserver implements ProximityActiveListener {
+        private static final String PROXIMITY_SENSOR_NAME = null;
+        private static final String PROXIMITY_SENSOR_TYPE = Sensor.STRING_TYPE_PROXIMITY;
+
+        private final BallotBox mBallotBox;
+        private final Context mContext;
+
+        private DisplayManager mDisplayManager;
+        private DisplayManagerInternal mDisplayManagerInternal;
+        private boolean mIsProxActive = false;
+
+        SensorObserver(Context context, BallotBox ballotBox) {
+            mContext = context;
+            mBallotBox = ballotBox;
+        }
+
+        @Override
+        public void onProximityActive(boolean isActive) {
+            if (mIsProxActive != isActive) {
+                mIsProxActive = isActive;
+                recalculateVotes();
+            }
+        }
+
+        public void observe() {
+            mDisplayManager = mContext.getSystemService(DisplayManager.class);
+            mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+
+            final SensorManagerInternal sensorManager =
+                    LocalServices.getService(SensorManagerInternal.class);
+            sensorManager.addProximityActiveListener(BackgroundThread.getExecutor(), this);
+        }
+
+        private void recalculateVotes() {
+            final Display[] displays = mDisplayManager.getDisplays();
+            for (Display d : displays) {
+                int displayId = d.getDisplayId();
+                Vote vote = null;
+                if (mIsProxActive) {
+                    final RefreshRateRange rate =
+                            mDisplayManagerInternal.getRefreshRateForDisplayAndSensor(
+                                    displayId, PROXIMITY_SENSOR_NAME, PROXIMITY_SENSOR_TYPE);
+                    if (rate != null) {
+                        vote = Vote.forRefreshRates(rate.min, rate.max);
+                    }
+                }
+                mBallotBox.vote(displayId, Vote.PRIORITY_PROXIMITY, vote);
+            }
+        }
+
+        void dumpLocked(PrintWriter pw) {
+            pw.println("  SensorObserver");
+            pw.println("    mIsProxActive=" + mIsProxActive);
+        }
+    }
+
     private class DeviceConfigDisplaySettings implements DeviceConfig.OnPropertiesChangedListener {
         public DeviceConfigDisplaySettings() {
         }
@@ -2328,4 +2341,7 @@ public class DisplayModeDirector {
         }
     }
 
+    interface BallotBox {
+        void vote(int displayId, int priority, Vote vote);
+    }
 }

@@ -218,13 +218,7 @@ public class StackScrollAlgorithm {
      */
     private void initAlgorithmState(ViewGroup hostView, StackScrollAlgorithmState state,
             AmbientState ambientState) {
-        float bottomOverScroll = ambientState.getOverScrollAmount(false /* onTop */);
-        int scrollY = ambientState.getScrollY();
-
-        // Due to the overScroller, the stackscroller can have negative scroll state. This is
-        // already accounted for by the top padding and doesn't need an additional adaption
-        scrollY = Math.max(0, scrollY);
-        state.scrollY = (int) (scrollY + bottomOverScroll);
+        state.scrollY = ambientState.getScrollY();
         state.mCurrentYPosition = -state.scrollY;
         state.mCurrentExpandedYPosition = -state.scrollY;
 
@@ -261,7 +255,7 @@ public class StackScrollAlgorithm {
         // Save the index of first view in shelf from when shade is fully
         // expanded. Consider updating these states in updateContentView instead so that we don't
         // have to recalculate in every frame.
-        float currentY = -scrollY;
+        float currentY = -ambientState.getScrollY();
         if (!ambientState.isOnKeyguard()) {
             currentY += mNotificationScrimPadding;
         }
