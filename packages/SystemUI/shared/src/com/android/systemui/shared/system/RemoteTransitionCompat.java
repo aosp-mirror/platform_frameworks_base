@@ -17,10 +17,12 @@
 package com.android.systemui.shared.system;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionFilter.CONTAINER_ORDER_TOP;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -163,9 +165,13 @@ public class RemoteTransitionCompat implements Parcelable {
             mFilter = new TransitionFilter();
         }
         mFilter.mRequirements =
-                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement(),
+                        new TransitionFilter.Requirement()};
         mFilter.mRequirements[0].mActivityType = ACTIVITY_TYPE_HOME;
         mFilter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+        mFilter.mRequirements[0].mOrder = CONTAINER_ORDER_TOP;
+        mFilter.mRequirements[1].mActivityType = ACTIVITY_TYPE_STANDARD;
+        mFilter.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
     }
 
     /**

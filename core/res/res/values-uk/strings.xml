@@ -1498,10 +1498,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Додаток зможе надсилати запити на видалення пакетів."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"запитувати дозвіл ігнорувати оптимізацію використання заряду акумулятора"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Додаток зможе запитувати дозвіл ігнорувати оптимізацію використання заряду акумулятора."</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"подавати запити на всі пакети"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Дозволяє додатку переглядати всі встановлені пакети."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Двічі натис. для кер. масшт."</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Не вдалося додати віджет."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Йти"</string>

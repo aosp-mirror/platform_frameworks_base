@@ -1034,6 +1034,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ეკრანის ნაწილის გადიდება"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"გადართვა"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"მარტივი წვდომის ღილაკმა ჩაანაცვლა მარტივი წვდომის ჟესტი\n\n"<annotation id="link">"პარამეტრების ნახვა"</annotation></string>
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"შეგიძლიათ, გადართოთ მარტივი წვდომის ჟესტიდან ღილაკის\n\n"<annotation id="link">"პარამეტრებზე"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"გადაიტანეთ ღილაკი კიდეში, რათა დროებით დამალოთ ის"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ზევით და მარცხნივ გადატანა"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ზევით და მარჯვნივ გადატანა"</string>
