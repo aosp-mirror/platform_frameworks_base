@@ -90,15 +90,15 @@ public class BubbleExpandedView extends LinearLayout {
     private boolean mNeedsNewHeight;
 
     /**
-     * Whether we want the TaskView's content to be visible (alpha = 1f). If
-     * {@link #mIsAlphaAnimating} is true, this may not reflect the TaskView's actual alpha value
-     * until the animation ends.
+     * Whether we want the {@code TaskView}'s content to be visible (alpha = 1f). If
+     * {@link #mIsAlphaAnimating} is true, this may not reflect the {@code TaskView}'s actual alpha
+     * value until the animation ends.
      */
     private boolean mIsContentVisible = false;
 
     /**
-     * Whether we're animating the TaskView's alpha value. If so, we will hold off on applying alpha
-     * changes from {@link #setContentVisibility} until the animation ends.
+     * Whether we're animating the {@code TaskView}'s alpha value. If so, we will hold off on
+     * applying alpha changes from {@link #setContentVisibility} until the animation ends.
      */
     private boolean mIsAlphaAnimating = false;
 
@@ -127,8 +127,8 @@ public class BubbleExpandedView extends LinearLayout {
     private BubblePositioner mPositioner;
 
     /**
-     * Container for the ActivityView that has a solid, round-rect background that shows if the
-     * ActivityView hasn't loaded.
+     * Container for the {@code TaskView} that has a solid, round-rect background that shows if the
+     * {@code TaskView} hasn't loaded.
      */
     private final FrameLayout mExpandedViewContainer = new FrameLayout(getContext());
 
@@ -139,7 +139,7 @@ public class BubbleExpandedView extends LinearLayout {
         @Override
         public void onInitialized() {
             if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-                Log.d(TAG, "onActivityViewReady: destroyed=" + mDestroyed
+                Log.d(TAG, "onInitialized: destroyed=" + mDestroyed
                         + " initialized=" + mInitialized
                         + " bubble=" + getBubbleKey());
             }
@@ -159,7 +159,7 @@ public class BubbleExpandedView extends LinearLayout {
             // Post to keep the lifecycle normal
             post(() -> {
                 if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-                    Log.d(TAG, "onActivityViewReady: calling startActivity, bubble="
+                    Log.d(TAG, "onInitialized: calling startActivity, bubble="
                             + getBubbleKey());
                 }
                 try {
@@ -265,7 +265,7 @@ public class BubbleExpandedView extends LinearLayout {
         mCurrentPointer = mTopPointer;
         mPointerView.setVisibility(INVISIBLE);
 
-        // Set TaskView's alpha value as zero, since there is no view content to be shown.
+        // Set {@code TaskView}'s alpha value as zero, since there is no view content to be shown.
         setContentVisibility(false);
 
         mExpandedViewContainer.setOutlineProvider(new ViewOutlineProvider() {
@@ -290,6 +290,27 @@ public class BubbleExpandedView extends LinearLayout {
         applyThemeAttrs();
 
         setClipToPadding(false);
+        setOnTouchListener((view, motionEvent) -> {
+            if (mTaskView == null) {
+                return false;
+            }
+
+            final Rect avBounds = new Rect();
+            mTaskView.getBoundsOnScreen(avBounds);
+
+            // Consume and ignore events on the expanded view padding that are within the
+            // {@code TaskView}'s vertical bounds. These events are part of a back gesture, and so
+            // they should not collapse the stack (which all other touches on areas around the AV
+            // would do).
+            if (motionEvent.getRawY() >= avBounds.top
+                            && motionEvent.getRawY() <= avBounds.bottom
+                            && (motionEvent.getRawX() < avBounds.left
+                                || motionEvent.getRawX() > avBounds.right)) {
+                return true;
+            }
+
+            return false;
+        });
 
         // BubbleStackView is forced LTR, but we want to respect the locale for expanded view layout
         // so the Manage button appears on the right.
@@ -470,7 +491,7 @@ public class BubbleExpandedView extends LinearLayout {
     /**
      * Updates the obscured touchable region for the task surface. This calls onLocationChanged,
      * which results in a call to {@link BubbleStackView#subtractObscuredTouchableRegion}. This is
-     * useful if a view has been added or removed from on top of the ActivityView, such as the
+     * useful if a view has been added or removed from on top of the {@code TaskView}, such as the
      * manage menu.
      */
     void updateObscuredTouchableRegion() {
@@ -490,8 +511,9 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     /**
-     * Whether we are currently animating the TaskView's alpha value. If this is set to true, calls
-     * to {@link #setContentVisibility} will not be applied until this is set to false again.
+     * Whether we are currently animating the {@code TaskView}'s alpha value. If this is set to
+     * true, calls to {@link #setContentVisibility} will not be applied until this is set to false
+     * again.
      */
     void setAlphaAnimating(boolean animating) {
         mIsAlphaAnimating = animating;
@@ -503,8 +525,8 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     /**
-     * Sets the alpha of the underlying TaskView, since changing the expanded view's alpha does not
-     * affect the TaskView since it uses a Surface.
+     * Sets the alpha of the underlying {@code TaskView}, since changing the expanded view's alpha
+     * does not affect the {@code TaskView} since it uses a Surface.
      */
     void setTaskViewAlpha(float alpha) {
         if (mTaskView != null) {
@@ -743,9 +765,9 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     /**
-     * Cleans up anything related to the task and TaskView. If this view should be reused after this
-     * method is called, then {@link #initialize(BubbleController, BubbleStackView, boolean)} must
-     * be invoked first.
+     * Cleans up anything related to the task and {@code TaskView}. If this view should be reused
+     * after this method is called, then
+     * {@link #initialize(BubbleController, BubbleStackView, boolean)} must be invoked first.
      */
     public void cleanUpExpandedState() {
         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
