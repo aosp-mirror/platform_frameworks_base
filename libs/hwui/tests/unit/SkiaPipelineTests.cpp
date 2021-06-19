@@ -302,7 +302,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clipped) {
     class ClippedTestCanvas : public SkCanvas {
     public:
         ClippedTestCanvas() : SkCanvas(CANVAS_WIDTH, CANVAS_HEIGHT) {}
-        void onDrawImage(const SkImage*, SkScalar dx, SkScalar dy, const SkPaint*) override {
+        void onDrawImage2(const SkImage*, SkScalar dx, SkScalar dy, const SkSamplingOptions&,
+                          const SkPaint*) override {
             EXPECT_EQ(0, mDrawCounter++);
             EXPECT_EQ(SkRect::MakeLTRB(10, 20, 30, 40), TestUtils::getClipBounds(this));
             EXPECT_TRUE(getTotalMatrix().isIdentity());
@@ -336,7 +337,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clipped_rotated) {
     class ClippedTestCanvas : public SkCanvas {
     public:
         ClippedTestCanvas() : SkCanvas(CANVAS_WIDTH, CANVAS_HEIGHT) {}
-        void onDrawImage(const SkImage*, SkScalar dx, SkScalar dy, const SkPaint*) override {
+        void onDrawImage2(const SkImage*, SkScalar dx, SkScalar dy, const SkSamplingOptions&,
+                          const SkPaint*) override {
             EXPECT_EQ(0, mDrawCounter++);
             // Expect clip to be rotated.
             EXPECT_EQ(SkRect::MakeLTRB(CANVAS_HEIGHT - dirty.fTop - dirty.height(), dirty.fLeft,
@@ -402,6 +404,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
     EXPECT_TRUE(pipeline->isSurfaceReady());
     renderThread.destroyRenderingContext();
     EXPECT_FALSE(pipeline->isSurfaceReady());
+    LOG_ALWAYS_FATAL_IF(pipeline->isSurfaceReady());
 }
 
 RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, pictureCallback) {

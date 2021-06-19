@@ -19,6 +19,7 @@ package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -130,7 +131,7 @@ public class JetPlayer
      * Accessed by native methods: provides access to C++ JetPlayer object 
      */
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mNativePlayerInJavaObj;
 
     
@@ -564,7 +565,7 @@ public class JetPlayer
     // Called exclusively by native code
     //--------------------
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static void postEventFromNative(Object jetplayer_ref,
             int what, int arg1, int arg2) {
         //logd("Event posted from the native side: event="+ what + " args="+ arg1+" "+arg2);

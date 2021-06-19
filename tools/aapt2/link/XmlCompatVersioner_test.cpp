@@ -82,7 +82,7 @@ TEST_F(XmlCompatVersionerTest, NoRulesOnlyStripsAndCopies) {
           app:foo="16dp"
           foo="bar"/>)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   XmlCompatVersioner::Rules rules;
@@ -121,7 +121,7 @@ TEST_F(XmlCompatVersionerTest, SingleRule) {
           app:foo="16dp"
           foo="bar"/>)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   XmlCompatVersioner::Rules rules;
@@ -181,7 +181,7 @@ TEST_F(XmlCompatVersionerTest, ChainedRule) {
       <View xmlns:android="http://schemas.android.com/apk/res/android"
           android:paddingHorizontal="24dp" />)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   XmlCompatVersioner::Rules rules;
@@ -256,7 +256,7 @@ TEST_F(XmlCompatVersionerTest, DegradeRuleOverridesExistingAttribute) {
           android:paddingLeft="16dp"
           android:paddingRight="16dp"/>)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   Item* padding_horizontal_value =

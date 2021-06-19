@@ -55,6 +55,7 @@ public class ChooseAccountTypeActivity extends Activity {
         getWindow().addSystemFlags(
                 android.view.WindowManager.LayoutParams
                         .SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "ChooseAccountTypeActivity.onCreate(savedInstanceState="
                     + savedInstanceState + ")");

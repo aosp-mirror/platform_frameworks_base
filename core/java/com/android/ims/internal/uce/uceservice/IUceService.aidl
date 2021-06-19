@@ -38,7 +38,7 @@ interface IUceService
      * Service status is returned in setStatus callback in IUceListener.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean startService(IUceListener uceListener);
 
     /**
@@ -46,7 +46,7 @@ interface IUceService
      * @return boolean true if the service stop request is processed successfully, FALSE otherwise.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean stopService();
 
 
@@ -56,7 +56,7 @@ interface IUceService
      * @return boolean true if service started else false.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isServiceStarted();
 
     /**
@@ -74,7 +74,7 @@ interface IUceService
      *
      * @deprecated This is replaced with new API createOptionsServiceForSubscription()
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     int createOptionsService(IOptionsListener optionsListener,
                              inout UceLong optionsServiceListenerHdl);
     /**
@@ -101,7 +101,7 @@ interface IUceService
      *        in IOptionsListener
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void destroyOptionsService(int optionsServiceHandle);
 
     /**
@@ -119,7 +119,7 @@ interface IUceService
      *
      * @deprecated This is replaced with new API createPresenceServiceForSubscription()
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     int createPresenceService(IPresenceListener presenceServiceListener,
                               inout UceLong presenceServiceListenerHdl);
     /**
@@ -147,7 +147,7 @@ interface IUceService
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void destroyPresenceService(int presenceServiceHdl);
 
 
@@ -159,7 +159,7 @@ interface IUceService
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean getServiceStatus();
 
     /**
@@ -171,7 +171,7 @@ interface IUceService
      *
      * @deprecated use API getPresenceServiceForSubscription()
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     IPresenceService getPresenceService();
 
     /**
@@ -194,7 +194,7 @@ interface IUceService
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     IOptionsService getOptionsService();
 
     /**

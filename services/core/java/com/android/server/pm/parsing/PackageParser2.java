@@ -19,6 +19,7 @@ package com.android.server.pm.parsing;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
@@ -33,6 +34,7 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.permission.PermissionManager;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 
@@ -42,6 +44,7 @@ import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * The v2 of {@link PackageParser} for use when parsing is initiated in the server and must
@@ -71,7 +74,7 @@ public class PackageParser2 implements AutoCloseable {
                     return platformCompat.isChangeEnabled(changeId, appInfo);
                 } catch (Exception e) {
                     // This shouldn't happen, but assume enforcement if it does
-                    Slog.wtf(ParsingUtils.TAG, "IPlatformCompat query failed", e);
+                    Slog.wtf(TAG, "IPlatformCompat query failed", e);
                     return true;
                 }
             }
@@ -87,7 +90,7 @@ public class PackageParser2 implements AutoCloseable {
         });
     }
 
-    static final String TAG = "PackageParser2";
+    private static final String TAG = ParsingUtils.TAG;
 
     private static final boolean LOG_PARSE_TIMINGS = Build.IS_DEBUGGABLE;
     private static final int LOG_PARSE_TIMINGS_THRESHOLD_MS = 100;
@@ -118,10 +121,15 @@ public class PackageParser2 implements AutoCloseable {
             displayMetrics.setToDefaults();
         }
 
+        PermissionManager permissionManager = ActivityThread.currentApplication()
+                .getSystemService(PermissionManager.class);
+        List<PermissionManager.SplitPermissionInfo> splitPermissions = permissionManager
+                .getSplitPermissions();
+
         mCacher = cacheDir == null ? null : new PackageCacher(cacheDir);
 
         parsingUtils = new ParsingPackageUtils(onlyCoreApps, separateProcesses, displayMetrics,
-                callback);
+                splitPermissions, callback);
 
         ParseInput.Callback enforcementCallback = (changeId, packageName, targetSdkVersion) -> {
             ApplicationInfo appInfo = mSharedAppInfo.get();

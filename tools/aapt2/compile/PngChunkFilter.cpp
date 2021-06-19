@@ -35,7 +35,7 @@ constexpr uint32_t u32(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
          ((uint32_t)d);
 }
 
-// Whitelist of PNG chunk types that we want to keep in the resulting PNG.
+// Allow list of PNG chunk types that we want to keep in the resulting PNG.
 enum PngChunkTypes {
   kPngChunkIHDR = u32(73, 72, 68, 82),
   kPngChunkIDAT = u32(73, 68, 65, 84),
@@ -56,7 +56,7 @@ static uint32_t Peek32LE(const char* data) {
   return word;
 }
 
-static bool IsPngChunkWhitelisted(uint32_t type) {
+static bool IsPngChunkAllowed(uint32_t type) {
   switch (type) {
     case kPngChunkIHDR:
     case kPngChunkIDAT:
@@ -128,7 +128,7 @@ bool PngChunkFilter::Next(const void** buffer, size_t* len) {
 
     // Do we strip this chunk?
     const uint32_t chunk_type = Peek32LE(data_.data() + window_end_ + sizeof(uint32_t));
-    if (IsPngChunkWhitelisted(chunk_type)) {
+    if (IsPngChunkAllowed(chunk_type)) {
       // Advance the window to include this chunk.
       window_end_ += kMinChunkHeaderSize + chunk_len;
 

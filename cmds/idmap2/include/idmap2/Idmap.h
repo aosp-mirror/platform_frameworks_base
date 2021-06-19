@@ -17,48 +17,46 @@
 /*
  * # idmap file format (current version)
  *
- * idmap             := header data*
- * header            := magic version target_crc overlay_crc target_path overlay_path debug_info
- * data              := data_header data_block*
- * data_header       := target_package_id types_count
- * data_block        := target_type overlay_type entry_count entry_offset entry*
- * overlay_path      := string256
- * target_path       := string256
- * debug_info        := string
- * string            := <uint32_t> <uint8_t>+ '\0'+
- * entry             := <uint32_t>
- * entry_count       := <uint16_t>
- * entry_offset      := <uint16_t>
- * magic             := <uint32_t>
- * overlay_crc       := <uint32_t>
- * overlay_type      := <uint16_t>
- * string256         := <uint8_t>[256]
- * target_crc        := <uint32_t>
- * target_package_id := <uint16_t>
- * target_type       := <uint16_t>
- * types_count       := <uint16_t>
- * version           := <uint32_t>
+ * idmap                      := header data*
+ * header                     := magic version target_crc overlay_crc fulfilled_policies
+ *                               enforce_overlayable target_path overlay_path overlay_name
+ *                               debug_info
+ * data                       := data_header target_entry* target_inline_entry* overlay_entry*
+ *                               string_pool
+ * data_header                := target_entry_count target_inline_entry_count overlay_entry_count
+ *                               string_pool_index
+ * target_entry               := target_id overlay_id
+ * target_inline_entry        := target_id Res_value::size padding(1) Res_value::type
+ *                               Res_value::value
+ * overlay_entry              := overlay_id target_id
  *
- *
- * # idmap file format changelog
- * ## v1
- * - Identical to idmap v1.
- *
- * ## v2
- * - Entries are no longer separated by type into type specific data blocks.
- * - Added overlay-indexed target resource id lookup capabilities.
- * - Target and overlay entries are stored as a sparse array in the data block. The target entries
- *   array maps from target resource id to overlay data type and value and the array is sorted by
- *   target resource id. The overlay entries array maps from overlay resource id to target resource
- *   id and the array is sorted by overlay resource id. It is important for both arrays to be sorted
- *   to allow for O(log(number_of_overlaid_resources)) performance when looking up resource
- *   mappings at runtime.
- * - Idmap can now encode a type and value to override a resource without needing a table entry.
- * - A string pool block is included to retrieve the value of strings that do not have a resource
- *   table entry.
- *
- * ## v3
- * - Add 'debug' block to IdmapHeader.
+ * debug_info                 := string
+ * enforce_overlayable        := <uint32_t>
+ * fulfilled_policies         := <uint32_t>
+ * magic                      := <uint32_t>
+ * overlay_crc                := <uint32_t>
+ * overlay_entry_count        := <uint32_t>
+ * overlay_id                 := <uint32_t>
+ * overlay_package_id         := <uint8_t>
+ * overlay_name               := string
+ * overlay_path               := string
+ * padding(n)                 := <uint8_t>[n]
+ * Res_value::size            := <uint16_t>
+ * Res_value::type            := <uint8_t>
+ * Res_value::value           := <uint32_t>
+ * string                     := <uint32_t> <uint8_t>+ padding(n)
+ * string_pool                := string
+ * string_pool_index          := <uint32_t>
+ * string_pool_length         := <uint32_t>
+ * target_crc                 := <uint32_t>
+ * target_entry_count         := <uint32_t>
+ * target_inline_entry_count  := <uint32_t>
+ * target_id                  := <uint32_t>
+ * target_package_id          := <uint8_t>
+ * target_path                := string
+ * value_type                 := <uint8_t>
+ * value_data                 := <uint32_t>
+ * version                    := <uint32_t>
  */
 
 #ifndef IDMAP2_INCLUDE_IDMAP2_IDMAP_H_
@@ -70,32 +68,21 @@
 #include <vector>
 
 #include "android-base/macros.h"
-#include "androidfw/ApkAssets.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
+#include "idmap2/ResourceContainer.h"
 #include "idmap2/ResourceMapping.h"
-#include "idmap2/ZipFile.h"
 
 namespace android::idmap2 {
 
 class Idmap;
 class Visitor;
 
-static constexpr const ResourceId kPadding = 0xffffffffu;
-static constexpr const EntryId kNoEntry = 0xffffu;
-
 // magic number: all idmap files start with this
 static constexpr const uint32_t kIdmapMagic = android::kIdmapMagic;
 
 // current version of the idmap binary format; must be incremented when the format is changed
 static constexpr const uint32_t kIdmapCurrentVersion = android::kIdmapCurrentVersion;
-
-// strings in the idmap are encoded char arrays of length 'kIdmapStringLength' (including mandatory
-// terminating null)
-static constexpr const size_t kIdmapStringLength = 256;
-
-// Retrieves a crc generated using all of the files within the zip that can affect idmap generation.
-Result<uint32_t> GetPackageCrc(const ZipFile& zip_info);
 
 class IdmapHeader {
  public:
@@ -125,32 +112,38 @@ class IdmapHeader {
     return enforce_overlayable_;
   }
 
-  inline StringPiece GetTargetPath() const {
-    return StringPiece(target_path_);
+  const std::string& GetTargetPath() const {
+    return target_path_;
   }
 
-  inline StringPiece GetOverlayPath() const {
-    return StringPiece(overlay_path_);
+  const std::string& GetOverlayPath() const {
+    return overlay_path_;
   }
 
-  inline const std::string& GetDebugInfo() const {
+  const std::string& GetOverlayName() const {
+    return overlay_name_;
+  }
+
+  const std::string& GetDebugInfo() const {
     return debug_info_;
   }
 
   // Invariant: anytime the idmap data encoding is changed, the idmap version
   // field *must* be incremented. Because of this, we know that if the idmap
   // header is up-to-date the entire file is up-to-date.
-  Result<Unit> IsUpToDate(const char* target_path, const char* overlay_path,
+  Result<Unit> IsUpToDate(const TargetResourceContainer& target,
+                          const OverlayResourceContainer& overlay, const std::string& overlay_name,
                           PolicyBitmask fulfilled_policies, bool enforce_overlayable) const;
-  Result<Unit> IsUpToDate(const char* target_path, const char* overlay_path, uint32_t target_crc,
+
+  Result<Unit> IsUpToDate(const std::string& target_path, const std::string& overlay_path,
+                          const std::string& overlay_name, uint32_t target_crc,
                           uint32_t overlay_crc, PolicyBitmask fulfilled_policies,
                           bool enforce_overlayable) const;
 
   void accept(Visitor* v) const;
 
  private:
-  IdmapHeader() {
-  }
+  IdmapHeader() = default;
 
   uint32_t magic_;
   uint32_t version_;
@@ -158,8 +151,9 @@ class IdmapHeader {
   uint32_t overlay_crc_;
   uint32_t fulfilled_policies_;
   bool enforce_overlayable_;
-  char target_path_[kIdmapStringLength];
-  char overlay_path_[kIdmapStringLength];
+  std::string target_path_;
+  std::string overlay_path_;
+  std::string overlay_name_;
   std::string debug_info_;
 
   friend Idmap;
@@ -171,16 +165,12 @@ class IdmapData {
    public:
     static std::unique_ptr<const Header> FromBinaryStream(std::istream& stream);
 
-    inline PackageId GetTargetPackageId() const {
-      return target_package_id_;
-    }
-
-    inline PackageId GetOverlayPackageId() const {
-      return overlay_package_id_;
-    }
-
     inline uint32_t GetTargetEntryCount() const {
       return target_entry_count;
+    }
+
+    inline uint32_t GetTargetInlineEntryCount() const {
+      return target_entry_inline_count;
     }
 
     inline uint32_t GetOverlayEntryCount() const {
@@ -191,19 +181,13 @@ class IdmapData {
       return string_pool_index_offset;
     }
 
-    inline uint32_t GetStringPoolLength() const {
-      return string_pool_len;
-    }
-
     void accept(Visitor* v) const;
 
    private:
-    PackageId target_package_id_;
-    PackageId overlay_package_id_;
     uint32_t target_entry_count;
+    uint32_t target_entry_inline_count;
     uint32_t overlay_entry_count;
     uint32_t string_pool_index_offset;
-    uint32_t string_pool_len;
     Header() = default;
 
     friend Idmap;
@@ -213,8 +197,12 @@ class IdmapData {
 
   struct TargetEntry {
     ResourceId target_id;
-    TargetValue::DataType data_type;
-    TargetValue::DataValue data_value;
+    ResourceId overlay_id;
+  };
+
+  struct TargetInlineEntry {
+    ResourceId target_id;
+    TargetValue value;
   };
 
   struct OverlayEntry {
@@ -227,32 +215,36 @@ class IdmapData {
   static Result<std::unique_ptr<const IdmapData>> FromResourceMapping(
       const ResourceMapping& resource_mapping);
 
-  inline const std::unique_ptr<const Header>& GetHeader() const {
+  const std::unique_ptr<const Header>& GetHeader() const {
     return header_;
   }
 
-  inline const std::vector<TargetEntry>& GetTargetEntries() const {
+  const std::vector<TargetEntry>& GetTargetEntries() const {
     return target_entries_;
   }
 
-  inline const std::vector<OverlayEntry>& GetOverlayEntries() const {
+  const std::vector<TargetInlineEntry>& GetTargetInlineEntries() const {
+    return target_inline_entries_;
+  }
+
+  const std::vector<OverlayEntry>& GetOverlayEntries() const {
     return overlay_entries_;
   }
 
-  inline const void* GetStringPoolData() const {
-    return string_pool_.get();
+  const std::string& GetStringPoolData() const {
+    return string_pool_data_;
   }
 
   void accept(Visitor* v) const;
 
  private:
-  IdmapData() {
-  }
+  IdmapData() = default;
 
   std::unique_ptr<const Header> header_;
   std::vector<TargetEntry> target_entries_;
+  std::vector<TargetInlineEntry> target_inline_entries_;
   std::vector<OverlayEntry> overlay_entries_;
-  std::unique_ptr<uint8_t[]> string_pool_;
+  std::string string_pool_data_;
 
   friend Idmap;
   DISALLOW_COPY_AND_ASSIGN(IdmapData);
@@ -269,24 +261,23 @@ class Idmap {
   // file is used; change this in the next version of idmap to use a named
   // package instead; also update FromApkAssets to take additional parameters:
   // the target and overlay package names
-  static Result<std::unique_ptr<const Idmap>> FromApkAssets(const ApkAssets& target_apk_assets,
-                                                            const ApkAssets& overlay_apk_assets,
-                                                            const PolicyBitmask& fulfilled_policies,
-                                                            bool enforce_overlayable);
+  static Result<std::unique_ptr<const Idmap>> FromContainers(
+      const TargetResourceContainer& target, const OverlayResourceContainer& overlay,
+      const std::string& overlay_name, const PolicyBitmask& fulfilled_policies,
+      bool enforce_overlayable);
 
-  inline const std::unique_ptr<const IdmapHeader>& GetHeader() const {
+  const std::unique_ptr<const IdmapHeader>& GetHeader() const {
     return header_;
   }
 
-  inline const std::vector<std::unique_ptr<const IdmapData>>& GetData() const {
+  const std::vector<std::unique_ptr<const IdmapData>>& GetData() const {
     return data_;
   }
 
   void accept(Visitor* v) const;
 
  private:
-  Idmap() {
-  }
+  Idmap() = default;
 
   std::unique_ptr<const IdmapHeader> header_;
   std::vector<std::unique_ptr<const IdmapData>> data_;
@@ -296,13 +287,16 @@ class Idmap {
 
 class Visitor {
  public:
-  virtual ~Visitor() {
-  }
+  virtual ~Visitor() = default;
   virtual void visit(const Idmap& idmap) = 0;
   virtual void visit(const IdmapHeader& header) = 0;
   virtual void visit(const IdmapData& data) = 0;
   virtual void visit(const IdmapData::Header& header) = 0;
 };
+
+inline size_t CalculatePadding(size_t data_length) {
+  return (4 - (data_length % 4)) % 4;
+}
 
 }  // namespace android::idmap2
 

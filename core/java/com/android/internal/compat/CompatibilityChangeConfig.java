@@ -39,14 +39,14 @@ public final class CompatibilityChangeConfig implements Parcelable {
      * Changes forced to be enabled.
      */
     public Set<Long> enabledChanges() {
-        return mChangeConfig.forceEnabledSet();
+        return mChangeConfig.getEnabledSet();
     }
 
     /**
      * Changes forced to be disabled.
      */
     public Set<Long> disabledChanges() {
-        return mChangeConfig.forceDisabledSet();
+        return mChangeConfig.getDisabledSet();
     }
 
     /**
@@ -84,8 +84,8 @@ public final class CompatibilityChangeConfig implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        long[] enabled = mChangeConfig.forceEnabledChangesArray();
-        long[] disabled = mChangeConfig.forceDisabledChangesArray();
+        long[] enabled = mChangeConfig.getEnabledChangesArray();
+        long[] disabled = mChangeConfig.getDisabledChangesArray();
 
         dest.writeLongArray(enabled);
         dest.writeLongArray(disabled);

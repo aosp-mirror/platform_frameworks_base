@@ -16,8 +16,8 @@
 
 package android.security.keystore;
 
-import android.security.KeyStore;
 import android.security.KeyStoreException;
+import android.security.keymaster.KeymasterDefs;
 
 import java.security.ProviderException;
 
@@ -31,7 +31,7 @@ public class SecureKeyImportUnavailableException extends ProviderException {
     }
 
     public SecureKeyImportUnavailableException(String message) {
-        super(message, new KeyStoreException(KeyStore.HARDWARE_TYPE_UNAVAILABLE,
+        super(message, new KeyStoreException(KeymasterDefs.KM_ERROR_HARDWARE_TYPE_UNAVAILABLE,
                 "Secure Key Import not available"));
     }
 

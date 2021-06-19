@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import android.content.Context;
-import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 
@@ -45,6 +44,7 @@ import java.util.Random;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
 @SmallTest
@@ -77,7 +77,7 @@ public class RecoverableKeyGeneratorTest {
         mDatabaseFile = context.getDatabasePath(DATABASE_FILE_NAME);
         mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
 
-        AndroidKeyStoreSecretKey platformKey = generatePlatformKey();
+        SecretKey platformKey = generatePlatformKey();
         mPlatformKey = new PlatformEncryptionKey(TEST_GENERATION_ID, platformKey);
         mDecryptKey = new PlatformDecryptionKey(TEST_GENERATION_ID, platformKey);
         mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(mRecoverableKeyStoreDb);
@@ -168,7 +168,7 @@ public class RecoverableKeyGeneratorTest {
         assertArrayEquals(rawMaterial, unwrappedMaterial);
     }
 
-    private AndroidKeyStoreSecretKey generatePlatformKey() throws Exception {
+    private SecretKey generatePlatformKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(
                 KEY_ALGORITHM,
                 ANDROID_KEY_STORE_PROVIDER);
@@ -177,7 +177,7 @@ public class RecoverableKeyGeneratorTest {
                     .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                     .build());
-        return (AndroidKeyStoreSecretKey) keyGenerator.generateKey();
+        return keyGenerator.generateKey();
     }
 
     private static byte[] randomBytes(int n) {

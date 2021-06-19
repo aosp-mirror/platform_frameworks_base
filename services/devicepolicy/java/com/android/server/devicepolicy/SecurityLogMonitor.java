@@ -64,7 +64,7 @@ class SecurityLogMonitor implements Runnable {
         mLastForceNanos = System.nanoTime();
     }
 
-    private static final boolean DEBUG = false;  // STOPSHIP if true.
+    private static final boolean DEBUG = true;  // STOPSHIP if true.
     private static final String TAG = "SecurityLogMonitor";
     /**
      * Each log entry can hold up to 4K bytes (but as of {@link android.os.Build.VERSION_CODES#N}
@@ -226,7 +226,7 @@ class SecurityLogMonitor implements Runnable {
 
         Slog.i(TAG, "Resumed.");
         try {
-            notifyDeviceOwnerIfNeeded(false /* force */);
+            notifyDeviceOwnerOrProfileOwnerIfNeeded(false /* force */);
         } catch (InterruptedException e) {
             Log.w(TAG, "Thread interrupted.", e);
         }
@@ -427,7 +427,7 @@ class SecurityLogMonitor implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 final boolean force = mForceSemaphore.tryAcquire(POLLING_INTERVAL_MS, MILLISECONDS);
-
+                if (DEBUG) Slog.d(TAG, "Retrieving next batch, force=" + force);
                 getNextBatch(newLogs);
 
                 mLock.lockInterruptibly();
@@ -439,7 +439,7 @@ class SecurityLogMonitor implements Runnable {
 
                 saveLastEvents(newLogs);
                 newLogs.clear();
-                notifyDeviceOwnerIfNeeded(force);
+                notifyDeviceOwnerOrProfileOwnerIfNeeded(force);
             } catch (IOException e) {
                 Log.e(TAG, "Failed to read security log", e);
             } catch (InterruptedException e) {
@@ -460,27 +460,33 @@ class SecurityLogMonitor implements Runnable {
         Slog.i(TAG, "MonitorThread exit.");
     }
 
-    private void notifyDeviceOwnerIfNeeded(boolean force) throws InterruptedException {
-        boolean allowRetrievalAndNotifyDO = false;
+    private void notifyDeviceOwnerOrProfileOwnerIfNeeded(boolean force)
+            throws InterruptedException {
+        boolean allowRetrievalAndNotifyDOOrPO = false;
         mLock.lockInterruptibly();
         try {
             if (mPaused) {
                 return;
             }
             final int logSize = mPendingLogs.size();
+            if (DEBUG) {
+                Slog.d(TAG, String.format(
+                        "notifyDeviceOwnerOrProfileOwnerIfNeeded, size: %d now: %d next: %d",
+                        logSize, SystemClock.elapsedRealtime(), mNextAllowedRetrievalTimeMillis));
+            }
             if (logSize >= BUFFER_ENTRIES_NOTIFICATION_LEVEL || (force && logSize > 0)) {
                 // Allow DO to retrieve logs if too many pending logs or if forced.
                 if (!mAllowedToRetrieve) {
-                    allowRetrievalAndNotifyDO = true;
+                    allowRetrievalAndNotifyDOOrPO = true;
                 }
                 if (DEBUG) Slog.d(TAG, "Number of log entries over threshold: " + logSize);
             }
             if (logSize > 0 && SystemClock.elapsedRealtime() >= mNextAllowedRetrievalTimeMillis) {
                 // Rate limit reset
-                allowRetrievalAndNotifyDO = true;
+                allowRetrievalAndNotifyDOOrPO = true;
                 if (DEBUG) Slog.d(TAG, "Timeout reached");
             }
-            if (allowRetrievalAndNotifyDO) {
+            if (allowRetrievalAndNotifyDOOrPO) {
                 mAllowedToRetrieve = true;
                 // Set the timeout to retry the notification if the DO misses it.
                 mNextAllowedRetrievalTimeMillis = SystemClock.elapsedRealtime()
@@ -489,10 +495,10 @@ class SecurityLogMonitor implements Runnable {
         } finally {
             mLock.unlock();
         }
-        if (allowRetrievalAndNotifyDO) {
-            Slog.i(TAG, "notify DO");
-            mService.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE,
-                    null);
+        if (allowRetrievalAndNotifyDOOrPO) {
+            Slog.i(TAG, "notify DO or PO");
+            mService.sendDeviceOwnerOrProfileOwnerCommand(
+                    DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE, null, mEnabledUser);
         }
     }
 
@@ -506,6 +512,7 @@ class SecurityLogMonitor implements Runnable {
         synchronized (mForceSemaphore) {
             final long toWaitNanos = mLastForceNanos + FORCE_FETCH_THROTTLE_NS - nowNanos;
             if (toWaitNanos > 0) {
+                if (DEBUG) Slog.d(TAG, "Forcing security logs throttled");
                 return NANOSECONDS.toMillis(toWaitNanos) + 1; // Round up.
             }
             mLastForceNanos = nowNanos;
@@ -514,6 +521,7 @@ class SecurityLogMonitor implements Runnable {
             if (mForceSemaphore.availablePermits() == 0) {
                 mForceSemaphore.release();
             }
+            if (DEBUG) Slog.d(TAG, "Forcing security logs semaphore released");
             return 0;
         }
     }

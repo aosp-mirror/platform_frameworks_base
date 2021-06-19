@@ -1,0 +1,70 @@
+// Signature format: 2.0
+package com.android.server.compat.overrides {
+
+  public class ChangeOverrides {
+    ctor public ChangeOverrides();
+    method public long getChangeId();
+    method public com.android.server.compat.overrides.ChangeOverrides.Deferred getDeferred();
+    method public com.android.server.compat.overrides.ChangeOverrides.Raw getRaw();
+    method public com.android.server.compat.overrides.ChangeOverrides.Validated getValidated();
+    method public void setChangeId(long);
+    method public void setDeferred(com.android.server.compat.overrides.ChangeOverrides.Deferred);
+    method public void setRaw(com.android.server.compat.overrides.ChangeOverrides.Raw);
+    method public void setValidated(com.android.server.compat.overrides.ChangeOverrides.Validated);
+  }
+
+  public static class ChangeOverrides.Deferred {
+    ctor public ChangeOverrides.Deferred();
+    method public java.util.List<com.android.server.compat.overrides.OverrideValue> getOverrideValue();
+  }
+
+  public static class ChangeOverrides.Raw {
+    ctor public ChangeOverrides.Raw();
+    method public java.util.List<com.android.server.compat.overrides.RawOverrideValue> getRawOverrideValue();
+  }
+
+  public static class ChangeOverrides.Validated {
+    ctor public ChangeOverrides.Validated();
+    method public java.util.List<com.android.server.compat.overrides.OverrideValue> getOverrideValue();
+  }
+
+  public class OverrideValue {
+    ctor public OverrideValue();
+    method public boolean getEnabled();
+    method public String getPackageName();
+    method public void setEnabled(boolean);
+    method public void setPackageName(String);
+  }
+
+  public class Overrides {
+    ctor public Overrides();
+    method public java.util.List<com.android.server.compat.overrides.ChangeOverrides> getChangeOverrides();
+  }
+
+  public class RawOverrideValue {
+    ctor public RawOverrideValue();
+    method public boolean getEnabled();
+    method public long getMaxVersionCode();
+    method public long getMinVersionCode();
+    method public String getPackageName();
+    method public void setEnabled(boolean);
+    method public void setMaxVersionCode(long);
+    method public void setMinVersionCode(long);
+    method public void setPackageName(String);
+  }
+
+  public class XmlParser {
+    ctor public XmlParser();
+    method public static com.android.server.compat.overrides.Overrides read(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static String readText(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static void skip(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+  }
+
+  public class XmlWriter implements java.io.Closeable {
+    ctor public XmlWriter(java.io.PrintWriter);
+    method public void close();
+    method public static void write(com.android.server.compat.overrides.XmlWriter, com.android.server.compat.overrides.Overrides) throws java.io.IOException;
+  }
+
+}
+

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -60,13 +62,15 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
         mDynamicPrivacyController.setStatusBarKeyguardViewManager(
                 mock(StatusBarKeyguardViewManager.class));
         mDynamicPrivacyController.addListener(mListener);
+        // Disable dynamic privacy by default
+        allowPrivateNotificationsInPublic(true);
     }
 
     @Test
     public void testDynamicFalseWhenCannotSkipBouncer() {
         enableDynamicPrivacy();
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
-        Assert.assertFalse("can't skip bouncer but is dynamically unlocked",
+        assertFalse("can't skip bouncer but is dynamically unlocked",
                 mDynamicPrivacyController.isDynamicallyUnlocked());
     }
 
@@ -102,9 +106,26 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
         verify(mListener).onDynamicPrivacyChanged();
     }
 
-    private void enableDynamicPrivacy() {
+    @Test
+    public void dynamicPrivacyOnlyWhenHidingPrivate() {
+        // Verify that when only hiding notifications, this isn't enabled
+        allowPrivateNotificationsInPublic(true);
         when(mLockScreenUserManager.shouldHideNotifications(any())).thenReturn(
                 false);
+        assertFalse("Dynamic privacy shouldn't be enabled when only hiding notifications",
+                mDynamicPrivacyController.isDynamicPrivacyEnabled());
+        allowPrivateNotificationsInPublic(false);
+        assertTrue("Should be enabled when hiding notification contents",
+                mDynamicPrivacyController.isDynamicPrivacyEnabled());
+    }
+
+    private void enableDynamicPrivacy() {
+        allowPrivateNotificationsInPublic(false);
+    }
+
+    private void allowPrivateNotificationsInPublic(boolean allow) {
+        when(mLockScreenUserManager.userAllowsPrivateNotificationsInPublic(anyInt())).thenReturn(
+                allow);
     }
 
     @Test

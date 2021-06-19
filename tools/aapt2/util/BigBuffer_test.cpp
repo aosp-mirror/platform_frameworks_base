@@ -62,7 +62,7 @@ TEST(BigBufferTest, AppendAndMoveBlock) {
     *b1 = 44;
 
     buffer.AppendBuffer(std::move(buffer2));
-    EXPECT_EQ(0u, buffer2.size());
+    EXPECT_EQ(0u, buffer2.size()); // NOLINT
     EXPECT_EQ(buffer2.begin(), buffer2.end());
   }
 

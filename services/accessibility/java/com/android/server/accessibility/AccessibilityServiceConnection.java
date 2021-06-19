@@ -53,6 +53,10 @@ import java.util.Set;
  */
 class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnection {
     private static final String LOG_TAG = "AccessibilityServiceConnection";
+    private static final String TRACE_A11Y_SERVICE_CONNECTION =
+            LOG_TAG + ".IAccessibilityServiceConnection";
+    private static final String TRACE_A11Y_SERVICE_CLIENT =
+            LOG_TAG + ".IAccessibilityServiceClient";
     /*
      Holding a weak reference so there isn't a loop of references. AccessibilityUserState keeps
      lists of bound and binding services. These are freed on user changes, but just in case it
@@ -70,11 +74,12 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             ComponentName componentName,
             AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
             Object lock, AccessibilitySecurityPolicy securityPolicy, SystemSupport systemSupport,
-            WindowManagerInternal windowManagerInternal,
+            AccessibilityTrace trace, WindowManagerInternal windowManagerInternal,
             SystemActionPerformer systemActionPerfomer, AccessibilityWindowManager awm,
             ActivityTaskManagerInternal activityTaskManagerService) {
         super(context, componentName, accessibilityServiceInfo, id, mainHandler, lock,
-                securityPolicy, systemSupport, windowManagerInternal, systemActionPerfomer, awm);
+                securityPolicy, systemSupport, trace, windowManagerInternal, systemActionPerfomer,
+                awm);
         mUserStateWeakReference = new WeakReference<AccessibilityUserState>(userState);
         mIntent = new Intent().setComponent(mComponentName);
         mMainHandler = mainHandler;
@@ -120,7 +125,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         AccessibilityUserState userState = mUserStateWeakReference.get();
         if (userState == null) return;
         userState.removeServiceLocked(this);
-        mSystemSupport.getMagnificationController().resetAllIfNeeded(mId);
+        mSystemSupport.getFullScreenMagnificationController().resetAllIfNeeded(mId);
         mActivityTaskManagerService.setAllowAppSwitches(mComponentName.flattenToString(), -1,
                 userState.mUserId);
         resetLocked();
@@ -132,6 +137,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public void disableSelf() {
+        if (mTrace.isA11yTracingEnabled()) {
+            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".disableSelf");
+        }
         synchronized (mLock) {
             AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState == null) return;
@@ -210,6 +218,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             return;
         }
         try {
+            if (mTrace.isA11yTracingEnabled()) {
+                mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".init", this + ", " + mId + ", "
+                        + mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
+            }
             serviceInterface.init(this, mId, mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
         } catch (RemoteException re) {
             Slog.w(LOG_TAG, "Error while setting connection for service: "
@@ -252,6 +264,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public boolean setSoftKeyboardShowMode(int showMode) {
+        if (mTrace.isA11yTracingEnabled()) {
+            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".setSoftKeyboardShowMode",
+                    "showMode=" + showMode);
+        }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
                 return false;
@@ -264,12 +280,19 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public int getSoftKeyboardShowMode() {
+        if (mTrace.isA11yTracingEnabled()) {
+            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getSoftKeyboardShowMode");
+        }
         final AccessibilityUserState userState = mUserStateWeakReference.get();
         return (userState != null) ? userState.getSoftKeyboardShowModeLocked() : 0;
     }
 
     @Override
     public boolean switchToInputMethod(String imeId) {
+        if (mTrace.isA11yTracingEnabled()) {
+            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".switchToInputMethod",
+                    "imeId=" + imeId);
+        }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
                 return false;
@@ -288,6 +311,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public boolean isAccessibilityButtonAvailable() {
+        if (mTrace.isA11yTracingEnabled()) {
+            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".isAccessibilityButtonAvailable");
+        }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
                 return false;
@@ -312,7 +338,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 userState.serviceDisconnectedLocked(this);
             }
             resetLocked();
-            mSystemSupport.getMagnificationController().resetAllIfNeeded(mId);
+            mSystemSupport.getFullScreenMagnificationController().resetAllIfNeeded(mId);
             mSystemSupport.onClientChangeLocked(false);
         }
     }
@@ -347,6 +373,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
         if (serviceInterface != null) {
             try {
+                if (mTrace.isA11yTracingEnabled()) {
+                    mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT
+                            + ".onFingerprintCapturingGesturesChanged", String.valueOf(active));
+                }
                 mServiceInterface.onFingerprintCapturingGesturesChanged(active);
             } catch (RemoteException e) {
             }
@@ -364,6 +394,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
         if (serviceInterface != null) {
             try {
+                if (mTrace.isA11yTracingEnabled()) {
+                    mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".onFingerprintGesture",
+                            String.valueOf(gesture));
+                }
                 mServiceInterface.onFingerprintGesture(gesture);
             } catch (RemoteException e) {
             }
@@ -372,16 +406,20 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {
-        final boolean isTouchableDisplay = mWindowManagerService.isTouchableDisplay(displayId);
         synchronized (mLock) {
             if (mSecurityPolicy.canPerformGestures(this)) {
                 MotionEventInjector motionEventInjector =
                         mSystemSupport.getMotionEventInjectorForDisplayLocked(displayId);
-                if (motionEventInjector != null && isTouchableDisplay) {
+                if (motionEventInjector != null
+                        && mWindowManagerService.isTouchOrFaketouchDevice()) {
                     motionEventInjector.injectEvents(
                             gestureSteps.getList(), mServiceInterface, sequence, displayId);
                 } else {
                     try {
+                        if (mTrace.isA11yTracingEnabled()) {
+                            mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".onPerformGestureResult",
+                                    sequence + ", false");
+                        }
                         mServiceInterface.onPerformGestureResult(sequence, false);
                     } catch (RemoteException re) {
                         Slog.e(LOG_TAG, "Error sending motion event injection failure to "
@@ -389,6 +427,34 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                     }
                 }
             }
+        }
+    }
+
+    @Override
+    public void setFocusAppearance(int strokeWidth, int color) {
+        AccessibilityUserState userState = mUserStateWeakReference.get();
+        if (userState == null) {
+            return;
+        }
+
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return;
+            }
+
+            if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+                return;
+            }
+
+            if (userState.getFocusStrokeWidthLocked() == strokeWidth
+                    && userState.getFocusColorLocked() == color) {
+                return;
+            }
+
+            // Sets the appearance data in the A11yUserState.
+            userState.setFocusAppearanceLocked(strokeWidth, color);
+            // Updates the appearance data in the A11yManager.
+            mSystemSupport.onClientChangeLocked(false);
         }
     }
 }

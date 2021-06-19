@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsOsTestCases",
+      "options": [
+        {
+          "include-filter": "android.os.cts.CompanionDeviceManagerTest"
+        }
+      ]
+    }
+  ]
+}

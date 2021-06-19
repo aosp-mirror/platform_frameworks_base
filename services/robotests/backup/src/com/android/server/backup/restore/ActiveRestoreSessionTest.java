@@ -57,6 +57,7 @@ import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
+import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowEventLog;
 import com.android.server.testing.shadows.ShadowPerformUnifiedRestoreTask;
@@ -96,6 +97,7 @@ public class ActiveRestoreSessionTest {
     @Mock private TransportManager mTransportManager;
     @Mock private IRestoreObserver mObserver;
     @Mock private IBackupManagerMonitor mMonitor;
+    @Mock private BackupEligibilityRules mBackupEligibilityRules;
     private ShadowLooper mShadowBackupLooper;
     private ShadowApplication mShadowApplication;
     private UserBackupManagerService.BackupWakeLock mWakeLock;
@@ -576,7 +578,8 @@ public class ActiveRestoreSessionTest {
     private IRestoreSession createActiveRestoreSession(
             String packageName, TransportData transport) {
         return new ActiveRestoreSession(
-                mBackupManagerService, packageName, transport.transportName);
+                mBackupManagerService, packageName, transport.transportName,
+                mBackupEligibilityRules);
     }
 
     private IRestoreSession createActiveRestoreSessionWithRestoreSets(
@@ -584,7 +587,8 @@ public class ActiveRestoreSessionTest {
             throws RemoteException {
         ActiveRestoreSession restoreSession =
                 new ActiveRestoreSession(
-                        mBackupManagerService, packageName, transport.transportName);
+                        mBackupManagerService, packageName, transport.transportName,
+                        mBackupEligibilityRules);
         restoreSession.setRestoreSets(restoreSets);
         return restoreSession;
     }

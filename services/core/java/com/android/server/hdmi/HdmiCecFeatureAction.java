@@ -15,9 +15,11 @@
  */
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -25,6 +27,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -61,7 +64,20 @@ abstract class HdmiCecFeatureAction {
 
     private ArrayList<Pair<HdmiCecFeatureAction, Runnable>> mOnFinishedCallbacks;
 
+    final List<IHdmiControlCallback> mCallbacks = new ArrayList<>();
+
     HdmiCecFeatureAction(HdmiCecLocalDevice source) {
+        this(source, new ArrayList<>());
+    }
+
+    HdmiCecFeatureAction(HdmiCecLocalDevice source, IHdmiControlCallback callback) {
+        this(source, Arrays.asList(callback));
+    }
+
+    HdmiCecFeatureAction(HdmiCecLocalDevice source, List<IHdmiControlCallback> callbacks) {
+        for (IHdmiControlCallback callback : callbacks) {
+            addCallback(callback);
+        }
         mSource = source;
         mService = mSource.getService();
         mActionTimer = createActionTimer(mService.getServiceLooper());
@@ -281,5 +297,27 @@ abstract class HdmiCecFeatureAction {
             mOnFinishedCallbacks = new ArrayList<>();
         }
         mOnFinishedCallbacks.add(Pair.create(action, runnable));
+    }
+
+    protected void finishWithCallback(int returnCode) {
+        invokeCallback(returnCode);
+        finish();
+    }
+
+    public void addCallback(IHdmiControlCallback callback) {
+        mCallbacks.add(callback);
+    }
+
+    private void invokeCallback(int result) {
+        try {
+            for (IHdmiControlCallback callback : mCallbacks) {
+                if (callback == null) {
+                    continue;
+                }
+                callback.onComplete(result);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Callback failed:" + e);
+        }
     }
 }

@@ -19,6 +19,7 @@ package android.hardware;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
@@ -47,7 +48,7 @@ public class SerialManager {
      *
      * @return names of available serial ports
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public String[] getSerialPorts() {
         try {
             return mService.getSerialPorts();
@@ -67,7 +68,7 @@ public class SerialManager {
      * @param speed at which to open the serial port
      * @return the serial port
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public SerialPort openSerialPort(String name, int speed) throws IOException {
         try {
             ParcelFileDescriptor pfd = mService.openSerialPort(name);

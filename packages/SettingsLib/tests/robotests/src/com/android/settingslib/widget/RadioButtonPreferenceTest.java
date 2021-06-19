@@ -40,10 +40,30 @@ public class RadioButtonPreferenceTest {
     private Application mContext;
     private RadioButtonPreference mPreference;
 
+    private View mExtraWidgetContainer;
+    private View mExtraWidget;
+
+    private boolean mIsClickListenerCalled;
+    private View.OnClickListener mClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mIsClickListenerCalled = true;
+        }
+    };
+
     @Before
     public void setUp() {
         mContext = RuntimeEnvironment.application;
         mPreference = new RadioButtonPreference(mContext);
+
+        View view = LayoutInflater.from(mContext)
+                .inflate(R.layout.preference_radio, null /* root */);
+        PreferenceViewHolder preferenceViewHolder =
+                PreferenceViewHolder.createInstanceForTests(view);
+        mPreference.onBindViewHolder(preferenceViewHolder);
+
+        mExtraWidgetContainer = view.findViewById(R.id.radio_extra_widget_container);
+        mExtraWidget = view.findViewById(R.id.radio_extra_widget);
     }
 
     @Test
@@ -57,26 +77,30 @@ public class RadioButtonPreferenceTest {
     }
 
     @Test
-    public void summary_containerShouldBeVisible() {
+    public void onBindViewHolder_withSummary_containerShouldBeVisible() {
         mPreference.setSummary("some summary");
         View summaryContainer = new View(mContext);
         View view = mock(View.class);
         when(view.findViewById(R.id.summary_container)).thenReturn(summaryContainer);
         PreferenceViewHolder preferenceViewHolder =
                 PreferenceViewHolder.createInstanceForTests(view);
+
         mPreference.onBindViewHolder(preferenceViewHolder);
+
         assertEquals(View.VISIBLE, summaryContainer.getVisibility());
     }
 
     @Test
-    public void emptySummary_containerShouldBeGone() {
+    public void onBindViewHolder_emptySummary_containerShouldBeGone() {
         mPreference.setSummary("");
         View summaryContainer = new View(mContext);
         View view = mock(View.class);
         when(view.findViewById(R.id.summary_container)).thenReturn(summaryContainer);
         PreferenceViewHolder preferenceViewHolder =
                 PreferenceViewHolder.createInstanceForTests(view);
+
         mPreference.onBindViewHolder(preferenceViewHolder);
+
         assertEquals(View.GONE, summaryContainer.getVisibility());
     }
 
@@ -93,11 +117,36 @@ public class RadioButtonPreferenceTest {
     }
 
     @Test
-    public void hideAppendix_shouldBeGone() {
+    public void setAppendixVisibility_setGone_shouldBeGone() {
         mPreference.setAppendixVisibility(View.GONE);
-        View view = LayoutInflater.from(mContext).inflate(R.layout.preference_radio, null);
+
+        View view = LayoutInflater.from(mContext)
+                .inflate(R.layout.preference_radio, null /* root */);
         PreferenceViewHolder holder = PreferenceViewHolder.createInstanceForTests(view);
         mPreference.onBindViewHolder(holder);
         assertThat(holder.findViewById(R.id.appendix).getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void setExtraWidgetListener_setNull_extraWidgetShouldInvisible() {
+        mPreference.setExtraWidgetOnClickListener(null);
+
+        assertEquals(View.GONE, mExtraWidgetContainer.getVisibility());
+    }
+
+    @Test
+    public void setExtraWidgetListener_extraWidgetShouldVisible() {
+        mPreference.setExtraWidgetOnClickListener(mClickListener);
+
+        assertEquals(View.VISIBLE, mExtraWidgetContainer.getVisibility());
+    }
+
+    @Test
+    public void onClickListener_setExtraWidgetOnClickListener_ShouldCalled() {
+        mPreference.setExtraWidgetOnClickListener(mClickListener);
+
+        assertThat(mIsClickListenerCalled).isFalse();
+        mExtraWidget.callOnClick();
+        assertThat(mIsClickListenerCalled).isTrue();
     }
 }

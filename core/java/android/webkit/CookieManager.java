@@ -98,9 +98,17 @@ public abstract class CookieManager {
     public abstract boolean acceptThirdPartyCookies(WebView webview);
 
     /**
-     * Sets a cookie for the given URL. Any existing cookie with the same host,
-     * path and name will be replaced with the new cookie. The cookie being set
-     * will be ignored if it is expired.
+     * Sets a single cookie (key-value pair) for the given URL. Any existing cookie with the same
+     * host, path and name will be replaced with the new cookie. The cookie being set
+     * will be ignored if it is expired. To set multiple cookies, your application should invoke
+     * this method multiple times.
+     *
+     * <p>The {@code value} parameter must follow the format of the {@code Set-Cookie} HTTP
+     * response header defined by
+     * <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-03">RFC6265bis</a>.
+     * This is a key-value pair of the form {@code "key=value"}, optionally followed by a list of
+     * cookie attributes delimited with semicolons (ex. {@code "key=value; Max-Age=123"}). Please
+     * consult the RFC specification for a list of valid attributes.
      *
      * <p class="note"><b>Note:</b> if specifying a {@code value} containing the {@code "Secure"}
      * attribute, {@code url} must use the {@code "https://"} scheme.
@@ -112,13 +120,20 @@ public abstract class CookieManager {
     public abstract void setCookie(String url, String value);
 
     /**
-     * Sets a cookie for the given URL. Any existing cookie with the same host,
-     * path and name will be replaced with the new cookie. The cookie being set
-     * will be ignored if it is expired.
-     * <p>
-     * This method is asynchronous.
-     * If a {@link ValueCallback} is provided,
-     * {@link ValueCallback#onReceiveValue(T) onReceiveValue()} will be called on the current
+     * Sets a single cookie (key-value pair) for the given URL. Any existing cookie with the same
+     * host, path and name will be replaced with the new cookie. The cookie being set
+     * will be ignored if it is expired. To set multiple cookies, your application should invoke
+     * this method multiple times.
+     *
+     * <p>The {@code value} parameter must follow the format of the {@code Set-Cookie} HTTP
+     * response header defined by
+     * <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-03">RFC6265bis</a>.
+     * This is a key-value pair of the form {@code "key=value"}, optionally followed by a list of
+     * cookie attributes delimited with semicolons (ex. {@code "key=value; Max-Age=123"}). Please
+     * consult the RFC specification for a list of valid attributes.
+     *
+     * <p>This method is asynchronous. If a {@link ValueCallback} is provided,
+     * {@link ValueCallback#onReceiveValue} will be called on the current
      * thread's {@link android.os.Looper} once the operation is complete.
      * The value provided to the callback indicates whether the cookie was set successfully.
      * You can pass {@code null} as the callback if you don't need to know when the operation
@@ -137,7 +152,10 @@ public abstract class CookieManager {
             callback);
 
     /**
-     * Gets the cookies for the given URL.
+     * Gets all the cookies for the given URL. This may return multiple key-value pairs if multiple
+     * cookies are associated with this URL, in which case each cookie will be delimited by {@code
+     * "; "} characters (semicolon followed by a space). Each key-value pair will be of the form
+     * {@code "key=value"}.
      *
      * @param url the URL for which the cookies are requested
      * @return value the cookies as a string, using the format of the 'Cookie'
@@ -154,6 +172,7 @@ public abstract class CookieManager {
      *               HTTP request header
      * @hide Used by Browser and by WebViewProvider implementations.
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract String getCookie(String url, boolean privateBrowsing);
 
@@ -230,6 +249,7 @@ public abstract class CookieManager {
      * @param privateBrowsing whether to use the private browsing cookie jar
      * @hide Used by Browser and WebViewProvider implementations.
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract boolean hasCookies(boolean privateBrowsing);
 
@@ -264,6 +284,7 @@ public abstract class CookieManager {
      *
      * @hide Only for use by WebViewProvider implementations
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     protected abstract boolean allowFileSchemeCookiesImpl();
 
@@ -299,6 +320,7 @@ public abstract class CookieManager {
      *
      * @hide Only for use by WebViewProvider implementations
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     protected abstract void setAcceptFileSchemeCookiesImpl(boolean accept);
 }

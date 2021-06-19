@@ -24,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.PermissionInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -36,13 +37,15 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -52,20 +55,26 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.utils.Snappable;
+import com.android.server.utils.SnapshotCache;
+import com.android.server.utils.Watchable;
+import com.android.server.utils.WatchableImpl;
+import com.android.server.utils.Watched;
+import com.android.server.utils.WatchedSparseArray;
+import com.android.server.utils.WatchedSparseBooleanArray;
+import com.android.server.utils.Watcher;
 
 import libcore.io.IoUtils;
 import libcore.util.HexEncoding;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +88,7 @@ import java.util.function.Predicate;
  * pruning installed instant apps and meta-data for uninstalled instant apps
  * when free space is needed.
  */
-class InstantAppRegistry {
+class InstantAppRegistry implements Watchable, Snappable {
     private static final boolean DEBUG = false;
 
     private static final String LOG_TAG = "InstantAppRegistry";
@@ -112,11 +121,13 @@ class InstantAppRegistry {
     private static final String ATTR_GRANTED = "granted";
 
     private final PackageManagerService mService;
+    private final PermissionManagerServiceInternal mPermissionManager;
     private final CookiePersistence mCookiePersistence;
 
     /** State for uninstalled instant apps */
+    @Watched
     @GuardedBy("mService.mLock")
-    private SparseArray<List<UninstalledInstantAppState>> mUninstalledInstantApps;
+    private final WatchedSparseArray<List<UninstalledInstantAppState>> mUninstalledInstantApps;
 
     /**
      * Automatic grants for access to instant app metadata.
@@ -124,16 +135,103 @@ class InstantAppRegistry {
      * The value is a set of instant app UIDs.
      * UserID -> TargetAppId -> InstantAppId
      */
+    @Watched
     @GuardedBy("mService.mLock")
-    private SparseArray<SparseArray<SparseBooleanArray>> mInstantGrants;
+    private final WatchedSparseArray<WatchedSparseArray<WatchedSparseBooleanArray>> mInstantGrants;
 
     /** The set of all installed instant apps. UserID -> AppID */
+    @Watched
     @GuardedBy("mService.mLock")
-    private SparseArray<SparseBooleanArray> mInstalledInstantAppUids;
+    private final WatchedSparseArray<WatchedSparseBooleanArray> mInstalledInstantAppUids;
 
-    public InstantAppRegistry(PackageManagerService service) {
+    /**
+     * The cached snapshot
+     */
+    private final SnapshotCache<InstantAppRegistry> mSnapshot;
+
+    /**
+     * Watchable machinery
+     */
+    private final WatchableImpl mWatchable = new WatchableImpl();
+    public void registerObserver(@NonNull Watcher observer) {
+        mWatchable.registerObserver(observer);
+    }
+    public void unregisterObserver(@NonNull Watcher observer) {
+        mWatchable.unregisterObserver(observer);
+    }
+    public boolean isRegisteredObserver(@NonNull Watcher observer) {
+        return mWatchable.isRegisteredObserver(observer);
+    }
+    public void dispatchChange(@Nullable Watchable what) {
+        mWatchable.dispatchChange(what);
+    }
+    /**
+     * Notify listeners that this object has changed.
+     */
+    private void onChanged() {
+        dispatchChange(this);
+    }
+
+    /** The list of observers */
+    private final Watcher mObserver = new Watcher() {
+            @Override
+            public void onChange(@Nullable Watchable what) {
+                InstantAppRegistry.this.onChanged();
+            }
+        };
+
+    private SnapshotCache<InstantAppRegistry> makeCache() {
+        return new SnapshotCache<InstantAppRegistry>(this, this) {
+            @Override
+            public InstantAppRegistry createSnapshot() {
+                InstantAppRegistry s = new InstantAppRegistry(mSource);
+                s.mWatchable.seal();
+                return s;
+            }};
+    }
+
+    public InstantAppRegistry(PackageManagerService service,
+            PermissionManagerServiceInternal permissionManager) {
         mService = service;
+        mPermissionManager = permissionManager;
         mCookiePersistence = new CookiePersistence(BackgroundThread.getHandler().getLooper());
+
+        mUninstalledInstantApps = new WatchedSparseArray<List<UninstalledInstantAppState>>();
+        mInstantGrants = new WatchedSparseArray<WatchedSparseArray<WatchedSparseBooleanArray>>();
+        mInstalledInstantAppUids = new WatchedSparseArray<WatchedSparseBooleanArray>();
+
+        mUninstalledInstantApps.registerObserver(mObserver);
+        mInstantGrants.registerObserver(mObserver);
+        mInstalledInstantAppUids.registerObserver(mObserver);
+        Watchable.verifyWatchedAttributes(this, mObserver);
+
+        mSnapshot = makeCache();
+    }
+
+    /**
+     * The copy constructor is used by PackageManagerService to construct a snapshot.
+     */
+    private InstantAppRegistry(InstantAppRegistry r) {
+        mService = r.mService;
+        mPermissionManager = r.mPermissionManager;
+        mCookiePersistence = null;
+
+        mUninstalledInstantApps = new WatchedSparseArray<List<UninstalledInstantAppState>>(
+            r.mUninstalledInstantApps);
+        mInstantGrants = new WatchedSparseArray<WatchedSparseArray<WatchedSparseBooleanArray>>(
+            r.mInstantGrants);
+        mInstalledInstantAppUids = new WatchedSparseArray<WatchedSparseBooleanArray>(
+            r.mInstalledInstantAppUids);
+
+        // Do not register any observers.  This is a snapshot.
+        mSnapshot = null;
+    }
+
+    /**
+     * Return a snapshot: the value is the cached snapshot if available.
+     */
+    public InstantAppRegistry snapshot() {
+        return mSnapshot.snapshot();
     }
 
     @GuardedBy("mService.mLock")
@@ -364,89 +462,79 @@ class InstantAppRegistry {
 
     @GuardedBy("mService.mLock")
     public void onUserRemovedLPw(int userId) {
-        if (mUninstalledInstantApps != null) {
-            mUninstalledInstantApps.remove(userId);
-            if (mUninstalledInstantApps.size() <= 0) {
-                mUninstalledInstantApps = null;
-            }
-        }
-        if (mInstalledInstantAppUids != null) {
-            mInstalledInstantAppUids.remove(userId);
-            if (mInstalledInstantAppUids.size() <= 0) {
-                mInstalledInstantAppUids = null;
-            }
-        }
-        if (mInstantGrants != null) {
-            mInstantGrants.remove(userId);
-            if (mInstantGrants.size() <= 0) {
-                mInstantGrants = null;
-            }
-        }
+        mUninstalledInstantApps.remove(userId);
+        mInstalledInstantAppUids.remove(userId);
+        mInstantGrants.remove(userId);
         deleteDir(getInstantApplicationsDir(userId));
     }
 
     public boolean isInstantAccessGranted(@UserIdInt int userId, int targetAppId,
             int instantAppId) {
-        if (mInstantGrants == null) {
-            return false;
-        }
-        final SparseArray<SparseBooleanArray> targetAppList = mInstantGrants.get(userId);
+        final WatchedSparseArray<WatchedSparseBooleanArray> targetAppList =
+                mInstantGrants.get(userId);
         if (targetAppList == null) {
             return false;
         }
-        final SparseBooleanArray instantGrantList = targetAppList.get(targetAppId);
+        final WatchedSparseBooleanArray instantGrantList = targetAppList.get(targetAppId);
         if (instantGrantList == null) {
             return false;
         }
         return instantGrantList.get(instantAppId);
     }
 
+    /**
+     * Allows an app to see an instant app.
+     *
+     * @param userId the userId in which this access is being granted
+     * @param intent when provided, this serves as the intent that caused
+     *               this access to be granted
+     * @param recipientUid the uid of the app receiving visibility
+     * @param instantAppId the app ID of the instant app being made visible
+     *                      to the recipient
+     * @return {@code true} if access is granted.
+     */
     @GuardedBy("mService.mLock")
-    public void grantInstantAccessLPw(@UserIdInt int userId, @Nullable Intent intent,
+    public boolean grantInstantAccessLPw(@UserIdInt int userId, @Nullable Intent intent,
             int recipientUid, int instantAppId) {
         if (mInstalledInstantAppUids == null) {
-            return;     // no instant apps installed; no need to grant
+            return false;     // no instant apps installed; no need to grant
         }
-        SparseBooleanArray instantAppList = mInstalledInstantAppUids.get(userId);
+        WatchedSparseBooleanArray instantAppList = mInstalledInstantAppUids.get(userId);
         if (instantAppList == null || !instantAppList.get(instantAppId)) {
-            return;     // instant app id isn't installed; no need to grant
+            return false;     // instant app id isn't installed; no need to grant
         }
         if (instantAppList.get(recipientUid)) {
-            return;     // target app id is an instant app; no need to grant
+            return false;     // target app id is an instant app; no need to grant
         }
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             final Set<String> categories = intent.getCategories();
             if (categories != null && categories.contains(Intent.CATEGORY_BROWSABLE)) {
-                return;  // launched via VIEW/BROWSABLE intent; no need to grant
+                return false;  // launched via VIEW/BROWSABLE intent; no need to grant
             }
         }
-        if (mInstantGrants == null) {
-            mInstantGrants = new SparseArray<>();
-        }
-        SparseArray<SparseBooleanArray> targetAppList = mInstantGrants.get(userId);
+        WatchedSparseArray<WatchedSparseBooleanArray> targetAppList = mInstantGrants.get(userId);
         if (targetAppList == null) {
-            targetAppList = new SparseArray<>();
+            targetAppList = new WatchedSparseArray<>();
             mInstantGrants.put(userId, targetAppList);
         }
-        SparseBooleanArray instantGrantList = targetAppList.get(recipientUid);
+        WatchedSparseBooleanArray instantGrantList = targetAppList.get(recipientUid);
         if (instantGrantList == null) {
-            instantGrantList = new SparseBooleanArray();
+            instantGrantList = new WatchedSparseBooleanArray();
             targetAppList.put(recipientUid, instantGrantList);
         }
         instantGrantList.put(instantAppId, true /*granted*/);
+        return true;
     }
 
     @GuardedBy("mService.mLock")
     public void addInstantAppLPw(@UserIdInt int userId, int instantAppId) {
-        if (mInstalledInstantAppUids == null) {
-            mInstalledInstantAppUids = new SparseArray<>();
-        }
-        SparseBooleanArray instantAppList = mInstalledInstantAppUids.get(userId);
+        WatchedSparseBooleanArray instantAppList = mInstalledInstantAppUids.get(userId);
         if (instantAppList == null) {
-            instantAppList = new SparseBooleanArray();
+            instantAppList = new WatchedSparseBooleanArray();
             mInstalledInstantAppUids.put(userId, instantAppList);
         }
         instantAppList.put(instantAppId, true /*installed*/);
+        onChanged();
     }
 
     @GuardedBy("mService.mLock")
@@ -455,23 +543,28 @@ class InstantAppRegistry {
         if (mInstalledInstantAppUids == null) {
             return; // no instant apps on the system
         }
-        final SparseBooleanArray instantAppList = mInstalledInstantAppUids.get(userId);
+        final WatchedSparseBooleanArray instantAppList = mInstalledInstantAppUids.get(userId);
         if (instantAppList == null) {
             return;
         }
 
-        instantAppList.delete(instantAppId);
+        try {
+            instantAppList.delete(instantAppId);
 
-        // remove any grants
-        if (mInstantGrants == null) {
-            return; // no grants on the system
-        }
-        final SparseArray<SparseBooleanArray> targetAppList = mInstantGrants.get(userId);
-        if (targetAppList == null) {
-            return; // no grants for this user
-        }
-        for (int i = targetAppList.size() - 1; i >= 0; --i) {
-            targetAppList.valueAt(i).delete(instantAppId);
+            // remove any grants
+            if (mInstantGrants == null) {
+                return; // no grants on the system
+            }
+            final WatchedSparseArray<WatchedSparseBooleanArray> targetAppList =
+                    mInstantGrants.get(userId);
+            if (targetAppList == null) {
+                return; // no grants for this user
+            }
+            for (int i = targetAppList.size() - 1; i >= 0; --i) {
+                targetAppList.valueAt(i).delete(instantAppId);
+            }
+        } finally {
+            onChanged();
         }
     }
 
@@ -481,11 +574,13 @@ class InstantAppRegistry {
         if (mInstantGrants == null) {
             return; // no grants on the system
         }
-        final SparseArray<SparseBooleanArray> targetAppList = mInstantGrants.get(userId);
+        final WatchedSparseArray<WatchedSparseBooleanArray> targetAppList =
+                mInstantGrants.get(userId);
         if (targetAppList == null) {
             return; // no grants for this user
         }
         targetAppList.delete(targetAppId);
+        onChanged();
     }
 
     @GuardedBy("mService.mLock")
@@ -495,9 +590,6 @@ class InstantAppRegistry {
                 pkg, userId, false);
         if (uninstalledApp == null) {
             return;
-        }
-        if (mUninstalledInstantApps == null) {
-            mUninstalledInstantApps = new SparseArray<>();
         }
         List<UninstalledInstantAppState> uninstalledAppStates =
                 mUninstalledInstantApps.get(userId);
@@ -587,9 +679,7 @@ class InstantAppRegistry {
             uninstalledAppStates.remove(i);
             if (uninstalledAppStates.isEmpty()) {
                 mUninstalledInstantApps.remove(userId);
-                if (mUninstalledInstantApps.size() <= 0) {
-                    mUninstalledInstantApps = null;
-                }
+                onChanged();
                 return;
             }
         }
@@ -767,8 +857,8 @@ class InstantAppRegistry {
             for (int i = 0; i < packageCount; i++) {
                 final String packageToDelete = packagesToDelete.get(i);
                 if (mService.deletePackageX(packageToDelete, PackageManager.VERSION_CODE_HIGHEST,
-                        UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS)
-                                == PackageManager.DELETE_SUCCEEDED) {
+                        UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS,
+                        true /*removedBySystem*/) == PackageManager.DELETE_SUCCEEDED) {
                     if (file.getUsableSpace() >= neededSpace) {
                         return true;
                     }
@@ -861,7 +951,8 @@ class InstantAppRegistry {
         String[] requestedPermissions = new String[pkg.getRequestedPermissions().size()];
         pkg.getRequestedPermissions().toArray(requestedPermissions);
 
-        Set<String> permissions = ps.getPermissionsState().getPermissions(userId);
+        Set<String> permissions = mPermissionManager.getGrantedPermissions(
+                pkg.getPackageName(), userId);
         String[] grantedPermissions = new String[permissions.size()];
         permissions.toArray(grantedPermissions);
 
@@ -912,8 +1003,7 @@ class InstantAppRegistry {
         final long identity = Binder.clearCallingIdentity();
         try {
             for (String grantedPermission : appInfo.getGrantedPermissions()) {
-                final boolean propagatePermission =
-                        mService.mSettings.canPropagatePermissionToInstantApp(grantedPermission);
+                final boolean propagatePermission = canPropagatePermission(grantedPermission);
                 if (propagatePermission && pkg.getRequestedPermissions().contains(
                         grantedPermission)) {
                     mService.grantRuntimePermission(pkg.getPackageName(), grantedPermission,
@@ -923,6 +1013,19 @@ class InstantAppRegistry {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    private boolean canPropagatePermission(@NonNull String permissionName) {
+        final PermissionManager permissionManager = mService.mContext.getSystemService(
+                PermissionManager.class);
+        final PermissionInfo permissionInfo = permissionManager.getPermissionInfo(permissionName,
+                0);
+        return permissionInfo != null
+                && (permissionInfo.getProtection() == PermissionInfo.PROTECTION_DANGEROUS
+                        || (permissionInfo.getProtectionFlags()
+                                & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0)
+                && (permissionInfo.getProtectionFlags() & PermissionInfo.PROTECTION_FLAG_INSTANT)
+                        != 0;
     }
 
     private @NonNull
@@ -987,12 +1090,7 @@ class InstantAppRegistry {
             }
         }
 
-        if (uninstalledAppStates != null) {
-            if (mUninstalledInstantApps == null) {
-                mUninstalledInstantApps = new SparseArray<>();
-            }
-            mUninstalledInstantApps.put(userId, uninstalledAppStates);
-        }
+        mUninstalledInstantApps.put(userId, uninstalledAppStates);
 
         return uninstalledAppStates;
     }
@@ -1015,8 +1113,7 @@ class InstantAppRegistry {
         final String packageName = instantDir.getName();
 
         try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(in, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
             return new UninstalledInstantAppState(
                     parseMetadata(parser, packageName), timestamp);
         } catch (XmlPullParserException | IOException e) {
@@ -1056,7 +1153,7 @@ class InstantAppRegistry {
     }
 
     private static @Nullable
-    InstantAppInfo parseMetadata(@NonNull XmlPullParser parser,
+    InstantAppInfo parseMetadata(@NonNull TypedXmlPullParser parser,
                                  @NonNull String packageName)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
@@ -1068,7 +1165,7 @@ class InstantAppRegistry {
         return null;
     }
 
-    private static InstantAppInfo parsePackage(@NonNull XmlPullParser parser,
+    private static InstantAppInfo parsePackage(@NonNull TypedXmlPullParser parser,
                                                @NonNull String packageName)
             throws IOException, XmlPullParserException {
         String label = parser.getAttributeValue(null, ATTR_LABEL);
@@ -1093,7 +1190,7 @@ class InstantAppRegistry {
                 requestedPermissions, grantedPermissions);
     }
 
-    private static void parsePermissions(@NonNull XmlPullParser parser,
+    private static void parsePermissions(@NonNull TypedXmlPullParser parser,
             @NonNull List<String> outRequestedPermissions,
             @NonNull List<String> outGrantedPermissions)
             throws IOException, XmlPullParserException {
@@ -1102,7 +1199,7 @@ class InstantAppRegistry {
             if (TAG_PERMISSION.equals(parser.getName())) {
                 String permission = XmlUtils.readStringAttribute(parser, ATTR_NAME);
                 outRequestedPermissions.add(permission);
-                if (XmlUtils.readBooleanAttribute(parser, ATTR_GRANTED)) {
+                if (parser.getAttributeBoolean(null, ATTR_GRANTED, false)) {
                     outGrantedPermissions.add(permission);
                 }
             }
@@ -1123,8 +1220,7 @@ class InstantAppRegistry {
         try {
             out = destination.startWrite();
 
-            XmlSerializer serializer = Xml.newSerializer();
-            serializer.setOutput(out, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer serializer = Xml.resolveSerializer(out);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
             serializer.startDocument(null, true);
@@ -1138,7 +1234,7 @@ class InstantAppRegistry {
                 serializer.startTag(null, TAG_PERMISSION);
                 serializer.attribute(null, ATTR_NAME, permission);
                 if (ArrayUtils.contains(instantApp.getGrantedPermissions(), permission)) {
-                    serializer.attribute(null, ATTR_GRANTED, String.valueOf(true));
+                    serializer.attributeBoolean(null, ATTR_GRANTED, true);
                 }
                 serializer.endTag(null, TAG_PERMISSION);
             }

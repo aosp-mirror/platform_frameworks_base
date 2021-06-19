@@ -17,13 +17,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.frameworks.mockingservicestests">
 
+    <uses-sdk android:targetSdkVersion="31" />
+
     <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
     <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG"/>
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
     <uses-permission android:name="android.permission.HARDWARE_TEST"/>
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.MANAGE_APPOPS"/>
     <uses-permission android:name="android.permission.MONITOR_DEVICE_CONFIG_ACCESS"/>
+    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG"/>
+    <uses-permission
+        android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"/>
+
+    <!-- needed by MasterClearReceiverTest to display a system dialog -->
+    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW"/>
 
     <application android:testOnly="true"
                  android:debuggable="true">

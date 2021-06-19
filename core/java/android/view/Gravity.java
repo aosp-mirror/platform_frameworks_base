@@ -15,7 +15,12 @@
  */
 
 package android.view;
+
+import android.annotation.IntDef;
 import android.graphics.Rect;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Standard constants and tools for placing an object within a potentially
@@ -121,6 +126,32 @@ public class Gravity
      * Binary mask for the horizontal gravity and script specific direction bit.
      */
     public static final int RELATIVE_HORIZONTAL_GRAVITY_MASK = START | END;
+
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
+        Gravity.FILL,
+        Gravity.FILL_HORIZONTAL,
+        Gravity.FILL_VERTICAL,
+        Gravity.START,
+        Gravity.END,
+        Gravity.LEFT,
+        Gravity.RIGHT,
+        Gravity.TOP,
+        Gravity.BOTTOM,
+        Gravity.CENTER,
+        Gravity.CENTER_HORIZONTAL,
+        Gravity.CENTER_VERTICAL,
+        Gravity.DISPLAY_CLIP_HORIZONTAL,
+        Gravity.DISPLAY_CLIP_VERTICAL,
+        Gravity.CLIP_HORIZONTAL,
+        Gravity.CLIP_VERTICAL,
+        Gravity.NO_GRAVITY
+    })
+    public @interface GravityFlags {}
 
     /**
      * Apply a gravity constant to an object. This supposes that the layout direction is LTR.

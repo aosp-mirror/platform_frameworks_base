@@ -47,7 +47,7 @@ public class MockPriorityJobService extends JobService {
         int reason = params.getStopReason();
         int event = TestEnvironment.EVENT_STOP_JOB;
         Log.d(TAG, "stop reason: " + String.valueOf(reason));
-        if (reason == JobParameters.REASON_PREEMPT) {
+        if (reason == JobParameters.STOP_REASON_PREEMPT) {
             event = TestEnvironment.EVENT_PREEMPT_JOB;
             Log.d(TAG, "preempted " + String.valueOf(params.getJobId()));
         }

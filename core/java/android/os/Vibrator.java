@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,12 +27,13 @@ import android.annotation.SystemService;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
 import android.util.Log;
+import android.util.Range;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.concurrent.Executor;
 
 /**
@@ -156,6 +158,11 @@ public abstract class Vibrator {
         return ctx != null ? ctx.getResources().getInteger(resId) : VIBRATION_INTENSITY_MEDIUM;
     }
 
+    /** @hide */
+    protected VibratorInfo getInfo() {
+        return VibratorInfo.EMPTY_VIBRATOR_INFO;
+    }
+
     /**
      * Get the default vibration intensity for haptic feedback.
      *
@@ -184,6 +191,16 @@ public abstract class Vibrator {
     }
 
     /**
+     * Return the ID of this vibrator.
+     *
+     * @return A non-negative integer representing the id of the vibrator controlled by this
+     * service, or -1 this service is not attached to any physical vibrator.
+     */
+    public int getId() {
+        return getInfo().getId();
+    }
+
+    /**
      * Check whether the hardware has a vibrator.
      *
      * @return True if the hardware has a vibrator, else false.
@@ -196,6 +213,88 @@ public abstract class Vibrator {
      * @return True if the hardware can control the amplitude of the vibrations, otherwise false.
      */
     public abstract boolean hasAmplitudeControl();
+
+    /**
+     * Check whether the vibrator has independent frequency control.
+     *
+     * @return True if the hardware can control the frequency of the vibrations, otherwise false.
+     * @hide
+     */
+    public boolean hasFrequencyControl() {
+        // We currently can only control frequency of the vibration using the compose PWLE method.
+        return getInfo().hasCapability(
+                IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+    }
+
+    /**
+     * Check whether the vibrator can be controlled by an external service with the
+     * {@link IExternalVibratorService}.
+     *
+     * @return True if the hardware can be controlled by an external service, otherwise false.
+     * @hide
+     */
+    public boolean hasExternalControl() {
+        return getInfo().hasCapability(IVibrator.CAP_EXTERNAL_CONTROL);
+    }
+
+    /**
+     * Gets the resonant frequency of the vibrator.
+     *
+     * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown or
+     * this vibrator is a composite of multiple physical devices.
+     * @hide
+     */
+    public float getResonantFrequency() {
+        return getInfo().getResonantFrequency();
+    }
+
+    /**
+     * Gets the <a href="https://en.wikipedia.org/wiki/Q_factor">Q factor</a> of the vibrator.
+     *
+     * @return the Q factor of the vibrator, or {@link Float#NaN NaN} if it's unknown or
+     *         this vibrator is a composite of multiple physical devices.
+     * @hide
+     */
+    public float getQFactor() {
+        return getInfo().getQFactor();
+    }
+
+    /**
+     * Return a range of relative frequency values supported by the vibrator.
+     *
+     * <p>These values can be used to create waveforms that controls the vibration frequency via
+     * {@link VibrationEffect.WaveformBuilder}.
+     *
+     * @return A range of relative frequency values supported. The range will always contain the
+     * value 0, representing the device resonant frequency. Devices without frequency control will
+     * return the range [0,0]. Devices with frequency control will always return a range containing
+     * the safe range [-1, 1].
+     * @hide
+     */
+    public Range<Float> getRelativeFrequencyRange() {
+        return getInfo().getFrequencyRange();
+    }
+
+    /**
+     * Return the maximum amplitude the vibrator can play at given relative frequency.
+     *
+     * <p>Devices without frequency control will return 1 for the input zero (resonant frequency),
+     * and 0 to any other input.
+     *
+     * <p>Devices with frequency control will return the supported value, for input in
+     * {@link #getRelativeFrequencyRange()}, and 0 for any other input.
+     *
+     * <p>These values can be used to create waveforms that plays vibrations outside the resonant
+     * frequency via {@link VibrationEffect.WaveformBuilder}.
+     *
+     * @return a value in [0,1] representing the maximum amplitude the device can play at given
+     * relative frequency.
+     * @hide
+     */
+    @FloatRange(from = 0, to = 1)
+    public float getMaximumAmplitude(float relativeFrequency) {
+        return getInfo().getMaxAmplitude(relativeFrequency);
+    }
 
     /**
      * Configure an always-on haptics effect.
@@ -343,8 +442,24 @@ public abstract class Vibrator {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
-    public abstract void vibrate(int uid, String opPkg, VibrationEffect vibe,
-            String reason, AudioAttributes attributes);
+    public final void vibrate(int uid, String opPkg, VibrationEffect vibe,
+            String reason, AudioAttributes attributes) {
+        if (attributes == null) {
+            attributes = new AudioAttributes.Builder().build();
+        }
+        VibrationAttributes attr = new VibrationAttributes.Builder(attributes, vibe).build();
+        vibrate(uid, opPkg, vibe, reason, attr);
+    }
+
+    /**
+     * Like {@link #vibrate(int, String, VibrationEffect, String, AudioAttributes)}, but allows the
+     * caller to specify {@link VibrationAttributes} instead of {@link AudioAttributes}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public abstract void vibrate(int uid, String opPkg, @NonNull VibrationEffect vibe,
+            String reason, @NonNull VibrationAttributes attributes);
 
     /**
      * Query whether the vibrator supports the given effects.
@@ -366,9 +481,12 @@ public abstract class Vibrator {
     @VibrationEffectSupport
     public int[] areEffectsSupported(
             @NonNull @VibrationEffect.EffectType int... effectIds) {
-        final int[] support = new int[effectIds.length];
-        Arrays.fill(support, VIBRATION_EFFECT_SUPPORT_NO);
-        return support;
+        VibratorInfo info = getInfo();
+        int[] supported = new int[effectIds.length];
+        for (int i = 0; i < effectIds.length; i++) {
+            supported[i] = info.isEffectSupported(effectIds[i]);
+        }
+        return supported;
     }
 
     /**
@@ -419,8 +537,13 @@ public abstract class Vibrator {
      */
     @NonNull
     public boolean[] arePrimitivesSupported(
-            @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
-        return new boolean[primitiveIds.length];
+            @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
+        VibratorInfo info = getInfo();
+        boolean[] supported = new boolean[primitiveIds.length];
+        for (int i = 0; i < primitiveIds.length; i++) {
+            supported[i] = info.isPrimitiveSupported(primitiveIds[i]);
+        }
+        return supported;
     }
 
     /**
@@ -430,7 +553,7 @@ public abstract class Vibrator {
      * @return Whether primitives effects are supported.
      */
     public final boolean areAllPrimitivesSupported(
-            @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
+            @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
         for (boolean supported : arePrimitivesSupported(primitiveIds)) {
             if (!supported) {
                 return false;
@@ -440,10 +563,44 @@ public abstract class Vibrator {
     }
 
     /**
+     * Query the estimated durations of the given primitives.
+     *
+     * <p>The returned array will be the same length as the query array and the value at a given
+     * index will contain the duration in milliseconds of the effect at the same index in the
+     * querying array.
+     *
+     * <p>The duration will be positive for primitives that are supported and zero for the
+     * unsupported ones, in correspondence with {@link #arePrimitivesSupported(int...)}.
+     *
+     * @param primitiveIds Which primitives to query for.
+     * @return The duration of each primitive, with zeroes for primitives that are not supported.
+     */
+    @NonNull
+    public int[] getPrimitiveDurations(
+            @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
+        VibratorInfo info = getInfo();
+        int[] durations = new int[primitiveIds.length];
+        for (int i = 0; i < primitiveIds.length; i++) {
+            durations[i] = info.getPrimitiveDuration(primitiveIds[i]);
+        }
+        return durations;
+    }
+
+    /**
      * Turn the vibrator off.
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public abstract void cancel();
+
+    /**
+     * Cancel specific types of ongoing vibrations.
+     *
+     * @param usageFilter The type of vibration to be cancelled, represented as a bitwise
+     *                    combination of {@link VibrationAttributes.Usage} values.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public abstract void cancel(int usageFilter);
 
     /**
      * Check whether the vibrator is vibrating.
