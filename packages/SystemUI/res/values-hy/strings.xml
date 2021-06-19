@@ -480,8 +480,12 @@
     <string name="user_add_user" msgid="4336657383006913022">"Ավելացնել օգտատեր"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Նոր օգտատեր"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Հեռացնե՞լ հյուրին"</string>
+    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
+    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր ծրագրերն ու տվյալները կջնջվեն:"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Հեռացնել"</string>
+    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
+    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Բարի վերադարձ, հյուր"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Շարունակե՞լ աշխատաշրջանը։"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Վերսկսել"</string>
@@ -1034,8 +1038,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Խոշորացնել էկրանի որոշակի հատվածը"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Փոխել"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Հատուկ գործառույթների ժեստը փոխարինվել է կոճակով\n\n"<annotation id="link">"Բացել կարգավորումները"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Դուք հատուկ գործառույթի ժեստի փոխարեն կարող եք անցնել համապատասխան կոճակի օգտագործմանը\n\n"<annotation id="link">"Կարգավորումներ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Կոճակը ժամանակավորապես թաքցնելու համար այն տեղափոխեք էկրանի եզր"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Տեղափոխել վերև՝ ձախ"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Տեղափոխել վերև՝ աջ"</string>

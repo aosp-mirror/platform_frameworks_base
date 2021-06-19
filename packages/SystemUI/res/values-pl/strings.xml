@@ -484,8 +484,12 @@
     <string name="user_add_user" msgid="4336657383006913022">"Dodaj użytkownika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nowy użytkownik"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Usunąć gościa?"</string>
+    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
+    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Wszystkie aplikacje i dane w tej sesji zostaną usunięte."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Usuń"</string>
+    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
+    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Witaj ponownie, Gościu!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Chcesz kontynuować sesję?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Rozpocznij nową"</string>
@@ -1044,8 +1048,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Powiększ część ekranu"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Przełącz"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Przycisk ułatwień dostępu zastąpił gest ułatwień dostępu\n\n"<annotation id="link">"Wyświetl ustawienia"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Możesz przełączyć się z gestu na przycisk ułatwień dostępu.\n\n"<annotation id="link">"Ustawienia"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Przesuń przycisk do krawędzi, aby ukryć go tymczasowo"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Przenieś w lewy górny róg"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Przenieś w prawy górny róg"</string>
