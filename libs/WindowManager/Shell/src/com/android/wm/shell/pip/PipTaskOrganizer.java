@@ -463,6 +463,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     private void removePipImmediately() {
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.setBounds(mToken, null);
+            wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+            wct.reorder(mToken, false);
+            mPipTransitionController.startTransition(null, wct);
+            return;
+        }
+
         try {
             // Reset the task bounds first to ensure the activity configuration is reset as well
             final WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -524,6 +533,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
                 mPipMenuController.attach(mLeash);
+            } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+                mOneShotAnimationType = ANIM_TYPE_BOUNDS;
             }
             return;
         }

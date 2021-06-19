@@ -18,7 +18,6 @@ package android.app;
 
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ConfigurationController.createNewConfigAndUpdateIfNotNull;
-import static android.app.ConfigurationController.freeTextLayoutCachesIfNeeded;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_CREATE;
@@ -31,6 +30,10 @@ import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.window.ConfigurationHelper.diffPublicWithSizeBuckets;
+import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
+import static android.window.ConfigurationHelper.isDifferentDisplay;
+import static android.window.ConfigurationHelper.shouldUpdateResources;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
@@ -91,7 +94,6 @@ import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.HardwareRenderer;
-import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.hardware.display.DisplayManagerGlobal;
 import android.inputmethodservice.InputMethodService;
@@ -186,6 +188,7 @@ import android.webkit.WebView;
 import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreen;
 import android.window.SplashScreenView;
+import android.window.WindowProviderService;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -5756,7 +5759,7 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
-    public ArrayList<ComponentCallbacks2> collectComponentCallbacks(boolean includeActivities) {
+    public ArrayList<ComponentCallbacks2> collectComponentCallbacks(boolean includeUiContexts) {
         ArrayList<ComponentCallbacks2> callbacks
                 = new ArrayList<ComponentCallbacks2>();
 
@@ -5765,7 +5768,7 @@ public final class ActivityThread extends ClientTransactionHandler
             for (int i=0; i<NAPP; i++) {
                 callbacks.add(mAllApplications.get(i));
             }
-            if (includeActivities) {
+            if (includeUiContexts) {
                 for (int i = mActivities.size() - 1; i >= 0; i--) {
                     final Activity a = mActivities.valueAt(i).activity;
                     if (a != null && !a.mFinished) {
@@ -5775,11 +5778,15 @@ public final class ActivityThread extends ClientTransactionHandler
             }
             final int NSVC = mServices.size();
             for (int i=0; i<NSVC; i++) {
-                final ComponentCallbacks2 serviceComp = mServices.valueAt(i);
-                if (serviceComp instanceof InputMethodService) {
+                final Service service = mServices.valueAt(i);
+                if (service instanceof InputMethodService) {
                     mHasImeComponent = true;
                 }
-                callbacks.add(serviceComp);
+                // If {@code includeUiContext} is set to false, WindowProviderService should not be
+                // collected because WindowProviderService is a UI Context.
+                if (includeUiContexts || !(service instanceof WindowProviderService)) {
+                    callbacks.add(service);
+                }
             }
         }
         synchronized (mProviderMap) {
@@ -5834,35 +5841,26 @@ public final class ActivityThread extends ClientTransactionHandler
         // change callback, see also PinnedStackTests#testConfigurationChangeOrderDuringTransition
         handleWindowingModeChangeIfNeeded(activity, newConfig);
 
-        final boolean movedToDifferentDisplay = isDifferentDisplay(activity, displayId);
-        boolean shouldReportChange = false;
-        if (activity.mCurrentConfig == null) {
-            shouldReportChange = true;
-        } else {
-            // If the new config is the same as the config this Activity is already running with and
-            // the override config also didn't change, then don't bother calling
-            // onConfigurationChanged.
-            // TODO(b/173090263): Use diff instead after the improvement of AssetManager and
-            // ResourcesImpl constructions.
-            int diff = activity.mCurrentConfig.diffPublicOnly(newConfig);
-            final ActivityClientRecord cr = getActivityClient(activityToken);
-            diff = SizeConfigurationBuckets.filterDiff(diff, activity.mCurrentConfig, newConfig,
-                    cr != null ? cr.mSizeConfigurations : null);
-
-            if (diff == 0) {
-                if (!shouldUpdateWindowMetricsBounds(activity.mCurrentConfig, newConfig)
-                        && !movedToDifferentDisplay
-                        && mResourcesManager.isSameResourcesOverrideConfig(
-                                activityToken, amOverrideConfig)) {
-                    // Nothing significant, don't proceed with updating and reporting.
-                    return null;
-                }
-            } else if ((~activity.mActivityInfo.getRealConfigChanged() & diff) == 0) {
+        final boolean movedToDifferentDisplay = isDifferentDisplay(activity.getDisplayId(),
+                displayId);
+        final SizeConfigurationBuckets buckets = getActivityClient(activityToken)
+                .mSizeConfigurations;
+        final int diff = diffPublicWithSizeBuckets(activity.mCurrentConfig,
+                newConfig, buckets);
+        final boolean hasPublicConfigChange = diff != 0;
+        // TODO(b/173090263): Use diff instead after the improvement of AssetManager and
+        // ResourcesImpl constructions.
+        final boolean shouldUpdateResources = hasPublicConfigChange
+                || shouldUpdateResources(activityToken, activity.mCurrentConfig, newConfig,
+                amOverrideConfig, movedToDifferentDisplay, hasPublicConfigChange);
+        final boolean shouldReportChange = hasPublicConfigChange
                 // If this activity doesn't handle any of the config changes, then don't bother
                 // calling onConfigurationChanged. Otherwise, report to the activity for the
                 // changes.
-                shouldReportChange = true;
-            }
+                && (~activity.mActivityInfo.getRealConfigChanged() & diff) == 0;
+        // Nothing significant, don't proceed with updating and reporting.
+        if (!shouldUpdateResources) {
+            return null;
         }
 
         // Propagate the configuration change to ResourcesManager and Activity.
@@ -5911,26 +5909,6 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         return configToReport;
-    }
-
-    // TODO(b/173090263): Remove this method after the improvement of AssetManager and ResourcesImpl
-    // constructions.
-    /**
-     * Returns {@code true} if the metrics reported by {@link android.view.WindowMetrics} APIs
-     * should be updated.
-     *
-     * @see WindowManager#getCurrentWindowMetrics()
-     * @see WindowManager#getMaximumWindowMetrics()
-     */
-    private static boolean shouldUpdateWindowMetricsBounds(@NonNull Configuration currentConfig,
-            @NonNull Configuration newConfig) {
-        final Rect currentBounds = currentConfig.windowConfiguration.getBounds();
-        final Rect newBounds = newConfig.windowConfiguration.getBounds();
-
-        final Rect currentMaxBounds = currentConfig.windowConfiguration.getMaxBounds();
-        final Rect newMaxBounds = newConfig.windowConfiguration.getMaxBounds();
-
-        return !currentBounds.equals(newBounds) || !currentMaxBounds.equals(newMaxBounds);
     }
 
     public final void applyConfigurationToResources(Configuration config) {
@@ -6080,7 +6058,8 @@ public final class ActivityThread extends ClientTransactionHandler
             // display.
             displayId = r.activity.getDisplayId();
         }
-        final boolean movedToDifferentDisplay = isDifferentDisplay(r.activity, displayId);
+        final boolean movedToDifferentDisplay = isDifferentDisplay(
+                r.activity.getDisplayId(), displayId);
         if (r.overrideConfig != null && !r.overrideConfig.isOtherSeqNewer(overrideConfig)
                 && !movedToDifferentDisplay) {
             if (DEBUG_CONFIGURATION) {
@@ -6114,14 +6093,6 @@ public final class ActivityThread extends ClientTransactionHandler
             viewRoot.updateConfiguration(displayId);
         }
         mSomeActivitiesChanged = true;
-    }
-
-    /**
-     * Checks if the display id of activity is different from the given one. Note that
-     * {@link Display#INVALID_DISPLAY} means no difference.
-     */
-    private static boolean isDifferentDisplay(@NonNull Activity activity, int displayId) {
-        return displayId != INVALID_DISPLAY && displayId != activity.getDisplayId();
     }
 
     final void handleProfilerControl(boolean start, ProfilerInfo profilerInfo, int profileType) {
@@ -6301,7 +6272,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     final void handleLowMemory() {
         final ArrayList<ComponentCallbacks2> callbacks =
-                collectComponentCallbacks(true /* includeActivities */);
+                collectComponentCallbacks(true /* includeUiContexts */);
 
         final int N = callbacks.size();
         for (int i=0; i<N; i++) {
@@ -6334,7 +6305,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         final ArrayList<ComponentCallbacks2> callbacks =
-                collectComponentCallbacks(true /* includeActivities */);
+                collectComponentCallbacks(true /* includeUiContexts */);
 
         final int N = callbacks.size();
         for (int i = 0; i < N; i++) {

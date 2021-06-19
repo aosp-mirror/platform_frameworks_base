@@ -395,6 +395,11 @@ public interface WindowManager extends ViewManager {
      */
     int TRANSIT_KEYGUARD_UNOCCLUDE = 9;
     /**
+     * A window is starting to enter PiP.
+     * @hide
+     */
+    int TRANSIT_PIP = 10;
+    /**
      * The first slot for custom transition types. Callers (like Shell) can make use of custom
      * transition types for dealing with special cases. These types are effectively ignored by
      * Core and will just be passed along as part of TransitionInfo objects. An example is
@@ -403,7 +408,7 @@ public interface WindowManager extends ViewManager {
      * implementation.
      * @hide
      */
-    int TRANSIT_FIRST_CUSTOM = 10;
+    int TRANSIT_FIRST_CUSTOM = 11;
 
     /**
      * @hide
@@ -419,6 +424,7 @@ public interface WindowManager extends ViewManager {
             TRANSIT_KEYGUARD_GOING_AWAY,
             TRANSIT_KEYGUARD_OCCLUDE,
             TRANSIT_KEYGUARD_UNOCCLUDE,
+            TRANSIT_PIP,
             TRANSIT_FIRST_CUSTOM
     })
     @Retention(RetentionPolicy.SOURCE)

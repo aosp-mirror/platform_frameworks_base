@@ -59,11 +59,13 @@ public class FaceDetectClient extends AcquisitionClient<ISession> implements Det
 
     @Override
     protected void stopHalOperation() {
-        try {
-            mCancellationSignal.cancel();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-            mCallback.onClientFinished(this, false /* success */);
+        if (mCancellationSignal != null) {
+            try {
+                mCancellationSignal.cancel();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+                mCallback.onClientFinished(this, false /* success */);
+            }
         }
     }
 

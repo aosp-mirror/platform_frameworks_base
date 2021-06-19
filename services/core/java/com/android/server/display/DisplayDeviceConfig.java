@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Environment;
 import android.os.PowerManager;
+import android.text.TextUtils;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.Spline;
@@ -34,6 +35,7 @@ import com.android.server.display.config.HbmTiming;
 import com.android.server.display.config.HighBrightnessMode;
 import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
+import com.android.server.display.config.RefreshRateRange;
 import com.android.server.display.config.SensorDetails;
 import com.android.server.display.config.XmlParser;
 
@@ -79,10 +81,10 @@ public class DisplayDeviceConfig {
     private final Context mContext;
 
     // The details of the ambient light sensor associated with this display.
-    private final SensorIdentifier mAmbientLightSensor = new SensorIdentifier();
+    private final SensorData mAmbientLightSensor = new SensorData();
 
     // The details of the proximity sensor associated with this display.
-    private final SensorIdentifier mProximitySensor = new SensorIdentifier();
+    private final SensorData mProximitySensor = new SensorData();
 
     // Nits and backlight values that are loaded from either the display device config file, or
     // config.xml. These are the raw values and just used for the dumpsys
@@ -113,6 +115,7 @@ public class DisplayDeviceConfig {
     private List<String> mQuirks;
     private boolean mIsHighBrightnessModeEnabled = false;
     private HighBrightnessModeData mHbmData;
+    private String mLoadedFrom = null;
 
     private DisplayDeviceConfig(Context context) {
         mContext = context;
@@ -273,11 +276,11 @@ public class DisplayDeviceConfig {
         return mBrightnessRampSlowIncrease;
     }
 
-    SensorIdentifier getAmbientLightSensor() {
+    SensorData getAmbientLightSensor() {
         return mAmbientLightSensor;
     }
 
-    SensorIdentifier getProximitySensor() {
+    SensorData getProximitySensor() {
         return mProximitySensor;
     }
 
@@ -306,7 +309,8 @@ public class DisplayDeviceConfig {
     @Override
     public String toString() {
         String str = "DisplayDeviceConfig{"
-                + "mBacklight=" + Arrays.toString(mBacklight)
+                + "mLoadedFrom=" + mLoadedFrom
+                + ", mBacklight=" + Arrays.toString(mBacklight)
                 + ", mNits=" + Arrays.toString(mNits)
                 + ", mRawBacklight=" + Arrays.toString(mRawBacklight)
                 + ", mRawNits=" + Arrays.toString(mRawNits)
@@ -336,9 +340,8 @@ public class DisplayDeviceConfig {
         final String filename = String.format(CONFIG_FILE_FORMAT, suffix);
         final File filePath = Environment.buildPath(
                 baseDirectory, ETC_DIR, DISPLAY_CONFIG_DIR, filename);
-        if (filePath.exists()) {
-            final DisplayDeviceConfig config = new DisplayDeviceConfig(context);
-            config.initFromFile(filePath);
+        final DisplayDeviceConfig config = new DisplayDeviceConfig(context);
+        if (config.initFromFile(filePath)) {
             return config;
         }
         return null;
@@ -356,15 +359,15 @@ public class DisplayDeviceConfig {
         return config;
     }
 
-    private void initFromFile(File configFile) {
+    private boolean initFromFile(File configFile) {
         if (!configFile.exists()) {
             // Display configuration files aren't required to exist.
-            return;
+            return false;
         }
 
         if (!configFile.isFile()) {
             Slog.e(TAG, "Display configuration is not a file: " + configFile + ", skipping");
-            return;
+            return false;
         }
 
         try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
@@ -385,6 +388,8 @@ public class DisplayDeviceConfig {
             Slog.e(TAG, "Encountered an error while reading/parsing display config file: "
                     + configFile, e);
         }
+        mLoadedFrom = configFile.toString();
+        return true;
     }
 
     private void initFromGlobalXml() {
@@ -395,10 +400,12 @@ public class DisplayDeviceConfig {
         loadBrightnessRampsFromConfigXml();
         loadAmbientLightSensorFromConfigXml();
         setProxSensorUnspecified();
+        mLoadedFrom = "<config.xml>";
     }
 
     private void initFromDefaultValues() {
         // Set all to basic values
+        mLoadedFrom = "Static values";
         mBacklightMinimum = PowerManager.BRIGHTNESS_MIN;
         mBacklightMaximum = PowerManager.BRIGHTNESS_MAX;
         mBrightnessDefault = BRIGHTNESS_DEFAULT;
@@ -689,6 +696,11 @@ public class DisplayDeviceConfig {
         if (sensorDetails != null) {
             mAmbientLightSensor.type = sensorDetails.getType();
             mAmbientLightSensor.name = sensorDetails.getName();
+            final RefreshRateRange rr = sensorDetails.getRefreshRate();
+            if (rr != null) {
+                mAmbientLightSensor.minRefreshRate = rr.getMinimum().floatValue();
+                mAmbientLightSensor.maxRefreshRate = rr.getMaximum().floatValue();
+            }
         } else {
             loadAmbientLightSensorFromConfigXml();
         }
@@ -704,21 +716,41 @@ public class DisplayDeviceConfig {
         if (sensorDetails != null) {
             mProximitySensor.name = sensorDetails.getName();
             mProximitySensor.type = sensorDetails.getType();
+            final RefreshRateRange rr = sensorDetails.getRefreshRate();
+            if (rr != null) {
+                mProximitySensor.minRefreshRate = rr.getMinimum().floatValue();
+                mProximitySensor.maxRefreshRate = rr.getMaximum().floatValue();
+            }
         } else {
             setProxSensorUnspecified();
         }
     }
 
-    static class SensorIdentifier {
+    static class SensorData {
         public String type;
         public String name;
+        public float minRefreshRate = 0.0f;
+        public float maxRefreshRate = Float.POSITIVE_INFINITY;
 
         @Override
         public String toString() {
             return "Sensor{"
-                    + "type: \"" + type + "\""
-                    + ", name: \"" + name + "\""
+                    + "type: " + type
+                    + ", name: " + name
+                    + ", refreshRateRange: [" + minRefreshRate + ", " + maxRefreshRate + "]"
                     + "} ";
+        }
+
+        /**
+         * @return True if the sensor matches both the specified name and type, or one if only
+         * one is specified (not-empty). Always returns false if both parameters are null or empty.
+         */
+        public boolean matches(String sensorName, String sensorType) {
+            final boolean isNameSpecified = !TextUtils.isEmpty(sensorName);
+            final boolean isTypeSpecified = !TextUtils.isEmpty(sensorType);
+            return (isNameSpecified || isTypeSpecified)
+                    && (!isNameSpecified || sensorName.equals(name))
+                    && (!isTypeSpecified || sensorType.equals(type));
         }
     }
 
