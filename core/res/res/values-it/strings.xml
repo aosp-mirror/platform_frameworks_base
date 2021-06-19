@@ -1019,7 +1019,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Testo copiato negli appunti."</string>
     <string name="copied" msgid="4675902854553014676">"Copia eseguita"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Dati dell\'app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> incollati dall\'app <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"L\'app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha incollato dati dagli appunti"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha incollato dati dagli appunti"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha incollato il testo che hai copiato"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha incollato un\'immagine che hai copiato"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha incollato i contenuti che hai copiato"</string>

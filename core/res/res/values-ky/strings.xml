@@ -1019,7 +1019,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Текст алмашуу буферине көчүрүлдү."</string>
     <string name="copied" msgid="4675902854553014676">"Көчүрүлдү"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> колдонмосунан чапталды"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> алмашуу буферинен чапталды"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Алмашуу буфериндеги нерселер <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> колдонмосуна жайгаштырылды"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>: көчүрүлгөн текст чапталды"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>: көчүрүлгөн сүрөт чапталды"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>: көчүрүлгөн мазмун чапталды"</string>
