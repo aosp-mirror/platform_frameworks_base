@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran çəkilişi emal edilir"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekranın video çəkimi ərzində silinməyən bildiriş"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Yazmağa başlanılsın?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Yazarkən Android Sistemi ekranınızda görünən və ya cihazınızda göstərilən istənilən həssas məlumatı qeydə ala bilər. Buraya parollar, ödəniş məlumatı, fotolar, mesajlar və audio daxildir."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Ekranda görünən və ya cihazda oxudulan şəxsi məlumat (parol, bank hesabı, mesaj, fotoşəkil və sair) videoyazıya düşə bilər."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio yazın"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Cihaz audiosu"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Cihazınızdan gələn musiqi, zənglər və zəng melodiyaları kimi səslər"</string>
@@ -101,7 +101,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"Başlayın"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Ekran yazılır"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Ekran və audio yazılır"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Ekranda toxunuşları göstərin"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Ekrana toxunuş göstərilsin"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Dayandırmaq üçün toxunun"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Dayandırın"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Dayandırın"</string>
@@ -594,15 +594,15 @@
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Çıxış cihazına keçin"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Tətbiq bərkidilib"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri və İcmal düymələrinə basıb saxlayın."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri və Əsas səhifə düymələrinə basıb saxlayın."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Bu, onu çıxarana qədər görünəcək. Çıxarmaq üçün yuxarı sürüşdürün &amp; basıb saxlayın."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri düyməsinə basıb saxlayın."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Əsas səhifə düyməsinə basıb saxlayın."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Şəxsi məlumatlar (məsələn, kontaktlar və e-poçt məzmunu) əlçatan ola bilər."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"\"Geri\" və \"Əsas ekran\" düymələrinin davamlı basılması ilə çıxarılana qədər tətbiq göz önündə qalır."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Yuxarı sürüşdürülüb saxlanılana ilə çıxarılana qədər tətbiq göz önündə qalır."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"\"İcmal\" düyməsinin davamlı basılması ilə çıxarılana qədər tətbiq göz önündə qalır."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"\"Əsas ekran\" düyməsinin davamlı basılması ilə çıxarılana qədər tətbiq göz önündə qalır."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Şəxsi məlumatlar (məsələn, kontaktlar və e-poçt məzmunu) ekranda görünə bilər."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Bərkidilmiş tətbiq digər tətbiqləri aça bilər."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Bu tətbiqi çıxarmaq üçün Geri və İcmal düymələrinə basıb saxlayın"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Bu tətbiqi çıxarmaq üçün Geri və Əsas ekran düymələrinə basıb saxlayın"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Bu tətbiqi çıxarmaq üçün yuxarı sürüşdürüb saxlayın"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Tətbiqi çıxarmaq üçün yuxarı sürüşdürüb saxlayın"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Anladım!"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Yox, çox sağ olun"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Tətbiq bərkidildi"</string>
@@ -1026,10 +1026,10 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Böyütmə Pəncərəsi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Böyütmə Pəncərəsi Kontrolları"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Cihaz kontrolları"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Qoşulmuş cihazlarınız üçün nizamlayıcılar əlavə edin"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Cihazları idarə etmək üçün vidcet əlavə edin"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Cihaz idarəetmələrini ayarlayın"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Nizamlayıcılara giriş üçün Yandırıb-söndürmə düyməsini basıb saxlayın"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"Nizamlayıcıları əlavə etmək üçün tətbiq seçin"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Kontrol əlavə etmək üçün tətbiq seçin"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> nizamlayıcı əlavə edilib.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> nizamlayıcı əlavə edilib.</item>
@@ -1042,9 +1042,9 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"sevimlilərdən silin"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> mövqeyinə keçirin"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Nizamlayıcılar"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Enerji menyusundan daxil olacağınız nizamlayıcıları seçin"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Nizamlayıcıları yenidən tənzimləmək üçün tutub sürüşdürün"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Bütün nizamlayıcılar silindi"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Qidalanma düyməsində əlçatan olacaq kontrol vidcetləri seçin."</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Vidcetləri daşıyaraq yerini dəyişin"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Kontrol vidcetləri silindi"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Dəyişikliklər yadda saxlanmadı"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Digər tətbiqlərə baxın"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Nizamlayıcıları yükləmək mümkün olmadı. <xliff:g id="APP">%s</xliff:g> tətbiqinə toxunaraq tətbiq ayarlarının dəyişmədiyinə əmin olun."</string>
@@ -1079,6 +1079,6 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Xəta, yenidən cəhd edin"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Davam edir"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Yeni nizamlayıcıları görmək üçün yandırıb-söndürmə düyməsinə basıb saxlayın"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"Nizamlayıcılar əlavə edin"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Nizamlayıcıları redaktə edin"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Vidcet əlavə edin"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Vidcetlərə düzəliş edin"</string>
 </resources>
