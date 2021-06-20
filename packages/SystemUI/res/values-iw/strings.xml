@@ -1048,8 +1048,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"הגדלת חלק מהמסך"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"מעבר"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"לחצן הנגישות החליף את תנועת הנגישות\n\n"<annotation id="link">"להצגת ההגדרות"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"ניתן להחליף את תנועת הנגישות בלחצן\n\n"<annotation id="link">"הגדרות"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"כדי להסתיר זמנית את הלחצן, יש להזיז אותו לקצה"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"העברה לפינה השמאלית העליונה"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"העברה לפינה הימנית העליונה"</string>
