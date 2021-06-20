@@ -1858,7 +1858,7 @@ public class DisplayPolicy {
         }
 
         // Voice interaction overrides both top fullscreen and top docked.
-        if (affectsSystemUi && attrs.type == TYPE_VOICE_INTERACTION) {
+        if (affectsSystemUi && attrs.type == TYPE_VOICE_INTERACTION && attrs.isFullscreen()) {
             if (mTopFullscreenOpaqueWindowState == null) {
                 mTopFullscreenOpaqueWindowState = win;
                 if (mTopFullscreenOpaqueOrDimmingWindowState == null) {
