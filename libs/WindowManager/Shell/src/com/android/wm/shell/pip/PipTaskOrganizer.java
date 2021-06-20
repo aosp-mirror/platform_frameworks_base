@@ -835,11 +835,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             WindowContainerTransaction wct) {
         // note that this can be called when swipe-to-home or fixed-rotation is happening.
         // Skip this entirely if that's the case.
-        if ((mInSwipePipToHomeTransition || mWaitForFixedRotation) && fromRotation) {
+        final boolean waitForFixedRotationOnEnteringPip = mWaitForFixedRotation
+                && (mState != State.ENTERED_PIP);
+        if ((mInSwipePipToHomeTransition || waitForFixedRotationOnEnteringPip) && fromRotation) {
             if (DEBUG) {
                 Log.d(TAG, "Skip onMovementBoundsChanged on rotation change"
                         + " mInSwipePipToHomeTransition=" + mInSwipePipToHomeTransition
-                        + " mWaitForFixedRotation=" + mWaitForFixedRotation);
+                        + " mWaitForFixedRotation=" + mWaitForFixedRotation
+                        + " mState=" + mState);
             }
             return;
         }
