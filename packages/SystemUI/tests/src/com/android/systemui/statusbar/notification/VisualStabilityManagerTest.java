@@ -32,14 +32,17 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -54,109 +57,126 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
     private ExpandableNotificationRow mRow = mock(ExpandableNotificationRow.class);
     private NotificationEntry mEntry;
 
+    private StatusBarStateController.StateListener mStatusBarStateListener;
+    private WakefulnessLifecycle.Observer mWakefulnessObserver;
+
     @Before
     public void setUp() {
+        StatusBarStateController statusBarStateController = mock(StatusBarStateController.class);
+        WakefulnessLifecycle wakefulnessLifecycle = mock(WakefulnessLifecycle.class);
+
         mTestableLooper = TestableLooper.get(this);
         mVisualStabilityManager = new VisualStabilityManager(
                 mock(NotificationEntryManager.class),
-                new Handler(mTestableLooper.getLooper()));
+                new Handler(mTestableLooper.getLooper()),
+                statusBarStateController,
+                wakefulnessLifecycle);
 
-        mVisualStabilityManager.setUpWithPresenter(mock(NotificationPresenter.class));
         mVisualStabilityManager.setVisibilityLocationProvider(mLocationProvider);
         mEntry = new NotificationEntryBuilder().build();
         mEntry.setRow(mRow);
 
         when(mRow.getEntry()).thenReturn(mEntry);
+
+        ArgumentCaptor<StatusBarStateController.StateListener> stateListenerCaptor =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
+        verify(statusBarStateController).addCallback(stateListenerCaptor.capture());
+        mStatusBarStateListener = stateListenerCaptor.getValue();
+
+        ArgumentCaptor<WakefulnessLifecycle.Observer> wakefulnessObserverCaptor =
+                ArgumentCaptor.forClass(WakefulnessLifecycle.Observer.class);
+        verify(wakefulnessLifecycle).addObserver(wakefulnessObserverCaptor.capture());
+        mWakefulnessObserver = wakefulnessObserverCaptor.getValue();
     }
 
     @Test
     public void testPanelExpansion() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         assertFalse(mVisualStabilityManager.canReorderNotification(mRow));
-        mVisualStabilityManager.setPanelExpanded(false);
+        setPanelExpanded(false);
         assertTrue(mVisualStabilityManager.canReorderNotification(mRow));
     }
 
     @Test
     public void testScreenOn() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         assertFalse(mVisualStabilityManager.canReorderNotification(mRow));
-        mVisualStabilityManager.setScreenOn(false);
+        setScreenOn(false);
         assertTrue(mVisualStabilityManager.canReorderNotification(mRow));
     }
 
     @Test
     public void testReorderingAllowedChangesScreenOn() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         assertFalse(mVisualStabilityManager.isReorderingAllowed());
-        mVisualStabilityManager.setScreenOn(false);
+        setScreenOn(false);
         assertTrue(mVisualStabilityManager.isReorderingAllowed());
     }
 
     @Test
     public void testReorderingAllowedChangesPanel() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         assertFalse(mVisualStabilityManager.isReorderingAllowed());
-        mVisualStabilityManager.setPanelExpanded(false);
+        setPanelExpanded(false);
         assertTrue(mVisualStabilityManager.isReorderingAllowed());
     }
 
     @Test
     public void testCallBackCalledScreenOn() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
-        mVisualStabilityManager.setScreenOn(false);
+        setScreenOn(false);
         verify(mCallback).onChangeAllowed();
     }
 
     @Test
     public void testCallBackCalledPanelExpanded() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
-        mVisualStabilityManager.setPanelExpanded(false);
+        setPanelExpanded(false);
         verify(mCallback).onChangeAllowed();
     }
 
     @Test
     public void testCallBackExactlyOnce() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
-        mVisualStabilityManager.setScreenOn(false);
-        mVisualStabilityManager.setScreenOn(true);
-        mVisualStabilityManager.setScreenOn(false);
+        setScreenOn(false);
+        setScreenOn(true);
+        setScreenOn(false);
         verify(mCallback).onChangeAllowed();
     }
 
     @Test
     public void testCallBackCalledContinuouslyWhenRequested() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         mVisualStabilityManager.addReorderingAllowedCallback(mCallback, true  /* persistent */);
-        mVisualStabilityManager.setScreenOn(false);
-        mVisualStabilityManager.setScreenOn(true);
-        mVisualStabilityManager.setScreenOn(false);
+        setScreenOn(false);
+        setScreenOn(true);
+        setScreenOn(false);
         verify(mCallback, times(2)).onChangeAllowed();
     }
 
     @Test
     public void testAddedCanReorder() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         mVisualStabilityManager.notifyViewAddition(mRow);
         assertTrue(mVisualStabilityManager.canReorderNotification(mRow));
     }
 
     @Test
     public void testReorderingVisibleHeadsUpNotAllowed() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         when(mLocationProvider.isInVisibleLocation(any(NotificationEntry.class))).thenReturn(true);
         mVisualStabilityManager.onHeadsUpStateChanged(mEntry, true);
         assertFalse(mVisualStabilityManager.canReorderNotification(mRow));
@@ -164,8 +184,8 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
 
     @Test
     public void testReorderingVisibleHeadsUpAllowed() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         when(mLocationProvider.isInVisibleLocation(any(NotificationEntry.class))).thenReturn(false);
         mVisualStabilityManager.onHeadsUpStateChanged(mEntry, true);
         assertTrue(mVisualStabilityManager.canReorderNotification(mRow));
@@ -173,8 +193,8 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
 
     @Test
     public void testReorderingVisibleHeadsUpAllowedOnce() {
-        mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.setScreenOn(true);
+        setPanelExpanded(true);
+        setScreenOn(true);
         when(mLocationProvider.isInVisibleLocation(any(NotificationEntry.class))).thenReturn(false);
         mVisualStabilityManager.onHeadsUpStateChanged(mEntry, true);
         mVisualStabilityManager.onReorderingFinished();
@@ -183,33 +203,33 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
 
     @Test
     public void testPulsing() {
-        mVisualStabilityManager.setPulsing(true);
+        setPulsing(true);
         assertFalse(mVisualStabilityManager.canReorderNotification(mRow));
-        mVisualStabilityManager.setPulsing(false);
+        setPulsing(false);
         assertTrue(mVisualStabilityManager.canReorderNotification(mRow));
     }
 
     @Test
     public void testReorderingAllowedChanges_Pulsing() {
-        mVisualStabilityManager.setPulsing(true);
+        setPulsing(true);
         assertFalse(mVisualStabilityManager.isReorderingAllowed());
-        mVisualStabilityManager.setPulsing(false);
+        setPulsing(false);
         assertTrue(mVisualStabilityManager.isReorderingAllowed());
     }
 
     @Test
     public void testCallBackCalled_Pulsing() {
-        mVisualStabilityManager.setPulsing(true);
+        setPulsing(true);
         mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
-        mVisualStabilityManager.setPulsing(false);
+        setPulsing(false);
         verify(mCallback).onChangeAllowed();
     }
 
     @Test
     public void testTemporarilyAllowReorderingNotifiesCallbacks() {
         // GIVEN having the panel open (which would block reordering)
-        mVisualStabilityManager.setScreenOn(true);
-        mVisualStabilityManager.setPanelExpanded(true);
+        setScreenOn(true);
+        setPanelExpanded(true);
         mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
 
         // WHEN we temprarily allow reordering
@@ -223,7 +243,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
     @Test
     public void testTemporarilyAllowReorderingDoesntOverridePulsing() {
         // GIVEN we are in a pulsing state
-        mVisualStabilityManager.setPulsing(true);
+        setPulsing(true);
         mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
 
         // WHEN we temprarily allow reordering
@@ -237,8 +257,8 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
     @Test
     public void testTemporarilyAllowReorderingExpires() {
         // GIVEN having the panel open (which would block reordering)
-        mVisualStabilityManager.setScreenOn(true);
-        mVisualStabilityManager.setPanelExpanded(true);
+        setScreenOn(true);
+        setPanelExpanded(true);
         mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
 
         // WHEN we temprarily allow reordering and then wait until the window expires
@@ -248,5 +268,21 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
 
         // THEN reordering is no longer allowed
         assertFalse(mVisualStabilityManager.isReorderingAllowed());
+    }
+
+    private void setPanelExpanded(boolean expanded) {
+        mStatusBarStateListener.onExpandedChanged(expanded);
+    }
+
+    private void setPulsing(boolean pulsing) {
+        mStatusBarStateListener.onPulsingChanged(pulsing);
+    }
+
+    private void setScreenOn(boolean screenOn) {
+        if (screenOn) {
+            mWakefulnessObserver.onStartedWakingUp();
+        } else {
+            mWakefulnessObserver.onFinishedGoingToSleep();
+        }
     }
 }

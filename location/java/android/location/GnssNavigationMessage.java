@@ -17,6 +17,7 @@
 package android.location;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -77,6 +78,14 @@ public final class GnssNavigationMessage implements Parcelable {
     public static final int TYPE_IRN_L5CA = 0x0701;
 
     /**
+     * The status of the GNSS Navigation Message
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({STATUS_UNKNOWN, STATUS_PARITY_PASSED, STATUS_PARITY_REBUILT})
+    public @interface GnssNavigationMessageStatus {}
+
+    /**
      * The Navigation Message Status is 'unknown'.
      */
     public static final int STATUS_UNKNOWN = 0;
@@ -101,6 +110,7 @@ public final class GnssNavigationMessage implements Parcelable {
     public static abstract class Callback {
         /**
          * The status of GNSS Navigation Message event.
+         * @deprecated Do not use.
          * @hide
          */
         @Retention(RetentionPolicy.SOURCE)
@@ -111,19 +121,28 @@ public final class GnssNavigationMessage implements Parcelable {
          * The system does not support tracking of GNSS Navigation Messages.
          *
          * This status will not change in the future.
+         *
+         * @deprecated Do not use.
          */
+        @Deprecated
         public static final int STATUS_NOT_SUPPORTED = 0;
 
         /**
          * GNSS Navigation Messages are successfully being tracked, it will receive updates once
          * they are available.
+         *
+         * @deprecated Do not use.
          */
+        @Deprecated
         public static final int STATUS_READY = 1;
 
         /**
          * GNSS provider or Location is disabled, updated will not be received until they are
          * enabled.
+         *
+         * @deprecated Do not use.
          */
+        @Deprecated
         public static final int STATUS_LOCATION_DISABLED = 2;
 
         /**
@@ -133,7 +152,13 @@ public final class GnssNavigationMessage implements Parcelable {
 
         /**
          * Returns the latest status of the GNSS Navigation Messages sub-system.
+         *
+         * @deprecated Do not rely on this callback. From Android S onwards this callback will be
+         * invoked once with {@link #STATUS_READY} in all cases for backwards compatibility, and
+         * then never invoked again. Use LocationManager APIs if you need to determine if
+         * GNSS navigation messages are supported or if location is off, etc...
          */
+        @Deprecated
         public void onStatusChanged(@GnssNavigationMessageStatus int status) {}
     }
 
@@ -240,6 +265,7 @@ public final class GnssNavigationMessage implements Parcelable {
      *
      * <p>Range varies by constellation.  See definition at {@code GnssStatus#getSvid(int)}
      */
+    @IntRange(from = 1, to = 200)
     public int getSvid() {
         return mSvid;
     }
@@ -249,7 +275,7 @@ public final class GnssNavigationMessage implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setSvid(int value) {
+    public void setSvid(@IntRange(from = 1, to = 200) int value) {
         mSvid = value;
     }
 
@@ -282,6 +308,7 @@ public final class GnssNavigationMessage implements Parcelable {
      * id and this value can be set to -1.)</li>
      * </ul>
      */
+    @IntRange(from = -1, to = 120)
     public int getMessageId() {
         return mMessageId;
     }
@@ -291,7 +318,7 @@ public final class GnssNavigationMessage implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setMessageId(int value) {
+    public void setMessageId(@IntRange(from = -1, to = 120) int value) {
         mMessageId = value;
     }
 
@@ -316,6 +343,7 @@ public final class GnssNavigationMessage implements Parcelable {
      * navigation message, in the range of 1-4.</li>
      * </ul>
      */
+    @IntRange(from = 1)
     public int getSubmessageId() {
         return mSubmessageId;
     }
@@ -325,7 +353,7 @@ public final class GnssNavigationMessage implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setSubmessageId(int value) {
+    public void setSubmessageId(@IntRange(from = 1) int value) {
         mSubmessageId = value;
     }
 
@@ -335,10 +363,10 @@ public final class GnssNavigationMessage implements Parcelable {
      * <p>The bytes (or words) specified using big endian format (MSB first).
      *
      * <ul>
-     * <li>For GPS L1 C/A, Beidou D1 &amp; Beidou D2, each subframe contains 10 30-bit words. Each
-     * word (30 bits) should be fit into the last 30 bits in a 4-byte word (skip B31 and B32), with
-     * MSB first, for a total of 40 bytes, covering a time period of 6, 6, and 0.6 seconds,
-     * respectively.</li>
+     * <li>For GPS L1 C/A, IRNSS L5 C/A, Beidou D1 &amp; Beidou D2, each subframe contains 10
+     * 30-bit words. Each word (30 bits) should be fit into the last 30 bits in a 4-byte word (skip
+     * B31 and B32), with MSB first, for a total of 40 bytes, covering a time period of 6, 6, and
+     * 0.6 seconds, respectively.</li>
      * <li>For Glonass L1 C/A, each string contains 85 data bits, including the checksum.  These
      * bits should be fit into 11 bytes, with MSB first (skip B86-B88), covering a time period of 2
      * seconds.</li>
@@ -378,6 +406,7 @@ public final class GnssNavigationMessage implements Parcelable {
     /**
      * Gets the Status of the navigation message contained in the object.
      */
+    @GnssNavigationMessageStatus
     public int getStatus() {
         return mStatus;
     }
@@ -387,7 +416,7 @@ public final class GnssNavigationMessage implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setStatus(int value) {
+    public void setStatus(@GnssNavigationMessageStatus int value) {
         mStatus = value;
     }
 

@@ -19,6 +19,7 @@ package android.webkit;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import java.io.InputStream;
 import java.io.StringBufferInputStream;
@@ -34,7 +35,7 @@ public class WebResourceResponse {
     private boolean mImmutable;
     private String mMimeType;
     private String mEncoding;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mStatusCode;
     private String mReasonPhrase;
     private Map<String, String> mResponseHeaders;

@@ -66,7 +66,7 @@ public class SystemService {
     }
 
     /** Request that the init daemon stop a named service. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void stop(String name) {
         SystemProperties.set("ctl.stop", name);
     }

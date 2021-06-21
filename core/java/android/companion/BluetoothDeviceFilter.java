@@ -27,6 +27,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.provider.OneTimeUseBuilder;
@@ -100,7 +101,7 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
 
     /** @hide */
     @Nullable
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public String getAddress() {
         return mAddress;
     }
@@ -126,7 +127,7 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BluetoothDeviceFilter that = (BluetoothDeviceFilter) o;
@@ -139,6 +140,16 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
     @Override
     public int hashCode() {
         return Objects.hash(mNamePattern, mAddress, mServiceUuids, mServiceUuidMasks);
+    }
+
+    @Override
+    public String toString() {
+        return "BluetoothDeviceFilter{"
+                + "mNamePattern=" + mNamePattern
+                + ", mAddress='" + mAddress + '\''
+                + ", mServiceUuids=" + mServiceUuids
+                + ", mServiceUuidMasks=" + mServiceUuidMasks
+                + '}';
     }
 
     @Override

@@ -12,15 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 android_test {
     name: "BugreportManagerTestCases",
     srcs: ["src/**/*.java"],
+    data: [":bugreport_artifacts"],
     libs: [
         "android.test.runner",
         "android.test.base",
     ],
-    static_libs: ["androidx.test.rules", "truth-prebuilt"],
+    static_libs: [
+        "androidx.test.rules",
+        "androidx.test.uiautomator_uiautomator",
+        "truth-prebuilt",
+    ],
+    test_suites: ["general-tests"],
     sdk_version: "test_current",
     platform_apis: true,
 }
 
+filegroup {
+    name: "bugreport_artifacts",
+    srcs: ["config/test-sysconfig.xml"],
+}

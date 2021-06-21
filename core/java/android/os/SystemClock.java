@@ -178,6 +178,15 @@ public final class SystemClock {
     native public static long uptimeMillis();
 
     /**
+     * Returns nanoseconds since boot, not counting time spent in deep sleep.
+     *
+     * @return nanoseconds of non-sleep uptime since boot.
+     * @hide
+     */
+    @CriticalNative
+    public static native long uptimeNanos();
+
+    /**
      * Return {@link Clock} that starts at system boot, not counting time spent
      * in deep sleep.
      *
@@ -238,7 +247,7 @@ public final class SystemClock {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @CriticalNative
     public static native long currentThreadTimeMicro();
 
@@ -329,8 +338,7 @@ public final class SystemClock {
                 try {
                     time = mMgr.getGnssTimeMillis();
                 } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
-                    return 0;
+                    throw e.rethrowFromSystemServer();
                 }
                 if (time == null) {
                     throw new DateTimeException("Gnss based time is not available.");

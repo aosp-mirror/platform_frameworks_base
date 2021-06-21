@@ -61,8 +61,6 @@ enum {
     AMIDI_DEVICE_TYPE_BLUETOOTH = 3 /* A MIDI device connected via BlueTooth */
 };
 
-#if __ANDROID_API__ >= 29
-
 /*
  * Device API
  */
@@ -248,8 +246,6 @@ media_status_t AMIDI_API AMidiInputPort_sendFlush(const AMidiInputPort *inputPor
  * @param inputPort Identifies the input (sending) port to close.
  */
 void AMIDI_API AMidiInputPort_close(const AMidiInputPort *inputPort) __INTRODUCED_IN(29);
-
-#endif /* __ANDROID_API__ >= 29 */
 
 #ifdef __cplusplus
 }

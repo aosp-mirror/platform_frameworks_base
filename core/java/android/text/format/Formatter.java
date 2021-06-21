@@ -24,10 +24,11 @@ import android.content.res.Resources;
 import android.icu.text.MeasureFormat;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
-import android.net.NetworkUtils;
 import android.text.BidiFormatter;
 import android.text.TextUtils;
 import android.view.View;
+
+import com.android.net.module.util.Inet4AddressUtils;
 
 import java.util.Locale;
 
@@ -207,7 +208,7 @@ public final class Formatter {
      */
     @Deprecated
     public static String formatIpAddress(int ipv4Address) {
-        return NetworkUtils.intToInetAddress(ipv4Address).getHostAddress();
+        return Inet4AddressUtils.intToInet4AddressHTL(ipv4Address).getHostAddress();
     }
 
     private static final int SECONDS_PER_MINUTE = 60;

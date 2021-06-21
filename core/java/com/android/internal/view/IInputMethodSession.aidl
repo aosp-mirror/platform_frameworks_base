@@ -43,8 +43,6 @@ oneway interface IInputMethodSession {
 
     void appPrivateCommand(String action, in Bundle data);
 
-    void toggleSoftInput(int showFlags, int hideFlags);
-
     void finishSession();
 
     void updateCursorAnchorInfo(in CursorAnchorInfo cursorAnchorInfo);
@@ -52,4 +50,6 @@ oneway interface IInputMethodSession {
     void notifyImeHidden();
 
     void removeImeSurface();
+
+    void finishInput();
 }

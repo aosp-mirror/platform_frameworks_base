@@ -24,10 +24,10 @@ import com.android.server.Watchdog;
 
 /**
  * TvRemoteService represents a system service that allows a connected
- * remote control (emote) service to inject white-listed input events
+ * remote control (emote) service to inject allowlisted input events
  * and call other specified methods for functioning as an emote service.
  * <p/>
- * This service is intended for use only by white-listed packages.
+ * This service is intended for use only by allowlisted packages.
  */
 public class TvRemoteService extends SystemService implements Watchdog.Monitor {
     private static final String TAG = "TvRemoteService";

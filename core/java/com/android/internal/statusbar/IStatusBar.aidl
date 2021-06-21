@@ -19,8 +19,11 @@ package com.android.internal.statusbar;
 import android.app.ITransientNotificationCallback;
 import android.content.ComponentName;
 import android.graphics.Rect;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSysuiReceiver;
+import android.hardware.biometrics.PromptInfo;
+import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -39,7 +42,6 @@ oneway interface IStatusBar
 
     void showWirelessChargingAnimation(int batteryLevel);
 
-    void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive);
     void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher, boolean isMultiClientImeEnabled);
     void setWindowState(int display, int window, int state);
@@ -100,6 +102,13 @@ oneway interface IStatusBar
     void onCameraLaunchGestureDetected(int source);
 
     /**
+     * Notifies the status bar that the Emergency Action launch gesture has been detected.
+     *
+     * TODO(b/169175022) Update method name and docs when feature name is locked.
+     */
+    void onEmergencyActionLaunchGestureDetected();
+
+    /**
      * Shows the picture-in-picture menu if an activity is in picture-in-picture mode.
      */
     void showPictureInPictureMenu();
@@ -134,18 +143,31 @@ oneway interface IStatusBar
 
     void showShutdownUi(boolean isReboot, String reason);
 
-    // Used to show the authentication dialog (Biometrics, Device Credential)
-    void showAuthenticationDialog(in Bundle bundle, IBiometricServiceReceiverInternal receiver,
-            int biometricModality, boolean requireConfirmation, int userId, String opPackageName,
-            long operationId, int sysUiSessionId);
-    // Used to notify the authentication dialog that a biometric has been authenticated
+    /**
+    * Used to show the authentication dialog (Biometrics, Device Credential).
+    */
+    void showAuthenticationDialog(in PromptInfo promptInfo, IBiometricSysuiReceiver sysuiReceiver,
+            in int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation, int userId,
+            String opPackageName, long operationId, int multiSensorConfig);
+    /**
+    * Used to notify the authentication dialog that a biometric has been authenticated.
+    */
     void onBiometricAuthenticated();
-    // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc
-    void onBiometricHelp(String message);
-    // Used to show an error - the dialog will dismiss after a certain amount of time
+    /**
+    * Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc.
+    */
+    void onBiometricHelp(int modality, String message);
+    /** Used to show an error - the dialog will dismiss after a certain amount of time. */
     void onBiometricError(int modality, int error, int vendorCode);
-    // Used to hide the authentication dialog, e.g. when the application cancels authentication
+    /**
+    * Used to hide the authentication dialog, e.g. when the application cancels authentication.
+    */
     void hideAuthenticationDialog();
+
+    /**
+     * Sets an instance of IUdfpsHbmListener for UdfpsController.
+     */
+    void setUdfpsHbmListener(in IUdfpsHbmListener listener);
 
     /**
      * Notifies System UI that the display is ready to show system decorations.
@@ -158,7 +180,7 @@ oneway interface IStatusBar
     void onRecentsAnimationStateChanged(boolean running);
 
     /**
-     * Notifies System UI side of system bar appearance change on the specified display.
+     * Notifies System UI side of system bar attribute change on the specified display.
      *
      * @param displayId the ID of the display to notify
      * @param appearance the appearance of the focused window. The light top bar appearance is not
@@ -168,9 +190,12 @@ oneway interface IStatusBar
      *                         bar, that the bar can have partial appearances in corresponding
      *                         stacks.
      * @param navbarColorManagedByIme {@code true} if navigation bar color is managed by IME.
+     * @param behavior the behavior of the focused window.
+     * @param isFullscreen whether any of status or navigation bar is requested invisible.
      */
-    void onSystemBarAppearanceChanged(int displayId, int appearance,
-            in AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme);
+    void onSystemBarAttributesChanged(int displayId, int appearance,
+            in AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
+            int behavior, boolean isFullscreen);
 
     /**
      * Notifies System UI to show transient bars. The transient bars are system bars, e.g., status
@@ -223,8 +248,40 @@ oneway interface IStatusBar
     void stopTracing();
 
     /**
+     * Handles a logging command from the WM shell command.
+     */
+    void handleWindowManagerLoggingCommand(in String[] args, in ParcelFileDescriptor outFd);
+
+    /**
      * If true, suppresses the ambient display from showing. If false, re-enables the ambient
      * display.
      */
     void suppressAmbientDisplay(boolean suppress);
+
+    /**
+     * Requests {@link WindowMagnification} to set window magnification connection through
+     * {@link AccessibilityManager#setWindowMagnificationConnection(IWindowMagnificationConnection)}
+     *
+     * @param connect {@code true} if needs connection, otherwise set the connection to null.
+     */
+    void requestWindowMagnificationConnection(boolean connect);
+
+    /**
+     * Allow for pass-through arguments from `adb shell cmd statusbar <args>`, and write to the
+     * file descriptor passed in.
+     */
+     void passThroughShellCommand(in String[] args, in ParcelFileDescriptor pfd);
+
+    /**
+     * Enables/disables the navigation bar luma sampling.
+     *
+     * @param displayId the id of the display to notify.
+     * @param enable {@code true} if enable, otherwise set to {@code false}.
+     */
+    void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable);
+
+    /**
+     * Triggers a GC in the system and status bar.
+     */
+    void runGcForTest();
 }

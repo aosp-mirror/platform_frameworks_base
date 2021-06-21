@@ -26,10 +26,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 import android.util.Pair;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -741,38 +741,31 @@ public final class SystemUpdatePolicy implements Parcelable {
      * system server from a validated policy object previously.
      * @hide
      */
-    public static SystemUpdatePolicy restoreFromXml(XmlPullParser parser) {
+    public static SystemUpdatePolicy restoreFromXml(TypedXmlPullParser parser) {
         try {
             SystemUpdatePolicy policy = new SystemUpdatePolicy();
-            String value = parser.getAttributeValue(null, KEY_POLICY_TYPE);
-            if (value != null) {
-                policy.mPolicyType = Integer.parseInt(value);
+            policy.mPolicyType =
+                    parser.getAttributeInt(null, KEY_POLICY_TYPE, TYPE_UNKNOWN);
+            policy.mMaintenanceWindowStart =
+                    parser.getAttributeInt(null, KEY_INSTALL_WINDOW_START, 0);
+            policy.mMaintenanceWindowEnd =
+                    parser.getAttributeInt(null, KEY_INSTALL_WINDOW_END, 0);
 
-                value = parser.getAttributeValue(null, KEY_INSTALL_WINDOW_START);
-                if (value != null) {
-                    policy.mMaintenanceWindowStart = Integer.parseInt(value);
+            int outerDepth = parser.getDepth();
+            int type;
+            while ((type = parser.next()) != END_DOCUMENT
+                    && (type != END_TAG || parser.getDepth() > outerDepth)) {
+                if (type == END_TAG || type == TEXT) {
+                    continue;
                 }
-                value = parser.getAttributeValue(null, KEY_INSTALL_WINDOW_END);
-                if (value != null) {
-                    policy.mMaintenanceWindowEnd = Integer.parseInt(value);
+                if (!parser.getName().equals(KEY_FREEZE_TAG)) {
+                    continue;
                 }
-
-                int outerDepth = parser.getDepth();
-                int type;
-                while ((type = parser.next()) != END_DOCUMENT
-                        && (type != END_TAG || parser.getDepth() > outerDepth)) {
-                    if (type == END_TAG || type == TEXT) {
-                        continue;
-                    }
-                    if (!parser.getName().equals(KEY_FREEZE_TAG)) {
-                        continue;
-                    }
-                    policy.mFreezePeriods.add(new FreezePeriod(
-                            MonthDay.parse(parser.getAttributeValue(null, KEY_FREEZE_START)),
-                            MonthDay.parse(parser.getAttributeValue(null, KEY_FREEZE_END))));
-                }
-                return policy;
+                policy.mFreezePeriods.add(new FreezePeriod(
+                        MonthDay.parse(parser.getAttributeValue(null, KEY_FREEZE_START)),
+                        MonthDay.parse(parser.getAttributeValue(null, KEY_FREEZE_END))));
             }
+            return policy;
         } catch (NumberFormatException | XmlPullParserException | IOException e) {
             // Fail through
             Log.w(TAG, "Load xml failed", e);
@@ -783,10 +776,10 @@ public final class SystemUpdatePolicy implements Parcelable {
     /**
      * @hide
      */
-    public void saveToXml(XmlSerializer out) throws IOException {
-        out.attribute(null, KEY_POLICY_TYPE, Integer.toString(mPolicyType));
-        out.attribute(null, KEY_INSTALL_WINDOW_START, Integer.toString(mMaintenanceWindowStart));
-        out.attribute(null, KEY_INSTALL_WINDOW_END, Integer.toString(mMaintenanceWindowEnd));
+    public void saveToXml(TypedXmlSerializer out) throws IOException {
+        out.attributeInt(null, KEY_POLICY_TYPE, mPolicyType);
+        out.attributeInt(null, KEY_INSTALL_WINDOW_START, mMaintenanceWindowStart);
+        out.attributeInt(null, KEY_INSTALL_WINDOW_END, mMaintenanceWindowEnd);
         for (int i = 0; i < mFreezePeriods.size(); i++) {
             FreezePeriod interval = mFreezePeriods.get(i);
             out.startTag(null, KEY_FREEZE_TAG);

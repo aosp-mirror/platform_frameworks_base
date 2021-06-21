@@ -17,9 +17,8 @@
 package android.net;
 
 import android.net.INetworkPolicyListener;
+import android.net.Network;
 import android.net.NetworkPolicy;
-import android.net.NetworkQuotaInfo;
-import android.net.NetworkState;
 import android.net.NetworkTemplate;
 import android.telephony.SubscriptionPlan;
 
@@ -63,19 +62,20 @@ interface INetworkPolicyManager {
         3 - enabled
     */
     int getRestrictBackgroundByCaller();
+    int getRestrictBackgroundStatus(int uid);
 
     void setDeviceIdleMode(boolean enabled);
     void setWifiMeteredOverride(String networkId, int meteredOverride);
 
-    @UnsupportedAppUsage
-    NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
+    int getMultipathPreference(in Network network);
 
     SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage);
     void setSubscriptionPlans(int subId, in SubscriptionPlan[] plans, String callingPackage);
     String getSubscriptionPlansOwner(int subId);
-    void setSubscriptionOverride(int subId, int overrideMask, int overrideValue, long timeoutMillis, String callingPackage);
+    void setSubscriptionOverride(int subId, int overrideMask, int overrideValue, in int[] networkTypes, long timeoutMillis, String callingPackage);
 
     void factoryReset(String subscriber);
 
     boolean isUidNetworkingBlocked(int uid, boolean meteredNetwork);
+    boolean isUidRestrictedOnMeteredNetworks(int uid);
 }

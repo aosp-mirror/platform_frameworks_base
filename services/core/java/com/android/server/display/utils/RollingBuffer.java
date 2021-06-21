@@ -136,7 +136,7 @@ public class RollingBuffer {
      * @return The buffer as string.
      */
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (int i = 0; i < mCount; i++) {
             final int index = offsetOf(i);

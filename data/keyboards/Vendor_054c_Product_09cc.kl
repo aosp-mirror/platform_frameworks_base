@@ -68,3 +68,11 @@ key 0x13c    BUTTON_MODE
 # and this button will be equivalent to left mouse button
 # Therefore, map it to KEYCODE_BUTTON_1 here to allow apps to still handle this on earlier versions
 key 0x13d   BUTTON_1
+
+# SENSORs
+sensor 0x00 ACCELEROMETER X
+sensor 0x01 ACCELEROMETER Y
+sensor 0x02 ACCELEROMETER Z
+sensor 0x03 GYROSCOPE X
+sensor 0x04 GYROSCOPE Y
+sensor 0x05 GYROSCOPE Z

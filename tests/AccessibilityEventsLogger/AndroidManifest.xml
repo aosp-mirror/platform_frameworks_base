@@ -16,25 +16,23 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.android.tests.accessibilityeventlogger"
-    android:versionCode="1"
-    android:versionName="0.0" >
+     xmlns:tools="http://schemas.android.com/tools"
+     package="com.android.tests.accessibilityeventlogger"
+     android:versionCode="1"
+     android:versionName="0.0">
 
-    <uses-sdk
-        android:minSdkVersion="18"
-        android:targetSdkVersion="18" />
+    <uses-sdk android:minSdkVersion="18"
+         android:targetSdkVersion="18"/>
 
-    <application
-        android:allowBackup="true"
-        android:enabled="true"
-        android:label="@string/app_name" >
+    <application android:allowBackup="true"
+         android:enabled="true"
+         android:label="@string/app_name">
 
-        <service
-            android:name=".AELogger"
-            android:enabled="true"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:configChanges="locale" >
+        <service android:name=".AELogger"
+             android:enabled="true"
+             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+             android:configChanges="locale"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService"/>
 
@@ -43,9 +41,8 @@
                 <category android:name="android.accessibilityservice.category.FEEDBACK_AUDIBLE"/>
             </intent-filter>
 
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibilityservice" />
+            <meta-data android:name="android.accessibilityservice"
+                 android:resource="@xml/accessibilityservice"/>
         </service>
     </application>
 </manifest>

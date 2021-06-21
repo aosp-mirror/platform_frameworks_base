@@ -247,6 +247,48 @@ public class FunctionalUtils {
         }
     }
 
+    /**
+     * A {@link Consumer} that allows the caller to specify a custom checked {@link Exception} that
+     * can be thrown by the implementer. This is usually used when proxying/wrapping calls between
+     * different classes.
+     *
+     * @param <Input> Method parameter type
+     * @param <ExceptionType> Checked exception type
+     */
+    @FunctionalInterface
+    public interface ThrowingCheckedConsumer<Input, ExceptionType extends Exception> {
+        void accept(Input input) throws ExceptionType;
+    }
+
+    /**
+     * A {@link Consumer} that allows the caller to specify 2 different custom checked
+     * {@link Exception}s that can be thrown by the implementer. This is usually used when
+     * proxying/wrapping calls between different classes.
+     *
+     * @param <Input> Method parameter type
+     * @param <ExceptionOne> First checked exception type
+     * @param <ExceptionTwo> Second checked exception type
+     */
+    @FunctionalInterface
+    public interface ThrowingChecked2Consumer<Input, ExceptionOne extends Exception,
+            ExceptionTwo extends Exception> {
+        void accept(Input input) throws ExceptionOne, ExceptionTwo;
+    }
+
+    /**
+     * A {@link Function} that allows the caller to specify a custom checked {@link Exception} that
+     * can be thrown by the implementer. This is usually used when proxying/wrapping calls between
+     * different classes.
+     *
+     * @param <Input> Method parameter type
+     * @param <Output> Method return type
+     * @param <ExceptionType> Checked exception type
+     */
+    @FunctionalInterface
+    public interface ThrowingCheckedFunction<Input, Output, ExceptionType extends Exception> {
+        Output apply(Input input) throws ExceptionType;
+    }
+
     // TODO: add unit test
     /**
      * Gets a user-friendly name for a lambda function.

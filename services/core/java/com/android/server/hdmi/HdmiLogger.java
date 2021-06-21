@@ -18,9 +18,9 @@ package com.android.server.hdmi;
 
 import android.annotation.Nullable;
 import android.os.SystemClock;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -71,7 +71,7 @@ final class HdmiLogger {
         getLogger().errorInternal(toLogString(logMessage, objs));
     }
 
-    static void error(String logMessage, Exception e, Object... objs) {
+    static final void error(String logMessage, Exception e, Object... objs) {
         getLogger().errorInternal(toLogString(logMessage + e, objs));
     }
 

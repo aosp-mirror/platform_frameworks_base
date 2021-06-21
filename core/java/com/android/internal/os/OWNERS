@@ -1,1 +1,13 @@
-per-file ZygoteArguments.java,ZygoteConnection.java,ZygoteInit.java,Zygote.java,ZygoteServer.java = chriswailes@google.com, ngeoffray@google.com, sehr@google.com, narayan@google.com, maco@google.com
+per-file *Power* = file:/services/core/java/com/android/server/power/OWNERS
+per-file *Zygote* = file:/ZYGOTE_OWNERS
+per-file *Cpu* = file:CPU_OWNERS
+per-file *Binder* = file:BINDER_OWNERS
+
+# BatteryStats
+per-file BatterySipper.java = file:/BATTERY_STATS_OWNERS
+per-file BatteryStats* = file:/BATTERY_STATS_OWNERS
+per-file BatteryUsageStats* = file:/BATTERY_STATS_OWNERS
+per-file *ChargeCalculator* = file:/BATTERY_STATS_OWNERS
+per-file *PowerCalculator* = file:/BATTERY_STATS_OWNERS
+per-file *PowerEstimator* = file:/BATTERY_STATS_OWNERS
+

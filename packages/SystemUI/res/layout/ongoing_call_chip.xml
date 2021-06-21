@@ -1,0 +1,58 @@
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!-- Have the wrapper frame layout match the parent height so that we get a larger touch area for
+     the chip. -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ongoing_call_chip"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_vertical|start"
+>
+    <LinearLayout
+        android:id="@+id/ongoing_call_chip_background"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/ongoing_appops_chip_height"
+        android:layout_gravity="center_vertical"
+        android:gravity="center"
+        android:background="@drawable/ongoing_call_chip_bg"
+        android:paddingStart="@dimen/ongoing_call_chip_side_padding"
+        android:paddingEnd="@dimen/ongoing_call_chip_side_padding"
+        android:contentDescription="@string/ongoing_phone_call_content_description"
+        android:minWidth="@dimen/min_clickable_item_size"
+    >
+
+        <ImageView
+            android:src="@*android:drawable/ic_phone"
+            android:layout_width="@dimen/ongoing_call_chip_icon_size"
+            android:layout_height="@dimen/ongoing_call_chip_icon_size"
+            android:tint="?android:attr/colorPrimary"
+        />
+
+        <com.android.systemui.statusbar.phone.ongoingcall.OngoingCallChronometer
+            android:id="@+id/ongoing_call_chip_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:gravity="center|start"
+            android:paddingStart="@dimen/ongoing_call_chip_icon_text_padding"
+            android:textAppearance="@android:style/TextAppearance.Material.Small"
+            android:fontFamily="@*android:string/config_headlineFontFamily"
+            android:textColor="?android:attr/colorPrimary"
+        />
+
+    </LinearLayout>
+</FrameLayout>

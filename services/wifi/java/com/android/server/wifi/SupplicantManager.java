@@ -18,6 +18,9 @@ package com.android.server.wifi;
 
 import android.annotation.SystemApi;
 import android.os.SystemService;
+import android.util.Log;
+
+import java.util.NoSuchElementException;
 
 /**
  * Wrapper to start/stop supplicant daemon using init system.
@@ -25,6 +28,8 @@ import android.os.SystemService;
  */
 @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public class SupplicantManager {
+    private static final String TAG = "SupplicantManager";
+
     private static final String WPA_SUPPLICANT_DAEMON_NAME = "wpa_supplicant";
 
     private SupplicantManager() {}
@@ -32,9 +37,16 @@ public class SupplicantManager {
     /**
      * Start the wpa_supplicant daemon.
      * Note: This uses the init system to start the "wpa_supplicant" service.
+     *
+     * @throws NoSuchElementException if supplicant daemon failed to start
      */
     public static void start() {
-        SystemService.start(WPA_SUPPLICANT_DAEMON_NAME);
+        try {
+            SystemService.start(WPA_SUPPLICANT_DAEMON_NAME);
+        } catch (RuntimeException e) {
+            // likely a "failed to set system property" runtime exception
+            throw new NoSuchElementException("Failed to start Supplicant");
+        }
     }
 
     /**
@@ -42,6 +54,11 @@ public class SupplicantManager {
      * Note: This uses the init system to stop the "wpa_supplicant" service.
      */
     public static void stop() {
-        SystemService.stop(WPA_SUPPLICANT_DAEMON_NAME);
+        try {
+            SystemService.stop(WPA_SUPPLICANT_DAEMON_NAME);
+        } catch (RuntimeException e) {
+            // likely a "failed to set system property" runtime exception
+            Log.w(TAG, "Failed to stop Supplicant", e);
+        }
     }
 }

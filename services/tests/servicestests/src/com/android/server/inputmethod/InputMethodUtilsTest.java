@@ -23,6 +23,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -34,6 +35,7 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
+import android.util.ArrayMap;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
@@ -48,6 +50,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -60,6 +63,7 @@ public class InputMethodUtilsTest {
     private static final boolean IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE = true;
     private static final boolean IS_ASCII_CAPABLE = true;
     private static final boolean IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE = true;
+    private static final boolean CHECK_COUNTRY = true;
     private static final Locale LOCALE_EN = new Locale("en");
     private static final Locale LOCALE_EN_US = new Locale("en", "US");
     private static final Locale LOCALE_EN_GB = new Locale("en", "GB");
@@ -88,36 +92,36 @@ public class InputMethodUtilsTest {
     public void testVoiceImes() throws Exception {
         // locale: en_US
         assertDefaultEnabledImes(getImesWithDefaultVoiceIme(), LOCALE_EN_US,
-                "DummyDefaultEnKeyboardIme", "DummyDefaultAutoVoiceIme");
+                "FakeDefaultEnKeyboardIme", "FakeDefaultAutoVoiceIme");
         assertDefaultEnabledImes(getImesWithoutDefaultVoiceIme(), LOCALE_EN_US,
-                "DummyDefaultEnKeyboardIme", "DummyNonDefaultAutoVoiceIme0",
-                "DummyNonDefaultAutoVoiceIme1");
+                "FakeDefaultEnKeyboardIme", "FakeNonDefaultAutoVoiceIme0",
+                "FakeNonDefaultAutoVoiceIme1");
         assertDefaultEnabledMinimumImes(getImesWithDefaultVoiceIme(), LOCALE_EN_US,
-                "DummyDefaultEnKeyboardIme");
+                "FakeDefaultEnKeyboardIme");
         assertDefaultEnabledMinimumImes(getImesWithoutDefaultVoiceIme(), LOCALE_EN_US,
-                "DummyDefaultEnKeyboardIme");
+                "FakeDefaultEnKeyboardIme");
 
         // locale: en_GB
         assertDefaultEnabledImes(getImesWithDefaultVoiceIme(), LOCALE_EN_GB,
-                "DummyDefaultEnKeyboardIme", "DummyDefaultAutoVoiceIme");
+                "FakeDefaultEnKeyboardIme", "FakeDefaultAutoVoiceIme");
         assertDefaultEnabledImes(getImesWithoutDefaultVoiceIme(), LOCALE_EN_GB,
-                "DummyDefaultEnKeyboardIme", "DummyNonDefaultAutoVoiceIme0",
-                "DummyNonDefaultAutoVoiceIme1");
+                "FakeDefaultEnKeyboardIme", "FakeNonDefaultAutoVoiceIme0",
+                "FakeNonDefaultAutoVoiceIme1");
         assertDefaultEnabledMinimumImes(getImesWithDefaultVoiceIme(), LOCALE_EN_GB,
-                "DummyDefaultEnKeyboardIme");
+                "FakeDefaultEnKeyboardIme");
         assertDefaultEnabledMinimumImes(getImesWithoutDefaultVoiceIme(), LOCALE_EN_GB,
-                "DummyDefaultEnKeyboardIme");
+                "FakeDefaultEnKeyboardIme");
 
         // locale: ja_JP
         assertDefaultEnabledImes(getImesWithDefaultVoiceIme(), LOCALE_JA_JP,
-                "DummyDefaultEnKeyboardIme", "DummyDefaultAutoVoiceIme");
+                "FakeDefaultEnKeyboardIme", "FakeDefaultAutoVoiceIme");
         assertDefaultEnabledImes(getImesWithoutDefaultVoiceIme(), LOCALE_JA_JP,
-                "DummyDefaultEnKeyboardIme", "DummyNonDefaultAutoVoiceIme0",
-                "DummyNonDefaultAutoVoiceIme1");
+                "FakeDefaultEnKeyboardIme", "FakeNonDefaultAutoVoiceIme0",
+                "FakeNonDefaultAutoVoiceIme1");
         assertDefaultEnabledMinimumImes(getImesWithDefaultVoiceIme(), LOCALE_JA_JP,
-                "DummyDefaultEnKeyboardIme");
+                "FakeDefaultEnKeyboardIme");
         assertDefaultEnabledMinimumImes(getImesWithoutDefaultVoiceIme(), LOCALE_JA_JP,
-                "DummyDefaultEnKeyboardIme");
+                "FakeDefaultEnKeyboardIme");
     }
 
     @Test
@@ -189,67 +193,67 @@ public class InputMethodUtilsTest {
 
     @Test
     public void testGetImplicitlyApplicableSubtypesLocked() throws Exception {
-        final InputMethodSubtype nonAutoEnUS = createDummyInputMethodSubtype("en_US",
+        final InputMethodSubtype nonAutoEnUS = createFakeInputMethodSubtype("en_US",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoEnGB = createDummyInputMethodSubtype("en_GB",
+        final InputMethodSubtype nonAutoEnGB = createFakeInputMethodSubtype("en_GB",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoEnIN = createDummyInputMethodSubtype("en_IN",
+        final InputMethodSubtype nonAutoEnIN = createFakeInputMethodSubtype("en_IN",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoFrCA = createDummyInputMethodSubtype("fr_CA",
+        final InputMethodSubtype nonAutoFrCA = createFakeInputMethodSubtype("fr_CA",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoFr = createDummyInputMethodSubtype("fr_CA",
+        final InputMethodSubtype nonAutoFr = createFakeInputMethodSubtype("fr_CA",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoFil = createDummyInputMethodSubtype("fil",
+        final InputMethodSubtype nonAutoFil = createFakeInputMethodSubtype("fil",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoIn = createDummyInputMethodSubtype("in",
+        final InputMethodSubtype nonAutoIn = createFakeInputMethodSubtype("in",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoId = createDummyInputMethodSubtype("id",
+        final InputMethodSubtype nonAutoId = createFakeInputMethodSubtype("id",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype autoSubtype = createDummyInputMethodSubtype("auto",
+        final InputMethodSubtype autoSubtype = createFakeInputMethodSubtype("auto",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoJa = createDummyInputMethodSubtype("ja",
+        final InputMethodSubtype nonAutoJa = createFakeInputMethodSubtype("ja",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 !IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoHi = createDummyInputMethodSubtype("hi",
+        final InputMethodSubtype nonAutoHi = createFakeInputMethodSubtype("hi",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 !IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoSrCyrl = createDummyInputMethodSubtype("sr",
+        final InputMethodSubtype nonAutoSrCyrl = createFakeInputMethodSubtype("sr",
                 "sr-Cyrl", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                 !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                 !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoSrLatn = createDummyInputMethodSubtype("sr_ZZ",
+        final InputMethodSubtype nonAutoSrLatn = createFakeInputMethodSubtype("sr_ZZ",
                 "sr-Latn", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                 !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, IS_ASCII_CAPABLE,
                 !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoHandwritingEn = createDummyInputMethodSubtype("en",
+        final InputMethodSubtype nonAutoHandwritingEn = createFakeInputMethodSubtype("en",
                 SUBTYPE_MODE_HANDWRITING, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 !IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoHandwritingFr = createDummyInputMethodSubtype("fr",
+        final InputMethodSubtype nonAutoHandwritingFr = createFakeInputMethodSubtype("fr",
                 SUBTYPE_MODE_HANDWRITING, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 !IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoHandwritingSrCyrl = createDummyInputMethodSubtype("sr",
+        final InputMethodSubtype nonAutoHandwritingSrCyrl = createFakeInputMethodSubtype("sr",
                 "sr-Cyrl", SUBTYPE_MODE_HANDWRITING, !IS_AUX,
                 !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                 !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoHandwritingSrLatn = createDummyInputMethodSubtype("sr_ZZ",
+        final InputMethodSubtype nonAutoHandwritingSrLatn = createFakeInputMethodSubtype("sr_ZZ",
                 "sr-Latn", SUBTYPE_MODE_HANDWRITING, !IS_AUX,
                 !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                 !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
         final InputMethodSubtype nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype =
-                createDummyInputMethodSubtype("zz", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                createFakeInputMethodSubtype("zz", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                         !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                         IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
         final InputMethodSubtype nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype2 =
-                createDummyInputMethodSubtype("zz", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                createFakeInputMethodSubtype("zz", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                         !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                         IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
 
@@ -266,9 +270,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype2);
             subtypes.add(nonAutoHandwritingEn);
             subtypes.add(nonAutoHandwritingFr);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -290,9 +294,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype2);
             subtypes.add(nonAutoHandwritingEn);
             subtypes.add(nonAutoHandwritingFr);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -314,9 +318,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype);
             subtypes.add(nonAutoHandwritingEn);
             subtypes.add(nonAutoHandwritingFr);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -339,9 +343,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype2);
             subtypes.add(nonAutoHandwritingEn);
             subtypes.add(nonAutoHandwritingFr);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -360,9 +364,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype2);
             subtypes.add(nonAutoHandwritingEn);
             subtypes.add(nonAutoHandwritingFr);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -382,9 +386,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype2);
             subtypes.add(nonAutoHandwritingEn);
             subtypes.add(nonAutoHandwritingFr);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -404,9 +408,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoHandwritingEn);
             subtypes.add(nonAutoHandwritingFr);
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -421,9 +425,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoHandwritingEn);
             subtypes.add(nonAutoHandwritingFr);
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -438,9 +442,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoEnUS);
             subtypes.add(nonAutoHi);
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -460,9 +464,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoHandwritingFr);
             subtypes.add(nonAutoHandwritingSrCyrl);
             subtypes.add(nonAutoHandwritingSrLatn);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -480,9 +484,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoHandwritingFr);
             subtypes.add(nonAutoHandwritingSrCyrl);
             subtypes.add(nonAutoHandwritingSrLatn);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -506,9 +510,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoHandwritingFr);
             subtypes.add(nonAutoHandwritingSrCyrl);
             subtypes.add(nonAutoHandwritingSrLatn);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -533,9 +537,9 @@ public class InputMethodUtilsTest {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoEnUS);
             subtypes.add(nonAutoFil);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -551,9 +555,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoJa);
             subtypes.add(nonAutoEnUS);
             subtypes.add(nonAutoFil);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -567,9 +571,9 @@ public class InputMethodUtilsTest {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoIn);
             subtypes.add(nonAutoEnUS);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -581,9 +585,9 @@ public class InputMethodUtilsTest {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoIn);
             subtypes.add(nonAutoEnUS);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -595,9 +599,9 @@ public class InputMethodUtilsTest {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoId);
             subtypes.add(nonAutoEnUS);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -609,9 +613,9 @@ public class InputMethodUtilsTest {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoId);
             subtypes.add(nonAutoEnUS);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -631,9 +635,9 @@ public class InputMethodUtilsTest {
             subtypes.add(nonAutoFil);
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype);
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype2);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
@@ -649,33 +653,31 @@ public class InputMethodUtilsTest {
 
     @Test
     public void testContainsSubtypeOf() throws Exception {
-        final InputMethodSubtype nonAutoEnUS = createDummyInputMethodSubtype("en_US",
+        final InputMethodSubtype nonAutoEnUS = createFakeInputMethodSubtype("en_US",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoEnGB = createDummyInputMethodSubtype("en_GB",
+        final InputMethodSubtype nonAutoEnGB = createFakeInputMethodSubtype("en_GB",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoFil = createDummyInputMethodSubtype("fil",
+        final InputMethodSubtype nonAutoFil = createFakeInputMethodSubtype("fil",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoFilPH = createDummyInputMethodSubtype("fil_PH",
+        final InputMethodSubtype nonAutoFilPH = createFakeInputMethodSubtype("fil_PH",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoIn = createDummyInputMethodSubtype("in",
+        final InputMethodSubtype nonAutoIn = createFakeInputMethodSubtype("in",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoId = createDummyInputMethodSubtype("id",
+        final InputMethodSubtype nonAutoId = createFakeInputMethodSubtype("id",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-
-        final boolean CHECK_COUNTRY = true;
 
         {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoEnUS);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
 
             assertTrue(InputMethodUtils.containsSubtypeOf(imi, LOCALE_EN, !CHECK_COUNTRY,
@@ -705,9 +707,9 @@ public class InputMethodUtilsTest {
         {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoFil);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             assertTrue(InputMethodUtils.containsSubtypeOf(imi, LOCALE_FIL, !CHECK_COUNTRY,
                     SUBTYPE_MODE_KEYBOARD));
@@ -732,9 +734,9 @@ public class InputMethodUtilsTest {
         {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoFilPH);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             assertTrue(InputMethodUtils.containsSubtypeOf(imi, LOCALE_FIL, !CHECK_COUNTRY,
                     SUBTYPE_MODE_KEYBOARD));
@@ -760,9 +762,9 @@ public class InputMethodUtilsTest {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoIn);
             subtypes.add(nonAutoEnUS);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             assertTrue(InputMethodUtils.containsSubtypeOf(imi, LOCALE_IN, !CHECK_COUNTRY,
                     SUBTYPE_MODE_KEYBOARD));
@@ -779,9 +781,9 @@ public class InputMethodUtilsTest {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoId);
             subtypes.add(nonAutoEnUS);
-            final InputMethodInfo imi = createDummyInputMethodInfo(
+            final InputMethodInfo imi = createFakeInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             assertTrue(InputMethodUtils.containsSubtypeOf(imi, LOCALE_IN, !CHECK_COUNTRY,
                     SUBTYPE_MODE_KEYBOARD));
@@ -791,6 +793,97 @@ public class InputMethodUtilsTest {
                     SUBTYPE_MODE_KEYBOARD));
             assertTrue(InputMethodUtils.containsSubtypeOf(imi, LOCALE_ID, CHECK_COUNTRY,
                     SUBTYPE_MODE_KEYBOARD));
+        }
+    }
+
+    @Test
+    public void testChooseSystemVoiceIme() throws Exception {
+        final InputMethodInfo systemIme = createFakeInputMethodInfo("SystemIme", "fake.voice0",
+                true /* isSystem */);
+
+        // Returns null when the config value is null.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(methodMap, null, ""));
+        }
+
+        // Returns null when the config value is empty.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(methodMap, "", ""));
+        }
+
+        // Returns null when the configured package doesn't have an IME.
+        {
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(new ArrayMap<>(),
+                    systemIme.getPackageName(), ""));
+        }
+
+        // Returns the right one when the current default is null.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            assertEquals(systemIme, InputMethodUtils.chooseSystemVoiceIme(methodMap,
+                    systemIme.getPackageName(), null));
+        }
+
+        // Returns the right one when the current default is empty.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            assertEquals(systemIme, InputMethodUtils.chooseSystemVoiceIme(methodMap,
+                    systemIme.getPackageName(), ""));
+        }
+
+        // Returns null when the current default isn't found.
+        {
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(new ArrayMap<>(),
+                    systemIme.getPackageName(), systemIme.getId()));
+        }
+
+        // Returns null when there are multiple IMEs defined by the config package.
+        {
+            final InputMethodInfo secondIme = createFakeInputMethodInfo(systemIme.getPackageName(),
+                    "fake.voice1", true /* isSystem */);
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            methodMap.put(secondIme.getId(), secondIme);
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(methodMap, systemIme.getPackageName(),
+                    ""));
+        }
+
+        // Returns the current one when the current default and config point to the same package.
+        {
+            final InputMethodInfo secondIme = createFakeInputMethodInfo("SystemIme", "fake.voice1",
+                    true /* isSystem */);
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            methodMap.put(systemIme.getId(), systemIme);
+            methodMap.put(secondIme.getId(), secondIme);
+            assertEquals(systemIme, InputMethodUtils.chooseSystemVoiceIme(methodMap,
+                    systemIme.getPackageName(), systemIme.getId()));
+        }
+
+        // Doesn't return the current default if it isn't a system app.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            final InputMethodInfo nonSystemIme = createFakeInputMethodInfo("NonSystemIme",
+                    "fake.voice0", false /* isSystem */);
+            methodMap.put(nonSystemIme.getId(), nonSystemIme);
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(methodMap,
+                    nonSystemIme.getPackageName(), nonSystemIme.getId()));
+        }
+
+        // Returns null if the configured one isn't a system app.
+        {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            final InputMethodInfo nonSystemIme = createFakeInputMethodInfo(
+                    "FakeDefaultAutoVoiceIme", "fake.voice0", false /* isSystem */);
+            methodMap.put(systemIme.getId(), systemIme);
+            methodMap.put(nonSystemIme.getId(), nonSystemIme);
+            assertNull(InputMethodUtils.chooseSystemVoiceIme(methodMap,
+                    nonSystemIme.getPackageName(), ""));
         }
     }
 
@@ -866,7 +959,26 @@ public class InputMethodUtilsTest {
         assertEquals(expected.hashCode(), actual.hashCode());
     }
 
-    private static InputMethodInfo createDummyInputMethodInfo(String packageName, String name,
+    private static InputMethodInfo createFakeInputMethodInfo(String packageName, String name,
+            boolean isSystem) {
+        final ResolveInfo ri = new ResolveInfo();
+        final ServiceInfo si = new ServiceInfo();
+        final ApplicationInfo ai = new ApplicationInfo();
+        ai.packageName = packageName;
+        ai.enabled = true;
+        if (isSystem) {
+            ai.flags |= ApplicationInfo.FLAG_SYSTEM;
+        }
+        si.applicationInfo = ai;
+        si.enabled = true;
+        si.packageName = packageName;
+        si.name = name;
+        si.exported = true;
+        ri.serviceInfo = si;
+        return new InputMethodInfo(ri, false, "", Collections.emptyList(), 1, true);
+    }
+
+    private static InputMethodInfo createFakeInputMethodInfo(String packageName, String name,
             CharSequence label, boolean isAuxIme, boolean isDefault,
             List<InputMethodSubtype> subtypes) {
         final ResolveInfo ri = new ResolveInfo();
@@ -885,15 +997,15 @@ public class InputMethodUtilsTest {
         return new InputMethodInfo(ri, isAuxIme, "", subtypes, 1, isDefault);
     }
 
-    private static InputMethodSubtype createDummyInputMethodSubtype(String locale, String mode,
+    private static InputMethodSubtype createFakeInputMethodSubtype(String locale, String mode,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype,
             boolean isAsciiCapable, boolean isEnabledWhenDefaultIsNotAsciiCapable) {
-        return createDummyInputMethodSubtype(locale, null /* languageTag */, mode, isAuxiliary,
+        return createFakeInputMethodSubtype(locale, null /* languageTag */, mode, isAuxiliary,
                 overridesImplicitlyEnabledSubtype, isAsciiCapable,
                 isEnabledWhenDefaultIsNotAsciiCapable);
     }
 
-    private static InputMethodSubtype createDummyInputMethodSubtype(String locale,
+    private static InputMethodSubtype createFakeInputMethodSubtype(String locale,
             String languageTag, String mode, boolean isAuxiliary,
             boolean overridesImplicitlyEnabledSubtype, boolean isAsciiCapable,
             boolean isEnabledWhenDefaultIsNotAsciiCapable) {
@@ -920,14 +1032,14 @@ public class InputMethodUtilsTest {
         ArrayList<InputMethodInfo> preinstalledImes = new ArrayList<>();
         {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-            subtypes.add(createDummyInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX,
                     IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            preinstalledImes.add(createDummyInputMethodInfo("DummyDefaultAutoVoiceIme",
-                    "dummy.voice0", "DummyVoice0", IS_AUX, IS_DEFAULT, subtypes));
+            preinstalledImes.add(createFakeInputMethodInfo("FakeDefaultAutoVoiceIme",
+                    "fake.voice0", "FakeVoice0", IS_AUX, IS_DEFAULT, subtypes));
         }
         preinstalledImes.addAll(getImesWithoutDefaultVoiceIme());
         return preinstalledImes;
@@ -937,41 +1049,41 @@ public class InputMethodUtilsTest {
         ArrayList<InputMethodInfo> preinstalledImes = new ArrayList<>();
         {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-            subtypes.add(createDummyInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX,
                     IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            preinstalledImes.add(createDummyInputMethodInfo("DummyNonDefaultAutoVoiceIme0",
-                    "dummy.voice1", "DummyVoice1", IS_AUX, !IS_DEFAULT, subtypes));
+            preinstalledImes.add(createFakeInputMethodInfo("FakeNonDefaultAutoVoiceIme0",
+                    "fake.voice1", "FakeVoice1", IS_AUX, !IS_DEFAULT, subtypes));
         }
         {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-            subtypes.add(createDummyInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX,
                     IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            preinstalledImes.add(createDummyInputMethodInfo("DummyNonDefaultAutoVoiceIme1",
-                    "dummy.voice2", "DummyVoice2", IS_AUX, !IS_DEFAULT, subtypes));
+            preinstalledImes.add(createFakeInputMethodInfo("FakeNonDefaultAutoVoiceIme1",
+                    "fake.voice2", "FakeVoice2", IS_AUX, !IS_DEFAULT, subtypes));
         }
         {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            preinstalledImes.add(createDummyInputMethodInfo("DummyNonDefaultVoiceIme2",
-                    "dummy.voice3", "DummyVoice3", IS_AUX, !IS_DEFAULT, subtypes));
+            preinstalledImes.add(createFakeInputMethodInfo("FakeNonDefaultVoiceIme2",
+                    "fake.voice3", "FakeVoice3", IS_AUX, !IS_DEFAULT, subtypes));
         }
         {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("en_US", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            preinstalledImes.add(createDummyInputMethodInfo("DummyDefaultEnKeyboardIme",
-                    "dummy.keyboard0", "DummyKeyboard0", !IS_AUX, IS_DEFAULT, subtypes));
+            preinstalledImes.add(createFakeInputMethodInfo("FakeDefaultEnKeyboardIme",
+                    "fake.keyboard0", "FakeKeyboard0", !IS_AUX, IS_DEFAULT, subtypes));
         }
         return preinstalledImes;
     }
@@ -991,91 +1103,91 @@ public class InputMethodUtilsTest {
     private static ArrayList<InputMethodInfo> getSamplePreinstalledImes(final String localeString) {
         ArrayList<InputMethodInfo> preinstalledImes = new ArrayList<>();
 
-        // a dummy Voice IME
+        // a fake Voice IME
         {
             final boolean isDefaultIme = false;
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-            subtypes.add(createDummyInputMethodSubtype("", SUBTYPE_MODE_VOICE, IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("", SUBTYPE_MODE_VOICE, IS_AUX,
                     IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            preinstalledImes.add(createDummyInputMethodInfo("com.android.apps.inputmethod.voice",
-                    "com.android.inputmethod.voice", "DummyVoiceIme", IS_AUX, isDefaultIme,
+            preinstalledImes.add(createFakeInputMethodInfo("com.android.apps.inputmethod.voice",
+                    "com.android.inputmethod.voice", "FakeVoiceIme", IS_AUX, isDefaultIme,
                     subtypes));
         }
-        // a dummy Hindi IME
+        // a fake Hindi IME
         {
             final boolean isDefaultIme = contains(new String[]{ "hi", "en-rIN" }, localeString);
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             // TODO: This subtype should be marked as IS_ASCII_CAPABLE
-            subtypes.add(createDummyInputMethodSubtype("en_IN", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("en_IN", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            subtypes.add(createDummyInputMethodSubtype("hi", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("hi", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            preinstalledImes.add(createDummyInputMethodInfo("com.android.apps.inputmethod.hindi",
-                    "com.android.inputmethod.hindi", "DummyHindiIme", !IS_AUX, isDefaultIme,
+            preinstalledImes.add(createFakeInputMethodInfo("com.android.apps.inputmethod.hindi",
+                    "com.android.inputmethod.hindi", "FakeHindiIme", !IS_AUX, isDefaultIme,
                     subtypes));
         }
 
-        // a dummy Pinyin IME
+        // a fake Pinyin IME
         {
             final boolean isDefaultIme = contains(new String[]{ "zh-rCN" }, localeString);
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-            subtypes.add(createDummyInputMethodSubtype("zh_CN", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("zh_CN", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            preinstalledImes.add(createDummyInputMethodInfo("com.android.apps.inputmethod.pinyin",
-                    "com.android.apps.inputmethod.pinyin", "DummyPinyinIme", !IS_AUX, isDefaultIme,
+            preinstalledImes.add(createFakeInputMethodInfo("com.android.apps.inputmethod.pinyin",
+                    "com.android.apps.inputmethod.pinyin", "FakePinyinIme", !IS_AUX, isDefaultIme,
                     subtypes));
         }
 
-        // a dummy Korean IME
+        // a fake Korean IME
         {
             final boolean isDefaultIme = contains(new String[]{ "ko" }, localeString);
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-            subtypes.add(createDummyInputMethodSubtype("ko", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("ko", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            preinstalledImes.add(createDummyInputMethodInfo("com.android.apps.inputmethod.korean",
-                    "com.android.apps.inputmethod.korean", "DummyKoreanIme", !IS_AUX, isDefaultIme,
+            preinstalledImes.add(createFakeInputMethodInfo("com.android.apps.inputmethod.korean",
+                    "com.android.apps.inputmethod.korean", "FakeKoreanIme", !IS_AUX, isDefaultIme,
                     subtypes));
         }
 
-        // a dummy Latin IME
+        // a fake Latin IME
         {
             final boolean isDefaultIme = contains(
                     new String[]{ "en-rUS", "en-rGB", "en-rIN", "en", "hi" }, localeString);
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-            subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("en_US", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            subtypes.add(createDummyInputMethodSubtype("en_GB", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("en_GB", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            subtypes.add(createDummyInputMethodSubtype("en_IN", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("en_IN", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            subtypes.add(createDummyInputMethodSubtype("hi", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("hi", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            preinstalledImes.add(createDummyInputMethodInfo("com.android.apps.inputmethod.latin",
-                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, isDefaultIme,
+            preinstalledImes.add(createFakeInputMethodInfo("com.android.apps.inputmethod.latin",
+                    "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, isDefaultIme,
                     subtypes));
         }
 
-        // a dummy Japanese IME
+        // a fake Japanese IME
         {
             final boolean isDefaultIme = contains(new String[]{ "ja", "ja-rJP" }, localeString);
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
-            subtypes.add(createDummyInputMethodSubtype("ja", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("ja", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            subtypes.add(createDummyInputMethodSubtype("emoji", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+            subtypes.add(createFakeInputMethodSubtype("emoji", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
-            preinstalledImes.add(createDummyInputMethodInfo("com.android.apps.inputmethod.japanese",
-                    "com.android.apps.inputmethod.japanese", "DummyJapaneseIme", !IS_AUX,
+            preinstalledImes.add(createFakeInputMethodInfo("com.android.apps.inputmethod.japanese",
+                    "com.android.apps.inputmethod.japanese", "FakeJapaneseIme", !IS_AUX,
                     isDefaultIme, subtypes));
         }
 

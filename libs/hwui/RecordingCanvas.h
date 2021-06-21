@@ -18,7 +18,6 @@
 
 #include "CanvasTransform.h"
 #include "hwui/Bitmap.h"
-#include "hwui/Canvas.h"
 #include "utils/Macros.h"
 #include "utils/TypeLogic.h"
 
@@ -29,8 +28,10 @@
 #include "SkPaint.h"
 #include "SkPath.h"
 #include "SkRect.h"
-#include "SkTemplates.h"
 
+#include "pipeline/skia/AnimatedDrawables.h"
+
+#include <SkRuntimeEffect.h>
 #include <vector>
 
 namespace android {
@@ -39,6 +40,11 @@ namespace uirenderer {
 namespace skiapipeline {
 class FunctorDrawable;
 }
+
+namespace VectorDrawable {
+class Tree;
+}
+typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 enum class DisplayListOpType : uint8_t {
 #define X(T) T,
@@ -77,14 +83,12 @@ private:
     void flush();
 
     void save();
-    void saveLayer(const SkRect*, const SkPaint*, const SkImageFilter*, const SkImage*,
-                   const SkMatrix*, SkCanvas::SaveLayerFlags);
+    void saveLayer(const SkRect*, const SkPaint*, const SkImageFilter*, SkCanvas::SaveLayerFlags);
     void saveBehind(const SkRect*);
     void restore();
 
-    void concat44(const SkScalar colMajor[16]);
-    void concat(const SkMatrix&);
-    void setMatrix(const SkMatrix&);
+    void concat(const SkM44&);
+    void setMatrix(const SkM44&);
     void scale(SkScalar, SkScalar);
     void translate(SkScalar, SkScalar);
     void translateZ(SkScalar);
@@ -110,20 +114,21 @@ private:
 
     void drawTextBlob(const SkTextBlob*, SkScalar, SkScalar, const SkPaint&);
 
-    void drawImage(sk_sp<const SkImage>, SkScalar, SkScalar, const SkPaint*, BitmapPalette palette);
+    void drawImage(sk_sp<const SkImage>, SkScalar, SkScalar, const SkSamplingOptions&,
+                   const SkPaint*, BitmapPalette palette);
     void drawImageNine(sk_sp<const SkImage>, const SkIRect&, const SkRect&, const SkPaint*);
-    void drawImageRect(sk_sp<const SkImage>, const SkRect*, const SkRect&, const SkPaint*,
-                       SkCanvas::SrcRectConstraint, BitmapPalette palette);
+    void drawImageRect(sk_sp<const SkImage>, const SkRect*, const SkRect&, const SkSamplingOptions&,
+                       const SkPaint*, SkCanvas::SrcRectConstraint, BitmapPalette palette);
     void drawImageLattice(sk_sp<const SkImage>, const SkCanvas::Lattice&, const SkRect&,
-                          const SkPaint*, BitmapPalette);
+                          SkFilterMode, const SkPaint*, BitmapPalette);
 
     void drawPatch(const SkPoint[12], const SkColor[4], const SkPoint[4], SkBlendMode,
                    const SkPaint&);
     void drawPoints(SkCanvas::PointMode, size_t, const SkPoint[], const SkPaint&);
-    void drawVertices(const SkVertices*, const SkVertices::Bone bones[], int boneCount, SkBlendMode,
-                      const SkPaint&);
+    void drawVertices(const SkVertices*, SkBlendMode, const SkPaint&);
     void drawAtlas(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
-                   SkBlendMode, const SkRect*, const SkPaint*);
+                   SkBlendMode, const SkSamplingOptions&, const SkRect*, const SkPaint*);
+    void drawRippleDrawable(const skiapipeline::RippleDrawableParams& params);
     void drawShadowRec(const SkPath&, const SkDrawShadowRec&);
     void drawVectorDrawable(VectorDrawableRoot* tree);
     void drawWebView(skiapipeline::FunctorDrawable*);
@@ -155,9 +160,8 @@ public:
 
     void onFlush() override;
 
-    void didConcat44(const SkScalar[16]) override;
-    void didConcat(const SkMatrix&) override;
-    void didSetMatrix(const SkMatrix&) override;
+    void didConcat44(const SkM44&) override;
+    void didSetM44(const SkM44&) override;
     void didScale(SkScalar, SkScalar) override;
     void didTranslate(SkScalar, SkScalar) override;
 
@@ -182,34 +186,28 @@ public:
 
     void onDrawTextBlob(const SkTextBlob*, SkScalar, SkScalar, const SkPaint&) override;
 
-    void onDrawBitmap(const SkBitmap&, SkScalar, SkScalar, const SkPaint*) override;
-    void onDrawBitmapLattice(const SkBitmap&, const Lattice&, const SkRect&,
-                             const SkPaint*) override;
-    void onDrawBitmapNine(const SkBitmap&, const SkIRect&, const SkRect&, const SkPaint*) override;
-    void onDrawBitmapRect(const SkBitmap&, const SkRect*, const SkRect&, const SkPaint*,
-                          SrcRectConstraint) override;
-
-    void drawImage(const sk_sp<SkImage>& image, SkScalar left, SkScalar top, const SkPaint* paint,
-                   BitmapPalette pallete);
+    void drawImage(const sk_sp<SkImage>&, SkScalar left, SkScalar top, const SkSamplingOptions&,
+                   const SkPaint* paint, BitmapPalette pallete);
+    void drawRippleDrawable(const skiapipeline::RippleDrawableParams& params);
 
     void drawImageRect(const sk_sp<SkImage>& image, const SkRect& src, const SkRect& dst,
-                       const SkPaint* paint, SrcRectConstraint constraint, BitmapPalette palette);
+                       const SkSamplingOptions&, const SkPaint*, SrcRectConstraint, BitmapPalette);
     void drawImageLattice(const sk_sp<SkImage>& image, const Lattice& lattice, const SkRect& dst,
-                          const SkPaint* paint, BitmapPalette palette);
+                          SkFilterMode, const SkPaint* paint, BitmapPalette palette);
 
-    void onDrawImage(const SkImage*, SkScalar, SkScalar, const SkPaint*) override;
-    void onDrawImageLattice(const SkImage*, const Lattice&, const SkRect&, const SkPaint*) override;
-    void onDrawImageNine(const SkImage*, const SkIRect&, const SkRect&, const SkPaint*) override;
-    void onDrawImageRect(const SkImage*, const SkRect*, const SkRect&, const SkPaint*,
-                         SrcRectConstraint) override;
+    void onDrawImage2(const SkImage*, SkScalar, SkScalar, const SkSamplingOptions&,
+                      const SkPaint*) override;
+    void onDrawImageLattice2(const SkImage*, const Lattice&, const SkRect&, SkFilterMode,
+                             const SkPaint*) override;
+    void onDrawImageRect2(const SkImage*, const SkRect&, const SkRect&, const SkSamplingOptions&,
+                          const SkPaint*, SrcRectConstraint) override;
 
     void onDrawPatch(const SkPoint[12], const SkColor[4], const SkPoint[4], SkBlendMode,
                      const SkPaint&) override;
     void onDrawPoints(PointMode, size_t count, const SkPoint pts[], const SkPaint&) override;
-    void onDrawVerticesObject(const SkVertices*, const SkVertices::Bone bones[], int boneCount,
-                              SkBlendMode, const SkPaint&) override;
-    void onDrawAtlas(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
-                     SkBlendMode, const SkRect*, const SkPaint*) override;
+    void onDrawVerticesObject(const SkVertices*, SkBlendMode, const SkPaint&) override;
+    void onDrawAtlas2(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
+                     SkBlendMode, const SkSamplingOptions&, const SkRect*, const SkPaint*) override;
     void onDrawShadowRec(const SkPath&, const SkDrawShadowRec&) override;
 
     void drawVectorDrawable(VectorDrawableRoot* tree);

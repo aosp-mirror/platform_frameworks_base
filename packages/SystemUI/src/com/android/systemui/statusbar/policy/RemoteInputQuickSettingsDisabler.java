@@ -21,17 +21,17 @@ import android.content.Context;
 import android.content.res.Configuration;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Let {@link RemoteInputView} to control the visibility of QuickSetting.
  */
-@Singleton
+@SysUISingleton
 public class RemoteInputQuickSettingsDisabler
         implements ConfigurationController.ConfigurationListener {
 

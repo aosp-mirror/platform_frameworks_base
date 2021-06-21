@@ -367,8 +367,11 @@ public class FastXmlSerializer implements XmlSerializer {
 
     public void startDocument(String encoding, Boolean standalone) throws IOException,
             IllegalArgumentException, IllegalStateException {
-        append("<?xml version='1.0' encoding='utf-8' standalone='"
-                + (standalone ? "yes" : "no") + "' ?>\n");
+        append("<?xml version='1.0' encoding='utf-8'");
+        if (standalone != null) {
+            append(" standalone='" + (standalone ? "yes" : "no") + "'");
+        }
+        append(" ?>\n");
         mLineStart = true;
     }
 

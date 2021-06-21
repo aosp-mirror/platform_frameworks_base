@@ -17,20 +17,20 @@
 package com.android.server.power;
 
 import android.content.Intent;
-import android.os.IPowerManager;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 class PowerManagerShellCommand extends ShellCommand {
     private static final int LOW_POWER_MODE_ON = 1;
 
-    final IPowerManager mInterface;
+    final PowerManagerService.BinderService mService;
 
-    PowerManagerShellCommand(IPowerManager service) {
-        mInterface = service;
+    PowerManagerShellCommand(PowerManagerService.BinderService service) {
+        mService = service;
     }
 
     @Override
@@ -48,6 +48,10 @@ class PowerManagerShellCommand extends ShellCommand {
                     return runSetMode();
                 case "set-fixed-performance-mode-enabled":
                     return runSetFixedPerformanceModeEnabled();
+                case "suppress-ambient-display":
+                    return runSuppressAmbientDisplay();
+                case "list-ambient-display-suppression-tokens":
+                    return runListAmbientDisplaySuppressionTokens();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -58,7 +62,7 @@ class PowerManagerShellCommand extends ShellCommand {
     }
 
     private int runSetAdaptiveEnabled() throws RemoteException {
-        mInterface.setAdaptivePowerSaveEnabled(Boolean.parseBoolean(getNextArgRequired()));
+        mService.setAdaptivePowerSaveEnabled(Boolean.parseBoolean(getNextArgRequired()));
         return 0;
     }
 
@@ -71,12 +75,12 @@ class PowerManagerShellCommand extends ShellCommand {
             pw.println("Error: " + ex.toString());
             return -1;
         }
-        mInterface.setPowerSaveModeEnabled(mode == LOW_POWER_MODE_ON);
+        mService.setPowerSaveModeEnabled(mode == LOW_POWER_MODE_ON);
         return 0;
     }
 
     private int runSetFixedPerformanceModeEnabled() throws RemoteException {
-        boolean success = mInterface.setPowerModeChecked(
+        boolean success = mService.setPowerModeChecked(
                 PowerManagerInternal.MODE_FIXED_PERFORMANCE,
                 Boolean.parseBoolean(getNextArgRequired()));
         if (!success) {
@@ -87,6 +91,32 @@ class PowerManagerShellCommand extends ShellCommand {
         return success ? 0 : -1;
     }
 
+    private int runSuppressAmbientDisplay() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+
+        try {
+            String token = getNextArgRequired();
+            boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+            mService.suppressAmbientDisplay(token, enabled);
+        } catch (RuntimeException ex) {
+            pw.println("Error: " + ex.toString());
+            return -1;
+        }
+
+        return 0;
+    }
+
+    private int runListAmbientDisplaySuppressionTokens() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        List<String> tokens = mService.getAmbientDisplaySuppressionTokens();
+        if (tokens.isEmpty()) {
+            pw.println("none");
+        } else {
+            pw.println(String.format("[%s]", String.join(", ", tokens)));
+        }
+
+        return 0;
+    }
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -103,6 +133,11 @@ class PowerManagerShellCommand extends ShellCommand {
         pw.println("    enables or disables fixed performance mode");
         pw.println("    note: this will affect system performance and should only be used");
         pw.println("          during development");
+        pw.println("  suppress-ambient-display <token> [true|false]");
+        pw.println("    suppresses the current ambient display configuration and disables");
+        pw.println("    ambient display");
+        pw.println("  list-ambient-display-suppression-tokens");
+        pw.println("    prints the tokens used to suppress ambient display");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
