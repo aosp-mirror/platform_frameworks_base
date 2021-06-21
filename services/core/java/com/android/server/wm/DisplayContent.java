@@ -63,6 +63,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
@@ -208,6 +210,7 @@ import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
+import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
@@ -1549,9 +1552,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // to cover the activity configuration change.
             return false;
         }
-        if ((r.mStartingData != null && r.mStartingData.hasImeSurface())
-                || (mInsetsStateController.getImeSourceProvider()
-                        .getSource().getVisibleFrame() != null)) {
+        if (r.attachedToProcess() && mayImeShowOnLaunchingActivity(r)) {
             // Currently it is unknown that when will IME window be ready. Reject the case to
             // avoid flickering by showing IME in inconsistent orientation.
             return false;
@@ -1605,6 +1606,24 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         setFixedRotationLaunchingApp(r, rotation);
         return true;
+    }
+
+    /** Returns {@code true} if the IME is possible to show on the launching activity. */
+    private boolean mayImeShowOnLaunchingActivity(@NonNull ActivityRecord r) {
+        final WindowState win = r.findMainWindow();
+        if (win == null) {
+            return false;
+        }
+        // See InputMethodManagerService#shouldRestoreImeVisibility that we expecting the IME
+        // should be hidden when the window set the hidden softInputMode.
+        final int softInputMode = win.mAttrs.softInputMode;
+        switch (softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
+            case SOFT_INPUT_STATE_ALWAYS_HIDDEN:
+            case SOFT_INPUT_STATE_HIDDEN:
+                return false;
+        }
+        return r.mLastImeShown && mInputMethodWindow != null && mInputMethodWindow.mHasSurface
+                && mInputMethodWindow.mViewVisibility == View.VISIBLE;
     }
 
     /** Returns {@code true} if the top activity is transformed with the new rotation of display. */
