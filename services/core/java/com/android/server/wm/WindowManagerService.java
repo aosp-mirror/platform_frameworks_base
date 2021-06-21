@@ -46,6 +46,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_P
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -8632,6 +8633,25 @@ public class WindowManagerService extends IWindowManager.Stub
             final TaskSnapshot snapshot = mAtmService.getTaskSnapshot(imeTargetWindowTask.mTaskId,
                     false /* isLowResolution */);
             return snapshot != null && snapshot.hasImeSurface();
+        }
+    }
+
+    @Override
+    public int getImeDisplayId() {
+        // TODO(b/189805422): Add a toast to notify users that IMS may get extra
+        //  onConfigurationChanged callback when perDisplayFocus is enabled.
+        //  Enabling perDisplayFocus means that we track focus on each display, so we don't have
+        //  the "top focus" display and getTopFocusedDisplayContent returns the default display
+        //  as the fallback. It leads to InputMethodService receives an extra onConfiguration
+        //  callback when InputMethodService move from a secondary display to another display
+        //  with the same display metrics because InputMethodService will always associate with
+        //  the ImeContainer on the default display in onCreate and receive a configuration update
+        //  to match default display ImeContainer and then receive another configuration update
+        //  from attachToWindowToken.
+        synchronized (mGlobalLock) {
+            final DisplayContent dc = mRoot.getTopFocusedDisplayContent();
+            return dc.getImePolicy() == DISPLAY_IME_POLICY_LOCAL ? dc.getDisplayId()
+                    : DEFAULT_DISPLAY;
         }
     }
 }

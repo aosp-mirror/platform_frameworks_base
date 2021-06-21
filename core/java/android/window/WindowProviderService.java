@@ -36,7 +36,6 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
 import android.view.WindowManagerImpl;
 
-// TODO(b/159767464): handle #onConfigurationChanged(Configuration)
 /**
  * A {@link Service} responsible for showing a non-activity window, such as software keyboards or
  * accessibility overlay windows. This {@link Service} has similar behavior to
@@ -90,6 +89,20 @@ public abstract class WindowProviderService extends Service {
     }
 
     /**
+     * Returns the display ID to launch this {@link WindowProviderService}.
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint({"OnNameExpected"})
+    // Suppress the lint because it is not a callback and users may override this API to provide
+    // display.
+    @NonNull
+    public int getInitialDisplayId() {
+        return DEFAULT_DISPLAY;
+    }
+
+    /**
      * Attaches this WindowProviderService to the {@code windowToken}.
      *
      * @hide
@@ -104,10 +117,9 @@ public abstract class WindowProviderService extends Service {
     public final Context createServiceBaseContext(ActivityThread mainThread,
             LoadedApk packageInfo) {
         final Context context = super.createServiceBaseContext(mainThread, packageInfo);
-        // Always associate with the default display at initialization.
-        final Display defaultDisplay = context.getSystemService(DisplayManager.class)
-                .getDisplay(DEFAULT_DISPLAY);
-        return context.createTokenContext(mWindowToken, defaultDisplay);
+        final Display display = context.getSystemService(DisplayManager.class)
+                .getDisplay(getInitialDisplayId());
+        return context.createTokenContext(mWindowToken, display);
     }
 
     @CallSuper
