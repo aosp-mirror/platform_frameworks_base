@@ -57,7 +57,7 @@ public class SuspendDialogInfoTest {
     }
 
     @Test
-    public void equalsComparesTitle() {
+    public void equalsComparesTitleIds() {
         final SuspendDialogInfo.Builder dialogBuilder1 = createDefaultDialogBuilder();
         final SuspendDialogInfo.Builder dialogBuilder2 = createDefaultDialogBuilder();
         assertEquals(dialogBuilder1.build(), dialogBuilder2.build());
@@ -67,13 +67,77 @@ public class SuspendDialogInfoTest {
     }
 
     @Test
-    public void equalsComparesButtonText() {
+    public void equalsIgnoresTitleStringsWhenIdsSet() {
+        final SuspendDialogInfo.Builder dialogBuilder1 = new SuspendDialogInfo.Builder()
+                .setTitle(VALID_TEST_RES_ID_1)
+                .setTitle("1st title");
+        final SuspendDialogInfo.Builder dialogBuilder2 = new SuspendDialogInfo.Builder()
+                .setTitle(VALID_TEST_RES_ID_1)
+                .setTitle("2nd title");
+        // String titles different but should get be ignored when resource ids are set
+        assertEquals(dialogBuilder1.build(), dialogBuilder2.build());
+    }
+
+    @Test
+    public void equalsComparesTitleStringsWhenNoIdsSet() {
+        final SuspendDialogInfo.Builder dialogBuilder1 = new SuspendDialogInfo.Builder()
+                .setTitle("1st title");
+        final SuspendDialogInfo.Builder dialogBuilder2 = new SuspendDialogInfo.Builder()
+                .setTitle("2nd title");
+        // Both have different titles, which are not ignored as resource ids aren't set
+        assertNotEquals(dialogBuilder1.build(), dialogBuilder2.build());
+    }
+
+    @Test
+    public void titleStringClearedWhenResIdSet() {
+        final SuspendDialogInfo dialogInfo = new SuspendDialogInfo.Builder()
+                .setTitle(VALID_TEST_RES_ID_2)
+                .setTitle("Should be cleared on build")
+                .build();
+        assertNull(dialogInfo.getTitle());
+        assertEquals(VALID_TEST_RES_ID_2, dialogInfo.getTitleResId());
+    }
+
+    @Test
+    public void equalsComparesButtonTextIds() {
         final SuspendDialogInfo.Builder dialogBuilder1 = createDefaultDialogBuilder();
         final SuspendDialogInfo.Builder dialogBuilder2 = createDefaultDialogBuilder();
         assertEquals(dialogBuilder1.build(), dialogBuilder2.build());
         // Only button text is different
         dialogBuilder2.setNeutralButtonText(VALID_TEST_RES_ID_2);
         assertNotEquals(dialogBuilder1.build(), dialogBuilder2.build());
+    }
+
+    @Test
+    public void equalsIgnoresButtonStringsWhenIdsSet() {
+        final SuspendDialogInfo.Builder dialogBuilder1 = new SuspendDialogInfo.Builder()
+                .setNeutralButtonText(VALID_TEST_RES_ID_1)
+                .setNeutralButtonText("1st button text");
+        final SuspendDialogInfo.Builder dialogBuilder2 = new SuspendDialogInfo.Builder()
+                .setNeutralButtonText(VALID_TEST_RES_ID_1)
+                .setNeutralButtonText("2nd button text");
+        // Button strings different but should get be ignored when resource ids are set
+        assertEquals(dialogBuilder1.build(), dialogBuilder2.build());
+    }
+
+    @Test
+    public void equalsComparesButtonStringsWhenNoIdsSet() {
+        final SuspendDialogInfo.Builder dialogBuilder1 = new SuspendDialogInfo.Builder()
+                .setNeutralButtonText("1st button text");
+        final SuspendDialogInfo.Builder dialogBuilder2 = new SuspendDialogInfo.Builder()
+                .setNeutralButtonText("2nd button text");
+        // Both have different button texts, which are not ignored as resource ids aren't set
+        assertNotEquals(dialogBuilder1.build(), dialogBuilder2.build());
+    }
+
+    @Test
+    public void buttonStringClearedWhenResIdSet() {
+        final SuspendDialogInfo dialogInfo = new SuspendDialogInfo.Builder()
+                .setNeutralButtonText(VALID_TEST_RES_ID_2)
+                .setNeutralButtonText("Should be cleared on build")
+                .build();
+        assertNull(dialogInfo.getNeutralButtonText());
+        assertEquals(VALID_TEST_RES_ID_2, dialogInfo.getNeutralButtonTextResId());
     }
 
     @Test

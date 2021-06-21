@@ -32,13 +32,18 @@ public class TsRecordEvent extends FilterEvent {
     private final int mTsIndexMask;
     private final int mScIndexMask;
     private final long mDataLength;
+    private final long mPts;
+    private final int mFirstMbInSlice;
 
     // This constructor is used by JNI code only
-    private TsRecordEvent(int pid, int tsIndexMask, int scIndexMask, long dataLength) {
+    private TsRecordEvent(int pid, int tsIndexMask, int scIndexMask, long dataLength, long pts,
+            int firstMbInSlice) {
         mPid = pid;
         mTsIndexMask = tsIndexMask;
         mScIndexMask = scIndexMask;
         mDataLength = dataLength;
+        mPts = pts;
+        mFirstMbInSlice = firstMbInSlice;
     }
 
     /**
@@ -71,5 +76,30 @@ public class TsRecordEvent extends FilterEvent {
     @BytesLong
     public long getDataLength() {
         return mDataLength;
+    }
+
+    /**
+     * Gets the Presentation Time Stamp(PTS) for the audio or video frame. It is based on 90KHz
+     * and has the same format as the PTS in ISO/IEC 13818-1.
+     *
+     * <p>This field is only supported in Tuner 1.1 or higher version. Unsupported version will
+     * return {@link android.media.tv.tuner.Tuner#INVALID_TIMESTAMP}. Use
+     * {@link android.media.tv.tuner.TunerVersionChecker#getTunerVersion()} to get the version
+     * information.
+     */
+    public long getPts() {
+        return mPts;
+    }
+
+    /**
+     * Get the address of the first macroblock in the slice defined in ITU-T Rec. H.264.
+     *
+     * <p>This field is only supported in Tuner 1.1 or higher version. Unsupported version will
+     * return {@link android.media.tv.tuner.Tuner#INVALID_FIRST_MACROBLOCK_IN_SLICE}. Use
+     * {@link android.media.tv.tuner.TunerVersionChecker#getTunerVersion()} to get the version
+     * information.
+     */
+    public int getFirstMacroblockInSlice() {
+        return mFirstMbInSlice;
     }
 }

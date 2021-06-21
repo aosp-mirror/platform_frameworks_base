@@ -75,8 +75,6 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         mMockResources = mock(Resources.class);
         mPackageManagerSpy = spy(getContext().getPackageManager());
         doReturn(mMockResources).when(mPackageManagerSpy)
-                .getResourcesForApplicationAsUser(eq("mockPackage"), anyInt());
-        doReturn(mMockResources).when(mPackageManagerSpy)
                 .getResourcesForApplication(eq("mockPackage"));
         doReturn(mMockResources).when(mPackageManagerSpy).getResourcesForApplication(argThat(
                 (ArgumentMatcher<ApplicationInfo>) o -> "mockPackage".equals(o.packageName)));
@@ -127,7 +125,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
 
     @Test
     public void testGiantImageNotAllowed() {
-        Bitmap largeBitmap = Bitmap.createBitmap(1000, 1000, Bitmap.Config.ARGB_8888);
+        Bitmap largeBitmap = Bitmap.createBitmap(6000, 6000, Bitmap.Config.ARGB_8888);
         Icon icon = Icon.createWithBitmap(largeBitmap);
         StatusBarIcon largeIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
                 icon, 0, 0, "");

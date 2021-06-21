@@ -17,14 +17,13 @@ package com.android.server.hdmi;
  */
 
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.DisplayStatusCallback;
 import android.hardware.hdmi.IHdmiControlCallback;
-import android.os.RemoteException;
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.util.Slog;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Feature action that queries the power status of other device. This action is initiated via
@@ -40,7 +39,10 @@ final class DevicePowerStatusAction extends HdmiCecFeatureAction {
     private static final int STATE_WAITING_FOR_REPORT_POWER_STATUS = 1;
 
     private final int mTargetAddress;
-    private final List<IHdmiControlCallback> mCallbacks = new ArrayList<>();
+
+    // Retry the power status query as it might happen when the target device is waking up. In
+    // that case a device may be quite busy and can fail to respond within the 2s timeout.
+    private int mRetriesOnTimeout = 1;
 
     static DevicePowerStatusAction create(HdmiCecLocalDevice source,
             int targetAddress, IHdmiControlCallback callback) {
@@ -53,13 +55,25 @@ final class DevicePowerStatusAction extends HdmiCecFeatureAction {
 
     private DevicePowerStatusAction(HdmiCecLocalDevice localDevice,
             int targetAddress, IHdmiControlCallback callback) {
-        super(localDevice);
+        super(localDevice, callback);
         mTargetAddress = targetAddress;
-        addCallback(callback);
     }
 
     @Override
     boolean start() {
+        HdmiControlService service = localDevice().mService;
+        if (service.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {
+            HdmiDeviceInfo deviceInfo = service.getHdmiCecNetwork().getCecDeviceInfo(
+                    mTargetAddress);
+            if (deviceInfo != null
+                    && deviceInfo.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {
+                int powerStatus = deviceInfo.getDevicePowerStatus();
+                if (powerStatus != HdmiControlManager.POWER_STATUS_UNKNOWN) {
+                    finishWithCallback(powerStatus);
+                    return true;
+                }
+            }
+        }
         queryDevicePowerStatus();
         mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
@@ -68,19 +82,25 @@ final class DevicePowerStatusAction extends HdmiCecFeatureAction {
 
     private void queryDevicePowerStatus() {
         sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(),
-                mTargetAddress));
+                mTargetAddress), error -> {
+                // Don't retry on timeout if the remote device didn't even ACK the message. Assume
+                // the device is not present or not capable of CEC.
+                if (error == SendMessageResult.NACK) {
+                    // Got no response from TV. Report status 'unknown'.
+                    finishWithCallback(HdmiControlManager.POWER_STATUS_UNKNOWN);
+                }
+            });
     }
 
     @Override
     boolean processCommand(HdmiCecMessage cmd) {
         if (mState != STATE_WAITING_FOR_REPORT_POWER_STATUS
-               || mTargetAddress != cmd.getSource()) {
+                || mTargetAddress != cmd.getSource()) {
             return false;
         }
         if (cmd.getOpcode() == Constants.MESSAGE_REPORT_POWER_STATUS) {
             int status = cmd.getParams()[0];
-            invokeCallback(status);
-            finish();
+            finishWithCallback(status);
             return true;
         }
         return false;
@@ -92,23 +112,14 @@ final class DevicePowerStatusAction extends HdmiCecFeatureAction {
             return;
         }
         if (state == STATE_WAITING_FOR_REPORT_POWER_STATUS) {
-            // Got no response from TV. Report status 'unknown'.
-            invokeCallback(HdmiControlManager.POWER_STATUS_UNKNOWN);
-            finish();
-        }
-    }
-
-    public void addCallback(IHdmiControlCallback callback) {
-        mCallbacks.add(callback);
-    }
-
-    private void invokeCallback(int result) {
-        try {
-            for (IHdmiControlCallback callback : mCallbacks) {
-                callback.onComplete(result);
+            if (mRetriesOnTimeout > 0) {
+                mRetriesOnTimeout--;
+                start();
+                return;
             }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Callback failed:" + e);
+
+            // Got no response from TV. Report status 'unknown'.
+            finishWithCallback(HdmiControlManager.POWER_STATUS_UNKNOWN);
         }
     }
 }

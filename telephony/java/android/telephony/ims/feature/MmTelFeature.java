@@ -27,6 +27,8 @@ import android.telecom.TelecomManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ImsService;
+import android.telephony.ims.RtpHeaderExtensionType;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsMmTelListener;
@@ -37,6 +39,7 @@ import android.telephony.ims.stub.ImsMultiEndpointImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
+import android.util.ArraySet;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsEcbm;
@@ -45,6 +48,8 @@ import com.android.ims.internal.IImsUt;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Base implementation for Voice and SMS (IR-92) and Video (IR-94) IMS support.
@@ -86,6 +91,18 @@ public class MmTelFeature extends ImsFeature {
             synchronized (mLock) {
                 try {
                     return MmTelFeature.this.createCallProfile(callSessionType, callType);
+                } catch (Exception e) {
+                    throw new RemoteException(e.getMessage());
+                }
+            }
+        }
+
+        @Override
+        public void changeOfferedRtpHeaderExtensionTypes(List<RtpHeaderExtensionType> types)
+                throws RemoteException {
+            synchronized (mLock) {
+                try {
+                    MmTelFeature.this.changeOfferedRtpHeaderExtensionTypes(new ArraySet<>(types));
                 } catch (Exception e) {
                     throw new RemoteException(e.getMessage());
                 }
@@ -214,8 +231,9 @@ public class MmTelFeature extends ImsFeature {
      * The capabilities that are used in MmTelFeature are defined as
      * {@link MmTelCapabilities#CAPABILITY_TYPE_VOICE},
      * {@link MmTelCapabilities#CAPABILITY_TYPE_VIDEO},
-     * {@link MmTelCapabilities#CAPABILITY_TYPE_UT}, and
-     * {@link MmTelCapabilities#CAPABILITY_TYPE_SMS}.
+     * {@link MmTelCapabilities#CAPABILITY_TYPE_UT},
+     * {@link MmTelCapabilities#CAPABILITY_TYPE_SMS}, and
+     * {@link MmTelCapabilities#CAPABILITY_TYPE_CALL_COMPOSER}.
      *
      * The capabilities of this MmTelFeature will be set by the framework.
      */
@@ -258,7 +276,8 @@ public class MmTelFeature extends ImsFeature {
                         CAPABILITY_TYPE_VOICE,
                         CAPABILITY_TYPE_VIDEO,
                         CAPABILITY_TYPE_UT,
-                        CAPABILITY_TYPE_SMS
+                        CAPABILITY_TYPE_SMS,
+                        CAPABILITY_TYPE_CALL_COMPOSER
                 })
         @Retention(RetentionPolicy.SOURCE)
         public @interface MmTelCapability {}
@@ -284,8 +303,13 @@ public class MmTelFeature extends ImsFeature {
         public static final int CAPABILITY_TYPE_SMS = 1 << 3;
 
         /**
-        * @hide
-        */
+         * This MmTelFeature supports Call Composer (section 2.4 of RC.20)
+         */
+        public static final int CAPABILITY_TYPE_CALL_COMPOSER = 1 << 4;
+
+        /**
+         * @hide
+         */
         @Override
         @SystemApi
         public final void addCapabilities(@MmTelCapability int capabilities) {
@@ -293,8 +317,8 @@ public class MmTelFeature extends ImsFeature {
         }
 
         /**
-        * @hide
-        */
+         * @hide
+         */
         @Override
         @SystemApi
         public final void removeCapabilities(@MmTelCapability int capability) {
@@ -302,17 +326,18 @@ public class MmTelFeature extends ImsFeature {
         }
 
         /**
-        * @hide
-        */
+         * @param capabilities a bitmask of one or more capabilities.
+         *
+         * @return true if all queried capabilities are true, otherwise false.
+         */
         @Override
-        @SystemApi
         public final boolean isCapable(@MmTelCapability int capabilities) {
             return super.isCapable(capabilities);
         }
 
         /**
-        * @hide
-        */
+         * @hide
+         */
         @NonNull
         @Override
         public String toString() {
@@ -325,6 +350,8 @@ public class MmTelFeature extends ImsFeature {
             builder.append(isCapable(CAPABILITY_TYPE_UT));
             builder.append(" SMS: ");
             builder.append(isCapable(CAPABILITY_TYPE_SMS));
+            builder.append(" CALL_COMPOSER: ");
+            builder.append(isCapable(CAPABILITY_TYPE_CALL_COMPOSER));
             builder.append("]");
             return builder.toString();
         }
@@ -619,6 +646,24 @@ public class MmTelFeature extends ImsFeature {
     public @Nullable ImsCallProfile createCallProfile(int callSessionType, int callType) {
         // Base Implementation - Should be overridden
         return null;
+    }
+
+    /**
+     * Called by the framework to report a change to the RTP header extension types which should be
+     * offered during SDP negotiation (see RFC8285 for more information).
+     * <p>
+     * The {@link ImsService} should report the RTP header extensions which were accepted during
+     * SDP negotiation using {@link ImsCallProfile#setAcceptedRtpHeaderExtensionTypes(Set)}.
+     *
+     * @param extensionTypes The RTP header extensions the framework wishes to offer during
+     *                       outgoing and incoming call setup.  An empty list indicates that there
+     *                       are no framework defined RTP header extension types to offer.
+     * @hide
+     */
+    @SystemApi
+    public void changeOfferedRtpHeaderExtensionTypes(
+            @NonNull Set<RtpHeaderExtensionType> extensionTypes) {
+        // Base implementation - should be overridden if RTP header extension handling is supported.
     }
 
     /**

@@ -121,4 +121,11 @@ public class SettingsSpinner extends Spinner {
             int mode) {
         super(context, attrs, defStyleAttr, defStyleRes, mode, null);
     }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setDropDownVerticalOffset(getMeasuredHeight() - (int) getContext().getResources()
+                .getDimension(R.dimen.spinner_padding_top_or_bottom));
+    }
 }

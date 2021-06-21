@@ -18,6 +18,7 @@ package android.view.textservice;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
@@ -53,6 +54,7 @@ public final class SpellCheckerSubtype implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public static final int SUBTYPE_ID_NONE = 0;
     private static final String SUBTYPE_LANGUAGE_TAG_NONE = "";
 
@@ -201,7 +203,7 @@ public final class SpellCheckerSubtype implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof SpellCheckerSubtype) {
             SpellCheckerSubtype subtype = (SpellCheckerSubtype) o;
             if (subtype.mSubtypeId != SUBTYPE_ID_NONE || mSubtypeId != SUBTYPE_ID_NONE) {

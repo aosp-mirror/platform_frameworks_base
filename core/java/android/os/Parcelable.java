@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,10 +27,39 @@ import java.lang.annotation.RetentionPolicy;
  * and restored from a {@link Parcel}.  Classes implementing the Parcelable
  * interface must also have a non-null static field called <code>CREATOR</code>
  * of a type that implements the {@link Parcelable.Creator} interface.
- * 
+ *
  * <p>A typical implementation of Parcelable is:</p>
- * 
- * <pre>
+ *
+ * <div>
+ * <div class="ds-selector-tabs"><section><h3 id="kotlin">Kotlin</h3>
+ * <pre class="prettyprint lang-kotlin">
+ * class MyParcelable private constructor(`in`: Parcel) : Parcelable {
+ *     private val mData: Int = `in`.readInt()
+ *
+ *     override fun describeContents(): Int {
+ *         return 0
+ *     }
+ *
+ *     override fun writeToParcel(out: Parcel, flags: Int) {
+ *         out.writeInt(mData)
+ *     }
+ *
+ *     companion object {
+ *         val CREATOR: Parcelable.Creator&lt;MyParcelable?&gt;
+ *                 = object : Parcelable.Creator&lt;MyParcelable?&gt; {
+ *             override fun createFromParcel(`in`: Parcel): MyParcelable? {
+ *                 return MyParcelable(`in`)
+ *             }
+ *
+ *             override fun newArray(size: Int): Array&lt;MyParcelable?&gt; {
+ *                 return arrayOfNulls(size)
+ *             }
+ *         }
+ *     }
+ * }
+ * </pre>
+ * </section><section><h3 id="java">Java</h3>
+ * <pre class="prettyprint lang-java">
  * public class MyParcelable implements Parcelable {
  *     private int mData;
  *
@@ -51,11 +81,11 @@ import java.lang.annotation.RetentionPolicy;
  *             return new MyParcelable[size];
  *         }
  *     };
- *     
+ *
  *     private MyParcelable(Parcel in) {
  *         mData = in.readInt();
  *     }
- * }</pre>
+ * }</pre></section></div></div>
  */
 public interface Parcelable {
     /** @hide */
@@ -99,6 +129,37 @@ public interface Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ContentsFlags {}
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "PARCELABLE_STABILITY_" }, value = {
+            PARCELABLE_STABILITY_LOCAL,
+            PARCELABLE_STABILITY_VINTF,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Stability {}
+
+    /**
+     * Something that is not meant to cross compilation boundaries.
+     *
+     * Note: unlike binder/Stability.h which uses bitsets to detect stability,
+     * since we don't currently have a notion of different local locations,
+     * higher stability levels are formed at higher levels.
+     *
+     * For instance, contained entirely within system partitions.
+     * @see #getStability()
+     * @see ParcelableHolder
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    public static final int PARCELABLE_STABILITY_LOCAL = 0x0000;
+    /**
+     * Something that is meant to be used between system and vendor.
+     * @see #getStability()
+     * @see ParcelableHolder
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    public static final int PARCELABLE_STABILITY_VINTF = 0x0001;
+
     /**
      * Descriptor bit used with {@link #describeContents()}: indicates that
      * the Parcelable object's flattened representation includes a file descriptor.
@@ -118,7 +179,22 @@ public interface Parcelable {
      * by this Parcelable object instance.
      */
     public @ContentsFlags int describeContents();
-    
+
+    /**
+     * 'Stable' means this parcelable is guaranteed to be stable for multiple years.
+     * It must be guaranteed by setting stability field in aidl_interface,
+     * OR explicitly override this method from @JavaOnlyStableParcelable marked Parcelable.
+     * WARNING: isStable() is only expected to be overridden by auto-generated code,
+     * OR @JavaOnlyStableParcelable marked Parcelable only if there is guaranteed to
+     * be only once copy of the parcelable on the system.
+     * @return true if this parcelable is stable.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    default @Stability int getStability() {
+        return PARCELABLE_STABILITY_LOCAL;
+    }
+
     /**
      * Flatten this object in to a Parcel.
      * 

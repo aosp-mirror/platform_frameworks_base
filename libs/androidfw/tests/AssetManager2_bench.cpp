@@ -139,9 +139,13 @@ static void BM_AssetManagerGetBag(benchmark::State& state) {
   assets.SetApkAssets({apk.get()});
 
   while (state.KeepRunning()) {
-    const ResolvedBag* bag = assets.GetBag(app::R::style::StyleTwo);
-    const auto bag_end = end(bag);
-    for (auto iter = begin(bag); iter != bag_end; ++iter) {
+    auto bag = assets.GetBag(app::R::style::StyleTwo);
+    if (!bag.has_value()) {
+      state.SkipWithError("Failed to load get bag");
+      return;
+    }
+    const auto bag_end = end(*bag);
+    for (auto iter = begin(*bag); iter != bag_end; ++iter) {
       uint32_t key = iter->key;
       Res_value value = iter->value;
       benchmark::DoNotOptimize(key);

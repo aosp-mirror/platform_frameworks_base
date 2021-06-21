@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Пакети: Инстал. програма"</string>
     <string name="install" msgid="711829760615509273">"Инсталиране"</string>
+    <string name="update" msgid="3932142540719227615">"Актуализиране"</string>
     <string name="done" msgid="6632441120016885253">"Готово"</string>
     <string name="cancel" msgid="1018267193425558088">"Отказ"</string>
     <string name="installing" msgid="4921993079741206516">"Инсталира се..."</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> се инсталира…"</string>
     <string name="install_done" msgid="5987363587661783896">"Приложението бе инсталирано."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Искате ли да инсталирате това приложение?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Искате ли да инсталирате актуализация за това съществуващо приложение? Съществуващите ви данни няма да бъдат загубени."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Искате ли да инсталирате актуализация за това вградено приложение? Съществуващите ви данни няма да бъдат загубени."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Искате ли да инсталирате това приложение?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Искате ли да актуализирате това приложение?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Приложението не бе инсталирано."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Инсталирането на пакета бе блокирано."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Приложението не бе инсталирано, тъй като пакетът е в конфликт със съществуващ пакет."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Действията инсталиране и деинсталиране не се поддържат на устройства с Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Приложението се подготвя…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Неизвестно"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"От съображения за сигурност на таблета ви не могат да се инсталират неизвестни приложения от този източник."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"От съображения за сигурност на телевизора ви не могат да се инсталират неизвестни приложения от този източник."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"От съображения за сигурност на телефона ви не могат да се инсталират неизвестни приложения от този източник."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"От съображения за сигурност понастоящем на таблета ви не могат да се инсталират неизвестни приложения от този източник. Можете да промените това от „Настройки“."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"От съображения за сигурност понастоящем на телевизора ви не могат да се инсталират неизвестни приложения от този източник. Можете да промените това от „Настройки“."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"От съображения за сигурност понастоящем на телефона ви не могат да се инсталират неизвестни приложения от този източник. Можете да промените това от „Настройки“."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Телефонът и личните ви данни са по-уязвими към атаки от неизвестни приложения. С инсталирането на това приложение приемате, че носите отговорност при евентуална повреда на телефона или загуба на информация вследствие на използването на приложението."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Таблетът и личните ви данни са по-уязвими към атаки от неизвестни приложения. С инсталирането на това приложение приемате, че носите отговорност при евентуална повреда на таблета или загуба на информация вследствие на използването на приложението."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Телевизорът и личните ви данни са по-уязвими към атаки от неизвестни приложения. С инсталирането на това приложение приемате, че носите отговорност при евентуална повреда на телевизора или загуба на информация вследствие на използването на приложението."</string>

@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification
 
 import android.provider.DeviceConfig
 import android.provider.Settings
-import android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL
 import android.testing.AndroidTestingRunner
 
 import androidx.test.filters.SmallTest
@@ -43,8 +42,6 @@ class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
 
     @Before
     public fun setup() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-        NOTIFICATION_NEW_INTERRUPTION_MODEL, 1)
         manager = NotificationSectionsFeatureManager(proxyFake, mContext)
         manager!!.clearCache()
         originalQsMediaPlayer = Settings.System.getInt(context.getContentResolver(),

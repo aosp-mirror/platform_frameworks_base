@@ -27,14 +27,16 @@
      <application android:icon="@drawable/icon" android:label="wappush test">
          <uses-library android:name="android.test.runner" />
          <activity android:name=".ClientTest"
-             android:label="wappush test">
+             android:label="wappush test"
+             android:exported="true">
              <intent-filter>
                  <action android:name="android.intent.action.MAIN" />
                  <category android:name="android.intent.category.LAUNCHER" />
              </intent-filter>
          </activity>
 
-         <receiver android:name=".DrmReceiver" android:enabled="true">
+         <receiver android:name=".DrmReceiver" android:enabled="true"
+             android:exported="true">
              <intent-filter>
                  <action android:name="android.provider.Telephony.WAP_PUSH_RECEIVED" />
                  <data android:mimeType="application/vnd.oma.drm.rights+xml" />

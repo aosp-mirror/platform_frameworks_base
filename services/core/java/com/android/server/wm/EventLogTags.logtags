@@ -26,7 +26,7 @@ option java_package com.android.server.wm
 # The Activity Manager failed to pause the given activity.
 30012 wm_failed_to_pause (User|1|5),(Token|1|5),(Wanting to pause|3),(Currently pausing|3)
 # Attempting to pause the current activity
-30013 wm_pause_activity (User|1|5),(Token|1|5),(Component Name|3),(User Leaving|3)
+30013 wm_pause_activity (User|1|5),(Token|1|5),(Component Name|3),(User Leaving|3),(Reason|3)
 # Application process has been started
 
 # An activity is being destroyed:
@@ -35,22 +35,18 @@ option java_package com.android.server.wm
 30019 wm_relaunch_resume_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
 # An activity has been relaunched:
 30020 wm_relaunch_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
-# The activity's onPause has been called.
-30021 wm_on_paused_called (Token|1|5),(Component Name|3),(Reason|3)
-# The activity's onResume has been called.
-30022 wm_on_resume_called (Token|1|5),(Component Name|3),(Reason|3)
 
 # Activity set to resumed
 30043 wm_set_resumed_activity (User|1|5),(Component Name|3),(Reason|3)
 
-# Stack focus
-30044 wm_focused_stack (User|1|5),(Display Id|1|5),(Focused Stack Id|1|5),(Last Focused Stack Id|1|5),(Reason|3)
+# Root task focus
+30044 wm_focused_root_task (User|1|5),(Display Id|1|5),(Focused Root Task Id|1|5),(Last Focused Root Task Id|1|5),(Reason|3)
 
 # Attempting to stop an activity
 30048 wm_stop_activity (User|1|5),(Token|1|5),(Component Name|3)
 
-# The task is being removed from its parent stack
-30061 wm_remove_task (Task ID|1|5), (Stack ID|1|5)
+# The task is being removed from its parent task
+30061 wm_remove_task (Task ID|1|5), (Root Task ID|1|5)
 
 # An activity been add into stopping list
 30066 wm_add_to_stopping (User|1|5),(Token|1|5),(Component Name|3),(Reason|3)
@@ -61,17 +57,11 @@ option java_package com.android.server.wm
 # Out of memory for surfaces.
 31000 wm_no_surface_memory (Window|3),(PID|1|5),(Operation|3)
 # Task created.
-31001 wm_task_created (TaskId|1|5),(StackId|1|5)
+31001 wm_task_created (TaskId|1|5),(RootTaskId|1|5)
 # Task moved to top (1) or bottom (0).
 31002 wm_task_moved (TaskId|1|5),(ToTop|1),(Index|1)
 # Task removed with source explanation.
 31003 wm_task_removed (TaskId|1|5),(Reason|3)
-# Stack created.
-31004 wm_stack_created (StackId|1|5)
-# Home stack moved to top (1) or bottom (0).
-31005 wm_home_stack_moved (ToTop|1)
-# Stack removed.
-31006 wm_stack_removed (StackId|1|5)
 # bootanim finished:
 31007 wm_boot_animation_done (time|2|3)
 

@@ -15,26 +15,27 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.accessorydisplay.sink" >
+     package="com.android.accessorydisplay.sink">
 
     <uses-feature android:name="android.hardware.usb.host"/>
-    <uses-sdk android:minSdkVersion="18" />
+    <uses-sdk android:minSdkVersion="18"/>
 
     <application android:label="@string/app_name"
-            android:icon="@drawable/ic_app"
-            android:hardwareAccelerated="true">
+         android:icon="@drawable/ic_app"
+         android:hardwareAccelerated="true">
 
         <activity android:name=".SinkActivity"
-                android:label="@string/app_name"
-                android:theme="@android:style/Theme.Holo">
+             android:label="@string/app_name"
+             android:theme="@android:style/Theme.Holo"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                    android:resource="@xml/usb_device_filter"/>
+                 android:resource="@xml/usb_device_filter"/>
         </activity>
 
     </application>

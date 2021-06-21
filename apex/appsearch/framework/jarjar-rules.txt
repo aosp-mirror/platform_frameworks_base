@@ -1,0 +1,6 @@
+# Rename all com.android.internal.util classes to prevent class name collisions
+# between this module and the other versions of the utility classes linked into
+# the framework.
+
+# These must be kept in sync with the sources of framework-utils-appsearch
+rule com.android.internal.util.Preconditions* android.app.appsearch.internal.util.Preconditions@1

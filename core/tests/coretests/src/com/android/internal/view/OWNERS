@@ -1,0 +1,3 @@
+# Scroll Capture
+per-file *ScrollCapture*.java = file:/packages/SystemUI/src/com/android/systemui/screenshot/OWNERS
+per-file *CaptureHelper*.java = file:/packages/SystemUI/src/com/android/systemui/screenshot/OWNERS

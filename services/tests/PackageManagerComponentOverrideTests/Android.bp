@@ -17,6 +17,15 @@
 // NOTE: This test is separate from service tests since it relies on same vs different calling UID,
 // and this is more representative of a real caller. It also uses Mockito extended, and this
 // prevents converting the entire services test module.
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 android_test {
     name: "PackageManagerComponentOverrideTests",
     srcs: [

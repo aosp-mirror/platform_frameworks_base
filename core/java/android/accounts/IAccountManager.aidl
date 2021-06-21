@@ -43,7 +43,7 @@ interface IAccountManager {
         in String[] features, String opPackageName);
     void getAccountsByFeatures(in IAccountManagerResponse response, String accountType,
         in String[] features, String opPackageName);
-    boolean addAccountExplicitly(in Account account, String password, in Bundle extras);
+    boolean addAccountExplicitly(in Account account, String password, in Bundle extras, in String opPackageName);
     void removeAccountAsUser(in IAccountManagerResponse response, in Account account,
         boolean expectActivityLaunch, int userId);
     boolean removeAccountExplicitly(in Account account);
@@ -107,7 +107,7 @@ interface IAccountManager {
     /* Returns Map<String, Integer> from package name to visibility with all values stored for given account */
     Map getPackagesAndVisibilityForAccount(in Account account);
     boolean addAccountExplicitlyWithVisibility(in Account account, String password, in Bundle extras,
-            in Map visibility);
+            in Map visibility, in String opPackageName);
     boolean setAccountVisibility(in Account a, in String packageName, int newVisibility);
     int getAccountVisibility(in Account a, in String packageName);
     /* Type may be null returns Map <Account, Integer>*/

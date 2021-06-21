@@ -554,6 +554,10 @@ status_t IncidentService::command(FILE* in, FILE* out, FILE* err, Vector<String8
             return NO_ERROR;
         }
         if (!args[0].compare(String8("section"))) {
+            if (argCount == 1) {
+                fprintf(out, "Not enough arguments for section\n");
+                return NO_ERROR;
+            }
             int id = atoi(args[1]);
             int idx = 0;
             while (SECTION_LIST[idx] != NULL) {

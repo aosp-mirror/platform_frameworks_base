@@ -969,6 +969,8 @@ int doDump(Bundle* bundle)
                 densities.add(dens);
             }
 
+            std::vector<ResXMLParser::ResXMLPosition> tagsToSkip;
+
             size_t len;
             ResXMLTree::event_code_t code;
             int depth = 0;
@@ -1091,6 +1093,42 @@ int doDump(Bundle* bundle)
             Vector<FeatureGroup> featureGroups;
             KeyedVector<String8, ImpliedFeature> impliedFeatures;
 
+            {
+                int curDepth = 0;
+                ResXMLParser::ResXMLPosition initialPos;
+                tree.getPosition(&initialPos);
+
+                // Find all of the "uses-sdk" tags within the "manifest" tag.
+                std::vector<ResXMLParser::ResXMLPosition> usesSdkTagPositions;
+                ResXMLParser::ResXMLPosition curPos;
+                while ((code = tree.next()) != ResXMLTree::END_DOCUMENT &&
+                       code != ResXMLTree::BAD_DOCUMENT) {
+                    if (code == ResXMLTree::END_TAG) {
+                        curDepth--;
+                        continue;
+                    }
+                    if (code == ResXMLTree::START_TAG) {
+                        curDepth++;
+                    }
+                    const char16_t* ctag16 = tree.getElementName(&len);
+                    if (ctag16 == NULL || String8(ctag16) != "uses-sdk" || curDepth != 2) {
+                        continue;
+                    }
+
+                    tree.getPosition(&curPos);
+                    usesSdkTagPositions.emplace_back(curPos);
+                }
+
+                // Skip all "uses-sdk" tags besides the very last tag. The android runtime only uses
+                // the attribute values from the last defined tag.
+                for (size_t i = 1; i < usesSdkTagPositions.size(); i++) {
+                    tagsToSkip.emplace_back(usesSdkTagPositions[i - 1]);
+                }
+
+                // Reset the position before parsing.
+                tree.setPosition(initialPos);
+            }
+
             while ((code=tree.next()) != ResXMLTree::END_DOCUMENT &&
                     code != ResXMLTree::BAD_DOCUMENT) {
                 if (code == ResXMLTree::END_TAG) {
@@ -1202,7 +1240,24 @@ int doDump(Bundle* bundle)
                 if (code != ResXMLTree::START_TAG) {
                     continue;
                 }
+
                 depth++;
+
+                // If this tag should be skipped, skip to the end of this tag.
+                ResXMLParser::ResXMLPosition curPos;
+                tree.getPosition(&curPos);
+                if (std::find(tagsToSkip.begin(), tagsToSkip.end(), curPos) != tagsToSkip.end()) {
+                    const int breakDepth = depth - 1;
+                    while ((code = tree.next()) != ResXMLTree::END_DOCUMENT &&
+                           code != ResXMLTree::BAD_DOCUMENT) {
+                        if (code == ResXMLTree::END_TAG && --depth == breakDepth) {
+                            break;
+                        } else if (code == ResXMLTree::START_TAG) {
+                            depth++;
+                        }
+                    }
+                    continue;
+                }
 
                 const char16_t* ctag16 = tree.getElementName(&len);
                 if (ctag16 == NULL) {

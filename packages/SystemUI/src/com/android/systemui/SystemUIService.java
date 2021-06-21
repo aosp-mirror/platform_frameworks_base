@@ -32,6 +32,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.LogBufferFreezer;
 import com.android.systemui.dump.SystemUIAuxiliaryDumpService;
+import com.android.systemui.statusbar.policy.BatteryStateNotifier;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -44,18 +45,21 @@ public class SystemUIService extends Service {
     private final DumpHandler mDumpHandler;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final LogBufferFreezer mLogBufferFreezer;
+    private final BatteryStateNotifier mBatteryStateNotifier;
 
     @Inject
     public SystemUIService(
             @Main Handler mainHandler,
             DumpHandler dumpHandler,
             BroadcastDispatcher broadcastDispatcher,
-            LogBufferFreezer logBufferFreezer) {
+            LogBufferFreezer logBufferFreezer,
+            BatteryStateNotifier batteryStateNotifier) {
         super();
         mMainHandler = mainHandler;
         mDumpHandler = dumpHandler;
         mBroadcastDispatcher = broadcastDispatcher;
         mLogBufferFreezer = logBufferFreezer;
+        mBatteryStateNotifier = batteryStateNotifier;
     }
 
     @Override
@@ -67,6 +71,11 @@ public class SystemUIService extends Service {
 
         // Finish initializing dump logic
         mLogBufferFreezer.attach(mBroadcastDispatcher);
+
+        // If configured, set up a battery notification
+        if (getResources().getBoolean(R.bool.config_showNotificationForUnknownBatteryState)) {
+            mBatteryStateNotifier.startListening();
+        }
 
         // For debugging RescueParty
         if (Build.IS_DEBUGGABLE && SystemProperties.getBoolean("debug.crash_sysui", false)) {

@@ -116,6 +116,13 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
         filter.add(s -> s.startsWith("com.android.systemui")
                 || s.startsWith("com.android.keyguard"));
 
+        // Screenshots run in an isolated process and should not be run
+        // with the main process dependency graph because it will not exist
+        // at runtime and could lead to incorrect tests which assume
+        // the main SystemUI process. Therefore, exclude this package
+        // from the base class whitelist.
+        filter.add(s -> !s.startsWith("com.android.systemui.screenshot"));
+
         try {
             return scanner.getClassPathEntries(filter);
         } catch (IOException e) {

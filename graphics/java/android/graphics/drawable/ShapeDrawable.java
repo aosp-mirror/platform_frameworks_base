@@ -367,7 +367,6 @@ public class ShapeDrawable extends Drawable {
         return super.isStateful() || (s.mTint != null && s.mTint.isStateful());
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         return mShapeState.mTint != null && mShapeState.mTint.hasFocusStateSpecified();

@@ -267,19 +267,28 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
             permitted = dpm.isInputMethodPermittedByAdmin(admin.component,
                     packageName, userId);
         }
+
+        boolean permittedByParentAdmin = true;
+        EnforcedAdmin profileAdmin = null;
         int managedProfileId = getManagedProfileId(context, userId);
-        EnforcedAdmin profileAdmin = getProfileOrDeviceOwner(context,
-                getUserHandleOf(managedProfileId));
-        boolean permittedByProfileAdmin = true;
-        if (profileAdmin != null) {
-            permittedByProfileAdmin = dpm.isInputMethodPermittedByAdmin(profileAdmin.component,
-                    packageName, managedProfileId);
+        if (managedProfileId != UserHandle.USER_NULL) {
+            profileAdmin = getProfileOrDeviceOwner(context, getUserHandleOf(managedProfileId));
+            // If the device is an organization-owned device with a managed profile, the
+            // managedProfileId will be used instead of the affected userId. This is because
+            // isInputMethodPermittedByAdmin is called on the parent DPM instance, which will
+            // return results affecting the personal profile.
+            if (profileAdmin != null && dpm.isOrganizationOwnedDeviceWithManagedProfile()) {
+                DevicePolicyManager parentDpm = sProxy.getParentProfileInstance(dpm,
+                        UserManager.get(context).getUserInfo(managedProfileId));
+                permittedByParentAdmin = parentDpm.isInputMethodPermittedByAdmin(
+                        profileAdmin.component, packageName, managedProfileId);
+            }
         }
-        if (!permitted && !permittedByProfileAdmin) {
+        if (!permitted && !permittedByParentAdmin) {
             return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
         } else if (!permitted) {
             return admin;
-        } else if (!permittedByProfileAdmin) {
+        } else if (!permittedByParentAdmin) {
             return profileAdmin;
         }
         return null;
@@ -387,6 +396,28 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     }
 
     /**
+     * Check if USB data signaling (except from charging functions) is disabled by the admin.
+     * Only a device owner or a profile owner on an organization-owned managed profile can disable
+     * USB data signaling.
+     *
+     * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
+     * or {@code null} if USB data signaling is not disabled.
+     */
+    public static EnforcedAdmin checkIfUsbDataSignalingIsDisabled(Context context, int userId) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        if (dpm == null || dpm.isUsbDataSignalingEnabledForUser(userId)) {
+            return null;
+        } else {
+            EnforcedAdmin admin = getProfileOrDeviceOwner(context, getUserHandleOf(userId));
+            int managedProfileId = getManagedProfileId(context, userId);
+            if (admin == null && managedProfileId != UserHandle.USER_NULL) {
+                admin = getProfileOrDeviceOwner(context, getUserHandleOf(managedProfileId));
+            }
+            return admin;
+        }
+    }
+
+    /**
      * Check if {@param packageName} is restricted by the profile or device owner from using
      * metered data.
      *
@@ -408,7 +439,8 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     }
 
     /**
-     * Checks if an admin has enforced minimum password quality requirements on the given user.
+     * Checks if an admin has enforced minimum password quality or complexity requirements on the
+     * given user.
      *
      * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
      * or {@code null} if no quality requirements are set. If the requirements are set by
@@ -428,6 +460,30 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         }
 
         LockPatternUtils lockPatternUtils = new LockPatternUtils(context);
+        final int aggregatedComplexity = dpm.getAggregatedPasswordComplexityForUser(userId);
+        if (aggregatedComplexity > DevicePolicyManager.PASSWORD_COMPLEXITY_NONE) {
+            // First, check if there's a Device Owner. If so, then only it can apply password
+            // complexity requiremnts (there can be no secondary profiles).
+            final UserHandle deviceOwnerUser = dpm.getDeviceOwnerUser();
+            if (deviceOwnerUser != null) {
+                return new EnforcedAdmin(dpm.getDeviceOwnerComponentOnAnyUser(), deviceOwnerUser);
+            }
+
+            // The complexity could be enforced by a Profile Owner - either in the current user
+            // or the current user is the parent user that is affected by the profile owner.
+            for (UserInfo userInfo : UserManager.get(context).getProfiles(userId)) {
+                final ComponentName profileOwnerComponent = dpm.getProfileOwnerAsUser(userInfo.id);
+                if (profileOwnerComponent != null) {
+                    return new EnforcedAdmin(profileOwnerComponent, getUserHandleOf(userInfo.id));
+                }
+            }
+
+            // Should not get here: A Device Owner or Profile Owner should be found.
+            throw new IllegalStateException(
+                    String.format("Could not find admin enforcing complexity %d for user %d",
+                            aggregatedComplexity, userId));
+        }
+
         if (sProxy.isSeparateProfileChallengeEnabled(lockPatternUtils, userId)) {
             // userId is managed profile and has a separate challenge, only consider
             // the admins in that user.

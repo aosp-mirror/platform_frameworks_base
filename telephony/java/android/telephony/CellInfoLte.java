@@ -39,7 +39,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
     private CellConfigLte mCellConfig;
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public CellInfoLte() {
         super();
         mCellIdentityLte = new CellIdentityLte();
@@ -86,6 +86,15 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
     public CellInfoLte(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
         super(ci, timeStamp);
         final android.hardware.radio.V1_5.CellInfoLte cil = ci.ratSpecificInfo.lte();
+        mCellIdentityLte = new CellIdentityLte(cil.cellIdentityLte);
+        mCellSignalStrengthLte = new CellSignalStrengthLte(cil.signalStrengthLte);
+        mCellConfig = new CellConfigLte();
+    }
+
+    /** @hide */
+    public CellInfoLte(android.hardware.radio.V1_6.CellInfo ci, long timeStamp) {
+        super(ci, timeStamp);
+        final android.hardware.radio.V1_6.CellInfoLte cil = ci.ratSpecificInfo.lte();
         mCellIdentityLte = new CellIdentityLte(cil.cellIdentityLte);
         mCellSignalStrengthLte = new CellSignalStrengthLte(cil.signalStrengthLte);
         mCellConfig = new CellConfigLte();

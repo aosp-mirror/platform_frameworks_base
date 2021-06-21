@@ -16,6 +16,8 @@
 
 package com.android.server.usb;
 
+import static org.junit.Assert.assertEquals;
+
 import android.content.Context;
 import android.hardware.usb.UsbManager;
 
@@ -23,11 +25,11 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.usblib.UsbManagerTestLib;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.android.server.usblib.UsbManagerTestLib;
 
 /**
  * Unit tests for {@link android.hardware.usb.UsbManager}.
@@ -77,5 +79,36 @@ public class UsbManagerNoPermTest {
     @Ignore
     public void testUsbApi_SetCurrentFunctions_OnSecurityException() throws Exception {
         mUsbManagerTestLib.testSetCurrentFunctionsEx(UsbManager.FUNCTION_NONE);
+    }
+
+    public void assertSettableFunctions(boolean settable, long functions) {
+        assertEquals(
+                "areSettableFunctions(" + UsbManager.usbFunctionsToString(functions) + "):",
+                settable, UsbManager.areSettableFunctions(functions));
+    }
+
+    /**
+     * Tests the behaviour of the static areSettableFunctions method. This method performs no IPCs
+     * and requires no permissions.
+     */
+    @Test
+    public void testUsbManager_AreSettableFunctions() {
+        // NONE is settable.
+        assertSettableFunctions(true, UsbManager.FUNCTION_NONE);
+
+        // MTP, PTP, RNDIS, MIDI, NCM are all settable by themselves.
+        assertSettableFunctions(true, UsbManager.FUNCTION_MTP);
+        assertSettableFunctions(true, UsbManager.FUNCTION_PTP);
+        assertSettableFunctions(true, UsbManager.FUNCTION_RNDIS);
+        assertSettableFunctions(true, UsbManager.FUNCTION_MIDI);
+        assertSettableFunctions(true, UsbManager.FUNCTION_NCM);
+
+        // Setting two functions at the same time is not allowed...
+        assertSettableFunctions(false, UsbManager.FUNCTION_MTP | UsbManager.FUNCTION_PTP);
+        assertSettableFunctions(false, UsbManager.FUNCTION_PTP | UsbManager.FUNCTION_RNDIS);
+        assertSettableFunctions(false, UsbManager.FUNCTION_MIDI | UsbManager.FUNCTION_NCM);
+
+        // ... except in the special case of RNDIS and NCM.
+        assertSettableFunctions(true, UsbManager.FUNCTION_RNDIS | UsbManager.FUNCTION_NCM);
     }
 }

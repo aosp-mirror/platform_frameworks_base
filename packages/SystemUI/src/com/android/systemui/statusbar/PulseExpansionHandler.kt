@@ -28,26 +28,27 @@ import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.Interpolators
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators
+import com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN
+import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.ShadeController
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.max
 
 /**
  * A utility class to enable the downward swipe on when pulsing.
  */
-@Singleton
+@SysUISingleton
 class PulseExpansionHandler @Inject
 constructor(
     context: Context,
@@ -56,14 +57,15 @@ constructor(
     private val headsUpManager: HeadsUpManagerPhone,
     private val roundnessManager: NotificationRoundnessManager,
     private val statusBarStateController: StatusBarStateController,
-    private val falsingManager: FalsingManager
+    private val falsingManager: FalsingManager,
+    private val lockscreenShadeTransitionController: LockscreenShadeTransitionController,
+    private val falsingCollector: FalsingCollector
 ) : Gefingerpoken {
     companion object {
         private val RUBBERBAND_FACTOR_STATIC = 0.25f
         private val SPRING_BACK_ANIMATION_LENGTH_MS = 375
     }
     private val mPowerManager: PowerManager?
-    private lateinit var shadeController: ShadeController
 
     private val mMinDragDistance: Int
     private var mInitialTouchX: Float = 0.0f
@@ -92,21 +94,21 @@ constructor(
     var leavingLockscreen: Boolean = false
         private set
     private val mTouchSlop: Float
-    private lateinit var expansionCallback: ExpansionCallback
-    private lateinit var stackScroller: NotificationStackScrollLayout
+    private lateinit var overStretchHandler: OverStretchHandler
+    private lateinit var stackScrollerController: NotificationStackScrollLayoutController
     private val mTemp2 = IntArray(2)
     private var mDraggedFarEnough: Boolean = false
     private var mStartingChild: ExpandableView? = null
     private var mPulsing: Boolean = false
     var isWakingToShadeLocked: Boolean = false
         private set
-    private var mEmptyDragAmount: Float = 0.0f
+    private var overStretchAmount: Float = 0.0f
     private var mWakeUpHeight: Float = 0.0f
     private var mReachedWakeUpHeight: Boolean = false
     private var velocityTracker: VelocityTracker? = null
 
     private val isFalseTouch: Boolean
-        get() = falsingManager.isFalseTouch
+        get() = falsingManager.isFalseTouch(NOTIFICATION_DRAG_DOWN)
     var qsExpanded: Boolean = false
     var pulseExpandAbortListener: Runnable? = null
     var bouncerShowing: Boolean = false
@@ -147,7 +149,7 @@ constructor(
             MotionEvent.ACTION_MOVE -> {
                 val h = y - mInitialTouchY
                 if (h > mTouchSlop && h > Math.abs(x - mInitialTouchX)) {
-                    falsingManager.onStartExpandingFromPulse()
+                    falsingCollector.onStartExpandingFromPulse()
                     isExpanding = true
                     captureStartingChild(mInitialTouchX, mInitialTouchY)
                     mInitialTouchY = y
@@ -212,6 +214,7 @@ constructor(
 
     private fun finishExpansion() {
         resetClock()
+        val startingChild = mStartingChild
         if (mStartingChild != null) {
             setUserLocked(mStartingChild!!, false)
             mStartingChild = null
@@ -222,7 +225,8 @@ constructor(
             mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), WAKE_REASON_GESTURE,
                     "com.android.systemui:PULSEDRAG")
         }
-        shadeController.goToLockedShade(mStartingChild)
+        lockscreenShadeTransitionController.goToLockedShade(startingChild,
+                needsQSAnimation = false)
         leavingLockscreen = true
         isExpanding = false
         if (mStartingChild is ExpandableNotificationRow) {
@@ -249,8 +253,8 @@ constructor(
                     true /* increaseSpeed */)
             expansionHeight = max(mWakeUpHeight, expansionHeight)
         }
-        val emptyDragAmount = wakeUpCoordinator.setPulseHeight(expansionHeight)
-        setEmptyDragAmount(emptyDragAmount * RUBBERBAND_FACTOR_STATIC)
+        val dragDownAmount = wakeUpCoordinator.setPulseHeight(expansionHeight)
+        setOverStretchAmount(dragDownAmount)
     }
 
     private fun captureStartingChild(x: Float, y: Float) {
@@ -262,9 +266,9 @@ constructor(
         }
     }
 
-    private fun setEmptyDragAmount(amount: Float) {
-        mEmptyDragAmount = amount
-        expansionCallback.setEmptyDragAmount(amount)
+    private fun setOverStretchAmount(amount: Float) {
+        overStretchAmount = amount
+        overStretchHandler.setOverStretchAmount(amount)
     }
 
     private fun reset(child: ExpandableView) {
@@ -291,16 +295,18 @@ constructor(
     }
 
     private fun resetClock() {
-        val anim = ValueAnimator.ofFloat(mEmptyDragAmount, 0f)
+        val anim = ValueAnimator.ofFloat(overStretchAmount, 0f)
         anim.interpolator = Interpolators.FAST_OUT_SLOW_IN
         anim.duration = SPRING_BACK_ANIMATION_LENGTH_MS.toLong()
-        anim.addUpdateListener { animation -> setEmptyDragAmount(animation.animatedValue as Float) }
+        anim.addUpdateListener {
+            animation -> setOverStretchAmount(animation.animatedValue as Float)
+        }
         anim.start()
     }
 
     private fun cancelExpansion() {
         isExpanding = false
-        falsingManager.onExpansionFromPulseStopped()
+        falsingCollector.onExpansionFromPulseStopped()
         if (mStartingChild != null) {
             reset(mStartingChild!!)
             mStartingChild = null
@@ -315,23 +321,21 @@ constructor(
     private fun findView(x: Float, y: Float): ExpandableView? {
         var totalX = x
         var totalY = y
-        stackScroller.getLocationOnScreen(mTemp2)
+        stackScrollerController.getLocationOnScreen(mTemp2)
         totalX += mTemp2[0].toFloat()
         totalY += mTemp2[1].toFloat()
-        val childAtRawPosition = stackScroller.getChildAtRawPosition(totalX, totalY)
+        val childAtRawPosition = stackScrollerController.getChildAtRawPosition(totalX, totalY)
         return if (childAtRawPosition != null && childAtRawPosition.isContentExpandable) {
             childAtRawPosition
         } else null
     }
 
     fun setUp(
-        stackScroller: NotificationStackScrollLayout,
-        expansionCallback: ExpansionCallback,
-        shadeController: ShadeController
+        stackScrollerController: NotificationStackScrollLayoutController,
+        overStrechHandler: OverStretchHandler
     ) {
-        this.expansionCallback = expansionCallback
-        this.shadeController = shadeController
-        this.stackScroller = stackScroller
+        this.overStretchHandler = overStrechHandler
+        this.stackScrollerController = stackScrollerController
     }
 
     fun setPulsing(pulsing: Boolean) {
@@ -342,7 +346,11 @@ constructor(
         isWakingToShadeLocked = false
     }
 
-    interface ExpansionCallback {
-        fun setEmptyDragAmount(amount: Float)
+    interface OverStretchHandler {
+
+        /**
+         * Set the overstretch amount in pixels This will be rubberbanded later
+         */
+        fun setOverStretchAmount(amount: Float)
     }
 }

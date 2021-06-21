@@ -1,3 +1,12 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 android_test {
     name: "FrameworksCoreTests",
 
@@ -32,6 +41,7 @@ android_test {
         "frameworks-core-util-lib",
         "mockwebserver",
         "guava",
+        "androidx.core_core",
         "androidx.test.espresso.core",
         "androidx.test.ext.junit",
         "androidx.test.runner",
@@ -43,7 +53,8 @@ android_test {
         "truth-prebuilt",
         "print-test-util-lib",
         "testng",
-        "servicestests-utils"
+        "servicestests-utils",
+        "AppSearchTestUtils",
     ],
 
     libs: [
@@ -52,10 +63,12 @@ android_test {
         "org.apache.http.legacy",
         "android.test.base",
         "android.test.mock",
-        "framework-atb-backward-compatibility",
         "framework",
         "ext",
         "framework-res",
+    ],
+    jni_libs: [
+        "libpowermanagertest_jni",
     ],
 
     platform_apis: true,

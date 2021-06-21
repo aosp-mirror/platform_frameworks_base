@@ -61,7 +61,7 @@ CacheManager::CacheManager()
     SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
 }
 
-void CacheManager::reset(sk_sp<GrContext> context) {
+void CacheManager::reset(sk_sp<GrDirectContext> context) {
     if (context != mGrContext) {
         destroy();
     }
@@ -101,7 +101,8 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
         return;
     }
 
-    mGrContext->flush();
+    // flush and submit all work to the gpu and wait for it to finish
+    mGrContext->flushAndSubmit(/*syncCpu=*/true);
 
     switch (mode) {
         case TrimMemoryMode::Complete:
@@ -119,18 +120,30 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
             SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
             break;
     }
-
-    // We must sync the cpu to make sure deletions of resources still queued up on the GPU actually
-    // happen.
-    mGrContext->flush(kSyncCpu_GrFlushFlag, 0, nullptr);
 }
 
 void CacheManager::trimStaleResources() {
     if (!mGrContext) {
         return;
     }
-    mGrContext->flush();
+    mGrContext->flushAndSubmit();
     mGrContext->purgeResourcesNotUsedInMs(std::chrono::seconds(30));
+}
+
+void CacheManager::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {
+    *cpuUsage = 0;
+    *gpuUsage = 0;
+    if (!mGrContext) {
+        return;
+    }
+
+    skiapipeline::SkiaMemoryTracer cpuTracer("category", true);
+    SkGraphics::DumpMemoryStatistics(&cpuTracer);
+    *cpuUsage += cpuTracer.total();
+
+    skiapipeline::SkiaMemoryTracer gpuTracer("category", true);
+    mGrContext->dumpMemoryStatistics(&gpuTracer);
+    *gpuUsage += gpuTracer.total();
 }
 
 void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState) {
@@ -139,33 +152,32 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
         return;
     }
 
-    log.appendFormat("Font Cache (CPU):\n");
-    log.appendFormat("  Size: %.2f kB \n", SkGraphics::GetFontCacheUsed() / 1024.0f);
-    log.appendFormat("  Glyph Count: %d \n", SkGraphics::GetFontCacheCountUsed());
-
-    log.appendFormat("CPU Caches:\n");
     std::vector<skiapipeline::ResourcePair> cpuResourceMap = {
             {"skia/sk_resource_cache/bitmap_", "Bitmaps"},
             {"skia/sk_resource_cache/rrect-blur_", "Masks"},
             {"skia/sk_resource_cache/rects-blur_", "Masks"},
             {"skia/sk_resource_cache/tessellated", "Shadows"},
+            {"skia/sk_glyph_cache", "Glyph Cache"},
     };
     skiapipeline::SkiaMemoryTracer cpuTracer(cpuResourceMap, false);
     SkGraphics::DumpMemoryStatistics(&cpuTracer);
-    cpuTracer.logOutput(log);
+    if (cpuTracer.hasOutput()) {
+        log.appendFormat("CPU Caches:\n");
+        cpuTracer.logOutput(log);
+        log.appendFormat("  Glyph Count: %d \n", SkGraphics::GetFontCacheCountUsed());
+        log.appendFormat("Total CPU memory usage:\n");
+        cpuTracer.logTotals(log);
+    }
 
-    log.appendFormat("GPU Caches:\n");
     skiapipeline::SkiaMemoryTracer gpuTracer("category", true);
     mGrContext->dumpMemoryStatistics(&gpuTracer);
-    gpuTracer.logOutput(log);
+    if (gpuTracer.hasOutput()) {
+        log.appendFormat("GPU Caches:\n");
+        gpuTracer.logOutput(log);
+    }
 
-    log.appendFormat("Other Caches:\n");
-    log.appendFormat("                         Current / Maximum\n");
-
-    if (renderState) {
-        if (renderState->mActiveLayers.size() > 0) {
-            log.appendFormat("  Layer Info:\n");
-        }
+    if (renderState && renderState->mActiveLayers.size() > 0) {
+        log.appendFormat("Layer Info:\n");
 
         const char* layerType = Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL
                                         ? "GlLayer"
@@ -195,6 +207,14 @@ void CacheManager::onFrameCompleted() {
             mGrContext->dumpMemoryStatistics(&tracer);
         }
         tracer.logTraces();
+    }
+}
+
+void CacheManager::performDeferredCleanup(nsecs_t cleanupOlderThanMillis) {
+    if (mGrContext) {
+        mGrContext->performDeferredCleanup(
+            std::chrono::milliseconds(cleanupOlderThanMillis),
+            /* scratchResourcesOnly */true);
     }
 }
 

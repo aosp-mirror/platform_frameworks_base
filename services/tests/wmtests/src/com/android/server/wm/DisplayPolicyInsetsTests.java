@@ -36,6 +36,8 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @Presubmit
+@WindowTestsBase.UseTestDisplay(
+        addWindows = { WindowTestsBase.W_STATUS_BAR, WindowTestsBase.W_NAVIGATION_BAR })
 @RunWith(WindowTestRunner.class)
 public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
 
@@ -64,8 +66,14 @@ public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
     public void landscape() {
         final DisplayInfo di = displayInfoForRotation(ROTATION_90, false /* withCutout */);
 
-        verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        verifyNonDecorInsets(di, 0, 0, NAV_BAR_HEIGHT, 0);
+        if (mDisplayPolicy.navigationBarCanMove()) {
+            verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
+            verifyNonDecorInsets(di, 0, 0, NAV_BAR_HEIGHT, 0);
+        } else {
+            // if the navigation bar cannot move then it is always on the bottom
+            verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
+            verifyNonDecorInsets(di, 0, 0, 0, NAV_BAR_HEIGHT);
+        }
         verifyConsistency(di);
     }
 
@@ -73,8 +81,14 @@ public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
     public void landscape_withCutout() {
         final DisplayInfo di = displayInfoForRotation(ROTATION_90, true /* withCutout */);
 
-        verifyStableInsets(di, DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        verifyNonDecorInsets(di, DISPLAY_CUTOUT_HEIGHT, 0, NAV_BAR_HEIGHT, 0);
+        if (mDisplayPolicy.navigationBarCanMove()) {
+            verifyStableInsets(di, DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
+            verifyNonDecorInsets(di, DISPLAY_CUTOUT_HEIGHT, 0, NAV_BAR_HEIGHT, 0);
+        } else {
+            // if the navigation bar cannot move then it is always on the bottom
+            verifyStableInsets(di, DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
+            verifyNonDecorInsets(di, DISPLAY_CUTOUT_HEIGHT, 0, 0, NAV_BAR_HEIGHT);
+        }
         verifyConsistency(di);
     }
 
@@ -82,8 +96,14 @@ public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
     public void seascape() {
         final DisplayInfo di = displayInfoForRotation(ROTATION_270, false /* withCutout */);
 
-        verifyStableInsets(di, NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, 0, 0);
-        verifyNonDecorInsets(di, NAV_BAR_HEIGHT, 0, 0, 0);
+        if (mDisplayPolicy.navigationBarCanMove()) {
+            verifyStableInsets(di, NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, 0, 0);
+            verifyNonDecorInsets(di, NAV_BAR_HEIGHT, 0, 0, 0);
+        } else {
+            // if the navigation bar cannot move then it is always on the bottom
+            verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
+            verifyNonDecorInsets(di, 0, 0, 0, NAV_BAR_HEIGHT);
+        }
         verifyConsistency(di);
     }
 
@@ -91,8 +111,14 @@ public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
     public void seascape_withCutout() {
         final DisplayInfo di = displayInfoForRotation(ROTATION_270, true /* withCutout */);
 
-        verifyStableInsets(di, NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, DISPLAY_CUTOUT_HEIGHT, 0);
-        verifyNonDecorInsets(di, NAV_BAR_HEIGHT, 0, DISPLAY_CUTOUT_HEIGHT, 0);
+        if (mDisplayPolicy.navigationBarCanMove()) {
+            verifyStableInsets(di, NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, DISPLAY_CUTOUT_HEIGHT, 0);
+            verifyNonDecorInsets(di, NAV_BAR_HEIGHT, 0, DISPLAY_CUTOUT_HEIGHT, 0);
+        } else {
+            // if the navigation bar cannot move then it is always on the bottom
+            verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, DISPLAY_CUTOUT_HEIGHT, NAV_BAR_HEIGHT);
+            verifyNonDecorInsets(di, 0, 0, DISPLAY_CUTOUT_HEIGHT, NAV_BAR_HEIGHT);
+        }
         verifyConsistency(di);
     }
 

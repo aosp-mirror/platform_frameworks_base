@@ -16,12 +16,14 @@
 
 package android.view;
 
+import static java.lang.Integer.toHexString;
+
 import android.app.Activity;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.internal.view.IDragAndDropPermissions;
 
@@ -56,9 +58,10 @@ import com.android.internal.view.IDragAndDropPermissions;
  */
 public final class DragAndDropPermissions implements Parcelable {
 
-    private final IDragAndDropPermissions mDragAndDropPermissions;
+    private static final String TAG = "DragAndDrop";
+    private static final boolean DEBUG = false;
 
-    private IBinder mTransientToken;
+    private final IDragAndDropPermissions mDragAndDropPermissions;
 
     /**
      * Create a new {@link DragAndDropPermissions} object to control the access permissions for
@@ -81,30 +84,49 @@ public final class DragAndDropPermissions implements Parcelable {
     }
 
     /**
-     * Take the permissions and bind their lifetime to the activity.
+     * Take permissions, binding their lifetime to the activity.
+     *
+     * <p>Note: This API is exposed to apps via
+     * {@link Activity#requestDragAndDropPermissions(DragEvent)}.
+     *
      * @param activityToken Binder pointing to an Activity instance to bind the lifetime to.
      * @return True if permissions are successfully taken.
+     *
      * @hide
      */
     public boolean take(IBinder activityToken) {
         try {
+            if (DEBUG) {
+                Log.d(TAG, this + ": calling take() with activity-bound token: "
+                        + toHexString(activityToken.hashCode()));
+            }
             mDragAndDropPermissions.take(activityToken);
         } catch (RemoteException e) {
+            Log.w(TAG, this + ": take() failed with a RemoteException", e);
             return false;
         }
         return true;
     }
 
     /**
-     * Take the permissions. Must call {@link #release} explicitly.
+     * Take permissions transiently. Permissions will be tied to this object's lifecycle; if not
+     * released explicitly, they will be released automatically when there are no more references
+     * to this object and it's garbage collected.
+     *
+     * <p>Note: This API is not exposed to apps.
+     *
      * @return True if permissions are successfully taken.
+     *
      * @hide
      */
     public boolean takeTransient() {
         try {
-            mTransientToken = new Binder();
-            mDragAndDropPermissions.takeTransient(mTransientToken);
+            if (DEBUG) {
+                Log.d(TAG, this + ": calling takeTransient()");
+            }
+            mDragAndDropPermissions.takeTransient();
         } catch (RemoteException e) {
+            Log.w(TAG, this + ": takeTransient() failed with a RemoteException", e);
             return false;
         }
         return true;
@@ -116,8 +138,8 @@ public final class DragAndDropPermissions implements Parcelable {
     public void release() {
         try {
             mDragAndDropPermissions.release();
-            mTransientToken = null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -142,11 +164,9 @@ public final class DragAndDropPermissions implements Parcelable {
     @Override
     public void writeToParcel(Parcel destination, int flags) {
         destination.writeStrongInterface(mDragAndDropPermissions);
-        destination.writeStrongBinder(mTransientToken);
     }
 
     private DragAndDropPermissions(Parcel in) {
         mDragAndDropPermissions = IDragAndDropPermissions.Stub.asInterface(in.readStrongBinder());
-        mTransientToken = in.readStrongBinder();
     }
 }

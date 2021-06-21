@@ -17,13 +17,13 @@
 package android.content.pm.parsing.component;
 
 import android.annotation.NonNull;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 
 import com.android.internal.R;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -53,12 +53,7 @@ public class ParsedAttributionUtils {
             attributionTag = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestAttribution_tag, 0);
             if (attributionTag == null) {
-                // TODO moltmann: Remove handling of featureId
-                attributionTag = sa.getNonConfigurationString(
-                        R.styleable.AndroidManifestAttribution_featureId, 0);
-                if (attributionTag == null) {
-                    return input.error("<attribution> does not specify android:tag");
-                }
+                return input.error("<attribution> does not specify android:tag");
             }
             if (attributionTag.length() > ParsedAttribution.MAX_ATTRIBUTION_TAG_LEN) {
                 return input.error("android:tag is too long. Max length is "

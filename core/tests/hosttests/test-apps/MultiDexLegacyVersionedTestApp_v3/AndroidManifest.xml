@@ -1,31 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.framework.multidexlegacyversionedtestapp"
-    android:versionCode="3"
-    android:versionName="3.0" >
+     package="com.android.framework.multidexlegacyversionedtestapp"
+     android:versionCode="3"
+     android:versionName="3.0">
 
-    <uses-sdk
-        android:minSdkVersion="9"
-        android:targetSdkVersion="18" />
+    <uses-sdk android:minSdkVersion="9"
+         android:targetSdkVersion="18"/>
 
-    <application
-        android:name="androidx.multidex.MultiDexApplication"
-        android:allowBackup="true"
-        android:label="MultiDexLegacyVersionedTestApp_v3">
-        <activity
-            android:name="com.android.framework.multidexlegacyversionedtestapp.MainActivity"
-            android:label="MultiDexLegacyVersionedTestApp_v3" >
+    <application android:name="androidx.multidex.MultiDexApplication"
+         android:allowBackup="true"
+         android:label="MultiDexLegacyVersionedTestApp_v3">
+        <activity android:name="com.android.framework.multidexlegacyversionedtestapp.MainActivity"
+             android:label="MultiDexLegacyVersionedTestApp_v3"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.test.runner"/>
     </application>
 
     <instrumentation android:name="android.test.InstrumentationTestRunner"
-                     android:targetPackage="com.android.framework.multidexlegacyversionedtestapp"
-                     android:label="Test for MultiDexLegacyVersionedTestApp_v3" />
+         android:targetPackage="com.android.framework.multidexlegacyversionedtestapp"
+         android:label="Test for MultiDexLegacyVersionedTestApp_v3"/>
 
 </manifest>

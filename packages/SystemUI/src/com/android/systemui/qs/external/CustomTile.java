@@ -18,7 +18,6 @@ package com.android.systemui.qs.external;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,7 +28,9 @@ import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.service.quicksettings.IQSTileService;
@@ -39,18 +40,33 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.IWindowManager;
+import android.view.View;
 import android.view.WindowManagerGlobal;
 import android.widget.Switch;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 import java.util.Objects;
+
+import javax.inject.Inject;
+
+import dagger.Lazy;
 
 public class CustomTile extends QSTileImpl<State> implements TileChangeListener {
     public static final String PREFIX = "custom(";
@@ -70,6 +86,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private final IQSTileService mService;
     private final TileServiceManager mServiceManager;
     private final int mUser;
+    private final CustomTileStatePersister mCustomTileStatePersister;
     private android.graphics.drawable.Icon mDefaultIcon;
     private CharSequence mDefaultLabel;
 
@@ -79,22 +96,51 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private boolean mIsTokenGranted;
     private boolean mIsShowingDialog;
 
-    private CustomTile(QSHost host, String action, Context userContext) {
-        super(host);
+    private final TileServiceKey mKey;
+
+    private CustomTile(
+            QSHost host,
+            Looper backgroundLooper,
+            Handler mainHandler,
+            FalsingManager falsingManager,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            String action,
+            Context userContext,
+            CustomTileStatePersister customTileStatePersister
+    ) {
+        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                statusBarStateController, activityStarter, qsLogger);
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         mComponent = ComponentName.unflattenFromString(action);
         mTile = new Tile();
         mUserContext = userContext;
         mUser = mUserContext.getUserId();
-        updateDefaultTileAndIcon();
+        mKey = new TileServiceKey(mComponent, mUser);
+
         mServiceManager = host.getTileServices().getTileWrapper(this);
+        mService = mServiceManager.getTileService();
+        mCustomTileStatePersister = customTileStatePersister;
+    }
+
+    @Override
+    protected void handleInitialize() {
+        updateDefaultTileAndIcon();
         if (mServiceManager.isToggleableTile()) {
             // Replace states with BooleanState
             resetStates();
         }
-
-        mService = mServiceManager.getTileService();
         mServiceManager.setTileChangeListener(this);
+        if (mServiceManager.isActiveTile()) {
+            Tile t = mCustomTileStatePersister.readState(mKey);
+            if (t != null) {
+                applyTileState(t, /* overwriteNulls */ false);
+                mServiceManager.clearPendingBind();
+                refreshState();
+            }
+        }
     }
 
     @Override
@@ -164,7 +210,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     @Override
     public void onTileChanged(ComponentName tile) {
-        updateDefaultTileAndIcon();
+        mHandler.post(this::updateDefaultTileAndIcon);
     }
 
     @Override
@@ -186,16 +232,44 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     }
 
     public Tile getQsTile() {
+        // TODO(b/191145007) Move to background thread safely
         updateDefaultTileAndIcon();
         return mTile;
     }
 
-    public void updateState(Tile tile) {
-        mTile.setIcon(tile.getIcon());
-        mTile.setLabel(tile.getLabel());
-        mTile.setSubtitle(tile.getSubtitle());
-        mTile.setContentDescription(tile.getContentDescription());
-        mTile.setStateDescription(tile.getStateDescription());
+    /**
+     * Update state of {@link this#mTile} from a remote {@link TileService}.
+     * @param tile tile populated with state to apply
+     */
+    public void updateTileState(Tile tile) {
+        // This comes from a binder call IQSService.updateQsTile
+        mHandler.post(() -> handleUpdateTileState(tile));
+    }
+
+    private void handleUpdateTileState(Tile tile) {
+        applyTileState(tile, /* overwriteNulls */ true);
+        if (mServiceManager.isActiveTile()) {
+            mCustomTileStatePersister.persistState(mKey, tile);
+        }
+    }
+
+    @WorkerThread
+    private void applyTileState(Tile tile, boolean overwriteNulls) {
+        if (tile.getIcon() != null || overwriteNulls) {
+            mTile.setIcon(tile.getIcon());
+        }
+        if (tile.getLabel() != null || overwriteNulls) {
+            mTile.setLabel(tile.getLabel());
+        }
+        if (tile.getSubtitle() != null || overwriteNulls) {
+            mTile.setSubtitle(tile.getSubtitle());
+        }
+        if (tile.getContentDescription() != null || overwriteNulls) {
+            mTile.setContentDescription(tile.getContentDescription());
+        }
+        if (tile.getStateDescription() != null || overwriteNulls) {
+            mTile.setStateDescription(tile.getStateDescription());
+        }
         mTile.setState(tile.getState());
     }
 
@@ -280,20 +354,20 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     }
 
     private Intent resolveIntent(Intent i) {
-        ResolveInfo result = mContext.getPackageManager().resolveActivityAsUser(i, 0,
-                ActivityManager.getCurrentUser());
+        ResolveInfo result = mContext.getPackageManager().resolveActivityAsUser(i, 0, mUser);
         return result != null ? new Intent(TileService.ACTION_QS_TILE_PREFERENCES)
                 .setClassName(result.activityInfo.packageName, result.activityInfo.name) : null;
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (mTile.getState() == Tile.STATE_UNAVAILABLE) {
             return;
         }
         try {
             if (DEBUG) Log.d(TAG, "Adding token");
-            mWindowManager.addWindowToken(mToken, TYPE_QS_DIALOG, DEFAULT_DISPLAY);
+            mWindowManager.addWindowToken(mToken, TYPE_QS_DIALOG, DEFAULT_DISPLAY,
+                    null /* options */);
             mIsTokenGranted = true;
         } catch (RemoteException e) {
         }
@@ -397,7 +471,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         return ComponentName.unflattenFromString(action);
     }
 
-    public static CustomTile create(QSHost host, String spec, Context userContext) {
+    private static String getAction(String spec) {
         if (spec == null || !spec.startsWith(PREFIX) || !spec.endsWith(")")) {
             throw new IllegalArgumentException("Bad custom tile spec: " + spec);
         }
@@ -405,6 +479,89 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         if (action.isEmpty()) {
             throw new IllegalArgumentException("Empty custom tile spec action");
         }
-        return new CustomTile(host, action, userContext);
+        return action;
+    }
+
+    /**
+     * Create a {@link CustomTile} for a given spec and user.
+     *
+     * @param builder including injected common dependencies.
+     * @param spec as provided by {@link CustomTile#toSpec}
+     * @param userContext context for the user that is creating this tile.
+     * @return a new {@link CustomTile}
+     */
+    public static CustomTile create(Builder builder, String spec, Context userContext) {
+        return builder
+                .setSpec(spec)
+                .setUserContext(userContext)
+                .build();
+    }
+
+    public static class Builder {
+        final Lazy<QSHost> mQSHostLazy;
+        final Looper mBackgroundLooper;
+        final Handler mMainHandler;
+        private final FalsingManager mFalsingManager;
+        final MetricsLogger mMetricsLogger;
+        final StatusBarStateController mStatusBarStateController;
+        final ActivityStarter mActivityStarter;
+        final QSLogger mQSLogger;
+        final CustomTileStatePersister mCustomTileStatePersister;
+
+        Context mUserContext;
+        String mSpec = "";
+
+        @Inject
+        public Builder(
+                Lazy<QSHost> hostLazy,
+                @Background Looper backgroundLooper,
+                @Main Handler mainHandler,
+                FalsingManager falsingManager,
+                MetricsLogger metricsLogger,
+                StatusBarStateController statusBarStateController,
+                ActivityStarter activityStarter,
+                QSLogger qsLogger,
+                CustomTileStatePersister customTileStatePersister
+        ) {
+            mQSHostLazy = hostLazy;
+            mBackgroundLooper = backgroundLooper;
+            mMainHandler = mainHandler;
+            mFalsingManager = falsingManager;
+            mMetricsLogger = metricsLogger;
+            mStatusBarStateController = statusBarStateController;
+            mActivityStarter = activityStarter;
+            mQSLogger = qsLogger;
+            mCustomTileStatePersister = customTileStatePersister;
+        }
+
+        Builder setSpec(@NonNull String spec) {
+            mSpec = spec;
+            return this;
+        }
+
+        Builder setUserContext(@NonNull Context userContext) {
+            mUserContext = userContext;
+            return this;
+        }
+
+        CustomTile build() {
+            if (mUserContext == null) {
+                throw new NullPointerException("UserContext cannot be null");
+            }
+            String action = getAction(mSpec);
+            return new CustomTile(
+                    mQSHostLazy.get(),
+                    mBackgroundLooper,
+                    mMainHandler,
+                    mFalsingManager,
+                    mMetricsLogger,
+                    mStatusBarStateController,
+                    mActivityStarter,
+                    mQSLogger,
+                    action,
+                    mUserContext,
+                    mCustomTileStatePersister
+            );
+        }
     }
 }

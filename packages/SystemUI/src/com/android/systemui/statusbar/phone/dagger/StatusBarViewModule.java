@@ -16,8 +16,14 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
+import android.annotation.Nullable;
+
+import com.android.keyguard.LockIconView;
+import com.android.systemui.R;
+import com.android.systemui.biometrics.AuthRippleView;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
+import com.android.systemui.statusbar.phone.TapAgainView;
 
 import dagger.Module;
 import dagger.Provides;
@@ -32,4 +38,27 @@ public abstract class StatusBarViewModule {
         return notificationShadeWindowView.getNotificationPanelView();
     }
 
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    public static LockIconView getLockIconView(
+            NotificationShadeWindowView notificationShadeWindowView) {
+        return notificationShadeWindowView.findViewById(R.id.lock_icon_view);
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    @Nullable
+    public static AuthRippleView getAuthRippleView(
+            NotificationShadeWindowView notificationShadeWindowView) {
+        return notificationShadeWindowView.findViewById(R.id.auth_ripple);
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    public static TapAgainView getTapAgainView(NotificationPanelView npv) {
+        return npv.getTapAgainView();
+    }
 }

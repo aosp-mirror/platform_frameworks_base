@@ -32,7 +32,11 @@ import java.io.UnsupportedEncodingException;
  * Program is a base class for all the objects that modify
  * various stages of the graphics pipeline
  *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public class Program extends BaseObj {
     static final int MAX_INPUT = 8;
     static final int MAX_OUTPUT = 8;

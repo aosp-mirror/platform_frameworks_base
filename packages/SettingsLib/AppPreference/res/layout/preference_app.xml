@@ -29,9 +29,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="start|center_vertical"
-        android:minWidth="56dp"
+        android:minWidth="@dimen/secondary_app_icon_size"
         android:orientation="horizontal"
-        android:paddingEnd="8dp"
+        android:paddingEnd="16dp"
         android:paddingTop="4dp"
         android:paddingBottom="4dp">
         <ImageView
@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
-            android:singleLine="true"
+            android:maxLines="2"
             android:textAppearance="?android:attr/textAppearanceListItem"/>
 
         <TextView
@@ -90,7 +90,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical|end"
-        android:minWidth="64dp"
+        android:minWidth="@dimen/two_target_min_width"
         android:orientation="vertical"/>
 
 </LinearLayout>

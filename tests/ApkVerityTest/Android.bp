@@ -12,10 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 java_test_host {
     name: "ApkVerityTest",
     srcs: ["src/**/*.java"],
     libs: ["tradefed", "compatibility-tradefed", "compatibility-host-util"],
+    static_libs: [
+        "block_device_writer_jar",
+        "frameworks-base-hostutils",
+    ],
     test_suites: ["general-tests", "vts"],
     target_required: [
         "block_device_writer_module",
