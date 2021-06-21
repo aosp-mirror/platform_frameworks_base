@@ -21,6 +21,7 @@ import static android.os.UserManager.SWITCHABILITY_STATUS_OK;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.IActivityTaskManager;
@@ -48,6 +49,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManagerGlobal;
 import android.widget.BaseAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -63,6 +65,7 @@ import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.QSUserSwitcherEvent;
@@ -76,6 +79,8 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -123,23 +128,35 @@ public class UserSwitcherController implements Dumpable {
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
     private final UiEventLogger mUiEventLogger;
     public final DetailAdapter mUserDetailAdapter;
+    private final Executor mUiBgExecutor;
+    private final boolean mGuestUserAutoCreated;
+    private final AtomicBoolean mGuestCreationScheduled;
 
     @Inject
-    public UserSwitcherController(Context context, KeyguardStateController keyguardStateController,
-            @Main Handler handler, ActivityStarter activityStarter,
-            BroadcastDispatcher broadcastDispatcher, UiEventLogger uiEventLogger,
+    public UserSwitcherController(Context context,
+            KeyguardStateController keyguardStateController,
+            @Main Handler handler,
+            ActivityStarter activityStarter,
+            BroadcastDispatcher broadcastDispatcher,
+            UiEventLogger uiEventLogger,
             TelephonyListenerManager telephonyListenerManager,
-            IActivityTaskManager activityTaskManager, UserDetailAdapter userDetailAdapter) {
+            IActivityTaskManager activityTaskManager,
+            UserDetailAdapter userDetailAdapter,
+            @UiBackground Executor uiBgExecutor) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mTelephonyListenerManager = telephonyListenerManager;
         mActivityTaskManager = activityTaskManager;
         mUiEventLogger = uiEventLogger;
-        mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(mUiEventLogger);
+        mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(this, mUiEventLogger);
         mUserDetailAdapter = userDetailAdapter;
+        mUiBgExecutor = uiBgExecutor;
         if (!UserManager.isGuestUserEphemeral()) {
             mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
         }
+        mGuestUserAutoCreated = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_guestUserAutoCreated);
+        mGuestCreationScheduled = new AtomicBoolean();
         mKeyguardStateController = keyguardStateController;
         mHandler = handler;
         mActivityStarter = activityStarter;
@@ -379,21 +396,13 @@ public class UserSwitcherController implements Dumpable {
         int id;
         if (record.isGuest && record.info == null) {
             // No guest user. Create one.
-            UserInfo guest;
-            try {
-                guest = mUserManager.createGuest(mContext,
-                        mContext.getString(com.android.settingslib.R.string.guest_nickname));
-            } catch (UserManager.UserOperationException e) {
-                Log.e(TAG, "Couldn't create guest user", e);
-                return;
-            }
-            if (guest == null) {
-                // Couldn't create guest, most likely because there already exists one, we just
-                // haven't reloaded the user list yet.
+            int guestId = createGuest();
+            if (guestId == UserHandle.USER_NULL) {
+                // This may happen if we haven't reloaded the user list yet.
                 return;
             }
             mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_ADD);
-            id = guest.id;
+            id = guestId;
         } else if (record.isAddUser) {
             showAddUserDialog();
             return;
@@ -455,11 +464,6 @@ public class UserSwitcherController implements Dumpable {
         }
         mAddUserDialog = new AddUserDialog(mContext);
         mAddUserDialog.show();
-    }
-
-    protected void exitGuest(int id, int targetId) {
-        switchToUserId(targetId);
-        mUserManager.removeUser(id);
     }
 
     private void listenForCallState() {
@@ -576,6 +580,7 @@ public class UserSwitcherController implements Dumpable {
             pw.print("    "); pw.println(u.toString());
         }
         pw.println("mSimpleUserSwitcher=" + mSimpleUserSwitcher);
+        pw.println("mGuestUserAutoCreated=" + mGuestUserAutoCreated);
     }
 
     /** Returns the name of the current user of the phone. */
@@ -600,6 +605,126 @@ public class UserSwitcherController implements Dumpable {
     @VisibleForTesting
     public ArrayList<UserRecord> getUsers() {
         return mUsers;
+    }
+
+    /**
+     * Removes guest user and switches to target user. The guest must be the current user and its id
+     * must be {@code guestUserId}.
+     *
+     * <p>If {@code targetUserId} is {@link UserHandle.USER_NULL}, then create a new guest user in
+     * the foreground, and immediately switch to it. This is used for wiping the current guest and
+     * replacing it with a new one.
+     *
+     * <p>If {@code targetUserId} is specified, then remove the guest in the background while
+     * switching to {@code targetUserId}.
+     *
+     * <p>If device is configured with {@link
+     * com.android.internal.R.bool.config_guestUserAutoCreated}, then after guest user is removed, a
+     * new one is created in the background. This has no effect if {@code targetUserId} is {@link
+     * UserHandle.USER_NULL}.
+     *
+     * @param guestUserId id of the guest user to remove
+     * @param targetUserId id of the user to switch to after guest is removed. If {@link
+     * UserHandle.USER_NULL}, then switch immediately to the newly created guest user.
+     */
+    public void removeGuestUser(@UserIdInt int guestUserId, @UserIdInt int targetUserId) {
+        UserInfo currentUser;
+        try {
+            currentUser = ActivityManager.getService().getCurrentUser();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't remove guest because ActivityManager is dead");
+            return;
+        }
+        if (currentUser.id != guestUserId) {
+            Log.w(TAG, "User requesting to start a new session (" + guestUserId + ")"
+                    + " is not current user (" + currentUser.id + ")");
+            return;
+        }
+        if (!currentUser.isGuest()) {
+            Log.w(TAG, "User requesting to start a new session (" + guestUserId + ")"
+                    + " is not a guest");
+            return;
+        }
+
+        boolean marked = mUserManager.markGuestForDeletion(currentUser.id);
+        if (!marked) {
+            Log.w(TAG, "Couldn't mark the guest for deletion for user " + guestUserId);
+            return;
+        }
+
+        try {
+            if (targetUserId == UserHandle.USER_NULL) {
+                // Create a new guest in the foreground, and then immediately switch to it
+                int newGuestId = createGuest();
+                if (newGuestId == UserHandle.USER_NULL) {
+                    Log.e(TAG, "Could not create new guest, switching back to system user");
+                    switchToUserId(UserHandle.USER_SYSTEM);
+                    mUserManager.removeUser(currentUser.id);
+                    WindowManagerGlobal.getWindowManagerService().lockNow(/* options= */ null);
+                    return;
+                }
+                switchToUserId(newGuestId);
+                mUserManager.removeUser(currentUser.id);
+            } else {
+                if (mGuestUserAutoCreated) {
+                    // TODO(b/191067027): Move guest recreation to system_server
+                    scheduleGuestCreation();
+                }
+                switchToUserId(targetUserId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't remove guest because ActivityManager or WindowManager is dead");
+            return;
+        }
+    }
+
+    private void scheduleGuestCreation() {
+        if (!mGuestCreationScheduled.compareAndSet(false, true)) {
+            return;
+        }
+
+        mUiBgExecutor.execute(() -> {
+            int newGuestId = createGuest();
+            if (newGuestId == UserHandle.USER_NULL) {
+                Log.w(TAG, "Could not create new guest while exiting existing guest");
+            }
+            mGuestCreationScheduled.set(false);
+        });
+
+    }
+
+    /**
+     * If there is no guest on the device, schedule creation of a new guest user in the background.
+     */
+    public void guaranteeGuestPresent() {
+        if (mUserManager.findCurrentGuestUser() == null) {
+            scheduleGuestCreation();
+        }
+    }
+
+    /**
+     * Creates a guest user and return its multi-user user ID.
+     *
+     * This method does not check if a guest already exists before it makes a call to
+     * {@link UserManager} to create a new one.
+     *
+     * @return The multi-user user ID of the newly created guest user, or
+     * {@link UserHandle.USER_NULL} if the guest couldn't be created.
+     */
+    public @UserIdInt int createGuest() {
+        UserInfo guest;
+        try {
+            guest = mUserManager.createGuest(mContext,
+                    mContext.getString(com.android.settingslib.R.string.guest_nickname));
+        } catch (UserManager.UserOperationException e) {
+            Log.e(TAG, "Couldn't create guest user", e);
+            return UserHandle.USER_NULL;
+        }
+        if (guest == null) {
+            Log.e(TAG, "Couldn't create guest, most likely because there already exists one");
+            return UserHandle.USER_NULL;
+        }
+        return guest.id;
     }
 
     public static abstract class BaseUserAdapter extends BaseAdapter {
@@ -662,10 +787,15 @@ public class UserSwitcherController implements Dumpable {
         public String getName(Context context, UserRecord item) {
             if (item.isGuest) {
                 if (item.isCurrent) {
-                    return context.getString(com.android.settingslib.R.string.guest_exit_guest);
+                    return context.getString(mController.mGuestUserAutoCreated
+                            ? com.android.settingslib.R.string.guest_reset_guest
+                            : com.android.settingslib.R.string.guest_exit_guest);
                 } else {
+                    // If config_guestUserAutoCreated, always show guest nickname instead of "Add
+                    // guest" to make it seem as though the device always has a guest ready for use
                     return context.getString(
-                            item.info == null ? com.android.settingslib.R.string.guest_new_guest
+                            item.info == null && !mController.mGuestUserAutoCreated
+                                    ? com.android.settingslib.R.string.guest_new_guest
                                     : com.android.settingslib.R.string.guest_nickname);
                 }
             } else if (item.isAddUser) {
@@ -882,12 +1012,15 @@ public class UserSwitcherController implements Dumpable {
 
         public ExitGuestDialog(Context context, int guestId, int targetId) {
             super(context);
-            setTitle(R.string.guest_exit_guest_dialog_title);
+            setTitle(mGuestUserAutoCreated ? R.string.guest_reset_guest_dialog_title
+                    : R.string.guest_exit_guest_dialog_title);
             setMessage(context.getString(R.string.guest_exit_guest_dialog_message));
             setButton(DialogInterface.BUTTON_NEGATIVE,
                     context.getString(android.R.string.cancel), this);
             setButton(DialogInterface.BUTTON_POSITIVE,
-                    context.getString(R.string.guest_exit_guest_dialog_remove), this);
+                    context.getString(
+                            mGuestUserAutoCreated ? R.string.guest_reset_guest_dialog_remove
+                                    : R.string.guest_exit_guest_dialog_remove), this);
             SystemUIDialog.setWindowOnTop(this);
             setCanceledOnTouchOutside(false);
             mGuestId = guestId;
@@ -901,7 +1034,7 @@ public class UserSwitcherController implements Dumpable {
             } else {
                 mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
                 dismiss();
-                exitGuest(mGuestId, mTargetId);
+                removeGuestUser(mGuestId, mTargetId);
             }
         }
     }
