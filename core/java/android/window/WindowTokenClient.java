@@ -26,8 +26,11 @@ import android.app.IWindowToken;
 import android.app.ResourcesManager;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.inputmethodservice.AbstractInputMethodService;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 
@@ -43,6 +46,8 @@ import java.lang.ref.WeakReference;
  * @hide
  */
 public class WindowTokenClient extends IWindowToken.Stub {
+    private static final String TAG = WindowTokenClient.class.getSimpleName();
+
     /**
      * Attached {@link Context} for this window token to update configuration and resources.
      * Initialized by {@link #attachContext(Context)}.
@@ -52,6 +57,8 @@ public class WindowTokenClient extends IWindowToken.Stub {
     private final ResourcesManager mResourcesManager = ResourcesManager.getInstance();
 
     private final Configuration mConfiguration = new Configuration();
+
+    private boolean mShouldDumpConfigForIme;
 
     /**
      * Attaches {@code context} to this {@link WindowTokenClient}. Each {@link WindowTokenClient}
@@ -69,6 +76,8 @@ public class WindowTokenClient extends IWindowToken.Stub {
         }
         mContextRef = new WeakReference<>(context);
         mConfiguration.setTo(context.getResources().getConfiguration());
+        mShouldDumpConfigForIme = Build.IS_DEBUGGABLE
+                && context instanceof AbstractInputMethodService;
     }
 
     @Override
@@ -81,6 +90,13 @@ public class WindowTokenClient extends IWindowToken.Stub {
         final boolean shouldUpdateResources = shouldUpdateResources(this, mConfiguration,
                 newConfig, newConfig /* overrideConfig */, displayChanged,
                 null /* configChanged */);
+
+        if (!shouldUpdateResources && mShouldDumpConfigForIme) {
+            Log.d(TAG, "Configuration not dispatch to IME because configuration is up"
+                    + " to date. Current config=" + context.getResources().getConfiguration()
+                    + ", reported config=" + mConfiguration
+                    + ", updated config=" + newConfig);
+        }
 
         if (shouldUpdateResources) {
             // TODO(ag/9789103): update resource manager logic to track non-activity tokens
@@ -104,6 +120,13 @@ public class WindowTokenClient extends IWindowToken.Stub {
                         ((WindowProviderService) context).onConfigurationChanged(newConfig));
             }
             freeTextLayoutCachesIfNeeded(diff);
+            if (diff == 0 && mShouldDumpConfigForIme) {
+                Log.d(TAG, "Configuration not dispatch to IME because configuration has no "
+                        + " public difference with updated config. "
+                        + " Current config=" + context.getResources().getConfiguration()
+                        + ", reported config=" + mConfiguration
+                        + ", updated config=" + newConfig);
+            }
             mConfiguration.setTo(newConfig);
         }
         if (displayChanged) {
