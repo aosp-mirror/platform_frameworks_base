@@ -524,8 +524,12 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * owned ActivityContainer such as that within an ActivityView. If not set and
      * this activity is launched into such a container a SecurityException will be
      * thrown. Set from the {@link android.R.attr#allowEmbedded} attribute.
+     *
+     * @deprecated this flag is no longer needed since ActivityView is now fully removed
+     * TODO(b/191165536): delete this flag since is no longer used
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @Deprecated
     public static final int FLAG_ALLOW_EMBEDDED = 0x80000000;
 
     /**
