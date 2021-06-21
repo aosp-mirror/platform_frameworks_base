@@ -1182,6 +1182,36 @@ public class AppStandbyControllerTests {
         assertBucket(STANDBY_BUCKET_RESTRICTED);
     }
 
+    /**
+     * Test that an app that "timed out" into the RESTRICTED bucket can be raised out by system
+     * interaction.
+     */
+    @Test
+    public void testSystemInteractionOverridesRestrictedTimeout() throws Exception {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Long enough that it could have timed out into RESTRICTED.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Report system interaction.
+        mInjector.mElapsedRealtime += 1000;
+        reportEvent(mController, SYSTEM_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+
+        // Ensure that it's raised out of RESTRICTED for the system interaction elevation duration.
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+        mInjector.mElapsedRealtime += 1000;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Elevation duration over. Should fall back down.
+        mInjector.mElapsedRealtime += 10 * MINUTE_MS;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
     @Test
     public void testRestrictedBucketDisabled() throws Exception {
         mInjector.mIsRestrictedBucketEnabled = false;
