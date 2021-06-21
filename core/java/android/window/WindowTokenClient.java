@@ -29,8 +29,11 @@ import android.content.res.Configuration;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.ref.WeakReference;
 
@@ -65,7 +68,7 @@ public class WindowTokenClient extends IWindowToken.Stub {
      * can only attach one {@link Context}.
      * <p>This method must be called before invoking
      * {@link android.view.IWindowManager#attachWindowContextToDisplayArea(IBinder, int, int,
-     * Bundle, boolean)}.<p/>
+     * Bundle)}.<p/>
      *
      * @param context context to be attached
      * @throws IllegalStateException if attached context has already existed.
@@ -80,8 +83,26 @@ public class WindowTokenClient extends IWindowToken.Stub {
                 && context instanceof AbstractInputMethodService;
     }
 
+    /**
+     * Called when {@link Configuration} updates from the server side receive.
+     *
+     * @param newConfig the updated {@link Configuration}
+     * @param newDisplayId the updated {@link android.view.Display} ID
+     */
     @Override
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId) {
+        onConfigurationChanged(newConfig, newDisplayId, true /* shouldReportConfigChange */);
+    }
+
+    /**
+     * Called when {@link Configuration} updates from the server side receive.
+     *
+     * Similar to {@link #onConfigurationChanged(Configuration, int)}, but adds a flag to control
+     * whether to dispatch configuration update or not.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void onConfigurationChanged(Configuration newConfig, int newDisplayId,
+            boolean shouldReportConfigChange) {
         final Context context = mContextRef.get();
         if (context == null) {
             return;
@@ -102,9 +123,10 @@ public class WindowTokenClient extends IWindowToken.Stub {
             // TODO(ag/9789103): update resource manager logic to track non-activity tokens
             mResourcesManager.updateResourcesForActivity(this, newConfig, newDisplayId);
 
-            if (context instanceof WindowContext) {
+            if (shouldReportConfigChange && context instanceof WindowContext) {
+                final WindowContext windowContext = (WindowContext) context;
                 ActivityThread.currentActivityThread().getHandler().post(
-                        () -> ((WindowContext) context).dispatchConfigurationChanged(newConfig));
+                        () -> windowContext.dispatchConfigurationChanged(newConfig));
             }
 
             // Dispatch onConfigurationChanged only if there's a significant public change to
@@ -115,17 +137,24 @@ public class WindowTokenClient extends IWindowToken.Stub {
                     ? new SizeConfigurationBuckets(sizeConfigurations) : null;
             final int diff = diffPublicWithSizeBuckets(mConfiguration, newConfig, buckets);
 
-            if (context instanceof WindowProviderService && diff != 0) {
-                ActivityThread.currentActivityThread().getHandler().post(() ->
-                        ((WindowProviderService) context).onConfigurationChanged(newConfig));
+            if (shouldReportConfigChange && diff != 0
+                    && context instanceof WindowProviderService) {
+                final WindowProviderService windowProviderService = (WindowProviderService) context;
+                ActivityThread.currentActivityThread().getHandler().post(
+                        () -> windowProviderService.onConfigurationChanged(newConfig));
             }
             freeTextLayoutCachesIfNeeded(diff);
-            if (diff == 0 && mShouldDumpConfigForIme) {
-                Log.d(TAG, "Configuration not dispatch to IME because configuration has no "
-                        + " public difference with updated config. "
-                        + " Current config=" + context.getResources().getConfiguration()
-                        + ", reported config=" + mConfiguration
-                        + ", updated config=" + newConfig);
+            if (mShouldDumpConfigForIme) {
+                if (!shouldReportConfigChange) {
+                    Log.d(TAG, "Only apply configuration update to Resources because "
+                            + "shouldReportConfigChange is false.\n" + Debug.getCallers(5));
+                } else if (diff == 0) {
+                    Log.d(TAG, "Configuration not dispatch to IME because configuration has no "
+                            + " public difference with updated config. "
+                            + " Current config=" + context.getResources().getConfiguration()
+                            + ", reported config=" + mConfiguration
+                            + ", updated config=" + newConfig);
+                }
             }
             mConfiguration.setTo(newConfig);
         }

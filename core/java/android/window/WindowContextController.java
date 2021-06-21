@@ -19,6 +19,7 @@ package android.window;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -46,7 +47,7 @@ public class WindowContextController {
     @VisibleForTesting
     public boolean mAttachedToDisplayArea;
     @NonNull
-    private final IBinder mToken;
+    private final WindowTokenClient mToken;
 
     /**
      * Window Context Controller constructor
@@ -54,14 +55,13 @@ public class WindowContextController {
      * @param token The token used to attach to a window manager node. It is usually from
      *              {@link Context#getWindowContextToken()}.
      */
-    public WindowContextController(@NonNull IBinder token) {
-        mToken = token;
-        mWms = WindowManagerGlobal.getWindowManagerService();
+    public WindowContextController(@NonNull WindowTokenClient token) {
+        this(token, WindowManagerGlobal.getWindowManagerService());
     }
 
     /** Used for test only. DO NOT USE it in production code. */
     @VisibleForTesting
-    public WindowContextController(@NonNull IBinder token, IWindowManager mockWms) {
+    public WindowContextController(@NonNull WindowTokenClient token, IWindowManager mockWms) {
         mToken = token;
         mWms = mockWms;
     }
@@ -81,8 +81,15 @@ public class WindowContextController {
                     + "a DisplayArea once.");
         }
         try {
-            mAttachedToDisplayArea = mWms.attachWindowContextToDisplayArea(mToken, type, displayId,
-                    options);
+            final Configuration configuration = mWms.attachWindowContextToDisplayArea(mToken, type,
+                    displayId, options);
+            if (configuration != null) {
+                mAttachedToDisplayArea = true;
+                // Send the DisplayArea's configuration to WindowContext directly instead of
+                // waiting for dispatching from WMS.
+                mToken.onConfigurationChanged(configuration, displayId,
+                        false /* shouldReportConfigChange */);
+            }
         }  catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
