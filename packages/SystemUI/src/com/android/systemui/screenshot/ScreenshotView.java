@@ -764,7 +764,53 @@ public class ScreenshotView extends FrameLayout implements
         return r;
     }
 
+    void startLongScreenshotTransition(Rect destination, Runnable onTransitionEnd,
+            ScrollCaptureController.LongScreenshot longScreenshot) {
+        mScrollablePreview.setImageBitmap(longScreenshot.toBitmap());
+        ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+        float startX = mScrollablePreview.getX();
+        float startY = mScrollablePreview.getY();
+        int[] locInScreen = mScrollablePreview.getLocationOnScreen();
+        destination.offset((int) startX - locInScreen[0], (int) startY - locInScreen[1]);
+        mScrollablePreview.setPivotX(0);
+        mScrollablePreview.setPivotY(0);
+        mScrollablePreview.setAlpha(1f);
+        float currentScale = mScrollablePreview.getWidth() / (float) longScreenshot.getWidth();
+        Matrix matrix = new Matrix();
+        matrix.setScale(currentScale, currentScale);
+        matrix.postTranslate(
+                longScreenshot.getLeft() * currentScale, longScreenshot.getTop() * currentScale);
+        mScrollablePreview.setImageMatrix(matrix);
+        float destinationScale = destination.width() / (float) mScrollablePreview.getWidth();
+        anim.addUpdateListener(animation -> {
+            float t = animation.getAnimatedFraction();
+            mScrollingScrim.setAlpha(1 - t);
+            float currScale = MathUtils.lerp(1, destinationScale, t);
+            mScrollablePreview.setScaleX(currScale);
+            mScrollablePreview.setScaleY(currScale);
+            mScrollablePreview.setX(MathUtils.lerp(startX, destination.left, t));
+            mScrollablePreview.setY(MathUtils.lerp(startY, destination.top, t));
+        });
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                onTransitionEnd.run();
+                mScrollablePreview.animate().alpha(0).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        mCallbacks.onDismiss();
+                    }
+                });
+            }
+        });
+        anim.start();
+    }
+
     void prepareScrollingTransition(ScrollCaptureResponse response, Bitmap screenBitmap) {
+        mScrollingScrim.setImageBitmap(screenBitmap);
+        mScrollingScrim.setVisibility(View.VISIBLE);
         Rect scrollableArea = scrollableAreaOnScreen(response);
         float scale = mCornerSizeX
                 / (mOrientationPortrait ? screenBitmap.getWidth() : screenBitmap.getHeight());
@@ -775,14 +821,12 @@ public class ScreenshotView extends FrameLayout implements
         params.height = (int) (scale * scrollableArea.height());
         Matrix matrix = new Matrix();
         matrix.setScale(scale, scale);
-        matrix.postTranslate(0, -scrollableArea.top * scale);
+        matrix.postTranslate(-scrollableArea.left * scale, -scrollableArea.top * scale);
 
         mScrollablePreview.setTranslationX(scale * scrollableArea.left);
         mScrollablePreview.setTranslationY(scale * scrollableArea.top);
         mScrollablePreview.setImageMatrix(matrix);
 
-        mScrollingScrim.setImageBitmap(screenBitmap);
-        mScrollingScrim.setVisibility(View.VISIBLE);
         mScrollablePreview.setImageBitmap(screenBitmap);
         mScrollablePreview.setVisibility(View.VISIBLE);
         createScreenshotFadeDismissAnimation(true).start();
