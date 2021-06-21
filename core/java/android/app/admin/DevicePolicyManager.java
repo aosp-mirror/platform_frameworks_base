@@ -13876,7 +13876,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns whether USB data signaling is currently enabled by the admin. Callable by any app.
+     * Returns whether USB data signaling is currently enabled.
+     *
+     * <p> When called by a device owner or profile owner of an organization-owned managed profile,
+     * this API returns whether USB data signaling is currently enabled by that admin. When called
+     * by any other app, returns whether USB data signaling is currently enabled on the device.
      *
      * @return {@code true} if USB data signaling is enabled, {@code false} otherwise.
      */
