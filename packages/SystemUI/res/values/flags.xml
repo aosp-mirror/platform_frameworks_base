@@ -36,6 +36,13 @@
     <!-- The new animations to/from lockscreen and AOD! -->
     <bool name="flag_lockscreen_animations">false</bool>
 
+    <!-- The new swipe to unlock animation, which shows the app/launcher behind the keyguard during
+    the swipe. -->
+    <bool name="flag_new_unlock_swipe_animation">true</bool>
+
+    <!-- The shared-element transition between lockscreen smartspace and launcher smartspace. -->
+    <bool name="flag_smartspace_shared_element_transition">false</bool>
+
     <bool name="flag_pm_lite">true</bool>
 
     <bool name="flag_charging_ripple">false</bool>
