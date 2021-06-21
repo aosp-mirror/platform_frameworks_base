@@ -4714,7 +4714,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (visible) {
                 displayContent.mOpeningApps.add(this);
                 mEnteringAnimation = true;
-            } else {
+            } else if (mVisible) {
                 displayContent.mClosingApps.add(this);
                 mEnteringAnimation = false;
             }
@@ -4817,11 +4817,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *                this has become invisible.
      */
     private void postApplyAnimation(boolean visible) {
-        final boolean usingShellTransitions =
-                mAtmService.getTransitionController().getTransitionPlayer() != null;
         final boolean delayed = isAnimating(PARENTS | CHILDREN,
                 ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION);
-        if (!delayed && !usingShellTransitions) {
+        if (!delayed) {
             // We aren't delayed anything, but exiting windows rely on the animation finished
             // callback being called in case the ActivityRecord was pretending to be delayed,
             // which we might have done because we were in closing/opening apps list.
@@ -4840,8 +4838,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // updated.
         // If we're becoming invisible, update the client visibility if we are not running an
         // animation. Otherwise, we'll update client visibility in onAnimationFinished.
-        if (visible || !isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)
-                || usingShellTransitions) {
+        if (visible || !isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)) {
             setClientVisible(visible);
         }
 
