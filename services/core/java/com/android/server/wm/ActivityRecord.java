@@ -5894,9 +5894,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void onStartingWindowDrawn() {
+        boolean wasTaskVisible = false;
         if (task != null) {
             mSplashScreenStyleEmpty = true;
+            wasTaskVisible = task.getHasBeenVisible();
             task.setHasBeenVisible(true);
+        }
+
+        // The transition may not be executed if the starting process hasn't attached. But if the
+        // starting window is drawn, the transition can start earlier. Exclude finishing and bubble
+        // because it may be a trampoline.
+        if (!wasTaskVisible && mStartingData != null && !finishing && !mLaunchedFromBubble
+                && !mDisplayContent.mAppTransition.isReady()
+                && !mDisplayContent.mAppTransition.isRunning()) {
+            // The pending transition state will be cleared after the transition is started, so
+            // save the state for launching the client later (used by LaunchActivityItem).
+            mStartingData.mIsTransitionForward = mDisplayContent.isNextTransitionForward();
+            mDisplayContent.executeAppTransition();
         }
     }
 
@@ -6609,6 +6623,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 && (dc.mOpeningApps.contains(this)
                 || dc.mClosingApps.contains(this)
                 || dc.mChangingContainers.contains(this));
+    }
+
+    boolean isTransitionForward() {
+        return (mStartingData != null && mStartingData.mIsTransitionForward)
+                || mDisplayContent.isNextTransitionForward();
     }
 
     private int getAnimationLayer() {
@@ -8290,8 +8309,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     preserveWindow);
             final ActivityLifecycleItem lifecycleItem;
             if (andResume) {
-                lifecycleItem = ResumeActivityItem.obtain(
-                        mDisplayContent.isNextTransitionForward());
+                lifecycleItem = ResumeActivityItem.obtain(isTransitionForward());
             } else {
                 lifecycleItem = PauseActivityItem.obtain();
             }
