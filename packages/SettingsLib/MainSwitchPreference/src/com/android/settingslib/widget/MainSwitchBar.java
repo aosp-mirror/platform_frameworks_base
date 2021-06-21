@@ -89,7 +89,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         mFrameView = findViewById(R.id.frame);
         mTextView = (TextView) findViewById(R.id.switch_text);
         mSwitch = (Switch) findViewById(android.R.id.switch_widget);
-        if (BuildCompat.isAtLeastS()) {
+        if (BuildCompatUtils.isAtLeastS()) {
             mBackgroundOn = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_on);
             mBackgroundOff = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_off);
             mBackgroundDisabled = getContext().getDrawable(
