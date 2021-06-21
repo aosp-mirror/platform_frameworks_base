@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.row;
 import androidx.annotation.NonNull;
 import androidx.collection.ArraySet;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.util.ArrayList;
@@ -26,14 +27,13 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * A manager handling the error state of a notification when it encounters an exception while
  * inflating. We don't want to show these notifications to the user but may want to keep them
  * around for logging purposes.
  */
-@Singleton
+@SysUISingleton
 public class NotifInflationErrorManager {
 
     Set<NotificationEntry> mErroredNotifs = new ArraySet<>();

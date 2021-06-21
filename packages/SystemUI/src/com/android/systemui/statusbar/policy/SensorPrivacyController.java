@@ -23,6 +23,11 @@ public interface SensorPrivacyController extends
         CallbackController<SensorPrivacyController.OnSensorPrivacyChangedListener> {
 
     /**
+     * Initialize the controller. Needs to be called after constructing the object
+     */
+    void init();
+
+    /**
      * Returns whether sensor privacy is enabled.
      */
     boolean isSensorPrivacyEnabled();

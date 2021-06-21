@@ -25,6 +25,6 @@ interface IUceListener
      * @param serviceStatusValue defined in ImsUceManager
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setStatus(int serviceStatusValue);
 }

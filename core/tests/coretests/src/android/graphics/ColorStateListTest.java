@@ -67,4 +67,10 @@ public class ColorStateListTest extends AndroidTestCase {
         int defaultColor = mResources.getColor(R.color.color_no_default);
         assertEquals(mResources.getColor(R.color.testcolor1), defaultColor);
     }
+
+    @SmallTest
+    public void testLstar() throws Exception {
+        int defaultColor = mResources.getColor(R.color.color_with_lstar);
+        assertEquals(mResources.getColor(R.color.testcolor3), defaultColor);
+    }
 }

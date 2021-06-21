@@ -49,7 +49,7 @@ public class ProvisionObserver extends JobService {
             case PROVISION_OBSERVER_REEVALUATION_JOB_ID:
                 if (isProvisioned(this)) {
                     Log.d(TAG, "device provisioned, force network re-evaluation");
-                    final ConnectivityManager connMgr = ConnectivityManager.from(this);
+                    final ConnectivityManager connMgr = getSystemService(ConnectivityManager.class);
                     Network[] info = connMgr.getAllNetworks();
                     for (Network nw : info) {
                         final NetworkCapabilities nc = connMgr.getNetworkCapabilities(nw);

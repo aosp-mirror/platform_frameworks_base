@@ -32,10 +32,20 @@ import javax.inject.Inject
  * with the view instance and keeping the media view states up to date.
  */
 class MediaViewController @Inject constructor(
-    context: Context,
+    private val context: Context,
     private val configurationController: ConfigurationController,
     private val mediaHostStatesManager: MediaHostStatesManager
 ) {
+
+    /** Indicating the media view controller is for a player or recommendation. */
+    enum class TYPE {
+        PLAYER, RECOMMENDATION
+    }
+
+    companion object {
+        @JvmField
+        val GUTS_ANIMATION_DURATION = 500L
+    }
 
     /**
      * A listener when the current dimensions of the player change
@@ -48,6 +58,7 @@ class MediaViewController @Inject constructor(
     private var animationDuration: Long = 0
     private var animateNextStateChange: Boolean = false
     private val measurement = MeasurementOutput(0, 0)
+    private var type: TYPE = TYPE.PLAYER
 
     /**
      * A map containing all viewStates for all locations of this mediaState
@@ -59,11 +70,10 @@ class MediaViewController @Inject constructor(
      * finished
      */
     @MediaLocation
-    private var currentEndLocation: Int = -1
+    var currentEndLocation: Int = -1
 
     /**
-     * The ending location of the view where it ends when all animations and transitions have
-     * finished
+     * The starting location of the view where it starts for all animations and transitions
      */
     @MediaLocation
     private var currentStartLocation: Int = -1
@@ -169,9 +179,18 @@ class MediaViewController @Inject constructor(
      */
     val expandedLayout = ConstraintSet()
 
+    /**
+     * Whether the guts are visible for the associated player.
+     */
+    var isGutsVisible = false
+        private set
+
+    /**
+     * Whether the settings button in the guts should be visible
+     */
+    var shouldHideGutsSettings = false
+
     init {
-        collapsedLayout.load(context, R.xml.media_collapsed)
-        expandedLayout.load(context, R.xml.media_expanded)
         mediaHostStatesManager.addController(this)
         layoutController.sizeChangedListener = { width: Int, height: Int ->
             currentWidth = width
@@ -189,6 +208,37 @@ class MediaViewController @Inject constructor(
         configurationController.removeCallback(configurationListener)
     }
 
+    /**
+     * Show guts with an animated transition.
+     */
+    fun openGuts() {
+        if (isGutsVisible) return
+        isGutsVisible = true
+        animatePendingStateChange(GUTS_ANIMATION_DURATION, 0L)
+        setCurrentState(currentStartLocation,
+                currentEndLocation,
+                currentTransitionProgress,
+                applyImmediately = false)
+    }
+
+    /**
+     * Close the guts for the associated player.
+     *
+     * @param immediate if `false`, it will animate the transition.
+     */
+    @JvmOverloads
+    fun closeGuts(immediate: Boolean = false) {
+        if (!isGutsVisible) return
+        isGutsVisible = false
+        if (!immediate) {
+            animatePendingStateChange(GUTS_ANIMATION_DURATION, 0L)
+        }
+        setCurrentState(currentStartLocation,
+                currentEndLocation,
+                currentTransitionProgress,
+                applyImmediately = immediate)
+    }
+
     private fun ensureAllMeasurements() {
         val mediaStates = mediaHostStatesManager.mediaHostStates
         for (entry in mediaStates) {
@@ -203,6 +253,41 @@ class MediaViewController @Inject constructor(
             if (expansion > 0) expandedLayout else collapsedLayout
 
     /**
+     * Set the views to be showing/hidden based on the [isGutsVisible] for a given
+     * [TransitionViewState].
+     */
+    private fun setGutsViewState(viewState: TransitionViewState) {
+        if (type == TYPE.PLAYER) {
+            PlayerViewHolder.controlsIds.forEach { id ->
+                viewState.widgetStates.get(id)?.let { state ->
+                    // Make sure to use the unmodified state if guts are not visible.
+                    state.alpha = if (isGutsVisible) 0f else state.alpha
+                    state.gone = if (isGutsVisible) true else state.gone
+                }
+            }
+            PlayerViewHolder.gutsIds.forEach { id ->
+                viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
+                viewState.widgetStates.get(id)?.gone = !isGutsVisible
+            }
+        } else {
+            RecommendationViewHolder.controlsIds.forEach { id ->
+                viewState.widgetStates.get(id)?.let { state ->
+                    // Make sure to use the unmodified state if guts are not visible.
+                    state.alpha = if (isGutsVisible) 0f else state.alpha
+                    state.gone = if (isGutsVisible) true else state.gone
+                }
+            }
+            RecommendationViewHolder.gutsIds.forEach { id ->
+                viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
+                viewState.widgetStates.get(id)?.gone = !isGutsVisible
+            }
+        }
+        if (shouldHideGutsSettings) {
+            viewState.widgetStates.get(R.id.settings)?.gone = true
+        }
+    }
+
+    /**
      * Obtain a new viewState for a given media state. This usually returns a cached state, but if
      * it's not available, it will recreate one by measuring, which may be expensive.
      */
@@ -211,7 +296,7 @@ class MediaViewController @Inject constructor(
             return null
         }
         // Only a subset of the state is relevant to get a valid viewState. Let's get the cachekey
-        var cacheKey = getKey(state, tmpKey)
+        var cacheKey = getKey(state, isGutsVisible, tmpKey)
         val viewState = viewStates[cacheKey]
         if (viewState != null) {
             // we already have cached this measurement, let's continue
@@ -228,6 +313,7 @@ class MediaViewController @Inject constructor(
                         constraintSetForExpansion(state.expansion),
                         TransitionViewState())
 
+                setGutsViewState(result)
                 // We don't want to cache interpolated or null states as this could quickly fill up
                 // our cache. We only cache the start and the end states since the interpolation
                 // is cheap
@@ -252,11 +338,16 @@ class MediaViewController @Inject constructor(
         return result
     }
 
-    private fun getKey(state: MediaHostState, result: CacheKey): CacheKey {
+    private fun getKey(
+        state: MediaHostState,
+        guts: Boolean,
+        result: CacheKey
+    ): CacheKey {
         result.apply {
             heightMeasureSpec = state.measurementInput?.heightMeasureSpec ?: 0
             widthMeasureSpec = state.measurementInput?.widthMeasureSpec ?: 0
             expansion = state.expansion
+            gutsVisible = guts
         }
         return result
     }
@@ -265,7 +356,8 @@ class MediaViewController @Inject constructor(
      * Attach a view to this controller. This may perform measurements if it's not available yet
      * and should therefore be done carefully.
      */
-    fun attach(transitionLayout: TransitionLayout) {
+    fun attach(transitionLayout: TransitionLayout, type: TYPE) {
+        updateMediaViewControllerType(type)
         this.transitionLayout = transitionLayout
         layoutController.attach(transitionLayout)
         if (currentEndLocation == -1) {
@@ -364,7 +456,7 @@ class MediaViewController @Inject constructor(
         viewState: TransitionViewState?,
         location: Int,
         outState: TransitionViewState
-    ) : TransitionViewState? {
+    ): TransitionViewState? {
         val result = viewState?.copy(outState) ?: return null
         val overrideSize = mediaHostStatesManager.carouselSizes[location]
         overrideSize?.let {
@@ -374,6 +466,18 @@ class MediaViewController @Inject constructor(
             result.width = Math.max(it.measuredWidth, result.width)
         }
         return result
+    }
+
+    private fun updateMediaViewControllerType(type: TYPE) {
+        this.type = type
+        if (type == TYPE.PLAYER) {
+            collapsedLayout.load(context, R.xml.media_collapsed)
+            expandedLayout.load(context, R.xml.media_expanded)
+        } else {
+            collapsedLayout.load(context, R.xml.media_recommendation_collapsed)
+            expandedLayout.load(context, R.xml.media_recommendation_expanded)
+        }
+        refreshState()
     }
 
     /**
@@ -432,5 +536,6 @@ class MediaViewController @Inject constructor(
 private data class CacheKey(
     var widthMeasureSpec: Int = -1,
     var heightMeasureSpec: Int = -1,
-    var expansion: Float = 0.0f
+    var expansion: Float = 0.0f,
+    var gutsVisible: Boolean = false
 )

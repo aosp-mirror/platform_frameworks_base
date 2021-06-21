@@ -96,7 +96,7 @@ public class DexoptOptionsTests {
 
         int[] reasons = new int[] {
                 PackageManagerService.REASON_FIRST_BOOT,
-                PackageManagerService.REASON_BOOT,
+                PackageManagerService.REASON_POST_BOOT,
                 PackageManagerService.REASON_INSTALL,
                 PackageManagerService.REASON_BACKGROUND_DEXOPT,
                 PackageManagerService.REASON_AB_OTA,

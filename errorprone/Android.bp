@@ -1,4 +1,13 @@
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 java_plugin {
     name: "error_prone_android_framework",
 
@@ -14,10 +23,39 @@ java_library_host {
 
     static_libs: [
         "//external/error_prone:error_prone_core",
-        "//external/dagger2:dagger2-auto-service",
+    ],
+
+    libs: [
+        "//external/auto:auto_service_annotations",
     ],
 
     plugins: [
-        "//external/dagger2:dagger2-auto-service",
+        "//external/auto:auto_service_plugin",
     ],
+}
+
+java_test_host {
+    name: "error_prone_android_framework_test",
+    srcs: ["tests/java/**/*.java"],
+    java_resource_dirs: ["tests/res"],
+    java_resources: [":error_prone_android_framework_testdata"],
+    static_libs: [
+        "truth-prebuilt",
+        "kxml2-2.3.0",
+        "error_prone_android_framework_lib",
+        "error_prone_test_helpers",
+        "hamcrest-library",
+        "hamcrest",
+        "platform-test-annotations",
+        "junit",
+    ],
+    test_options: {
+        unit_test: true,
+    },
+}
+
+filegroup {
+    name: "error_prone_android_framework_testdata",
+    path: "tests/res",
+    srcs: ["tests/res/**/*.java"],
 }

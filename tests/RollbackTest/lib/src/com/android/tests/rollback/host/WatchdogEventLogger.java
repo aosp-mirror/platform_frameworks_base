@@ -17,52 +17,52 @@
 package com.android.tests.rollback.host;
 
 import com.android.tradefed.device.ITestDevice;
-import com.android.tradefed.device.LogcatReceiver;
-import com.android.tradefed.result.InputStreamSource;
+import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.Truth;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import static com.google.common.truth.Truth.assertThat;
 
 public class WatchdogEventLogger {
-    private LogcatReceiver mReceiver;
+    private static final String[] ROLLBACK_EVENT_TYPES = {
+            "ROLLBACK_INITIATE", "ROLLBACK_BOOT_TRIGGERED", "ROLLBACK_SUCCESS"};
+    private static final String[] ROLLBACK_EVENT_ATTRS = {
+            "logPackage", "rollbackReason", "failedPackageName"};
+    private static final String PROP_PREFIX = "persist.sys.rollbacktest.";
 
-    public void start(ITestDevice device) {
-        mReceiver =  new LogcatReceiver(device, "logcat -s WatchdogRollbackLogger",
-                device.getOptions().getMaxLogcatDataSize(), 0);
-        mReceiver.start();
-    }
+    private ITestDevice mDevice;
 
-    public void stop() {
-        if (mReceiver != null) {
-            mReceiver.stop();
-            mReceiver.clear();
-        }
-    }
-
-    /**
-     * Returns a list of all Watchdog logging events which have occurred.
-     */
-    public List<String> getWatchdogLoggingEvents() throws Exception {
-        try (InputStreamSource logcatStream = mReceiver.getLogcatData()) {
-            return getWatchdogLoggingEvents(logcatStream);
-        }
-    }
-
-    private static List<String> getWatchdogLoggingEvents(InputStreamSource inputStreamSource)
-            throws Exception {
-        List<String> watchdogEvents = new ArrayList<>();
-        InputStream inputStream = inputStreamSource.createInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.contains("Watchdog event occurred")) {
-                watchdogEvents.add(line);
+    private void resetProperties(boolean enabled) throws Exception {
+        try {
+            mDevice.enableAdbRoot();
+            assertThat(mDevice.setProperty(
+                    PROP_PREFIX + "enabled", String.valueOf(enabled))).isTrue();
+            for (String type : ROLLBACK_EVENT_TYPES) {
+                String key = PROP_PREFIX + type;
+                assertThat(mDevice.setProperty(key, "")).isTrue();
+                for (String attr : ROLLBACK_EVENT_ATTRS) {
+                    assertThat(mDevice.setProperty(key + "." + attr, "")).isTrue();
+                }
             }
+        } finally {
+            mDevice.disableAdbRoot();
         }
-        return watchdogEvents;
+    }
+
+    public void start(ITestDevice device) throws Exception {
+        mDevice = device;
+        resetProperties(true);
+    }
+
+    public void stop() throws Exception {
+        if (mDevice != null) {
+            resetProperties(false);
+        }
+    }
+
+    private boolean matchProperty(String type, String attr, String expectedVal) throws Exception {
+        String key = PROP_PREFIX + type + "." + attr;
+        String val = mDevice.getProperty(key);
+        return expectedVal == null || expectedVal.equals(val);
     }
 
     /**
@@ -71,33 +71,37 @@ public class WatchdogEventLogger {
      * Check the value of all non-null parameters against the list of Watchdog events that have
      * occurred, and return {@code true} if an event exists which matches all criteria.
      */
-    public static boolean watchdogEventOccurred(List<String> loggingEvents,
-            String type, String logPackage,
+    public boolean watchdogEventOccurred(String type, String logPackage,
             String rollbackReason, String failedPackageName) throws Exception {
-        List<String> eventCriteria = new ArrayList<>();
-        if (type != null) {
-            eventCriteria.add("type: " + type);
+        return mDevice.getBooleanProperty(PROP_PREFIX + type, false)
+                && matchProperty(type, "logPackage", logPackage)
+                && matchProperty(type, "rollbackReason", rollbackReason)
+                && matchProperty(type, "failedPackageName", failedPackageName);
+    }
+
+    static class Subject extends com.google.common.truth.Subject {
+        private final WatchdogEventLogger mActual;
+
+        private Subject(FailureMetadata failureMetadata, WatchdogEventLogger subject) {
+            super(failureMetadata, subject);
+            mActual = subject;
         }
-        if (logPackage != null) {
-            eventCriteria.add("logPackage: " + logPackage);
+
+        private static com.google.common.truth.Subject.Factory<Subject,
+                WatchdogEventLogger> loggers() {
+            return Subject::new;
         }
-        if (rollbackReason != null) {
-            eventCriteria.add("rollbackReason: " + rollbackReason);
+
+        static Subject assertThat(WatchdogEventLogger actual) {
+            return Truth.assertAbout(loggers()).that(actual);
         }
-        if (failedPackageName != null) {
-            eventCriteria.add("failedPackageName: " + failedPackageName);
+
+        void eventOccurred(String type, String logPackage, String rollbackReason,
+                String failedPackageName) throws Exception {
+            check("watchdogEventOccurred(type=%s, logPackage=%s, rollbackReason=%s, "
+                    + "failedPackageName=%s)", type, logPackage, rollbackReason, failedPackageName)
+                    .that(mActual.watchdogEventOccurred(type, logPackage, rollbackReason,
+                            failedPackageName)).isTrue();
         }
-        for (String loggingEvent: loggingEvents) {
-            boolean matchesCriteria = true;
-            for (String criterion: eventCriteria) {
-                if (!loggingEvent.contains(criterion)) {
-                    matchesCriteria = false;
-                }
-            }
-            if (matchesCriteria) {
-                return true;
-            }
-        }
-        return false;
     }
 }

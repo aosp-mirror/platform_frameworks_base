@@ -23,6 +23,8 @@
     <!-- The maximum number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">2</integer>
 
+    <integer name="quick_settings_num_columns">4</integer>
+
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">2</integer>
 

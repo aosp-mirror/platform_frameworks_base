@@ -47,7 +47,7 @@ public class WallpaperColorsTest {
     }
 
     /**
-     * Sanity check to guarantee that white supports dark text and black doesn't
+     * Check that white supports dark text and black doesn't
      */
     @Test
     public void colorHintsTest() {

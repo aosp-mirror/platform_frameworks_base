@@ -1,13 +1,18 @@
--keep class com.android.systemui.statusbar.policy.KeyButtonView {
+-keep class com.android.systemui.navigationbar.buttons.KeyButtonView {
   public float getDrawingAlpha();
   public void setDrawingAlpha(float);
 }
 
--keep class com.android.systemui.statusbar.policy.KeyButtonRipple {
+-keep class com.android.systemui.navigationbar.buttons.KeyButtonRipple {
   public float getGlowAlpha();
   public float getGlowScale();
   public void setGlowAlpha(float);
   public void setGlowScale(float);
+}
+
+-keep class com.android.systemui.settings.brightness.BrightnessSliderView {
+  public float getSliderScaleY();
+  public void setSliderScaleY(float);
 }
 
 -keep class com.android.systemui.recents.OverviewProxyRecentsImpl
@@ -40,3 +45,15 @@
 -keep public class * extends com.android.systemui.SystemUI {
     public <init>(android.content.Context);
 }
+
+# Keep the wm shell lib
+-keep class com.android.wm.shell.*
+# Keep the protolog group methods that are called by the generated code
+-keepclassmembers class com.android.wm.shell.protolog.ShellProtoLogGroup {
+    *;
+}
+
+-keep class com.android.systemui.dagger.GlobalRootComponent { *; }
+-keep class com.android.systemui.dagger.GlobalRootComponent$SysUIComponentImpl { *; }
+-keep class com.android.systemui.dagger.Dagger** { *; }
+-keep class com.android.systemui.tv.Dagger** { *; }

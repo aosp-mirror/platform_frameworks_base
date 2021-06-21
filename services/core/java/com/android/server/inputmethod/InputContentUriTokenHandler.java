@@ -73,7 +73,7 @@ final class InputContentUriTokenHandler extends IInputContentUriToken.Stub {
     }
 
     private void doTakeLocked(@NonNull IBinder permissionOwner) {
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         try {
             try {
                 UriGrantsManager.getService().grantUriPermissionFromOwner(
@@ -104,7 +104,8 @@ final class InputContentUriTokenHandler extends IInputContentUriToken.Stub {
     }
 
     /**
-     * {@inheritDoc}
+     * If permissions are not released explicitly via {@link #release()}, release automatically
+     * whenever there are no more references to this object.
      */
     @Override
     protected void finalize() throws Throwable {

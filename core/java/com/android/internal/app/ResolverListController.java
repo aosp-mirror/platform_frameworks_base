@@ -70,7 +70,7 @@ public class ResolverListController {
             UserHandle userHandle) {
         this(context, pm, targetIntent, referrerPackage, launchedFromUid, userHandle,
                     new ResolverRankerServiceResolverComparator(
-                        context, targetIntent, referrerPackage, null));
+                        context, targetIntent, referrerPackage, null, null));
     }
 
     public ResolverListController(

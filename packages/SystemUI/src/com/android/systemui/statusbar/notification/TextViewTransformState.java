@@ -98,20 +98,20 @@ public class TextViewTransformState extends TransformState {
         int lineCount = mText.getLineCount();
         return lineCount == 1 && lineCount == otherTvs.mText.getLineCount()
                 && getEllipsisCount() == otherTvs.getEllipsisCount()
-                && getViewHeight() != otherTvs.getViewHeight();
+                && getContentHeight() != otherTvs.getContentHeight();
     }
 
     @Override
-    protected int getViewWidth() {
+    protected int getContentWidth() {
         Layout l = mText.getLayout();
         if (l != null) {
             return (int) l.getLineWidth(0);
         }
-        return super.getViewWidth();
+        return super.getContentWidth();
     }
 
     @Override
-    protected int getViewHeight() {
+    protected int getContentHeight() {
         return mText.getLineHeight();
     }
 

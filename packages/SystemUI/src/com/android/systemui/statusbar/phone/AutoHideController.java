@@ -138,7 +138,7 @@ public class AutoHideController {
         mHandler.postDelayed(mAutoHide, AUTO_HIDE_TIMEOUT_MS);
     }
 
-    void checkUserAutoHide(MotionEvent event) {
+    public void checkUserAutoHide(MotionEvent event) {
         boolean shouldHide = isAnyTransientBarShown()
                 && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar.
                 && event.getX() == 0 && event.getY() == 0;

@@ -134,7 +134,7 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeProcess(JNIEnv* env,
                                                                     jobject output) {
   NativeProgram* program = ConvertFromJava<NativeProgram>(env, thiz);
 
-  // Sanity checks
+  // Validation checks
   if (!program || !inputs) {
     return JNI_FALSE;
   }

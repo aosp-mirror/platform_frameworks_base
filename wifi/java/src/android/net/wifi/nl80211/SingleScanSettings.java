@@ -32,6 +32,7 @@ public class SingleScanSettings implements Parcelable {
     private static final String TAG = "SingleScanSettings";
 
     public int scanType;
+    public boolean enable6GhzRnr;
     public ArrayList<ChannelSettings> channelSettings;
     public ArrayList<HiddenNetwork> hiddenNetworks;
 
@@ -50,6 +51,7 @@ public class SingleScanSettings implements Parcelable {
             return false;
         }
         return scanType == settings.scanType
+                && enable6GhzRnr == settings.enable6GhzRnr
                 && channelSettings.equals(settings.channelSettings)
                 && hiddenNetworks.equals(settings.hiddenNetworks);
     }
@@ -57,7 +59,7 @@ public class SingleScanSettings implements Parcelable {
     /** override hash code */
     @Override
     public int hashCode() {
-        return Objects.hash(scanType, channelSettings, hiddenNetworks);
+        return Objects.hash(scanType, channelSettings, hiddenNetworks, enable6GhzRnr);
     }
 
 
@@ -83,6 +85,7 @@ public class SingleScanSettings implements Parcelable {
             Log.wtf(TAG, "Invalid scan type " + scanType);
         }
         out.writeInt(scanType);
+        out.writeBoolean(enable6GhzRnr);
         out.writeTypedList(channelSettings);
         out.writeTypedList(hiddenNetworks);
     }
@@ -100,6 +103,7 @@ public class SingleScanSettings implements Parcelable {
             if (!isValidScanType(result.scanType)) {
                 Log.wtf(TAG, "Invalid scan type " + result.scanType);
             }
+            result.enable6GhzRnr = in.readBoolean();
             result.channelSettings = new ArrayList<ChannelSettings>();
             in.readTypedList(result.channelSettings, ChannelSettings.CREATOR);
             result.hiddenNetworks = new ArrayList<HiddenNetwork>();

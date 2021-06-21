@@ -27,11 +27,13 @@ import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.RemotableViewMethod;
 import android.view.SoundEffectConstants;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
@@ -183,14 +185,14 @@ public abstract class CompoundButton extends Button implements Checkable {
     public void setStateDescription(@Nullable CharSequence stateDescription) {
         mCustomStateDescription = stateDescription;
         if (stateDescription == null) {
-            setDefaultStateDescritption();
+            setDefaultStateDescription();
         } else {
             super.setStateDescription(stateDescription);
         }
     }
 
     /** @hide **/
-    protected void setDefaultStateDescritption() {
+    protected void setDefaultStateDescription() {
         if (mCustomStateDescription == null) {
             super.setStateDescription(getButtonStateDescription());
         }
@@ -210,6 +212,8 @@ public abstract class CompoundButton extends Button implements Checkable {
 
             // Avoid infinite recursions if setChecked() is called from a listener
             if (mBroadcasting) {
+                // setStateDescription will not send out event if the description is unchanged.
+                setDefaultStateDescription();
                 return;
             }
 
@@ -228,7 +232,7 @@ public abstract class CompoundButton extends Button implements Checkable {
             mBroadcasting = false;
         }
         // setStateDescription will not send out event if the description is unchanged.
-        setDefaultStateDescritption();
+        setDefaultStateDescription();
     }
 
     /**
@@ -273,6 +277,7 @@ public abstract class CompoundButton extends Button implements Checkable {
      * @param resId the resource identifier of the drawable
      * @attr ref android.R.styleable#CompoundButton_button
      */
+    @RemotableViewMethod(asyncImpl = "setButtonDrawableAsync")
     public void setButtonDrawable(@DrawableRes int resId) {
         final Drawable d;
         if (resId != 0) {
@@ -281,6 +286,12 @@ public abstract class CompoundButton extends Button implements Checkable {
             d = null;
         }
         setButtonDrawable(d);
+    }
+
+    /** @hide **/
+    public Runnable setButtonDrawableAsync(@DrawableRes int resId) {
+        Drawable drawable = resId == 0 ? null : getContext().getDrawable(resId);
+        return () -> setButtonDrawable(drawable);
     }
 
     /**
@@ -334,6 +345,23 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     /**
+     * Sets the button of this CompoundButton to the specified Icon.
+     *
+     * @param icon an Icon holding the desired button, or {@code null} to clear
+     *             the button
+     */
+    @RemotableViewMethod(asyncImpl = "setButtonIconAsync")
+    public void setButtonIcon(@Nullable Icon icon) {
+        setButtonDrawable(icon == null ? null : icon.loadDrawable(getContext()));
+    }
+
+    /** @hide **/
+    public Runnable setButtonIconAsync(@Nullable Icon icon) {
+        Drawable button = icon == null ? null : icon.loadDrawable(getContext());
+        return () -> setButtonDrawable(button);
+    }
+
+    /**
      * Applies a tint to the button drawable. Does not modify the current tint
      * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
      * <p>
@@ -348,6 +376,7 @@ public abstract class CompoundButton extends Button implements Checkable {
      * @see #setButtonTintList(ColorStateList)
      * @see Drawable#setTintList(ColorStateList)
      */
+    @RemotableViewMethod
     public void setButtonTintList(@Nullable ColorStateList tint) {
         mButtonTintList = tint;
         mHasButtonTint = true;
@@ -392,6 +421,7 @@ public abstract class CompoundButton extends Button implements Checkable {
      * @see #getButtonTintMode()
      * @see Drawable#setTintBlendMode(BlendMode)
      */
+    @RemotableViewMethod
     public void setButtonTintBlendMode(@Nullable BlendMode tintMode) {
         mButtonBlendMode = tintMode;
         mHasButtonBlendMode = true;

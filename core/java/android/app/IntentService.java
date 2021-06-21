@@ -27,8 +27,9 @@ import android.os.Looper;
 import android.os.Message;
 
 /**
- * IntentService is a base class for {@link Service}s that handle asynchronous
- * requests (expressed as {@link Intent}s) on demand.  Clients send requests
+ * IntentService is an extension of the {@link Service} component class that
+ * handles asynchronous requests (expressed as {@link Intent}s) on demand.
+ * Clients send requests
  * through {@link android.content.Context#startService(Intent)} calls; the
  * service is started as needed, handles each Intent in turn using a worker
  * thread, and stops itself when it runs out of work.

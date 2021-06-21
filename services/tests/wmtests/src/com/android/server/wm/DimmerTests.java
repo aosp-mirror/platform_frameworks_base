@@ -199,7 +199,7 @@ public class DimmerTests extends WindowTestsBase {
         mHost.addChild(child, 0);
 
         final float alpha = 0.8f;
-        mDimmer.dimBelow(mTransaction, child, alpha);
+        mDimmer.dimBelow(mTransaction, child, alpha, 0);
         SurfaceControl dimLayer = getDimLayer();
 
         assertNotNull("Dimmer should have created a surface", dimLayer);

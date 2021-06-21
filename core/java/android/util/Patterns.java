@@ -248,6 +248,13 @@ public class Patterns {
             + "[0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\\.(25[0-5]|2[0-4][0-9]|[0-1]"
             + "[0-9]{2}|[1-9][0-9]|[1-9]|0)\\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}"
             + "|[1-9][0-9]|[0-9]))";
+
+    /**
+     * Kept for backward compatibility reasons. It does not match IPv6 addresses.
+     *
+     * @deprecated Please use {@link android.net.InetAddresses#isNumericAddress(String)} instead.
+     */
+    @Deprecated
     public static final Pattern IP_ADDRESS = Pattern.compile(IP_ADDRESS_STRING);
 
     /**
@@ -301,7 +308,7 @@ public class Patterns {
     private static final String DOMAIN_NAME_STR = "(" + HOST_NAME + "|" + IP_ADDRESS_STRING + ")";
     public static final Pattern DOMAIN_NAME = Pattern.compile(DOMAIN_NAME_STR);
 
-    private static final String PROTOCOL = "(?i:http|https|rtsp)://";
+    private static final String PROTOCOL = "(?i:http|https|rtsp|ftp)://";
 
     /* A word boundary or end of input.  This is to stop foo.sure from matching as foo.su */
     private static final String WORD_BOUNDARY = "(?:\\b|$|^)";

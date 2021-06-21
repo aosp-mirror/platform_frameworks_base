@@ -21,6 +21,7 @@
 
 #include <SkMatrix.h>
 #include <SkRect.h>
+#include <effects/StretchEffect.h>
 
 #include "utils/Macros.h"
 
@@ -58,9 +59,33 @@ public:
     // Returns the current dirty area, *NOT* transformed by pushed transforms
     void peekAtDirty(SkRect* dest) const;
 
-    ANDROID_API void computeCurrentTransform(Matrix4* outMatrix) const;
+    void computeCurrentTransform(Matrix4* outMatrix) const;
 
     void finish(SkRect* totalDirty);
+
+    struct StretchResult {
+        /**
+         * Stretch parameters configured on the stretch container
+         */
+        const StretchEffect* stretchEffect;
+
+        /**
+         * Bounds of the child relative to the stretch container
+         */
+        const SkRect childRelativeBounds;
+
+        /**
+         * Width of the stretch container
+         */
+        const float width;
+
+        /**
+         * Height of the stretch container
+         */
+        const float height;
+    };
+
+    [[nodiscard]] StretchResult findNearestStretchEffect() const;
 
 private:
     void pushCommon();

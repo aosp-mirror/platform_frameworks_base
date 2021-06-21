@@ -309,7 +309,7 @@ public class Camera2CaptureRequestTest extends Camera2SurfaceViewTestCase {
     private void changeExposure(CaptureRequest.Builder requestBuilder,
             long expTime, int sensitivity) {
         // Check if the max analog sensitivity is available and no larger than max sensitivity.
-        // The max analog sensitivity is not actually used here. This is only an extra sanity check.
+        // The max analog sensitivity is not actually used here. This is only an extra check.
         mStaticInfo.getMaxAnalogSensitivityChecked();
 
         expTime = mStaticInfo.getExposureClampToRange(expTime);

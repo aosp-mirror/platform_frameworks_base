@@ -31,15 +31,20 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
 
+import com.android.server.DropBoxManagerInternal.EntrySource;
 import com.android.server.DropBoxManagerService.EntryFile;
+
+import libcore.io.Streams;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.zip.GZIPOutputStream;
 
@@ -55,6 +60,8 @@ public class DropBoxTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
+        LocalServices.removeServiceForTest(DropBoxManagerInternal.class);
 
         mContext = new ContextWrapper(super.getContext()) {
             @Override
@@ -210,6 +217,67 @@ public class DropBoxTest extends AndroidTestCase {
         e1.close();
         e2.close();
         e3.close();
+    }
+
+    public void testAddEntry_Success() throws Exception {
+        File dir = getEmptyDir("testAddEntry");
+        long before = System.currentTimeMillis();
+
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
+
+        LocalServices.getService(DropBoxManagerInternal.class).addEntry("DropBoxTest",
+                new EntrySource() {
+                    @Override
+                    public void writeTo(FileDescriptor fd) throws IOException {
+                        try (FileOutputStream out = new FileOutputStream(fd)) {
+                            out.write("test".getBytes(StandardCharsets.UTF_8));
+                        }
+                    }
+
+                    @Override
+                    public void close() throws IOException {
+                    }
+
+                    @Override
+                    public long length() {
+                        return 0;
+                    }
+                }, DropBoxManager.IS_TEXT);
+
+        DropBoxManager.Entry entry = dropbox.getNextEntry("DropBoxTest", before);
+        assertEquals(DropBoxManager.IS_TEXT, entry.getFlags());
+        assertEquals("test", new String(Streams.readFully(entry.getInputStream())));
+    }
+
+    public void testAddEntry_Failure() throws Exception {
+        File dir = getEmptyDir("testAddEntry");
+        long before = System.currentTimeMillis();
+
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
+
+        LocalServices.getService(DropBoxManagerInternal.class).addEntry("DropBoxTest",
+                new EntrySource() {
+                    @Override
+                    public void writeTo(FileDescriptor fd) throws IOException {
+                        throw new IOException();
+                    }
+
+                    @Override
+                    public void close() throws IOException {
+                    }
+
+                    @Override
+                    public long length() {
+                        return 0;
+                    }
+                }, DropBoxManager.IS_TEXT);
+
+        DropBoxManager.Entry entry = dropbox.getNextEntry("DropBoxTest", before);
+        assertNull(entry);
     }
 
     public void testAddEntriesInTheFuture() throws Exception {

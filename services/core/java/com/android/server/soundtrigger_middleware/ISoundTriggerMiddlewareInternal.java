@@ -17,11 +17,28 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.media.ICaptureStateListener;
-import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
+import android.media.soundtrigger_middleware.ISoundTriggerCallback;
+import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 
 /**
- * This interface unifies ISoundTriggerMiddlewareService with ICaptureStateListener.
+ * This interface unifies methods from ISoundTriggerMiddlewareService and ICaptureStateListener.
+ *
+ * The ISoundTriggerMiddlewareService have been modified to exclude identity information and the
+ * RemoteException signature, both of which are only relevant at the service boundary layer.
  */
-public interface ISoundTriggerMiddlewareInternal extends ISoundTriggerMiddlewareService,
-        ICaptureStateListener {
+public interface ISoundTriggerMiddlewareInternal extends ICaptureStateListener {
+    /**
+     * Query the available modules and their capabilities.
+     */
+    public SoundTriggerModuleDescriptor[] listModules();
+
+    /**
+     * Attach to one of the available modules.
+     *
+     * listModules() must be called prior to calling this method and the provided handle must be
+     * one of the handles from the returned list.
+     */
+    public ISoundTriggerModule attach(int handle,
+            ISoundTriggerCallback callback);
 }

@@ -68,30 +68,22 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
     public final boolean isEnDcAvailable;
 
     /**
-     * Provides network support info for LTE VoPS and LTE Emergency bearer support
+     * Provides network support info for VoPS and Emergency bearer support
      */
-    private final LteVopsSupportInfo mLteVopsSupportInfo;
-
-    /**
-     * Indicates if it's using carrier aggregation
-     *
-     * @hide
-     */
-    public boolean mIsUsingCarrierAggregation;
+    @Nullable
+    private final VopsSupportInfo mVopsSupportInfo;
 
     /**
      * @hide
      */
     DataSpecificRegistrationInfo(
             int maxDataCalls, boolean isDcNrRestricted, boolean isNrAvailable,
-            boolean isEnDcAvailable, LteVopsSupportInfo lteVops,
-            boolean isUsingCarrierAggregation) {
+            boolean isEnDcAvailable, @Nullable VopsSupportInfo vops) {
         this.maxDataCalls = maxDataCalls;
         this.isDcNrRestricted = isDcNrRestricted;
         this.isNrAvailable = isNrAvailable;
         this.isEnDcAvailable = isEnDcAvailable;
-        this.mLteVopsSupportInfo = lteVops;
-        this.mIsUsingCarrierAggregation = isUsingCarrierAggregation;
+        this.mVopsSupportInfo = vops;
     }
 
     /**
@@ -100,32 +92,29 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
      * @param dsri another data specific registration info
      * @hide
      */
-    DataSpecificRegistrationInfo(DataSpecificRegistrationInfo dsri) {
+    DataSpecificRegistrationInfo(@NonNull DataSpecificRegistrationInfo dsri) {
         maxDataCalls = dsri.maxDataCalls;
         isDcNrRestricted = dsri.isDcNrRestricted;
         isNrAvailable = dsri.isNrAvailable;
         isEnDcAvailable = dsri.isEnDcAvailable;
-        mLteVopsSupportInfo = dsri.mLteVopsSupportInfo;
-        mIsUsingCarrierAggregation = dsri.mIsUsingCarrierAggregation;
+        mVopsSupportInfo = dsri.mVopsSupportInfo;
     }
 
-    private DataSpecificRegistrationInfo(Parcel source) {
+    private DataSpecificRegistrationInfo(/* @NonNull */ Parcel source) {
         maxDataCalls = source.readInt();
         isDcNrRestricted = source.readBoolean();
         isNrAvailable = source.readBoolean();
         isEnDcAvailable = source.readBoolean();
-        mLteVopsSupportInfo = LteVopsSupportInfo.CREATOR.createFromParcel(source);
-        mIsUsingCarrierAggregation = source.readBoolean();
+        mVopsSupportInfo = source.readParcelable(VopsSupportInfo.class.getClassLoader());
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(/* @NonNull */ Parcel dest, int flags) {
         dest.writeInt(maxDataCalls);
         dest.writeBoolean(isDcNrRestricted);
         dest.writeBoolean(isNrAvailable);
         dest.writeBoolean(isEnDcAvailable);
-        mLteVopsSupportInfo.writeToParcel(dest, flags);
-        dest.writeBoolean(mIsUsingCarrierAggregation);
+        dest.writeParcelable(mVopsSupportInfo, flags);
     }
 
     @Override
@@ -142,16 +131,15 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
                 .append(" isDcNrRestricted = " + isDcNrRestricted)
                 .append(" isNrAvailable = " + isNrAvailable)
                 .append(" isEnDcAvailable = " + isEnDcAvailable)
-                .append(" " + mLteVopsSupportInfo.toString())
-                .append(" mIsUsingCarrierAggregation = " + mIsUsingCarrierAggregation)
+                .append(" " + mVopsSupportInfo)
                 .append(" }")
                 .toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(maxDataCalls, isDcNrRestricted, isNrAvailable, isEnDcAvailable,
-                mLteVopsSupportInfo, mIsUsingCarrierAggregation);
+        return Objects.hash(maxDataCalls, isDcNrRestricted, isNrAvailable,
+                isEnDcAvailable, mVopsSupportInfo);
     }
 
     @Override
@@ -165,8 +153,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
                 && this.isDcNrRestricted == other.isDcNrRestricted
                 && this.isNrAvailable == other.isNrAvailable
                 && this.isEnDcAvailable == other.isEnDcAvailable
-                && this.mLteVopsSupportInfo.equals(other.mLteVopsSupportInfo)
-                && this.mIsUsingCarrierAggregation == other.mIsUsingCarrierAggregation;
+                && Objects.equals(mVopsSupportInfo, other.mVopsSupportInfo);
     }
 
     public static final @NonNull Parcelable.Creator<DataSpecificRegistrationInfo> CREATOR =
@@ -184,29 +171,26 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
 
     /**
      * @return The LTE VOPS (Voice over Packet Switched) support information
+     *
+     * @deprecated use {@link #getVopsSupportInfo()}
      */
+    @Deprecated
     @NonNull
     public LteVopsSupportInfo getLteVopsSupportInfo() {
-        return mLteVopsSupportInfo;
+        return mVopsSupportInfo instanceof LteVopsSupportInfo
+                ? (LteVopsSupportInfo) mVopsSupportInfo
+                : new LteVopsSupportInfo(LteVopsSupportInfo.LTE_STATUS_NOT_AVAILABLE,
+                LteVopsSupportInfo.LTE_STATUS_NOT_AVAILABLE);
     }
 
     /**
-     * Set the flag indicating if using carrier aggregation.
+     * @return The VOPS (Voice over Packet Switched) support information.
      *
-     * @param isUsingCarrierAggregation {@code true} if using carrier aggregation.
-     * @hide
+     * The instance of {@link LTEVopsSupportInfo}, or {@link NrVopsSupportInfo},
+     * null if there is there is no VOPS support information available.
      */
-    public void setIsUsingCarrierAggregation(boolean isUsingCarrierAggregation) {
-        mIsUsingCarrierAggregation = isUsingCarrierAggregation;
-    }
-
-    /**
-     * Get whether network has configured carrier aggregation or not.
-     *
-     * @return {@code true} if using carrier aggregation.
-     * @hide
-     */
-    public boolean isUsingCarrierAggregation() {
-        return mIsUsingCarrierAggregation;
+    @Nullable
+    public VopsSupportInfo getVopsSupportInfo() {
+        return mVopsSupportInfo;
     }
 }

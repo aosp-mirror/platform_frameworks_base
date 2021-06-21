@@ -18,6 +18,8 @@ package android.security.keystore;
 
 import libcore.util.EmptyArray;
 
+import java.util.function.Consumer;
+
 /**
  * @hide
  */
@@ -29,6 +31,14 @@ public abstract class ArrayUtils {
     }
 
     public static String[] cloneIfNotEmpty(String[] array) {
+        return ((array != null) && (array.length > 0)) ? array.clone() : array;
+    }
+
+    /**
+     * Clones an array if it is not null and has a length greater than 0. Otherwise, returns the
+     * array.
+     */
+    public static int[] cloneIfNotEmpty(int[] array) {
         return ((array != null) && (array.length > 0)) ? array.clone() : array;
     }
 
@@ -105,6 +115,18 @@ public abstract class ArrayUtils {
             System.arraycopy(arr1, 0, result, 0, arr1.length);
             System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
             return result;
+        }
+    }
+
+    /**
+     * Runs {@code consumer.accept()} for each element of {@code array}.
+     * @param array
+     * @param consumer
+     * @hide
+     */
+    public static void forEach(int[] array, Consumer<Integer> consumer) {
+        for (int i : array) {
+            consumer.accept(i);
         }
     }
 }

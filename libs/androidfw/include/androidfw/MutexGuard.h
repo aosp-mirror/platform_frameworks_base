@@ -18,6 +18,7 @@
 #define ANDROIDFW_MUTEXGUARD_H
 
 #include <mutex>
+#include <optional>
 #include <type_traits>
 
 #include "android-base/macros.h"
@@ -47,34 +48,32 @@ class Guarded {
   static_assert(!std::is_pointer<T>::value, "T must not be a raw pointer");
 
  public:
-  explicit Guarded() : guarded_() {
+  Guarded() : guarded_(std::in_place, T()) {
   }
 
-  template <typename U = T>
-  explicit Guarded(const T& guarded,
-                   typename std::enable_if<std::is_copy_constructible<U>::value>::type = void())
-      : guarded_(guarded) {
+  explicit Guarded(const T& guarded) : guarded_(std::in_place, guarded) {
   }
 
-  template <typename U = T>
-  explicit Guarded(T&& guarded,
-                   typename std::enable_if<std::is_move_constructible<U>::value>::type = void())
-      : guarded_(std::move(guarded)) {
+  explicit Guarded(T&& guarded) : guarded_(std::in_place, std::forward<T>(guarded)) {
+  }
+
+  ~Guarded() {
+    std::lock_guard<std::mutex> scoped_lock(lock_);
+    guarded_.reset();
   }
 
  private:
   friend class ScopedLock<T>;
-
   DISALLOW_COPY_AND_ASSIGN(Guarded);
 
   std::mutex lock_;
-  T guarded_;
+  std::optional<T> guarded_;
 };
 
 template <typename T>
 class ScopedLock {
  public:
-  explicit ScopedLock(Guarded<T>& guarded) : lock_(guarded.lock_), guarded_(guarded.guarded_) {
+  explicit ScopedLock(Guarded<T>& guarded) : lock_(guarded.lock_), guarded_(*guarded.guarded_) {
   }
 
   T& operator*() {

@@ -69,7 +69,7 @@ public class IpAddressPreferenceControllerTest {
 
         assertWithMessage("Intent filter should contain expected intents")
                 .that(ipAddressPreferenceController.getConnectivityIntents())
-                .asList().containsAllIn(expectedIntents);
+                .asList().containsAtLeastElementsIn(expectedIntents);
     }
 
     private static class ConcreteIpAddressPreferenceController extends

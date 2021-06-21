@@ -26,6 +26,7 @@ import android.view.inputmethod.InputContentInfo;
 import com.android.internal.inputmethod.ICharSequenceResultCallback;
 import com.android.internal.inputmethod.IExtractedTextResultCallback;
 import com.android.internal.inputmethod.IIntResultCallback;
+import com.android.internal.inputmethod.ISurroundingTextResultCallback;
 
 /**
  * Interface from an input method to the application, allowing it to perform
@@ -69,6 +70,8 @@ import com.android.internal.inputmethod.IIntResultCallback;
     
     void clearMetaKeyStates(int states);
     
+    void performSpellCheck();
+
     void performPrivateCommand(String action, in Bundle data);
 
     void setComposingRegion(int start, int end);
@@ -79,4 +82,9 @@ import com.android.internal.inputmethod.IIntResultCallback;
 
     void commitContent(in InputContentInfo inputContentInfo, int flags, in Bundle opts,
             IIntResultCallback callback);
+
+    void getSurroundingText(int beforeLength, int afterLength, int flags,
+            ISurroundingTextResultCallback callback);
+
+    void setImeConsumesInput(boolean imeConsumesInput);
 }

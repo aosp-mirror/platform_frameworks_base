@@ -16,22 +16,27 @@
 
 package com.android.systemui.doze;
 
-import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.doze.dagger.DozeScope;
+
+import javax.inject.Inject;
 
 /**
  * Notifies FalsingManager of whether or not AOD is showing.
  */
+@DozeScope
 public class DozeFalsingManagerAdapter implements DozeMachine.Part {
 
-    private final FalsingManager mFalsingManager;
+    private final FalsingCollector mFalsingCollector;
 
-    public DozeFalsingManagerAdapter(FalsingManager falsingManager) {
-        mFalsingManager = falsingManager;
+    @Inject
+    public DozeFalsingManagerAdapter(FalsingCollector falsingCollector) {
+        mFalsingCollector = falsingCollector;
     }
 
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
-        mFalsingManager.setShowingAod(isAodMode(newState));
+        mFalsingCollector.setShowingAod(isAodMode(newState));
     }
 
     private boolean isAodMode(DozeMachine.State state) {

@@ -1,0 +1,98 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+import "frameworks/base/core/proto/android/privacy.proto";
+
+package android.view.inputmethod;
+
+option java_multiple_files = true;
+
+/**
+ * Represents a {@link android.view.inputmethod.InputConnection} object.
+ */
+message InputConnectionProto {
+  optional string editable_text = 1 [(.android.privacy).dest = DEST_LOCAL];
+  optional string selected_text = 2 [(.android.privacy).dest = DEST_LOCAL];
+  optional int32 selected_text_start = 3;
+  optional int32 selected_text_end = 4;
+  optional int32 cursor_caps_mode = 5;
+}
+
+/**
+ * Shows information about parameters and result for method calls to
+ * {@link android.view.inputmethod.InputConnection}.
+ */
+message InputConnectionCallProto {
+  oneof method_call {
+    GetTextBeforeCursor get_text_before_cursor = 1;
+    GetTextAfterCursor get_text_after_cursor = 2;
+    GetSelectedText get_selected_text = 3;
+    GetSurroundingText get_surrounding_text = 4;
+    GetCursorCapsMode get_cursor_caps_mode = 5;
+    GetExtractedText get_extracted_text = 6;
+  }
+
+  message GetTextBeforeCursor {
+    optional int32 length = 1;
+    optional int32 flags = 2;
+    optional string result = 3 [(.android.privacy).dest = DEST_LOCAL];
+  }
+
+  message GetTextAfterCursor {
+    optional int32 length = 1;
+    optional int32 flags = 2;
+    optional string result = 3 [(.android.privacy).dest = DEST_LOCAL];
+  }
+
+  message GetSelectedText {
+    optional int32 flags = 1;
+    optional string result = 2 [(.android.privacy).dest = DEST_LOCAL];
+  }
+
+  message GetSurroundingText {
+    optional int32 before_length = 1;
+    optional int32 after_length = 2;
+    optional int32 flags = 3;
+    optional SurroundingText result = 4;
+
+    message SurroundingText {
+      optional string text = 1 [(.android.privacy).dest = DEST_LOCAL];
+      optional int32 selection_start = 2;
+      optional int32 selection_end = 3;
+      optional int32 offset = 4;
+    }
+  }
+
+  message GetCursorCapsMode {
+    optional int32 req_modes = 1;
+    optional int32 result = 2;
+  }
+
+  message GetExtractedText {
+    optional ExtractedTextRequest request = 1;
+    optional int32 flags = 2;
+    optional string result = 3 [(.android.privacy).dest = DEST_LOCAL];
+
+    message ExtractedTextRequest {
+      optional int32 token = 1;
+      optional int32 flags = 2;
+      optional int32 hint_max_lines = 3;
+      optional int32 hint_max_chars = 4;
+    }
+  }
+}

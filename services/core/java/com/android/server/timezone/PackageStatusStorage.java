@@ -25,6 +25,8 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import java.io.File;
@@ -127,7 +129,7 @@ final class PackageStatusStorage {
     @GuardedBy("this")
     private PackageStatus getPackageStatusLocked() throws ParseException {
         try (FileInputStream fis = mPackageStatusFile.openRead()) {
-            XmlPullParser parser = parseToPackageStatusTag(fis);
+            TypedXmlPullParser parser = parseToPackageStatusTag(fis);
             Integer checkStatus = getNullableIntAttribute(parser, ATTRIBUTE_CHECK_STATUS);
             if (checkStatus == null) {
                 return null;
@@ -252,7 +254,7 @@ final class PackageStatusStorage {
     @GuardedBy("this")
     private int getCurrentOptimisticLockId() throws ParseException {
         try (FileInputStream fis = mPackageStatusFile.openRead()) {
-            XmlPullParser parser = parseToPackageStatusTag(fis);
+            TypedXmlPullParser parser = parseToPackageStatusTag(fis);
             return getIntAttribute(parser, ATTRIBUTE_OPTIMISTIC_LOCK_ID);
         } catch (IOException e) {
             ParseException e2 = new ParseException("Unable to read file", 0);
@@ -262,11 +264,10 @@ final class PackageStatusStorage {
     }
 
     /** Returns a parser or throws ParseException, never returns null. */
-    private static XmlPullParser parseToPackageStatusTag(FileInputStream fis)
+    private static TypedXmlPullParser parseToPackageStatusTag(FileInputStream fis)
             throws ParseException {
         try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(fis);
             int type;
             while ((type = parser.next()) != END_DOCUMENT) {
                 final String tag = parser.getName();
@@ -315,8 +316,7 @@ final class PackageStatusStorage {
         FileOutputStream fos = null;
         try {
             fos = mPackageStatusFile.startWrite();
-            XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(fos, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer serializer = Xml.resolveSerializer(fos);
             serializer.startDocument(null /* encoding */, true /* standalone */);
             final String namespace = null;
             serializer.startTag(namespace, TAG_PACKAGE_STATUS);
@@ -358,7 +358,7 @@ final class PackageStatusStorage {
         }
     }
 
-    private static Integer getNullableIntAttribute(XmlPullParser parser, String attributeName)
+    private static Integer getNullableIntAttribute(TypedXmlPullParser parser, String attributeName)
             throws ParseException {
         String attributeValue = parser.getAttributeValue(null, attributeName);
         try {
@@ -374,7 +374,7 @@ final class PackageStatusStorage {
         }
     }
 
-    private static int getIntAttribute(XmlPullParser parser, String attributeName)
+    private static int getIntAttribute(TypedXmlPullParser parser, String attributeName)
             throws ParseException {
         Integer value = getNullableIntAttribute(parser, attributeName);
         if (value == null) {

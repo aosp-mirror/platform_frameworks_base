@@ -15,22 +15,23 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.test.legacyassistant">
+     package="com.google.android.test.legacyassistant">
 
     <application android:label="@string/activity_title">
 
         <activity android:name=".AssistActivity"
-            android:theme="@android:style/Theme.NoTitleBar">
+             android:theme="@android:style/Theme.NoTitleBar"
+             android:exported="true">
 
             <!-- Handle assist intent -->
             <intent-filter>
-                <action android:name="android.intent.action.ASSIST" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.ASSIST"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
 
             <!-- Provide icon for search -->
             <meta-data android:name="com.android.systemui.action_assist_icon"
-                    android:resource="@drawable/ic_action_assist" />
+                 android:resource="@drawable/ic_action_assist"/>
 
         </activity>
 
