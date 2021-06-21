@@ -27,7 +27,7 @@ import android.util.ArraySet;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.server.wm.utils.DeviceConfigInterface;
+import com.android.server.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
 

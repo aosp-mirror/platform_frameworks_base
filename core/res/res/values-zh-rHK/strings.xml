@@ -301,7 +301,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"存取您的日曆"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"短訊"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"傳送和查看短訊"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"檔案和媒體"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"檔案及媒體"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"存取裝置上的相片、媒體和檔案"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"麥克風"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"錄音"</string>
@@ -431,7 +431,7 @@
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"即使您不使用此應用程式，它仍可隨時存取位置。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"更改音效設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"允許應用程式修改全域音頻設定，例如音量和用於輸出的喇叭。"</string>
-    <string name="permlab_recordAudio" msgid="1208457423054219147">"錄音"</string>
+    <string name="permlab_recordAudio" msgid="1208457423054219147">"錄製音效"</string>
     <string name="permdesc_recordAudio" msgid="3976213377904701093">"此應用程式可以隨時使用麥克風錄音。"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"發送指令至 SIM 卡"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"允許應用程式傳送指令到 SIM 卡。這項操作具有高危險性。"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"不明直向紙張"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"不明橫向紙張"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"已取消"</string>

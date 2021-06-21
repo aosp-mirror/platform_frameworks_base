@@ -48,6 +48,7 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.launcher3.icons.BitmapInfo;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -146,7 +147,8 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             }
 
             // App name & app icon
-            PackageManager pm = c.getPackageManager();
+            PackageManager pm = StatusBar.getPackageManagerForUser(
+                    c, b.getUser().getIdentifier());
             ApplicationInfo appInfo;
             Drawable badgedIcon;
             Drawable appIcon;
