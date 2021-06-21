@@ -94,7 +94,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private final OneHandedTouchHandler mTouchHandler;
     private final OneHandedState mState;
     private final OneHandedTutorialHandler mTutorialHandler;
-    private final OneHandedUiEventLogger mOneHandedUiEventLogger;
     private final TaskStackListenerImpl mTaskStackListener;
     private final IOverlayManager mOverlayManager;
     private final ShellExecutor mMainExecutor;
@@ -104,6 +103,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private OneHandedEventCallback mEventCallback;
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
     private OneHandedBackgroundPanelOrganizer mBackgroundPanelOrganizer;
+    private OneHandedUiEventLogger mOneHandedUiEventLogger;
 
     /**
      * Handle rotation based on OnDisplayChangingListener callback
@@ -114,6 +114,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                     return;
                 }
                 mDisplayAreaOrganizer.onRotateDisplay(mContext, toRotation, wct);
+                mOneHandedUiEventLogger.writeEvent(
+                        OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_ROTATION_OUT);
             };
 
     private final DisplayController.OnDisplaysChangedListener mDisplaysChangedListener =
@@ -582,6 +584,10 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 mOneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
                         mContext.getContentResolver(), mUserId);
         setSwipeToNotificationEnabled(enabled);
+
+        mOneHandedUiEventLogger.writeEvent(enabled
+                ? OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_SHOW_NOTIFICATION_ENABLED_ON
+                : OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_SHOW_NOTIFICATION_ENABLED_OFF);
 
         // Also checks one handed mode settings since they all need gesture overlay.
         setEnabledGesturalOverlay(
