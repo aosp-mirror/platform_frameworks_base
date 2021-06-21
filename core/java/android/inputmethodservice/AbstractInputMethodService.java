@@ -18,16 +18,23 @@ package android.inputmethodservice;
 
 import android.annotation.MainThread;
 import android.annotation.NonNull;
-import android.app.Service;
+import android.annotation.Nullable;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSession;
+import android.window.WindowProviderService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -44,9 +51,22 @@ import java.io.PrintWriter;
  * implement.  This base class takes care of reporting your InputMethod from
  * the service when clients bind to it, but provides no standard implementation
  * of the InputMethod interface itself.  Derived classes must implement that
- * interface.
+ * interface.</p>
+ *
+ * <p>After {@link android.os.Build.VERSION_CODES#S}, the maximum possible area to show the soft
+ * input may not be the entire screen. For example, some devices may support to show the soft input
+ * on only half of screen.</p>
+ *
+ * <p>In that case, moving the soft input from one half screen to another will trigger a
+ * {@link android.content.res.Resources} update to match the new {@link Configuration} and
+ * this {@link AbstractInputMethodService} may also receive a
+ * {@link #onConfigurationChanged(Configuration)} callback if there's notable configuration changes
+ * </p>
+ *
+ * @see android.content.ComponentCallbacks#onConfigurationChanged(Configuration)
+ * @see Context#isUiContext Context#isUiContext to see the concept of UI Context.
  */
-public abstract class AbstractInputMethodService extends Service
+public abstract class AbstractInputMethodService extends WindowProviderService
         implements KeyEvent.Callback {
     private InputMethod mInputMethod;
     
@@ -272,9 +292,33 @@ public abstract class AbstractInputMethodService extends Service
     public void notifyUserActionIfNecessary() {
     }
 
+    // TODO(b/149463653): remove it in T. We missed the API deadline in S.
     /** @hide */
     @Override
     public final boolean isUiContext() {
         return true;
+    }
+
+    /** @hide */
+    @Override
+    public final int getWindowType() {
+        return WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+    }
+
+    /** @hide */
+    @Override
+    @Nullable
+    public final Bundle getWindowContextOptions() {
+        return null;
+    }
+
+    /** @hide */
+    @Override
+    public final int getInitialDisplayId() {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().getImeDisplayId();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }
