@@ -647,6 +647,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mLastContainsDismissKeyguardWindow;
     private boolean mLastContainsTurnScreenOnWindow;
 
+    /** Whether the IME is showing when transitioning away from this activity. */
+    boolean mLastImeShown;
+
     /**
      * A flag to determine if this AR is in the process of closing or entering PIP. This is needed
      * to help AR know that the app is in the process of closing but hasn't yet started closing on
@@ -4720,6 +4723,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // animation. Otherwise, we'll update client visibility in onAnimationFinished.
         if (visible || !isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)) {
             setClientVisible(visible);
+        }
+
+        if (!visible) {
+            final InsetsControlTarget imeInputTarget = mDisplayContent.getImeTarget(
+                    DisplayContent.IME_TARGET_INPUT);
+            mLastImeShown = imeInputTarget != null && imeInputTarget.getWindow() != null
+                    && imeInputTarget.getWindow().mActivityRecord == this
+                    && mDisplayContent.mInputMethodWindow != null
+                    && mDisplayContent.mInputMethodWindow.isVisible();
         }
 
         final DisplayContent displayContent = getDisplayContent();
