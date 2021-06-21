@@ -347,6 +347,7 @@ public final class VcnGatewayConnectionConfig {
     public int hashCode() {
         return Objects.hash(
                 mGatewayConnectionName,
+                mTunnelConnectionParams,
                 mExposedCapabilities,
                 Arrays.hashCode(mRetryIntervalsMs),
                 mMaxMtu);
@@ -360,6 +361,7 @@ public final class VcnGatewayConnectionConfig {
 
         final VcnGatewayConnectionConfig rhs = (VcnGatewayConnectionConfig) other;
         return mGatewayConnectionName.equals(rhs.mGatewayConnectionName)
+                && mTunnelConnectionParams.equals(rhs.mTunnelConnectionParams)
                 && mExposedCapabilities.equals(rhs.mExposedCapabilities)
                 && Arrays.equals(mRetryIntervalsMs, rhs.mRetryIntervalsMs)
                 && mMaxMtu == rhs.mMaxMtu;
