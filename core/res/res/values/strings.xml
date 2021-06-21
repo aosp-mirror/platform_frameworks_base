@@ -1636,6 +1636,8 @@
     <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor.</string>
     <!-- Generic error message shown when fingerprint is not available due to a security vulnerability. [CHAR LIMIT=50] -->
     <string name="fingerprint_error_security_update_required">Sensor temporarily disabled.</string>
+    <!-- Generic error message shown when fingerprint needs calibration [CHAR LIMIT=50] -->
+    <string name="fingerprint_error_bad_calibration">Sensor needs calibration</string>
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
