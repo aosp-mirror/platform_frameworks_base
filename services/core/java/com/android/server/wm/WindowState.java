@@ -2568,6 +2568,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private void setupWindowForRemoveOnExit() {
         mRemoveOnExit = true;
         setDisplayLayoutNeeded();
+        getDisplayContent().getDisplayPolicy().removeWindowLw(this);
         // Request a focus update as this window's input channel is already gone. Otherwise
         // we could have no focused window in input manager.
         final boolean focusChanged = mWmService.updateFocusedWindowLocked(
