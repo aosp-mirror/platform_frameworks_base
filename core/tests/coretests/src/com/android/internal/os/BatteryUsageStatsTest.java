@@ -24,6 +24,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.os.BatteryConsumer;
 import android.os.BatteryUsageStats;
@@ -47,7 +49,9 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -64,12 +68,14 @@ public class BatteryUsageStatsTest {
     }
 
     @Test
-    public void testParcelability() {
+    public void testParcelability_smallNumberOfUids() {
         final BatteryUsageStats outBatteryUsageStats = buildBatteryUsageStats1(true).build();
         final Parcel outParcel = Parcel.obtain();
         outParcel.writeParcelable(outBatteryUsageStats, 0);
         final byte[] bytes = outParcel.marshall();
         outParcel.recycle();
+
+        assertThat(bytes.length).isLessThan(2000);
 
         final Parcel inParcel = Parcel.obtain();
         inParcel.unmarshall(bytes, 0, bytes.length);
@@ -80,6 +86,46 @@ public class BatteryUsageStatsTest {
         assertBatteryUsageStats1(inBatteryUsageStats, true);
     }
 
+    @Test
+    public void testParcelability_largeNumberOfUids() {
+        final BatteryUsageStats.Builder builder =
+                new BatteryUsageStats.Builder(new String[0]);
+
+        // Without the use of a blob, this BatteryUsageStats object would generate a Parcel
+        // larger than 64 Kb
+        final int uidCount = 200;
+        for (int i = 0; i < uidCount; i++) {
+            BatteryStatsImpl.Uid mockUid = mock(BatteryStatsImpl.Uid.class);
+            when(mockUid.getUid()).thenReturn(i);
+            builder.getOrCreateUidBatteryConsumerBuilder(mockUid)
+                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, i * 100);
+        }
+
+        BatteryUsageStats outBatteryUsageStats = builder.build();
+
+        final Parcel parcel = Parcel.obtain();
+        parcel.writeParcelable(outBatteryUsageStats, 0);
+
+        assertThat(parcel.dataSize()).isLessThan(2000);
+
+        // This parcel cannot be marshaled because it contains a file descriptor.
+        // Assuming that parcel marshaling works fine, let's just rewind the parcel.
+        parcel.setDataPosition(0);
+
+        final BatteryUsageStats inBatteryUsageStats =
+                parcel.readParcelable(getClass().getClassLoader());
+        parcel.recycle();
+
+        assertThat(inBatteryUsageStats.getUidBatteryConsumers()).hasSize(uidCount);
+        final Map<Integer, UidBatteryConsumer> consumersByUid =
+                inBatteryUsageStats.getUidBatteryConsumers().stream().collect(
+                        Collectors.toMap(UidBatteryConsumer::getUid, c -> c));
+        for (int i = 0; i < uidCount; i++) {
+            final UidBatteryConsumer uidBatteryConsumer = consumersByUid.get(i);
+            assertThat(uidBatteryConsumer).isNotNull();
+            assertThat(uidBatteryConsumer.getConsumedPower()).isEqualTo(i * 100);
+        }
+    }
 
     @Test
     public void testDefaultSessionDuration() {
