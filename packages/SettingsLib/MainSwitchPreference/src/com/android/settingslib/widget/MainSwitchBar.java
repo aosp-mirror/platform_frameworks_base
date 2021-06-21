@@ -79,7 +79,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
             final TypedArray a = context.obtainStyledAttributes(
                     new int[]{android.R.attr.colorAccent});
             mBackgroundActivatedColor = a.getColor(0, 0);
-            mBackgroundColor = context.getColor(R.color.settingslib_switchbar_background_color);
+            mBackgroundColor = context.getColor(R.color.material_grey_600);
             a.recycle();
         }
 
@@ -89,11 +89,12 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         mFrameView = findViewById(R.id.frame);
         mTextView = (TextView) findViewById(R.id.switch_text);
         mSwitch = (Switch) findViewById(android.R.id.switch_widget);
-        mBackgroundOn = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_on);
-        mBackgroundOff = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_off);
-        mBackgroundDisabled = getContext().getDrawable(
-                R.drawable.settingslib_switch_bar_bg_disabled);
-
+        if (BuildCompat.isAtLeastS()) {
+            mBackgroundOn = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_on);
+            mBackgroundOff = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_off);
+            mBackgroundDisabled = getContext().getDrawable(
+                    R.drawable.settingslib_switch_bar_bg_disabled);
+        }
         addOnSwitchChangeListener((switchView, isChecked) -> setChecked(isChecked));
 
         setChecked(mSwitch.isChecked());
@@ -195,9 +196,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
      * Remove a listener for switch changes
      */
     public void removeOnSwitchChangeListener(OnMainSwitchChangeListener listener) {
-        if (mSwitchChangeListeners.contains(listener)) {
-            mSwitchChangeListeners.remove(listener);
-        }
+        mSwitchChangeListeners.remove(listener);
     }
 
     /**
@@ -268,10 +267,12 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
 
         public static final Parcelable.Creator<SavedState> CREATOR =
                 new Parcelable.Creator<SavedState>() {
+                    @Override
                     public SavedState createFromParcel(Parcel in) {
                         return new SavedState(in);
                     }
 
+                    @Override
                     public SavedState[] newArray(int size) {
                         return new SavedState[size];
                     }
