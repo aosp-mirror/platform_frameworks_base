@@ -49,10 +49,10 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TRANSIT
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RESULTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TRANSITION;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_USER_LEAVING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -126,7 +126,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_RESULTS = TAG + POSTFIX_RESULTS;
     private static final String TAG_TRANSITION = TAG + POSTFIX_TRANSITION;
-    private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
 
     /** Set to false to disable the preview that is shown while a new activity is being started. */
     static final boolean SHOW_APP_STARTING_PREVIEW = true;
@@ -143,15 +142,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     final ActivityTaskSupervisor mTaskSupervisor;
     final RootWindowContainer mRootWindowContainer;
 
-    // TODO(b/189384393): this is not set in TaskFragment so far. It should be passed from the
-    // parent task when adding to the hierarchy
     /**
      * Minimal width of this task fragment when it's resizeable. {@link #INVALID_MIN_SIZE} means it
      * should use the default minimal width.
      */
     int mMinWidth;
-    // TODO(b/189384393): this is not set in TaskFragment so far. It should be passed from the
-    // parent task when adding to the hierarchy
+
     /**
      * Minimal height of this task fragment when it's resizeable. {@link #INVALID_MIN_SIZE} means it
      * should use the default minimal height.
@@ -175,7 +171,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * used to determine if we need to do an activity transition while sleeping,
      * when we normally hold the top activity paused.
      */
-    // TODO(b/189384393): check whether this should work on root task or leaf.
     ActivityRecord mLastPausedActivity = null;
 
     /**
@@ -251,7 +246,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             f.recycle();
 
             if (mUpdateConfig) {
-                // TODO(b/189384393): rename to resumeFocusedTaskFragmentsTopActivities
                 // Ensure the resumed state of the focus activity if we updated the configuration of
                 // any activity.
                 mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -374,21 +368,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return false;
     }
 
-    void cleanUpActivityReferences(ActivityRecord r) {
+    void cleanUpActivityReferences(@NonNull ActivityRecord r) {
         if (mPausingActivity != null && mPausingActivity == r) {
             mPausingActivity = null;
         }
 
         if (mResumedActivity != null && mResumedActivity == r) {
             setResumedActivity(null, "cleanUpActivityReferences");
-        }
-
-        // TODO(b/189384393): why clean up the references in parents while the references are
-        //  kept in the leaf?
-        final WindowContainer parent = getParent();
-        if (parent != null && parent.asTaskFragment() != null) {
-            parent.asTaskFragment().cleanUpActivityReferences(r);
-            return;
         }
         r.removeTimeouts();
     }
@@ -994,10 +980,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             // Launcher is already visible in this case. If we don't add it to opening
             // apps, maybeUpdateTransitToWallpaper() will fail to identify this as a
             // TRANSIT_WALLPAPER_OPEN animation, and run some funny animation.
-            final boolean lastActivityTranslucent = lastFocusedRootTask != null
-                    && (lastFocusedRootTask.inMultiWindowMode()
-                    || (lastFocusedRootTask.mLastPausedActivity != null
-                    && !lastFocusedRootTask.mLastPausedActivity.occludesParent()));
+            final boolean lastActivityTranslucent = inMultiWindowMode()
+                    || mLastPausedActivity != null && !mLastPausedActivity.occludesParent();
 
             // This activity is now becoming visible.
             if (!next.mVisibleRequested || next.stopped || lastActivityTranslucent) {
@@ -1366,7 +1350,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (resumeNext) {
             final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
             if (topRootTask != null && !topRootTask.shouldSleepOrShutDownActivities()) {
-                mRootWindowContainer.resumeFocusedTasksTopActivities(topRootTask, prev, null);
+                mRootWindowContainer.resumeFocusedTasksTopActivities(topRootTask, prev,
+                        null /* targetOptions */);
             } else {
                 // checkReadyForSleep();
                 final ActivityRecord top =
@@ -1395,6 +1380,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
             mTaskSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
         }
+    }
+
+    @Override
+    void forAllTaskFragments(Consumer<TaskFragment> callback, boolean traverseTopToBottom) {
+        super.forAllTaskFragments(callback, traverseTopToBottom);
+        callback.accept(this);
     }
 
     @Override
@@ -1985,6 +1976,25 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return mFragmentToken;
     }
 
+    /** Clear {@link #mLastPausedActivity} for all {@link TaskFragment} children */
+    void clearLastPausedActivity() {
+        forAllTaskFragments(taskFragment -> taskFragment.mLastPausedActivity = null);
+    }
+
+    /**
+     * Sets {@link #mMinWidth} and {@link #mMinWidth} to this TaskFragment.
+     * It is usually set from the parent {@link Task} when adding the TaskFragment to the window
+     * hierarchy.
+     */
+    void setMinDimensions(int minWidth, int minHeight) {
+        if (asTask() != null) {
+            throw new UnsupportedOperationException("This method must not be used to Task. The "
+                    + " minimum dimension of Task should be passed from Task constructor.");
+        }
+        mMinWidth = minWidth;
+        mMinHeight = minHeight;
+    }
+
     boolean dump(String prefix, FileDescriptor fd, PrintWriter pw, boolean dumpAll,
             boolean dumpClient, String dumpPackage, final boolean needSep, Runnable header) {
         boolean printed = false;
@@ -2025,6 +2035,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void dumpInner(String prefix, PrintWriter pw, boolean dumpAll, String dumpPackage) {
         pw.print(prefix); pw.print("* "); pw.println(this);
         pw.println(prefix + "  mBounds=" + getRequestedOverrideBounds());
+        if (dumpAll) {
+            printThisActivity(pw, mLastPausedActivity, dumpPackage, false,
+                    prefix + "  mLastPausedActivity: ", null);
+        }
     }
 
     @Override

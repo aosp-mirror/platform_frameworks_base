@@ -1474,6 +1474,13 @@ class Task extends TaskFragment {
         // Make sure the list of display UID allowlists is updated
         // now that this record is in a new task.
         mRootWindowContainer.updateUIDsPresentOnDisplay();
+
+        // Only pass minimum dimensions for pure TaskFragment. Task's minimum dimensions must be
+        // passed from Task constructor.
+        final TaskFragment childTaskFrag = child.asTaskFragment();
+        if (childTaskFrag != null && childTaskFrag.asTask() == null) {
+            childTaskFrag.setMinDimensions(mMinWidth, mMinHeight);
+        }
     }
 
     /** Called when an {@link ActivityRecord} is added as a descendant */
