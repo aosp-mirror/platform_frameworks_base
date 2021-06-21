@@ -214,8 +214,8 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         spyOn(mDisplayContent);
         spyOn(mDisplayContent.mInputMethodWindow);
         when(task.getDisplayContent().shouldImeAttachedToApp()).thenReturn(true);
-        // Intentionally set the IME window is in drawn state.
-        doReturn(true).when(mDisplayContent.mInputMethodWindow).isDrawn();
+        // Intentionally set the IME window is in visible state.
+        doReturn(true).when(mDisplayContent.mInputMethodWindow).isVisible();
         // Verify no NPE happens when calling createTaskSnapshot.
         try {
             final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
