@@ -30,7 +30,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
-import androidx.core.os.BuildCompat;
+
+import com.android.settingslib.utils.BuildCompatUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +75,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
 
         LayoutInflater.from(context).inflate(R.layout.settingslib_main_switch_bar, this);
 
-        if (!BuildCompat.isAtLeastS()) {
+        if (!BuildCompatUtils.isAtLeastS()) {
             final TypedArray a = context.obtainStyledAttributes(
                     new int[]{android.R.attr.colorAccent});
             mBackgroundActivatedColor = a.getColor(0, 0);
@@ -207,7 +208,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         mTextView.setEnabled(enabled);
         mSwitch.setEnabled(enabled);
 
-        if (BuildCompat.isAtLeastS()) {
+        if (BuildCompatUtils.isAtLeastS()) {
             if (enabled) {
                 mFrameView.setBackground(isChecked() ? mBackgroundOn : mBackgroundOff);
             } else {
@@ -226,7 +227,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
     }
 
     private void setBackground(boolean isChecked) {
-        if (!BuildCompat.isAtLeastS()) {
+        if (!BuildCompatUtils.isAtLeastS()) {
             setBackgroundColor(isChecked ? mBackgroundActivatedColor : mBackgroundColor);
         } else {
             mFrameView.setBackground(isChecked ? mBackgroundOn : mBackgroundOff);

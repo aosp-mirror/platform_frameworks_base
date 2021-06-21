@@ -16,6 +16,7 @@ android_library {
     static_libs: [
         "androidx.preference_preference",
         "SettingsLibSettingsTheme",
+        "SettingsLibUtils",
     ],
 
     sdk_version: "system_current",

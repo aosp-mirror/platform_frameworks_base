@@ -22,7 +22,7 @@ import android.content.pm.PackageManager;
 import android.os.UserManager;
 import android.util.Log;
 
-import com.android.settingslib.widget.R;
+import com.android.settingslib.utils.R;
 
 public class AppUtils {
 
