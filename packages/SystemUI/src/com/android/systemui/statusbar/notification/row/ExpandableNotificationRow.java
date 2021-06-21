@@ -2890,6 +2890,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mShowNoBackground = false;
         }
         updateOutline();
+        updateBackground();
+    }
+
+    @Override
+    protected boolean hideBackground() {
+        return mShowNoBackground || super.hideBackground();
     }
 
     public int getPositionOfChild(ExpandableNotificationRow childRow) {
