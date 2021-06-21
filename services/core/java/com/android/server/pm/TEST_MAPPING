@@ -13,6 +13,9 @@
       "name": "CtsAppEnumerationTestCases"
     },
     {
+      "name": "AppEnumerationInternalTests"
+    },
+    {
       "name": "CtsMatchFlagTestCases"
     },
     {
@@ -48,6 +51,14 @@
         },
         {
           "include-filter": "android.content.pm.cts"
+        }
+      ]
+    },
+    {
+      "name": "GtsContentTestCases",
+      "options": [
+        {
+          "include-filter": "com.google.android.content.gts"
         }
       ]
     },

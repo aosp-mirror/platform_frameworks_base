@@ -265,7 +265,7 @@ public class PeopleTileViewHelper {
 
     private RemoteViews createSuppressedView() {
         RemoteViews views;
-        if (mTile.isUserQuieted()) {
+        if (mTile != null && mTile.isUserQuieted()) {
             views = new RemoteViews(mContext.getPackageName(),
                     R.layout.people_tile_work_profile_quiet_layout);
         } else {

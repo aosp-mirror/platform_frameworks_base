@@ -284,6 +284,15 @@ public class Bubble implements BubbleViewProvider {
         return mTitle;
     }
 
+    /**
+     * @return the ShortcutInfo id if it exists, or the metadata shortcut id otherwise.
+     */
+    String getShortcutId() {
+        return getShortcutInfo() != null
+                ? getShortcutInfo().getId()
+                : getMetadataShortcutId();
+    }
+
     String getMetadataShortcutId() {
         return mMetadataShortcutId;
     }

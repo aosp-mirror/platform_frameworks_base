@@ -16,7 +16,6 @@
   -->
 
 <resources xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <color name="settingslib_switchbar_background_color">@*android:color/material_grey_600</color>
     <color name="settingslib_switchbar_switch_track_tint">#BFFFFFFF</color>
     <color name="settingslib_switchbar_switch_thumb_tint">@android:color/white</color>
 </resources>

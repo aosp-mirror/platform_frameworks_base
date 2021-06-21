@@ -46,6 +46,7 @@ interface IUserManager {
     UserInfo createProfileForUserWithThrow(in String name, in String userType, int flags, int userId,
             in String[] disallowedPackages);
     UserInfo createRestrictedProfileWithThrow(String name, int parentUserHandle);
+    String[] getPreInstallableSystemPackages(in String userType);
     void setUserEnabled(int userId);
     void setUserAdmin(int userId);
     void evictCredentialEncryptionKey(int userId);
