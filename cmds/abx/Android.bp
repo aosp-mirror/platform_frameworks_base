@@ -1,0 +1,37 @@
+
+package {
+    default_applicable_licenses: ["frameworks_base_cmds_abx_license"],
+}
+
+// Added automatically by a large-scale-change
+// See: http://go/android-license-faq
+license {
+    name: "frameworks_base_cmds_abx_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
+
+java_binary {
+    name: "abx",
+    wrapper: "abx",
+    srcs: ["**/*.java"],
+    required: [
+        "abx2xml",
+        "xml2abx",
+    ],
+}
+
+sh_binary {
+    name: "abx2xml",
+    src: "abx2xml",
+}
+
+sh_binary {
+    name: "xml2abx",
+    src: "xml2abx",
+}

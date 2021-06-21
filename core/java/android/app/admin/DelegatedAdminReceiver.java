@@ -18,6 +18,7 @@ package android.app.admin;
 
 import static android.app.admin.DeviceAdminReceiver.ACTION_CHOOSE_PRIVATE_KEY_ALIAS;
 import static android.app.admin.DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE;
+import static android.app.admin.DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_ALIAS;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_URI;
@@ -103,6 +104,10 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
      * receiver's manifest in order to receive this callback. The default implementation
      * simply throws {@link UnsupportedOperationException}.
      *
+     * <p>
+     * This callback is triggered by a foreground broadcast and the app should ensure that any
+     * long-running work is not executed synchronously inside the callback.
+     *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      * @param batchToken The token representing the current batch of network logs.
@@ -112,6 +117,33 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
     public void onNetworkLogsAvailable(@NonNull Context context, @NonNull Intent intent,
             long batchToken, @IntRange(from = 1) int networkLogsCount) {
         throw new UnsupportedOperationException("onNetworkLogsAvailable should be implemented");
+    }
+
+    /**
+     * Called each time a new batch of security logs can be retrieved. This callback method will
+     * only ever be called when security logging is enabled. The logs can only be retrieved while
+     * security logging is enabled.
+     *
+     * <p>If a secondary user or profile is created, this callback won't be received until all users
+     * become affiliated again (even if security logging is enabled). It will also no longer be
+     * possible to retrieve the security logs. See {@link DevicePolicyManager#setAffiliationIds}.
+     *
+     * <p> This callback is only applicable if the delegated app has
+     * {@link DevicePolicyManager#DELEGATION_SECURITY_LOGGING} capability. Additionally, it must
+     * declare an intent filter for {@link DeviceAdminReceiver#ACTION_SECURITY_LOGS_AVAILABLE} in
+     * the receiver's manifest in order to receive this callback. The default implementation
+     * simply throws {@link UnsupportedOperationException}.
+     *
+     * <p>
+     * This callback is triggered by a foreground broadcast and the app should ensure that any
+     * long-running work is not executed synchronously inside the callback.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @see DevicePolicyManager#retrieveSecurityLogs
+     */
+    public void onSecurityLogsAvailable(@NonNull Context context, @NonNull Intent intent) {
+        throw new UnsupportedOperationException("onSecurityLogsAvailable should be implemented");
     }
 
     /**
@@ -132,6 +164,8 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
             long batchToken = intent.getLongExtra(EXTRA_NETWORK_LOGS_TOKEN, -1);
             int networkLogsCount = intent.getIntExtra(EXTRA_NETWORK_LOGS_COUNT, 0);
             onNetworkLogsAvailable(context, intent, batchToken, networkLogsCount);
+        } else if (ACTION_SECURITY_LOGS_AVAILABLE.equals(action)) {
+            onSecurityLogsAvailable(context, intent);
         } else {
             Log.w(TAG, "Unhandled broadcast: " + action);
         }

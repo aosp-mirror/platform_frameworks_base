@@ -61,8 +61,8 @@ public final class TotalCaptureResult extends CaptureResult {
 
     private final List<CaptureResult> mPartialResults;
     private final int mSessionId;
-    // The map between physical camera id and capture result
-    private final HashMap<String, CaptureResult> mPhysicalCaptureResults;
+    // The map between physical camera ids and their total capture result
+    private final HashMap<String, TotalCaptureResult> mPhysicalCaptureResults;
 
     /**
      * Takes ownership of the passed-in camera metadata and the partial results
@@ -70,10 +70,10 @@ public final class TotalCaptureResult extends CaptureResult {
      * @param partials a list of partial results; {@code null} will be substituted for an empty list
      * @hide
      */
-    public TotalCaptureResult(CameraMetadataNative results, CaptureRequest parent,
-            CaptureResultExtras extras, List<CaptureResult> partials, int sessionId,
-            PhysicalCaptureResultInfo physicalResults[]) {
-        super(results, parent, extras);
+    public TotalCaptureResult(String logicalCameraId, CameraMetadataNative results,
+            CaptureRequest parent, CaptureResultExtras extras, List<CaptureResult> partials,
+            int sessionId, PhysicalCaptureResultInfo[] physicalResults) {
+        super(logicalCameraId, results, parent, extras);
 
         if (partials == null) {
             mPartialResults = new ArrayList<>();
@@ -83,10 +83,41 @@ public final class TotalCaptureResult extends CaptureResult {
 
         mSessionId = sessionId;
 
-        mPhysicalCaptureResults = new HashMap<String, CaptureResult>();
+        mPhysicalCaptureResults = new HashMap<String, TotalCaptureResult>();
         for (PhysicalCaptureResultInfo onePhysicalResult : physicalResults) {
-            CaptureResult physicalResult = new CaptureResult(
-                    onePhysicalResult.getCameraMetadata(), parent, extras);
+            TotalCaptureResult physicalResult = new TotalCaptureResult(
+                    onePhysicalResult.getCameraId(), onePhysicalResult.getCameraMetadata(),
+                    parent, extras, /*partials*/null, sessionId, new PhysicalCaptureResultInfo[0]);
+            mPhysicalCaptureResults.put(onePhysicalResult.getCameraId(),
+                    physicalResult);
+        }
+    }
+
+    /**
+     * Takes ownership of the passed-in camera metadata and the partial results
+     *
+     * @param partials a list of partial results; {@code null} will be substituted for an empty list
+     * @hide
+     */
+    public TotalCaptureResult(String logicalCameraId, CameraMetadataNative results,
+            CaptureRequest parent, int requestId, long frameNumber, List<CaptureResult> partials,
+            int sessionId, PhysicalCaptureResultInfo[] physicalResults) {
+        super(logicalCameraId, results, parent, requestId, frameNumber);
+
+        if (partials == null) {
+            mPartialResults = new ArrayList<>();
+        } else {
+            mPartialResults = partials;
+        }
+
+        mSessionId = sessionId;
+
+        mPhysicalCaptureResults = new HashMap<String, TotalCaptureResult>();
+        for (PhysicalCaptureResultInfo onePhysicalResult : physicalResults) {
+            TotalCaptureResult physicalResult = new TotalCaptureResult(
+                    onePhysicalResult.getCameraId(), onePhysicalResult.getCameraMetadata(),
+                    parent, requestId, frameNumber, /*partials*/null, sessionId,
+                    new PhysicalCaptureResultInfo[0]);
             mPhysicalCaptureResults.put(onePhysicalResult.getCameraId(),
                     physicalResult);
         }
@@ -103,7 +134,7 @@ public final class TotalCaptureResult extends CaptureResult {
 
         mPartialResults = new ArrayList<>();
         mSessionId = CameraCaptureSession.SESSION_ID_NONE;
-        mPhysicalCaptureResults = new HashMap<String, CaptureResult>();
+        mPhysicalCaptureResults = new HashMap<String, TotalCaptureResult>();
     }
 
     /**
@@ -146,8 +177,37 @@ public final class TotalCaptureResult extends CaptureResult {
      * cameras. Otherwise, an empty map is returned.</p>
 
      * @return unmodifiable map between physical camera ids and their capture result metadata
+     *
+     * @deprecated
+     * <p>Please use {@link #getPhysicalCameraTotalResults() instead to get the
+     * physical cameras' {@code TotalCaptureResult}.</p>
      */
     public Map<String, CaptureResult> getPhysicalCameraResults() {
+        return Collections.unmodifiableMap(mPhysicalCaptureResults);
+    }
+
+    /**
+     * Get the map between physical camera ids and their total capture result metadata
+     *
+     * <p>This function can be called for logical multi-camera devices, which are devices that have
+     * REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA capability.</p>
+     *
+     * <p>If one or more streams from the underlying physical cameras were requested by the
+     * corresponding capture request, this function returns the total result metadata for those
+     * physical cameras. Otherwise, an empty map is returned.</p>
+     *
+     * <p>This function replaces the deprecated {@link #getPhysicalCameraResults}, and its return
+     * value is a map of TotalCaptureResult rather than CaptureResult. </p>
+     *
+     * <p>To reprocess an image from a physical camera stream, typically returned from a
+     * {@link MultiResolutionImageReader}, the application must look up this map to get the {@link
+     * TotalCaptureResult} from the physical camera and pass it to {@link
+     * CameraDevice#createReprocessCaptureRequest}.</p>
+     *
+     * @return unmodifiable map between physical camera ids and their total capture result metadata
+     */
+    @NonNull
+    public Map<String, TotalCaptureResult> getPhysicalCameraTotalResults() {
         return Collections.unmodifiableMap(mPhysicalCaptureResults);
     }
 }

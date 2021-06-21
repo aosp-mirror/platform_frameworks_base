@@ -16,29 +16,22 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
-import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
-
-import android.service.notification.NotificationStats;
-
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
-import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles notification inflating, rebinding, and inflation aborting.
  *
  * Currently a wrapper for NotificationRowBinderImpl.
  */
-@Singleton
+@SysUISingleton
 public class NotifInflaterImpl implements NotifInflater {
 
     private final IStatusBarService mStatusBarService;
@@ -81,7 +74,6 @@ public class NotifInflaterImpl implements NotifInflater {
         try {
             requireBinder().inflateViews(
                     entry,
-                    getDismissCallback(entry),
                     wrapInflationCallback(callback));
         } catch (InflationException e) {
             mNotifErrorManager.setInflationError(entry, e);
@@ -91,30 +83,6 @@ public class NotifInflaterImpl implements NotifInflater {
     @Override
     public void abortInflation(NotificationEntry entry) {
         entry.abortTask();
-    }
-
-    private Runnable getDismissCallback(NotificationEntry entry) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                int dismissalSurface = NotificationStats.DISMISSAL_SHADE;
-                /*
-                 * TODO: determine dismissal surface (ie: shade / headsup / aod)
-                 * see {@link NotificationLogger#logNotificationClear}
-                 */
-                mNotifCollection.dismissNotification(
-                        entry,
-                        new DismissedByUserStats(
-                                dismissalSurface,
-                                DISMISS_SENTIMENT_NEUTRAL,
-                                NotificationVisibility.obtain(entry.getKey(),
-                                        entry.getRanking().getRank(),
-                                        mNotifPipeline.getShadeListCount(),
-                                        true,
-                                        NotificationLogger.getNotificationLocation(entry))
-                        ));
-            }
-        };
     }
 
     private NotificationContentInflater.InflationCallback wrapInflationCallback(

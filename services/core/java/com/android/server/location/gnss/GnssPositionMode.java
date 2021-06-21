@@ -22,31 +22,31 @@ import java.util.Arrays;
  * Represents a GNSS position mode.
  */
 public class GnssPositionMode {
-    private final int mode;
-    private final int recurrence;
-    private final int minInterval;
-    private final int preferredAccuracy;
-    private final int preferredTime;
-    private final boolean lowPowerMode;
+    private final int mMode;
+    private final int mRecurrence;
+    private final int mMinInterval;
+    private final int mPreferredAccuracy;
+    private final int mPreferredTime;
+    private final boolean mLowPowerMode;
 
     public GnssPositionMode(int mode, int recurrence, int minInterval,
             int preferredAccuracy, int preferredTime, boolean lowPowerMode) {
-        this.mode = mode;
-        this.recurrence = recurrence;
-        this.minInterval = minInterval;
-        this.preferredAccuracy = preferredAccuracy;
-        this.preferredTime = preferredTime;
-        this.lowPowerMode = lowPowerMode;
+        this.mMode = mode;
+        this.mRecurrence = recurrence;
+        this.mMinInterval = minInterval;
+        this.mPreferredAccuracy = preferredAccuracy;
+        this.mPreferredTime = preferredTime;
+        this.mLowPowerMode = lowPowerMode;
     }
 
     @Override
     public boolean equals(Object other) {
         if (other instanceof GnssPositionMode) {
             GnssPositionMode that = (GnssPositionMode) other;
-            return mode == that.mode && recurrence == that.recurrence
-                    && minInterval == that.minInterval
-                    && preferredAccuracy == that.preferredAccuracy
-                    && preferredTime == that.preferredTime && lowPowerMode == that.lowPowerMode
+            return mMode == that.mMode && mRecurrence == that.mRecurrence
+                    && mMinInterval == that.mMinInterval
+                    && mPreferredAccuracy == that.mPreferredAccuracy
+                    && mPreferredTime == that.mPreferredTime && mLowPowerMode == that.mLowPowerMode
                     && this.getClass() == that.getClass();
         }
 
@@ -56,7 +56,7 @@ public class GnssPositionMode {
     @Override
     public int hashCode() {
         return Arrays.hashCode(
-                new Object[]{mode, recurrence, minInterval, preferredAccuracy, preferredTime,
-                        lowPowerMode, getClass()});
+                new Object[]{mMode, mRecurrence, mMinInterval, mPreferredAccuracy, mPreferredTime,
+                        mLowPowerMode, getClass()});
     }
 }

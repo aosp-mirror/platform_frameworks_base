@@ -20,6 +20,10 @@
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
+            "name": "CtsAppOps2TestCases"
+        },
+        {
+            "file_patterns": ["(/|^)AppOpsManager.java"],
             "name": "FrameworksServicesTests",
             "options": [
                 {
@@ -29,10 +33,10 @@
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
-            "name": "CtsStatsdHostTestCases",
+            "name": "CtsStatsdAtomHostTestCases",
             "options": [
                 {
-                    "include-filter": "android.cts.statsd.atom.UidAtomTests#testAppOps"
+                    "include-filter": "android.cts.statsdatom.appops.AppOpsTests#testAppOps"
                 }
             ]
         },
@@ -61,6 +65,102 @@
         {
             "name": "CtsInstantAppTests",
             "file_patterns": ["(/|^)InstantAppResolve[^/]*"]
+        },
+        {
+            "name": "CtsAutoFillServiceTestCases",
+            "options": [
+                {
+                    "include-filter": "android.autofillservice.cts.saveui.AutofillSaveDialogTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ],
+            "file_patterns": ["(/|^)Activity.java"]
+        },
+        {
+            "name": "CtsAutoFillServiceTestCases",
+            "options": [
+                {
+                    "include-filter": "android.autofillservice.cts.saveui.PreSimpleSaveActivityTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ],
+            "file_patterns": ["(/|^)Activity.java"]
+        },
+        {
+            "name": "CtsAutoFillServiceTestCases",
+            "options": [
+                {
+                    "include-filter": "android.autofillservice.cts.saveui.SimpleSaveActivityTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "android.platform.test.annotations.AppModeFull"
+                }
+            ],
+            "file_patterns": ["(/|^)Activity.java"]
+        },
+        {
+            "name": "CtsVoiceInteractionTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ],
+            "file_patterns": ["(/|^)VoiceInteract[^/]*"]
+        },
+        {
+            "name": "CtsContentTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "CtsOsTestCases",
+            "options": [
+                {
+                    "include-annotation": "android.platform.test.annotations.Presubmit"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.os.cts.StrictModeTest"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "FrameworksCoreTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.ContextTest"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
         }
     ],
     "postsubmit": [

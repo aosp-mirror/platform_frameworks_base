@@ -34,6 +34,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -501,6 +502,33 @@ public class BatterySaverStateMachine {
     }
 
     /**
+     * Change the full battery saver policy.
+     */
+    public BatterySaverPolicyConfig getFullBatterySaverPolicy() {
+        if (DEBUG) {
+            Slog.d(TAG, "getFullBatterySaverPolicy");
+        }
+
+        synchronized (mLock) {
+            return mBatterySaverController.getPolicyLocked(BatterySaverPolicy.POLICY_LEVEL_FULL);
+        }
+    }
+
+    /**
+     * Change the full battery saver policy.
+     */
+    public boolean setFullBatterySaverPolicy(BatterySaverPolicyConfig config) {
+        if (DEBUG) {
+            Slog.d(TAG, "setFullBatterySaverPolicy: config=" + config);
+        }
+
+        synchronized (mLock) {
+            return mBatterySaverController.setFullPolicyLocked(config,
+                    BatterySaverController.REASON_FULL_POWER_SAVINGS_CHANGED);
+        }
+    }
+
+    /**
      * Enable or disable the current adaptive battery saver policy. This may not change what's in
      * effect if full battery saver is also enabled.
      */
@@ -888,70 +916,75 @@ public class BatterySaverStateMachine {
     }
 
     public void dump(PrintWriter pw) {
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+
+        ipw.println();
+        ipw.println("Battery saver state machine:");
+        ipw.increaseIndent();
         synchronized (mLock) {
-            pw.println();
-            pw.println("Battery saver state machine:");
-
-            pw.print("  Enabled=");
-            pw.println(mBatterySaverController.isEnabled());
-            pw.print("    full=");
-            pw.println(mBatterySaverController.isFullEnabled());
-            pw.print("    adaptive=");
-            pw.print(mBatterySaverController.isAdaptiveEnabled());
+            ipw.print("Enabled=");
+            ipw.println(mBatterySaverController.isEnabled());
+            ipw.increaseIndent();
+            ipw.print("full=");
+            ipw.println(mBatterySaverController.isFullEnabled());
+            ipw.print("adaptive=");
+            ipw.print(mBatterySaverController.isAdaptiveEnabled());
             if (mBatterySaverController.isAdaptiveEnabled()) {
-                pw.print(" (advertise=");
-                pw.print(
+                ipw.print(" (advertise=");
+                ipw.print(
                         mBatterySaverController.getBatterySaverPolicy().shouldAdvertiseIsEnabled());
-                pw.print(")");
+                ipw.print(")");
             }
-            pw.println();
-            pw.print("  mState=");
-            pw.println(mState);
+            ipw.decreaseIndent();
+            ipw.println();
+            ipw.print("mState=");
+            ipw.println(mState);
 
-            pw.print("  mLastChangedIntReason=");
-            pw.println(mLastChangedIntReason);
-            pw.print("  mLastChangedStrReason=");
-            pw.println(mLastChangedStrReason);
+            ipw.print("mLastChangedIntReason=");
+            ipw.println(mLastChangedIntReason);
+            ipw.print("mLastChangedStrReason=");
+            ipw.println(mLastChangedStrReason);
 
-            pw.print("  mBootCompleted=");
-            pw.println(mBootCompleted);
-            pw.print("  mSettingsLoaded=");
-            pw.println(mSettingsLoaded);
-            pw.print("  mBatteryStatusSet=");
-            pw.println(mBatteryStatusSet);
+            ipw.print("mBootCompleted=");
+            ipw.println(mBootCompleted);
+            ipw.print("mSettingsLoaded=");
+            ipw.println(mSettingsLoaded);
+            ipw.print("mBatteryStatusSet=");
+            ipw.println(mBatteryStatusSet);
 
-            pw.print("  mIsPowered=");
-            pw.println(mIsPowered);
-            pw.print("  mBatteryLevel=");
-            pw.println(mBatteryLevel);
-            pw.print("  mIsBatteryLevelLow=");
-            pw.println(mIsBatteryLevelLow);
+            ipw.print("mIsPowered=");
+            ipw.println(mIsPowered);
+            ipw.print("mBatteryLevel=");
+            ipw.println(mBatteryLevel);
+            ipw.print("mIsBatteryLevelLow=");
+            ipw.println(mIsBatteryLevelLow);
 
-            pw.print("  mSettingAutomaticBatterySaver=");
-            pw.println(mSettingAutomaticBatterySaver);
-            pw.print("  mSettingBatterySaverEnabled=");
-            pw.println(mSettingBatterySaverEnabled);
-            pw.print("  mSettingBatterySaverEnabledSticky=");
-            pw.println(mSettingBatterySaverEnabledSticky);
-            pw.print("  mSettingBatterySaverStickyAutoDisableEnabled=");
-            pw.println(mSettingBatterySaverStickyAutoDisableEnabled);
-            pw.print("  mSettingBatterySaverStickyAutoDisableThreshold=");
-            pw.println(mSettingBatterySaverStickyAutoDisableThreshold);
-            pw.print("  mSettingBatterySaverTriggerThreshold=");
-            pw.println(mSettingBatterySaverTriggerThreshold);
-            pw.print("  mBatterySaverStickyBehaviourDisabled=");
-            pw.println(mBatterySaverStickyBehaviourDisabled);
+            ipw.print("mSettingAutomaticBatterySaver=");
+            ipw.println(mSettingAutomaticBatterySaver);
+            ipw.print("mSettingBatterySaverEnabled=");
+            ipw.println(mSettingBatterySaverEnabled);
+            ipw.print("mSettingBatterySaverEnabledSticky=");
+            ipw.println(mSettingBatterySaverEnabledSticky);
+            ipw.print("mSettingBatterySaverStickyAutoDisableEnabled=");
+            ipw.println(mSettingBatterySaverStickyAutoDisableEnabled);
+            ipw.print("mSettingBatterySaverStickyAutoDisableThreshold=");
+            ipw.println(mSettingBatterySaverStickyAutoDisableThreshold);
+            ipw.print("mSettingBatterySaverTriggerThreshold=");
+            ipw.println(mSettingBatterySaverTriggerThreshold);
+            ipw.print("mBatterySaverStickyBehaviourDisabled=");
+            ipw.println(mBatterySaverStickyBehaviourDisabled);
 
-            pw.print("  mDynamicPowerSavingsDefaultDisableThreshold=");
-            pw.println(mDynamicPowerSavingsDefaultDisableThreshold);
-            pw.print("  mDynamicPowerSavingsDisableThreshold=");
-            pw.println(mDynamicPowerSavingsDisableThreshold);
-            pw.print("  mDynamicPowerSavingsEnableBatterySaver=");
-            pw.println(mDynamicPowerSavingsEnableBatterySaver);
+            ipw.print("mDynamicPowerSavingsDefaultDisableThreshold=");
+            ipw.println(mDynamicPowerSavingsDefaultDisableThreshold);
+            ipw.print("mDynamicPowerSavingsDisableThreshold=");
+            ipw.println(mDynamicPowerSavingsDisableThreshold);
+            ipw.print("mDynamicPowerSavingsEnableBatterySaver=");
+            ipw.println(mDynamicPowerSavingsEnableBatterySaver);
 
-            pw.print("  mLastAdaptiveBatterySaverChangedExternallyElapsed=");
-            pw.println(mLastAdaptiveBatterySaverChangedExternallyElapsed);
+            ipw.print("mLastAdaptiveBatterySaverChangedExternallyElapsed=");
+            ipw.println(mLastAdaptiveBatterySaverChangedExternallyElapsed);
         }
+        ipw.decreaseIndent();
     }
 
     public void dumpProto(ProtoOutputStream proto, long tag) {

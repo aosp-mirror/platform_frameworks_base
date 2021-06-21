@@ -18,8 +18,10 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * The AudioDevicePort is a specialized type of AudioPort
@@ -41,7 +43,7 @@ public class AudioDevicePort extends AudioPort {
     private final int[] mEncapsulationModes;
     private final int[] mEncapsulationMetadataTypes;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     AudioDevicePort(AudioHandle handle, String deviceName,
             int[] samplingRates, int[] channelMasks, int[] channelIndexMasks,
             int[] formats, AudioGain[] gains, int type, String address, int[] encapsulationModes,
@@ -50,6 +52,19 @@ public class AudioDevicePort extends AudioPort {
              (AudioManager.isInputDevice(type) == true)  ?
                         AudioPort.ROLE_SOURCE : AudioPort.ROLE_SINK,
              deviceName, samplingRates, channelMasks, channelIndexMasks, formats, gains);
+        mType = type;
+        mAddress = address;
+        mEncapsulationModes = encapsulationModes;
+        mEncapsulationMetadataTypes = encapsulationMetadataTypes;
+    }
+
+    AudioDevicePort(AudioHandle handle, String deviceName, List<AudioProfile> profiles,
+            AudioGain[] gains, int type, String address, int[] encapsulationModes,
+            @AudioTrack.EncapsulationMetadataType int[] encapsulationMetadataTypes,
+            List<AudioDescriptor> descriptors) {
+        super(handle,
+                AudioManager.isInputDevice(type) ? AudioPort.ROLE_SOURCE : AudioPort.ROLE_SINK,
+                deviceName, profiles, gains, descriptors);
         mType = type;
         mAddress = address;
         mEncapsulationModes = encapsulationModes;
@@ -70,7 +85,9 @@ public class AudioDevicePort extends AudioPort {
      * {@link AudioManager#DEVICE_IN_USB_DEVICE}) use an address composed of the ALSA card number
      * and device number: "card=2;device=1"
      * - Bluetooth devices ({@link AudioManager#DEVICE_OUT_BLUETOOTH_SCO},
-     * {@link AudioManager#DEVICE_OUT_BLUETOOTH_SCO}, {@link AudioManager#DEVICE_OUT_BLUETOOTH_A2DP})
+     * {@link AudioManager#DEVICE_OUT_BLUETOOTH_SCO},
+     * {@link AudioManager#DEVICE_OUT_BLUETOOTH_A2DP}),
+     * {@link AudioManager#DEVICE_OUT_BLE_HEADSET}, {@link AudioManager#DEVICE_OUT_BLE_SPEAKER})
      * use the MAC address of the bluetooth device in the form "00:11:22:AA:BB:CC" as reported by
      * {@link BluetoothDevice#getAddress()}.
      * - Deivces that do not have an address will indicate an empty string "".

@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 /**
  * Helper class for passing more arguments though a message
@@ -42,11 +43,11 @@ public final class SomeArgs {
     static final int WAIT_FINISHED = 2;
     int mWaitState = WAIT_NONE;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Object arg1;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Object arg2;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Object arg3;
     public Object arg4;
     public Object arg5;
@@ -55,9 +56,9 @@ public final class SomeArgs {
     public Object arg8;
     public Object arg9;
     public int argi1;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int argi2;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int argi3;
     public int argi4;
     public int argi5;
@@ -67,7 +68,7 @@ public final class SomeArgs {
         /* do nothing - reduce visibility */
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static SomeArgs obtain() {
         synchronized (sPoolLock) {
             if (sPoolSize > 0) {
@@ -93,7 +94,7 @@ public final class SomeArgs {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void recycle() {
         if (mInPool) {
             throw new IllegalStateException("Already recycled.");

@@ -1,0 +1,81 @@
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.os;
+
+option java_multiple_files = true;
+
+import "frameworks/proto_logging/stats/enums/os/enums.proto";
+
+// This message is used for statsd logging and should be kept in sync with
+// frameworks/proto_logging/stats/atoms.proto
+/**
+ * Represents a device's BatteryUsageStats, with power usage information about the device
+ * and each app.
+ */
+message BatteryUsageStatsAtomsProto {
+
+    // The session start timestamp in UTC milliseconds since January 1, 1970, per Date#getTime().
+    // All data is no older than this time.
+    optional int64 session_start_millis = 1;
+
+    // The session end timestamp in UTC milliseconds since January 1, 1970, per Date#getTime().
+    // All data is no more recent than this time.
+    optional int64 session_end_millis = 2;
+
+    // Length that the reported data covered. This usually will be equal to the entire session,
+    // session_end_millis - session_start_millis, but may not be if some data during this time frame
+    // is missing.
+    optional int64 session_duration_millis = 3;
+
+    // Represents usage of a consumer, storing all of its power component usage.
+    message BatteryConsumerData {
+        // Total power consumed by this BatteryConsumer (including all of its PowerComponents).
+        // May not equal the sum of the PowerComponentUsage due to under- or over-estimations.
+        // Multiply by 1/36 to obtain mAh.
+        optional int64 total_consumed_power_deci_coulombs = 1;
+
+        // Represents power and time usage of a particular power component.
+        message PowerComponentUsage {
+            // Holds android.os.PowerComponentEnum, or custom component value between 1000 and 9999.
+            // Evidently, if one attempts to write an int to an enum field that is out of range, it
+            // is treated as 0, so we must make this an int32.
+            optional int32 component = 1;
+
+            // Power consumed by this component. Multiply by 1/36 to obtain mAh.
+            optional int64 power_deci_coulombs = 2;
+
+            optional int64 duration_millis = 3;
+        }
+        repeated PowerComponentUsage power_components = 2;
+    }
+
+    // Total power usage for the device during this session.
+    optional BatteryConsumerData device_battery_consumer = 4;
+
+    // Power usage by a uid during this session.
+    message UidBatteryConsumer {
+        optional int32 uid = 1;
+        optional BatteryConsumerData battery_consumer_data = 2;
+        optional int64 time_in_foreground_millis = 3;
+        optional int64 time_in_background_millis = 4;
+    }
+    repeated UidBatteryConsumer uid_battery_consumers = 5;
+
+    // Sum of all discharge percentage point drops during the reported session.
+    optional int32 session_discharge_percentage = 6;
+}

@@ -1,12 +1,26 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 android_test {
     name: "FrameworkPermissionTests",
     // Include all test java files.
     srcs: ["src/**/*.java"],
     libs: [
         "android.test.runner",
-        "telephony-common",
         "android.test.base",
+        "telephony-common",
     ],
-    static_libs: ["junit"],
+    static_libs: [
+        "androidx.test.runner",
+        "junit",
+        "platform-test-annotations",
+    ],
     platform_apis: true,
+    test_suites: ["device-tests"],
 }

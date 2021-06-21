@@ -160,7 +160,7 @@ public class StatusBarTest extends TestActivity
                     StatusBarTest.this,
                     0,
                     fullScreenIntent,
-                    PendingIntent.FLAG_CANCEL_CURRENT);
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
                 Notification not = new Notification.Builder(StatusBarTest.this)
                         .setSmallIcon(R.drawable.stat_sys_phone)
                         .setWhen(System.currentTimeMillis() - (1000 * 60 * 60 * 24))

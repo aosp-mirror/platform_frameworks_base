@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
@@ -72,6 +73,8 @@ public final class UsageStatsQueryHelperTest {
 
     @Mock
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
+    @Mock
+    private UsageStatsQueryHelper.EventListener mEventListener;
 
     private TestPackageData mPackageData;
     private UsageStatsQueryHelper mHelper;
@@ -93,7 +96,7 @@ public final class UsageStatsQueryHelperTest {
                 .setLocusId(LOCUS_ID_1)
                 .build();
 
-        mHelper = new UsageStatsQueryHelper(USER_ID_PRIMARY, pkg -> mPackageData);
+        mHelper = new UsageStatsQueryHelper(USER_ID_PRIMARY, pkg -> mPackageData, mEventListener);
     }
 
     @After
@@ -131,6 +134,8 @@ public final class UsageStatsQueryHelperTest {
                 Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
         assertEquals(1, events.size());
         assertEquals(createInAppConversationEvent(100_000L, 10), events.get(0));
+        verify(mEventListener).onEvent(
+                mPackageData, mPackageData.mConversationStore.mConversationInfo, events.get(0));
     }
 
     @Test
@@ -145,6 +150,8 @@ public final class UsageStatsQueryHelperTest {
                 Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
         assertEquals(1, events.size());
         assertEquals(createInAppConversationEvent(100_000L, 10), events.get(0));
+        verify(mEventListener).onEvent(
+                mPackageData, mPackageData.mConversationStore.mConversationInfo, events.get(0));
     }
 
     @Test
@@ -159,6 +166,8 @@ public final class UsageStatsQueryHelperTest {
                 Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
         assertEquals(1, events.size());
         assertEquals(createInAppConversationEvent(100_000L, 10), events.get(0));
+        verify(mEventListener).onEvent(
+                mPackageData, mPackageData.mConversationStore.mConversationInfo, events.get(0));
     }
 
     @Test

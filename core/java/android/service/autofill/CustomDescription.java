@@ -180,7 +180,7 @@ public final class CustomDescription implements Parcelable {
         public Builder addChild(int id, @NonNull Transformation transformation) {
             throwIfDestroyed();
             Preconditions.checkArgument((transformation instanceof InternalTransformation),
-                    "not provided by Android System: " + transformation);
+                    "not provided by Android System: %s", transformation);
             if (mTransformations == null) {
                 mTransformations = new ArrayList<>();
             }
@@ -275,7 +275,7 @@ public final class CustomDescription implements Parcelable {
         public Builder batchUpdate(@NonNull Validator condition, @NonNull BatchUpdates updates) {
             throwIfDestroyed();
             Preconditions.checkArgument((condition instanceof InternalValidator),
-                    "not provided by Android System: " + condition);
+                    "not provided by Android System: %s", condition);
             Preconditions.checkNotNull(updates);
             if (mUpdates == null) {
                 mUpdates = new ArrayList<>();
@@ -329,7 +329,7 @@ public final class CustomDescription implements Parcelable {
         public Builder addOnClickAction(int id, @NonNull OnClickAction action) {
             throwIfDestroyed();
             Preconditions.checkArgument((action instanceof InternalOnClickAction),
-                    "not provided by Android System: " + action);
+                    "not provided by Android System: %s", action);
             if (mActions == null) {
                 mActions = new SparseArray<InternalOnClickAction>();
             }

@@ -22,7 +22,22 @@ package android.os;
  *
  * Example of showing a 30 second countdown in a text field:
  *
- * <pre class="prettyprint">
+ * <div>
+ * <div class="ds-selector-tabs"><section><h3 id="kotlin">Kotlin</h3>
+ * <pre class="prettyprint lang-kotlin">
+ * object : CountDownTimer(30000, 1000) {
+ *
+ *     override fun onTick(millisUntilFinished: Long) {
+ *         mTextField.setText("seconds remaining: " + millisUntilFinished / 1000)
+ *     }
+ *
+ *     override fun onFinish() {
+ *         mTextField.setText("done!")
+ *     }
+ * }.start()
+ * </pre>
+ * </section><section><h3 id="java">Java</h3>
+ * <pre class="prettyprint lang-java">
  * new CountDownTimer(30000, 1000) {
  *
  *     public void onTick(long millisUntilFinished) {
@@ -32,8 +47,8 @@ package android.os;
  *     public void onFinish() {
  *         mTextField.setText("done!");
  *     }
- *  }.start();
- * </pre>
+ * }.start();
+ * </pre></section></div></div>
  *
  * The calls to {@link #onTick(long)} are synchronized to this object so that
  * one call to {@link #onTick(long)} won't ever occur before the previous

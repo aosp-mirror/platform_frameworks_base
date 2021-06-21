@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.annotation.Nullable;
+
 import java.util.Objects;
 
 /**
@@ -47,7 +49,7 @@ public class Pair<F, S> {
      *         equal
      */
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof Pair)) {
             return false;
         }

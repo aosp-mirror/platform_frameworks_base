@@ -1,21 +1,72 @@
 # Haptics
+per-file CombinedVibrationEffect.aidl = michaelwr@google.com
+per-file CombinedVibrationEffect.java = michaelwr@google.com
 per-file ExternalVibration.aidl = michaelwr@google.com
 per-file ExternalVibration.java = michaelwr@google.com
 per-file IExternalVibrationController.aidl = michaelwr@google.com
 per-file IExternalVibratorService.aidl = michaelwr@google.com
-per-file IVibratorService.aidl = michaelwr@google.com
+per-file IVibratorManagerService.aidl = michaelwr@google.com
 per-file NullVibrator.java = michaelwr@google.com
 per-file SystemVibrator.java = michaelwr@google.com
+per-file SystemVibratorManager.java = michaelwr@google.com
 per-file VibrationEffect.aidl = michaelwr@google.com
 per-file VibrationEffect.java = michaelwr@google.com
 per-file Vibrator.java = michaelwr@google.com
+per-file VibratorManager.java = michaelwr@google.com
 
 # PowerManager
 per-file IPowerManager.aidl = michaelwr@google.com, santoscordon@google.com
 per-file PowerManager.java = michaelwr@google.com, santoscordon@google.com
 per-file PowerManagerInternal.java = michaelwr@google.com, santoscordon@google.com
 
-# Zygote
-per-file ZygoteProcess.java = chriswailes@google.com, ngeoffray@google.com, sehr@google.com, narayan@google.com, maco@google.com
+# BatteryStats
+per-file *BatteryConsumer* = file:/BATTERY_STATS_OWNERS
+per-file BatteryManager* = file:/BATTERY_STATS_OWNERS
+per-file BatteryStats* = file:/BATTERY_STATS_OWNERS
+per-file BatteryUsageStats* = file:/BATTERY_STATS_OWNERS
+per-file PowerComponents.java = file:/BATTERY_STATS_OWNERS
 
-per-file GraphicsEnvironment.java = chrisforbes@google.com, cnorthrop@google.com, lpy@google.com, timvp@google.com, zzyiwei@google.com
+# Multiuser
+per-file IUser* = file:/MULTIUSER_OWNERS
+per-file User* = file:/MULTIUSER_OWNERS
+
+# Binder
+per-file BadParcelableException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file Binder.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file BinderProxy.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file DeadObjectException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file IBinder.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file Parcel.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ParcelFileDescriptor.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ParcelFormatException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file Parcelable.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ParcelableException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ParcelableHolder.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ParcelableParcel.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file RemoteException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ServiceManager.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ServiceManagerNative.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ServiceSpecificException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file TransactionTooLargeException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+
+# HwBinder
+per-file HwBinder.java = file:platform/system/libhwbinder:/OWNERS
+per-file HwBlob.java = file:platform/system/libhwbinder:/OWNERS
+per-file HwParcel.java = file:platform/system/libhwbinder:/OWNERS
+per-file HwParcel.java = file:platform/system/libhwbinder:/OWNERS
+per-file HwRemoteBinder.java = file:platform/system/libhwbinder:/OWNERS
+per-file IHwBinder.java = file:platform/system/libhwbinder:/OWNERS
+per-file IHwInterface.java = file:platform/system/libhwbinder:/OWNERS
+
+per-file GraphicsEnvironment.java = file:platform/frameworks/native:/opengl/OWNERS
+
+per-file *Network* = file:/services/core/java/com/android/server/net/OWNERS
+per-file *Power* = file:/services/core/java/com/android/server/power/OWNERS
+per-file *Telephony* = file:/telephony/OWNERS
+per-file *Zygote* = file:/ZYGOTE_OWNERS
+
+# RecoverySystem
+per-file *Recovery* = file:/services/core/java/com/android/server/recoverysystem/OWNERS
+
+# Bugreporting
+per-file Bugreport* = file:/platform/frameworks/native:/cmds/dumpstate/OWNERS

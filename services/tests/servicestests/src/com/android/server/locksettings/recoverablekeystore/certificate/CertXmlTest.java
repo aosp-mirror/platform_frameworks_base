@@ -70,7 +70,7 @@ public final class CertXmlTest {
         CertXml certXml = CertXml.parse(certXmlBytes);
         List<X509Certificate> endpointCerts = certXml.getAllEndpointCerts();
         assertThat(endpointCerts).hasSize(3);
-        assertThat(endpointCerts).containsAllOf(TestData.LEAF_CERT_1, TestData.LEAF_CERT_2);
+        assertThat(endpointCerts).containsAtLeast(TestData.LEAF_CERT_1, TestData.LEAF_CERT_2);
     }
 
     @Test

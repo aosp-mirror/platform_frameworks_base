@@ -20,7 +20,8 @@
     <application>
         <uses-library android:name="android.test.runner" />
         <activity android:name="android.test.StubTestBrowserActivity"
-            android:label="Stubbed Test Browser">
+            android:label="Stubbed Test Browser"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.FOR_TESTS_ONLY"/>
@@ -28,7 +29,8 @@
         </activity>
 
         <activity android:name="android.test.TestBrowserTests"
-            android:label="Test Browser Tests">
+            android:label="Test Browser Tests"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.UNIT_TEST"/>

@@ -65,7 +65,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
-            style="?android:attr/progressBarStyleHorizontal" />
+            style="?android:attr/progressBarStyleHorizontal"
+            android:indeterminate="true" />
 
     </LinearLayout>
 
@@ -83,14 +84,6 @@
         android:layout_height="wrap_content"
         style="@android:style/TextAppearance.Material.Subhead"
         android:text="@string/install_confirm_question_update"
-        android:visibility="invisible" />
-
-    <TextView
-        android:id="@+id/install_confirm_question_update_system"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_confirm_question_update_system"
         android:visibility="invisible" />
 
     <TextView

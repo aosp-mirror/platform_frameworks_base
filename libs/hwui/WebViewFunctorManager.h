@@ -19,11 +19,11 @@
 #include <private/hwui/WebViewFunctor.h>
 #ifdef __ANDROID__ // Layoutlib does not support render thread
 #include <renderthread/RenderProxy.h>
-#else
-#include <utils/Log.h>
 #endif
 
 #include <utils/LightRefBase.h>
+#include <utils/Log.h>
+#include <utils/StrongPointer.h>
 #include <mutex>
 #include <vector>
 
@@ -56,6 +56,8 @@ public:
 
         void postDrawVk() { mReference.postDrawVk(); }
 
+        void removeOverlays() { mReference.removeOverlays(); }
+
     private:
         friend class WebViewFunctor;
 
@@ -71,6 +73,10 @@ public:
     void drawVk(const VkFunctorDrawParams& params);
     void postDrawVk();
     void destroyContext();
+    void removeOverlays();
+
+    ASurfaceControl* getSurfaceControl();
+    void mergeTransaction(ASurfaceTransaction* transaction);
 
     sp<Handle> createHandle() {
         LOG_ALWAYS_FATAL_IF(mCreatedHandle);
@@ -85,6 +91,7 @@ private:
     RenderMode mMode;
     bool mHasContext = false;
     bool mCreatedHandle = false;
+    ASurfaceControl* mSurfaceControl = nullptr;
 };
 
 class WebViewFunctorManager {

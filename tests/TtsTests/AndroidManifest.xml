@@ -15,29 +15,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.android.speech.tts">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     package="com.android.speech.tts">
     <application>
-        <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.test.runner"/>
 
 
         <service android:name=".MockableTextToSpeechService"
-                 android:label="Mockable Text-to-speech Service">
+             android:label="Mockable Text-to-speech Service"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.TTS_SERVICE" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.TTS_SERVICE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </service>
 
         <activity android:name=".MockableCheckVoiceData"
-                  android:theme="@android:style/Theme.NoDisplay">
+             android:theme="@android:style/Theme.NoDisplay"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.speech.tts.engine.CHECK_TTS_DATA" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.speech.tts.engine.CHECK_TTS_DATA"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
     </application>
 
     <instrumentation android:name="android.test.InstrumentationTestRunner"
-                     android:targetPackage="com.android.speech.tts"
-                     android:label="Tests for android.speech.tts" />
+         android:targetPackage="com.android.speech.tts"
+         android:label="Tests for android.speech.tts"/>
 </manifest>

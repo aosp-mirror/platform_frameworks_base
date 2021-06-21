@@ -16,6 +16,8 @@
 
 package com.android.statementservice.retriever;
 
+import com.android.statementservice.utils.StatementUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,15 +33,15 @@ import org.json.JSONObject;
             JSONException {
         JSONObject queryObject = new JSONObject(query);
 
-        String namespace = queryObject.optString(Utils.NAMESPACE_FIELD, null);
+        String namespace = queryObject.optString(StatementUtils.NAMESPACE_FIELD, null);
         if (namespace == null) {
             throw new AssociationServiceException(String.format(
-                    FIELD_NOT_STRING_FORMAT_STRING, Utils.NAMESPACE_FIELD));
+                    FIELD_NOT_STRING_FORMAT_STRING, StatementUtils.NAMESPACE_FIELD));
         }
 
-        if (namespace.equals(Utils.NAMESPACE_WEB)) {
+        if (namespace.equals(StatementUtils.NAMESPACE_WEB)) {
             return new WebAssetMatcher(WebAsset.create(queryObject));
-        } else if (namespace.equals(Utils.NAMESPACE_ANDROID_APP)) {
+        } else if (namespace.equals(StatementUtils.NAMESPACE_ANDROID_APP)) {
             return new AndroidAppAssetMatcher(AndroidAppAsset.create(queryObject));
         } else {
             throw new AssociationServiceException(

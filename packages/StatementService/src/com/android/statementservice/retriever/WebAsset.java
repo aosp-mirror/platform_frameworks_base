@@ -16,6 +16,8 @@
 
 package com.android.statementservice.retriever;
 
+import com.android.statementservice.utils.StatementUtils;
+
 import org.json.JSONObject;
 
 import java.net.MalformedURLException;
@@ -36,7 +38,7 @@ import java.util.Locale;
  * <p>The only protocol supported now are https and http. If the optional port is not specified,
  * the default for each protocol will be used (i.e. 80 for http and 443 for https).
  */
-/* package private */ final class WebAsset extends AbstractAsset {
+public final class WebAsset extends AbstractAsset {
 
     private static final String MISSING_FIELD_FORMAT_STRING = "Expected %s to be set.";
     private static final String SCHEME_HTTP = "http";
@@ -73,8 +75,8 @@ import java.util.Locale;
     public String toJson() {
         AssetJsonWriter writer = new AssetJsonWriter();
 
-        writer.writeFieldLower(Utils.NAMESPACE_FIELD, Utils.NAMESPACE_WEB);
-        writer.writeFieldLower(Utils.WEB_ASSET_FIELD_SITE, mUrl.toExternalForm());
+        writer.writeFieldLower(StatementUtils.NAMESPACE_FIELD, StatementUtils.NAMESPACE_WEB);
+        writer.writeFieldLower(StatementUtils.WEB_ASSET_FIELD_SITE, mUrl.toExternalForm());
 
         return writer.closeAndGetString();
     }
@@ -119,14 +121,14 @@ import java.util.Locale;
      */
     protected static WebAsset create(JSONObject asset)
             throws AssociationServiceException {
-        if (asset.optString(Utils.WEB_ASSET_FIELD_SITE).equals("")) {
+        if (asset.optString(StatementUtils.WEB_ASSET_FIELD_SITE).equals("")) {
             throw new AssociationServiceException(String.format(MISSING_FIELD_FORMAT_STRING,
-                    Utils.WEB_ASSET_FIELD_SITE));
+                    StatementUtils.WEB_ASSET_FIELD_SITE));
         }
 
         URL url;
         try {
-            url = new URL(asset.optString(Utils.WEB_ASSET_FIELD_SITE));
+            url = new URL(asset.optString(StatementUtils.WEB_ASSET_FIELD_SITE));
         } catch (MalformedURLException e) {
             throw new AssociationServiceException("Url is not well formatted.", e);
         }

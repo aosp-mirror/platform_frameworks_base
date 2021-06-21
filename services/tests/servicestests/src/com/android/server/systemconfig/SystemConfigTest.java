@@ -184,7 +184,7 @@ public class SystemConfigTest {
 
     /**
      * Tests that readPermissions works correctly with {@link SystemConfig#ALLOW_APP_CONFIGS}
-     * permission flag for the tag: whitelisted-staged-installer.
+     * permission flag for the tag: allowlisted-staged-installer.
      */
     @Test
     public void readPermissions_allowAppConfigs_parsesStagedInstallerWhitelist()
@@ -204,7 +204,7 @@ public class SystemConfigTest {
 
     /**
      * Tests that readPermissions works correctly without {@link SystemConfig#ALLOW_APP_CONFIGS}
-     * permission flag for the tag: whitelisted-staged-installer.
+     * permission flag for the tag: allowlisted-staged-installer.
      */
     @Test
     public void readPermissions_notAllowAppConfigs_wontParseStagedInstallerWhitelist()

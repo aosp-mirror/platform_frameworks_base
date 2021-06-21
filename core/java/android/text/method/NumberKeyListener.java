@@ -29,8 +29,6 @@ import android.text.format.DateFormat;
 import android.view.KeyEvent;
 import android.view.View;
 
-import libcore.icu.LocaleData;
-
 import java.util.Collection;
 import java.util.Locale;
 
@@ -228,7 +226,7 @@ public abstract class NumberKeyListener extends BaseKeyListener
         if (locale == null) {
             return false;
         }
-        final String[] amPm = LocaleData.get(locale).amPm;
+        final String[] amPm = DateFormat.getIcuDateFormatSymbols(locale).getAmPmStrings();
         for (int i = 0; i < amPm.length; i++) {
             for (int j = 0; j < amPm[i].length(); j++) {
                 final char ch = amPm[i].charAt(j);

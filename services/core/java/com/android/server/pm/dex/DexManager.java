@@ -27,8 +27,11 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
+import android.os.BatteryManager;
 import android.os.FileUtils;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -83,6 +86,11 @@ public class DexManager {
     // However it can load verification data - thus we pick the "verify" compiler filter.
     private static final String SYSTEM_SERVER_COMPILER_FILTER = "verify";
 
+    // The suffix we add to the package name when the loading happens in an isolated process.
+    // Note that the double dot creates and "invalid" package name which makes it clear that this
+    // is an artificially constructed name.
+    private static final String ISOLATED_PROCESS_PACKAGE_SUFFIX = "..isolated";
+
     private final Context mContext;
 
     // Maps package name to code locations.
@@ -107,6 +115,13 @@ public class DexManager {
     @GuardedBy("mInstallLock")
     private final Installer mInstaller;
 
+    private BatteryManager mBatteryManager = null;
+    private PowerManager mPowerManager = null;
+
+    // An integer percentage value used to determine when the device is considered to be on low
+    // power for compilation purposes.
+    private final int mCriticalBatteryLevel;
+
     // Possible outcomes of a dex search.
     private static int DEX_SEARCH_NOT_FOUND = 0;  // dex file not found
     private static int DEX_SEARCH_FOUND_PRIMARY = 1;  // dex file is the primary/base apk
@@ -123,6 +138,23 @@ public class DexManager {
         mInstaller = installer;
         mInstallLock = installLock;
         mDynamicCodeLogger = new DynamicCodeLogger(pms, installer);
+
+        // This is currently checked to handle tests that pass in a null context.
+        // TODO(b/174783329): Modify the tests to pass in a mocked Context, PowerManager,
+        //      and BatteryManager.
+        if (mContext != null) {
+            mPowerManager = mContext.getSystemService(PowerManager.class);
+
+            if (mPowerManager == null) {
+                Slog.wtf(TAG, "Power Manager is unavailable at time of Dex Manager start");
+            }
+
+            mCriticalBatteryLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_criticalBatteryWarningLevel);
+        } else {
+            // This value will never be used as the Battery Manager null check will fail first.
+            mCriticalBatteryLevel = 0;
+        }
     }
 
     public DynamicCodeLogger getDynamicCodeLogger() {
@@ -139,12 +171,14 @@ public class DexManager {
      *     the class loader context that was used to load them.
      * @param loaderIsa the ISA of the app loading the dex files
      * @param loaderUserId the user id which runs the code loading the dex files
+     * @param loaderIsIsolatedProcess whether or not the loading process is isolated.
      */
     public void notifyDexLoad(ApplicationInfo loadingAppInfo,
-            Map<String, String> classLoaderContextMap, String loaderIsa, int loaderUserId) {
+            Map<String, String> classLoaderContextMap, String loaderIsa, int loaderUserId,
+            boolean loaderIsIsolatedProcess) {
         try {
             notifyDexLoadInternal(loadingAppInfo, classLoaderContextMap, loaderIsa,
-                    loaderUserId);
+                    loaderUserId, loaderIsIsolatedProcess);
         } catch (Exception e) {
             Slog.w(TAG, "Exception while notifying dex load for package " +
                     loadingAppInfo.packageName, e);
@@ -154,7 +188,7 @@ public class DexManager {
     @VisibleForTesting
     /*package*/ void notifyDexLoadInternal(ApplicationInfo loadingAppInfo,
             Map<String, String> classLoaderContextMap, String loaderIsa,
-            int loaderUserId) {
+            int loaderUserId, boolean loaderIsIsolatedProcess) {
         if (classLoaderContextMap == null) {
             return;
         }
@@ -168,27 +202,41 @@ public class DexManager {
             return;
         }
 
+        // If this load is coming from an isolated process we need to be able to prevent profile
+        // based optimizations. This is because isolated processes are sandboxed and can only read
+        // world readable files, so they need world readable optimization files. An
+        // example of such a package is webview.
+        //
+        // In order to prevent profile optimization we pretend that the load is coming from a
+        // different package, and so we assign a artificial name to the loading package making it
+        // clear that it comes from an isolated process. This blends well with the entire
+        // usedByOthers logic without needing to special handle isolated process in all dexopt
+        // layers.
+        String loadingPackageAmendedName = loadingAppInfo.packageName;
+        if (loaderIsIsolatedProcess) {
+            loadingPackageAmendedName += ISOLATED_PROCESS_PACKAGE_SUFFIX;
+        }
         for (Map.Entry<String, String> mapping : classLoaderContextMap.entrySet()) {
             String dexPath = mapping.getKey();
             // Find the owning package name.
             DexSearchResult searchResult = getDexPackage(loadingAppInfo, dexPath, loaderUserId);
 
             if (DEBUG) {
-                Slog.i(TAG, loadingAppInfo.packageName
-                    + " loads from " + searchResult + " : " + loaderUserId + " : " + dexPath);
+                Slog.i(TAG, loadingPackageAmendedName
+                        + " loads from " + searchResult + " : " + loaderUserId + " : " + dexPath);
             }
 
             if (searchResult.mOutcome != DEX_SEARCH_NOT_FOUND) {
                 // TODO(calin): extend isUsedByOtherApps check to detect the cases where
                 // different apps share the same runtime. In that case we should not mark the dex
                 // file as isUsedByOtherApps. Currently this is a safe approximation.
-                boolean isUsedByOtherApps = !loadingAppInfo.packageName.equals(
-                        searchResult.mOwningPackageName);
+                boolean isUsedByOtherApps =
+                        !loadingPackageAmendedName.equals(searchResult.mOwningPackageName);
                 boolean primaryOrSplit = searchResult.mOutcome == DEX_SEARCH_FOUND_PRIMARY ||
                         searchResult.mOutcome == DEX_SEARCH_FOUND_SPLIT;
 
                 if (primaryOrSplit && !isUsedByOtherApps
-                        && !PLATFORM_PACKAGE_NAME.equals(searchResult.mOwningPackageName)) {
+                        && !isPlatformPackage(searchResult.mOwningPackageName)) {
                     // If the dex file is the primary apk (or a split) and not isUsedByOtherApps
                     // do not record it. This case does not bring any new usable information
                     // and can be safely skipped.
@@ -205,15 +253,24 @@ public class DexManager {
                 }
 
                 String classLoaderContext = mapping.getValue();
+
+                // Overwrite the class loader context for system server (instead of merging it).
+                // We expect system server jars to only change contexts in between OTAs and to
+                // otherwise be stable.
+                // Instead of implementing a complex clear-context logic post OTA, it is much
+                // simpler to always override the context for system server. This way, the context
+                // will always be up to date and we will avoid merging which could lead to the
+                // the context being marked as variable and thus making dexopt non-optimal.
+                boolean overwriteCLC = isPlatformPackage(searchResult.mOwningPackageName);
+
                 if (classLoaderContext != null
                         && VMRuntime.isValidClassLoaderContext(classLoaderContext)) {
                     // Record dex file usage. If the current usage is a new pattern (e.g. new
                     // secondary, or UsedByOtherApps), record will return true and we trigger an
                     // async write to disk to make sure we don't loose the data in case of a reboot.
-
                     if (mPackageDexUsage.record(searchResult.mOwningPackageName,
                             dexPath, loaderUserId, loaderIsa, primaryOrSplit,
-                            loadingAppInfo.packageName, classLoaderContext)) {
+                            loadingPackageAmendedName, classLoaderContext, overwriteCLC)) {
                         mPackageDexUsage.maybeWriteAsync();
                     }
                 }
@@ -447,7 +504,7 @@ public class DexManager {
      *         because they don't need to be compiled)..
      */
     public boolean dexoptSecondaryDex(DexoptOptions options) {
-        if (PLATFORM_PACKAGE_NAME.equals(options.getPackageName())) {
+        if (isPlatformPackage(options.getPackageName())) {
             // We could easily redirect to #dexoptSystemServer in this case. But there should be
             // no-one calling this method directly for system server.
             // As such we prefer to abort in this case.
@@ -507,7 +564,7 @@ public class DexManager {
      * <p>PackageDexOptimizer.DEX_OPT_PERFORMED if all dexopt operations succeeded.
      */
     public int dexoptSystemServer(DexoptOptions options) {
-        if (!PLATFORM_PACKAGE_NAME.equals(options.getPackageName())) {
+        if (!isPlatformPackage(options.getPackageName())) {
             Slog.wtf(TAG, "Non system server package used when trying to dexopt system server:"
                     + options.getPackageName());
             return PackageDexOptimizer.DEX_OPT_FAILED;
@@ -635,7 +692,7 @@ public class DexManager {
             // Special handle system server files.
             // We don't need an installd call because we have permissions to check if the file
             // exists.
-            if (PLATFORM_PACKAGE_NAME.equals(packageName)) {
+            if (isPlatformPackage(packageName)) {
                 if (!Files.exists(Paths.get(dexPath))) {
                     if (DEBUG) {
                         Slog.w(TAG, "A dex file previously loaded by System Server does not exist "
@@ -712,7 +769,8 @@ public class DexManager {
             boolean newUpdate = mPackageDexUsage.record(searchResult.mOwningPackageName,
                     dexPath, userId, isa, /*primaryOrSplit*/ false,
                     loadingPackage,
-                    PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT);
+                    PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT,
+                    /*overwriteCLC=*/ false);
             update |= newUpdate;
         }
         if (update) {
@@ -782,7 +840,7 @@ public class DexManager {
         // Note: We don't have any way to detect which code paths are actually
         // owned by system server. We can only assume that such paths are on
         // system partitions.
-        if (PLATFORM_PACKAGE_NAME.equals(loadingAppInfo.packageName)) {
+        if (isPlatformPackage(loadingAppInfo.packageName)) {
             if (isSystemServerDexPathSupportedForOdex(dexPath)) {
                 // We record system server dex files as secondary dex files.
                 // The reason is that we only record the class loader context for secondary dex
@@ -813,6 +871,11 @@ public class DexManager {
         // Cache miss. The cache is updated during installs and uninstalls,
         // so if we get here we're pretty sure the dex path does not exist.
         return new DexSearchResult(null, DEX_SEARCH_NOT_FOUND);
+    }
+
+    /** Returns true if this is the platform package .*/
+    private static boolean isPlatformPackage(String packageName) {
+        return PLATFORM_PACKAGE_NAME.equals(packageName);
     }
 
     private static <K,V> V putIfAbsent(Map<K,V> map, K key, V newValue) {
@@ -903,6 +966,94 @@ public class DexManager {
                 }
             } catch (IOException ignore) {}
         }
+    }
+
+    /**
+     * Translates install scenarios into compilation reasons.  This process can be influenced
+     * by the state of the device.
+     */
+    public int getCompilationReasonForInstallScenario(int installScenario) {
+        // Compute the compilation reason from the installation scenario.
+
+        boolean resourcesAreCritical = areBatteryThermalOrMemoryCritical();
+        switch (installScenario) {
+            case PackageManager.INSTALL_SCENARIO_DEFAULT: {
+                return PackageManagerService.REASON_INSTALL;
+            }
+            case PackageManager.INSTALL_SCENARIO_FAST: {
+                return PackageManagerService.REASON_INSTALL_FAST;
+            }
+            case PackageManager.INSTALL_SCENARIO_BULK: {
+                if (resourcesAreCritical) {
+                    return PackageManagerService.REASON_INSTALL_BULK_DOWNGRADED;
+                } else {
+                    return PackageManagerService.REASON_INSTALL_BULK;
+                }
+            }
+            case PackageManager.INSTALL_SCENARIO_BULK_SECONDARY: {
+                if (resourcesAreCritical) {
+                    return PackageManagerService.REASON_INSTALL_BULK_SECONDARY_DOWNGRADED;
+                } else {
+                    return PackageManagerService.REASON_INSTALL_BULK_SECONDARY;
+                }
+            }
+            default: {
+                throw new IllegalArgumentException("Invalid installation scenario");
+            }
+        }
+    }
+
+    /**
+     * Fetches the battery manager object and caches it if it hasn't been fetched already.
+     */
+    private BatteryManager getBatteryManager() {
+        if (mBatteryManager == null && mContext != null) {
+            mBatteryManager = mContext.getSystemService(BatteryManager.class);
+        }
+
+        return mBatteryManager;
+    }
+
+    /**
+     * Returns true if the battery level, device temperature, or memory usage are considered to be
+     * in a critical state.
+     */
+    private boolean areBatteryThermalOrMemoryCritical() {
+        BatteryManager batteryManager = getBatteryManager();
+        boolean isBtmCritical = (batteryManager != null
+                && batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS)
+                    == BatteryManager.BATTERY_STATUS_DISCHARGING
+                && batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                    <= mCriticalBatteryLevel)
+                || (mPowerManager != null
+                    && mPowerManager.getCurrentThermalStatus()
+                        >= PowerManager.THERMAL_STATUS_SEVERE);
+
+        return isBtmCritical;
+    }
+
+    /**
+     * Deletes all the optimizations files generated by ART.
+     * This is best effort, and the method will log but not throw errors
+     * for individual deletes
+     *
+     * @param packageInfo the package information.
+     * @return the number of freed bytes or -1 if there was an error in the process.
+     */
+    public long deleteOptimizedFiles(ArtPackageInfo packageInfo) {
+        long freedBytes = 0;
+        boolean hadErrors = false;
+        for (String codePath : packageInfo.getCodePaths()) {
+            for (String isa : packageInfo.getInstructionSets()) {
+                try {
+                    freedBytes += mInstaller.deleteOdex(codePath, isa, packageInfo.getOatDir());
+                } catch (InstallerException e) {
+                    Log.e(TAG, "Failed deleting oat files for " + codePath, e);
+                    hadErrors = true;
+                }
+            }
+        }
+        return hadErrors ? -1 : freedBytes;
     }
 
     public static class RegisterDexModuleResult {

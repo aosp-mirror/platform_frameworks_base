@@ -20,6 +20,10 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
 /**
+ * API for sending log output to the {@link Log#LOG_ID_SYSTEM} buffer.
+ *
+ * <p>Should be used by system components. Use {@code adb logcat --buffer=system} to fetch the logs.
+ *
  * @hide
  */
 public final class Slog {
@@ -89,7 +93,7 @@ public final class Slog {
      * will always be handled asynchronously.  Primarily for use by coding running within
      * the system process.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int wtf(String tag, String msg) {
         return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, false, true);
     }
@@ -130,9 +134,8 @@ public final class Slog {
         return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, tr, false, true);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int println(int priority, String tag, String msg) {
         return Log.println_native(Log.LOG_ID_SYSTEM, priority, tag, msg);
     }
 }
-

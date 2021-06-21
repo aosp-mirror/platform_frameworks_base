@@ -16,70 +16,72 @@
 
 package com.android.systemui.statusbar;
 
-import android.annotation.NonNull;
-import android.provider.DeviceConfig;
-import android.util.ArrayMap;
-
-import com.android.systemui.dagger.qualifiers.Background;
-
-import java.util.Map;
-import java.util.concurrent.Executor;
+import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.flags.FeatureFlagReader;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Class to manage simple DeviceConfig-based feature flags.
  *
- * To enable or disable a flag, run:
- *
- * {@code
- *  $ adb shell device_config put systemui <key> <true|false>
-*  }
- *
- * You will probably need to restart systemui for the changes to be picked up:
- *
- * {@code
- *  $ adb shell am restart com.android.systemui
- * }
+ * See {@link FeatureFlagReader} for instructions on defining and flipping flags.
  */
-@Singleton
+@SysUISingleton
 public class FeatureFlags {
-    private final Map<String, Boolean> mCachedDeviceConfigFlags = new ArrayMap<>();
+    private final FeatureFlagReader mFlagReader;
 
     @Inject
-    public FeatureFlags(@Background Executor executor) {
-        DeviceConfig.addOnPropertiesChangedListener(
-                "systemui",
-                executor,
-                this::onPropertiesChanged);
+    public FeatureFlags(FeatureFlagReader flagReader) {
+        mFlagReader = flagReader;
     }
 
     public boolean isNewNotifPipelineEnabled() {
-        return getDeviceConfigFlag("notification.newpipeline.enabled", true);
+        return mFlagReader.isEnabled(R.bool.flag_notification_pipeline2);
     }
 
     public boolean isNewNotifPipelineRenderingEnabled() {
-        return isNewNotifPipelineEnabled()
-                && getDeviceConfigFlag("notification.newpipeline.rendering", false);
+        return mFlagReader.isEnabled(R.bool.flag_notification_pipeline2_rendering);
     }
 
-    private void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
-        synchronized (mCachedDeviceConfigFlags) {
-            for (String key : properties.getKeyset()) {
-                mCachedDeviceConfigFlags.remove(key);
-            }
-        }
+    /** b/171917882 */
+    public boolean isTwoColumnNotificationShadeEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_notification_twocolumn);
     }
 
-    private boolean getDeviceConfigFlag(String key, boolean defaultValue) {
-        synchronized (mCachedDeviceConfigFlags) {
-            Boolean flag = mCachedDeviceConfigFlags.get(key);
-            if (flag == null) {
-                flag = DeviceConfig.getBoolean("systemui", key, defaultValue);
-                mCachedDeviceConfigFlags.put(key, flag);
-            }
-            return flag;
-        }
+    public boolean isKeyguardLayoutEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_keyguard_layout);
+    }
+
+    public boolean useNewLockscreenAnimations() {
+        return mFlagReader.isEnabled(R.bool.flag_lockscreen_animations);
+    }
+
+    public boolean isPeopleTileEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_conversations);
+    }
+
+    public boolean isMonetEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_monet);
+    }
+
+    public boolean isPMLiteEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_pm_lite);
+    }
+
+    public boolean isChargingRippleEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_charging_ripple);
+    }
+
+    public boolean isOngoingCallStatusBarChipEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_ongoing_call_status_bar_chip);
+    }
+
+    public boolean isSmartspaceEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_smartspace);
+    }
+
+    public boolean isSmartspaceDedupingEnabled() {
+        return isSmartspaceEnabled() && mFlagReader.isEnabled(R.bool.flag_smartspace_deduping);
     }
 }

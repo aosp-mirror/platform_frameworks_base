@@ -19,14 +19,14 @@ package android.text;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.FontListParser;
 import android.graphics.Typeface;
-import android.graphics.fonts.Font;
-import android.graphics.fonts.FontCustomizationParser;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.SystemFonts;
-import android.util.ArrayMap;
 
 import androidx.test.InstrumentationRegistry;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,13 +35,13 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
+import java.util.Map;
 
 public class FontFallbackSetup implements AutoCloseable {
     private final String[] mTestFontFiles;
     private final String mXml;
     private final String mTestFontsDir;
-    final ArrayMap<String, Typeface> mFontMap = new ArrayMap<>();
+    private final Map<String, Typeface> mFontMap;
 
     public FontFallbackSetup(@NonNull String testSubDir, @NonNull String[] testFontFiles,
             @NonNull String xml) {
@@ -77,13 +77,15 @@ public class FontFallbackSetup implements AutoCloseable {
             throw new RuntimeException(e);
         }
 
-        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final ArrayList<Font> availableFonts = new ArrayList<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
-        final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(testFontsXml,
-                mTestFontsDir, oemCustomization, fallbackMap, availableFonts);
-        Typeface.initSystemDefaultTypefaces(mFontMap, fallbackMap, aliases);
+        FontConfig fontConfig;
+        try {
+            fontConfig = FontListParser.parse(testFontsXml, mTestFontsDir, null, null, null, 0, 0);
+        } catch (IOException | XmlPullParserException e) {
+            throw new RuntimeException(e);
+        }
+
+        Map<String, FontFamily[]> fallbackMap = SystemFonts.buildSystemFallback(fontConfig);
+        mFontMap = SystemFonts.buildSystemTypefaces(fontConfig, fallbackMap);
     }
 
     @NonNull

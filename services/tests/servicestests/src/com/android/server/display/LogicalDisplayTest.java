@@ -20,16 +20,23 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.PropertyInvalidatedCache;
 import android.graphics.Point;
+import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import androidx.test.filters.SmallTest;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.OutputStream;
 
+@SmallTest
+@Presubmit
 public class LogicalDisplayTest {
     private static final int DISPLAY_ID = 0;
     private static final int LAYER_STACK = 0;
@@ -51,9 +58,27 @@ public class LogicalDisplayTest {
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice);
         when(mDisplayDevice.getDisplayDeviceInfoLocked()).thenReturn(displayDeviceInfo);
 
-        ArrayList<DisplayDevice> displayDevices = new ArrayList<>();
-        displayDevices.add(mDisplayDevice);
-        mLogicalDisplay.updateLocked(displayDevices);
+        // Disable binder caches in this process.
+        PropertyInvalidatedCache.disableForTestMode();
+
+        DisplayDeviceRepository repo = new DisplayDeviceRepository(
+                new DisplayManagerService.SyncRoot(),
+                new PersistentDataStore(new PersistentDataStore.Injector() {
+                    @Override
+                    public InputStream openRead() {
+                        return null;
+                    }
+
+                    @Override
+                    public OutputStream startWrite() {
+                        return null;
+                    }
+
+                    @Override
+                    public void finishWrite(OutputStream os, boolean success) {}
+                }));
+        repo.onDisplayDeviceEvent(mDisplayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED);
+        mLogicalDisplay.updateLocked(repo);
     }
 
     @Test

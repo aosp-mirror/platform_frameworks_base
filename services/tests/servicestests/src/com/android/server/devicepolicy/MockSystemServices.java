@@ -16,7 +16,6 @@
 package com.android.server.devicepolicy;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -46,16 +45,18 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
+import android.hardware.usb.UsbManager;
 import android.media.IAudioService;
+import android.net.ConnectivityManager;
 import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
+import android.net.VpnManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.permission.IPermissionManager;
 import android.provider.Settings;
 import android.security.KeyChain;
@@ -71,6 +72,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.File;
@@ -114,12 +116,15 @@ public class MockSystemServices {
     public final SettingsForMock settings;
     public final MockContentResolver contentResolver;
     public final TelephonyManager telephonyManager;
+    public final ConnectivityManager connectivityManager;
     public final AccountManager accountManager;
     public final AlarmManager alarmManager;
     public final KeyChain.KeyChainConnection keyChainConnection;
     public final CrossProfileApps crossProfileApps;
     public final PersistentDataBlockManagerInternal persistentDataBlockManagerInternal;
     public final AppOpsManager appOpsManager;
+    public final UsbManager usbManager;
+    public final VpnManager vpnManager;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
     public final BuildMock buildMock = new BuildMock();
@@ -158,12 +163,15 @@ public class MockSystemServices {
         wifiManager = mock(WifiManager.class);
         settings = mock(SettingsForMock.class);
         telephonyManager = mock(TelephonyManager.class);
+        connectivityManager = mock(ConnectivityManager.class);
         accountManager = mock(AccountManager.class);
         alarmManager = mock(AlarmManager.class);
         keyChainConnection = mock(KeyChain.KeyChainConnection.class, RETURNS_DEEP_STUBS);
         crossProfileApps = mock(CrossProfileApps.class);
         persistentDataBlockManagerInternal = mock(PersistentDataBlockManagerInternal.class);
         appOpsManager = mock(AppOpsManager.class);
+        usbManager = mock(UsbManager.class);
+        vpnManager = mock(VpnManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());
@@ -236,7 +244,7 @@ public class MockSystemServices {
         }
         mUserInfos.add(uh);
         when(userManager.getUsers()).thenReturn(mUserInfos);
-        when(userManager.getUsers(anyBoolean())).thenReturn(mUserInfos);
+        when(userManager.getAliveUsers()).thenReturn(mUserInfos);
         when(userManager.isUserRunning(eq(new UserHandle(userId)))).thenReturn(true);
         when(userManager.getProfileParent(anyInt())).thenAnswer(
                 invocation -> {
@@ -393,8 +401,10 @@ public class MockSystemServices {
     }
 
     public static class RecoverySystemForMock {
-        public void rebootWipeUserData(boolean shutdown, String reason, boolean force,
-                boolean wipeEuicc) throws IOException {
+        public boolean rebootWipeUserData(boolean shutdown, String reason, boolean force,
+                boolean wipeEuicc, boolean wipeExtRequested, boolean wipeResetProtectionData)
+                        throws IOException {
+            return false;
         }
     }
 
@@ -420,7 +430,7 @@ public class MockSystemServices {
     }
 
     public static class UserManagerForMock {
-        public boolean isSplitSystemUser() {
+        public boolean isHeadlessSystemUserMode() {
             return false;
         }
     }

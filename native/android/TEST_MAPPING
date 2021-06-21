@@ -1,0 +1,17 @@
+{
+  "presubmit": [
+    {
+       "name": "CtsPermissionManagerNativeTestCases",
+       "file_patterns": ["permission_manager.cpp"]
+    },
+    {
+       "name": "CtsPermissionTestCases",
+       "options": [
+           {
+              "include-filter": "android.permission.cts.PermissionManagerNativeJniTest"
+           }
+       ],
+       "file_patterns": ["permission_manager.cpp"]
+    }
+  ]
+}

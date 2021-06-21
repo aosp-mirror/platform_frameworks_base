@@ -751,7 +751,7 @@ public class DrmManagerClient implements AutoCloseable {
 
     /**
      * Removes all the rights information of every DRM plug-in (agent) associated with
-     * the DRM framework. Will be used during a master reset.
+     * the DRM framework.
      *
      * @return ERROR_NONE for success; ERROR_UNKNOWN for failure.
      */

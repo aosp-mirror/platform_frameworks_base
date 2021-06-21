@@ -1,0 +1,29 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "framework-telephony-common-sources",
+    srcs: [
+        "**/*.java",
+        ":statslog-telephony-common-java-gen",
+    ],
+    visibility: [
+        "//frameworks/base",
+        "//frameworks/base/tests/TelephonyCommonTests",
+    ],
+}
+
+genrule {
+    name: "statslog-telephony-common-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module telephony_common" +
+        " --javaPackage com.android.internal.telephony --javaClass TelephonyCommonStatsLog",
+    out: ["com/android/internal/telephony/TelephonyCommonStatsLog.java"],
+    visibility: ["//visibility:private"],
+}

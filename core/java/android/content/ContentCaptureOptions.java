@@ -17,6 +17,7 @@ package android.content;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.os.Parcel;
@@ -69,10 +70,11 @@ public final class ContentCaptureOptions implements Parcelable {
     public final int logHistorySize;
 
     /**
-     * List of activities explicitly whitelisted for content capture (or {@code null} if whitelisted
+     * List of activities explicitly allowlisted for content capture (or {@code null} if allowlisted
      * for all acitivites in the package).
      */
     @Nullable
+    @SuppressLint("NullableCollection")
     public final ArraySet<ComponentName> whitelistedComponents;
 
     /**
@@ -96,6 +98,7 @@ public final class ContentCaptureOptions implements Parcelable {
      */
     public ContentCaptureOptions(int loggingLevel, int maxBufferSize, int idleFlushingFrequencyMs,
             int textChangeFlushingFrequencyMs, int logHistorySize,
+            @SuppressLint("NullableCollection")
             @Nullable ArraySet<ComponentName> whitelistedComponents) {
         this(/* lite= */ false, loggingLevel, maxBufferSize, idleFlushingFrequencyMs,
                 textChangeFlushingFrequencyMs, logHistorySize, whitelistedComponents);
@@ -131,7 +134,8 @@ public final class ContentCaptureOptions implements Parcelable {
 
         final String packageName = at.getApplication().getPackageName();
 
-        if (!"android.contentcaptureservice.cts".equals(packageName)) {
+        if (!"android.contentcaptureservice.cts".equals(packageName)
+                && !"android.translation.cts".equals(packageName)) {
             Log.e(TAG, "forWhitelistingItself(): called by " + packageName);
             throw new SecurityException("Thou shall not pass!");
         }
@@ -147,7 +151,7 @@ public final class ContentCaptureOptions implements Parcelable {
     /** @hide */
     @VisibleForTesting
     public boolean isWhitelisted(@NonNull Context context) {
-        if (whitelistedComponents == null) return true; // whole package is whitelisted
+        if (whitelistedComponents == null) return true; // whole package is allowlisted
         final ContentCaptureClient client = context.getContentCaptureClient();
         if (client == null) {
             // Shouldn't happen, but it doesn't hurt to check...

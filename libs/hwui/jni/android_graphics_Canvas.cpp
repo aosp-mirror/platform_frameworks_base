@@ -30,10 +30,12 @@
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedStringChars.h>
 
+#include "FontUtils.h"
 #include "Bitmap.h"
 #include "SkGraphics.h"
 #include "SkRegion.h"
 #include "SkVertices.h"
+#include "SkRRect.h"
 
 namespace minikin {
 class MeasuredText;
@@ -92,16 +94,14 @@ static jint save(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jint flagsHandle)
 }
 
 static jint saveLayer(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat l, jfloat t,
-                      jfloat r, jfloat b, jlong paintHandle, jint flagsHandle) {
+                      jfloat r, jfloat b, jlong paintHandle) {
     Paint* paint  = reinterpret_cast<Paint*>(paintHandle);
-    SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
-    return static_cast<jint>(get_canvas(canvasHandle)->saveLayer(l, t, r, b, paint, flags));
+    return static_cast<jint>(get_canvas(canvasHandle)->saveLayer(l, t, r, b, paint));
 }
 
 static jint saveLayerAlpha(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat l, jfloat t,
-                           jfloat r, jfloat b, jint alpha, jint flagsHandle) {
-    SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
-    return static_cast<jint>(get_canvas(canvasHandle)->saveLayerAlpha(l, t, r, b, alpha, flags));
+                           jfloat r, jfloat b, jint alpha) {
+    return static_cast<jint>(get_canvas(canvasHandle)->saveLayerAlpha(l, t, r, b, alpha));
 }
 
 static jint saveUnclippedLayer(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jint l, jint t, jint r, jint b) {
@@ -540,6 +540,21 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jlong bitma
                                              colorA.ptr() + colorIndex, paint);
 }
 
+static void drawGlyphs(JNIEnv* env, jobject, jlong canvasHandle, jintArray glyphIds,
+                       jfloatArray positions, jint glyphOffset, jint positionOffset,
+                       jint glyphCount, jlong fontHandle, jlong paintHandle) {
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
+    AutoJavaIntArray glyphIdArray(env, glyphIds);
+    AutoJavaFloatArray positionArray(env, positions);
+    get_canvas(canvasHandle)->drawGlyphs(
+        *font->font.get(),
+        glyphIdArray.ptr() + glyphOffset,
+        positionArray.ptr() + positionOffset,
+        glyphCount,
+        *paint);
+}
+
 static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray charArray,
                           jint index, jint count, jfloat x, jfloat y, jint bidiFlags,
                           jlong paintHandle) {
@@ -653,6 +668,11 @@ static void setCompatibilityVersion(JNIEnv* env, jobject, jint apiLevel) {
     Canvas::setCompatibilityVersion(apiLevel);
 }
 
+static void punchHole(JNIEnv* env, jobject, jlong canvasPtr, jfloat left, jfloat top, jfloat right,
+        jfloat bottom, jfloat rx, jfloat ry) {
+    auto canvas = reinterpret_cast<Canvas*>(canvasPtr);
+    canvas->punchHole(SkRRect::MakeRectXY(SkRect::MakeLTRB(left, top, right, bottom), rx, ry));
+}
 
 }; // namespace CanvasJNI
 
@@ -672,8 +692,8 @@ static const JNINativeMethod gMethods[] = {
     {"nGetWidth","(J)I", (void*) CanvasJNI::getWidth},
     {"nGetHeight","(J)I", (void*) CanvasJNI::getHeight},
     {"nSave","(JI)I", (void*) CanvasJNI::save},
-    {"nSaveLayer","(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
-    {"nSaveLayerAlpha","(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},
+    {"nSaveLayer","(JFFFFJ)I", (void*) CanvasJNI::saveLayer},
+    {"nSaveLayerAlpha","(JFFFFI)I", (void*) CanvasJNI::saveLayerAlpha},
     {"nSaveUnclippedLayer","(JIIII)I", (void*) CanvasJNI::saveUnclippedLayer},
     {"nRestoreUnclippedLayer","(JIJ)V", (void*) CanvasJNI::restoreUnclippedLayer},
     {"nGetSaveCount","(J)I", (void*) CanvasJNI::getSaveCount},
@@ -719,12 +739,14 @@ static const JNINativeMethod gDrawMethods[] = {
     {"nDrawBitmap","(JJFFJIII)V", (void*) CanvasJNI::drawBitmap},
     {"nDrawBitmap","(JJFFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
     {"nDrawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
+    {"nDrawGlyphs", "(J[I[FIIIJJ)V", (void*)CanvasJNI::drawGlyphs},
     {"nDrawText","(J[CIIFFIJ)V", (void*) CanvasJNI::drawTextChars},
     {"nDrawText","(JLjava/lang/String;IIFFIJ)V", (void*) CanvasJNI::drawTextString},
     {"nDrawTextRun","(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
     {"nDrawTextRun","(JLjava/lang/String;IIIIFFZJ)V", (void*) CanvasJNI::drawTextRunString},
     {"nDrawTextOnPath","(J[CIIJFFIJ)V", (void*) CanvasJNI::drawTextOnPathChars},
     {"nDrawTextOnPath","(JLjava/lang/String;JFFIJ)V", (void*) CanvasJNI::drawTextOnPathString},
+    {"nPunchHole", "(JFFFFFF)V", (void*) CanvasJNI::punchHole}
 };
 
 int register_android_graphics_Canvas(JNIEnv* env) {

@@ -16,19 +16,22 @@
 
 package android.net;
 
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.net.module.util.ProxyUtils;
 
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A convenience class for accessing the user and default proxy
@@ -57,44 +60,14 @@ public final class Proxy {
      * {@link ConnectivityManager#getDefaultProxy()} or
      * {@link ConnectivityManager#getLinkProperties(Network)}.{@link LinkProperties#getHttpProxy()}
      * to get the proxy for the Network(s) they are using.
+     * @removed
      */
     @Deprecated
     public static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
 
-    /** @hide */
-    public static final int PROXY_VALID             = 0;
-    /** @hide */
-    public static final int PROXY_HOSTNAME_EMPTY    = 1;
-    /** @hide */
-    public static final int PROXY_HOSTNAME_INVALID  = 2;
-    /** @hide */
-    public static final int PROXY_PORT_EMPTY        = 3;
-    /** @hide */
-    public static final int PROXY_PORT_INVALID      = 4;
-    /** @hide */
-    public static final int PROXY_EXCLLIST_INVALID  = 5;
-
     private static ConnectivityManager sConnectivityManager = null;
 
-    // Hostname / IP REGEX validation
-    // Matches blank input, ips, and domain names
-    private static final String NAME_IP_REGEX =
-        "[a-zA-Z0-9]+(\\-[a-zA-Z0-9]+)*(\\.[a-zA-Z0-9]+(\\-[a-zA-Z0-9]+)*)*";
-
-    private static final String HOSTNAME_REGEXP = "^$|^" + NAME_IP_REGEX + "$";
-
-    private static final Pattern HOSTNAME_PATTERN;
-
-    private static final String EXCL_REGEX =
-        "[a-zA-Z0-9*]+(\\-[a-zA-Z0-9*]+)*(\\.[a-zA-Z0-9*]+(\\-[a-zA-Z0-9*]+)*)*";
-
-    private static final String EXCLLIST_REGEXP = "^$|^" + EXCL_REGEX + "(," + EXCL_REGEX + ")*$";
-
-    private static final Pattern EXCLLIST_PATTERN;
-
     static {
-        HOSTNAME_PATTERN = Pattern.compile(HOSTNAME_REGEXP);
-        EXCLLIST_PATTERN = Pattern.compile(EXCLLIST_REGEXP);
         sDefaultProxySelector = ProxySelector.getDefault();
     }
 
@@ -204,7 +177,7 @@ public final class Proxy {
                 if (host.equalsIgnoreCase("localhost")) {
                     return true;
                 }
-                if (NetworkUtils.numericToInetAddress(host).isLoopbackAddress()) {
+                if (InetAddresses.parseNumericAddress(host).isLoopbackAddress()) {
                     return true;
                 }
             }
@@ -213,36 +186,21 @@ public final class Proxy {
         return false;
     }
 
-    /**
-     * Validate syntax of hostname, port and exclusion list entries
-     * {@hide}
-     */
-    public static int validate(String hostname, String port, String exclList) {
-        Matcher match = HOSTNAME_PATTERN.matcher(hostname);
-        Matcher listMatch = EXCLLIST_PATTERN.matcher(exclList);
-
-        if (!match.matches()) return PROXY_HOSTNAME_INVALID;
-
-        if (!listMatch.matches()) return PROXY_EXCLLIST_INVALID;
-
-        if (hostname.length() > 0 && port.length() == 0) return PROXY_PORT_EMPTY;
-
-        if (port.length() > 0) {
-            if (hostname.length() == 0) return PROXY_HOSTNAME_EMPTY;
-            int portVal = -1;
-            try {
-                portVal = Integer.parseInt(port);
-            } catch (NumberFormatException ex) {
-                return PROXY_PORT_INVALID;
-            }
-            if (portVal <= 0 || portVal > 0xFFFF) return PROXY_PORT_INVALID;
-        }
-        return PROXY_VALID;
+    /** @hide */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @Deprecated
+    public static void setHttpProxySystemProperty(ProxyInfo p) {
+        setHttpProxyConfiguration(p);
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
-    public static final void setHttpProxySystemProperty(ProxyInfo p) {
+    /**
+     * Set HTTP proxy configuration for the process to match the provided ProxyInfo.
+     *
+     * If the provided ProxyInfo is null, the proxy configuration will be cleared.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static void setHttpProxyConfiguration(@Nullable ProxyInfo p) {
         String host = null;
         String port = null;
         String exclList = null;
@@ -250,14 +208,14 @@ public final class Proxy {
         if (p != null) {
             host = p.getHost();
             port = Integer.toString(p.getPort());
-            exclList = p.getExclusionListAsString();
+            exclList = ProxyUtils.exclusionListAsString(p.getExclusionList());
             pacFileUrl = p.getPacFileUrl();
         }
-        setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
+        setHttpProxyConfiguration(host, port, exclList, pacFileUrl);
     }
 
     /** @hide */
-    public static final void setHttpProxySystemProperty(String host, String port, String exclList,
+    public static void setHttpProxyConfiguration(String host, String port, String exclList,
             Uri pacFileUrl) {
         if (exclList != null) exclList = exclList.replace(",", "|");
         if (false) Log.d(TAG, "setHttpProxySystemProperty :"+host+":"+port+" - "+exclList);

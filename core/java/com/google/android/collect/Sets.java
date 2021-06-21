@@ -17,6 +17,7 @@
 package com.google.android.collect;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.util.ArraySet;
 
 import java.util.Collections;
@@ -107,7 +108,7 @@ public class Sets {
     /**
      * Creates a {@code ArraySet} instance containing the given elements.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static <E> ArraySet<E> newArraySet(E... elements) {
         int capacity = elements.length * 4 / 3 + 1;
         ArraySet<E> set = new ArraySet<E>(capacity);

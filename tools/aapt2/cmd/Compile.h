@@ -28,6 +28,7 @@ namespace aapt {
 
 struct CompileOptions {
   std::string output_path;
+  Maybe<std::string> source_path;
   Maybe<std::string> res_dir;
   Maybe<std::string> res_zip;
   Maybe<std::string> generate_text_symbols_path;
@@ -69,6 +70,9 @@ class CompileCommand : public Command {
     AddOptionalSwitch("-v", "Enables verbose logging", &options_.verbose);
     AddOptionalFlag("--trace-folder", "Generate systrace json trace fragment to specified folder.",
                     &trace_folder_);
+    AddOptionalFlag("--source-path",
+                      "Sets the compiled resource file source file path to the given string.",
+                      &options_.source_path);
   }
 
   int Action(const std::vector<std::string>& args) override;

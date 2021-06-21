@@ -1,0 +1,23 @@
+// Signature format: 2.0
+package android.graphics {
+
+  public class ColorMatrix {
+    ctor public ColorMatrix();
+    ctor public ColorMatrix(float[]);
+    ctor public ColorMatrix(android.graphics.ColorMatrix);
+    method public final float[] getArray();
+    method public void postConcat(android.graphics.ColorMatrix);
+    method public void preConcat(android.graphics.ColorMatrix);
+    method public void reset();
+    method public void set(android.graphics.ColorMatrix);
+    method public void set(float[]);
+    method public void setConcat(android.graphics.ColorMatrix, android.graphics.ColorMatrix);
+    method public void setRGB2YUV();
+    method public void setRotate(int, float);
+    method public void setSaturation(float);
+    method public void setScale(float, float, float, float);
+    method public void setYUV2RGB();
+  }
+
+}
+

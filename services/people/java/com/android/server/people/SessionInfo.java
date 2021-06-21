@@ -20,6 +20,7 @@ import android.annotation.UserIdInt;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppTarget;
 import android.app.prediction.IPredictionCallback;
+import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -40,9 +41,9 @@ class SessionInfo {
             new RemoteCallbackList<>();
 
     SessionInfo(AppPredictionContext predictionContext, DataManager dataManager,
-            @UserIdInt int callingUserId) {
+            @UserIdInt int callingUserId, Context context) {
         mAppTargetPredictor = AppTargetPredictor.create(predictionContext,
-                this::updatePredictions, dataManager, callingUserId);
+                this::updatePredictions, dataManager, callingUserId, context);
     }
 
     void addCallback(IPredictionCallback callback) {
