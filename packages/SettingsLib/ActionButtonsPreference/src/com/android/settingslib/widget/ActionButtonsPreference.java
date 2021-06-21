@@ -27,9 +27,10 @@ import android.widget.Button;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
-import androidx.core.os.BuildCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
+
+import com.android.settingslib.utils.BuildCompatUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +95,7 @@ public class ActionButtonsPreference extends Preference {
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
 
-        final boolean allowedDivider = !BuildCompat.isAtLeastS();
+        final boolean allowedDivider = !BuildCompatUtils.isAtLeastS();
         holder.setDividerAllowedAbove(allowedDivider);
         holder.setDividerAllowedBelow(allowedDivider);
 
