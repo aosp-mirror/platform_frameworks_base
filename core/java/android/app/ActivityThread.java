@@ -449,7 +449,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @GuardedBy("mLock")
         ContentProviderHolder mHolder; // Temp holder to be used between notifier and waiter
-        Object mLock; // The lock to be used to get notified when the provider is ready
+        final Object mLock; // The lock to be used to get notified when the provider is ready
 
         public ProviderKey(String authority, int userId) {
             this.authority = authority;
@@ -1829,11 +1829,14 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void notifyContentProviderPublishStatus(@NonNull ContentProviderHolder holder,
-                @NonNull String auth, int userId, boolean published) {
-            final ProviderKey key = getGetProviderKey(auth, userId);
-            synchronized (key.mLock) {
-                key.mHolder = holder;
-                key.mLock.notifyAll();
+                @NonNull String authorities, int userId, boolean published) {
+            final String auths[] = authorities.split(";");
+            for (String auth: auths) {
+                final ProviderKey key = getGetProviderKey(auth, userId);
+                synchronized (key.mLock) {
+                    key.mHolder = holder;
+                    key.mLock.notifyAll();
+                }
             }
         }
 
