@@ -158,7 +158,11 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         CharSequence label = mController.getWalletClient().getServiceLabel();
         state.label = label == null ? mLabel : label;
         state.contentDescription = state.label;
-        state.icon = ResourceIcon.get(R.drawable.ic_wallet_lockscreen);
+        Drawable tileIcon = mController.getWalletClient().getTileIcon();
+        state.icon =
+                tileIcon == null
+                        ? ResourceIcon.get(R.drawable.ic_wallet_lockscreen)
+                        : new DrawableIcon(tileIcon);
         boolean isDeviceLocked = !mKeyguardStateController.isUnlocked();
         if (mController.getWalletClient().isWalletServiceAvailable()
                 && mController.getWalletClient().isWalletFeatureAvailable()) {
