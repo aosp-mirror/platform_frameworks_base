@@ -5419,6 +5419,205 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    public void isActivePasswordSufficient_SeparateWorkChallenge_ProfileQualityRequirementMet()
+            throws Exception {
+        // Create work profile with empty separate challenge
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfileForPasswordTests(managedProfileUserId, managedProfileAdminUid,
+                /* separateChallenge */ true);
+
+        // Set profile password quality requirement. No password added yet so
+        // profile.isActivePasswordSufficient should return false
+        mContext.binder.callingUid = managedProfileAdminUid;
+        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC);
+        assertThat(dpm.isActivePasswordSufficient()).isFalse();
+        assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
+
+        // Set a work challenge and verify profile.isActivePasswordSufficient is now true
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(managedProfileUserId))
+                .thenReturn(computeForPasswordOrPin("abcdXYZ5".getBytes(), /* isPin */ false));
+        assertThat(dpm.isActivePasswordSufficient()).isTrue();
+        assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
+    }
+
+    @Test
+    public void isActivePasswordSufficient_SeparateWorkChallenge_ProfileComplexityRequirementMet()
+            throws Exception {
+        // Create work profile with empty separate challenge
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfileForPasswordTests(managedProfileUserId, managedProfileAdminUid,
+                /* separateChallenge */ true);
+
+        // Set profile password complexity requirement. No password added yet so
+        // profile.isActivePasswordSufficient should return false
+        mContext.binder.callingUid = managedProfileAdminUid;
+        dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_MEDIUM);
+        assertThat(dpm.isActivePasswordSufficient()).isFalse();
+        assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
+
+        // Set a work challenge and verify profile.isActivePasswordSufficient is now true
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(managedProfileUserId))
+                .thenReturn(computeForPasswordOrPin("5156".getBytes(), /* isPin */ true));
+        assertThat(dpm.isActivePasswordSufficient()).isTrue();
+        assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
+    }
+
+    @Test
+    public void isActivePasswordSufficient_SeparateWorkChallenge_ParentQualityRequirementMet()
+            throws Exception {
+        // Create work profile with empty separate challenge
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfileForPasswordTests(managedProfileUserId, managedProfileAdminUid,
+                /* separateChallenge */ true);
+
+        // Set parent password quality requirement. No password added yet so
+        // parent.isActivePasswordSufficient should return false
+        mContext.binder.callingUid = managedProfileAdminUid;
+        parentDpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX);
+        assertThat(dpm.isActivePasswordSufficient()).isTrue();
+        assertThat(parentDpm.isActivePasswordSufficient()).isFalse();
+
+        // Set a device lockscreen and verify parent.isActivePasswordSufficient is now true
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
+                .thenReturn(computeForPasswordOrPin("acbdXYZ5".getBytes(), /* isPin */ false));
+        assertThat(dpm.isActivePasswordSufficient()).isTrue();
+        assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
+    }
+
+    @Test
+    public void isActivePasswordSufficient_SeparateWorkChallenge_ParentComplexityRequirementMet()
+            throws Exception {
+        // Create work profile with empty separate challenge
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfileForPasswordTests(managedProfileUserId, managedProfileAdminUid,
+                /* separateChallenge */ true);
+
+        // Set parent password complexity requirement. No password added yet so
+        // parent.isActivePasswordSufficient should return false
+        mContext.binder.callingUid = managedProfileAdminUid;
+        parentDpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW);
+        assertThat(dpm.isActivePasswordSufficient()).isTrue();
+        assertThat(parentDpm.isActivePasswordSufficient()).isFalse();
+
+        // Set a device lockscreen and verify parent.isActivePasswordSufficient is now true
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
+                .thenReturn(computeForPasswordOrPin("1234".getBytes(), /* isPin */ true));
+        assertThat(dpm.isActivePasswordSufficient()).isTrue();
+        assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
+    }
+
+    @Test
+    public void isActivePasswordSufficient_UnifiedWorkChallenge_ProfileQualityRequirementMet()
+            throws Exception {
+        // Create work profile with unified challenge
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfileForPasswordTests(managedProfileUserId, managedProfileAdminUid,
+                /* separateChallenge */ false);
+
+        // Set profile password quality requirement. No password added yet so
+        // {profile, parent}.isActivePasswordSufficient should return false
+        mContext.binder.callingUid = managedProfileAdminUid;
+        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC);
+        assertThat(dpm.isActivePasswordSufficient()).isFalse();
+        assertThat(parentDpm.isActivePasswordSufficient()).isFalse();
+
+        // Set a device lockscreen and verify {profile, parent}.isActivePasswordSufficient is true
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
+                .thenReturn(computeForPasswordOrPin("abcdXYZ5".getBytes(), /* isPin */ false));
+        assertThat(dpm.isActivePasswordSufficient()).isTrue();
+        assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
+    }
+
+    @Test
+    public void isActivePasswordSufficient_UnifiedWorkChallenge_ProfileComplexityRequirementMet()
+            throws Exception {
+        // Create work profile with unified challenge
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfileForPasswordTests(managedProfileUserId, managedProfileAdminUid,
+                /* separateChallenge */ false);
+
+        // Set profile password complexity requirement. No password added yet so
+        // {profile, parent}.isActivePasswordSufficient should return false
+        mContext.binder.callingUid = managedProfileAdminUid;
+        dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
+        assertThat(dpm.isActivePasswordSufficient()).isFalse();
+        assertThat(parentDpm.isActivePasswordSufficient()).isFalse();
+
+        // Set a device lockscreen and verify {profile, parent}.isActivePasswordSufficient is true
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
+                .thenReturn(computeForPasswordOrPin("51567548".getBytes(), /* isPin */ true));
+        assertThat(dpm.isActivePasswordSufficient()).isTrue();
+        assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
+    }
+
+    @Test
+    public void isActivePasswordSufficient_UnifiedWorkChallenge_ParentQualityRequirementMet()
+            throws Exception {
+        // Create work profile with unified challenge
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfileForPasswordTests(managedProfileUserId, managedProfileAdminUid,
+                /* separateChallenge */ false);
+
+        // Set parent password quality requirement. No password added yet so
+        // {profile, parent}.isActivePasswordSufficient should return false
+        mContext.binder.callingUid = managedProfileAdminUid;
+        parentDpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC);
+        assertThat(dpm.isActivePasswordSufficient()).isFalse();
+        assertThat(parentDpm.isActivePasswordSufficient()).isFalse();
+
+        // Set a device lockscreen and verify {profile, parent}.isActivePasswordSufficient is true
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
+                .thenReturn(computeForPasswordOrPin("abcdXYZ5".getBytes(), /* isPin */ false));
+        assertThat(dpm.isActivePasswordSufficient()).isTrue();
+        assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
+    }
+
+    @Test
+    public void isActivePasswordSufficient_UnifiedWorkChallenge_ParentComplexityRequirementMet()
+            throws Exception {
+        // Create work profile with unified challenge
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfileForPasswordTests(managedProfileUserId, managedProfileAdminUid,
+                /* separateChallenge */ false);
+
+        // Set parent password complexity requirement. No password added yet so
+        // {profile, parent}.isActivePasswordSufficient should return false
+        mContext.binder.callingUid = managedProfileAdminUid;
+        parentDpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_MEDIUM);
+        assertThat(dpm.isActivePasswordSufficient()).isFalse();
+        assertThat(parentDpm.isActivePasswordSufficient()).isFalse();
+
+        // Set a device lockscreen and verify {profile, parent}.isActivePasswordSufficient is true
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
+                .thenReturn(computeForPasswordOrPin("5156".getBytes(), /* isPin */ true));
+        assertThat(dpm.isActivePasswordSufficient()).isTrue();
+        assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
+    }
+
+    private void addManagedProfileForPasswordTests(int userId, int adminUid,
+            boolean separateChallenge) throws Exception {
+        addManagedProfile(admin1, adminUid, admin1);
+        when(getServices().userManager.getProfileParent(userId))
+                .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
+        doReturn(separateChallenge).when(getServices().lockPatternUtils)
+                .isSeparateProfileChallengeEnabled(userId);
+        when(getServices().userManager.getCredentialOwnerProfile(userId))
+                .thenReturn(separateChallenge ? userId : UserHandle.USER_SYSTEM);
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(userId))
+                .thenReturn(new PasswordMetrics(CREDENTIAL_TYPE_NONE));
+        when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
+                .thenReturn(new PasswordMetrics(CREDENTIAL_TYPE_NONE));
+    }
+
+    @Test
     public void testPasswordQualityAppliesToParentPreS() throws Exception {
         final int managedProfileUserId = CALLER_USER_HANDLE;
         final int managedProfileAdminUid =
