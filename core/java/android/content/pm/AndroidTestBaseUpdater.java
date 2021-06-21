@@ -17,7 +17,7 @@
 package android.content.pm;
 
 /**
- * Dummy class to maintain legacy behavior of including a class in core source to toggle
+ * Placeholder class to maintain legacy behavior of including a class in core source to toggle
  * whether or not a shared library is stripped at build time.
  *
  * @hide

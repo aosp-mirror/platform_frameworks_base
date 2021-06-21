@@ -466,7 +466,7 @@ public final class ProgramList implements AutoCloseable {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof Chunk)) return false;
             Chunk other = (Chunk) obj;

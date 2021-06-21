@@ -59,8 +59,6 @@ public class Protocol {
     public static final int BASE_TETHERING                                          = 0x00050000;
     public static final int BASE_NSD_MANAGER                                        = 0x00060000;
     public static final int BASE_NETWORK_STATE_TRACKER                              = 0x00070000;
-    public static final int BASE_CONNECTIVITY_MANAGER                               = 0x00080000;
-    public static final int BASE_NETWORK_AGENT                                      = 0x00081000;
     public static final int BASE_NETWORK_FACTORY                                    = 0x00083000;
     public static final int BASE_ETHERNET                                           = 0x00084000;
     public static final int BASE_LOWPAN                                             = 0x00085000;

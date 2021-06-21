@@ -20,6 +20,9 @@ include $(CLEAR_VARS)
 LOCAL_USE_AAPT2 := true
 LOCAL_AAPT_NAMESPACES := true
 LOCAL_MODULE := AaptTestMergeOnly_LeafLib
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE := $(LOCAL_PATH)/../../../../../NOTICE
 LOCAL_SDK_VERSION := current
 LOCAL_MODULE_TAGS := tests
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res

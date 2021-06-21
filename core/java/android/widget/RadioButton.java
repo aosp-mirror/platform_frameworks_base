@@ -16,9 +16,13 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.RemoteViews.RemoteView;
+
+import com.android.internal.R;
 
 
 /**
@@ -46,6 +50,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * {@link android.R.styleable#View View Attributes}
  * </p>
  */
+@RemoteView
 public class RadioButton extends CompoundButton {
 
     public RadioButton(Context context) {
@@ -96,6 +101,17 @@ public class RadioButton extends CompoundButton {
                         radioGroup.getIndexWithinVisibleButtons(this), 1, 0, 1,
                         false, isChecked()));
             }
+        }
+    }
+
+    /** @hide **/
+    @Override
+    @NonNull
+    protected CharSequence getButtonStateDescription() {
+        if (isChecked()) {
+            return getResources().getString(R.string.selected);
+        } else {
+            return getResources().getString(R.string.not_selected);
         }
     }
 }

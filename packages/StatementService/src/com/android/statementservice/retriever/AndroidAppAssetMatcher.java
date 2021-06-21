@@ -23,7 +23,7 @@ import java.util.Set;
  * Match assets that have the same 'package_name' field and have at least one common certificate
  * fingerprint in 'sha256_cert_fingerprints' field.
  */
-/* package private */ final class AndroidAppAssetMatcher extends AbstractAssetMatcher {
+public final class AndroidAppAssetMatcher extends AbstractAssetMatcher {
 
     private final AndroidAppAsset mQuery;
 

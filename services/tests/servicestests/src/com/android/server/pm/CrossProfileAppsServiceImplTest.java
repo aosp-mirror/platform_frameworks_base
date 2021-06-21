@@ -5,22 +5,29 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import static org.testng.Assert.assertThrows;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.content.AttributionSourceState;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.CrossProfileAppsInternal;
@@ -34,6 +41,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.permission.PermissionCheckerManager;
 import android.permission.PermissionManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
@@ -410,6 +418,18 @@ public class CrossProfileAppsServiceImplTest {
         } catch (PackageManager.NameNotFoundException ignored) {
         }
         mActivityInfo.exported = false;
+
+
+        // There's a bug in static mocking if the APK is large - so here is the next best thing...
+        doReturn(Context.PERMISSION_CHECKER_SERVICE).when(mContext)
+                .getSystemServiceName(PermissionCheckerManager.class);
+        PermissionCheckerManager permissionCheckerManager = mock(PermissionCheckerManager.class);
+        doReturn(PermissionChecker.PERMISSION_HARD_DENIED).when(permissionCheckerManager)
+                .checkPermission(eq(Manifest.permission.INTERACT_ACROSS_PROFILES), any(
+                        AttributionSourceState.class), anyString(), anyBoolean(), anyBoolean(),
+                        anyBoolean(), anyInt());
+        doReturn(permissionCheckerManager).when(mContext).getSystemService(
+                Context.PERMISSION_CHECKER_SERVICE);
 
         assertThrows(
                 SecurityException.class,

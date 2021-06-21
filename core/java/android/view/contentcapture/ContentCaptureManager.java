@@ -23,10 +23,13 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
+import android.annotation.UserIdInt;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -67,7 +70,7 @@ import java.util.function.Consumer;
  * <p>Content capture provides real-time, continuous capture of application activity, display and
  * events to an intelligence service that is provided by the Android system. The intelligence
  * service then uses that info to mediate and speed user journey through different apps. For
- * example, when the user receives a restaurant address in a chat app and switchs to a map app
+ * example, when the user receives a restaurant address in a chat app and switches to a map app
  * to search for that restaurant, the intelligence service could offer an autofill dialog to
  * let the user automatically select its address.
  *
@@ -81,7 +84,7 @@ import java.util.function.Consumer;
  *   <a href="https://source.android.com/compatibility/cdd">CDD requirements</a>.
  *   <li><b>Performance:</b> content capture is highly optimized to minimize its impact in the app
  *   jankiness and overall device system health. For example, its only enabled on apps (or even
- *   specific activities from an app) that were explicitly whitelisted by the intelligence service,
+ *   specific activities from an app) that were explicitly allowlisted by the intelligence service,
  *   and it buffers the events so they are sent in a batch to the service (see
  *   {@link #isContentCaptureEnabled()} for other cases when its disabled).
  * </ul>
@@ -208,6 +211,9 @@ import java.util.function.Consumer;
 public final class ContentCaptureManager {
 
     private static final String TAG = ContentCaptureManager.class.getSimpleName();
+
+    /** @hide */
+    public static final boolean DEBUG = false;
 
     /** Error happened during the data sharing session. */
     public static final int DATA_SHARE_ERROR_UNKNOWN = 1;
@@ -432,10 +438,11 @@ public final class ContentCaptureManager {
     /** @hide */
     @UiThread
     public void onActivityCreated(@NonNull IBinder applicationToken,
-            @NonNull ComponentName activityComponent) {
+            @NonNull IBinder shareableActivityToken, @NonNull ComponentName activityComponent) {
         if (mOptions.lite) return;
         synchronized (mLock) {
-            getMainContentCaptureSession().start(applicationToken, activityComponent, mFlags);
+            getMainContentCaptureSession().start(applicationToken, shareableActivityToken,
+                    activityComponent, mFlags);
         }
     }
 
@@ -495,7 +502,7 @@ public final class ContentCaptureManager {
     /**
      * Gets the (optional) intent used to launch the service-specific settings.
      *
-     * <p>This method is static because it's called by Settings, which might not be whitelisted
+     * <p>This method is static because it's called by Settings, which might not be allowlisted
      * for content capture (in which case the ContentCaptureManager on its context would be null).
      *
      * @hide
@@ -530,8 +537,8 @@ public final class ContentCaptureManager {
      * <p>There are many reasons it could be disabled, such as:
      * <ul>
      *   <li>App itself disabled content capture through {@link #setContentCaptureEnabled(boolean)}.
-     *   <li>Intelligence service did not whitelist content capture for this activity's package.
-     *   <li>Intelligence service did not whitelist content capture for this specific activity.
+     *   <li>Intelligence service did not allowlist content capture for this activity's package.
+     *   <li>Intelligence service did not allowlist content capture for this specific activity.
      *   <li>Intelligence service disabled content capture globally.
      *   <li>User disabled content capture globally through the Android Settings app.
      *   <li>Device manufacturer (OEM) disabled content capture globally.
@@ -566,7 +573,7 @@ public final class ContentCaptureManager {
     public Set<ContentCaptureCondition> getContentCaptureConditions() {
         // NOTE: we could cache the conditions on ContentCaptureOptions, but then it would be stick
         // to the lifetime of the app. OTOH, by dynamically calling the server every time, we allow
-        // the service to fine tune how long-lived apps (like browsers) are whitelisted.
+        // the service to fine tune how long-lived apps (like browsers) are allowlisted.
         if (!isContentCaptureEnabled() && !mOptions.lite) return null;
 
         final SyncResultReceiver resultReceiver = syncRun(
@@ -753,6 +760,74 @@ public final class ContentCaptureManager {
                 pw.print(prefix2); pw.println("No sessions");
             }
         }
+    }
+
+    /**
+     * Resets the temporary content capture service implementation to the default component.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_CAPTURE)
+    public static void resetTemporaryService(@UserIdInt int userId) {
+        final IContentCaptureManager service = getService();
+        if (service == null) {
+            Log.e(TAG, "IContentCaptureManager is null");
+        }
+        try {
+            service.resetTemporaryService(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Temporarily sets the content capture service implementation.
+     *
+     * @param userId user Id to set the temporary service on.
+     * @param serviceName name of the new component
+     * @param duration how long the change will be valid (the service will be automatically reset
+     * to the default component after this timeout expires).
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_CAPTURE)
+    public static void setTemporaryService(
+            @UserIdInt int userId, @NonNull String serviceName, int duration) {
+        final IContentCaptureManager service = getService();
+        if (service == null) {
+            Log.e(TAG, "IContentCaptureManager is null");
+        }
+        try {
+            service.setTemporaryService(userId, serviceName, duration);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets whether the default content capture service should be used.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_CAPTURE)
+    public static void setDefaultServiceEnabled(@UserIdInt int userId, boolean enabled) {
+        final IContentCaptureManager service = getService();
+        if (service == null) {
+            Log.e(TAG, "IContentCaptureManager is null");
+        }
+        try {
+            service.setDefaultServiceEnabled(userId, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static IContentCaptureManager getService() {
+        return IContentCaptureManager.Stub.asInterface(ServiceManager.getService(
+                Service.CONTENT_CAPTURE_MANAGER_SERVICE));
     }
 
     private interface MyRunnable {

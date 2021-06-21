@@ -15,4 +15,4 @@
 
 package android.os;
 
-parcelable WorkSource;
+parcelable WorkSource cpp_header "android/WorkSource.h";

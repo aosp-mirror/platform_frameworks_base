@@ -23,8 +23,10 @@ import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.StatusBar
+import com.android.wm.shell.bubbles.Bubbles
 import java.io.FileDescriptor
 import java.io.PrintWriter
+import java.util.Optional
 
 /**
  * The master controller for all notifications-related work
@@ -35,6 +37,7 @@ import java.io.PrintWriter
 interface NotificationsController {
     fun initialize(
         statusBar: StatusBar,
+        bubblesOptional: Optional<Bubbles>,
         presenter: NotificationPresenter,
         listContainer: NotificationListContainer,
         notificationActivityStarter: NotificationActivityStarter,
@@ -45,6 +48,5 @@ interface NotificationsController {
     fun resetUserExpandedStates()
     fun setNotificationSnoozed(sbn: StatusBarNotification, snoozeOption: SnoozeOption)
     fun getActiveNotificationsCount(): Int
-    fun setNotificationSnoozed(sbn: StatusBarNotification, hoursToSnooze: Int)
     fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>, dumpTruck: Boolean)
 }

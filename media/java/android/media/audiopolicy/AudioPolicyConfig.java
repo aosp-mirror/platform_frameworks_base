@@ -97,9 +97,11 @@ public class AudioPolicyConfig implements Parcelable {
             dest.writeInt(mix.getFormat().getEncoding());
             dest.writeInt(mix.getFormat().getChannelMask());
             // write opt-out respect
-            dest.writeBoolean(mix.getRule().allowPrivilegedPlaybackCapture());
+            dest.writeBoolean(mix.getRule().allowPrivilegedMediaPlaybackCapture());
             // write voice communication capture allowed flag
             dest.writeBoolean(mix.getRule().voiceCommunicationCaptureAllowed());
+            // write specified mix type
+            dest.writeInt(mix.getRule().getTargetMixType());
             // write mix rules
             final ArrayList<AudioMixMatchCriterion> criteria = mix.getRule().getCriteria();
             dest.writeInt(criteria.size());
@@ -134,6 +136,8 @@ public class AudioPolicyConfig implements Parcelable {
             ruleBuilder.allowPrivilegedPlaybackCapture(in.readBoolean());
             // read voice capture allowed flag
             ruleBuilder.voiceCommunicationCaptureAllowed(in.readBoolean());
+            // read specified mix type
+            ruleBuilder.setTargetMixType(in.readInt());
             // read mix rules
             int nbRules = in.readInt();
             for (int j = 0 ; j < nbRules ; j++) {
@@ -162,7 +166,7 @@ public class AudioPolicyConfig implements Parcelable {
 
     public String toLogFriendlyString () {
         String textDump = new String("android.media.audiopolicy.AudioPolicyConfig:\n");
-        textDump += mMixes.size() + " AudioMix: "+ mRegistrationId + "\n";
+        textDump += mMixes.size() + " AudioMix, reg:" + mRegistrationId + "\n";
         for(AudioMix mix : mMixes) {
             // write mix route flags
             textDump += "* route flags=0x" + Integer.toHexString(mix.getRouteFlags()) + "\n";
@@ -172,10 +176,12 @@ public class AudioPolicyConfig implements Parcelable {
             textDump += "  channels=0x";
             textDump += Integer.toHexString(mix.getFormat().getChannelMask()).toUpperCase() + "\n";
             textDump += "  ignore playback capture opt out="
-                    + mix.getRule().allowPrivilegedPlaybackCapture() + "\n";
+                    + mix.getRule().allowPrivilegedMediaPlaybackCapture() + "\n";
             textDump += "  allow voice communication capture="
                     + mix.getRule().voiceCommunicationCaptureAllowed() + "\n";
             // write mix rules
+            textDump += "  specified mix type="
+                    + mix.getRule().getTargetMixType() + "\n";
             final ArrayList<AudioMixMatchCriterion> criteria = mix.getRule().getCriteria();
             for (AudioMixMatchCriterion criterion : criteria) {
                 switch(criterion.mRule) {
@@ -218,6 +224,38 @@ public class AudioPolicyConfig implements Parcelable {
             }
         }
         return textDump;
+    }
+
+    /**
+     * Very short dump of configuration
+     * @return a condensed dump of configuration, uniquely identifies a policy in a log
+     */
+    public String toCompactLogString() {
+        String compactDump = "reg:" + mRegistrationId;
+        int mixNum = 0;
+        for (AudioMix mix : mMixes) {
+            compactDump += " Mix:" + mixNum + "-Typ:" + mixTypePrefix(mix.getMixType())
+                    + "-Rul:" + mix.getRule().getCriteria().size();
+            mixNum++;
+        }
+        return compactDump;
+    }
+
+    private static String mixTypePrefix(int mixType) {
+        switch (mixType) {
+            case AudioMix.MIX_TYPE_PLAYERS:
+                return "p";
+            case AudioMix.MIX_TYPE_RECORDERS:
+                return "r";
+            case AudioMix.MIX_TYPE_INVALID:
+            default:
+                return "#";
+
+        }
+    }
+
+    protected void reset() {
+        mMixCounter = 0;
     }
 
     protected void setRegistration(String regId) {

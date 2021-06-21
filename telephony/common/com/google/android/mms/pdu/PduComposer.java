@@ -745,7 +745,9 @@ public class PduComposer {
             return PDU_COMPOSE_CONTENT_ERROR;
         }
 
-        // X-Mms-Report-Allowed Optional (not support)
+        // X-Mms-Report-Allowed Optional
+        appendHeader(PduHeaders.REPORT_ALLOWED);
+
         return PDU_COMPOSE_SUCCESS;
     }
 
@@ -1049,7 +1051,7 @@ public class PduComposer {
             }
 
             if (dataLength != (attachment.getLength() - headerLength)) {
-                throw new RuntimeException("BUG: Length sanity check failed");
+                throw new RuntimeException("BUG: Length correctness check failed");
             }
 
             mStack.pop();

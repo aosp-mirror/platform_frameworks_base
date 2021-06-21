@@ -22,48 +22,122 @@ package android.view.inputmethod;
 import "frameworks/base/core/proto/android/view/inputmethod/inputmethodmanager.proto";
 import "frameworks/base/core/proto/android/view/viewrootimpl.proto";
 import "frameworks/base/core/proto/android/view/insetscontroller.proto";
-import "frameworks/base/core/proto/android/view/insetssourceconsumer.proto";
 import "frameworks/base/core/proto/android/view/imeinsetssourceconsumer.proto";
 import "frameworks/base/core/proto/android/view/inputmethod/editorinfo.proto";
+import "frameworks/base/core/proto/android/view/inputmethod/inputconnection.proto";
 import "frameworks/base/core/proto/android/view/imefocuscontroller.proto";
 
+import "frameworks/base/core/proto/android/server/inputmethod/inputmethodmanagerservice.proto";
+import "frameworks/base/core/proto/android/inputmethodservice/inputmethodservice.proto";
+
 /**
- * Represents a file full of input method editor trace entries.
- * Encoded, it should start with 0x9 0x49 0x4d 0x45 0x54 0x52 0x41 0x43 0x45 (.IMETRACE), such
+ * Represents a file full of trace entries for clients that use InputMethod.
+ * Encoded, it should start with 0x9 0x49 0x4d 0x43 0x54 0x52 0x41 0x43 0x45 (.IMCTRACE), such
  * that they can be easily identified.
  */
-message InputMethodEditorTraceFileProto {
+message InputMethodClientsTraceFileProto {
 
     /* constant; MAGIC_NUMBER = (long) MAGIC_NUMBER_H << 32 | MagicNumber.MAGIC_NUMBER_L
        (this is needed because enums have to be 32 bits and there's no nice way to put 64bit
         constants into .proto files.) */
     enum MagicNumber {
         INVALID = 0;
-        MAGIC_NUMBER_L = 0x54454d49;  /* IMET (little-endian ASCII) */
+        MAGIC_NUMBER_L = 0x54434d49;  /* IMCT (little-endian ASCII) */
         MAGIC_NUMBER_H = 0x45434152;  /* RACE (little-endian ASCII) */
     }
 
     /* Must be the first field to allow winscope to auto-detect the dump type. Set to value
         in MagicNumber */
     optional fixed64 magic_number = 1;
-    repeated InputMethodEditorProto entry = 2;
+    repeated InputMethodClientsTraceProto entry = 2;
 }
 
-/* one input method editor dump entry. */
-message InputMethodEditorProto {
-
+/* One dump entry for clients that use InputMethod. */
+message InputMethodClientsTraceProto {
     /* required: elapsed realtime in nanos since boot of when this entry was logged */
     optional fixed64 elapsed_realtime_nanos = 1;
-    optional ClientSideProto client_side_dump = 2;
+
+    /* where the trace originated */
+    optional string where = 2;
+
+    optional ClientSideProto client = 3;
 
     /* groups together the dump from ime related client side classes */
     message ClientSideProto {
-        optional InputMethodManagerProto input_method_manager = 1;
-        optional ViewRootImplProto view_root_impl = 2;
-        optional InsetsControllerProto insets_controller = 3;
-        optional InsetsSourceConsumerProto insets_source_consumer = 4;
+        optional int32 display_id = 1;
+        optional InputMethodManagerProto input_method_manager = 2;
+        optional ViewRootImplProto view_root_impl = 3;
+        optional InsetsControllerProto insets_controller = 4;
         optional ImeInsetsSourceConsumerProto ime_insets_source_consumer = 5;
         optional EditorInfoProto editor_info = 6;
         optional ImeFocusControllerProto ime_focus_controller = 7;
+        optional InputConnectionProto input_connection = 8;
+        optional InputConnectionCallProto input_connection_call = 9;
     }
+}
+
+/**
+ * Represents a file full of InputMethodService trace entries.
+ * Encoded, it should start with 0x9 0x49 0x4d 0x53 0x54 0x52 0x41 0x43 0x45 (.IMSTRACE), such
+ * that they can be easily identified.
+ */
+message InputMethodServiceTraceFileProto {
+
+    /* constant; MAGIC_NUMBER = (long) MAGIC_NUMBER_H << 32 | MagicNumber.MAGIC_NUMBER_L
+       (this is needed because enums have to be 32 bits and there's no nice way to put 64bit
+        constants into .proto files.) */
+    enum MagicNumber {
+        INVALID = 0;
+        MAGIC_NUMBER_L = 0x54534d49;  /* IMST (little-endian ASCII) */
+        MAGIC_NUMBER_H = 0x45434152;  /* RACE (little-endian ASCII) */
+    }
+
+    /* Must be the first field to allow winscope to auto-detect the dump type. Set to value
+        in MagicNumber */
+    optional fixed64 magic_number = 1;
+    repeated InputMethodServiceTraceProto entry = 2;
+}
+
+/* One dump entry for InputMethodService. */
+message InputMethodServiceTraceProto {
+    /* required: elapsed realtime in nanos since boot of when this entry was logged */
+    optional fixed64 elapsed_realtime_nanos = 1;
+
+    /* where the trace originated */
+    optional string where = 2;
+
+    optional .android.inputmethodservice.InputMethodServiceProto input_method_service = 3;
+}
+
+/**
+ * Represents a file full of InputMethodManagerService trace entries.
+ * Encoded, it should start with 0x9 0x49 0x4d 0x4d 0x54 0x52 0x41 0x43 0x45 (.IMMTRACE), such
+ * that they can be easily identified.
+ */
+message InputMethodManagerServiceTraceFileProto {
+
+    /* constant; MAGIC_NUMBER = (long) MAGIC_NUMBER_H << 32 | MagicNumber.MAGIC_NUMBER_L
+       (this is needed because enums have to be 32 bits and there's no nice way to put 64bit
+        constants into .proto files.) */
+    enum MagicNumber {
+        INVALID = 0;
+        MAGIC_NUMBER_L = 0x544d4d49;  /* IMMT (little-endian ASCII) */
+        MAGIC_NUMBER_H = 0x45434152;  /* RACE (little-endian ASCII) */
+    }
+
+    /* Must be the first field to allow winscope to auto-detect the dump type. Set to value
+        in MagicNumber */
+    optional fixed64 magic_number = 1;
+    repeated InputMethodManagerServiceTraceProto entry = 2;
+}
+
+/* One dump entry for InputMethodManagerService. */
+message InputMethodManagerServiceTraceProto {
+    /* required: elapsed realtime in nanos since boot of when this entry was logged */
+    optional fixed64 elapsed_realtime_nanos = 1;
+
+    /* where the trace originated */
+    optional string where = 2;
+
+    optional .android.server.inputmethod.InputMethodManagerServiceProto input_method_manager_service = 3;
 }

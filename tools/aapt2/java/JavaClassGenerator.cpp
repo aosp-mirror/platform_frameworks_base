@@ -218,16 +218,22 @@ struct StyleableAttr {
 static bool operator<(const StyleableAttr& lhs, const StyleableAttr& rhs) {
   const ResourceId lhs_id = lhs.attr_ref->id.value_or_default(ResourceId(0));
   const ResourceId rhs_id = rhs.attr_ref->id.value_or_default(ResourceId(0));
-  if (lhs_id < rhs_id) {
-    return true;
-  } else if (lhs_id > rhs_id) {
-    return false;
-  } else {
+  if (lhs_id == rhs_id) {
     return lhs.attr_ref->name.value() < rhs.attr_ref->name.value();
   }
+  return cmp_ids_dynamic_after_framework(lhs_id, rhs_id);
 }
 
-void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,
+static FieldReference GetRFieldReference(const ResourceName& name,
+                                         StringPiece fallback_package_name) {
+  const std::string package_name =
+      name.package.empty() ? fallback_package_name.to_string() : name.package;
+  const std::string entry = JavaClassGenerator::TransformToFieldName(name.entry);
+  return FieldReference(
+      StringPrintf("%s.R.%s.%s", package_name.c_str(), to_string(name.type).data(), entry.c_str()));
+}
+
+bool JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,
                                           const Styleable& styleable,
                                           const StringPiece& package_name_to_generate,
                                           ClassDefinition* out_class_def,
@@ -343,14 +349,29 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
 
   // Add the ResourceIds to the array member.
   for (size_t i = 0; i < attr_count; i++) {
-    const ResourceId id = sorted_attributes[i].attr_ref->id.value_or_default(ResourceId(0));
-    array_def->AddElement(id);
+    const StyleableAttr& attr = sorted_attributes[i];
+    std::string r_txt_contents;
+    if (attr.symbol && attr.symbol.value().is_dynamic) {
+      if (!attr.attr_ref->name) {
+        error_ = "unable to determine R.java field name of dynamic resource";
+        return false;
+      }
+
+      const FieldReference field_name =
+          GetRFieldReference(attr.attr_ref->name.value(), package_name_to_generate);
+      array_def->AddElement(field_name);
+      r_txt_contents = field_name.ref;
+    } else {
+      const ResourceId attr_id = attr.attr_ref->id.value_or_default(ResourceId(0));
+      array_def->AddElement(attr_id);
+      r_txt_contents = to_string(attr_id);
+    }
 
     if (r_txt_printer != nullptr) {
       if (i != 0) {
         r_txt_printer->Print(",");
       }
-      r_txt_printer->Print(" ").Print(id.to_string());
+      r_txt_printer->Print(" ").Print(r_txt_contents);
     }
   }
 
@@ -422,19 +443,7 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
     }
   }
 
-  // If there is a rewrite method to generate, add the statements that rewrite package IDs
-  // for this styleable.
-  if (out_rewrite_method != nullptr) {
-    out_rewrite_method->AppendStatement(
-        StringPrintf("for (int i = 0; i < styleable.%s.length; i++) {", array_field_name.data()));
-    out_rewrite_method->AppendStatement(
-        StringPrintf("  if ((styleable.%s[i] & 0xff000000) == 0) {", array_field_name.data()));
-    out_rewrite_method->AppendStatement(
-        StringPrintf("    styleable.%s[i] = (styleable.%s[i] & 0x00ffffff) | packageIdBits;",
-                     array_field_name.data(), array_field_name.data()));
-    out_rewrite_method->AppendStatement("  }");
-    out_rewrite_method->AppendStatement("}");
-  }
+  return true;
 }
 
 void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const ResourceId& id,
@@ -451,8 +460,8 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
 
   const std::string field_name = TransformToFieldName(name.entry);
   if (out_class_def != nullptr) {
-    std::unique_ptr<ResourceMember> resource_member =
-        util::make_unique<ResourceMember>(field_name, real_id);
+    auto resource_member =
+        util::make_unique<ResourceMember>(field_name, real_id, entry.visibility.staged_api);
 
     // Build the comments and annotations for this entry.
     AnnotationProcessor* processor = resource_member->GetCommentBuilder();
@@ -534,8 +543,8 @@ bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate
 
     // Create an ID if there is one (static libraries don't need one).
     ResourceId id;
-    if (package.id && type.id && entry->id) {
-      id = ResourceId(package.id.value(), type.id.value(), entry->id.value());
+    if (entry->id) {
+      id = entry->id.value();
     }
 
     // We need to make sure we hide the fact that we are generating kAttrPrivate attributes.
@@ -554,12 +563,11 @@ bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate
 
     if (resource_name.type == ResourceType::kStyleable) {
       CHECK(!entry->values.empty());
-
-      const Styleable* styleable =
-          static_cast<const Styleable*>(entry->values.front()->value.get());
-
-      ProcessStyleable(resource_name, id, *styleable, package_name_to_generate, out_type_class_def,
-                       out_rewrite_method_def, r_txt_printer);
+      const auto styleable = reinterpret_cast<const Styleable*>(entry->values.front()->value.get());
+      if (!ProcessStyleable(resource_name, id, *styleable, package_name_to_generate,
+                            out_type_class_def, out_rewrite_method_def, r_txt_printer)) {
+        return false;
+      }
     } else {
       ProcessResource(resource_name, id, *entry, out_type_class_def, out_rewrite_method_def,
                       r_txt_printer);
@@ -608,8 +616,9 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
 
   for (const auto& package : table_->packages) {
     for (const auto& type : package->types) {
-      if (type->type == ResourceType::kAttrPrivate) {
-        // We generate these as part of the kAttr type, so skip them here.
+      if (type->type == ResourceType::kAttrPrivate || type->type == ResourceType::kMacro) {
+        // We generate kAttrPrivate as part of the kAttr type, so skip them here.
+        // Macros are not actual resources, so skip them as well.
         continue;
       }
 
@@ -629,8 +638,7 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
 
       if (type->type == ResourceType::kAttr) {
         // Also include private attributes in this same class.
-        const ResourceTableType* priv_type = package->FindType(ResourceType::kAttrPrivate);
-        if (priv_type) {
+        if (const ResourceTableType* priv_type = package->FindType(ResourceType::kAttrPrivate)) {
           if (!ProcessType(package_name_to_generate, *package, *priv_type, class_def.get(),
                            rewrite_method.get(), r_txt_printer.get())) {
             return false;

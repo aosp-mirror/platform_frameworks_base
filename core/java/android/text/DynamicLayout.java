@@ -475,9 +475,8 @@ public class DynamicLayout extends Layout {
 
         mObjects.insertAt(0, dirs);
 
-        final int baseLength = mBase.length();
-        // Update from 0 characters to whatever the real text is
-        reflow(mBase, 0, 0, baseLength);
+        // Update from 0 characters to whatever the displayed text is
+        reflow(mBase, 0, 0, mDisplay.length());
 
         if (mBase instanceof Spannable) {
             if (mWatcher == null)
@@ -485,6 +484,7 @@ public class DynamicLayout extends Layout {
 
             // Strip out any watchers for other DynamicLayouts.
             final Spannable sp = (Spannable) mBase;
+            final int baseLength = mBase.length();
             final ChangeWatcher[] spans = sp.getSpans(0, baseLength, ChangeWatcher.class);
             for (int i = 0; i < spans.length; i++) {
                 sp.removeSpan(spans[i]);
@@ -987,7 +987,7 @@ public class DynamicLayout extends Layout {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int getIndexFirstChangedBlock() {
         return mIndexFirstChangedBlock;
     }
@@ -995,7 +995,7 @@ public class DynamicLayout extends Layout {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setIndexFirstChangedBlock(int i) {
         mIndexFirstChangedBlock = i;
     }

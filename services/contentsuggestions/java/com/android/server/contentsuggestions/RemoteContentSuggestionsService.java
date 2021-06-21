@@ -24,7 +24,7 @@ import android.app.contentsuggestions.ISelectionsCallback;
 import android.app.contentsuggestions.SelectionsRequest;
 import android.content.ComponentName;
 import android.content.Context;
-import android.graphics.GraphicBuffer;
+import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.service.contentsuggestions.ContentSuggestionsService;
@@ -67,7 +67,7 @@ public class RemoteContentSuggestionsService extends
         return TIMEOUT_REMOTE_REQUEST_MILLIS;
     }
 
-    void provideContextImage(int taskId, @Nullable GraphicBuffer contextImage,
+    void provideContextImage(int taskId, @Nullable HardwareBuffer contextImage,
             int colorSpaceId, @NonNull Bundle imageContextRequestExtras) {
         scheduleAsyncRequest((s) -> s.provideContextImage(taskId, contextImage,
                 colorSpaceId, imageContextRequestExtras));

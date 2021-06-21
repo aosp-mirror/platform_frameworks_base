@@ -478,7 +478,7 @@ public class Tonal implements ExtractionType {
         public ConfigParser(Context context) {
             mTonalPalettes = new ArrayList<>();
 
-            // Load all palettes and the blacklist from an XML.
+            // Load all palettes and the denylist from an XML.
             try {
                 XmlPullParser parser = context.getResources().getXml(R.xml.color_extraction);
                 int eventType = parser.getEventType();

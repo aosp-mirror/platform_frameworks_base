@@ -16,9 +16,16 @@
 
 package android.location;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
+import android.util.TimeUtils;
+
+import com.android.internal.util.Preconditions;
+
+import java.util.Objects;
 
 /**
  * Represents a geographical boundary, also known as a geofence.
@@ -28,13 +35,11 @@ import android.os.Parcelable;
  * @hide
  */
 public final class Geofence implements Parcelable {
-    /** @hide */
-    public static final int TYPE_HORIZONTAL_CIRCLE = 1;
 
-    private final int mType;
     private final double mLatitude;
     private final double mLongitude;
     private final float mRadius;
+    private long mExpirationRealtimeMs;
 
     /**
      * Create a circular geofence (on a flat, horizontal plane).
@@ -45,76 +50,62 @@ public final class Geofence implements Parcelable {
      * @return a new geofence
      * @throws IllegalArgumentException if any parameters are out of range
      */
-    public static Geofence createCircle(double latitude, double longitude, float radius) {
-        return new Geofence(latitude, longitude, radius);
+    public static Geofence createCircle(double latitude, double longitude, float radius,
+            long expirationRealtimeMs) {
+        return new Geofence(latitude, longitude, radius, expirationRealtimeMs);
     }
 
-    private Geofence(double latitude, double longitude, float radius) {
-        checkRadius(radius);
-        checkLatLong(latitude, longitude);
-        mType = TYPE_HORIZONTAL_CIRCLE;
+    Geofence(double latitude, double longitude, float radius, long expirationRealtimeMs) {
+        Preconditions.checkArgumentInRange(latitude, -90.0, 90.0, "latitude");
+        Preconditions.checkArgumentInRange(longitude, -180.0, 180.0, "latitude");
+        Preconditions.checkArgument(radius > 0, "invalid radius: %f", radius);
+
         mLatitude = latitude;
         mLongitude = longitude;
         mRadius = radius;
+        mExpirationRealtimeMs = expirationRealtimeMs;
     }
 
-    /** @hide */
-    public int getType() {
-        return mType;
-    }
-
-    /** @hide */
     public double getLatitude() {
         return mLatitude;
     }
 
-    /** @hide */
     public double getLongitude() {
         return mLongitude;
     }
 
-    /** @hide */
     public float getRadius() {
         return mRadius;
     }
 
-    private static void checkRadius(float radius) {
-        if (radius <= 0) {
-            throw new IllegalArgumentException("invalid radius: " + radius);
-        }
+    public boolean isExpired() {
+        return isExpired(SystemClock.elapsedRealtime());
     }
 
-    private static void checkLatLong(double latitude, double longitude) {
-        if (latitude > 90.0 || latitude < -90.0) {
-            throw new IllegalArgumentException("invalid latitude: " + latitude);
-        }
-        if (longitude > 180.0 || longitude < -180.0) {
-            throw new IllegalArgumentException("invalid longitude: " + longitude);
-        }
-    }
-
-    private static void checkType(int type) {
-        if (type != TYPE_HORIZONTAL_CIRCLE) {
-            throw new IllegalArgumentException("invalid type: " + type);
-        }
+    /**
+     * Returns true if this geofence is expired with reference to the given realtime.
+     */
+    public boolean isExpired(long referenceRealtimeMs) {
+        return referenceRealtimeMs >= mExpirationRealtimeMs;
     }
 
     @UnsupportedAppUsage
-    public static final @android.annotation.NonNull Parcelable.Creator<Geofence> CREATOR = new Parcelable.Creator<Geofence>() {
-        @Override
-        public Geofence createFromParcel(Parcel in) {
-            int type = in.readInt();
-            double latitude = in.readDouble();
-            double longitude = in.readDouble();
-            float radius = in.readFloat();
-            checkType(type);
-            return Geofence.createCircle(latitude, longitude, radius);
-        }
-        @Override
-        public Geofence[] newArray(int size) {
-            return new Geofence[size];
-        }
-    };
+    public static final @NonNull Parcelable.Creator<Geofence> CREATOR =
+            new Parcelable.Creator<Geofence>() {
+                @Override
+                public Geofence createFromParcel(Parcel in) {
+                    return new Geofence(
+                            in.readDouble(),
+                            in.readDouble(),
+                            in.readFloat(),
+                            in.readLong());
+                }
+
+                @Override
+                public Geofence[] newArray(int size) {
+                    return new Geofence[size];
+                }
+            };
 
     @Override
     public int describeContents() {
@@ -123,62 +114,46 @@ public final class Geofence implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeInt(mType);
         parcel.writeDouble(mLatitude);
         parcel.writeDouble(mLongitude);
         parcel.writeFloat(mRadius);
-    }
-
-    private static String typeToString(int type) {
-        switch (type) {
-            case TYPE_HORIZONTAL_CIRCLE:
-                return "CIRCLE";
-            default:
-                checkType(type);
-                return null;
-        }
+        parcel.writeLong(mExpirationRealtimeMs);
     }
 
     @Override
-    public String toString() {
-        return String.format("Geofence[%s %.6f, %.6f %.0fm]",
-                typeToString(mType), mLatitude, mLongitude, mRadius);
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Geofence)) {
+            return false;
+        }
+        Geofence geofence = (Geofence) o;
+        return Double.compare(geofence.mLatitude, mLatitude) == 0
+                && Double.compare(geofence.mLongitude, mLongitude) == 0
+                && Float.compare(geofence.mRadius, mRadius) == 0
+                && mExpirationRealtimeMs == geofence.mExpirationRealtimeMs;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        long temp;
-        temp = Double.doubleToLongBits(mLatitude);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(mLongitude);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        result = prime * result + Float.floatToIntBits(mRadius);
-        result = prime * result + mType;
-        return result;
+        return Objects.hash(mLatitude, mLongitude, mRadius);
     }
 
-    /**
-     * Two geofences are equal if they have identical properties.
-     */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (!(obj instanceof Geofence))
-            return false;
-        Geofence other = (Geofence) obj;
-        if (mRadius != other.mRadius)
-            return false;
-        if (mLatitude != other.mLatitude)
-            return false;
-        if (mLongitude != other.mLongitude)
-            return false;
-        if (mType != other.mType)
-            return false;
-        return true;
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Geofence[(").append(mLatitude).append(", ").append(mLongitude).append(")");
+        builder.append(" ").append(mRadius).append("m");
+        if (mExpirationRealtimeMs < Long.MAX_VALUE) {
+            if (isExpired()) {
+                builder.append(" expired");
+            } else {
+                builder.append(" expires=");
+                TimeUtils.formatDuration(mExpirationRealtimeMs, builder);
+            }
+        }
+        builder.append("]");
+        return builder.toString();
     }
 }

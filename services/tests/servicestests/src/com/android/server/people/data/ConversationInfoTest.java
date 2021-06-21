@@ -16,11 +16,17 @@
 
 package com.android.server.people.data;
 
+import static android.app.people.ConversationStatus.ACTIVITY_ANNIVERSARY;
+import static android.app.people.ConversationStatus.ACTIVITY_GAME;
+
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.app.people.ConversationStatus;
 import android.content.LocusId;
 import android.content.pm.ShortcutInfo;
 import android.net.Uri;
@@ -37,15 +43,21 @@ public final class ConversationInfoTest {
     private static final Uri CONTACT_URI = Uri.parse("tel:+1234567890");
     private static final String PHONE_NUMBER = "+1234567890";
     private static final String NOTIFICATION_CHANNEL_ID = "test : abc";
+    private static final String PARENT_NOTIFICATION_CHANNEL_ID = "test";
 
     @Test
     public void testBuild() {
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+        ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
+
         ConversationInfo conversationInfo = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
                 .setLocusId(LOCUS_ID)
                 .setContactUri(CONTACT_URI)
                 .setContactPhoneNumber(PHONE_NUMBER)
                 .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
+                .setParentNotificationChannelId(PARENT_NOTIFICATION_CHANNEL_ID)
+                .setLastEventTimestamp(100L)
                 .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED
                         | ShortcutInfo.FLAG_CACHED_NOTIFICATIONS)
                 .setImportant(true)
@@ -55,6 +67,8 @@ public final class ConversationInfoTest {
                 .setPersonImportant(true)
                 .setPersonBot(true)
                 .setContactStarred(true)
+                .addOrUpdateStatus(cs)
+                .addOrUpdateStatus(cs2)
                 .build();
 
         assertEquals(SHORTCUT_ID, conversationInfo.getShortcutId());
@@ -62,6 +76,9 @@ public final class ConversationInfoTest {
         assertEquals(CONTACT_URI, conversationInfo.getContactUri());
         assertEquals(PHONE_NUMBER, conversationInfo.getContactPhoneNumber());
         assertEquals(NOTIFICATION_CHANNEL_ID, conversationInfo.getNotificationChannelId());
+        assertEquals(PARENT_NOTIFICATION_CHANNEL_ID,
+                conversationInfo.getParentNotificationChannelId());
+        assertEquals(100L, conversationInfo.getLastEventTimestamp());
         assertTrue(conversationInfo.isShortcutLongLived());
         assertTrue(conversationInfo.isShortcutCachedForNotification());
         assertTrue(conversationInfo.isImportant());
@@ -71,6 +88,8 @@ public final class ConversationInfoTest {
         assertTrue(conversationInfo.isPersonImportant());
         assertTrue(conversationInfo.isPersonBot());
         assertTrue(conversationInfo.isContactStarred());
+        assertThat(conversationInfo.getStatuses()).contains(cs);
+        assertThat(conversationInfo.getStatuses()).contains(cs2);
     }
 
     @Test
@@ -84,6 +103,8 @@ public final class ConversationInfoTest {
         assertNull(conversationInfo.getContactUri());
         assertNull(conversationInfo.getContactPhoneNumber());
         assertNull(conversationInfo.getNotificationChannelId());
+        assertNull(conversationInfo.getParentNotificationChannelId());
+        assertEquals(0L, conversationInfo.getLastEventTimestamp());
         assertFalse(conversationInfo.isShortcutLongLived());
         assertFalse(conversationInfo.isShortcutCachedForNotification());
         assertFalse(conversationInfo.isImportant());
@@ -93,16 +114,23 @@ public final class ConversationInfoTest {
         assertFalse(conversationInfo.isPersonImportant());
         assertFalse(conversationInfo.isPersonBot());
         assertFalse(conversationInfo.isContactStarred());
+        assertThat(conversationInfo.getStatuses()).isNotNull();
+        assertThat(conversationInfo.getStatuses()).isEmpty();
     }
 
     @Test
     public void testBuildFromAnotherConversationInfo() {
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+        ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
+
         ConversationInfo source = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
                 .setLocusId(LOCUS_ID)
                 .setContactUri(CONTACT_URI)
                 .setContactPhoneNumber(PHONE_NUMBER)
                 .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
+                .setParentNotificationChannelId(PARENT_NOTIFICATION_CHANNEL_ID)
+                .setLastEventTimestamp(100L)
                 .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED)
                 .setImportant(true)
                 .setNotificationSilenced(true)
@@ -110,6 +138,8 @@ public final class ConversationInfoTest {
                 .setPersonImportant(true)
                 .setPersonBot(true)
                 .setContactStarred(true)
+                .addOrUpdateStatus(cs)
+                .addOrUpdateStatus(cs2)
                 .build();
 
         ConversationInfo destination = new ConversationInfo.Builder(source)
@@ -122,6 +152,8 @@ public final class ConversationInfoTest {
         assertEquals(CONTACT_URI, destination.getContactUri());
         assertEquals(PHONE_NUMBER, destination.getContactPhoneNumber());
         assertEquals(NOTIFICATION_CHANNEL_ID, destination.getNotificationChannelId());
+        assertEquals(PARENT_NOTIFICATION_CHANNEL_ID, destination.getParentNotificationChannelId());
+        assertEquals(100L, destination.getLastEventTimestamp());
         assertTrue(destination.isShortcutLongLived());
         assertFalse(destination.isImportant());
         assertTrue(destination.isNotificationSilenced());
@@ -129,5 +161,7 @@ public final class ConversationInfoTest {
         assertTrue(destination.isPersonImportant());
         assertTrue(destination.isPersonBot());
         assertFalse(destination.isContactStarred());
+        assertThat(destination.getStatuses()).contains(cs);
+        assertThat(destination.getStatuses()).contains(cs2);
     }
 }

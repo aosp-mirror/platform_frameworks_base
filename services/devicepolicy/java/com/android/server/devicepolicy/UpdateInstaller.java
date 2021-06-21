@@ -68,7 +68,7 @@ abstract class UpdateInstaller {
             notifyCallbackOnError(
                     InstallSystemUpdateCallback.UPDATE_ERROR_BATTERY_LOW,
                     "The battery level must be above "
-                            + mConstants.BATTERY_THRESHOLD_NOT_CHARGING + " while not charging or"
+                            + mConstants.BATTERY_THRESHOLD_NOT_CHARGING + " while not charging or "
                             + "above " + mConstants.BATTERY_THRESHOLD_CHARGING + " while charging");
             return;
         }

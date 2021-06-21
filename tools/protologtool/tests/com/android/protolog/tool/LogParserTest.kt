@@ -17,8 +17,8 @@
 package com.android.protolog.tool
 
 import com.android.json.stream.JsonReader
-import com.android.server.protolog.ProtoLogMessage
-import com.android.server.protolog.ProtoLogFileProto
+import com.android.internal.protolog.ProtoLogMessage
+import com.android.internal.protolog.ProtoLogFileProto
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

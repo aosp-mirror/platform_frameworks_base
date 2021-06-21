@@ -10,31 +10,32 @@ toddke@android.com
 toddke@google.com
 
 # apex support
-per-file ApexManager.java = dariofreni@google.com
-per-file StagingManager.java = dariofreni@google.com
+per-file ApexManager.java = dariofreni@google.com, ioffe@google.com, olilan@google.com
+per-file StagingManager.java = dariofreni@google.com, ioffe@google.com, olilan@google.com
 
 # dex
-per-file AbstractStatsBase.java = agampe@google.com, calin@google.com, ngeoffray@google.com
-per-file BackgroundDexOptService.java = agampe@google.com, calin@google.com, ngeoffray@google.com
-per-file CompilerStats.java = agampe@google.com, calin@google.com, ngeoffray@google.com
-per-file DynamicCodeLoggingService.java = alanstokes@google.com, agampe@google.com, calin@google.com, ngeoffray@google.com
-per-file InstructionSets.java = agampe@google.com, calin@google.com, ngeoffray@google.com
-per-file OtaDexoptService.java = agampe@google.com, calin@google.com, ngeoffray@google.com
-per-file OtaDexoptShellCommand.java = agampe@google.com, calin@google.com, ngeoffray@google.com
-per-file PackageDexOptimizer.java = agampe@google.com, calin@google.com, ngeoffray@google.com
-per-file PackageManagerServiceCompilerMapping.java = agampe@google.com, calin@google.com, ngeoffray@google.com
-per-file PackageUsage.java = agampe@google.com, calin@google.com, ngeoffray@google.com
+per-file AbstractStatsBase.java = calin@google.com, ngeoffray@google.com
+per-file BackgroundDexOptService.java = calin@google.com, ngeoffray@google.com
+per-file CompilerStats.java = calin@google.com, ngeoffray@google.com
+per-file DynamicCodeLoggingService.java = alanstokes@google.com, calin@google.com, ngeoffray@google.com
+per-file InstructionSets.java = calin@google.com, ngeoffray@google.com
+per-file OtaDexoptService.java = calin@google.com, ngeoffray@google.com
+per-file OtaDexoptShellCommand.java = calin@google.com, ngeoffray@google.com
+per-file PackageDexOptimizer.java = calin@google.com, ngeoffray@google.com
+per-file PackageManagerServiceCompilerMapping.java = calin@google.com, ngeoffray@google.com
+per-file PackageUsage.java = calin@google.com, ngeoffray@google.com
 
 # multi user / cross profile
 per-file CrossProfileAppsServiceImpl.java = omakoto@google.com, yamasani@google.com
 per-file CrossProfileAppsService.java = omakoto@google.com, yamasani@google.com
 per-file CrossProfileIntentFilter.java = omakoto@google.com, yamasani@google.com
 per-file CrossProfileIntentResolver.java = omakoto@google.com, yamasani@google.com
-per-file UserManagerService.java = omakoto@google.com, yamasani@google.com
-per-file UserRestrictionsUtils.java = omakoto@google.com, rubinxu@google.com, sandness@google.com, yamasani@google.com
-per-file UserSystemPackageInstaller.java = bookatz@google.com, omakoto@google.com, yamasani@google.com
-per-file UserTypeDetails.java = bookatz@google.com, omakoto@google.com, yamasani@google.com
-per-file UserTypeFactory.java = bookatz@google.com, omakoto@google.com, yamasani@google.com
+per-file RestrictionsSet.java = file:MULTIUSER_AND_ENTERPRISE_OWNERS
+per-file UserManager* = file:/MULTIUSER_OWNERS
+per-file UserRestriction* = file:MULTIUSER_AND_ENTERPRISE_OWNERS
+per-file UserSystemPackageInstaller* = file:/MULTIUSER_OWNERS
+per-file UserTypeDetails.java = file:/MULTIUSER_OWNERS
+per-file UserTypeFactory.java = file:/MULTIUSER_OWNERS
 
 # security
 per-file KeySetHandle.java = cbrubaker@google.com, nnk@google.com
@@ -44,17 +45,17 @@ per-file PackageSignatures.java = cbrubaker@google.com, nnk@google.com
 per-file SELinuxMMAC.java = cbrubaker@google.com, jeffv@google.com, jgalenson@google.com, nnk@google.com
 
 # shortcuts
-per-file LauncherAppsService.java = omakoto@google.com, yamasani@google.com
-per-file ShareTargetInfo.java = omakoto@google.com, yamasani@google.com
-per-file ShortcutBitmapSaver.java = omakoto@google.com, yamasani@google.com
-per-file ShortcutDumpFiles.java = omakoto@google.com, yamasani@google.com
-per-file ShortcutLauncher.java = omakoto@google.com, yamasani@google.com
-per-file ShortcutNonPersistentUser.java = omakoto@google.com, yamasani@google.com
-per-file ShortcutPackage.java = omakoto@google.com, yamasani@google.com
-per-file ShortcutPackageInfo.java = omakoto@google.com, yamasani@google.com
-per-file ShortcutPackageItem.java = omakoto@google.com, yamasani@google.com
-per-file ShortcutParser.java = omakoto@google.com, yamasani@google.com
-per-file ShortcutRequestPinProcessor.java = omakoto@google.com, yamasani@google.com
-per-file ShortcutService.java = omakoto@google.com, yamasani@google.com
-per-file ShortcutUser.java = omakoto@google.com, yamasani@google.com
+per-file LauncherAppsService.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShareTargetInfo.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShortcutBitmapSaver.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShortcutDumpFiles.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShortcutLauncher.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShortcutNonPersistentUser.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShortcutPackage.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShortcutPackageInfo.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShortcutPackageItem.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShortcutParser.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShortcutRequestPinProcessor.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShortcutService.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
+per-file ShortcutUser.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
 

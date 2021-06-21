@@ -15,29 +15,13 @@
   ~ limitations under the License
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/line1"
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/title"
+    android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.BigTitle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    >
-    <TextView android:id="@+id/title"
-        android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:fadingEdge="horizontal"
-        android:textAlignment="viewStart"
-        />
-    <TextView android:id="@+id/text_line_1"
-        style="@style/Widget.DeviceDefault.Notification.Text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="end|bottom"
-        android:layout_marginStart="16dp"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:fadingEdge="horizontal"
-        />
-</LinearLayout>
+    android:maxLines="2"
+    android:ellipsize="end"
+    android:textAlignment="viewStart"
+    />

@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.annotation.SuppressLint;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -26,6 +28,7 @@ import java.io.OutputStream;
  *
  * @hide
  */
+@SuppressLint("AndroidFrameworkBluetoothPermission")
 /*package*/ final class BluetoothOutputStream extends OutputStream {
     private BluetoothSocket mSocket;
 

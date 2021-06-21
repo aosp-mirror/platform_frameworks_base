@@ -12,8 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-droiddoc {
-    name: "uiautomator-stubs-docs",
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+droidstubs {
+    name: "uiautomator-stubs",
     srcs: [
         "core-src/**/*.java",
         "testrunner-src/**/*.java",
@@ -24,10 +33,10 @@ droiddoc {
         "android.test.base",
         "unsupportedappusage",
     ],
-    custom_template: "droiddoc-templates-sdk",
     installable: false,
-    args: "-stubpackages com.android.uiautomator.core:" +
-          "com.android.uiautomator.testrunner",
+    flags: [
+        "-stubpackages com.android.uiautomator.core:com.android.uiautomator.testrunner",
+    ],
 
     check_api: {
         current: {
@@ -41,10 +50,25 @@ droiddoc {
     },
 }
 
+droiddoc {
+    name: "uiautomator-stubs-docs",
+    srcs: [
+        ":uiautomator-stubs",
+    ],
+    libs: [
+        "android.test.runner",
+        "junit",
+        "android.test.base",
+    ],
+    sdk_version: "current",
+    installable: false,
+    custom_template: "droiddoc-templates-sdk",
+}
+
 java_library_static {
     name: "android_uiautomator",
     srcs: [
-        ":uiautomator-stubs-docs",
+        ":uiautomator-stubs",
     ],
     libs: [
         "android.test.runner",
@@ -65,7 +89,7 @@ java_library_static {
     ],
     static_libs: [
         "junit",
-    ]
+    ],
 }
 
 java_library_static {

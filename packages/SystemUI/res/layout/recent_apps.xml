@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<com.android.systemui.statusbar.policy.KeyButtonView
+<com.android.systemui.navigationbar.buttons.KeyButtonView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/recent_apps"

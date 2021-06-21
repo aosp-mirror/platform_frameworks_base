@@ -105,7 +105,7 @@ public class PathMeasure {
      * @param flags Specified what aspects should be returned in the matrix.
      */
     public boolean getMatrix(float distance, Matrix matrix, int flags) {
-        return native_getMatrix(native_instance, distance, matrix.native_instance, flags);
+        return native_getMatrix(native_instance, distance, matrix.ni(), flags);
     }
 
     /**

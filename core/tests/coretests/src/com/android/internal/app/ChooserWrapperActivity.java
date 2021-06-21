@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.app.usage.UsageStatsManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -67,7 +68,8 @@ public class ChooserWrapperActivity extends ChooserActivity {
                         : sOverrides.packageManager;
         return new ChooserListAdapter(context, payloadIntents, initialIntents, rList,
                 filterLastUsed, resolverListController,
-                this, this, packageManager);
+                this, this, packageManager,
+                getChooserActivityLogger());
     }
 
     ChooserListAdapter getAdapter() {
@@ -88,6 +90,18 @@ public class ChooserWrapperActivity extends ChooserActivity {
     }
 
     boolean getIsSelected() { return mIsSuccessfullySelected; }
+
+    @Override
+    protected ComponentName getNearbySharingComponent() {
+        // an arbitrary pre-installed activity that handles this type of intent
+        return ComponentName.unflattenFromString("com.google.android.apps.messaging/"
+                + "com.google.android.apps.messaging.ui.conversationlist.ShareIntentActivity");
+    }
+
+    @Override
+    protected TargetInfo getNearbySharingTarget(Intent originalIntent) {
+        return new ChooserWrapperActivity.EmptyTargetInfo();
+    }
 
     UsageStatsManager getUsageStatsManager() {
         if (mUsm == null) {

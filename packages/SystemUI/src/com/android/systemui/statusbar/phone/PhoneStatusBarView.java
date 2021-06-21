@@ -44,6 +44,7 @@ import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.leak.RotationUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 public class PhoneStatusBarView extends PanelBar {
@@ -66,6 +67,7 @@ public class PhoneStatusBarView extends PanelBar {
         }
     };
     private DarkReceiver mBattery;
+    private DarkReceiver mClock;
     private int mRotationOrientation = -1;
     @Nullable
     private View mCenterIconSpace;
@@ -74,6 +76,8 @@ public class PhoneStatusBarView extends PanelBar {
     @Nullable
     private DisplayCutout mDisplayCutout;
     private int mStatusBarHeight;
+    @Nullable
+    private List<StatusBar.ExpansionChangedListener> mExpansionChangedListeners;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -92,6 +96,11 @@ public class PhoneStatusBarView extends PanelBar {
         mBar = bar;
     }
 
+    public void setExpansionChangedListeners(
+            @Nullable List<StatusBar.ExpansionChangedListener> listeners) {
+        mExpansionChangedListeners = listeners;
+    }
+
     public void setScrimController(ScrimController scrimController) {
         mScrimController = scrimController;
     }
@@ -99,6 +108,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onFinishInflate() {
         mBattery = findViewById(R.id.battery);
+        mClock = findViewById(R.id.clock);
         mCutoutSpace = findViewById(R.id.cutout_space_view);
         mCenterIconSpace = findViewById(R.id.centered_icon_area);
 
@@ -110,6 +120,7 @@ public class PhoneStatusBarView extends PanelBar {
         super.onAttachedToWindow();
         // Always have Battery meters in the status bar observe the dark/light modes.
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mBattery);
+        Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mClock);
         if (updateOrientationAndCutout()) {
             updateLayoutForCutout();
         }
@@ -119,6 +130,7 @@ public class PhoneStatusBarView extends PanelBar {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mBattery);
+        Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mClock);
         mDisplayCutout = null;
     }
 
@@ -272,6 +284,12 @@ public class PhoneStatusBarView extends PanelBar {
         updateScrimFraction();
         if ((frac == 0 || frac == 1) && mBar.getNavigationBarView() != null) {
             mBar.getNavigationBarView().onStatusBarPanelStateChanged();
+        }
+
+        if (mExpansionChangedListeners != null) {
+            for (StatusBar.ExpansionChangedListener listener : mExpansionChangedListeners) {
+                listener.onExpansionChanged(frac, expanded);
+            }
         }
     }
 

@@ -54,7 +54,7 @@ public class UsbAccessoryUriActivity extends AlertActivity
         String uriString = intent.getStringExtra("uri");
         mUri = (uriString == null ? null : Uri.parse(uriString));
 
-        // sanity check before displaying dialog
+        // Exception check before displaying dialog
         if (mUri == null) {
             Log.e(TAG, "could not parse Uri " + uriString);
             finish();

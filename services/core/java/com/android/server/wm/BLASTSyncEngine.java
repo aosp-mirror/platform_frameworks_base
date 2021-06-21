@@ -16,10 +16,14 @@
 
 package com.android.server.wm;
 
-import android.util.ArrayMap;
-import android.util.ArraySet;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 
-import java.util.Set;
+import android.annotation.NonNull;
+import android.util.ArraySet;
+import android.util.SparseArray;
+import android.view.SurfaceControl;
+
+import com.android.internal.protolog.common.ProtoLog;
 
 /**
  * Utility class for collecting WindowContainers that will merge transactions.
@@ -41,80 +45,138 @@ import java.util.Set;
  *   5. If there were no sub windows anywhere in the hierarchy to wait on, then
  *      transactionReady is immediately invoked, otherwise all the windows are poked
  *      to redraw and to deliver a buffer to {@link WindowState#finishDrawing}.
- *      Once all this drawing is complete the WindowContainer that's ready will be added to the
- *      set of ready WindowContainers. When the final onTransactionReady is called, it will merge
- *      the transactions of the all the WindowContainers and will be delivered to the
- *      TransactionReadyListener
+ *      Once all this drawing is complete, all the transactions will be merged and delivered
+ *      to TransactionReadyListener.
+ *
+ * This works primarily by setting-up state and then watching/waiting for the registered subtrees
+ * to enter into a "finished" state (either by receiving drawn content or by disappearing). This
+ * checks the subtrees during surface-placement.
  */
 class BLASTSyncEngine {
     private static final String TAG = "BLASTSyncEngine";
 
     interface TransactionReadyListener {
-        void onTransactionReady(int mSyncId, Set<WindowContainer> windowContainersReady);
-    };
+        void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
+    }
 
-    // Holds state associated with a single synchronous set of operations.
-    class SyncState implements TransactionReadyListener {
-        int mSyncId;
-        int mRemainingTransactions;
-        TransactionReadyListener mListener;
+    /**
+     * Holds state associated with a single synchronous set of operations.
+     */
+    class SyncGroup {
+        final int mSyncId;
+        final TransactionReadyListener mListener;
         boolean mReady = false;
-        Set<WindowContainer> mWindowContainersReady = new ArraySet<>();
+        final ArraySet<WindowContainer> mRootMembers = new ArraySet<>();
+        private SurfaceControl.Transaction mOrphanTransaction = null;
 
-        private void tryFinish() {
-            if (mRemainingTransactions == 0 && mReady) {
-                mListener.onTransactionReady(mSyncId, mWindowContainersReady);
-                mPendingSyncs.remove(mSyncId);
-            }
-        }
-
-        public void onTransactionReady(int mSyncId, Set<WindowContainer> windowContainersReady) {
-            mRemainingTransactions--;
-            mWindowContainersReady.addAll(windowContainersReady);
-            tryFinish();
-        }
-
-        void setReady() {
-            mReady = true;
-            tryFinish();
-        }
-
-        boolean addToSync(WindowContainer wc) {
-            if (wc.prepareForSync(this, mSyncId)) {
-                mRemainingTransactions++;
-                return true;
-            }
-            return false;
-        }
-
-        SyncState(TransactionReadyListener l, int id) {
-            mListener = l;
+        private SyncGroup(TransactionReadyListener listener, int id) {
             mSyncId = id;
-            mRemainingTransactions = 0;
+            mListener = listener;
         }
-    };
 
+        /**
+         * Gets a transaction to dump orphaned operations into. Orphaned operations are operations
+         * that were on the mSyncTransactions of "root" subtrees which have been removed during the
+         * sync period.
+         */
+        @NonNull
+        SurfaceControl.Transaction getOrphanTransaction() {
+            if (mOrphanTransaction == null) {
+                // Lazy since this isn't common
+                mOrphanTransaction = mWm.mTransactionFactory.get();
+            }
+            return mOrphanTransaction;
+        }
+
+        private void onSurfacePlacement() {
+            if (!mReady) return;
+            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: onSurfacePlacement checking %s",
+                    mSyncId, mRootMembers);
+            for (int i = mRootMembers.size() - 1; i >= 0; --i) {
+                final WindowContainer wc = mRootMembers.valueAt(i);
+                if (!wc.isSyncFinished()) {
+                    ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d:  Unfinished container: %s",
+                            mSyncId, wc);
+                    return;
+                }
+            }
+            finishNow();
+        }
+
+        private void finishNow() {
+            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Finished!", mSyncId);
+            SurfaceControl.Transaction merged = mWm.mTransactionFactory.get();
+            if (mOrphanTransaction != null) {
+                merged.merge(mOrphanTransaction);
+            }
+            for (WindowContainer wc : mRootMembers) {
+                wc.finishSync(merged, false /* cancel */);
+            }
+            mListener.onTransactionReady(mSyncId, merged);
+            mActiveSyncs.remove(mSyncId);
+        }
+
+        private void setReady(boolean ready) {
+            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Set ready", mSyncId);
+            mReady = ready;
+            if (!ready) return;
+            mWm.mWindowPlacerLocked.requestTraversal();
+        }
+
+        private void addToSync(WindowContainer wc) {
+            if (!mRootMembers.add(wc)) {
+                return;
+            }
+            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Adding to group: %s", mSyncId, wc);
+            wc.setSyncGroup(this);
+            wc.prepareSync();
+            mWm.mWindowPlacerLocked.requestTraversal();
+        }
+
+        void onCancelSync(WindowContainer wc) {
+            mRootMembers.remove(wc);
+        }
+    }
+
+    private final WindowManagerService mWm;
     private int mNextSyncId = 0;
+    private final SparseArray<SyncGroup> mActiveSyncs = new SparseArray<>();
 
-    private final ArrayMap<Integer, SyncState> mPendingSyncs = new ArrayMap<>();
-
-    BLASTSyncEngine() {
+    BLASTSyncEngine(WindowManagerService wms) {
+        mWm = wms;
     }
 
     int startSyncSet(TransactionReadyListener listener) {
         final int id = mNextSyncId++;
-        final SyncState s = new SyncState(listener, id);
-        mPendingSyncs.put(id, s);
+        final SyncGroup s = new SyncGroup(listener, id);
+        mActiveSyncs.put(id, s);
+        ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s", id, listener);
         return id;
     }
 
-    boolean addToSyncSet(int id, WindowContainer wc) {
-        final SyncState st = mPendingSyncs.get(id);
-        return st.addToSync(wc);
+    void addToSyncSet(int id, WindowContainer wc) {
+        mActiveSyncs.get(id).addToSync(wc);
+    }
+
+    void setReady(int id, boolean ready) {
+        mActiveSyncs.get(id).setReady(ready);
     }
 
     void setReady(int id) {
-        final SyncState st = mPendingSyncs.get(id);
-        st.setReady();
+        setReady(id, true);
+    }
+
+    /**
+     * Aborts the sync (ie. it doesn't wait for ready or anything to finish)
+     */
+    void abort(int id) {
+        mActiveSyncs.get(id).finishNow();
+    }
+
+    void onSurfacePlacement() {
+        // backwards since each state can remove itself if finished
+        for (int i = mActiveSyncs.size() - 1; i >= 0; --i) {
+            mActiveSyncs.valueAt(i).onSurfacePlacement();
+        }
     }
 }

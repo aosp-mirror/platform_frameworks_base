@@ -28,15 +28,6 @@ import com.android.server.LocalServices;
  */
 public abstract class AudioManagerInternal {
 
-    public abstract void adjustSuggestedStreamVolumeForUid(int streamType, int direction,
-            int flags, String callingPackage, int uid, int pid);
-
-    public abstract void adjustStreamVolumeForUid(int streamType, int direction, int flags,
-            String callingPackage, int uid, int pid);
-
-    public abstract void setStreamVolumeForUid(int streamType, int direction, int flags,
-            String callingPackage, int uid, int pid);
-
     public abstract void setRingerModeDelegate(RingerModeDelegate delegate);
 
     public abstract int getRingerModeInternal();

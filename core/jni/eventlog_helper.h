@@ -24,7 +24,7 @@
 #include <android-base/macros.h>
 #include <log/log_event_list.h>
 
-#include <log/log.h>
+#include <log/log_read.h>
 
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>

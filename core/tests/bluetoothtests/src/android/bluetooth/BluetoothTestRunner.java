@@ -40,6 +40,7 @@ import android.util.Log;
  *     [-e connect_input_iterations <iterations>] \
  *     [-e connect_pan_iterations <iterations>] \
  *     [-e start_stop_sco_iterations <iterations>] \
+ *     [-e mce_set_message_status_iterations <iterations>] \
  *     [-e pair_address <address>] \
  *     [-e headset_address <address>] \
  *     [-e a2dp_address <address>] \
@@ -64,6 +65,7 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
     public static int sConnectInputIterations = 100;
     public static int sConnectPanIterations = 100;
     public static int sStartStopScoIterations = 100;
+    public static int sMceSetMessageStatusIterations = 100;
 
     public static String sDeviceAddress = "";
     public static byte[] sDevicePairPin = {'1', '2', '3', '4'};
@@ -168,6 +170,15 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
         if (val != null) {
             try {
                 sStartStopScoIterations = Integer.parseInt(val);
+            } catch (NumberFormatException e) {
+                // Invalid argument, fall back to default value
+            }
+        }
+
+        val = arguments.getString("mce_set_message_status_iterations");
+        if (val != null) {
+            try {
+                sMceSetMessageStatusIterations = Integer.parseInt(val);
             } catch (NumberFormatException e) {
                 // Invalid argument, fall back to default value
             }
