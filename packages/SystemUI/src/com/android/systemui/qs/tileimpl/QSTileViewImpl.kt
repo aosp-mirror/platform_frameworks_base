@@ -190,6 +190,9 @@ open class QSTileViewImpl @JvmOverloads constructor(
         if (collapsed) {
             labelContainer.ignoreLastView = true
             secondaryLabel.alpha = 0f
+            // Do not marque in QQS
+            label.ellipsize = TextUtils.TruncateAt.END
+            secondaryLabel.ellipsize = TextUtils.TruncateAt.END
         }
         setLabelColor(getLabelColorForState(QSTile.State.DEFAULT_STATE))
         setSecondaryLabelColor(getSecondaryLabelColorForState(QSTile.State.DEFAULT_STATE))
