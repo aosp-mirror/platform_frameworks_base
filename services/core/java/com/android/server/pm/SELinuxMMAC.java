@@ -79,7 +79,7 @@ public final class SELinuxMMAC {
 
     /**
      * Allows opt-in to the latest targetSdkVersion enforced changes without changing target SDK.
-     * Turning this change off for an app targeting >= the latest SDK is a no-op.
+     * Turning this change off for an app targeting the latest SDK or higher is a no-op.
      *
      * <p>Has no effect for apps using shared user id.
      *
@@ -92,7 +92,7 @@ public final class SELinuxMMAC {
     /**
      * This change gates apps access to untrusted_app_R-targetSDK SELinux domain. Allows opt-in
      * to R targetSdkVersion enforced changes without changing target SDK. Turning this change
-     * off for an app targeting >= S is a no-op.
+     * off for an app targeting {@code >= android.os.Build.VERSION_CODES.R} is a no-op.
      *
      * <p>Has no effect for apps using shared user id.
      *
