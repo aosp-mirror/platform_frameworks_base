@@ -67,6 +67,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteFullException;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Binder;
 import android.os.Bundle;
@@ -5153,7 +5154,7 @@ public class AccountManagerService
                     logStatement.bindLong(6, userDebugDbInsertionPoint);
                     try {
                         logStatement.execute();
-                    } catch (IllegalStateException e) {
+                    } catch (IllegalStateException | SQLiteFullException e) {
                         // Guard against crash, DB can already be closed
                         // since this statement is executed on a handler thread
                         Slog.w(TAG, "Failed to insert a log record. accountId=" + accountId
