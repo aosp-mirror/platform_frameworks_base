@@ -104,6 +104,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
+import com.android.internal.view.RotationPolicy;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
@@ -400,7 +401,9 @@ public class VolumeDialogImpl implements VolumeDialog,
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.setOnShowListener(dialog -> {
             mDialogView.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
-            if (!isLandscape()) mDialogView.setTranslationX(mDialogView.getWidth() / 2.0f);
+            if (!shouldSlideInVolumeTray()) {
+                mDialogView.setTranslationX(mDialogView.getWidth() / 2.0f);
+            }
             mDialogView.setAlpha(0);
             mDialogView.animate()
                     .alpha(1)
@@ -585,6 +588,10 @@ public class VolumeDialogImpl implements VolumeDialog,
         float alpha = ta.getFloat(0, 0);
         ta.recycle();
         return (int) (alpha * 255);
+    }
+
+    private boolean shouldSlideInVolumeTray() {
+        return mContext.getDisplay().getRotation() != RotationPolicy.NATURAL_ROTATION;
     }
 
     private boolean isLandscape() {
@@ -1315,7 +1322,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
                     hideRingerDrawer();
                 }, 50));
-        if (!isLandscape()) animator.translationX(mDialogView.getWidth() / 2.0f);
+        if (!shouldSlideInVolumeTray()) animator.translationX(mDialogView.getWidth() / 2.0f);
         animator.start();
         checkODICaptionsTooltip(true);
         mController.notifyVisible(false);
