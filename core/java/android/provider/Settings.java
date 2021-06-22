@@ -16470,6 +16470,18 @@ public final class Settings {
              * @hide
              */
             public static final String CORNER_ROUNDNESS = "corner_roundness";
+
+            /**
+             * Whether the physical button has been set.
+             * @hide
+             */
+            public static final String BUTTON_SET = "button_set";
+
+            /**
+             * Whether there is a side button.
+             * @hide
+             */
+            public static final String SIDE_BUTTON = "side_button";
         }
     }
 
