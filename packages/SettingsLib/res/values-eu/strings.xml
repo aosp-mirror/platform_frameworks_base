@@ -513,7 +513,7 @@
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio-gailu kableduna"</string>
     <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritziak"</string>
     <string name="storage_category" msgid="2287342585424631813">"Biltegiratzea"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"Partekatutako datuak"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Datu partekatuak"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Ikusi eta aldatu partekatutako datuak"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Ez dago erabiltzaile honen datu partekaturik."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Errore bat gertatu da datu partekatuak eskuratzean. Saiatu berriro."</string>

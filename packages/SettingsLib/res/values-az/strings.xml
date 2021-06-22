@@ -553,5 +553,5 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Deaktiv"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiv"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Bu dəyişikliyin tətbiq edilməsi üçün cihaz yenidən başladılmalıdır. İndi yenidən başladın və ya ləğv edin."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Simli qulaqlıq"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Naqilli qulaqlıq"</string>
 </resources>
