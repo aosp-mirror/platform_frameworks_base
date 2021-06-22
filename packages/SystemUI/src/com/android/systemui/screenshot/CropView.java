@@ -62,6 +62,7 @@ public class CropView extends View {
     private final float mCropTouchMargin;
     private final Paint mShadePaint;
     private final Paint mHandlePaint;
+    private final Paint mContainerBackgroundPaint;
 
     // Crop rect with each element represented as [0,1] along its proper axis.
     private RectF mCrop = new RectF(0, 0, 1, 1);
@@ -79,6 +80,9 @@ public class CropView extends View {
     // The allowable values for the current boundary being dragged
     private Range<Float> mMotionRange;
 
+    // Value [0,1] indicating progress in animateEntrance()
+    private float mEntranceInterpolation = 1f;
+
     private CropInteractionListener mCropInteractionListener;
     private final ExploreByTouchHelper mExploreByTouchHelper;
 
@@ -92,6 +96,9 @@ public class CropView extends View {
                 attrs, R.styleable.CropView, 0, 0);
         mShadePaint = new Paint();
         mShadePaint.setColor(t.getColor(R.styleable.CropView_scrimColor, Color.TRANSPARENT));
+        mContainerBackgroundPaint = new Paint();
+        mContainerBackgroundPaint.setColor(t.getColor(R.styleable.CropView_containerBackgroundColor,
+                Color.TRANSPARENT));
         mHandlePaint = new Paint();
         mHandlePaint.setColor(t.getColor(R.styleable.CropView_handleColor, Color.BLACK));
         mHandlePaint.setStrokeCap(Paint.Cap.ROUND);
@@ -125,10 +132,22 @@ public class CropView extends View {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawShade(canvas, 0, 0, 1, mCrop.top);
-        drawShade(canvas, 0, mCrop.bottom, 1, 1);
+        // Top and bottom borders reflect the boundary between the (scrimmed) image and the
+        // opaque container background. This is only meaningful during an entrance transition.
+        float topBorder = MathUtils.lerp(mCrop.top, 0, mEntranceInterpolation);
+        float bottomBorder = MathUtils.lerp(mCrop.bottom, 1, mEntranceInterpolation);
+        drawShade(canvas, 0, topBorder, 1, mCrop.top);
+        drawShade(canvas, 0, mCrop.bottom, 1, bottomBorder);
         drawShade(canvas, 0, mCrop.top, mCrop.left, mCrop.bottom);
         drawShade(canvas, mCrop.right, mCrop.top, 1, mCrop.bottom);
+
+        // Entrance transition expects the crop bounds to be full width, so we only draw container
+        // background on the top and bottom.
+        drawContainerBackground(canvas, 0, 0, 1, topBorder);
+        drawContainerBackground(canvas, 0, bottomBorder, 1, 1);
+
+        mHandlePaint.setAlpha((int) (mEntranceInterpolation * 255));
+
         drawHorizontalHandle(canvas, mCrop.top, /* draw the handle tab up */ true);
         drawHorizontalHandle(canvas, mCrop.bottom, /* draw the handle tab down */ false);
         drawVerticalHandle(canvas, mCrop.left, /* left */ true);
@@ -282,6 +301,22 @@ public class CropView extends View {
     }
 
     /**
+     * Fade in crop bounds, animate reveal of cropped-out area from current crop bounds.
+     */
+    public void animateEntrance() {
+        mEntranceInterpolation = 0;
+        ValueAnimator animator = new ValueAnimator();
+        animator.addUpdateListener(animation -> {
+            mEntranceInterpolation = animation.getAnimatedFraction();
+            invalidate();
+        });
+        animator.setFloatValues(0f, 1f);
+        animator.setDuration(750);
+        animator.setInterpolator(new FastOutSlowInInterpolator());
+        animator.start();
+    }
+
+    /**
      * Set additional top and bottom padding for the image being cropped (used when the
      * corresponding ImageView doesn't take the full height).
      */
@@ -367,6 +402,13 @@ public class CropView extends View {
         canvas.drawRect(fractionToHorizontalPixels(left), fractionToVerticalPixels(top),
                 fractionToHorizontalPixels(right),
                 fractionToVerticalPixels(bottom), mShadePaint);
+    }
+
+    private void drawContainerBackground(Canvas canvas, float left, float top, float right,
+            float bottom) {
+        canvas.drawRect(fractionToHorizontalPixels(left), fractionToVerticalPixels(top),
+                fractionToHorizontalPixels(right),
+                fractionToVerticalPixels(bottom), mContainerBackgroundPaint);
     }
 
     private void drawHorizontalHandle(Canvas canvas, float frac, boolean handleTabUp) {

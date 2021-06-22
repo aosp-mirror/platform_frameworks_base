@@ -34,7 +34,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
-import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -258,8 +257,8 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
         // WHEN the device is dozing
         mStatusBarStateListener.onDozingChanged(true);
 
-        // THEN the view is GONE
-        verify(mView).setVisibility(View.GONE);
+        // THEN switch to INDICATION_TYPE_NONE
+        verify(mView).switchIndication(null);
     }
 
     @Test

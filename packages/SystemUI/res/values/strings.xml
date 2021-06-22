@@ -1148,11 +1148,17 @@
     <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_title">Remove guest?</string>
 
+    <!-- Title of the confirmation dialog when resetting guest session [CHAR LIMIT=NONE] -->
+    <string name="guest_reset_guest_dialog_title">Reset guest?</string>
+
     <!-- Message of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_message">All apps and data in this session will be deleted.</string>
 
     <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
     <string name="guest_exit_guest_dialog_remove">Remove</string>
+
+    <!-- Label for button in confirmation dialog when resetting guest session [CHAR LIMIT=35] -->
+    <string name="guest_reset_guest_dialog_remove">Reset</string>
 
     <!-- Title of the notification when resuming an existing guest session [CHAR LIMIT=NONE] -->
     <string name="guest_wipe_session_title">Welcome back, guest!</string>
@@ -2979,6 +2985,8 @@
     <!-- Content description for a chip in the status bar showing that the user is currently on a phone call. [CHAR LIMIT=NONE] -->
     <string name="ongoing_phone_call_content_description">Ongoing phone call</string>
 
+    <!-- Placeholder for string describing changes in global actions -->
+    <string name="global_actions_change_description" translatable="false"><xliff:g>%1$s</xliff:g></string>
     <!-- URL for more information about changes in global actions -->
     <string name="global_actions_change_url" translatable="false"></string>
 </resources>

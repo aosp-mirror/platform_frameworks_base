@@ -221,6 +221,7 @@ public class RippleDrawable extends LayerDrawable {
     private boolean mForceSoftware;
 
     // Patterned
+    private boolean mAddRipple = false;
     private float mTargetBackgroundOpacity;
     private ValueAnimator mBackgroundAnimation;
     private float mBackgroundOpacity;
@@ -716,6 +717,7 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         cancelExitingRipples();
+        exitPatternedAnimation();
     }
 
     @Override
@@ -732,7 +734,7 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     /**
-     * Notifies all the animating ripples that the hotspot bounds have changed.
+     * Notifies all the animating ripples that the hotspot bounds have changed and modify sessions.
      */
     private void onHotspotBoundsChanged() {
         final int count = mExitingRipplesCount;
@@ -747,6 +749,20 @@ public class RippleDrawable extends LayerDrawable {
 
         if (mBackground != null) {
             mBackground.onHotspotBoundsChanged();
+        }
+        float newRadius = Math.round(computeRadius());
+        for (int i = 0; i < mRunningAnimations.size(); i++) {
+            RippleAnimationSession s = mRunningAnimations.get(i);
+            s.setRadius(newRadius);
+            s.getProperties().getShader()
+                    .setResolution(mHotspotBounds.width(), mHotspotBounds.height());
+            float cx = mHotspotBounds.centerX(), cy = mHotspotBounds.centerY();
+            s.getProperties().getShader().setOrigin(cx, cy);
+            s.getProperties().setOrigin(cx, cy);
+            if (!s.isForceSoftware()) {
+                s.getCanvasProperties()
+                        .setOrigin(CanvasProperty.createFloat(cx), CanvasProperty.createFloat(cy));
+            }
         }
     }
 
@@ -807,7 +823,7 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private void startPatternedAnimation() {
-        mRippleActive = true;
+        mAddRipple = true;
         invalidateSelf(false);
     }
 
@@ -838,41 +854,36 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private void drawPatterned(@NonNull Canvas canvas) {
-        final Rect bounds = getDirtyBounds();
+        final Rect bounds = mHotspotBounds;
         final int saveCount = canvas.save(Canvas.CLIP_SAVE_FLAG);
         boolean useCanvasProps = shouldUseCanvasProps(canvas);
-        boolean changedHotspotBounds = !bounds.equals(mHotspotBounds);
         if (isBounded()) {
-            canvas.clipRect(bounds);
+            canvas.clipRect(getDirtyBounds());
         }
         final float x, y, cx, cy, w, h;
-        if (changedHotspotBounds) {
-            x = mHotspotBounds.exactCenterX();
-            y = mHotspotBounds.exactCenterY();
-            cx = x;
-            cy = y;
-            h = mHotspotBounds.height();
-            w = mHotspotBounds.width();
-            useCanvasProps = false;
-        } else {
-            x = mPendingX;
-            y = mPendingY;
-            cx = bounds.centerX();
-            cy = bounds.centerY();
-            h = bounds.height();
-            w = bounds.width();
-        }
-        boolean shouldAnimate = mRippleActive;
+        boolean addRipple = mAddRipple;
+        cx = bounds.centerX();
+        cy = bounds.centerY();
         boolean shouldExit = mExitingAnimation;
-        mRippleActive = false;
         mExitingAnimation = false;
-        if (mRunningAnimations.size() > 0 && !shouldAnimate) {
+        mAddRipple = false;
+        if (mRunningAnimations.size() > 0 && !addRipple) {
             // update paint when view is invalidated
             getRipplePaint();
         }
         drawContent(canvas);
         drawPatternedBackground(canvas, cx, cy);
-        if (shouldAnimate && mRunningAnimations.size() <= MAX_RIPPLES) {
+        if (addRipple && mRunningAnimations.size() <= MAX_RIPPLES) {
+            if (mHasPending) {
+                x = mPendingX;
+                y = mPendingY;
+                mHasPending = false;
+            } else {
+                x = bounds.exactCenterX();
+                y = bounds.exactCenterY();
+            }
+            h = bounds.height();
+            w = bounds.width();
             RippleAnimationSession.AnimationProperties<Float, Paint> properties =
                     createAnimationProperties(x, y, cx, cy, w, h);
             mRunningAnimations.add(new RippleAnimationSession(properties, !useCanvasProps)
@@ -896,33 +907,13 @@ public class RippleDrawable extends LayerDrawable {
                         CanvasProperty<Paint>>
                         p = s.getCanvasProperties();
                 RecordingCanvas can = (RecordingCanvas) canvas;
-                CanvasProperty<Float> xProp, yProp;
-                if (changedHotspotBounds) {
-                    xProp = CanvasProperty.createFloat(x);
-                    yProp = CanvasProperty.createFloat(y);
-                    p.getShader().setTouch(x, y);
-                    p.getShader().setOrigin(x, y);
-                } else {
-                    xProp = p.getX();
-                    yProp = p.getY();
-                }
-                can.drawRipple(xProp, yProp, p.getMaxRadius(), p.getPaint(),
+                can.drawRipple(p.getX(), p.getY(), p.getMaxRadius(), p.getPaint(),
                         p.getProgress(), p.getNoisePhase(), p.getColor(), p.getShader());
             } else {
                 RippleAnimationSession.AnimationProperties<Float, Paint> p =
                         s.getProperties();
-                float xProp, yProp;
-                if (changedHotspotBounds) {
-                    xProp = x;
-                    yProp = y;
-                    p.getShader().setTouch(x, y);
-                    p.getShader().setOrigin(x, y);
-                } else {
-                    xProp = p.getX();
-                    yProp = p.getY();
-                }
                 float radius = p.getMaxRadius();
-                canvas.drawCircle(xProp, yProp, radius, p.getPaint());
+                canvas.drawCircle(p.getX(), p.getY(), radius, p.getPaint());
             }
         }
         canvas.restoreToCount(saveCount);
@@ -1108,6 +1099,11 @@ public class RippleDrawable extends LayerDrawable {
         }
         if (mState.mRippleStyle == STYLE_SOLID) {
             mMaskCanvas.translate(left, top);
+        }
+        if (mState.mRippleStyle == STYLE_PATTERNED) {
+            for (int i = 0; i < mRunningAnimations.size(); i++) {
+                mRunningAnimations.get(i).getProperties().getShader().setShader(mMaskShader);
+            }
         }
     }
 

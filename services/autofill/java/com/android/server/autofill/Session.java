@@ -2648,6 +2648,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.d(TAG, "Starting partition or augmented request for view id " + id + ": "
                         + viewState.getStateAsString());
             }
+            // Fix to always let standard autofill start.
+            // Sometimes activity contain IMPORTANT_FOR_AUTOFILL_NO fields which marks session as
+            // augmentedOnly, but other fields are still fillable by standard autofill.
+            mSessionFlags.mAugmentedAutofillOnly = false;
             requestNewFillResponseLocked(viewState, ViewState.STATE_STARTED_PARTITION, flags);
             return true;
         }
@@ -2847,12 +2851,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             if (sDebug) Slog.d(TAG, "trigger augmented autofill.");
                             triggerAugmentedAutofillLocked(flags);
                         } else {
-                            if (sDebug) Slog.d(TAG, "skip augmented autofill for same view.");
+                            if (sDebug) {
+                                Slog.d(TAG, "skip augmented autofill for same view: "
+                                        + "same view entered");
+                            }
                         }
                         return;
                     } else if (mSessionFlags.mAugmentedAutofillOnly && isSameViewEntered) {
                         // Regular autofill is disabled.
-                        if (sDebug) Slog.d(TAG, "skip augmented autofill for same view.");
+                        if (sDebug) {
+                            Slog.d(TAG, "skip augmented autofill for same view: "
+                                    + "standard autofill disabled.");
+                        }
                         return;
                     }
                 }

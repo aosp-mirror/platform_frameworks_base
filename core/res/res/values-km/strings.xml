@@ -601,6 +601,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"មិន​មាន​ការ​ចុះឈ្មោះស្នាម​ម្រាមដៃទេ។"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ឧបករណ៍នេះ​មិនមាន​ឧបករណ៍ចាប់​ស្នាមម្រាមដៃទេ។"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"បានបិទ​ឧបករណ៍​ចាប់សញ្ញាជា​បណ្តោះអាសន្ន។"</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ម្រាមដៃ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ប្រើស្នាមម្រាមដៃ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ប្រើស្នាមម្រាមដៃ ឬ​ការចាក់សោអេក្រង់"</string>
@@ -1019,7 +1021,7 @@
     <string name="text_copied" msgid="2531420577879738860">"បាន​ចម្លង​អត្ថបទ​ទៅ​ក្ដារ​តម្បៀត​ខ្ទាស់។"</string>
     <string name="copied" msgid="4675902854553014676">"បា​នចម្លង"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូលពី <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​ពីឃ្លីបបត​របស់អ្នក"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"បានដាក់ចូល <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ពីឃ្លីបបត​របស់អ្នក"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​អត្ថបទ​ដែលអ្នក​បានចម្លង"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​រូបភាព​ដែលអ្នក​បានចម្លង"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូល​ខ្លឹមសារ​ដែលអ្នក​បានចម្លង"</string>
@@ -1458,10 +1460,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​ស្នើសុំលុប​កញ្ចប់។"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ស្នើឲ្យមិនអើពើចំពោះការបង្កើនប្រសិទ្ធភាពថ្ម"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"អនុញ្ញាតឲ្យកម្មវិធីស្នើសុំការអនុញ្ញាត ដើម្បីមិនអើពើចំពោះការបង្កើនប្រសិទ្ធភាពថ្ម។"</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"សួរសំណួរអំពីកញ្ចប់ទាំងអស់"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"អនុញ្ញាតឱ្យកម្មវិធីមើលកញ្ចប់ដែលបានដំឡើងទាំងអស់។"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ប៉ះ ពីរ​ដង​ដើម្បី​ពិនិត្យ​ការ​ពង្រីក"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"មិន​អាច​បន្ថែម​ធាតុ​ក្រាហ្វិក។"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ទៅ"</string>

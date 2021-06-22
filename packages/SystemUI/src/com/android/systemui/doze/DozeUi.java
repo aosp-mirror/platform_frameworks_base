@@ -21,6 +21,7 @@ import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
 
 import android.app.AlarmManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -34,6 +35,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -48,7 +50,8 @@ import dagger.Lazy;
  * The policy controlling doze.
  */
 @DozeScope
-public class DozeUi implements DozeMachine.Part, TunerService.Tunable {
+public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
+        ConfigurationController.ConfigurationListener {
     // if enabled, calls dozeTimeTick() whenever the time changes:
     private static final boolean BURN_IN_TESTING_ENABLED = false;
     private static final long TIME_TICK_DEADLINE_MILLIS = 90 * 1000; // 1.5min
@@ -63,6 +66,7 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable {
     private final DozeLog mDozeLog;
     private final Lazy<StatusBarStateController> mStatusBarStateController;
     private final TunerService mTunerService;
+    private final ConfigurationController mConfigurationController;
 
     private boolean mKeyguardShowing;
     private final KeyguardUpdateMonitorCallback mKeyguardVisibilityCallback =
@@ -84,6 +88,11 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable {
                         mHandler.post(mWakeLock.wrap(() -> {}));
                     }
                 }
+
+                @Override
+                public void onShadeExpandedChanged(boolean expanded) {
+                    updateAnimateScreenOff();
+                }
             };
 
     private long mLastTimeTickElapsed = 0;
@@ -93,7 +102,8 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable {
             WakeLock wakeLock, DozeHost host, @Main Handler handler,
             DozeParameters params, KeyguardUpdateMonitor keyguardUpdateMonitor,
             DozeLog dozeLog, TunerService tunerService,
-            Lazy<StatusBarStateController> statusBarStateController) {
+            Lazy<StatusBarStateController> statusBarStateController,
+            ConfigurationController configurationController) {
         mContext = context;
         mWakeLock = wakeLock;
         mHost = host;
@@ -107,11 +117,15 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable {
         mStatusBarStateController = statusBarStateController;
 
         mTunerService.addTunable(this, Settings.Secure.DOZE_ALWAYS_ON);
+
+        mConfigurationController = configurationController;
+        mConfigurationController.addCallback(this);
     }
 
     @Override
     public void destroy() {
         mTunerService.removeTunable(this);
+        mConfigurationController.removeCallback(this);
     }
 
     @Override
@@ -273,5 +287,10 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable {
         if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)) {
             updateAnimateScreenOff();
         }
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        updateAnimateScreenOff();
     }
 }

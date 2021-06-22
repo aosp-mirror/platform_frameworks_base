@@ -31,9 +31,6 @@ import android.provider.Settings;
 import android.util.MathUtils;
 import android.view.Display;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 /**
  * BrightnessSynchronizer helps convert between the int (old) system and float
  * (new) system for storing the brightness. It has methods to convert between the two and also
@@ -43,12 +40,11 @@ public class BrightnessSynchronizer {
 
     private static final int MSG_UPDATE_FLOAT = 1;
     private static final int MSG_UPDATE_INT = 2;
+    private static final int MSG_UPDATE_BOTH = 3;
 
     private static final String TAG = "BrightnessSynchronizer";
     private static final Uri BRIGHTNESS_URI =
             Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS);
-    private static final Uri BRIGHTNESS_FLOAT_URI =
-            Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_FLOAT);
 
     // The tolerance within which we consider brightness values approximately equal to eachother.
     // This value is approximately 1/3 of the smallest possible brightness value.
@@ -56,8 +52,6 @@ public class BrightnessSynchronizer {
 
     private DisplayManager mDisplayManager;
     private final Context mContext;
-
-    private final Queue<Object> mWriteHistory = new LinkedList<>();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -68,6 +62,9 @@ public class BrightnessSynchronizer {
                     break;
                 case MSG_UPDATE_INT:
                     updateBrightnessIntFromFloat(Float.intBitsToFloat(msg.arg1));
+                    break;
+                case MSG_UPDATE_BOTH:
+                    updateBoth(Float.intBitsToFloat(msg.arg1));
                     break;
                 default:
                     super.handleMessage(msg);
@@ -139,7 +136,7 @@ public class BrightnessSynchronizer {
 
     /**
      * Translates specified value from the float brightness system to the int brightness system,
-     * given the min/max of each range.  Accounts for special values such as OFF and invalid values.
+     * given the min/max of each range. Accounts for special values such as OFF and invalid values.
      * Value returned as a float primitive (to preserve precision), but is a value within the
      * int-system range.
      */
@@ -168,49 +165,63 @@ public class BrightnessSynchronizer {
     }
 
     /**
-     * Updates the float setting based on a passed in int value. This is called whenever the int
-     * setting changes. mWriteHistory keeps a record of the values that been written to the settings
-     * from either this method or updateBrightnessIntFromFloat. This is to ensure that the value
-     * being set is due to an external value being set, rather than the updateBrightness* methods.
-     * The intention of this is to avoid race conditions when the setting is being changed
-     * frequently and to ensure we are not reacting to settings changes from this file.
+     * Updates the settings based on a passed in int value. This is called whenever the int
+     * setting changes. mPreferredSettingValue holds the most recently updated brightness value
+     * as a float that we would like the display to be set to.
+     *
+     * We then schedule an update to both the int and float settings, but, remove all the other
+     * messages to update all, to prevent us getting stuck in a loop.
+     *
      * @param value Brightness value as int to store in the float setting.
      */
     private void updateBrightnessFloatFromInt(int value) {
-        Object topOfQueue = mWriteHistory.peek();
-        if (topOfQueue != null && topOfQueue.equals(value)) {
-            mWriteHistory.poll();
-        } else {
-            if (brightnessFloatToInt(mPreferredSettingValue) == value) {
-                return;
-            }
-            float newBrightnessFloat = brightnessIntToFloat(value);
-            mWriteHistory.offer(newBrightnessFloat);
-            mPreferredSettingValue = newBrightnessFloat;
-            mDisplayManager.setBrightness(Display.DEFAULT_DISPLAY, newBrightnessFloat);
+        if (brightnessFloatToInt(mPreferredSettingValue) == value) {
+            return;
         }
+
+        mPreferredSettingValue = brightnessIntToFloat(value);
+        final int newBrightnessAsIntBits = Float.floatToIntBits(mPreferredSettingValue);
+        mHandler.removeMessages(MSG_UPDATE_BOTH);
+        mHandler.obtainMessage(MSG_UPDATE_BOTH, newBrightnessAsIntBits, 0).sendToTarget();
     }
 
     /**
-     * Updates the int setting based on a passed in float value. This is called whenever the float
-     * setting changes. mWriteHistory keeps a record of the values that been written to the settings
-     * from either this method or updateBrightnessFloatFromInt. This is to ensure that the value
-     * being set is due to an external value being set, rather than the updateBrightness* methods.
-     * The intention of this is to avoid race conditions when the setting is being changed
-     * frequently and to ensure we are not reacting to settings changes from this file.
+     * Updates the settings based on a passed in float value. This is called whenever the float
+     * setting changes. mPreferredSettingValue holds the most recently updated brightness value
+     * as a float that we would like the display to be set to.
+     *
+     * We then schedule an update to both the int and float settings, but, remove all the other
+     * messages to update all, to prevent us getting stuck in a loop.
+     *
      * @param value Brightness setting as float to store in int setting.
      */
     private void updateBrightnessIntFromFloat(float value) {
-        int newBrightnessInt = brightnessFloatToInt(value);
-        Object topOfQueue = mWriteHistory.peek();
-        if (topOfQueue != null && topOfQueue.equals(value)) {
-            mWriteHistory.poll();
-        } else {
-            mWriteHistory.offer(newBrightnessInt);
-            mPreferredSettingValue = value;
+        if (floatEquals(mPreferredSettingValue, value)) {
+            return;
+        }
+
+        mPreferredSettingValue = value;
+        final int newBrightnessAsIntBits = Float.floatToIntBits(mPreferredSettingValue);
+        mHandler.removeMessages(MSG_UPDATE_BOTH);
+        mHandler.obtainMessage(MSG_UPDATE_BOTH, newBrightnessAsIntBits, 0).sendToTarget();
+    }
+
+
+    /**
+     * Updates both setting values if they have changed
+     * mDisplayManager.setBrightness automatically checks for changes
+     * Settings.System.putIntForUser needs to be checked, to prevent an extra callback to this class
+     *
+     * @param newBrightnessFloat Brightness setting as float to store in both settings
+     */
+    private void updateBoth(float newBrightnessFloat) {
+        int newBrightnessInt = brightnessFloatToInt(newBrightnessFloat);
+        mDisplayManager.setBrightness(Display.DEFAULT_DISPLAY, newBrightnessFloat);
+        if (getScreenBrightnessInt(mContext) != newBrightnessInt) {
             Settings.System.putIntForUser(mContext.getContentResolver(),
                     Settings.System.SCREEN_BRIGHTNESS, newBrightnessInt, UserHandle.USER_CURRENT);
         }
+
     }
 
     /**

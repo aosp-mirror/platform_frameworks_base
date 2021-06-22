@@ -80,6 +80,8 @@ class AlarmTileTest : SysuiTestCase() {
             nextAlarmController
         )
 
+        tile.initialize()
+
         verify(nextAlarmController).observe(eq(tile), capture(callbackCaptor))
         tile.refreshState()
         testableLooper.processAllMessages()

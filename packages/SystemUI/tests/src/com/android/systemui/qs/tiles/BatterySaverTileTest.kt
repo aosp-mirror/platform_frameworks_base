@@ -87,6 +87,9 @@ class BatterySaverTileTest : SysuiTestCase() {
                 qsLogger,
                 batteryController,
                 secureSettings)
+
+        tile.initialize()
+        testableLooper.processAllMessages()
     }
 
     @Test

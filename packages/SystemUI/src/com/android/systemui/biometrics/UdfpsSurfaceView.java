@@ -55,6 +55,7 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
     @NonNull private final SurfaceHolder mHolder;
     @NonNull private final Paint mSensorPaint;
     @NonNull private final SimpleDrawable mIlluminationDotDrawable;
+    private final int mOnIlluminatedDelayMs;
     private final @HbmType int mHbmType;
 
     @NonNull private RectF mSensorRect;
@@ -82,6 +83,9 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
             canvas.drawOval(mSensorRect, mSensorPaint);
         };
 
+        mOnIlluminatedDelayMs = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_udfps_illumination_transition_ms);
+
         if (Build.IS_ENG || Build.IS_USERDEBUG) {
             mHbmType = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                     SETTING_HBM_TYPE, DEFAULT_HBM_TYPE, UserHandle.USER_CURRENT);
@@ -107,9 +111,8 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
                 }
                 if (onIlluminatedRunnable != null) {
                     // No framework API can reliably tell when a frame reaches the panel. A timeout
-                    // is the safest solution. The frame should be displayed within 3 refresh
-                    // cycles, which on a 60 Hz panel equates to 50 milliseconds.
-                    postDelayed(onIlluminatedRunnable, 50 /* delayMillis */);
+                    // is the safest solution.
+                    postDelayed(onIlluminatedRunnable, mOnIlluminatedDelayMs);
                 } else {
                     Log.w(TAG, "startIllumination | onIlluminatedRunnable is null");
                 }

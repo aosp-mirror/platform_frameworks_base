@@ -710,10 +710,10 @@ public class NotificationChildrenContainer extends ViewGroup {
         if (mUserLocked) {
             expandFraction = getGroupExpandFraction();
         }
-        final boolean dividersVisible = mUserLocked && !showingAsLowPriority()
-                || (mChildrenExpanded && mShowDividersWhenExpanded)
-                || (mContainingNotification.isGroupExpansionChanging()
-                && !mHideDividersDuringExpand);
+        final boolean isExpanding = !showingAsLowPriority()
+                && (mUserLocked || mContainingNotification.isGroupExpansionChanging());
+        final boolean dividersVisible = (mChildrenExpanded && mShowDividersWhenExpanded)
+                || (isExpanding && !mHideDividersDuringExpand);
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mAttachedChildren.get(i);
             ExpandableViewState viewState = child.getViewState();
@@ -725,7 +725,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             tmpState.yTranslation = viewState.yTranslation - mDividerHeight;
             float alpha = mChildrenExpanded && viewState.alpha != 0 ? mDividerAlpha : 0;
             if (mUserLocked && !showingAsLowPriority() && viewState.alpha != 0) {
-                alpha = NotificationUtils.interpolate(0, 0.5f,
+                alpha = NotificationUtils.interpolate(0, mDividerAlpha,
                         Math.min(viewState.alpha, expandFraction));
             }
             tmpState.hidden = !dividersVisible;
@@ -789,10 +789,10 @@ public class NotificationChildrenContainer extends ViewGroup {
         int childCount = mAttachedChildren.size();
         ViewState tmpState = new ViewState();
         float expandFraction = getGroupExpandFraction();
-        final boolean dividersVisible = mUserLocked && !showingAsLowPriority()
-                || (mChildrenExpanded && mShowDividersWhenExpanded)
-                || (mContainingNotification.isGroupExpansionChanging()
-                && !mHideDividersDuringExpand);
+        final boolean isExpanding = !showingAsLowPriority()
+                && (mUserLocked || mContainingNotification.isGroupExpansionChanging());
+        final boolean dividersVisible = (mChildrenExpanded && mShowDividersWhenExpanded)
+                || (isExpanding && !mHideDividersDuringExpand);
         for (int i = childCount - 1; i >= 0; i--) {
             ExpandableNotificationRow child = mAttachedChildren.get(i);
             ExpandableViewState viewState = child.getViewState();
@@ -802,9 +802,9 @@ public class NotificationChildrenContainer extends ViewGroup {
             View divider = mDividers.get(i);
             tmpState.initFrom(divider);
             tmpState.yTranslation = viewState.yTranslation - mDividerHeight;
-            float alpha = mChildrenExpanded && viewState.alpha != 0 ? 0.5f : 0;
+            float alpha = mChildrenExpanded && viewState.alpha != 0 ? mDividerAlpha : 0;
             if (mUserLocked && !showingAsLowPriority() && viewState.alpha != 0) {
-                alpha = NotificationUtils.interpolate(0, 0.5f,
+                alpha = NotificationUtils.interpolate(0, mDividerAlpha,
                         Math.min(viewState.alpha, expandFraction));
             }
             tmpState.hidden = !dividersVisible;

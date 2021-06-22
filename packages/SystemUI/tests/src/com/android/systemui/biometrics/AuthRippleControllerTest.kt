@@ -25,6 +25,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.CommandRegistry
+import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.StatusBar
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -53,6 +54,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var bypassController: KeyguardBypassController
+    @Mock private lateinit var biometricUnlockController: BiometricUnlockController
 
     @Before
     fun setUp() {
@@ -66,6 +68,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
             commandRegistry,
             notificationShadeWindowController,
             bypassController,
+            biometricUnlockController,
             rippleView
         )
         controller.init()
@@ -90,7 +93,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
 
         // THEN update sensor location and show ripple
         verify(rippleView).setSensorLocation(fpsLocation)
-        verify(rippleView).startRipple(any())
+        verify(rippleView).startRipple(any(), any())
     }
 
     @Test
@@ -111,7 +114,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
             false /* isStrongBiometric */)
 
         // THEN no ripple
-        verify(rippleView, never()).startRipple(any())
+        verify(rippleView, never()).startRipple(any(), any())
     }
 
     @Test
@@ -132,7 +135,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
             false /* isStrongBiometric */)
 
         // THEN no ripple
-        verify(rippleView, never()).startRipple(any())
+        verify(rippleView, never()).startRipple(any(), any())
     }
 
     @Test
@@ -156,7 +159,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
 
         // THEN show ripple
         verify(rippleView).setSensorLocation(faceLocation)
-        verify(rippleView).startRipple(any())
+        verify(rippleView).startRipple(any(), any())
     }
 
     @Test
@@ -176,7 +179,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
             false /* isStrongBiometric */)
 
         // THEN no ripple
-        verify(rippleView, never()).startRipple(any())
+        verify(rippleView, never()).startRipple(any(), any())
     }
 
     @Test
@@ -191,7 +194,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
             0 /* userId */,
             BiometricSourceType.FACE /* type */,
             false /* isStrongBiometric */)
-        verify(rippleView, never()).startRipple(any())
+        verify(rippleView, never()).startRipple(any(), any())
     }
 
     @Test
@@ -206,7 +209,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
             0 /* userId */,
             BiometricSourceType.FINGERPRINT /* type */,
             false /* isStrongBiometric */)
-        verify(rippleView, never()).startRipple(any())
+        verify(rippleView, never()).startRipple(any(), any())
     }
 
     @Test

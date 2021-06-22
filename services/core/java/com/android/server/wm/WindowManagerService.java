@@ -2463,6 +2463,17 @@ public class WindowManagerService extends IWindowManager.Stub
             configChanged = displayContent.updateOrientation();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
+            final DisplayInfo rotatedDisplayInfo =
+                    win.mToken.getFixedRotationTransformDisplayInfo();
+            if (rotatedDisplayInfo != null) {
+                outSurfaceControl.setTransformHint(rotatedDisplayInfo.rotation);
+            } else {
+                // We have to update the transform hint of display here, but we need to get if from
+                // SurfaceFlinger, so set it as rotation of display for most cases, then
+                // SurfaceFlinger would still update the transform hint of display in next frame.
+                outSurfaceControl.setTransformHint(displayContent.getDisplayInfo().rotation);
+            }
+
             if (toBeDisplayed && win.mIsWallpaper) {
                 displayContent.mWallpaperController.updateWallpaperOffset(win, false /* sync */);
             }
@@ -5384,25 +5395,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
                 if (displayContent != null) {
                     displayContent.setForcedScalingMode(mode);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    void setSandboxDisplayApis(int displayId, boolean sandboxDisplayApis) {
-        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
-        }
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                if (displayContent != null) {
-                    displayContent.setSandboxDisplayApis(sandboxDisplayApis);
                 }
             }
         } finally {

@@ -613,6 +613,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ليست هناك بصمات إصبع مسجَّلة."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"لا يحتوي هذا الجهاز على مستشعِر بصمات إصبع."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"تم إيقاف جهاز الاستشعار مؤقتًا."</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"الإصبع <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"استخدام بصمة الإصبع"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"استخدام بصمة الإصبع أو قفل الشاشة"</string>
@@ -1538,10 +1540,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"للسماح لتطبيق ما بطلب حذف الحِزم."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"طلب تجاهل تحسينات البطارية"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"للسماح للتطبيق بطلب الإذن لتجاهل تحسينات البطارية في هذا التطبيق."</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"طلب البحث في كل الحِزم"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"يسمح هذا الإذن للتطبيق بعرض كل الحِزم المثبّتة."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"اضغط مرتين للتحكم في التكبير أو التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"تعذرت إضافة أداة."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"تنفيذ"</string>

@@ -26,11 +26,9 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENAB
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Log;
 import android.view.Display;
@@ -53,6 +51,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import com.google.android.collect.Lists;
 
@@ -108,12 +107,14 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
             KeyguardViewMediator keyguardViewMediator,
-            KeyguardBypassController keyguardBypassController, SysuiColorExtractor colorExtractor,
-            DumpManager dumpManager) {
+            KeyguardBypassController keyguardBypassController,
+            SysuiColorExtractor colorExtractor,
+            DumpManager dumpManager,
+            KeyguardStateController keyguardStateController) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
-        mKeyguardScreenRotation = shouldEnableKeyguardScreenRotation();
+        mKeyguardScreenRotation = keyguardStateController.isKeyguardScreenRotationAllowed();
         mDozeParameters = dozeParameters;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
         mLpChanged = new LayoutParams();
@@ -171,12 +172,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         if (listener != null && mScrimsVisibilityListener != listener) {
             mScrimsVisibilityListener = listener;
         }
-    }
-
-    private boolean shouldEnableKeyguardScreenRotation() {
-        Resources res = mContext.getResources();
-        return SystemProperties.getBoolean("lockscreen.rot_override", false)
-                || res.getBoolean(R.bool.config_enableLockScreenRotation);
     }
 
     /**

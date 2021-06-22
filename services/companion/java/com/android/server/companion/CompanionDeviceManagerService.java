@@ -454,19 +454,13 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 }).cancelTimeout();
 
             }, FgThread.getExecutor()).whenComplete(uncheckExceptions((association, err) -> {
-
-                final long callingIdentity = Binder.clearCallingIdentity();
-                try {
-                    if (err == null) {
-                        addAssociation(association);
-                    } else {
-                        Slog.e(LOG_TAG, "Failed to discover device(s)", err);
-                        callback.onFailure("No devices found: " + err.getMessage());
-                    }
-                    cleanup();
-                } finally {
-                    Binder.restoreCallingIdentity(callingIdentity);
+                if (err == null) {
+                    addAssociation(association);
+                } else {
+                    Slog.e(LOG_TAG, "Failed to discover device(s)", err);
+                    callback.onFailure("No devices found: " + err.getMessage());
                 }
+                cleanup();
             }));
         }
 
@@ -759,9 +753,19 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }
             return notMatch;
         }));
+        restartBleScan();
     }
 
     void onAssociationPreRemove(Association association) {
+        if (association.isNotifyOnDeviceNearby()) {
+            ServiceConnector<ICompanionDeviceService> serviceConnector =
+                    mDeviceListenerServiceConnectors.forUser(association.getUserId())
+                            .get(association.getPackageName());
+            if (serviceConnector != null) {
+                serviceConnector.unbind();
+            }
+        }
+
         String deviceProfile = association.getDeviceProfile();
         if (deviceProfile != null) {
             Association otherAssociationWithDeviceProfile = find(
@@ -791,16 +795,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
-            }
-        }
-
-        if (association.isNotifyOnDeviceNearby()) {
-            ServiceConnector<ICompanionDeviceService> serviceConnector =
-                    mDeviceListenerServiceConnectors.forUser(association.getUserId())
-                            .get(association.getPackageName());
-            if (serviceConnector != null) {
-                serviceConnector.unbind();
-                restartBleScan();
             }
         }
     }

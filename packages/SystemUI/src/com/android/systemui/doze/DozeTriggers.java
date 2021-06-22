@@ -38,6 +38,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.doze.DozeMachine.State;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
@@ -96,6 +97,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private long mNotificationPulseTime;
     private boolean mPulsePending;
+    private Runnable mAodInterruptRunnable;
 
     /** see {@link #onProximityFar} prox for callback */
     private boolean mWantProxSensor;
@@ -303,11 +305,16 @@ public class DozeTriggers implements DozeMachine.Part {
                 } else if (isPickup) {
                     gentleWakeUp(pulseReason);
                 } else if (isUdfpsLongPress) {
+                    final State state = mMachine.getState();
+                    if (state == State.DOZE_AOD || state == State.DOZE) {
+                        // Since the gesture won't be received by the UDFPS view, we need to
+                        // manually inject an event once the display is ON
+                        mAodInterruptRunnable = () ->
+                            mAuthController.onAodInterrupt((int) screenX, (int) screenY,
+                                rawValues[3] /* major */, rawValues[4] /* minor */);
+                    }
+
                     requestPulse(DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS, true, null);
-                    // Since the gesture won't be received by the UDFPS view, manually inject an
-                    // event.
-                    mAuthController.onAodInterrupt((int) screenX, (int) screenY,
-                            rawValues[3] /* major */, rawValues[4] /* minor */);
                 } else {
                     mDozeHost.extendPulse(pulseReason);
                 }
@@ -439,6 +446,7 @@ public class DozeTriggers implements DozeMachine.Part {
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
             case INITIALIZED:
+                mAodInterruptRunnable = null;
                 sWakeDisplaySensorState = true;
                 mBroadcastReceiver.register(mBroadcastDispatcher);
                 mDozeHost.addCallback(mHostCallback);
@@ -448,6 +456,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 break;
             case DOZE:
             case DOZE_AOD:
+                mAodInterruptRunnable = null;
                 mWantProxSensor = newState != DozeMachine.State.DOZE;
                 mWantSensors = true;
                 mWantTouchScreenSensors = true;
@@ -494,6 +503,11 @@ public class DozeTriggers implements DozeMachine.Part {
                 || state == Display.STATE_DOZE_SUSPEND || state == Display.STATE_OFF;
         mDozeSensors.setProxListening(mWantProxSensor && lowPowerStateOrOff);
         mDozeSensors.setListening(mWantSensors, mWantTouchScreenSensors, lowPowerStateOrOff);
+
+        if (mAodInterruptRunnable != null && state == Display.STATE_ON) {
+            mAodInterruptRunnable.run();
+            mAodInterruptRunnable = null;
+        }
     }
 
     /**
@@ -576,6 +590,8 @@ public class DozeTriggers implements DozeMachine.Part {
 
     @Override
     public void dump(PrintWriter pw) {
+        pw.println(" mAodInterruptRunnable=" + mAodInterruptRunnable);
+
         pw.print(" notificationPulseTime=");
         pw.println(Formatter.formatShortElapsedTime(mContext, mNotificationPulseTime));
 

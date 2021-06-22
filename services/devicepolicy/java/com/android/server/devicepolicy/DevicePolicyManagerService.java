@@ -169,6 +169,7 @@ import android.app.admin.DevicePolicyManager.OperationSafetyReason;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.DevicePolicyManager.PersonalAppsSuspensionReason;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DevicePolicyManagerLiteInternal;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.app.admin.DeviceStateCache;
 import android.app.admin.FactoryResetProtectionPolicy;
@@ -1748,6 +1749,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mTransferOwnershipMetadataManager = mInjector.newTransferOwnershipMetadataManager();
         mBugreportCollectionManager = new RemoteBugreportManager(this, mInjector);
 
+        // "Lite" interface is available even when the device doesn't have the feature
+        LocalServices.addService(DevicePolicyManagerLiteInternal.class, mLocalService);
         if (!mHasFeature) {
             // Skip the rest of the initialization
             mSetupContentObserver = null;
@@ -12612,7 +12615,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @VisibleForTesting
-    final class LocalService extends DevicePolicyManagerInternal {
+    final class LocalService extends DevicePolicyManagerInternal
+            implements DevicePolicyManagerLiteInternal {
         private List<OnCrossProfileWidgetProvidersChangeListener> mWidgetProviderListeners;
 
         @Override
@@ -14313,7 +14317,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isAffiliatedUser() {
+    public boolean isCallingUserAffiliated() {
         if (!mHasFeature) {
             return false;
         }
@@ -14321,6 +14325,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             return isUserAffiliatedWithDeviceLocked(mInjector.userHandleGetCallingUserId());
         }
+    }
+
+    @Override
+    public boolean isAffiliatedUser(@UserIdInt int userId) {
+        if (!mHasFeature) {
+            return false;
+        }
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
+
+        return isUserAffiliatedWithDeviceLocked(userId);
     }
 
     private boolean isUserAffiliatedWithDeviceLocked(@UserIdInt int userId) {
@@ -17550,10 +17565,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isUsbDataSignalingEnabled(String packageName) {
+        final CallerIdentity caller = getCallerIdentity(packageName);
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(
-                    getCallerIdentity(packageName));
-            return admin.mUsbDataSignalingEnabled;
+            // If the caller is an admin, return the policy set by itself. Otherwise
+            // return the device-wide policy.
+            if (isDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller)) {
+                return getProfileOwnerOrDeviceOwnerLocked(caller).mUsbDataSignalingEnabled;
+            } else {
+                return isUsbDataSignalingEnabledInternalLocked();
+            }
         }
     }
 
@@ -17563,10 +17583,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(isSystemUid(caller));
 
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                    UserHandle.USER_SYSTEM);
-            return admin == null || admin.mUsbDataSignalingEnabled;
+            return isUsbDataSignalingEnabledInternalLocked();
         }
+    }
+
+    private boolean isUsbDataSignalingEnabledInternalLocked() {
+        final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                UserHandle.USER_SYSTEM);
+        return admin == null || admin.mUsbDataSignalingEnabled;
     }
 
     @Override

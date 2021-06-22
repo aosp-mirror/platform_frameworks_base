@@ -753,9 +753,23 @@ public class HardwareRenderer {
         nCancelLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
     }
 
+    private ASurfaceTransactionCallback mASurfaceTransactionCallback;
+
     /** @hide */
     public void setASurfaceTransactionCallback(ASurfaceTransactionCallback callback) {
+        // ensure callback is kept alive on the java side since weak ref is used in native code
+        mASurfaceTransactionCallback = callback;
         nSetASurfaceTransactionCallback(mNativeProxy, callback);
+    }
+
+    private PrepareSurfaceControlForWebviewCallback mAPrepareSurfaceControlForWebviewCallback;
+
+    /** @hide */
+    public void setPrepareSurfaceControlForWebviewCallback(
+            PrepareSurfaceControlForWebviewCallback callback) {
+        // ensure callback is kept alive on the java side since weak ref is used in native code
+        mAPrepareSurfaceControlForWebviewCallback = callback;
+        nSetPrepareSurfaceControlForWebviewCallback(mNativeProxy, callback);
     }
 
     /** @hide */
@@ -870,6 +884,19 @@ public class HardwareRenderer {
     /** called by native */
     static void closeHintSession(PerformanceHintManager.Session session) {
         session.close();
+    }
+
+   /**
+     * Interface used to receive callbacks when Webview requests a surface control.
+     *
+     * @hide
+     */
+    public interface PrepareSurfaceControlForWebviewCallback {
+        /**
+         * Invoked when Webview calls to get a surface control.
+         *
+         */
+        void prepare();
     }
 
     /**
@@ -1369,6 +1396,9 @@ public class HardwareRenderer {
 
     private static native void nSetASurfaceTransactionCallback(long nativeProxy,
             ASurfaceTransactionCallback callback);
+
+    private static native void nSetPrepareSurfaceControlForWebviewCallback(long nativeProxy,
+            PrepareSurfaceControlForWebviewCallback callback);
 
     private static native void nSetFrameCallback(long nativeProxy, FrameDrawingCallback callback);
 

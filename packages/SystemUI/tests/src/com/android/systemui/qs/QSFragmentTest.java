@@ -46,6 +46,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
+import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.settings.UserTracker;
@@ -132,7 +133,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 () -> mock(AutoTileManager.class), mock(DumpManager.class),
                 mock(BroadcastDispatcher.class), Optional.of(mock(StatusBar.class)),
                 mock(QSLogger.class), mock(UiEventLogger.class), mock(UserTracker.class),
-                mock(SecureSettings.class));
+                mock(SecureSettings.class), mock(CustomTileStatePersister.class));
         qs.setHost(host);
 
         qs.setListening(true);

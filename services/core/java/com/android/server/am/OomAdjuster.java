@@ -328,7 +328,8 @@ public class OomAdjuster {
                     final int index = mCache.indexOfKey(app.packageName);
                     Pair<Boolean, WeakReference<ApplicationInfo>> p;
                     if (index < 0) {
-                        p = new Pair<>(mPlatformCompat.isChangeEnabled(mChangeId, app),
+                        p = new Pair<>(mPlatformCompat.isChangeEnabledInternalNoLogging(mChangeId,
+                                                                                        app),
                                 new WeakReference<>(app));
                         mCache.put(app.packageName, p);
                         return p.first;
@@ -338,7 +339,8 @@ public class OomAdjuster {
                         return p.first;
                     }
                     // Cache is invalid, regenerate it
-                    p = new Pair<>(mPlatformCompat.isChangeEnabled(mChangeId, app),
+                    p = new Pair<>(mPlatformCompat.isChangeEnabledInternalNoLogging(mChangeId,
+                                                                                    app),
                             new WeakReference<>(app));
                     mCache.setValueAt(index, p);
                     return p.first;

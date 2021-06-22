@@ -132,4 +132,9 @@ public class FakeKeyguardStateController implements KeyguardStateController {
     public boolean canPerformSmartSpaceTransition() {
         return false;
     }
+
+    @Override
+    public boolean isKeyguardScreenRotationAllowed() {
+        return false;
+    }
 }

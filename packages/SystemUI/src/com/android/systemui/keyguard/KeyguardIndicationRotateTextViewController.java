@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.text.TextUtils;
-import android.view.View;
 
 import androidx.annotation.IntDef;
 
@@ -202,10 +201,7 @@ public class KeyguardIndicationRotateTextViewController extends
 
         mCurrIndicationType = type;
         mIndicationQueue.removeIf(x -> x == type);
-        if (mCurrIndicationType == INDICATION_TYPE_NONE) {
-            mView.setVisibility(View.GONE);
-        } else {
-            mView.setVisibility(View.VISIBLE);
+        if (mCurrIndicationType != INDICATION_TYPE_NONE) {
             mIndicationQueue.add(type); // re-add to show later
         }
 
@@ -299,7 +295,7 @@ public class KeyguardIndicationRotateTextViewController extends
         }
     }
 
-    private static final int INDICATION_TYPE_NONE = -1;
+    static final int INDICATION_TYPE_NONE = -1;
     public static final int INDICATION_TYPE_OWNER_INFO = 0;
     public static final int INDICATION_TYPE_DISCLOSURE = 1;
     public static final int INDICATION_TYPE_LOGOUT = 2;

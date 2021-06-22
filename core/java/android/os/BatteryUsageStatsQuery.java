@@ -72,12 +72,16 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     @NonNull
     private final int[] mUserIds;
     private final long mMaxStatsAgeMs;
+    private long mFromTimestamp;
+    private long mToTimestamp;
 
     private BatteryUsageStatsQuery(@NonNull Builder builder) {
         mFlags = builder.mFlags;
         mUserIds = builder.mUserIds != null ? builder.mUserIds.toArray()
                 : new int[]{UserHandle.USER_ALL};
         mMaxStatsAgeMs = builder.mMaxStatsAgeMs;
+        mFromTimestamp = builder.mFromTimestamp;
+        mToTimestamp = builder.mToTimestamp;
     }
 
     @BatteryUsageStatsFlags
@@ -112,11 +116,30 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         return mMaxStatsAgeMs;
     }
 
+    /**
+     * Returns the exclusive lower bound of the stored snapshot timestamps that should be included
+     * in the aggregation.  Ignored if {@link #getToTimestamp()} is zero.
+     */
+    public long getFromTimestamp() {
+        return mFromTimestamp;
+    }
+
+    /**
+     * Returns the inclusive upper bound of the stored snapshot timestamps that should
+     * be included in the aggregation.  The default is to include only the current stats
+     * accumulated since the latest battery reset.
+     */
+    public long getToTimestamp() {
+        return mToTimestamp;
+    }
+
     private BatteryUsageStatsQuery(Parcel in) {
         mFlags = in.readInt();
         mUserIds = new int[in.readInt()];
         in.readIntArray(mUserIds);
         mMaxStatsAgeMs = in.readLong();
+        mFromTimestamp = in.readLong();
+        mToTimestamp = in.readLong();
     }
 
     @Override
@@ -125,6 +148,8 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         dest.writeInt(mUserIds.length);
         dest.writeIntArray(mUserIds);
         dest.writeLong(mMaxStatsAgeMs);
+        dest.writeLong(mFromTimestamp);
+        dest.writeLong(mToTimestamp);
     }
 
     @Override
@@ -153,6 +178,8 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         private int mFlags;
         private IntArray mUserIds;
         private long mMaxStatsAgeMs = DEFAULT_MAX_STATS_AGE_MS;
+        private long mFromTimestamp;
+        private long mToTimestamp;
 
         /**
          * Builds a read-only BatteryUsageStatsQuery object.
@@ -200,6 +227,17 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          */
         public Builder includePowerModels() {
             mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS;
+            return this;
+        }
+
+        /**
+         * Requests to aggregate stored snapshots between the two supplied timestamps
+         * @param fromTimestamp Exclusive starting timestamp, as per System.currentTimeMillis()
+         * @param toTimestamp Inclusive ending timestamp, as per System.currentTimeMillis()
+         */
+        public Builder aggregateSnapshots(long fromTimestamp, long toTimestamp) {
+            mFromTimestamp = fromTimestamp;
+            mToTimestamp = toTimestamp;
             return this;
         }
 

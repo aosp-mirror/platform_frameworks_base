@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -109,6 +110,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private RingerModeTracker mRingerModeTracker;
     @Mock private RingerModeLiveData mRingerModeLiveData;
     @Mock private SysUiState mSysUiState;
+    @Mock private PackageManager mPackageManager;
     @Mock private Handler mHandler;
     @Mock private UserContextProvider mUserContextProvider;
     @Mock private StatusBar mStatusBar;
@@ -123,6 +125,8 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
 
         when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
         when(mUserContextProvider.getUserContext()).thenReturn(mContext);
+        when(mResources.getConfiguration()).thenReturn(
+                getContext().getResources().getConfiguration());
 
         mGlobalActionsDialogLite = new GlobalActionsDialogLite(mContext,
                 mWindowManagerFuncs,
@@ -154,6 +158,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mRingerModeTracker,
                 mSysUiState,
                 mHandler,
+                mPackageManager,
                 mStatusBar
         );
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();

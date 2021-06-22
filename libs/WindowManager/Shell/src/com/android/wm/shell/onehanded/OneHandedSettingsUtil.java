@@ -105,6 +105,17 @@ public final class OneHandedSettingsUtil {
     }
 
     /**
+     * Sets one handed enable or disable flag from Settings provider.
+     *
+     * @return true if the value was set, false on database errors
+     */
+    public boolean setOneHandedModeEnabled(ContentResolver resolver, int enabled, int userId) {
+        return Settings.Secure.putIntForUser(resolver,
+                Settings.Secure.ONE_HANDED_MODE_ENABLED, enabled, userId);
+    }
+
+
+    /**
      * Queries taps app to exit config from Settings provider.
      *
      * @return enable or disable taps app exit.

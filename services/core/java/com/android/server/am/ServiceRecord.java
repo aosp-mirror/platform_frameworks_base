@@ -109,7 +109,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean fgWaiting;      // is a timeout for going foreground already scheduled?
     boolean isNotAppComponentUsage; // is service binding not considered component/package usage?
     boolean isForeground;   // is service currently in foreground mode?
-    boolean mLogEntering;    // need to report fgs transition once deferral policy is known
     int foregroundId;       // Notification ID of last foreground req.
     Notification foregroundNoti; // Notification record of foreground state.
     long fgDisplayTime;     // time at which the FGS notification should become visible
@@ -167,8 +166,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     long mFgsEnterTime = 0;
     // The uptime when the service exits FGS state.
     long mFgsExitTime = 0;
-    // FGS notification was deferred.
+    // FGS notification is deferred.
     boolean mFgsNotificationDeferred;
+    // FGS notification was deferred.
+    boolean mFgsNotificationWasDeferred;
     // FGS notification was shown before the FGS finishes, or it wasn't deferred in the first place.
     boolean mFgsNotificationShown;
 

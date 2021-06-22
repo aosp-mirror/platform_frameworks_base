@@ -601,6 +601,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Chưa đăng ký vân tay."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Thiết bị này không có cảm biến vân tay."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Đã tạm thời tắt cảm biến."</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Ngón tay <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Dùng vân tay"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Dùng vân tay hoặc phương thức khóa màn hình"</string>
@@ -1458,10 +1460,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Cho phép ứng dụng yêu cầu xóa gói."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"hỏi để bỏ qua tối ưu hóa pin"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Cho phép ứng dụng hỏi quyền để bỏ qua tối ưu hóa pin cho ứng dụng đó."</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"truy vấn tất cả các gói"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Cho phép một ứng dụng xem tất cả các gói đã cài đặt."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Nhấn hai lần để kiểm soát thu phóng"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Không thể thêm tiện ích."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Đến"</string>

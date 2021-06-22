@@ -121,6 +121,9 @@ public class QSTileImplTest extends SysuiTestCase {
 
         mTile = new TileImpl(mHost, mTestableLooper.getLooper(), mainHandler, mFalsingManager,
                 mMetricsLogger, mStatusBarStateController, mActivityStarter, mQsLogger);
+        mTile.initialize();
+        mTestableLooper.processAllMessages();
+
         mTile.setTileSpec(SPEC);
     }
 

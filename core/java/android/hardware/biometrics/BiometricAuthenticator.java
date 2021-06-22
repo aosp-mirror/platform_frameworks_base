@@ -63,6 +63,11 @@ public interface BiometricAuthenticator {
      */
     int TYPE_FACE = 1 << 3;
 
+    /**
+     * @hide
+     */
+    int TYPE_ANY_BIOMETRIC = TYPE_FINGERPRINT | TYPE_IRIS | TYPE_FACE;
+
     @IntDef(flag = true, value = {
             TYPE_NONE,
             TYPE_CREDENTIAL,

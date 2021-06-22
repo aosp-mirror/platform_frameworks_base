@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DevicePolicyManagerLiteInternal;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -158,6 +159,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         final long ident = mContext.binder.clearCallingIdentity();
         try {
+            LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
             LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
             dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);
@@ -271,6 +273,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         final long ident = mContext.binder.clearCallingIdentity();
         try {
+            LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
             LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
             dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);
@@ -339,6 +342,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         // (Need clearCallingIdentity() to pass permission checks.)
         final long ident = mContext.binder.clearCallingIdentity();
         try {
+            LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
             LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
             dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);
@@ -499,6 +503,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         DevicePolicyManagerServiceTestable dpms;
         final long ident = mContext.binder.clearCallingIdentity();
         try {
+            LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
             LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
             dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);

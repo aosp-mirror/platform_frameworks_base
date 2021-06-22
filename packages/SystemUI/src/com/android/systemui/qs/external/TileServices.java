@@ -204,7 +204,7 @@ public class TileServices extends IQSService.Stub {
                 tileServiceManager.clearPendingBind();
                 tileServiceManager.setLastUpdate(System.currentTimeMillis());
             }
-            customTile.updateState(tile);
+            customTile.updateTileState(tile);
             customTile.refreshState();
         }
     }

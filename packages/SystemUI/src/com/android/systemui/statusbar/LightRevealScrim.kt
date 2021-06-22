@@ -93,10 +93,10 @@ class CircleReveal(
     val endRadius: Float
 ) : LightRevealEffect {
     override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
-        val interpolatedAmount = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(amount)
-        val fadeAmount =
-            LightRevealEffect.getPercentPastThreshold(interpolatedAmount, 0.75f)
-        val radius = startRadius + ((endRadius - startRadius) * interpolatedAmount)
+        // reveal amount updates already have an interpolator, so we intentionally use the
+        // non-interpolated amount
+        val fadeAmount = LightRevealEffect.getPercentPastThreshold(amount, 0.5f)
+        val radius = startRadius + ((endRadius - startRadius) * amount)
         scrim.revealGradientEndColorAlpha = 1f - fadeAmount
         scrim.setRevealGradientBounds(
             centerX - radius /* left */,

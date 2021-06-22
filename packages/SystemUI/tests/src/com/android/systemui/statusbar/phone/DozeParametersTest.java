@@ -63,6 +63,7 @@ public class DozeParametersTest extends SysuiTestCase {
     @Mock private BatteryController mBatteryController;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private DumpManager mDumpManager;
+    @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     @Before
     public void setup() {
@@ -75,7 +76,8 @@ public class DozeParametersTest extends SysuiTestCase {
             mBatteryController,
             mTunerService,
             mDumpManager,
-            mFeatureFlags
+            mFeatureFlags,
+            mUnlockedScreenOffAnimationController
         );
     }
     @Test
@@ -125,7 +127,8 @@ public class DozeParametersTest extends SysuiTestCase {
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
         mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
         when(mFeatureFlags.useNewLockscreenAnimations()).thenReturn(true);
-
+        when(mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation())
+                .thenReturn(true);
         assertTrue(mDozeParameters.shouldControlUnlockedScreenOff());
 
         // Trigger the setter for the current value.

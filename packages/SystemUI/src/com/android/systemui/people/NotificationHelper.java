@@ -240,9 +240,16 @@ public class NotificationHelper {
     /** Returns whether {@code entry} is suppressed from shade, meaning we should not show it. */
     public static boolean shouldFilterOut(
             Optional<Bubbles> bubblesOptional, NotificationEntry entry) {
-        return bubblesOptional.isPresent()
-                && bubblesOptional.get().isBubbleNotificationSuppressedFromShade(
-                entry.getKey(), entry.getSbn().getGroupKey());
+        boolean isSuppressed = false;
+        //TODO(b/190822282): Investigate what is causing the NullPointerException
+        try {
+            isSuppressed = bubblesOptional.isPresent()
+                    && bubblesOptional.get().isBubbleNotificationSuppressedFromShade(
+                    entry.getKey(), entry.getSbn().getGroupKey());
+        } catch (Exception e) {
+            Log.e(TAG, "Exception checking if notification is suppressed: " + e);
+        }
+        return isSuppressed;
     }
 }
 

@@ -44,6 +44,7 @@ import org.junit.runners.Suite;
         BatteryStatsUidTest.class,
         BatteryUsageStatsProviderTest.class,
         BatteryUsageStatsTest.class,
+        BatteryUsageStatsStoreTest.class,
         BatteryStatsUserLifecycleTests.class,
         BluetoothPowerCalculatorTest.class,
         BstatsCpuTimesValidationTest.class,

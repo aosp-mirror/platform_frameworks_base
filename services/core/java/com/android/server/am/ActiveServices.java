@@ -1877,7 +1877,6 @@ public final class ActiveServices {
                             active.mNumActive++;
                         }
                         r.isForeground = true;
-                        r.mLogEntering = true;
                         // The logging of FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER event could
                         // be deferred, make a copy of mAllowStartForeground and
                         // mAllowWhileInUsePermissionInFgs.
@@ -1903,6 +1902,9 @@ public final class ActiveServices {
                                 AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
                         registerAppOpCallbackLocked(r);
                         mAm.updateForegroundServiceUsageStats(r.name, r.userId, true);
+                        logFGSStateChangeLocked(r,
+                                FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
+                                0);
                     }
                     // Even if the service is already a FGS, we need to update the notification,
                     // so we need to call it again.
@@ -1958,6 +1960,7 @@ public final class ActiveServices {
                         FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT,
                         r.mFgsExitTime > r.mFgsEnterTime
                                 ? (int)(r.mFgsExitTime - r.mFgsEnterTime) : 0);
+                r.mFgsNotificationWasDeferred = false;
                 resetFgsRestrictionLocked(r);
                 mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
                 if (r.app != null) {
@@ -2162,6 +2165,7 @@ public final class ActiveServices {
         }
         r.fgDisplayTime = when;
         r.mFgsNotificationDeferred = true;
+        r.mFgsNotificationWasDeferred = true;
         r.mFgsNotificationShown = false;
         mPendingFgsNotifications.add(r);
         if (DEBUG_FOREGROUND_SERVICE) {
@@ -2205,11 +2209,6 @@ public final class ActiveServices {
                                 Slog.d(TAG_SERVICE, "  - service no longer running/fg, ignoring");
                             }
                         }
-                        // Regardless of whether we needed to post the notification or the
-                        // service is no longer running, we may not have logged its FGS
-                        // transition yet depending on the timing and API sequence that led
-                        // to this point - so make sure to do so.
-                        maybeLogFGSStateEnteredLocked(r);
                     }
                 }
                 if (DEBUG_FOREGROUND_SERVICE) {
@@ -2252,16 +2251,6 @@ public final class ActiveServices {
         }
     }
 
-    private void maybeLogFGSStateEnteredLocked(ServiceRecord r) {
-        if (r.mLogEntering) {
-            logFGSStateChangeLocked(r,
-                    FrameworkStatsLog
-                            .FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
-                    0);
-            r.mLogEntering = false;
-        }
-    }
-
     /**
      * Callback from NotificationManagerService whenever it posts a notification
      * associated with a foreground service.  This is the unified handling point
@@ -2280,9 +2269,7 @@ public final class ActiveServices {
                     && id == sr.foregroundId
                     && sr.appInfo.packageName.equals(pkg)) {
                 // Found it.  If 'shown' is false, it means that the notification
-                // subsystem will not be displaying it yet, so all we do is log
-                // the "fgs entered" transition noting deferral, then we're done.
-                maybeLogFGSStateEnteredLocked(sr);
+                // subsystem will not be displaying it yet.
                 if (shown) {
                     if (DEBUG_FOREGROUND_SERVICE) {
                         Slog.d(TAG_SERVICE, "Notification shown; canceling deferral of "
@@ -4240,6 +4227,7 @@ public final class ActiveServices {
         r.isForeground = false;
         r.foregroundId = 0;
         r.foregroundNoti = null;
+        r.mFgsNotificationWasDeferred = false;
         resetFgsRestrictionLocked(r);
 
         // Clear start entries.
@@ -6263,7 +6251,7 @@ public final class ActiveServices {
                         ? r.mRecentCallerApplicationInfo.targetSdkVersion : 0,
                 r.mInfoTempFgsAllowListReason != null
                         ? r.mInfoTempFgsAllowListReason.mCallingUid : INVALID_UID,
-                r.mFgsNotificationDeferred,
+                r.mFgsNotificationWasDeferred,
                 r.mFgsNotificationShown,
                 durationMs,
                 r.mStartForegroundCount,

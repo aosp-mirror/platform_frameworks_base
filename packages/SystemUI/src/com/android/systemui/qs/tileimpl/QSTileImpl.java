@@ -159,6 +159,15 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      */
     abstract public int getMetricsCategory();
 
+    /**
+     * Performs initialization of the tile
+     *
+     * Use this to perform initialization of the tile. Empty by default.
+     */
+    protected void handleInitialize() {
+
+    }
+
     protected QSTileImpl(
             QSHost host,
             Looper backgroundLooper,
@@ -347,6 +356,15 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mHandler.sendEmptyMessage(H.DESTROY);
     }
 
+    /**
+     * Schedules initialization of the tile.
+     *
+     * Should be called upon creation of the tile, before performing other operations
+     */
+    public void initialize() {
+        mHandler.sendEmptyMessage(H.INITIALIZE);
+    }
+
     public TState getState() {
         return mState;
     }
@@ -368,6 +386,13 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     private void handleRemoveCallbacks() {
         mCallbacks.clear();
+    }
+
+    /**
+     * Posts a stale message to the background thread.
+     */
+    public void postStale() {
+        mHandler.sendEmptyMessage(H.STALE);
     }
 
     /**
@@ -582,6 +607,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         private static final int SET_LISTENING = 13;
         @VisibleForTesting
         protected static final int STALE = 14;
+        private static final int INITIALIZE = 15;
 
         @VisibleForTesting
         protected H(Looper looper) {
@@ -640,6 +666,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                 } else if (msg.what == STALE) {
                     name = "handleStale";
                     handleStale();
+                } else if (msg.what == INITIALIZE) {
+                    name = "initialize";
+                    handleInitialize();
                 } else {
                     throw new IllegalArgumentException("Unknown msg: " + msg.what);
                 }

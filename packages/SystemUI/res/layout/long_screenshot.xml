@@ -99,6 +99,7 @@
         app:handleThickness="@dimen/screenshot_crop_handle_thickness"
         app:handleColor="?androidprv:attr/colorAccentPrimary"
         app:scrimColor="@color/screenshot_crop_scrim"
+        app:containerBackgroundColor="?android:colorBackgroundFloating"
         tools:background="?android:colorBackground"
         tools:minHeight="100dp"
         tools:minWidth="100dp" />

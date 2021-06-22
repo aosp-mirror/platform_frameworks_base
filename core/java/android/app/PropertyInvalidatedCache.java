@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -260,12 +261,19 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     private static final HashMap<String, Integer> sCorks = new HashMap<>();
 
     /**
+     * A map of cache keys that have been disabled in the local process.  When a key is
+     * disabled locally, existing caches are disabled and the key is saved in this map.
+     * Future cache instances that use the same key will be disabled in their constructor.
+     */
+    @GuardedBy("sCorkLock")
+    private static final HashSet<String> sDisabledKeys = new HashSet<>();
+
+    /**
      * Weakly references all cache objects in the current process, allowing us to iterate over
      * them all for purposes like issuing debug dumps and reacting to memory pressure.
      */
     @GuardedBy("sCorkLock")
-    private static final WeakHashMap<PropertyInvalidatedCache, Void> sCaches =
-            new WeakHashMap<>();
+    private static final WeakHashMap<PropertyInvalidatedCache, Void> sCaches = new WeakHashMap<>();
 
     private final Object mLock = new Object();
 
@@ -348,6 +356,9 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             };
         synchronized (sCorkLock) {
             sCaches.put(this, null);
+            if (sDisabledKeys.contains(mCacheName)) {
+                disableInstance();
+            }
         }
     }
 
@@ -370,6 +381,14 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * "negative cache" in the query: we don't cache null results at all.
      */
     protected abstract Result recompute(Query query);
+
+    /**
+     * Return true if the query should bypass the cache.  The default behavior is to
+     * always use the cache but the method can be overridden for a specific class.
+     */
+    protected boolean bypass(Query query) {
+        return false;
+    }
 
     /**
      * Determines if a pair of responses are considered equal. Used to determine whether
@@ -414,11 +433,35 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     /**
      * Disable the use of this cache in this process.
      */
-    public final void disableLocal() {
+    public final void disableInstance() {
         synchronized (mLock) {
             mDisabled = true;
             clear();
         }
+    }
+
+    /**
+     * Disable the local use of all caches with the same name.  All currently registered caches
+     * using the key will be disabled now, and all future cache instances that use the key will be
+     * disabled in their constructor.
+     */
+    public static final void disableLocal(@NonNull String name) {
+        synchronized (sCorkLock) {
+            sDisabledKeys.add(name);
+            for (PropertyInvalidatedCache cache : sCaches.keySet()) {
+                if (name.equals(cache.mCacheName)) {
+                    cache.disableInstance();
+                }
+            }
+        }
+    }
+
+    /**
+     * Disable this cache in the current process, and all other caches that use the same
+     * property.
+     */
+    public final void disableLocal() {
+        disableLocal(mCacheName);
     }
 
     /**
@@ -435,8 +478,8 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         // Let access to mDisabled race: it's atomic anyway.
         long currentNonce = (!isDisabledLocal()) ? getCurrentNonce() : NONCE_DISABLED;
         for (;;) {
-            if (currentNonce == NONCE_DISABLED || currentNonce == NONCE_UNSET ||
-                currentNonce == NONCE_CORKED) {
+            if (currentNonce == NONCE_DISABLED || currentNonce == NONCE_UNSET
+                    || currentNonce == NONCE_CORKED || bypass(query)) {
                 if (!mDisabled) {
                     // Do not bother collecting statistics if the cache is
                     // locally disabled.
@@ -872,6 +915,15 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     public static void disableForTestMode() {
         Log.d(TAG, "disabling all caches in the process");
         sEnabled = false;
+    }
+
+    /**
+     * Report the disabled status of this cache instance.  The return value does not
+     * reflect status of the property key.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public boolean getDisabledState() {
+        return isDisabledLocal();
     }
 
     /**

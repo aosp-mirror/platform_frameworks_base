@@ -1534,30 +1534,6 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSandboxDisplayApis_unresizableAppNotSandboxed() {
-        // Set up a display in landscape with an unresizable app.
-        setUpDisplaySizeWithApp(2500, 1000);
-        mActivity.mDisplayContent.setSandboxDisplayApis(false /* sandboxDisplayApis */);
-        prepareUnresizable(mActivity, 1.5f, SCREEN_ORIENTATION_LANDSCAPE);
-        assertFitted();
-
-        // Activity max bounds not be sandboxed since sandboxing is disabled.
-        assertMaxBoundsInheritDisplayAreaBounds();
-    }
-
-    @Test
-    public void testSandboxDisplayApis_unresizableAppSandboxed() {
-        // Set up a display in landscape with an unresizable app.
-        setUpDisplaySizeWithApp(2500, 1000);
-        mActivity.mDisplayContent.setSandboxDisplayApis(true /* sandboxDisplayApis */);
-        prepareUnresizable(mActivity, 1.5f, SCREEN_ORIENTATION_LANDSCAPE);
-        assertFitted();
-
-        // Activity max bounds should be sandboxed since sandboxing is enabled.
-        assertActivityMaxBoundsSandboxed();
-    }
-
-    @Test
     public void testResizableApp_notSandboxed() {
         // Set up a display in landscape with a fully resizable app.
         setUpDisplaySizeWithApp(2500, 1000);

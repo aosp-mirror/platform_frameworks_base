@@ -601,6 +601,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"கைரேகைப் பதிவுகள் எதுவும் இல்லை."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"இந்தச் சாதனத்தில் கைரேகை சென்சார் இல்லை."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"சென்சார் தற்காலிகமாக முடக்கப்பட்டுள்ளது."</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"கைரேகை <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"கைரேகையைப் பயன்படுத்து"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"கைரேகையையோ திரைப் பூட்டையோ பயன்படுத்து"</string>
@@ -1458,10 +1460,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"தொகுப்புகளை நீக்க கோர, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"பேட்டரி மேம்படுத்தல்களைப் புறக்கணிப்பதற்கான அனுமதியைக் கோரு"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"பயன்பாட்டிற்கான பேட்டரி மேம்படுத்தல்களைப் புறக்கணிப்பதற்கான அனுமதியைக் கோர, ஆப்ஸை அனுமதிக்கும்."</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"அனைத்துப் பேக்கேஜ்களையும் பார்க்க அனுமதித்தல்"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"நிறுவப்பட்டுள்ள அனைத்துப் பேக்கேஜ்களையும் பார்ப்பதற்கு ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"அளவை மாற்றுவதற்கான கட்டுப்பாட்டிற்கு, இருமுறை தட்டவும்"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"விட்ஜெட்டைச் சேர்க்க முடியவில்லை."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"செல்"</string>

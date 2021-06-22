@@ -71,6 +71,10 @@ struct {
 } gASurfaceTransactionCallback;
 
 struct {
+    jmethodID prepare;
+} gPrepareSurfaceControlForWebviewCallback;
+
+struct {
     jmethodID onFrameDraw;
 } gFrameDrawingCallback;
 
@@ -500,6 +504,28 @@ private:
     jobject mObject;
 };
 
+class JWeakGlobalRefHolder {
+public:
+    JWeakGlobalRefHolder(JavaVM* vm, jobject object) : mVm(vm) {
+        mWeakRef = getenv(vm)->NewWeakGlobalRef(object);
+    }
+
+    virtual ~JWeakGlobalRefHolder() {
+        if (mWeakRef != nullptr) getenv(mVm)->DeleteWeakGlobalRef(mWeakRef);
+        mWeakRef = nullptr;
+    }
+
+    jobject ref() { return mWeakRef; }
+    JavaVM* vm() { return mVm; }
+
+private:
+    JWeakGlobalRefHolder(const JWeakGlobalRefHolder&) = delete;
+    void operator=(const JWeakGlobalRefHolder&) = delete;
+
+    JavaVM* mVm;
+    jobject mWeakRef;
+};
+
 using TextureMap = std::unordered_map<uint32_t, sk_sp<SkImage>>;
 
 struct PictureCaptureState {
@@ -633,16 +659,42 @@ static void android_view_ThreadedRenderer_setASurfaceTransactionCallback(
     } else {
         JavaVM* vm = nullptr;
         LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
-        auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(
-                vm, env->NewGlobalRef(aSurfaceTransactionCallback));
+        auto globalCallbackRef =
+                std::make_shared<JWeakGlobalRefHolder>(vm, aSurfaceTransactionCallback);
         proxy->setASurfaceTransactionCallback(
                 [globalCallbackRef](int64_t transObj, int64_t scObj, int64_t frameNr) {
                     JNIEnv* env = getenv(globalCallbackRef->vm());
-                    env->CallVoidMethod(globalCallbackRef->object(),
-                                        gASurfaceTransactionCallback.onMergeTransaction,
+                    jobject localref = env->NewLocalRef(globalCallbackRef->ref());
+                    if (CC_UNLIKELY(!localref)) {
+                        return;
+                    }
+                    env->CallVoidMethod(localref, gASurfaceTransactionCallback.onMergeTransaction,
                                         static_cast<jlong>(transObj), static_cast<jlong>(scObj),
                                         static_cast<jlong>(frameNr));
+                    env->DeleteLocalRef(localref);
                 });
+    }
+}
+
+static void android_view_ThreadedRenderer_setPrepareSurfaceControlForWebviewCallback(
+        JNIEnv* env, jobject clazz, jlong proxyPtr, jobject callback) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    if (!callback) {
+        proxy->setPrepareSurfaceControlForWebviewCallback(nullptr);
+    } else {
+        JavaVM* vm = nullptr;
+        LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
+        auto globalCallbackRef =
+                std::make_shared<JWeakGlobalRefHolder>(vm, callback);
+        proxy->setPrepareSurfaceControlForWebviewCallback([globalCallbackRef]() {
+            JNIEnv* env = getenv(globalCallbackRef->vm());
+            jobject localref = env->NewLocalRef(globalCallbackRef->ref());
+            if (CC_UNLIKELY(!localref)) {
+                return;
+            }
+            env->CallVoidMethod(localref, gPrepareSurfaceControlForWebviewCallback.prepare);
+            env->DeleteLocalRef(localref);
+        });
     }
 }
 
@@ -944,6 +996,9 @@ static const JNINativeMethod gMethods[] = {
         {"nSetASurfaceTransactionCallback",
          "(JLandroid/graphics/HardwareRenderer$ASurfaceTransactionCallback;)V",
          (void*)android_view_ThreadedRenderer_setASurfaceTransactionCallback},
+        {"nSetPrepareSurfaceControlForWebviewCallback",
+         "(JLandroid/graphics/HardwareRenderer$PrepareSurfaceControlForWebviewCallback;)V",
+         (void*)android_view_ThreadedRenderer_setPrepareSurfaceControlForWebviewCallback},
         {"nSetFrameCallback", "(JLandroid/graphics/HardwareRenderer$FrameDrawingCallback;)V",
          (void*)android_view_ThreadedRenderer_setFrameCallback},
         {"nSetFrameCompleteCallback",
@@ -1010,6 +1065,11 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
             FindClassOrDie(env, "android/graphics/HardwareRenderer$ASurfaceTransactionCallback");
     gASurfaceTransactionCallback.onMergeTransaction =
             GetMethodIDOrDie(env, aSurfaceTransactionCallbackClass, "onMergeTransaction", "(JJJ)V");
+
+    jclass prepareSurfaceControlForWebviewCallbackClass = FindClassOrDie(
+            env, "android/graphics/HardwareRenderer$PrepareSurfaceControlForWebviewCallback");
+    gPrepareSurfaceControlForWebviewCallback.prepare =
+            GetMethodIDOrDie(env, prepareSurfaceControlForWebviewCallbackClass, "prepare", "()V");
 
     jclass frameCallbackClass = FindClassOrDie(env,
             "android/graphics/HardwareRenderer$FrameDrawingCallback");

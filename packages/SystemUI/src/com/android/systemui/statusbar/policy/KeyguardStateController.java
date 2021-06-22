@@ -57,6 +57,11 @@ public interface KeyguardStateController extends CallbackController<Callback> {
     boolean canPerformSmartSpaceTransition();
 
     /**
+     * Whether the keyguard is allowed to rotate, or needs to be locked to the default orientation.
+     */
+    boolean isKeyguardScreenRotationAllowed();
+
+    /**
      * If the device has PIN/pattern/password or a lock screen at all.
      */
     boolean isMethodSecure();

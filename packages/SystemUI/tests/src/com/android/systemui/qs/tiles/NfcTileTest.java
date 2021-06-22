@@ -92,6 +92,9 @@ public class NfcTileTest extends SysuiTestCase {
                 mQSLogger,
                 mBroadcastDispatcher
         );
+
+        mNfcTile.initialize();
+        mTestableLooper.processAllMessages();
     }
 
     @Test

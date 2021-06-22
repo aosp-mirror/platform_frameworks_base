@@ -68,6 +68,11 @@ public interface OneHanded {
     void setLockedDisabled(boolean locked, boolean enabled);
 
     /**
+     * Registers callback to notify WMShell when user tap shortcut to expand notification.
+     */
+    void registerEventCallback(OneHandedEventCallback callback);
+
+    /**
      * Registers callback to be notified after {@link OneHandedDisplayAreaOrganizer}
      * transition start or finish
      */
@@ -82,4 +87,9 @@ public interface OneHanded {
      * Notifies when user switch complete
      */
     void onUserSwitch(int userId);
+
+    /**
+     * Notifies when keyguard visibility changed
+     */
+    void onKeyguardVisibilityChanged(boolean showing);
 }

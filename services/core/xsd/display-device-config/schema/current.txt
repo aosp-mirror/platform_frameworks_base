@@ -44,10 +44,12 @@ package com.android.server.display.config {
     ctor public HighBrightnessMode();
     method public boolean getEnabled();
     method @NonNull public final java.math.BigDecimal getMinimumLux_all();
+    method @Nullable public final com.android.server.display.config.RefreshRateRange getRefreshRate_all();
     method public com.android.server.display.config.HbmTiming getTiming_all();
     method @NonNull public final java.math.BigDecimal getTransitionPoint_all();
     method public void setEnabled(boolean);
     method public final void setMinimumLux_all(@NonNull java.math.BigDecimal);
+    method public final void setRefreshRate_all(@Nullable com.android.server.display.config.RefreshRateRange);
     method public void setTiming_all(com.android.server.display.config.HbmTiming);
     method public final void setTransitionPoint_all(@NonNull java.math.BigDecimal);
   }
@@ -65,11 +67,21 @@ package com.android.server.display.config {
     method public final void setValue(@NonNull java.math.BigDecimal);
   }
 
+  public class RefreshRateRange {
+    ctor public RefreshRateRange();
+    method public final java.math.BigInteger getMaximum();
+    method public final java.math.BigInteger getMinimum();
+    method public final void setMaximum(java.math.BigInteger);
+    method public final void setMinimum(java.math.BigInteger);
+  }
+
   public class SensorDetails {
     ctor public SensorDetails();
     method @Nullable public final String getName();
+    method @Nullable public final com.android.server.display.config.RefreshRateRange getRefreshRate();
     method @Nullable public final String getType();
     method public final void setName(@Nullable String);
+    method public final void setRefreshRate(@Nullable com.android.server.display.config.RefreshRateRange);
     method public final void setType(@Nullable String);
   }
 

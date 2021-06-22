@@ -187,6 +187,12 @@ class MediaHierarchyManager @Inject constructor(
     private var currentAttachmentLocation = -1
 
     /**
+     * Is there any active media in the carousel?
+     */
+    private var hasActiveMedia: Boolean = false
+        get() = mediaHosts.get(LOCATION_QQS)?.visible == true
+
+    /**
      * Are we currently waiting on an animation to start?
      */
     private var animationPending: Boolean = false
@@ -214,14 +220,11 @@ class MediaHierarchyManager @Inject constructor(
         set(value) {
             if (field != value) {
                 field = value
+                mediaCarouselController.mediaCarouselScrollHandler.qsExpanded = value
             }
             // qs is expanded on LS shade and HS shade
             if (value && (isLockScreenShadeVisibleToUser() || isHomeScreenShadeVisibleToUser())) {
-                mediaCarouselController.logSmartspaceImpression()
-            }
-            // Release shade and back to lock screen
-            if (isLockScreenVisibleToUser()) {
-                mediaCarouselController.logSmartspaceImpression()
+                mediaCarouselController.logSmartspaceImpression(value)
             }
             mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
         }
@@ -403,7 +406,7 @@ class MediaHierarchyManager @Inject constructor(
                 updateTargetState()
                 // Enters shade from lock screen
                 if (newState == StatusBarState.SHADE_LOCKED && isLockScreenShadeVisibleToUser()) {
-                    mediaCarouselController.logSmartspaceImpression()
+                    mediaCarouselController.logSmartspaceImpression(qsExpanded)
                 }
                 mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
             }
@@ -417,7 +420,7 @@ class MediaHierarchyManager @Inject constructor(
                     dozeAnimationRunning = false
                     // Enters lock screen from screen off
                     if (isLockScreenVisibleToUser()) {
-                        mediaCarouselController.logSmartspaceImpression()
+                        mediaCarouselController.logSmartspaceImpression(qsExpanded)
                     }
                 } else {
                     updateDesiredLocation()
@@ -430,11 +433,7 @@ class MediaHierarchyManager @Inject constructor(
             override fun onExpandedChanged(isExpanded: Boolean) {
                 // Enters shade from home screen
                 if (isHomeScreenShadeVisibleToUser()) {
-                    mediaCarouselController.logSmartspaceImpression()
-                }
-                // Back to lock screen from bouncer
-                if (isLockScreenVisibleToUser()) {
-                    mediaCarouselController.logSmartspaceImpression()
+                    mediaCarouselController.logSmartspaceImpression(qsExpanded)
                 }
                 mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
             }
@@ -459,6 +458,10 @@ class MediaHierarchyManager @Inject constructor(
                 goingToSleep = false
             }
         })
+
+        mediaCarouselController.updateUserVisibility = {
+            mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
+        }
     }
 
     private fun updateConfiguration() {
@@ -476,8 +479,12 @@ class MediaHierarchyManager @Inject constructor(
         val viewHost = createUniqueObjectHost()
         mediaObject.hostView = viewHost
         mediaObject.addVisibilityChangeListener {
+            // If QQS changes visibility, we need to force an update to ensure the transition
+            // goes into the correct state
+            val stateUpdate = mediaObject.location == LOCATION_QQS
+
             // Never animate because of a visibility change, only state changes should do that
-            updateDesiredLocation(forceNoAnimation = true)
+            updateDesiredLocation(forceNoAnimation = true, forceStateUpdate = stateUpdate)
         }
         mediaHosts[mediaObject.location] = mediaObject
         if (mediaObject.location == desiredLocation) {
@@ -521,10 +528,15 @@ class MediaHierarchyManager @Inject constructor(
      * going from the old desired location to the new one.
      *
      * @param forceNoAnimation optional parameter telling the system not to animate
+     * @param forceStateUpdate optional parameter telling the system to update transition state
+     *                         even if location did not change
      */
-    private fun updateDesiredLocation(forceNoAnimation: Boolean = false) {
+    private fun updateDesiredLocation(
+        forceNoAnimation: Boolean = false,
+        forceStateUpdate: Boolean = false
+    ) {
         val desiredLocation = calculateLocation()
-        if (desiredLocation != this.desiredLocation) {
+        if (desiredLocation != this.desiredLocation || forceStateUpdate) {
             if (this.desiredLocation >= 0) {
                 previousLocation = this.desiredLocation
             }
@@ -784,7 +796,7 @@ class MediaHierarchyManager @Inject constructor(
     private fun getQSTransformationProgress(): Float {
         val currentHost = getHost(desiredLocation)
         val previousHost = getHost(previousLocation)
-        if (currentHost?.location == LOCATION_QS) {
+        if (hasActiveMedia && currentHost?.location == LOCATION_QS) {
             if (previousHost?.location == LOCATION_QQS) {
                 if (previousHost.visible || statusbarState != StatusBarState.KEYGUARD) {
                     return qsExpansion
@@ -917,6 +929,7 @@ class MediaHierarchyManager @Inject constructor(
         val location = when {
             qsExpansion > 0.0f && !onLockscreen -> LOCATION_QS
             qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
+            !hasActiveMedia -> LOCATION_QS
             onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
             onLockscreen && allowedOnLockscreen -> LOCATION_LOCKSCREEN
             else -> LOCATION_QQS

@@ -601,6 +601,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"କୌଣସି ଆଙ୍ଗୁଠି ଚିହ୍ନ ପଞ୍ଜୀକୃତ ହୋଇନାହିଁ।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ଏହି ଡିଭାଇସ୍‌ରେ ଟିପଚିହ୍ନ ସେନ୍‍ସର୍ ନାହିଁ।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ଆଙ୍ଗୁଠି <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ଟିପଚିହ୍ନ ବା ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
@@ -1239,7 +1241,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"ସର୍ବଦା ଦେଖାନ୍ତୁ"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଏକ କମ୍ପାଟିବଲ୍‍ ନଥିବା Android OSରେ ତିଆରି ହୋଇଛି ଏବଂ ଆକସ୍ମିକ ଗତିବିଧି ଦେଖାଦେଇପାରେ। ଆପ୍‍ର ଏକ ଅପଡେଟ୍‍ ଭର୍ସନ୍‍ ଉପଲବ୍ଧ ରହିପାରେ।"</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"ସର୍ବଦା ଦେଖାନ୍ତୁ"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"କୌଣସି ଅପଡେଟ୍‌ ଅଛି କି ନାହିଁ ଦେଖନ୍ତୁ"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"ଅପଡେଟ୍‌ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="smv_application" msgid="3775183542777792638">"ଆପ୍‍ <xliff:g id="APPLICATION">%1$s</xliff:g> (ପ୍ରକ୍ରିୟା <xliff:g id="PROCESS">%2$s</xliff:g>) ଏହାର ସ୍ୱ-ଲାଗୁ କରାଯାଇଥିବା ଷ୍ଟ୍ରିକ୍ଟ-ମୋଡ୍‍ ପଲିସୀ ଉଲ୍ଲଂଘନ କରିଛି।"</string>
     <string name="smv_process" msgid="1398801497130695446">"ଏହି {0/PROCESS<xliff:g id="PROCESS">%1$s</xliff:g> ନିଜ ଦ୍ୱାରା ଲାଗୁ କରାଯାଇଥିବା ଷ୍ଟ୍ରିକ୍ଟମୋଡ୍‌ ପଲିସୀକୁ ଉଲ୍ଲଂଘନ କରିଛି।"</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"ଫୋନ୍ ଅପଡେଟ୍ ହେଉଛି…"</string>
@@ -1458,10 +1460,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ପ୍ୟାକେଜ୍‌ଗୁଡ଼ିକ ଡିଲିଟ୍‍ କରିବା ପାଇଁ ଅନୁରୋଧ କରିବାକୁ ଏକ ଆପ୍ଲିକେଶନକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ବ୍ୟାଟେରୀ ଅନୁକୂଳନ ଏଡ଼ାଇବା ପାଇଁ ପଚାରନ୍ତୁ"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ଆପ୍‍ ପାଇଁ ବ୍ୟାଟେରୀ ଅନୁକୂଳନ ଏଡ଼ାଇବାର ଅନୁମତି ମାଗିବା ନିମନ୍ତେ ଆପ୍‍କୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ସବୁ ପ୍ୟାକେଜ୍ ବିଷୟରେ କ୍ୱେରୀ କରନ୍ତୁ"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ଇନଷ୍ଟଲ୍ କରାଯାଇଥିବା ସମସ୍ତ ପ୍ୟାକେଜକୁ ଦେଖିବା ପାଇଁ ଏକ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ଜୁମ୍ ନିୟନ୍ତ୍ରଣ ପାଇଁ ଦୁଇଥର ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ୱିଜେଟ୍‍ ଯୋଡ଼ିପାରିବ ନାହିଁ।"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ଯାଆନ୍ତୁ"</string>

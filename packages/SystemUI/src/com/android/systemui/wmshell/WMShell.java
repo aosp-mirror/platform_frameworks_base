@@ -34,6 +34,7 @@ import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.view.KeyEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -44,6 +45,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.shared.tracing.ProtoTraceable;
@@ -57,6 +59,7 @@ import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
+import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
@@ -112,6 +115,7 @@ public final class WMShell extends SystemUI
     private final NavigationModeController mNavigationModeController;
     private final ScreenLifecycle mScreenLifecycle;
     private final SysUiState mSysUiState;
+    private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final ProtoTracer mProtoTracer;
     private final Executor mSysUiMainExecutor;
 
@@ -119,6 +123,7 @@ public final class WMShell extends SystemUI
     private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
     private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
+    private WakefulnessLifecycle.Observer mWakefulnessObserver;
 
     @Inject
     public WMShell(Context context,
@@ -134,6 +139,7 @@ public final class WMShell extends SystemUI
             ScreenLifecycle screenLifecycle,
             SysUiState sysUiState,
             ProtoTracer protoTracer,
+            WakefulnessLifecycle wakefulnessLifecycle,
             @Main Executor sysUiMainExecutor) {
         super(context);
         mCommandQueue = commandQueue;
@@ -146,6 +152,7 @@ public final class WMShell extends SystemUI
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
         mHideDisplayCutoutOptional = hideDisplayCutoutOptional;
+        mWakefulnessLifecycle = wakefulnessLifecycle;
         mProtoTracer = protoTracer;
         mShellCommandHandler = shellCommandHandler;
         mSysUiMainExecutor = sysUiMainExecutor;
@@ -253,23 +260,19 @@ public final class WMShell extends SystemUI
             }
         });
 
+        oneHanded.registerEventCallback(new OneHandedEventCallback() {
+            @Override
+            public void notifyExpandNotification() {
+                mSysUiMainExecutor.execute(
+                        () -> mCommandQueue.handleSystemKey(
+                                KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN));
+            }
+        });
+
         mOneHandedKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
-            public void onKeyguardBouncerChanged(boolean bouncer) {
-                if (bouncer) {
-                    oneHanded.stopOneHanded();
-                }
-            }
-
-            @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
-                if (showing) {
-                    // When keyguard shown, temperory lock OHM disabled to avoid mis-trigger.
-                    oneHanded.setLockedDisabled(true /* locked */, false /* enabled */);
-                } else {
-                    // Reset locked.
-                    oneHanded.setLockedDisabled(false /* locked */, false /* enabled */);
-                }
+                oneHanded.onKeyguardVisibilityChanged(showing);
                 oneHanded.stopOneHanded();
             }
 
@@ -279,6 +282,24 @@ public final class WMShell extends SystemUI
             }
         };
         mKeyguardUpdateMonitor.registerCallback(mOneHandedKeyguardCallback);
+
+        mWakefulnessObserver =
+                new WakefulnessLifecycle.Observer() {
+                    @Override
+                    public void onFinishedWakingUp() {
+                        // Reset locked for the case keyguard not shown.
+                        oneHanded.setLockedDisabled(false /* locked */, false /* enabled */);
+                    }
+
+                    @Override
+                    public void onStartedGoingToSleep() {
+                        oneHanded.stopOneHanded();
+                        // When user press power button going to sleep, temperory lock OHM disabled
+                        // to avoid mis-trigger.
+                        oneHanded.setLockedDisabled(true /* locked */, false /* enabled */);
+                    }
+                };
+        mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
 
         mScreenLifecycle.addObserver(new ScreenLifecycle.Observer() {
             @Override
