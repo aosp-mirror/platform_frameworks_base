@@ -480,8 +480,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"Aggiungi utente"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nuovo utente"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Rimuovere l\'ospite?"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Reimpostare sessione Ospite?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tutte le app e i dati di questa sessione verranno eliminati."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Rimuovi"</string>
+    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Reimposta"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Ti ridiamo il benvenuto alla sessione Ospite."</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vuoi continuare la sessione?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Ricomincia"</string>
