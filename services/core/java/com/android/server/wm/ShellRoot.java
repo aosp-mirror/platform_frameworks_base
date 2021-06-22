@@ -50,6 +50,7 @@ public class ShellRoot {
     private SurfaceControl mSurfaceControl = null;
     private IWindow mAccessibilityWindow;
     private IBinder.DeathRecipient mAccessibilityWindowDeath;
+    private int mWindowType;
 
     ShellRoot(@NonNull IWindow client, @NonNull DisplayContent dc,
             @WindowManager.ShellRootLayer final int shellRootLayer) {
@@ -64,19 +65,18 @@ public class ShellRoot {
             return;
         }
         mClient = client;
-        int windowType;
         switch (shellRootLayer) {
             case SHELL_ROOT_LAYER_DIVIDER:
-                windowType = TYPE_DOCK_DIVIDER;
+                mWindowType = TYPE_DOCK_DIVIDER;
                 break;
             case SHELL_ROOT_LAYER_PIP:
-                windowType = TYPE_APPLICATION_OVERLAY;
+                mWindowType = TYPE_APPLICATION_OVERLAY;
                 break;
             default:
                 throw new IllegalArgumentException(shellRootLayer
                         + " is not an acceptable shell root layer.");
         }
-        mToken = new WindowToken.Builder(dc.mWmService, client.asBinder(), windowType)
+        mToken = new WindowToken.Builder(dc.mWmService, client.asBinder(), mWindowType)
                 .setDisplayContent(dc)
                 .setPersistOnEmpty(true)
                 .setOwnerCanManageAppTokens(true)
@@ -87,6 +87,10 @@ public class ShellRoot {
                 .setCallsite("ShellRoot")
                 .build();
         mToken.getPendingTransaction().show(mSurfaceControl);
+    }
+
+    int getWindowType() {
+        return mWindowType;
     }
 
     void clear() {
