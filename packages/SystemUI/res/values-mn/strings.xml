@@ -480,12 +480,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"Хэрэглэгч нэмэх"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Шинэ хэрэглэгч"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Зочныг хасах уу?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Зочныг шинэчлэх үү?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Энэ харилцан үйлдлийн бүх апп болон дата устах болно."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Хасах"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Шинэчлэх"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Эргэн тавтай морилно уу!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Та үргэлжлүүлэхийг хүсэж байна уу?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Дахин эхлүүлэх"</string>
