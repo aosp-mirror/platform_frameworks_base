@@ -28,6 +28,8 @@ public interface SecurityController extends CallbackController<SecurityControlle
     boolean isDeviceManaged();
     boolean hasProfileOwner();
     boolean hasWorkProfile();
+    /** Whether the work profile is turned on. */
+    boolean isWorkProfileOn();
     /** Whether this device is organization-owned with a work profile **/
     boolean isProfileOwnerOfOrganizationOwnedDevice();
     String getDeviceOwnerName();
@@ -56,7 +58,6 @@ public interface SecurityController extends CallbackController<SecurityControlle
     Drawable getIcon(DeviceAdminInfo info);
     /** Label for admin */
     CharSequence getLabel(DeviceAdminInfo info);
-
 
     public interface SecurityControllerCallback {
         void onStateChanged();
