@@ -172,7 +172,8 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // We currently draw both the light reveal scrim, and the AOD UI, in the shade. If it's
         // already expanded and showing notifications/QS, the animation looks really messy. For now,
         // disable it if the notification panel is expanded.
-        if (statusBar.notificationPanelViewController.isFullyExpanded) {
+        if (!this::statusBar.isInitialized ||
+                statusBar.notificationPanelViewController.isFullyExpanded) {
             return false
         }
 
