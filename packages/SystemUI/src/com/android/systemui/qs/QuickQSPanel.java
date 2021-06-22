@@ -228,24 +228,5 @@ public class QuickQSPanel extends QSPanel {
                 }
             }
         }
-
-        @Override
-        public void setExpansion(float expansion) {
-            if (expansion > 0f && expansion < 1f) {
-                return;
-            }
-            boolean selected = expansion == 0f;
-            // Expansion == 0f is when QQS is fully showing (as opposed to 1f, which is QS). At this
-            // point we want them to be selected so the tiles will marquee (but not at other points
-            // of expansion.
-            // We set it as not important while we change this, so setting each tile as selected
-            // will not cause them to announce themselves until the user has actually selected the
-            // item.
-            setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
-            for (int i = 0; i < getChildCount(); i++) {
-                getChildAt(i).setSelected(selected);
-            }
-            setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-        }
     }
 }
