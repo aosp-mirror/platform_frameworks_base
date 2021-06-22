@@ -32,6 +32,7 @@ import javax.inject.Provider
 
 private const val TAG = "MediaCarouselController"
 private val settingsIntent = Intent().setAction(ACTION_MEDIA_CONTROLS_SETTINGS)
+private const val DEBUG = false
 
 /**
  * Class that is responsible for keeping the view carousel up to date.
@@ -237,7 +238,7 @@ class MediaCarouselController @Inject constructor(
                 data: SmartspaceMediaData,
                 shouldPrioritize: Boolean
             ) {
-                Log.d(TAG, "My Smartspace media update is here")
+                if (DEBUG) Log.d(TAG, "Loading Smartspace media update")
                 if (data.isActive) {
                     addSmartspaceMediaRecommendations(key, data, shouldPrioritize)
                     MediaPlayerData.getMediaPlayer(key, null)?.let {
@@ -266,7 +267,7 @@ class MediaCarouselController @Inject constructor(
             }
 
             override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
-                Log.d(TAG, "My Smartspace media removal request is received")
+                if (DEBUG) Log.d(TAG, "My Smartspace media removal request is received")
                 if (immediately || visualStabilityManager.isReorderingAllowed) {
                     onMediaDataRemoved(key)
                 } else {
@@ -384,7 +385,7 @@ class MediaCarouselController @Inject constructor(
         data: SmartspaceMediaData,
         shouldPrioritize: Boolean
     ) {
-        Log.d(TAG, "Updating smartspace target in carousel")
+        if (DEBUG) Log.d(TAG, "Updating smartspace target in carousel")
         if (MediaPlayerData.getMediaPlayer(key, null) != null) {
             Log.w(TAG, "Skip adding smartspace target in carousel")
             return
