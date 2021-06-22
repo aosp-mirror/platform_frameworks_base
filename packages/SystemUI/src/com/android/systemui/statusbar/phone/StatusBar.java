@@ -4444,6 +4444,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
+        updateLightRevealScrimVisibility();
+
         Trace.endSection();
     }
 
@@ -4894,6 +4896,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
 
+        mLightRevealScrim.setAlpha(mScrimController.getState().getMaxLightRevealScrimAlpha());
         if (mFeatureFlags.useNewLockscreenAnimations()
                 && (mDozeParameters.getAlwaysOn() || mDozeParameters.isQuickPickupEnabled())) {
             mLightRevealScrim.setVisibility(View.VISIBLE);
