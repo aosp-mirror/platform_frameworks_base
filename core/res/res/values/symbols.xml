@@ -2014,6 +2014,7 @@
   <java-symbol type="integer" name="config_notificationServiceArchiveSize" />
   <java-symbol type="integer" name="config_previousVibrationsDumpLimit" />
   <java-symbol type="integer" name="config_defaultVibrationAmplitude" />
+  <java-symbol type="dimen" name="config_hapticChannelMaxVibrationAmplitude" />
   <java-symbol type="integer" name="config_vibrationWaveformRampStepDuration" />
   <java-symbol type="integer" name="config_vibrationWaveformRampDownDuration" />
   <java-symbol type="integer" name="config_radioScanningTimeout" />
