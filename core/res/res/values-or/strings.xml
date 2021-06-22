@@ -1458,10 +1458,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ପ୍ୟାକେଜ୍‌ଗୁଡ଼ିକ ଡିଲିଟ୍‍ କରିବା ପାଇଁ ଅନୁରୋଧ କରିବାକୁ ଏକ ଆପ୍ଲିକେଶନକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ବ୍ୟାଟେରୀ ଅନୁକୂଳନ ଏଡ଼ାଇବା ପାଇଁ ପଚାରନ୍ତୁ"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ଆପ୍‍ ପାଇଁ ବ୍ୟାଟେରୀ ଅନୁକୂଳନ ଏଡ଼ାଇବାର ଅନୁମତି ମାଗିବା ନିମନ୍ତେ ଆପ୍‍କୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ସବୁ ପ୍ୟାକେଜ୍ ବିଷୟରେ କ୍ୱେରୀ କରନ୍ତୁ"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ଇନଷ୍ଟଲ୍ କରାଯାଇଥିବା ସମସ୍ତ ପ୍ୟାକେଜକୁ ଦେଖିବା ପାଇଁ ଏକ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ଜୁମ୍ ନିୟନ୍ତ୍ରଣ ପାଇଁ ଦୁଇଥର ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ୱିଜେଟ୍‍ ଯୋଡ଼ିପାରିବ ନାହିଁ।"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ଯାଆନ୍ତୁ"</string>

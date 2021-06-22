@@ -857,6 +857,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mMetricsLogger.action(MetricsEvent.ACTION_EMERGENCY_DIALER_FROM_POWER_MENU);
             mUiEventLogger.log(GlobalActionsEvent.GA_EMERGENCY_DIALER_PRESS);
             if (mTelecomManager != null) {
+                // Close shade so user sees the activity
+                mStatusBar.collapseShade();
                 Intent intent = mTelecomManager.createLaunchEmergencyDialerIntent(
                         null /* number */);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -987,6 +989,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                             Log.w(TAG, "Bugreport handler could not be launched");
                             mIActivityManager.requestInteractiveBugReport();
                         }
+                        // Close shade so user sees the activity
+                        mStatusBar.collapseShade();
                     } catch (RemoteException e) {
                     }
                 }
@@ -1005,6 +1009,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mMetricsLogger.action(MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_FULL);
                 mUiEventLogger.log(GlobalActionsEvent.GA_BUGREPORT_LONG_PRESS);
                 mIActivityManager.requestFullBugReport();
+                // Close shade so user sees the activity
+                mStatusBar.collapseShade();
             } catch (RemoteException e) {
             }
             return false;

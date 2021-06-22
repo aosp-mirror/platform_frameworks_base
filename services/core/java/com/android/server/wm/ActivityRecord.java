@@ -665,6 +665,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mLastContainsDismissKeyguardWindow;
     private boolean mLastContainsTurnScreenOnWindow;
 
+    /** Whether the IME is showing when transitioning away from this activity. */
+    boolean mLastImeShown;
+
     /**
      * A flag to determine if this AR is in the process of closing or entering PIP. This is needed
      * to help AR know that the app is in the process of closing but hasn't yet started closing on
@@ -1310,6 +1313,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     TopResumedActivityChangeItem.obtain(onTop));
         } catch (RemoteException e) {
             // If process died, whatever.
+            Slog.w(TAG, "Failed to send top-resumed=" + onTop + " to " + this, e);
             return false;
         }
         return true;
@@ -4714,7 +4718,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (visible) {
                 displayContent.mOpeningApps.add(this);
                 mEnteringAnimation = true;
-            } else {
+            } else if (mVisible) {
                 displayContent.mClosingApps.add(this);
                 mEnteringAnimation = false;
             }
@@ -4817,11 +4821,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *                this has become invisible.
      */
     private void postApplyAnimation(boolean visible) {
-        final boolean usingShellTransitions =
-                mAtmService.getTransitionController().getTransitionPlayer() != null;
         final boolean delayed = isAnimating(PARENTS | CHILDREN,
                 ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION);
-        if (!delayed && !usingShellTransitions) {
+        if (!delayed) {
             // We aren't delayed anything, but exiting windows rely on the animation finished
             // callback being called in case the ActivityRecord was pretending to be delayed,
             // which we might have done because we were in closing/opening apps list.
@@ -4840,9 +4842,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // updated.
         // If we're becoming invisible, update the client visibility if we are not running an
         // animation. Otherwise, we'll update client visibility in onAnimationFinished.
-        if (visible || !isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)
-                || usingShellTransitions) {
+        if (visible || !isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)) {
             setClientVisible(visible);
+        }
+
+        if (!visible) {
+            final InsetsControlTarget imeInputTarget = mDisplayContent.getImeTarget(
+                    DisplayContent.IME_TARGET_INPUT);
+            mLastImeShown = imeInputTarget != null && imeInputTarget.getWindow() != null
+                    && imeInputTarget.getWindow().mActivityRecord == this
+                    && mDisplayContent.mInputMethodWindow != null
+                    && mDisplayContent.mInputMethodWindow.isVisible();
         }
 
         final DisplayContent displayContent = getDisplayContent();
@@ -5881,9 +5891,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void onStartingWindowDrawn() {
+        boolean wasTaskVisible = false;
         if (task != null) {
             mSplashScreenStyleEmpty = true;
+            wasTaskVisible = task.getHasBeenVisible();
             task.setHasBeenVisible(true);
+        }
+
+        // The transition may not be executed if the starting process hasn't attached. But if the
+        // starting window is drawn, the transition can start earlier. Exclude finishing and bubble
+        // because it may be a trampoline.
+        if (!wasTaskVisible && mStartingData != null && !finishing && !mLaunchedFromBubble
+                && !mDisplayContent.mAppTransition.isReady()
+                && !mDisplayContent.mAppTransition.isRunning()) {
+            // The pending transition state will be cleared after the transition is started, so
+            // save the state for launching the client later (used by LaunchActivityItem).
+            mStartingData.mIsTransitionForward = mDisplayContent.isNextTransitionForward();
+            mDisplayContent.executeAppTransition();
         }
     }
 
@@ -6596,6 +6620,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 && (dc.mOpeningApps.contains(this)
                 || dc.mClosingApps.contains(this)
                 || dc.mChangingContainers.contains(this));
+    }
+
+    boolean isTransitionForward() {
+        return (mStartingData != null && mStartingData.mIsTransitionForward)
+                || mDisplayContent.isNextTransitionForward();
     }
 
     private int getAnimationLayer() {
@@ -8277,8 +8306,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     preserveWindow);
             final ActivityLifecycleItem lifecycleItem;
             if (andResume) {
-                lifecycleItem = ResumeActivityItem.obtain(
-                        mDisplayContent.isNextTransitionForward());
+                lifecycleItem = ResumeActivityItem.obtain(isTransitionForward());
             } else {
                 lifecycleItem = PauseActivityItem.obtain();
             }
