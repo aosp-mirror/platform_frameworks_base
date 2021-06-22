@@ -704,6 +704,15 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     public abstract boolean filterAppAccess(
             @NonNull String packageName, int callingUid, int userId);
 
+    /**
+     * Returns whether or not access to the application which belongs to the given UID should be
+     * filtered. If the UID is part of a shared user ID, return {@code true} if all applications
+     * belong to the shared user ID should be filtered.
+     *
+     * @see #filterAppAccess(AndroidPackage, int, int)
+     */
+    public abstract boolean filterAppAccess(int uid, int callingUid);
+
     /** Returns whether the given package was signed by the platform */
     public abstract boolean isPlatformSigned(String pkg);
 

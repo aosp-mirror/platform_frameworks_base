@@ -5690,6 +5690,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
         }
+        if (uid != ROOT_UID) { // bypass the root
+            if (mPackageManagerInt.filterAppAccess(uid, Binder.getCallingUid())) {
+                return PackageManager.PERMISSION_DENIED;
+            }
+        }
         return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
                 ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
     }

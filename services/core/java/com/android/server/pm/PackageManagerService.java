@@ -2133,6 +2133,8 @@ public class PackageManagerService extends IPackageManager.Stub
         @LiveImplementation(override = LiveImplementation.MANDATORY)
         boolean filterAppAccess(String packageName, int callingUid, int userId);
         @LiveImplementation(override = LiveImplementation.MANDATORY)
+        boolean filterAppAccess(int uid, int callingUid);
+        @LiveImplementation(override = LiveImplementation.MANDATORY)
         void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState);
     }
 
@@ -4656,6 +4658,22 @@ public class PackageManagerService extends IPackageManager.Stub
                     userId);
         }
 
+        public boolean filterAppAccess(int uid, int callingUid) {
+            final int userId = UserHandle.getUserId(uid);
+            final int appId = UserHandle.getAppId(uid);
+            final Object setting = mSettings.getSettingLPr(appId);
+
+            if (setting instanceof SharedUserSetting) {
+                return shouldFilterApplicationLocked(
+                        (SharedUserSetting) setting, callingUid, userId);
+            } else if (setting == null
+                    || setting instanceof PackageSetting) {
+                return shouldFilterApplicationLocked(
+                        (PackageSetting) setting, callingUid, userId);
+            }
+            return false;
+        }
+
         public void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {
             final String packageName = dumpState.getTargetPackageName();
             final boolean checkin = dumpState.isCheckIn();
@@ -5000,6 +5018,11 @@ public class PackageManagerService extends IPackageManager.Stub
         public final boolean filterAppAccess(String packageName, int callingUid, int userId) {
             synchronized (mLock) {
                 return super.filterAppAccess(packageName, callingUid, userId);
+            }
+        }
+        public final boolean filterAppAccess(int uid, int callingUid) {
+            synchronized (mLock) {
+                return super.filterAppAccess(uid, callingUid);
             }
         }
         public final void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {
@@ -5368,6 +5391,14 @@ public class PackageManagerService extends IPackageManager.Stub
             ThreadComputer current = snapshot();
             try {
                 return current.mComputer.filterAppAccess(packageName, callingUid, userId);
+            } finally {
+                current.release();
+            }
+        }
+        public final boolean filterAppAccess(int uid, int callingUid) {
+            ThreadComputer current = snapshot();
+            try {
+                return current.mComputer.filterAppAccess(uid, callingUid);
             } finally {
                 current.release();
             }
@@ -27096,6 +27127,10 @@ public class PackageManagerService extends IPackageManager.Stub
         return mComputer.filterAppAccess(packageName, callingUid, userId);
     }
 
+    private boolean filterAppAccess(int uid, int callingUid) {
+        return mComputer.filterAppAccess(uid, callingUid);
+    }
+
     private class PackageManagerInternalImpl extends PackageManagerInternal {
         @Override
         public List<ApplicationInfo> getInstalledApplications(int flags, int userId,
@@ -27176,6 +27211,11 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean filterAppAccess(String packageName, int callingUid, int userId) {
             return PackageManagerService.this.filterAppAccess(packageName, callingUid, userId);
+        }
+
+        @Override
+        public boolean filterAppAccess(int uid, int callingUid) {
+            return PackageManagerService.this.filterAppAccess(uid, callingUid);
         }
 
         @Override
