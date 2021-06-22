@@ -137,6 +137,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     // adb shell setprop persist.debug.nssl true && adb reboot
     private static final boolean DEBUG = SystemProperties.getBoolean("persist.debug.nssl",
             false /* default */);
+    // TODO(b/187291379) disable again before release
+    private static final boolean DEBUG_REMOVE_ANIMATION = SystemProperties.getBoolean(
+            "persist.debug.nssl.dismiss", true /* default */);
 
     private static final float RUBBER_BAND_FACTOR_NORMAL = 0.35f;
     private static final float RUBBER_BAND_FACTOR_AFTER_EXPAND = 0.15f;
@@ -2575,7 +2578,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     boolean generateRemoveAnimation(ExpandableView child) {
+        String key = "";
+        if (DEBUG_REMOVE_ANIMATION) {
+            if (child instanceof ExpandableNotificationRow) {
+                key = ((ExpandableNotificationRow) child).getEntry().getKey();
+            }
+            Log.d(TAG, "generateRemoveAnimation " + key);
+        }
         if (removeRemovedChildFromHeadsUpChangeAnimations(child)) {
+            if (DEBUG_REMOVE_ANIMATION) {
+                Log.d(TAG, "removedBecauseOfHeadsUp " + key);
+            }
             mAddedHeadsUpChildren.remove(child);
             return false;
         }
@@ -2584,8 +2597,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mClearTransientViewsWhenFinished.add(child);
             return true;
         }
+        if (DEBUG_REMOVE_ANIMATION) {
+            Log.d(TAG, "generateRemove " + key
+                    + "\nmIsExpanded " + mIsExpanded
+                    + "\nmAnimationsEnabled " + mAnimationsEnabled
+                    + "\n!invisible group " + !isChildInInvisibleGroup(child));
+        }
         if (mIsExpanded && mAnimationsEnabled && !isChildInInvisibleGroup(child)) {
             if (!mChildrenToAddAnimated.contains(child)) {
+                if (DEBUG_REMOVE_ANIMATION) {
+                    Log.d(TAG, "needsAnimation = true " + key);
+                }
                 // Generate Animations
                 mChildrenToRemoveAnimated.add(child);
                 mNeedsAnimation = true;
@@ -2607,7 +2629,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * Remove a removed child view from the heads up animations if it was just added there
      *
-     * @return whether any child was removed from the list to animate
+     * @return whether any child was removed from the list to animate and the view was just added
      */
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private boolean removeRemovedChildFromHeadsUpChangeAnimations(View child) {
@@ -2626,7 +2648,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             ((ExpandableNotificationRow) child).setHeadsUpAnimatingAway(false);
         }
         mTmpList.clear();
-        return hasAddEvent;
+        return hasAddEvent && mAddedHeadsUpChildren.contains(child);
     }
 
     // TODO (b/162832756): remove since this won't happen in new pipeline (we prune groups in
