@@ -25,9 +25,6 @@ import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
-import android.content.Context;
-
-import androidx.test.core.app.ApplicationProvider;
 
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
@@ -60,15 +57,9 @@ public class AppSearchLoggerTest {
 
     @Before
     public void setUp() throws Exception {
-        Context context = ApplicationProvider.getApplicationContext();
-
-        // Give ourselves global query permissions
         mAppSearchImpl =
                 AppSearchImpl.create(
-                        mTemporaryFolder.newFolder(),
-                        context,
-                        /*logger=*/ null,
-                        ALWAYS_OPTIMIZE);
+                        mTemporaryFolder.newFolder(), /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
         mLogger = new TestLogger();
     }
 
@@ -289,20 +280,15 @@ public class AppSearchLoggerTest {
     //
     @Test
     public void testLoggingStats_initialize() throws Exception {
-        Context context = ApplicationProvider.getApplicationContext();
-
         // Create an unused AppSearchImpl to generated an InitializeStats.
-        AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(
-                        mTemporaryFolder.newFolder(),
-                        context,
-                        mLogger,
-                        ALWAYS_OPTIMIZE);
+        InitializeStats.Builder initStatsBuilder = new InitializeStats.Builder();
+        AppSearchImpl.create(mTemporaryFolder.newFolder(), initStatsBuilder, ALWAYS_OPTIMIZE);
+        InitializeStats iStats = initStatsBuilder.build();
 
-        InitializeStats iStats = mLogger.mInitializeStats;
         assertThat(iStats).isNotNull();
         assertThat(iStats.getStatusCode()).isEqualTo(AppSearchResult.RESULT_OK);
-        assertThat(iStats.getTotalLatencyMillis()).isGreaterThan(0);
+        // Total latency captured in LocalStorage
+        assertThat(iStats.getTotalLatencyMillis()).isEqualTo(0);
         assertThat(iStats.hasDeSync()).isFalse();
         assertThat(iStats.getNativeLatencyMillis()).isGreaterThan(0);
         assertThat(iStats.getDocumentStoreDataStatus())
@@ -322,6 +308,7 @@ public class AppSearchLoggerTest {
                 testPackageName,
                 testDatabase,
                 schemas,
+                /*visibilityStore=*/ null,
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                 /*schemasPackageAccessible=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
@@ -350,10 +337,12 @@ public class AppSearchLoggerTest {
                 testPackageName,
                 testDatabase,
                 schemas,
+                /*visibilityStore=*/ null,
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                 /*schemasPackageAccessible=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
                 /*version=*/ 0);
+
         GenericDocument document = new GenericDocument.Builder<>("namespace", "id", "type").build();
         mAppSearchImpl.putDocument(testPackageName, testDatabase, document, mLogger);
 
@@ -401,6 +390,7 @@ public class AppSearchLoggerTest {
                 testPackageName,
                 testDatabase,
                 schemas,
+                /*visibilityStore=*/ null,
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                 /*schemasPackageAccessible=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
@@ -432,6 +422,7 @@ public class AppSearchLoggerTest {
                 testPackageName,
                 testDatabase,
                 schemas,
+                /*visibilityStore=*/ null,
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                 /*schemasPackageAccessible=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,

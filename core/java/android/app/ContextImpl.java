@@ -3194,12 +3194,6 @@ class ContextImpl extends Context {
     @UnsupportedAppUsage
     final void setOuterContext(@NonNull Context context) {
         mOuterContext = context;
-        // TODO(b/149463653): check if we still need this method after migrating IMS to
-        //  WindowContext.
-        if (mOuterContext.isUiContext() && mContextType <= CONTEXT_TYPE_DISPLAY_CONTEXT) {
-            mContextType = CONTEXT_TYPE_WINDOW_CONTEXT;
-            mIsConfigurationBasedContext = true;
-        }
     }
 
     @UnsupportedAppUsage

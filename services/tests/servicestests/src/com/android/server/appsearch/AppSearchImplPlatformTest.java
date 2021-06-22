@@ -42,6 +42,7 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.android.compatibility.common.util.SystemUtil;
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
+import com.android.server.appsearch.visibilitystore.VisibilityStore;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -66,6 +67,7 @@ public class AppSearchImplPlatformTest {
     private final Map<UserHandle, PackageManager> mMockPackageManagers = new ArrayMap<>();
     private Context mContext;
     private AppSearchImpl mAppSearchImpl;
+    private VisibilityStore mVisibilityStore;
     private int mGlobalQuerierUid;
 
     @Before
@@ -89,13 +91,9 @@ public class AppSearchImplPlatformTest {
         };
 
         // Give ourselves global query permissions
-        mAppSearchImpl =
-                AppSearchImpl.create(
-                        mTemporaryFolder.newFolder(),
-                        mContext,
-                        /*logger=*/ null,
-                        ALWAYS_OPTIMIZE);
-
+        mAppSearchImpl = AppSearchImpl.create(
+                mTemporaryFolder.newFolder(), /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
+        mVisibilityStore = VisibilityStore.create(mAppSearchImpl, mContext);
         mGlobalQuerierUid =
                 mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
     }
@@ -128,6 +126,7 @@ public class AppSearchImplPlatformTest {
                 "package",
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("schema1").build()),
+                mVisibilityStore,
                 /*schemasNotPlatformSurfaceable=*/ Collections.singletonList("schema1"),
                 /*schemasPackageAccessible=*/ ImmutableMap.of(
                         "schema1",
@@ -136,26 +135,20 @@ public class AppSearchImplPlatformTest {
                 /*schemaVersion=*/ 0);
 
         // "schema1" is platform hidden now and package visible to package1
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "schema1",
-                                        mContext.getPackageName(),
-                                        mGlobalQuerierUid))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "schema1",
+                mGlobalQuerierUid,
+                /*callerHasSystemAccess=*/ true))
                 .isFalse();
 
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "schema1",
-                                        packageNameFoo,
-                                        uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "schema1",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isTrue();
 
         // Add a new schema, and include the already-existing "schema1"
@@ -165,6 +158,7 @@ public class AppSearchImplPlatformTest {
                 ImmutableList.of(
                         new AppSearchSchema.Builder("schema1").build(),
                         new AppSearchSchema.Builder("schema2").build()),
+                mVisibilityStore,
                 /*schemasNotPlatformSurfaceable=*/ Collections.singletonList("schema1"),
                 /*schemasPackageAccessible=*/ ImmutableMap.of(
                         "schema1",
@@ -174,50 +168,40 @@ public class AppSearchImplPlatformTest {
 
         // Check that "schema1" still has the same visibility settings
         SystemUtil.runWithShellPermissionIdentity(() -> assertThat(
-                mAppSearchImpl
-                        .getVisibilityStoreLocked()
-                        .isSchemaSearchableByCaller(
-                                "package",
-                                "database",
-                                prefix + "schema1",
-                                mContext.getPackageName(),
-                                mGlobalQuerierUid))
+                mVisibilityStore.isSchemaSearchableByCaller(
+                        "package",
+                        "database",
+                        prefix + "schema1",
+                        mGlobalQuerierUid,
+                        /*callerHasSystemAccess=*/ true))
                         .isFalse(),
                 READ_GLOBAL_APP_SEARCH_DATA);
 
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "schema1",
-                                        packageNameFoo,
-                                        uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "schema1",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isTrue();
 
         // "schema2" has default visibility settings
         SystemUtil.runWithShellPermissionIdentity(() -> assertThat(
-                mAppSearchImpl
-                        .getVisibilityStoreLocked()
-                        .isSchemaSearchableByCaller(
-                                "package",
-                                "database",
-                                prefix + "schema2",
-                                mContext.getPackageName(),
-                                mGlobalQuerierUid))
+                mVisibilityStore.isSchemaSearchableByCaller(
+                        "package",
+                        "database",
+                        prefix + "schema2",
+                        mGlobalQuerierUid,
+                        /*callerHasSystemAccess=*/ true))
                         .isTrue(),
                 READ_GLOBAL_APP_SEARCH_DATA);
 
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "schema2",
-                                        packageNameFoo,
-                                        uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "schema2",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isFalse();
     }
 
@@ -248,6 +232,7 @@ public class AppSearchImplPlatformTest {
                 "package",
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("schema1").build()),
+                mVisibilityStore,
                 /*schemasNotPlatformSurfaceable=*/ Collections.singletonList("schema1"),
                 /*schemasPackageAccessible=*/ ImmutableMap.of(
                         "schema1",
@@ -256,26 +241,20 @@ public class AppSearchImplPlatformTest {
                 /*schemaVersion=*/ 0);
 
         // "schema1" is platform hidden now and package accessible
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "schema1",
-                                        mContext.getPackageName(),
-                                        mGlobalQuerierUid))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "schema1",
+                mGlobalQuerierUid,
+                /*callerHasSystemAccess=*/ true))
                 .isFalse();
 
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "schema1",
-                                        packageNameFoo,
-                                        uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "schema1",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isTrue();
 
         // Remove "schema1" by force overriding
@@ -283,32 +262,27 @@ public class AppSearchImplPlatformTest {
                 "package",
                 "database",
                 /*schemas=*/ Collections.emptyList(),
+                mVisibilityStore,
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                 /*schemasPackageAccessible=*/ Collections.emptyMap(),
                 /*forceOverride=*/ true,
                 /*schemaVersion=*/ 0);
 
         // Check that "schema1" is no longer considered platform hidden or package accessible
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "schema1",
-                                        mContext.getPackageName(),
-                                        mGlobalQuerierUid))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "schema1",
+                mGlobalQuerierUid,
+                /*callerHasSystemAccess=*/ true))
                 .isTrue();
 
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "schema1",
-                                        packageNameFoo,
-                                        uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "schema1",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isFalse();
 
         // Add "schema1" back, it gets default visibility settings which means it's not platform
@@ -317,30 +291,25 @@ public class AppSearchImplPlatformTest {
                 "package",
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("schema1").build()),
+                mVisibilityStore,
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                 /*schemasPackageAccessible=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
                 /*schemaVersion=*/ 0);
 
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "schema1",
-                                        mContext.getPackageName(),
-                                        mGlobalQuerierUid))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "schema1",
+                mGlobalQuerierUid,
+                /*callerHasSystemAccess=*/ true))
                 .isTrue();
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "schema1",
-                                        packageNameFoo,
-                                        uidFoo))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "schema1",
+                uidFoo,
+                /*callerHasSystemAccess=*/ false))
                 .isFalse();
     }
 
@@ -357,20 +326,18 @@ public class AppSearchImplPlatformTest {
                 "package",
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("Schema").build()),
+                mVisibilityStore,
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                 /*schemasPackageAccessible=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
                 /*schemaVersion=*/ 0);
 
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "Schema",
-                                        mContext.getPackageName(),
-                                        mGlobalQuerierUid))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "Schema",
+                mGlobalQuerierUid,
+                /*callerHasSystemAccess=*/ true))
                 .isTrue();
     }
 
@@ -387,20 +354,18 @@ public class AppSearchImplPlatformTest {
                 "package",
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("Schema").build()),
+                mVisibilityStore,
                 /*schemasNotPlatformSurfaceable=*/ Collections.singletonList("Schema"),
                 /*schemasPackageAccessible=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
                 /*schemaVersion=*/ 0);
 
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
-                                .isSchemaSearchableByCaller(
-                                        "package",
-                                        "database",
-                                        prefix + "Schema",
-                                        mContext.getPackageName(),
-                                        mGlobalQuerierUid))
+        assertThat(mVisibilityStore.isSchemaSearchableByCaller(
+                "package",
+                "database",
+                prefix + "Schema",
+                mGlobalQuerierUid,
+                /*callerHasSystemAccess=*/ true))
                 .isFalse();
     }
 
@@ -418,19 +383,18 @@ public class AppSearchImplPlatformTest {
                 "package",
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("Schema").build()),
+                mVisibilityStore,
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                 /*schemasPackageAccessible=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
                 /*schemaVersion=*/ 0);
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
+        assertThat(mVisibilityStore
                                 .isSchemaSearchableByCaller(
                                         "package",
                                         "database",
                                         prefix + "Schema",
-                                        packageName,
-                                        /*callerUid=*/ 42))
+                                        /*callerUid=*/ 42,
+                                        /*callerHasSystemAccess=*/ false))
                 .isFalse();
     }
 
@@ -458,21 +422,20 @@ public class AppSearchImplPlatformTest {
                 "package",
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("Schema").build()),
+                mVisibilityStore,
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                 /*schemasPackageAccessible=*/ ImmutableMap.of(
                         "Schema",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))),
                 /*forceOverride=*/ false,
                 /*schemaVersion=*/ 0);
-        assertThat(
-                        mAppSearchImpl
-                                .getVisibilityStoreLocked()
+        assertThat(mVisibilityStore
                                 .isSchemaSearchableByCaller(
                                         "package",
                                         "database",
                                         prefix + "Schema",
-                                        packageNameFoo,
-                                        uidFoo))
+                                        uidFoo,
+                                        /*callerHasSystemAccess=*/ false))
                 .isTrue();
     }
 

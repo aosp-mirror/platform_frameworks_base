@@ -35,9 +35,10 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
-import androidx.core.os.BuildCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
+
+import com.android.settingslib.utils.BuildCompatUtils;
 
 /**
  * Banner message is a banner displaying important information (permission request, page error etc),
@@ -83,7 +84,7 @@ public class BannerMessagePreference extends Preference {
     }
 
     private static final String TAG = "BannerPreference";
-    private static final boolean IS_AT_LEAST_S = BuildCompat.isAtLeastS();
+    private static final boolean IS_AT_LEAST_S = BuildCompatUtils.isAtLeastS();
 
     private final BannerMessagePreference.ButtonInfo mPositiveButtonInfo =
             new BannerMessagePreference.ButtonInfo();

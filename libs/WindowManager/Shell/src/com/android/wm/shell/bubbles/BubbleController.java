@@ -94,6 +94,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -270,15 +271,7 @@ public class BubbleController {
 
     public void initialize() {
         mBubbleData.setListener(mBubbleDataListener);
-        mBubbleData.setSuppressionChangedListener(bubble -> {
-            // Make sure NoMan knows suppression state so that anyone querying it can tell.
-            try {
-                mBarService.onBubbleNotificationSuppressionChanged(bubble.getKey(),
-                        !bubble.showInShade(), bubble.isSuppressed());
-            } catch (RemoteException e) {
-                // Bad things have happened
-            }
-        });
+        mBubbleData.setSuppressionChangedListener(this::onBubbleNotificationSuppressionChanged);
 
         mBubbleData.setPendingIntentCancelledListener(bubble -> {
             if (bubble.getBubbleIntent() == null) {
@@ -406,6 +399,11 @@ public class BubbleController {
         return mImpl;
     }
 
+    @VisibleForTesting
+    public BubblesImpl.CachedState getImplCachedState() {
+        return mImpl.mCachedState;
+    }
+
     public ShellExecutor getMainExecutor() {
         return mMainExecutor;
     }
@@ -503,6 +501,18 @@ public class BubbleController {
         }
 
         updateStack();
+    }
+
+    @VisibleForTesting
+    public void onBubbleNotificationSuppressionChanged(Bubble bubble) {
+        // Make sure NoMan knows suppression state so that anyone querying it can tell.
+        try {
+            mBarService.onBubbleNotificationSuppressionChanged(bubble.getKey(),
+                    !bubble.showInShade(), bubble.isSuppressed());
+        } catch (RemoteException e) {
+            // Bad things have happened
+        }
+        mImpl.mCachedState.updateBubbleSuppressedState(bubble);
     }
 
     /** Called when the current user changes. */
@@ -703,7 +713,7 @@ public class BubbleController {
         mSysuiProxy.getShouldRestoredEntries(savedBubbleKeys, (entries) -> {
             mMainExecutor.execute(() -> {
                 for (BubbleEntry e : entries) {
-                    if (canLaunchInActivityView(mContext, e)) {
+                    if (canLaunchInTaskView(mContext, e)) {
                         updateBubble(e, true /* suppressFlyout */, false /* showInShade */);
                     }
                 }
@@ -815,11 +825,6 @@ public class BubbleController {
                 callback.accept(mBubbleData.getSummaryKey(groupKey));
             }
         }
-    }
-
-    private boolean isBubbleExpanded(String key) {
-        return isStackExpanded() && mBubbleData != null && mBubbleData.getSelectedBubble() != null
-                && mBubbleData.getSelectedBubble().getKey().equals(key);
     }
 
     /** Promote the provided bubble from the overflow view. */
@@ -966,14 +971,14 @@ public class BubbleController {
     }
 
     private void onEntryAdded(BubbleEntry entry) {
-        if (canLaunchInActivityView(mContext, entry)) {
+        if (canLaunchInTaskView(mContext, entry)) {
             updateBubble(entry);
         }
     }
 
     private void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
         // shouldBubbleUp checks canBubble & for bubble metadata
-        boolean shouldBubble = shouldBubbleUp && canLaunchInActivityView(mContext, entry);
+        boolean shouldBubble = shouldBubbleUp && canLaunchInTaskView(mContext, entry);
         if (!shouldBubble && mBubbleData.hasAnyBubbleWithKey(entry.getKey())) {
             // It was previously a bubble but no longer a bubble -- lets remove it
             removeBubble(entry.getKey(), DISMISS_NO_LONGER_BUBBLE);
@@ -1200,6 +1205,9 @@ public class BubbleController {
 
             mSysuiProxy.notifyInvalidateNotifications("BubbleData.Listener.applyUpdate");
             updateStack();
+
+            // Update the cached state for queries from SysUI
+            mImpl.mCachedState.update(update);
         }
     };
 
@@ -1304,15 +1312,16 @@ public class BubbleController {
     }
 
     /**
-     * Whether an intent is properly configured to display in an {@link android.app.ActivityView}.
+     * Whether an intent is properly configured to display in a
+     * {@link com.android.wm.shell.TaskView}.
      *
-     * Keep checks in sync with NotificationManagerService#canLaunchInActivityView. Typically
+     * Keep checks in sync with BubbleExtractor#canLaunchInTaskView. Typically
      * that should filter out any invalid bubbles, but should protect SysUI side just in case.
      *
      * @param context the context to use.
      * @param entry the entry to bubble.
      */
-    static boolean canLaunchInActivityView(Context context, BubbleEntry entry) {
+    static boolean canLaunchInTaskView(Context context, BubbleEntry entry) {
         PendingIntent intent = entry.getBubbleMetadata() != null
                 ? entry.getBubbleMetadata().getIntent()
                 : null;
@@ -1373,25 +1382,124 @@ public class BubbleController {
     }
 
     private class BubblesImpl implements Bubbles {
+        // Up-to-date cached state of bubbles data for SysUI to query from the calling thread
+        @VisibleForTesting
+        public class CachedState {
+            private boolean mIsStackExpanded;
+            private String mSelectedBubbleKey;
+            private HashSet<String> mSuppressedBubbleKeys = new HashSet<>();
+            private HashMap<String, String> mSuppressedGroupToNotifKeys = new HashMap<>();
+            private HashMap<String, Bubble> mShortcutIdToBubble = new HashMap<>();
+
+            private ArrayList<Bubble> mTmpBubbles = new ArrayList<>();
+
+            /**
+             * Updates the cached state based on the last full BubbleData change.
+             */
+            synchronized void update(BubbleData.Update update) {
+                if (update.selectionChanged) {
+                    mSelectedBubbleKey = update.selectedBubble != null
+                            ? update.selectedBubble.getKey()
+                            : null;
+                }
+                if (update.expandedChanged) {
+                    mIsStackExpanded = update.expanded;
+                }
+                if (update.suppressedSummaryChanged) {
+                    String summaryKey =
+                            mBubbleData.getSummaryKey(update.suppressedSummaryGroup);
+                    if (summaryKey != null) {
+                        mSuppressedGroupToNotifKeys.put(update.suppressedSummaryGroup, summaryKey);
+                    } else {
+                        mSuppressedGroupToNotifKeys.remove(update.suppressedSummaryGroup);
+                    }
+                }
+
+                mTmpBubbles.clear();
+                mTmpBubbles.addAll(update.bubbles);
+                mTmpBubbles.addAll(update.overflowBubbles);
+
+                mSuppressedBubbleKeys.clear();
+                mShortcutIdToBubble.clear();
+                for (Bubble b : mTmpBubbles) {
+                    mShortcutIdToBubble.put(b.getShortcutId(), b);
+                    updateBubbleSuppressedState(b);
+                }
+            }
+
+            /**
+             * Updates a specific bubble suppressed state.  This is used mainly because notification
+             * suppression changes don't go through the same BubbleData update mechanism.
+             */
+            synchronized void updateBubbleSuppressedState(Bubble b) {
+                if (!b.showInShade()) {
+                    mSuppressedBubbleKeys.add(b.getKey());
+                } else {
+                    mSuppressedBubbleKeys.remove(b.getKey());
+                }
+            }
+
+            public synchronized boolean isStackExpanded() {
+                return mIsStackExpanded;
+            }
+
+            public synchronized boolean isBubbleExpanded(String key) {
+                return mIsStackExpanded && key.equals(mSelectedBubbleKey);
+            }
+
+            public synchronized boolean isBubbleNotificationSuppressedFromShade(String key,
+                    String groupKey) {
+                return mSuppressedBubbleKeys.contains(key)
+                        || (mSuppressedGroupToNotifKeys.containsKey(groupKey)
+                                && key.equals(mSuppressedGroupToNotifKeys.get(groupKey)));
+            }
+
+            @Nullable
+            public synchronized Bubble getBubbleWithShortcutId(String id) {
+                return mShortcutIdToBubble.get(id);
+            }
+
+            synchronized void dump(PrintWriter pw) {
+                pw.println("BubbleImpl.CachedState state:");
+
+                pw.println("mIsStackExpanded: " + mIsStackExpanded);
+                pw.println("mSelectedBubbleKey: " + mSelectedBubbleKey);
+
+                pw.print("mSuppressedBubbleKeys: ");
+                pw.println(mSuppressedBubbleKeys.size());
+                for (String key : mSuppressedBubbleKeys) {
+                    pw.println("   suppressing: " + key);
+                }
+
+                pw.print("mSuppressedGroupToNotifKeys: ");
+                pw.println(mSuppressedGroupToNotifKeys.size());
+                for (String key : mSuppressedGroupToNotifKeys.keySet()) {
+                    pw.println("   suppressing: " + key);
+                }
+            }
+        }
+
+        private CachedState mCachedState = new CachedState();
+
         @Override
         public boolean isBubbleNotificationSuppressedFromShade(String key, String groupKey) {
-            return mMainExecutor.executeBlockingForResult(() -> {
-                return BubbleController.this.isBubbleNotificationSuppressedFromShade(key, groupKey);
-            }, Boolean.class);
+            return mCachedState.isBubbleNotificationSuppressedFromShade(key, groupKey);
         }
 
         @Override
         public boolean isBubbleExpanded(String key) {
-            return mMainExecutor.executeBlockingForResult(() -> {
-                return BubbleController.this.isBubbleExpanded(key);
-            }, Boolean.class);
+            return mCachedState.isBubbleExpanded(key);
         }
 
         @Override
         public boolean isStackExpanded() {
-            return mMainExecutor.executeBlockingForResult(() -> {
-                return BubbleController.this.isStackExpanded();
-            }, Boolean.class);
+            return mCachedState.isStackExpanded();
+        }
+
+        @Override
+        @Nullable
+        public Bubble getBubbleWithShortcutId(String shortcutId) {
+            return mCachedState.getBubbleWithShortcutId(shortcutId);
         }
 
         @Override
@@ -1431,14 +1539,6 @@ public class BubbleController {
             mMainExecutor.execute(() -> {
                 BubbleController.this.expandStackAndSelectBubble(bubble);
             });
-        }
-
-        @Override
-        @Nullable
-        public Bubble getBubbleWithShortcutId(String shortcutId) {
-            return mMainExecutor.executeBlockingForResult(() -> {
-                return BubbleController.this.mBubbleData.getAnyBubbleWithShortcutId(shortcutId);
-            }, Bubble.class);
         }
 
         @Override
@@ -1564,6 +1664,7 @@ public class BubbleController {
             try {
                 mMainExecutor.executeBlocking(() -> {
                     BubbleController.this.dump(fd, pw, args);
+                    mCachedState.dump(pw);
                 });
             } catch (InterruptedException e) {
                 Slog.e(TAG, "Failed to dump BubbleController in 2s");
