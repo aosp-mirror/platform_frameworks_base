@@ -209,30 +209,11 @@ public class DozeTriggersTest extends SysuiTestCase {
         // WHEN quick pick up is triggered
         mTriggers.onSensor(DozeLog.REASON_SENSOR_QUICK_PICKUP, 100, 100, null);
 
-        // THEN device goes into aod (shows clock with black background)
-        verify(mMachine).requestState(DOZE_AOD);
+        // THEN request pulse
+        verify(mMachine).requestPulse(anyInt());
 
         // THEN a log is taken that quick pick up was triggered
         verify(mUiEventLogger).log(DozingUpdateUiEvent.DOZING_UPDATE_QUICK_PICKUP);
-    }
-
-    @Test
-    public void testQuickPickupTimeOutAfterExecutables() {
-        // GIVEN quick pickup is triggered when device is in DOZE
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
-        mTriggers.onSensor(DozeLog.REASON_SENSOR_QUICK_PICKUP, 100, 100, null);
-        verify(mMachine).requestState(DOZE_AOD);
-        verify(mMachine, never()).requestState(DozeMachine.State.DOZE);
-
-        // WHEN next executable is run
-        mExecutor.advanceClockToLast();
-        mExecutor.runAllReady();
-
-        // THEN device goes back into DOZE
-        verify(mMachine).requestState(DozeMachine.State.DOZE);
-
-        // THEN a log is taken that wake up timeout expired
-        verify(mUiEventLogger).log(DozingUpdateUiEvent.DOZING_UPDATE_WAKE_TIMEOUT);
     }
 
     @Test
