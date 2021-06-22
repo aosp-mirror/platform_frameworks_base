@@ -127,8 +127,8 @@ public class AppSearchImplPlatformTest {
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("schema1").build()),
                 mVisibilityStore,
-                /*schemasNotPlatformSurfaceable=*/ Collections.singletonList("schema1"),
-                /*schemasPackageAccessible=*/ ImmutableMap.of(
+                /*schemasNotDisplayedBySystem=*/ Collections.singletonList("schema1"),
+                /*schemasVisibleToPackages=*/ ImmutableMap.of(
                         "schema1",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))),
                 /*forceOverride=*/ false,
@@ -159,8 +159,8 @@ public class AppSearchImplPlatformTest {
                         new AppSearchSchema.Builder("schema1").build(),
                         new AppSearchSchema.Builder("schema2").build()),
                 mVisibilityStore,
-                /*schemasNotPlatformSurfaceable=*/ Collections.singletonList("schema1"),
-                /*schemasPackageAccessible=*/ ImmutableMap.of(
+                /*schemasNotDisplayedBySystem=*/ Collections.singletonList("schema1"),
+                /*schemasVisibleToPackages=*/ ImmutableMap.of(
                         "schema1",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))),
                 /*forceOverride=*/ false,
@@ -233,8 +233,8 @@ public class AppSearchImplPlatformTest {
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("schema1").build()),
                 mVisibilityStore,
-                /*schemasNotPlatformSurfaceable=*/ Collections.singletonList("schema1"),
-                /*schemasPackageAccessible=*/ ImmutableMap.of(
+                /*schemasNotDisplayedBySystem=*/ Collections.singletonList("schema1"),
+                /*schemasVisibleToPackages=*/ ImmutableMap.of(
                         "schema1",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))),
                 /*forceOverride=*/ false,
@@ -263,8 +263,8 @@ public class AppSearchImplPlatformTest {
                 "database",
                 /*schemas=*/ Collections.emptyList(),
                 mVisibilityStore,
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
-                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ true,
                 /*schemaVersion=*/ 0);
 
@@ -292,8 +292,8 @@ public class AppSearchImplPlatformTest {
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("schema1").build()),
                 mVisibilityStore,
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
-                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
                 /*schemaVersion=*/ 0);
 
@@ -327,8 +327,8 @@ public class AppSearchImplPlatformTest {
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("Schema").build()),
                 mVisibilityStore,
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
-                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
                 /*schemaVersion=*/ 0);
 
@@ -355,8 +355,8 @@ public class AppSearchImplPlatformTest {
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("Schema").build()),
                 mVisibilityStore,
-                /*schemasNotPlatformSurfaceable=*/ Collections.singletonList("Schema"),
-                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*schemasNotDisplayedBySystem=*/ Collections.singletonList("Schema"),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
                 /*schemaVersion=*/ 0);
 
@@ -370,7 +370,7 @@ public class AppSearchImplPlatformTest {
     }
 
     @Test
-    public void testSetSchema_defaultNotPackageAccessible() throws Exception {
+    public void testSetSchema_defaultNotVisibleToPackages() throws Exception {
         String packageName = "com.package";
 
         // Make sure package doesn't global query privileges
@@ -384,8 +384,8 @@ public class AppSearchImplPlatformTest {
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("Schema").build()),
                 mVisibilityStore,
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
-                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false,
                 /*schemaVersion=*/ 0);
         assertThat(mVisibilityStore
@@ -399,7 +399,7 @@ public class AppSearchImplPlatformTest {
     }
 
     @Test
-    public void testSetSchema_packageAccessible() throws Exception {
+    public void testSetSchema_visibleToPackages() throws Exception {
         // Values for a "foo" client
         String packageNameFoo = "packageFoo";
         byte[] sha256CertFoo = new byte[] {10};
@@ -423,8 +423,8 @@ public class AppSearchImplPlatformTest {
                 "database",
                 Collections.singletonList(new AppSearchSchema.Builder("Schema").build()),
                 mVisibilityStore,
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
-                /*schemasPackageAccessible=*/ ImmutableMap.of(
+                /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                /*schemasVisibleToPackages=*/ ImmutableMap.of(
                         "Schema",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))),
                 /*forceOverride=*/ false,
