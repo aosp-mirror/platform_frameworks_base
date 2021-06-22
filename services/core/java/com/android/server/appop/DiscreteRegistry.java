@@ -16,6 +16,7 @@
 
 package com.android.server.appop;
 
+import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
 import static android.app.AppOpsManager.FILTER_BY_ATTRIBUTION_TAG;
 import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
 import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
@@ -58,7 +59,9 @@ import com.android.internal.util.XmlUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -138,6 +141,7 @@ final class DiscreteRegistry {
 
     private static final String TAG_HISTORY = "h";
     private static final String ATTR_VERSION = "v";
+    private static final String ATTR_LARGEST_CHAIN_ID = "lc";
     private static final int CURRENT_VERSION = 1;
 
     private static final String TAG_UID = "u";
@@ -182,6 +186,16 @@ final class DiscreteRegistry {
 
     DiscreteRegistry(Object inMemoryLock) {
         mInMemoryLock = inMemoryLock;
+        synchronized (mOnDiskLock) {
+            mDiscreteAccessDir = new File(
+                    new File(Environment.getDataSystemDirectory(), "appops"),
+                    "discrete");
+            createDiscreteAccessDirLocked();
+            int largestChainId = readLargestChainIdFromDiskLocked();
+            synchronized (mInMemoryLock) {
+                mDiscreteOps = new DiscreteOps(largestChainId);
+            }
+        }
     }
 
     void systemReady() {
@@ -190,15 +204,6 @@ final class DiscreteRegistry {
                     setDiscreteHistoryParameters(p);
                 });
         setDiscreteHistoryParameters(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_PRIVACY));
-        synchronized (mOnDiskLock) {
-            synchronized (mInMemoryLock) {
-                mDiscreteAccessDir = new File(
-                        new File(Environment.getDataSystemDirectory(), "appops"),
-                        "discrete");
-                createDiscreteAccessDirLocked();
-                mDiscreteOps = new DiscreteOps();
-            }
-        }
     }
 
     private void setDiscreteHistoryParameters(DeviceConfig.Properties p) {
@@ -251,7 +256,7 @@ final class DiscreteRegistry {
             DiscreteOps discreteOps;
             synchronized (mInMemoryLock) {
                 discreteOps = mDiscreteOps;
-                mDiscreteOps = new DiscreteOps();
+                mDiscreteOps = new DiscreteOps(discreteOps.mChainIdOffset);
                 mCachedOps = null;
             }
             deleteOldDiscreteHistoryFilesLocked();
@@ -273,6 +278,50 @@ final class DiscreteRegistry {
                 opNamesFilter, attributionTagFilter, flagsFilter);
         discreteOps.applyToHistoricalOps(result);
         return;
+    }
+
+    private int readLargestChainIdFromDiskLocked() {
+        final File[] files = mDiscreteAccessDir.listFiles();
+        if (files != null && files.length > 0) {
+            File latestFile = null;
+            long latestFileTimestamp = 0;
+            for (File f : files) {
+                final String fileName = f.getName();
+                if (!fileName.endsWith(DISCRETE_HISTORY_FILE_SUFFIX)) {
+                    continue;
+                }
+                long timestamp = Long.valueOf(fileName.substring(0,
+                        fileName.length() - DISCRETE_HISTORY_FILE_SUFFIX.length()));
+                if (latestFileTimestamp < timestamp) {
+                    latestFile = f;
+                    latestFileTimestamp = timestamp;
+                }
+            }
+            if (latestFile == null) {
+                return 0;
+            }
+            FileInputStream stream;
+            try {
+                stream = new FileInputStream(latestFile);
+            } catch (FileNotFoundException e) {
+                return 0;
+            }
+            try {
+                TypedXmlPullParser parser = Xml.resolvePullParser(stream);
+                XmlUtils.beginDocument(parser, TAG_HISTORY);
+
+                final int largestChainId = parser.getAttributeInt(null, ATTR_LARGEST_CHAIN_ID, 0);
+                return largestChainId;
+            } catch (Throwable t) {
+                return 0;
+            } finally {
+                try {
+                    stream.close();
+                } catch (IOException e) { }
+            }
+        } else {
+            return 0;
+        }
     }
 
     private void readDiscreteOpsFromDisk(DiscreteOps discreteOps) {
@@ -301,7 +350,7 @@ final class DiscreteRegistry {
     void clearHistory() {
         synchronized (mOnDiskLock) {
             synchronized (mInMemoryLock) {
-                mDiscreteOps = new DiscreteOps();
+                mDiscreteOps = new DiscreteOps(0);
             }
             clearOnDiskHistoryLocked();
         }
@@ -341,6 +390,10 @@ final class DiscreteRegistry {
                 : new String[]{AppOpsManager.opToPublicName(dumpOp)};
         discreteOps.filter(0, Instant.now().toEpochMilli(), filter, uidFilter, packageNameFilter,
                 opNamesFilter, attributionTagFilter, OP_FLAGS_ALL);
+        pw.print(prefix);
+        pw.print("Largest chain id: ");
+        pw.print(mDiscreteOps.mLargestChainId);
+        pw.println();
         discreteOps.dump(pw, sdf, date, prefix, nDiscreteOps);
     }
 
@@ -351,14 +404,14 @@ final class DiscreteRegistry {
     }
 
     private DiscreteOps getAllDiscreteOps() {
-        DiscreteOps discreteOps = new DiscreteOps();
+        DiscreteOps discreteOps = new DiscreteOps(0);
 
         synchronized (mOnDiskLock) {
             synchronized (mInMemoryLock) {
                 discreteOps.merge(mDiscreteOps);
             }
             if (mCachedOps == null) {
-                mCachedOps = new DiscreteOps();
+                mCachedOps = new DiscreteOps(0);
                 readDiscreteOpsFromDisk(mCachedOps);
             }
             discreteOps.merge(mCachedOps);
@@ -368,9 +421,13 @@ final class DiscreteRegistry {
 
     private final class DiscreteOps {
         ArrayMap<Integer, DiscreteUidOps> mUids;
+        int mChainIdOffset;
+        int mLargestChainId;
 
-        DiscreteOps() {
+        DiscreteOps(int chainIdOffset) {
             mUids = new ArrayMap<>();
+            mChainIdOffset = chainIdOffset;
+            mLargestChainId = chainIdOffset;
         }
 
         boolean isEmpty() {
@@ -378,6 +435,7 @@ final class DiscreteRegistry {
         }
 
         void merge(DiscreteOps other) {
+            mLargestChainId = max(mLargestChainId, other.mLargestChainId);
             int nUids = other.mUids.size();
             for (int i = 0; i < nUids; i++) {
                 int uid = other.mUids.keyAt(i);
@@ -390,6 +448,17 @@ final class DiscreteRegistry {
                 @Nullable String attributionTag, @AppOpsManager.OpFlags int flags,
                 @AppOpsManager.UidState int uidState, long accessTime, long accessDuration,
                 @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId) {
+            if (attributionChainId != ATTRIBUTION_CHAIN_ID_NONE) {
+                attributionChainId += mChainIdOffset;
+                if (attributionChainId < 0) {
+                    attributionChainId -= mChainIdOffset;
+                    mChainIdOffset = 0;
+                    mLargestChainId = attributionChainId;
+                }
+                if (attributionChainId > mLargestChainId) {
+                    mLargestChainId = attributionChainId;
+                }
+            }
             getOrCreateDiscreteUidOps(uid).addDiscreteAccess(op, packageName, attributionTag, flags,
                     uidState, accessTime, accessDuration, attributionFlags, attributionChainId);
         }
@@ -442,6 +511,7 @@ final class DiscreteRegistry {
             out.startDocument(null, true);
             out.startTag(null, TAG_HISTORY);
             out.attributeInt(null, ATTR_VERSION, CURRENT_VERSION);
+            out.attributeInt(null, ATTR_LARGEST_CHAIN_ID, mLargestChainId);
 
             int nUids = mUids.size();
             for (int i = 0; i < nUids; i++) {
@@ -476,8 +546,13 @@ final class DiscreteRegistry {
         }
 
         private void readFromFile(File f, long beginTimeMillis) {
+            FileInputStream stream;
             try {
-                FileInputStream stream = new FileInputStream(f);
+                stream = new FileInputStream(f);
+            } catch (FileNotFoundException e) {
+                return;
+            }
+            try {
                 TypedXmlPullParser parser = Xml.resolvePullParser(stream);
                 XmlUtils.beginDocument(parser, TAG_HISTORY);
 
@@ -487,7 +562,6 @@ final class DiscreteRegistry {
                 if (version != CURRENT_VERSION) {
                     throw new IllegalStateException("Dropping unsupported discrete history " + f);
                 }
-
                 int depth = parser.getDepth();
                 while (XmlUtils.nextElementWithin(parser, depth)) {
                     if (TAG_UID.equals(parser.getName())) {
@@ -498,8 +572,12 @@ final class DiscreteRegistry {
             } catch (Throwable t) {
                 Slog.e(TAG, "Failed to read file " + f.getName() + " " + t.getMessage() + " "
                         + Arrays.toString(t.getStackTrace()));
+            } finally {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                }
             }
-
         }
     }
 

@@ -209,6 +209,7 @@ final class HistoricalRegistry {
         mMode = other.mMode;
         mBaseSnapshotInterval = other.mBaseSnapshotInterval;
         mIntervalCompressionMultiplier = other.mIntervalCompressionMultiplier;
+        mDiscreteRegistry = other.mDiscreteRegistry;
     }
 
     void systemReady(@NonNull ContentResolver resolver) {
