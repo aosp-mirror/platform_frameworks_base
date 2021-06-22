@@ -602,6 +602,10 @@ public class NotificationIconAreaController implements
         updateAodIconColors();
     }
 
+    public int getHeight() {
+        return mAodIcons == null ? 0 : mAodIcons.getHeight();
+    }
+
     public void appearAodIcons() {
         if (mAodIcons == null) {
             return;
