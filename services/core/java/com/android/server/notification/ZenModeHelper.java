@@ -383,7 +383,14 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
             for (int i = newConfig.automaticRules.size() - 1; i >= 0; i--) {
                 ZenRule rule = newConfig.automaticRules.get(newConfig.automaticRules.keyAt(i));
-                if (rule.pkg.equals(packageName) && canManageAutomaticZenRule(rule)) {
+                String pkg = rule.pkg != null
+                        ? rule.pkg
+                        : (rule.component != null)
+                                ? rule.component.getPackageName()
+                                : (rule.configurationActivity != null)
+                                        ? rule.configurationActivity.getPackageName()
+                                        : null;
+                if (Objects.equals(pkg, packageName) && canManageAutomaticZenRule(rule)) {
                     newConfig.automaticRules.removeAt(i);
                 }
             }
