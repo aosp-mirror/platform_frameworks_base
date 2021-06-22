@@ -238,9 +238,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         mNetworkController.setNoNetworksAvailable(false);
         setWifiStateForVcn(true, testSsid);
         setWifiLevelForVcn(0);
-        // Connected, but still not validated - does not show
-        //verifyLastWifiIcon(false, WifiIcons.WIFI_SIGNAL_STRENGTH[0][0]);
-        verifyLastMobileDataIndicatorsForVcn(false, 0, 0, false);
+        verifyLastMobileDataIndicatorsForVcn(true, 0, TelephonyIcons.ICON_CWF, false);
 
         mNetworkController.setNoNetworksAvailable(true);
         for (int testLevel = 0; testLevel < WifiIcons.WIFI_LEVEL_COUNT; testLevel++) {
