@@ -148,7 +148,7 @@ class MediaDataManager(
     private val internalListeners: MutableSet<Listener> = mutableSetOf()
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
     // There should ONLY be at most one Smartspace media recommendation.
-    private var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
+    var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
     private var smartspaceSession: SmartspaceSession? = null
     private var allowMediaRecommendations = Utils.allowMediaRecommendations(context)
 
@@ -824,12 +824,16 @@ class MediaDataManager(
          * @param immediately indicates should apply the UI changes immediately, otherwise wait
          * until the next refresh-round before UI becomes visible. True by default to take in place
          * immediately.
+         *
+         * @param isSsReactivated indicates transition from a state with no active media players to
+         * a state with active media players upon receiving Smartspace media data.
          */
         fun onMediaDataLoaded(
             key: String,
             oldKey: String?,
             data: MediaData,
-            immediately: Boolean = true
+            immediately: Boolean = true,
+            isSsReactivated: Boolean = false
         ) {}
 
         /**
