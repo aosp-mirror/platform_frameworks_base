@@ -43,6 +43,7 @@ import static android.app.people.PeopleSpaceTile.SHOW_IMPORTANT_CONVERSATIONS;
 import static android.app.people.PeopleSpaceTile.SHOW_STARRED_CONTACTS;
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_PACKAGES_SUSPENDED;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.PermissionChecker.PERMISSION_GRANTED;
 import static android.content.PermissionChecker.PERMISSION_HARD_DENIED;
 import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_ANYONE;
@@ -88,7 +89,6 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.notification.ConversationChannelWrapper;
@@ -1104,7 +1104,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetPeopleTileFromPersistentStorageNoConversation() throws RemoteException {
+    public void testGetPeopleTileFromPersistentStorageNoConversation() throws Exception {
         when(mIPeopleManager.getConversation(TEST_PACKAGE_A, 0, SHORTCUT_ID)).thenReturn(null);
         PeopleTileKey key = new PeopleTileKey(SHORTCUT_ID, 0, TEST_PACKAGE_A);
         PeopleSpaceTile tile = mManager.getTileFromPersistentStorage(key, WIDGET_ID_WITH_SHORTCUT);
@@ -1223,8 +1223,38 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChange() {
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+    public void testUpdateWidgetsFromBroadcastInBackgroundBootCompleteWithPackageUninstalled()
+            throws Exception {
+        when(mPackageManager.getApplicationInfoAsUser(any(), anyInt(), anyInt())).thenThrow(
+                PackageManager.NameNotFoundException.class);
+
+        // We should remove widgets if the package is uninstalled at next reboot if we missed the
+        // package removed broadcast.
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
+
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
+        assertThat(tile).isNull();
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+    }
+
+    @Test
+    public void testUpdateWidgetsFromBroadcastInBackgroundPackageRemovedWithPackageUninstalled()
+            throws Exception {
+        when(mPackageManager.getApplicationInfoAsUser(any(), anyInt(), anyInt())).thenThrow(
+                PackageManager.NameNotFoundException.class);
+
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_PACKAGE_REMOVED);
+
+        PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
+        assertThat(tile).isNull();
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+    }
+
+    @Test
+    public void testUpdateWidgetsFromBroadcastInBackground() {
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.isPackageSuspended()).isFalse();
@@ -1236,10 +1266,10 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeWithUserQuieted() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundWithUserQuieted() {
         when(mUserManager.isQuietModeEnabled(any())).thenReturn(true);
 
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.isPackageSuspended()).isFalse();
@@ -1248,10 +1278,10 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeWithPackageSuspended() throws Exception {
+    public void testUpdateWidgetsFromBroadcastInBackgroundWithPackageSuspended() throws Exception {
         when(mPackageManager.isPackageSuspended(any())).thenReturn(true);
 
-        mManager.updateWidgetsOnStateChange(ACTION_PACKAGES_SUSPENDED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_PACKAGES_SUSPENDED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.isPackageSuspended()).isTrue();
@@ -1260,9 +1290,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeNotInDnd() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundNotInDnd() {
         int expected = 0;
-        mManager.updateWidgetsOnStateChange(NotificationManager
+        mManager.updateWidgetsFromBroadcastInBackground(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
@@ -1270,14 +1300,14 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllConversations() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllConversations() {
         int expected = 0;
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
                 INTERRUPTION_FILTER_PRIORITY);
         when(mNotificationPolicy.allowConversations()).thenReturn(true);
         setFinalField("priorityConversationSenders", CONVERSATION_SENDERS_ANYONE);
 
-        mManager.updateWidgetsOnStateChange(NotificationManager
+        mManager.updateWidgetsFromBroadcastInBackground(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
@@ -1285,7 +1315,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowOnlyImportantConversations() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowOnlyImportantConversations() {
         int expected = 0;
         // Only allow important conversations.
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
@@ -1293,7 +1323,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mNotificationPolicy.allowConversations()).thenReturn(true);
         setFinalField("priorityConversationSenders", CONVERSATION_SENDERS_IMPORTANT);
 
-        mManager.updateWidgetsOnStateChange(NotificationManager
+        mManager.updateWidgetsFromBroadcastInBackground(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
@@ -1302,13 +1332,13 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowNoConversations() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowNoConversations() {
         int expected = 0;
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
                 INTERRUPTION_FILTER_PRIORITY);
         when(mNotificationPolicy.allowConversations()).thenReturn(false);
 
-        mManager.updateWidgetsOnStateChange(NotificationManager
+        mManager.updateWidgetsFromBroadcastInBackground(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
@@ -1316,7 +1346,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowNoConversationsAllowContactMessages() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowNoConversationsAllowContactMessages() {
         int expected = 0;
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
                 INTERRUPTION_FILTER_PRIORITY);
@@ -1324,14 +1354,14 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mNotificationPolicy.allowMessagesFrom()).thenReturn(ZenModeConfig.SOURCE_CONTACT);
         when(mNotificationPolicy.allowMessages()).thenReturn(true);
 
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_CONTACTS);
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowNoConversationsAllowStarredContactMessages() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowNoConversationsAllowStarredContactMessages() {
         int expected = 0;
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
                 INTERRUPTION_FILTER_PRIORITY);
@@ -1339,26 +1369,26 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mNotificationPolicy.allowMessagesFrom()).thenReturn(ZenModeConfig.SOURCE_STAR);
         when(mNotificationPolicy.allowMessages()).thenReturn(true);
 
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_STARRED_CONTACTS);
 
         setFinalField("suppressedVisualEffects", SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                 | SUPPRESSED_EFFECT_AMBIENT);
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_CONVERSATIONS);
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowAlarmsOnly() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowAlarmsOnly() {
         int expected = 0;
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
                 INTERRUPTION_FILTER_ALARMS);
 
-        mManager.updateWidgetsOnStateChange(NotificationManager
+        mManager.updateWidgetsFromBroadcastInBackground(NotificationManager
                 .ACTION_INTERRUPTION_FILTER_CHANGED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
@@ -1366,7 +1396,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateWidgetsOnStateChangeAllowVisualEffectsAndAllowAlarmsOnly() {
+    public void testUpdateWidgetsFromBroadcastInBackgroundAllowVisualEffectsAndAllowAlarmsOnly() {
         int expected = 0;
         // If we show visuals, but just only make sounds for alarms, still show content in tiles.
         when(mNotificationManager.getCurrentInterruptionFilter()).thenReturn(
@@ -1374,7 +1404,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         setFinalField("suppressedVisualEffects", SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                 | SUPPRESSED_EFFECT_AMBIENT);
 
-        mManager.updateWidgetsOnStateChange(ACTION_BOOT_COMPLETED);
+        mManager.updateWidgetsFromBroadcastInBackground(ACTION_BOOT_COMPLETED);
 
         PeopleSpaceTile tile = mManager.mTiles.get(WIDGET_ID_WITH_SHORTCUT);
         assertThat(tile.getNotificationPolicyState()).isEqualTo(expected | SHOW_CONVERSATIONS);

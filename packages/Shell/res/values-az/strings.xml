@@ -35,7 +35,7 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Zip faylı üçün baq hesabat detalları əlavə edilmədi"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"adsız"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detallar"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"displey görüntüsü"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Skrinşot"</string>
     <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Displey görüntüsü uğurla çəkildi."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Displey görüntüsü əlçatan deyil."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Baq hesabatı <xliff:g id="ID">#%d</xliff:g> detalları"</string>

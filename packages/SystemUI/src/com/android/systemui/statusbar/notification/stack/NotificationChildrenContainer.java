@@ -725,7 +725,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             tmpState.yTranslation = viewState.yTranslation - mDividerHeight;
             float alpha = mChildrenExpanded && viewState.alpha != 0 ? mDividerAlpha : 0;
             if (mUserLocked && !showingAsLowPriority() && viewState.alpha != 0) {
-                alpha = NotificationUtils.interpolate(0, 0.5f,
+                alpha = NotificationUtils.interpolate(0, mDividerAlpha,
                         Math.min(viewState.alpha, expandFraction));
             }
             tmpState.hidden = !dividersVisible;
@@ -802,9 +802,9 @@ public class NotificationChildrenContainer extends ViewGroup {
             View divider = mDividers.get(i);
             tmpState.initFrom(divider);
             tmpState.yTranslation = viewState.yTranslation - mDividerHeight;
-            float alpha = mChildrenExpanded && viewState.alpha != 0 ? 0.5f : 0;
+            float alpha = mChildrenExpanded && viewState.alpha != 0 ? mDividerAlpha : 0;
             if (mUserLocked && !showingAsLowPriority() && viewState.alpha != 0) {
-                alpha = NotificationUtils.interpolate(0, 0.5f,
+                alpha = NotificationUtils.interpolate(0, mDividerAlpha,
                         Math.min(viewState.alpha, expandFraction));
             }
             tmpState.hidden = !dividersVisible;
