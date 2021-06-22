@@ -1914,11 +1914,11 @@ public class AlarmManagerServiceTest {
     public void hasScheduleExactAlarmBinderCallChangeDisabled() throws RemoteException {
         mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, false);
 
-        mockExactAlarmPermissionGrant(true, false, MODE_DEFAULT);
-        assertFalse(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
+        mockExactAlarmPermissionGrant(false, true, MODE_DEFAULT);
+        assertTrue(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
 
-        mockExactAlarmPermissionGrant(true, true, MODE_ALLOWED);
-        assertFalse(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
+        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
+        assertTrue(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
     }
 
     private void mockChangeEnabled(long changeId, boolean enabled) {
