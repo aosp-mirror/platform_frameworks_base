@@ -37,15 +37,7 @@ java_library {
     name: "services.net-module-wifi",
     srcs: [
         ":framework-services-net-module-wifi-shared-srcs",
-        ":net-module-utils-srcs",
         ":net-utils-services-common-srcs",
-        "java/android/net/ip/IpClientCallbacks.java",
-        "java/android/net/ip/IpClientManager.java",
-        "java/android/net/ip/IpClientUtil.java",
-        "java/android/net/util/KeepalivePacketDataUtil.java",
-        "java/android/net/util/NetworkConstants.java",
-        "java/android/net/IpMemoryStore.java",
-        "java/android/net/NetworkMonitorManager.java",
     ],
     sdk_version: "module_current",
     min_sdk_version: "30",
@@ -89,11 +81,7 @@ filegroup {
 filegroup {
     name: "services-connectivity-shared-srcs",
     srcs: [
-        // TODO: move to networkstack-client
-        "java/android/net/IpMemoryStore.java",
-        "java/android/net/NetworkMonitorManager.java",
         // TODO: move to libs/net
-        "java/android/net/util/KeepalivePacketDataUtil.java",
         "java/android/net/util/NetworkConstants.java",
     ],
 }
