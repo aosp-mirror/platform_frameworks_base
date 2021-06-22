@@ -652,7 +652,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"Демо режимін қосу"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Демо режимін көрсету"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Дабыл"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Оятқыш"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Жұмыс профилі"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Ұшақ режимі"</string>
     <string name="add_tile" msgid="6239678623873086686">"Тақтайша қосу"</string>

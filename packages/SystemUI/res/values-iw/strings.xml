@@ -701,7 +701,7 @@
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"ההודעות אלה יישלחו כהתראות"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"ההתראות האלה בדרך כלל נדחות על ידך. \nלהמשיך להציג אותן?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"סיום"</string>
-    <string name="inline_ok_button" msgid="603075490581280343">"החלה"</string>
+    <string name="inline_ok_button" msgid="603075490581280343">"אישור"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"שנמשיך להציג לך את ההתראות האלה?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"לא, אל תמשיכו"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"הצגה ללא צליל"</string>
