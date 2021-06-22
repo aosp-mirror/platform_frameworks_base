@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-// TODO(b/169883602): This is purposely a different package from the path so that it can access
-// AppSearchImpl methods without having to make methods public. This should be moved into a proper
-// package once AppSearchImpl-VisibilityStore's dependencies are refactored.
-package com.android.server.appsearch.external.localstorage;
+package com.android.server.appsearch.visibilitystore;
 
 import static android.Manifest.permission.READ_GLOBAL_APP_SEARCH_DATA;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
@@ -39,8 +36,10 @@ import android.util.ArrayMap;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.server.appsearch.external.localstorage.AppSearchImpl;
+import com.android.server.appsearch.external.localstorage.OptimizeStrategy;
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
-import com.android.server.appsearch.visibilitystore.VisibilityStore;
+import com.android.server.appsearch.external.localstorage.visibilitystore.VisibilityStore;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -55,7 +54,7 @@ import org.mockito.Mockito;
 import java.util.Collections;
 import java.util.Map;
 
-public class VisibilityStoreTest {
+public class VisibilityStoreImplTest {
     /**
      * Always trigger optimize in this class. OptimizeStrategy will be tested in its own test class.
      */
@@ -64,7 +63,7 @@ public class VisibilityStoreTest {
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
     private final Map<UserHandle, PackageManager> mMockPackageManagers = new ArrayMap<>();
     private Context mContext;
-    private VisibilityStore mVisibilityStore;
+    private VisibilityStoreImpl mVisibilityStore;
     private int mUid;
 
     @Before
@@ -90,7 +89,7 @@ public class VisibilityStoreTest {
         // Give ourselves global query permissions
         AppSearchImpl appSearchImpl = AppSearchImpl.create(
                 mTemporaryFolder.newFolder(), /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
-        mVisibilityStore = VisibilityStore.create(appSearchImpl, mContext);
+        mVisibilityStore = VisibilityStoreImpl.create(appSearchImpl, mContext);
         mUid = mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
     }
 

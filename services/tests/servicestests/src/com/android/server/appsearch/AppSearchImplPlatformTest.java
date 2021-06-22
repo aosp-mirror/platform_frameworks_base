@@ -42,7 +42,7 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.android.compatibility.common.util.SystemUtil;
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
-import com.android.server.appsearch.visibilitystore.VisibilityStore;
+import com.android.server.appsearch.visibilitystore.VisibilityStoreImpl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -67,7 +67,7 @@ public class AppSearchImplPlatformTest {
     private final Map<UserHandle, PackageManager> mMockPackageManagers = new ArrayMap<>();
     private Context mContext;
     private AppSearchImpl mAppSearchImpl;
-    private VisibilityStore mVisibilityStore;
+    private VisibilityStoreImpl mVisibilityStore;
     private int mGlobalQuerierUid;
 
     @Before
@@ -93,7 +93,7 @@ public class AppSearchImplPlatformTest {
         // Give ourselves global query permissions
         mAppSearchImpl = AppSearchImpl.create(
                 mTemporaryFolder.newFolder(), /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
-        mVisibilityStore = VisibilityStore.create(mAppSearchImpl, mContext);
+        mVisibilityStore = VisibilityStoreImpl.create(mAppSearchImpl, mContext);
         mGlobalQuerierUid =
                 mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
     }
