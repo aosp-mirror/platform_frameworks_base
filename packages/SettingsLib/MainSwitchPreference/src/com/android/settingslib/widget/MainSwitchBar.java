@@ -30,7 +30,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
-import androidx.core.os.BuildCompat;
+
+import com.android.settingslib.utils.BuildCompatUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,11 +75,11 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
 
         LayoutInflater.from(context).inflate(R.layout.settingslib_main_switch_bar, this);
 
-        if (!BuildCompat.isAtLeastS()) {
+        if (!BuildCompatUtils.isAtLeastS()) {
             final TypedArray a = context.obtainStyledAttributes(
                     new int[]{android.R.attr.colorAccent});
             mBackgroundActivatedColor = a.getColor(0, 0);
-            mBackgroundColor = context.getColor(R.color.settingslib_switchbar_background_color);
+            mBackgroundColor = context.getColor(R.color.material_grey_600);
             a.recycle();
         }
 
@@ -88,11 +89,12 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         mFrameView = findViewById(R.id.frame);
         mTextView = (TextView) findViewById(R.id.switch_text);
         mSwitch = (Switch) findViewById(android.R.id.switch_widget);
-        mBackgroundOn = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_on);
-        mBackgroundOff = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_off);
-        mBackgroundDisabled = getContext().getDrawable(
-                R.drawable.settingslib_switch_bar_bg_disabled);
-
+        if (BuildCompatUtils.isAtLeastS()) {
+            mBackgroundOn = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_on);
+            mBackgroundOff = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_off);
+            mBackgroundDisabled = getContext().getDrawable(
+                    R.drawable.settingslib_switch_bar_bg_disabled);
+        }
         addOnSwitchChangeListener((switchView, isChecked) -> setChecked(isChecked));
 
         setChecked(mSwitch.isChecked());
@@ -194,9 +196,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
      * Remove a listener for switch changes
      */
     public void removeOnSwitchChangeListener(OnMainSwitchChangeListener listener) {
-        if (mSwitchChangeListeners.contains(listener)) {
-            mSwitchChangeListeners.remove(listener);
-        }
+        mSwitchChangeListeners.remove(listener);
     }
 
     /**
@@ -207,7 +207,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         mTextView.setEnabled(enabled);
         mSwitch.setEnabled(enabled);
 
-        if (BuildCompat.isAtLeastS()) {
+        if (BuildCompatUtils.isAtLeastS()) {
             if (enabled) {
                 mFrameView.setBackground(isChecked() ? mBackgroundOn : mBackgroundOff);
             } else {
@@ -226,7 +226,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
     }
 
     private void setBackground(boolean isChecked) {
-        if (!BuildCompat.isAtLeastS()) {
+        if (!BuildCompatUtils.isAtLeastS()) {
             setBackgroundColor(isChecked ? mBackgroundActivatedColor : mBackgroundColor);
         } else {
             mFrameView.setBackground(isChecked ? mBackgroundOn : mBackgroundOff);
@@ -267,10 +267,12 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
 
         public static final Parcelable.Creator<SavedState> CREATOR =
                 new Parcelable.Creator<SavedState>() {
+                    @Override
                     public SavedState createFromParcel(Parcel in) {
                         return new SavedState(in);
                     }
 
+                    @Override
                     public SavedState[] newArray(int size) {
                         return new SavedState[size];
                     }

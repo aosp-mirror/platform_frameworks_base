@@ -494,7 +494,8 @@ public class PeopleSpaceUtils {
      * match the data by {@link ContactsContract.ContactsColumns#LOOKUP_KEY} key to ensure proper
      * matching across all the Contacts DB tables.
      */
-    private static List<String> getContactLookupKeysWithBirthdaysToday(Context context) {
+    @VisibleForTesting
+    public static List<String> getContactLookupKeysWithBirthdaysToday(Context context) {
         List<String> lookupKeysWithBirthdaysToday = new ArrayList<>(1);
         String today = new SimpleDateFormat("MM-dd").format(new Date());
         String[] projection = new String[]{
@@ -503,14 +504,20 @@ public class PeopleSpaceUtils {
         String where =
                 ContactsContract.Data.MIMETYPE
                         + "= ? AND " + ContactsContract.CommonDataKinds.Event.TYPE + "="
-                        + ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY + " AND substr("
-                        + ContactsContract.CommonDataKinds.Event.START_DATE + ",6) = ?";
+                        + ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY + " AND (substr("
+                        // Birthdays stored with years will match this format
+                        + ContactsContract.CommonDataKinds.Event.START_DATE + ",6) = ? OR substr("
+                        // Birthdays stored without years will match this format
+                        + ContactsContract.CommonDataKinds.Event.START_DATE + ",3) = ? )";
         String[] selection =
-                new String[]{ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE, today};
+                new String[]{ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE, today,
+                        today};
         Cursor cursor = null;
         try {
-            cursor = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI,
-                    projection, where, selection, null);
+            cursor = context
+                    .getContentResolver()
+                    .query(ContactsContract.Data.CONTENT_URI,
+                            projection, where, selection, null);
             while (cursor != null && cursor.moveToNext()) {
                 String lookupKey = cursor.getString(
                         cursor.getColumnIndex(ContactsContract.CommonDataKinds.Event.LOOKUP_KEY));

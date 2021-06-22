@@ -190,6 +190,9 @@ open class QSTileViewImpl @JvmOverloads constructor(
         if (collapsed) {
             labelContainer.ignoreLastView = true
             secondaryLabel.alpha = 0f
+            // Do not marque in QQS
+            label.ellipsize = TextUtils.TruncateAt.END
+            secondaryLabel.ellipsize = TextUtils.TruncateAt.END
         }
         setLabelColor(getLabelColorForState(QSTile.State.DEFAULT_STATE))
         setSecondaryLabelColor(getSecondaryLabelColorForState(QSTile.State.DEFAULT_STATE))
@@ -492,11 +495,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
 
         return if (state.state == Tile.STATE_UNAVAILABLE || state is BooleanState) {
-            val resName = "$TILE_STATE_RES_PREFIX${state.spec}"
-            var arrayResId = resources.getIdentifier(resName, "array", context.packageName)
-            if (arrayResId == 0) {
-                arrayResId = R.array.tile_states_default
-            }
+            var arrayResId = SubtitleArrayMapping.getSubtitleId(state.spec)
             val array = resources.getStringArray(arrayResId)
             array[state.state]
         } else {
@@ -555,6 +554,41 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     private fun getChevronColorForState(state: Int): Int = getSecondaryLabelColorForState(state)
+}
+
+@VisibleForTesting
+internal object SubtitleArrayMapping {
+    private val subtitleIdsMap = mapOf<String?, Int>(
+        "internet" to R.array.tile_states_internet,
+        "wifi" to R.array.tile_states_wifi,
+        "cell" to R.array.tile_states_cell,
+        "battery" to R.array.tile_states_battery,
+        "dnd" to R.array.tile_states_dnd,
+        "flashlight" to R.array.tile_states_flashlight,
+        "rotation" to R.array.tile_states_rotation,
+        "bt" to R.array.tile_states_bt,
+        "airplane" to R.array.tile_states_airplane,
+        "location" to R.array.tile_states_location,
+        "hotspot" to R.array.tile_states_hotspot,
+        "inversion" to R.array.tile_states_inversion,
+        "saver" to R.array.tile_states_saver,
+        "dark" to R.array.tile_states_dark,
+        "work" to R.array.tile_states_work,
+        "cast" to R.array.tile_states_cast,
+        "night" to R.array.tile_states_night,
+        "screenrecord" to R.array.tile_states_screenrecord,
+        "reverse" to R.array.tile_states_reverse,
+        "reduce_brightness" to R.array.tile_states_reduce_brightness,
+        "cameratoggle" to R.array.tile_states_cameratoggle,
+        "mictoggle" to R.array.tile_states_mictoggle,
+        "controls" to R.array.tile_states_controls,
+        "wallet" to R.array.tile_states_wallet,
+        "alarm" to R.array.tile_states_alarm
+    )
+
+    fun getSubtitleId(spec: String?): Int {
+        return subtitleIdsMap.getOrDefault(spec, R.array.tile_states_default)
+    }
 }
 
 private fun colorValuesHolder(name: String, vararg values: Int): PropertyValuesHolder {

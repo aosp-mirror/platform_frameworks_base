@@ -22,6 +22,7 @@ import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_ANYONE;
 
 import static com.android.systemui.people.NotificationHelper.getContactUri;
@@ -62,6 +63,7 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -172,6 +174,7 @@ public class PeopleSpaceWidgetManager {
     public void init() {
         synchronized (mLock) {
             if (!mRegisteredReceivers) {
+                if (DEBUG) Log.d(TAG, "Register receivers");
                 IntentFilter filter = new IntentFilter();
                 filter.addAction(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED);
                 filter.addAction(ACTION_BOOT_COMPLETED);
@@ -185,6 +188,14 @@ public class PeopleSpaceWidgetManager {
                 mBroadcastDispatcher.registerReceiver(mBaseBroadcastReceiver, filter,
 
                         null /* executor */, UserHandle.ALL);
+                IntentFilter perAppFilter = new IntentFilter(ACTION_PACKAGE_REMOVED);
+                perAppFilter.addDataScheme("package");
+                // BroadcastDispatcher doesn't allow data schemes.
+                mContext.registerReceiver(mBaseBroadcastReceiver, perAppFilter);
+                IntentFilter bootComplete = new IntentFilter(ACTION_BOOT_COMPLETED);
+                bootComplete.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+                // BroadcastDispatcher doesn't allow priority.
+                mContext.registerReceiver(mBaseBroadcastReceiver, bootComplete);
                 mRegisteredReceivers = true;
             }
         }
@@ -303,10 +314,6 @@ public class PeopleSpaceWidgetManager {
 
     /** Updates tile in app widget options and the current view. */
     public void updateAppWidgetOptionsAndView(int appWidgetId, PeopleSpaceTile tile) {
-        if (tile == null) {
-            if (DEBUG) Log.w(TAG, "Requested to store null tile");
-            return;
-        }
         synchronized (mTiles) {
             mTiles.put(appWidgetId, tile);
         }
@@ -320,6 +327,17 @@ public class PeopleSpaceWidgetManager {
      */
     @Nullable
     public PeopleSpaceTile getTileForExistingWidget(int appWidgetId) {
+        try {
+            return getTileForExistingWidgetThrowing(appWidgetId);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to retrieve conversation for tile: " + e);
+            return null;
+        }
+    }
+
+    @Nullable
+    private PeopleSpaceTile getTileForExistingWidgetThrowing(int appWidgetId) throws
+            PackageManager.NameNotFoundException {
         // First, check if tile is cached in memory.
         PeopleSpaceTile tile;
         synchronized (mTiles) {
@@ -348,7 +366,8 @@ public class PeopleSpaceWidgetManager {
      * If a {@link PeopleTileKey} is not provided, fetch one from {@link SharedPreferences}.
      */
     @Nullable
-    public PeopleSpaceTile getTileFromPersistentStorage(PeopleTileKey key, int appWidgetId) {
+    public PeopleSpaceTile getTileFromPersistentStorage(PeopleTileKey key, int appWidgetId) throws
+            PackageManager.NameNotFoundException {
         if (!key.isValid()) {
             Log.e(TAG, "PeopleTileKey invalid: " + key.toString());
             return null;
@@ -358,7 +377,6 @@ public class PeopleSpaceWidgetManager {
             Log.d(TAG, "System services are null");
             return null;
         }
-
         try {
             if (DEBUG) Log.d(TAG, "Retrieving Tile from storage: " + key.toString());
             ConversationChannel channel = mIPeopleManager.getConversation(
@@ -383,9 +401,9 @@ public class PeopleSpaceWidgetManager {
             }
 
             // Add current state.
-            return updateWithCurrentState(storedTile.build(), ACTION_BOOT_COMPLETED);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to retrieve conversation for tile: " + e);
+            return getTileWithCurrentState(storedTile.build(), ACTION_BOOT_COMPLETED);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not retrieve data: " + e);
             return null;
         }
     }
@@ -397,7 +415,6 @@ public class PeopleSpaceWidgetManager {
     public void updateWidgetsWithNotificationChanged(StatusBarNotification sbn,
             PeopleSpaceUtils.NotificationAction notificationAction) {
         if (DEBUG) {
-            Log.d(TAG, "updateWidgetsWithNotificationChanged called");
             if (notificationAction == PeopleSpaceUtils.NotificationAction.POSTED) {
                 Log.d(TAG, "Notification posted, key: " + sbn.getKey());
             } else {
@@ -414,7 +431,6 @@ public class PeopleSpaceWidgetManager {
             PeopleTileKey key = new PeopleTileKey(
                     sbn.getShortcutId(), sbn.getUser().getIdentifier(), sbn.getPackageName());
             if (!key.isValid()) {
-                Log.d(TAG, "Sbn doesn't contain valid PeopleTileKey: " + key.toString());
                 return;
             }
             int[] widgetIds = mAppWidgetManager.getAppWidgetIds(
@@ -775,7 +791,13 @@ public class PeopleSpaceWidgetManager {
     /** Adds a widget based on {@code key} mapped to {@code appWidgetId}. */
     public void addNewWidget(int appWidgetId, PeopleTileKey key) {
         if (DEBUG) Log.d(TAG, "addNewWidget called with key for appWidgetId: " + appWidgetId);
-        PeopleSpaceTile tile = getTileFromPersistentStorage(key, appWidgetId);
+        PeopleSpaceTile tile = null;
+        try {
+            tile = getTileFromPersistentStorage(key, appWidgetId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Cannot add widget since app was uninstalled");
+            return;
+        }
         if (tile == null) {
             return;
         }
@@ -1017,72 +1039,85 @@ public class PeopleSpaceWidgetManager {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (DEBUG) Log.d(TAG, "Update widgets from: " + action);
-            mBgExecutor.execute(() -> updateWidgetsOnStateChange(action));
+            if (DEBUG) Log.d(TAG, "Update widgets from: " + intent.getAction());
+            mBgExecutor.execute(() -> updateWidgetsFromBroadcastInBackground(intent.getAction()));
         }
     };
 
-    /** Updates any app widget based on the current state. */
+    /** Updates any app widget to the current state, triggered by a broadcast update. */
     @VisibleForTesting
-    void updateWidgetsOnStateChange(String entryPoint) {
+    void updateWidgetsFromBroadcastInBackground(String entryPoint) {
         int[] appWidgetIds = mAppWidgetManager.getAppWidgetIds(
                 new ComponentName(mContext, PeopleSpaceWidgetProvider.class));
         if (appWidgetIds == null) {
             return;
         }
-        synchronized (mLock) {
-            for (int appWidgetId : appWidgetIds) {
-                PeopleSpaceTile tile = getTileForExistingWidget(appWidgetId);
-                if (tile == null) {
-                    Log.e(TAG, "Matching conversation not found for shortcut ID");
-                } else {
-                    tile = updateWithCurrentState(tile, entryPoint);
+        for (int appWidgetId : appWidgetIds) {
+            PeopleSpaceTile existingTile = null;
+            PeopleSpaceTile updatedTile = null;
+            try {
+                synchronized (mLock) {
+                    existingTile = getTileForExistingWidgetThrowing(appWidgetId);
+                    if (existingTile == null) {
+                        Log.e(TAG, "Matching conversation not found for shortcut ID");
+                        return;
+                    }
+                    updatedTile = getTileWithCurrentState(existingTile, entryPoint);
+                    updateAppWidgetOptionsAndView(appWidgetId, updatedTile);
                 }
-                updateAppWidgetOptionsAndView(appWidgetId, tile);
+            } catch (PackageManager.NameNotFoundException e) {
+                // Delete data for uninstalled widgets.
+                Log.e(TAG, "Package no longer found for tile: " + e);
+                synchronized (mLock) {
+                    updateAppWidgetOptionsAndView(appWidgetId, updatedTile);
+                }
+                deleteWidgets(new int[]{appWidgetId});
             }
         }
     }
 
-    /** Checks the current state of {@code tile} dependencies, updating fields as necessary. */
+    /** Checks the current state of {@code tile} dependencies, modifying fields as necessary. */
     @Nullable
-    private PeopleSpaceTile updateWithCurrentState(PeopleSpaceTile tile,
-            String entryPoint) {
+    private PeopleSpaceTile getTileWithCurrentState(PeopleSpaceTile tile,
+            String entryPoint) throws
+            PackageManager.NameNotFoundException {
         PeopleSpaceTile.Builder updatedTile = tile.toBuilder();
-        try {
-            switch (entryPoint) {
-                case NotificationManager
-                        .ACTION_INTERRUPTION_FILTER_CHANGED:
-                    updatedTile.setNotificationPolicyState(getNotificationPolicyState());
-                    break;
-                case Intent.ACTION_PACKAGES_SUSPENDED:
-                case Intent.ACTION_PACKAGES_UNSUSPENDED:
-                    updatedTile.setIsPackageSuspended(getPackageSuspended(tile));
-                    break;
-                case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
-                case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
-                case Intent.ACTION_USER_UNLOCKED:
-                    updatedTile.setIsUserQuieted(getUserQuieted(tile));
-                    break;
-                case Intent.ACTION_LOCALE_CHANGED:
-                    break;
-                case ACTION_BOOT_COMPLETED:
-                default:
-                    updatedTile.setIsUserQuieted(getUserQuieted(tile)).setIsPackageSuspended(
-                            getPackageSuspended(tile)).setNotificationPolicyState(
-                            getNotificationPolicyState());
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Package no longer found for tile: " + tile.toString() + e);
-            return null;
+        switch (entryPoint) {
+            case NotificationManager
+                    .ACTION_INTERRUPTION_FILTER_CHANGED:
+                updatedTile.setNotificationPolicyState(getNotificationPolicyState());
+                break;
+            case Intent.ACTION_PACKAGES_SUSPENDED:
+            case Intent.ACTION_PACKAGES_UNSUSPENDED:
+                updatedTile.setIsPackageSuspended(getPackageSuspended(tile));
+                break;
+            case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
+            case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
+            case Intent.ACTION_USER_UNLOCKED:
+                updatedTile.setIsUserQuieted(getUserQuieted(tile));
+                break;
+            case Intent.ACTION_LOCALE_CHANGED:
+                break;
+            case ACTION_BOOT_COMPLETED:
+            default:
+                updatedTile.setIsUserQuieted(getUserQuieted(tile)).setIsPackageSuspended(
+                        getPackageSuspended(tile)).setNotificationPolicyState(
+                        getNotificationPolicyState());
         }
         return updatedTile.build();
     }
 
-    private boolean getPackageSuspended(PeopleSpaceTile tile) throws Exception {
+    private boolean getPackageSuspended(PeopleSpaceTile tile) throws
+            PackageManager.NameNotFoundException {
         boolean packageSuspended = !TextUtils.isEmpty(tile.getPackageName())
                 && mPackageManager.isPackageSuspended(tile.getPackageName());
         if (DEBUG) Log.d(TAG, "Package suspended: " + packageSuspended);
+        // isPackageSuspended() only throws an exception if the app has been uninstalled, and the
+        // app data has also been cleared. We want to empty the layout when the app is uninstalled
+        // regardless of app data clearing, which getApplicationInfoAsUser() handles.
+        mPackageManager.getApplicationInfoAsUser(
+                tile.getPackageName(), PackageManager.GET_META_DATA,
+                PeopleSpaceUtils.getUserId(tile));
         return packageSuspended;
     }
 
