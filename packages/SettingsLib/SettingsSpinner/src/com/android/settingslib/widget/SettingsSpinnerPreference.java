@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.AdapterView;
 
 import androidx.preference.Preference;
+import androidx.preference.Preference.OnPreferenceClickListener;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.widget.settingsspinner.SettingsSpinner;
@@ -31,12 +32,12 @@ import com.android.settingslib.widget.settingsspinner.SettingsSpinnerAdapter;
  * This preference uses SettingsSpinner & SettingsSpinnerAdapter which provide default layouts for
  * both view and drop down view of the Spinner.
  */
-public class SettingsSpinnerPreference extends Preference {
+public class SettingsSpinnerPreference extends Preference implements OnPreferenceClickListener {
 
     private SettingsSpinnerAdapter mAdapter;
     private AdapterView.OnItemSelectedListener mListener;
-    private int mPosition; //Default 0 for internal shard storage.
-    private boolean mIsClickable = true;
+    private int mPosition;
+    private boolean mShouldPerformClick;
 
     /**
      * Perform inflation from XML and apply a class-specific base style.
@@ -51,7 +52,7 @@ public class SettingsSpinnerPreference extends Preference {
     public SettingsSpinnerPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         setLayoutResource(R.layout.settings_spinner_preference);
-        setSelectable(false);
+        setOnPreferenceClickListener(this);
     }
 
     /**
@@ -64,7 +65,7 @@ public class SettingsSpinnerPreference extends Preference {
     public SettingsSpinnerPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         setLayoutResource(R.layout.settings_spinner_preference);
-        setSelectable(false);
+        setOnPreferenceClickListener(this);
     }
 
     /**
@@ -74,6 +75,13 @@ public class SettingsSpinnerPreference extends Preference {
      */
     public SettingsSpinnerPreference(Context context) {
         this(context, null);
+    }
+
+    @Override
+    public boolean onPreferenceClick(Preference preference) {
+        mShouldPerformClick = true;
+        notifyChanged();
+        return true;
     }
 
     /** Sets adapter of the spinner. */
@@ -101,24 +109,19 @@ public class SettingsSpinnerPreference extends Preference {
         notifyChanged();
     }
 
-    /** Set clickable of the spinner. */
-    public void setClickable(boolean isClickable) {
-        if (mIsClickable == isClickable) {
-            return;
-        }
-        mIsClickable = isClickable;
-        notifyChanged();
-    }
 
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         final SettingsSpinner spinner = (SettingsSpinner) holder.findViewById(R.id.spinner);
-        spinner.setEnabled(mIsClickable);
-        spinner.setClickable(mIsClickable);
         spinner.setAdapter(mAdapter);
         spinner.setSelection(mPosition);
         spinner.setOnItemSelectedListener(mOnSelectedListener);
+        if (mShouldPerformClick) {
+            mShouldPerformClick = false;
+            // To show dropdown view.
+            spinner.performClick();
+        }
     }
 
     private final AdapterView.OnItemSelectedListener mOnSelectedListener =
