@@ -46,7 +46,6 @@ public class SnippetTest {
                     PREFIX,
                     Collections.singletonMap(PREFIX + SCHEMA_TYPE, SCHEMA_TYPE_CONFIG_PROTO));
 
-    // TODO(tytytyww): Add tests for Double and Long Snippets.
     @Test
     public void testSingleStringSnippet() {
         final String propertyKeyString = "content";
@@ -112,7 +111,6 @@ public class SnippetTest {
         assertThat(match.getSnippet()).isEqualTo(window);
     }
 
-    // TODO(tytytyww): Add tests for Double and Long Snippets.
     @Test
     public void testNoSnippets() {
         final String propertyKeyString = "content";
