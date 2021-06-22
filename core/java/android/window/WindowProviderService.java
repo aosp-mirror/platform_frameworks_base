@@ -53,6 +53,7 @@ public abstract class WindowProviderService extends Service {
     private final WindowTokenClient mWindowToken = new WindowTokenClient();
     private final WindowContextController mController = new WindowContextController(mWindowToken);
     private WindowManager mWindowManager;
+    private boolean mInitialized;
 
     /**
      * Returns the type of this {@link WindowProviderService}.
@@ -122,13 +123,17 @@ public abstract class WindowProviderService extends Service {
         return context.createTokenContext(mWindowToken, display);
     }
 
-    @CallSuper
+    /** @hide */
     @Override
-    public void onCreate() {
-        super.onCreate();
-        mWindowToken.attachContext(this);
-        mController.attachToDisplayArea(getWindowType(), getDisplayId(), getWindowContextOptions());
-        mWindowManager = WindowManagerImpl.createWindowContextWindowManager(this);
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        if (!mInitialized) {
+            mWindowToken.attachContext(this);
+            mController.attachToDisplayArea(getWindowType(), getDisplayId(),
+                    getWindowContextOptions());
+            mWindowManager = WindowManagerImpl.createWindowContextWindowManager(this);
+            mInitialized = true;
+        }
     }
 
     @SuppressLint("OnNameExpected")
