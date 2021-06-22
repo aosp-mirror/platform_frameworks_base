@@ -82,6 +82,9 @@ public final class BluetoothGatt implements BluetoothProfile {
     private static final int CONN_STATE_DISCONNECTING = 3;
     private static final int CONN_STATE_CLOSED = 4;
 
+    private static final int WRITE_CHARACTERISTIC_MAX_RETRIES = 5;
+    private static final int WRITE_CHARACTERISTIC_TIME_TO_WAIT = 1000; // milliseconds
+
     private List<BluetoothGattService> mServices;
 
     /** A GATT operation completed successfully */
@@ -132,6 +135,27 @@ public final class BluetoothGatt implements BluetoothProfile {
 
     /** Connection parameter update - Request low power, reduced data rate connection parameters. */
     public static final int CONNECTION_PRIORITY_LOW_POWER = 2;
+
+    /**
+     * A GATT writeCharacteristic request is started successfully.
+     *
+     * @hide
+     */
+    public static final int GATT_WRITE_REQUEST_SUCCESS = 0;
+
+    /**
+     * A GATT writeCharacteristic request failed to start.
+     *
+     * @hide
+     */
+    public static final int GATT_WRITE_REQUEST_FAIL = 1;
+
+    /**
+     * A GATT writeCharacteristic request is issued to a busy remote device.
+     *
+     * @hide
+     */
+    public static final int GATT_WRITE_REQUEST_BUSY = 2;
 
     /**
      * No authentication required.
@@ -440,9 +464,19 @@ public final class BluetoothGatt implements BluetoothProfile {
                         try {
                             final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE)
                                     ? AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
-                            mService.writeCharacteristic(mClientIf, address, handle,
-                                    characteristic.getWriteType(), authReq,
-                                    characteristic.getValue(), mAttributionSource);
+                            int requestStatus = GATT_WRITE_REQUEST_FAIL;
+                            for (int i = 0; i < WRITE_CHARACTERISTIC_MAX_RETRIES; i++) {
+                                requestStatus =  mService.writeCharacteristic(mClientIf, address,
+                                                  handle, characteristic.getWriteType(), authReq,
+                                                  characteristic.getValue(), mAttributionSource);
+                                if (requestStatus != GATT_WRITE_REQUEST_BUSY) {
+                                    break;
+                                }
+                                try {
+                                    Thread.sleep(WRITE_CHARACTERISTIC_TIME_TO_WAIT);
+                                } catch (InterruptedException e) {
+                                }
+                            }
                             mAuthRetryState++;
                             return;
                         } catch (RemoteException e) {
@@ -1264,21 +1298,35 @@ public final class BluetoothGatt implements BluetoothProfile {
         if (device == null) return false;
 
         synchronized (mDeviceBusyLock) {
-            if (mDeviceBusy) return false;
+            if (mDeviceBusy) {
+                return false;
+            }
             mDeviceBusy = true;
         }
 
+        int requestStatus = GATT_WRITE_REQUEST_FAIL;
         try {
-            mService.writeCharacteristic(mClientIf, device.getAddress(),
+            for (int i = 0; i < WRITE_CHARACTERISTIC_MAX_RETRIES; i++) {
+                requestStatus = mService.writeCharacteristic(mClientIf, device.getAddress(),
                     characteristic.getInstanceId(), characteristic.getWriteType(),
                     AUTHENTICATION_NONE, characteristic.getValue(), mAttributionSource);
+                if (requestStatus != GATT_WRITE_REQUEST_BUSY) {
+                    break;
+                }
+                try {
+                    Thread.sleep(WRITE_CHARACTERISTIC_TIME_TO_WAIT);
+                } catch (InterruptedException e) {
+                }
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
-            mDeviceBusy = false;
+            synchronized (mDeviceBusyLock) {
+                mDeviceBusy = false;
+            }
             return false;
         }
 
-        return true;
+        return requestStatus == GATT_WRITE_REQUEST_SUCCESS;
     }
 
     /**
