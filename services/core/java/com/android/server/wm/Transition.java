@@ -777,6 +777,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             if (reportIfNotTop(wc)) {
                 tmpList.add(wc);
             }
+            // Wallpaper must be the top (regardless of how nested it is in DisplayAreas).
+            boolean skipIntermediateReports = isWallpaper(wc);
             for (WindowContainer p = wc.getParent(); p != null; p = p.getParent()) {
                 if (!p.isAttached() || !changes.get(p).hasChanged(p)) {
                     // Again, we're skipping no-ops
@@ -785,7 +787,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 if (participants.contains(p)) {
                     topParent = p;
                     break;
-                } else if (reportIfNotTop(p)) {
+                } else if (isWallpaper(p)) {
+                    skipIntermediateReports = true;
+                } else if (reportIfNotTop(p) && !skipIntermediateReports) {
                     tmpList.add(p);
                 }
             }
@@ -871,17 +875,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
 
         // Find the top-most shared ancestor of app targets
-        WindowContainer ancestor = null;
-        for (int i = appTargets.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = appTargets.valueAt(i);
-            ancestor = wc;
-            break;
-        }
-        if (ancestor == null) {
+        if (appTargets.isEmpty()) {
             out.setRootLeash(new SurfaceControl(), 0, 0);
             return out;
         }
-        ancestor = ancestor.getParent();
+        WindowContainer ancestor = appTargets.valueAt(appTargets.size() - 1).getParent();
 
         // Go up ancestor parent chain until all targets are descendants.
         ancestorLoop:
