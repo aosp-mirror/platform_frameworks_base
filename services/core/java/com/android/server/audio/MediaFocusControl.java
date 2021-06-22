@@ -857,6 +857,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * @param fd
      * @param clientId
      * @param callingPackageName
+     * @param attributionTag
      * @param flags
      * @param sdk
      * @param forceDuck only true if
@@ -868,7 +869,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      */
     protected int requestAudioFocus(@NonNull AudioAttributes aa, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, @NonNull String clientId, @NonNull String callingPackageName,
-            int flags, int sdk, boolean forceDuck, int testUid) {
+            String attributionTag, int flags, int sdk, boolean forceDuck, int testUid) {
         new MediaMetrics.Item(mMetricsId)
                 .setUid(Binder.getCallingUid())
                 .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackageName)
@@ -903,7 +904,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         if ((flags != AudioManager.AUDIOFOCUS_FLAG_TEST)
                 // note we're using the real uid for appOp evaluation
                 && (mAppOps.noteOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, Binder.getCallingUid(),
-                        callingPackageName) != AppOpsManager.MODE_ALLOWED)) {
+                        callingPackageName, attributionTag, null) != AppOpsManager.MODE_ALLOWED)) {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 

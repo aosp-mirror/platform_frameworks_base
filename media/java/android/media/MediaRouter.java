@@ -2034,8 +2034,8 @@ public class MediaRouter {
         public void requestSetVolume(int volume) {
             if (mPlaybackType == PLAYBACK_TYPE_LOCAL) {
                 try {
-                    sStatic.mAudioService.setStreamVolume(mPlaybackStream, volume, 0,
-                            ActivityThread.currentPackageName());
+                    sStatic.mAudioService.setStreamVolumeWithAttribution(mPlaybackStream, volume, 0,
+                            ActivityThread.currentPackageName(), null);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error setting local stream volume", e);
                 }
@@ -2053,8 +2053,8 @@ public class MediaRouter {
                 try {
                     final int volume =
                             Math.max(0, Math.min(getVolume() + direction, getVolumeMax()));
-                    sStatic.mAudioService.setStreamVolume(mPlaybackStream, volume, 0,
-                            ActivityThread.currentPackageName());
+                    sStatic.mAudioService.setStreamVolumeWithAttribution(mPlaybackStream, volume, 0,
+                            ActivityThread.currentPackageName(), null);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error setting local stream volume", e);
                 }

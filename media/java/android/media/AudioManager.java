@@ -930,8 +930,8 @@ public class AudioManager {
     public void adjustStreamVolume(int streamType, int direction, int flags) {
         final IAudioService service = getService();
         try {
-            service.adjustStreamVolume(streamType, direction, flags,
-                    getContext().getOpPackageName());
+            service.adjustStreamVolumeWithAttribution(streamType, direction, flags,
+                    getContext().getOpPackageName(), getContext().getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1001,7 +1001,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.setMasterMute(mute, flags, getContext().getOpPackageName(),
-                    UserHandle.getCallingUserId());
+                    UserHandle.getCallingUserId(), getContext().getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1254,7 +1254,8 @@ public class AudioManager {
     public void setStreamVolume(int streamType, int index, int flags) {
         final IAudioService service = getService();
         try {
-            service.setStreamVolume(streamType, index, flags, getContext().getOpPackageName());
+            service.setStreamVolumeWithAttribution(streamType, index, flags,
+                    getContext().getOpPackageName(), getContext().getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1279,7 +1280,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.setVolumeIndexForAttributes(attr, index, flags,
-                                                getContext().getOpPackageName());
+                    getContext().getOpPackageName(), getContext().getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2739,7 +2740,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.setMicrophoneMute(on, getContext().getOpPackageName(),
-                    UserHandle.getCallingUserId());
+                    UserHandle.getCallingUserId(), getContext().getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4266,7 +4267,9 @@ public class AudioManager {
                         afr.getFocusGain(), mICallBack,
                         mAudioFocusDispatcher,
                         clientId,
-                        getContext().getOpPackageName() /* package name */, afr.getFlags(),
+                        getContext().getOpPackageName() /* package name */,
+                        getContext().getAttributionTag(),
+                        afr.getFlags(),
                         ap != null ? ap.cb() : null,
                         sdk);
             } catch (RemoteException e) {
@@ -4371,6 +4374,7 @@ public class AudioManager {
                     durationHint, mICallBack, null,
                     AudioSystem.IN_VOICE_COMM_FOCUS_ID,
                     getContext().getOpPackageName(),
+                    getContext().getAttributionTag(),
                     AUDIOFOCUS_FLAG_LOCK,
                     null /* policy token */, 0 /* sdk n/a here*/);
         } catch (RemoteException e) {
