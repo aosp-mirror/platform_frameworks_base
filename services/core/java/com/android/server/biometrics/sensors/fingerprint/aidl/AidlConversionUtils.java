@@ -46,6 +46,8 @@ final class AidlConversionUtils {
             return BiometricFingerprintConstants.FINGERPRINT_ERROR_UNABLE_TO_REMOVE;
         } else if (aidlError == Error.VENDOR) {
             return BiometricFingerprintConstants.FINGERPRINT_ERROR_VENDOR;
+        } else if (aidlError == Error.BAD_CALIBRATION) {
+            return BiometricFingerprintConstants.FINGERPRINT_ERROR_BAD_CALIBARTION;
         } else {
             return BiometricFingerprintConstants.FINGERPRINT_ERROR_UNKNOWN;
         }
