@@ -218,7 +218,12 @@ class SensorUseStartedActivity @Inject constructor(
     }
 
     private fun disableSensorPrivacy() {
-        sensorPrivacyController.setSensorBlocked(sensor, false)
+        if (sensor == ALL_SENSORS) {
+            sensorPrivacyController.setSensorBlocked(MICROPHONE, false)
+            sensorPrivacyController.setSensorBlocked(CAMERA, false)
+        } else {
+            sensorPrivacyController.setSensorBlocked(sensor, false)
+        }
         unsuppressImmediately = true
         setResult(RESULT_OK)
     }
