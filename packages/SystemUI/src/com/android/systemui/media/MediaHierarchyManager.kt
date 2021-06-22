@@ -660,15 +660,11 @@ class MediaHierarchyManager @Inject constructor(
             return true
         }
 
-        if (statusbarState == StatusBarState.KEYGUARD) {
-            if (currentLocation == LOCATION_LOCKSCREEN &&
-                previousLocation == LOCATION_QS ||
-                (currentLocation == LOCATION_QS &&
-                    previousLocation == LOCATION_LOCKSCREEN)) {
-                // We're always fading from lockscreen to keyguard in situations where the player
-                // is already fully hidden
-                return false
-            }
+        if (statusbarState == StatusBarState.KEYGUARD && (currentLocation == LOCATION_LOCKSCREEN ||
+                        previousLocation == LOCATION_LOCKSCREEN)) {
+            // We're always fading from lockscreen to keyguard in situations where the player
+            // is already fully hidden
+            return false
         }
         return mediaFrame.isShownNotFaded || animator.isRunning || animationPending
     }
