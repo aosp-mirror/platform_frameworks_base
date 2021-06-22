@@ -77,6 +77,13 @@ public class SplashscreenContentDrawer {
     // For example, an icon with the foreground 108*108 opaque pixels and it's background
     // also 108*108 pixels, then do not enlarge this icon if only need to show foreground icon.
     private static final float ENLARGE_FOREGROUND_ICON_THRESHOLD = (72f * 72f) / (108f * 108f);
+
+    /**
+     * If the developer doesn't specify a background for the icon, we slightly scale it up.
+     *
+     * The background is either manually specified in the theme or the Adaptive Icon
+     * background is used if it's different from the window background.
+     */
     private static final float NO_BACKGROUND_SCALE = 192f / 160;
     private final Context mContext;
     private final IconProvider mIconProvider;
@@ -228,7 +235,7 @@ public class SplashscreenContentDrawer {
         attrs.mWindowBgColor = safeReturnAttrDefault((def) -> typedArray.getColor(
                 R.styleable.Window_windowSplashScreenBackground, def),
                 Color.TRANSPARENT);
-        attrs.mReplaceIcon = safeReturnAttrDefault((def) -> typedArray.getDrawable(
+        attrs.mSplashScreenIcon = safeReturnAttrDefault((def) -> typedArray.getDrawable(
                 R.styleable.Window_windowSplashScreenAnimatedIcon), null);
         attrs.mAnimationDuration = safeReturnAttrDefault((def) -> typedArray.getInt(
                 R.styleable.Window_windowSplashScreenAnimationDuration, def), 0);
@@ -241,7 +248,7 @@ public class SplashscreenContentDrawer {
         if (DEBUG) {
             Slog.d(TAG, "window attributes color: "
                     + Integer.toHexString(attrs.mWindowBgColor)
-                    + " icon " + attrs.mReplaceIcon + " duration " + attrs.mAnimationDuration
+                    + " icon " + attrs.mSplashScreenIcon + " duration " + attrs.mAnimationDuration
                     + " brandImage " + attrs.mBrandingImage);
         }
     }
@@ -250,7 +257,7 @@ public class SplashscreenContentDrawer {
     public static class SplashScreenWindowAttrs {
         private int mWindowBgResId = 0;
         private int mWindowBgColor = Color.TRANSPARENT;
-        private Drawable mReplaceIcon = null;
+        private Drawable mSplashScreenIcon = null;
         private Drawable mBrandingImage = null;
         private int mIconBgColor = Color.TRANSPARENT;
         private int mAnimationDuration = 0;
@@ -287,10 +294,15 @@ public class SplashscreenContentDrawer {
                 // empty splash screen case
                 animationDuration = 0;
                 mFinalIconSize = 0;
-            } else if (mTmpAttrs.mReplaceIcon != null) {
+            } else if (mTmpAttrs.mSplashScreenIcon != null) {
                 // replaced icon, don't process
-                iconDrawable = mTmpAttrs.mReplaceIcon;
+                iconDrawable = mTmpAttrs.mSplashScreenIcon;
                 animationDuration = mTmpAttrs.mAnimationDuration;
+
+                // There is no background below the icon, so scale the icon up
+                if (mTmpAttrs.mIconBgColor == Color.TRANSPARENT) {
+                    mFinalIconSize *= NO_BACKGROUND_SCALE;
+                }
                 createIconDrawable(iconDrawable, false);
             } else {
                 final float iconScale = (float) mIconSize / (float) mDefaultIconSize;

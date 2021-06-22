@@ -162,6 +162,7 @@ public class SplashscreenIconDrawableFactory {
 
         @Override
         public void draw(Canvas canvas) {
+            canvas.clipPath(mMaskScaleOnly);
             if (mMaskScaleOnly != null) {
                 canvas.drawPath(mMaskScaleOnly, mPaint);
             }
