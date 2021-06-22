@@ -2029,7 +2029,9 @@ public class DisplayModeDirector {
         public void observe() {
             StatusBarManagerInternal statusBar =
                     LocalServices.getService(StatusBarManagerInternal.class);
-            statusBar.setUdfpsHbmListener(this);
+            if (statusBar != null) {
+                statusBar.setUdfpsHbmListener(this);
+            }
         }
 
         @Override
