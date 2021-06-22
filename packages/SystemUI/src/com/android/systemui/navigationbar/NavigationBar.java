@@ -232,7 +232,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private boolean mTransientShown;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
-    private int mA11yBtnMode;
     private LightBarController mLightBarController;
     private AutoHideController mAutoHideController;
 
@@ -487,7 +486,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         mNavBarMode = mNavigationModeController.addListener(this);
         mAccessibilityButtonModeObserver.addListener(this);
-        mA11yBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
     }
 
     public NavigationBarView getView() {
@@ -1375,8 +1373,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private void setAccessibilityFloatingMenuModeIfNeeded() {
         if (QuickStepContract.isGesturalMode(mNavBarMode)) {
-            Settings.Secure.putInt(mContentResolver, Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
-                    ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU);
+            Settings.Secure.putIntForUser(mContentResolver,
+                    Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
+                    ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU, UserHandle.USER_CURRENT);
         }
     }
 
@@ -1437,7 +1436,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         // If accessibility button is floating menu mode, click and long click state should be
         // disabled.
-        if (mA11yBtnMode == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
+        if (mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()
+                == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
             return 0;
         }
 
@@ -1546,7 +1546,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     @Override
     public void onAccessibilityButtonModeChanged(int mode) {
-        mA11yBtnMode = mode;
         updateAccessibilityServicesState(mAccessibilityManager);
     }
 
