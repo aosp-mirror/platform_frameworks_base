@@ -240,6 +240,7 @@ public class SystemConfig {
 
     private final ArraySet<String> mRollbackWhitelistedPackages = new ArraySet<>();
     private final ArraySet<String> mWhitelistedStagedInstallers = new ArraySet<>();
+    private final ArraySet<String> mAllowedPartnerApexes = new ArraySet<>();
 
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
@@ -408,6 +409,10 @@ public class SystemConfig {
 
     public Set<String> getWhitelistedStagedInstallers() {
         return mWhitelistedStagedInstallers;
+    }
+
+    public Set<String> getAllowedPartnerApexes() {
+        return mAllowedPartnerApexes;
     }
 
     public ArraySet<String> getAppDataIsolationWhitelistedApps() {
@@ -1206,6 +1211,21 @@ public class SystemConfig {
                                         + " at " + parser.getPositionDescription());
                             } else {
                                 mWhitelistedStagedInstallers.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "allowed-partner-apex": {
+                        // TODO(b/189274479): should this be allowOemPermissions instead?
+                        if (allowAppConfigs) {
+                            String pkgName = parser.getAttributeValue(null, "package");
+                            if (pkgName == null) {
+                                Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                            } else {
+                                mAllowedPartnerApexes.add(pkgName);
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
