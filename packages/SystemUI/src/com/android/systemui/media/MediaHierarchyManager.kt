@@ -220,14 +220,11 @@ class MediaHierarchyManager @Inject constructor(
         set(value) {
             if (field != value) {
                 field = value
+                mediaCarouselController.mediaCarouselScrollHandler.qsExpanded = value
             }
             // qs is expanded on LS shade and HS shade
             if (value && (isLockScreenShadeVisibleToUser() || isHomeScreenShadeVisibleToUser())) {
-                mediaCarouselController.logSmartspaceImpression()
-            }
-            // Release shade and back to lock screen
-            if (isLockScreenVisibleToUser()) {
-                mediaCarouselController.logSmartspaceImpression()
+                mediaCarouselController.logSmartspaceImpression(value)
             }
             mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
         }
@@ -409,7 +406,7 @@ class MediaHierarchyManager @Inject constructor(
                 updateTargetState()
                 // Enters shade from lock screen
                 if (newState == StatusBarState.SHADE_LOCKED && isLockScreenShadeVisibleToUser()) {
-                    mediaCarouselController.logSmartspaceImpression()
+                    mediaCarouselController.logSmartspaceImpression(qsExpanded)
                 }
                 mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
             }
@@ -423,7 +420,7 @@ class MediaHierarchyManager @Inject constructor(
                     dozeAnimationRunning = false
                     // Enters lock screen from screen off
                     if (isLockScreenVisibleToUser()) {
-                        mediaCarouselController.logSmartspaceImpression()
+                        mediaCarouselController.logSmartspaceImpression(qsExpanded)
                     }
                 } else {
                     updateDesiredLocation()
@@ -436,11 +433,7 @@ class MediaHierarchyManager @Inject constructor(
             override fun onExpandedChanged(isExpanded: Boolean) {
                 // Enters shade from home screen
                 if (isHomeScreenShadeVisibleToUser()) {
-                    mediaCarouselController.logSmartspaceImpression()
-                }
-                // Back to lock screen from bouncer
-                if (isLockScreenVisibleToUser()) {
-                    mediaCarouselController.logSmartspaceImpression()
+                    mediaCarouselController.logSmartspaceImpression(qsExpanded)
                 }
                 mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
             }
@@ -465,6 +458,10 @@ class MediaHierarchyManager @Inject constructor(
                 goingToSleep = false
             }
         })
+
+        mediaCarouselController.updateUserVisibility = {
+            mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
+        }
     }
 
     private fun updateConfiguration() {
