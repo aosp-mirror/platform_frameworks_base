@@ -21473,6 +21473,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // for the uninstall-updates case and restricted profiles, remember the per-
         // user handle installed state
         int[] allUsers;
+        final int freezeUser;
+        final SparseArray<Pair<Integer, String>> enabledStateAndCallerPerUser;
         /** enabled state of the uninstalled application */
         synchronized (mLock) {
             uninstalledPs = mSettings.getPackageLPr(packageName);
@@ -21517,16 +21519,23 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             info.origUsers = uninstalledPs.queryInstalledUsers(allUsers, true);
-        }
 
-        final int freezeUser;
-        if (isUpdatedSystemApp(uninstalledPs)
-                && ((deleteFlags & PackageManager.DELETE_SYSTEM_APP) == 0)) {
-            // We're downgrading a system app, which will apply to all users, so
-            // freeze them all during the downgrade
-            freezeUser = UserHandle.USER_ALL;
-        } else {
-            freezeUser = removeUser;
+            if (isUpdatedSystemApp(uninstalledPs)
+                    && ((deleteFlags & PackageManager.DELETE_SYSTEM_APP) == 0)) {
+                // We're downgrading a system app, which will apply to all users, so
+                // freeze them all during the downgrade
+                freezeUser = UserHandle.USER_ALL;
+                enabledStateAndCallerPerUser = new SparseArray<>();
+                for (int i = 0; i < allUsers.length; i++) {
+                    PackageUserState userState = uninstalledPs.readUserState(allUsers[i]);
+                    Pair<Integer, String> enabledStateAndCaller =
+                            new Pair<>(userState.enabled, userState.lastDisableAppCaller);
+                    enabledStateAndCallerPerUser.put(allUsers[i], enabledStateAndCaller);
+                }
+            } else {
+                freezeUser = removeUser;
+                enabledStateAndCallerPerUser = null;
+            }
         }
 
         synchronized (mInstallLock) {
@@ -21593,6 +21602,19 @@ public class PackageManagerService extends IPackageManager.Stub
                         Slog.i(TAG, "System stub disabled for all users, leaving uncompressed "
                                 + "after removal; pkg: " + stubPkg.getPackageName());
                     }
+                }
+            }
+            if (enabledStateAndCallerPerUser != null) {
+                synchronized (mLock) {
+                    for (int i = 0; i < allUsers.length; i++) {
+                        Pair<Integer, String> enabledStateAndCaller =
+                                enabledStateAndCallerPerUser.get(allUsers[i]);
+                        getPackageSetting(packageName)
+                                .setEnabled(enabledStateAndCaller.first,
+                                        allUsers[i],
+                                        enabledStateAndCaller.second);
+                    }
+                    mSettings.writeAllUsersPackageRestrictionsLPr();
                 }
             }
         }
