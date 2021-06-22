@@ -316,6 +316,14 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                     }
                 }
 
+                public void onBiometricError(int msgId, String errString,
+                        BiometricSourceType biometricSourceType) {
+                    if (biometricSourceType == BiometricSourceType.FACE) {
+                        // show udfps hint when face auth fails
+                        showHint(true);
+                    }
+                }
+
                 public void onBiometricAuthenticated(int userId,
                         BiometricSourceType biometricSourceType, boolean isStrongBiometric) {
                     if (biometricSourceType == BiometricSourceType.FACE) {
