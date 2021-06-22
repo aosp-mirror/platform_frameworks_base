@@ -293,6 +293,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void setContainer(ViewGroup container) {
         if (container instanceof NotificationsQuickSettingsContainer) {
             mQSCustomizerController.setContainer((NotificationsQuickSettingsContainer) container);
+            mQSDetail.setContainer((NotificationsQuickSettingsContainer) container);
         }
     }
 
