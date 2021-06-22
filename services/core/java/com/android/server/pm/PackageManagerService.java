@@ -12797,21 +12797,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return performDexOpt(new DexoptOptions(packageName, compilerFilter, flags));
     }
 
-    /**
-    * Ask the package manager to compile layouts in the given package.
-    */
-    @Override
-    public boolean compileLayouts(String packageName) {
-        AndroidPackage pkg;
-        synchronized (mLock) {
-            pkg = mPackages.get(packageName);
-            if (pkg == null) {
-                return false;
-            }
-        }
-        return mViewCompiler.compileLayouts(pkg);
-    }
-
     /*package*/ boolean performDexOpt(DexoptOptions options) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;

@@ -586,11 +586,6 @@ interface IPackageManager {
             String targetCompilerFilter, boolean force);
 
     /**
-    * Ask the package manager to compile layouts in the given package.
-    */
-    boolean compileLayouts(String packageName);
-
-    /**
      * Ask the package manager to dump profiles associated with a package.
      */
     void dumpProfiles(String packageName);
