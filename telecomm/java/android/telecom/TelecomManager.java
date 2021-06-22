@@ -1018,6 +1018,16 @@ public class TelecomManager {
     // this magic number is a bug ID
     public static final long ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION = 157233955L;
 
+    /**
+     * Enable READ_PHONE_NUMBERS or READ_PRIVILEGED_PHONE_STATE protections on
+     * {@link TelecomManager#getPhoneAccount(PhoneAccountHandle)}.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    // bug ID
+    public static final long ENABLE_GET_PHONE_ACCOUNT_PERMISSION_PROTECTION = 183407956L;
+
     private static final String TAG = "TelecomManager";
 
 
@@ -1351,6 +1361,9 @@ public class TelecomManager {
      * Return the {@link PhoneAccount} for a specified {@link PhoneAccountHandle}. Object includes
      * resources which can be used in a user interface.
      *
+     * Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_NUMBERS} for applications targeting API
+     * level 31+.
      * @param account The {@link PhoneAccountHandle}.
      * @return The {@link PhoneAccount} object.
      */
@@ -1358,7 +1371,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.getPhoneAccount(account);
+                return service.getPhoneAccount(account, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#getPhoneAccount", e);
             }
