@@ -133,7 +133,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private boolean mUpdateBackgroundOnUpdate;
     private boolean mNotificationTranslationFinished = false;
-    private ArrayList<MenuItem> mSnoozedMenuItems;
+    private boolean mIsSnoozed;
 
     /**
      * Listener for when {@link ExpandableNotificationRow} is laid out.
@@ -1105,8 +1105,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
                     false /* resetMenu */);
             mNotificationGutsManager.openGuts(this, 0, 0, item);
-            mSnoozedMenuItems = mMenuRow.getMenuItems(mMenuRow.getMenuView().getContext());
-            mMenuRow.resetMenu();
+            mIsSnoozed = true;
         };
     }
 
@@ -1821,10 +1820,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     void onGutsClosed() {
         updateContentAccessibilityImportanceForGuts(true /* isEnabled */);
-        if (mSnoozedMenuItems != null && mSnoozedMenuItems.size() > 0) {
-            mMenuRow.setMenuItems(mSnoozedMenuItems);
-            mSnoozedMenuItems = null;
-        }
+        mIsSnoozed = false;
     }
 
     /**
@@ -2975,7 +2971,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
         info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
-        if (canViewBeDismissed()) {
+        if (canViewBeDismissed() && !mIsSnoozed) {
             info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_DISMISS);
         }
         boolean expandable = shouldShowPublic();
@@ -2991,7 +2987,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 isExpanded = isExpanded();
             }
         }
-        if (expandable) {
+        if (expandable && !mIsSnoozed) {
             if (isExpanded) {
                 info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
             } else {
