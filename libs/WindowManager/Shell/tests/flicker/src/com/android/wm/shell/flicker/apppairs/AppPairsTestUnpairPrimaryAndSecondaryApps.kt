@@ -29,6 +29,7 @@ import com.android.server.wm.flicker.traces.layers.getVisibleBounds
 import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER
 import com.android.wm.shell.flicker.appPairsDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
+import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,9 +52,11 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
         get() = {
             super.transition(this, it)
             setup {
-                executeShellCommand(
-                    composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
-                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
+                eachRun {
+                    executeShellCommand(
+                            composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
+                    waitAppsShown(primaryApp, secondaryApp)
+                }
             }
             transitions {
                 // TODO pair apps through normal UX flow
