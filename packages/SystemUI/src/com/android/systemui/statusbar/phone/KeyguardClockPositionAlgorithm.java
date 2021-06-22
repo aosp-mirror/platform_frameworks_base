@@ -40,9 +40,9 @@ public class KeyguardClockPositionAlgorithm {
     private static float CLOCK_HEIGHT_WEIGHT = 0.7f;
 
     /**
-     * Margin between the bottom of the clock and the notification shade.
+     * Margin between the bottom of the status view and the notification shade.
      */
-    private int mClockNotificationsMargin;
+    private int mStatusViewBottomMargin;
 
     /**
      * Height of the parent view - display size in px.
@@ -153,8 +153,8 @@ public class KeyguardClockPositionAlgorithm {
      * Refreshes the dimension values.
      */
     public void loadDimens(Resources res) {
-        mClockNotificationsMargin = res.getDimensionPixelSize(
-                R.dimen.keyguard_clock_notifications_margin);
+        mStatusViewBottomMargin = res.getDimensionPixelSize(
+                R.dimen.keyguard_status_view_bottom_margin);
 
         mContainerTopPadding =
                 res.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) / 2;
@@ -181,7 +181,7 @@ public class KeyguardClockPositionAlgorithm {
         mNotificationStackHeight = notificationStackHeight;
         mPanelExpansion = panelExpansion;
         mHeight = parentHeight;
-        mKeyguardStatusHeight = keyguardStatusHeight;
+        mKeyguardStatusHeight = keyguardStatusHeight + mStatusViewBottomMargin;
         mUserSwitchHeight = userSwitchHeight;
         mUserSwitchPreferredY = userSwitchPreferredY;
         mHasCustomClock = hasCustomClock;
@@ -221,40 +221,15 @@ public class KeyguardClockPositionAlgorithm {
 
     public float getMinStackScrollerPadding() {
         return mBypassEnabled ? mUnlockedStackScrollerPadding
-                : mMinTopMargin + mKeyguardStatusHeight + mClockNotificationsMargin;
-    }
-
-    private int getMaxClockY() {
-        return mHeight / 2 - mKeyguardStatusHeight - mClockNotificationsMargin;
+                : mMinTopMargin + mKeyguardStatusHeight;
     }
 
     private int getExpandedPreferredClockY() {
         return mMinTopMargin + mUserSwitchHeight;
     }
 
-    /**
-     * Vertically align the clock and the shade in the available space considering only
-     * a percentage of the clock height defined by {@code CLOCK_HEIGHT_WEIGHT}.
-     * @return Clock Y in pixels.
-     */
-    public int getExpandedClockPosition() {
-        final int availableHeight = mMaxShadeBottom - mMinTopMargin;
-        final int containerCenter = mMinTopMargin + availableHeight / 2;
-
-        float y = containerCenter
-                - (mKeyguardStatusHeight + mUserSwitchHeight) * CLOCK_HEIGHT_WEIGHT
-                - mClockNotificationsMargin - mNotificationStackHeight / 2;
-        if (y < mMinTopMargin) {
-            y = mMinTopMargin;
-        }
-
-        // Don't allow the clock base to be under half of the screen
-        final float maxClockY = getMaxClockY();
-        if (y > maxClockY) {
-            y = maxClockY;
-        }
-
-        return (int) y;
+    public int getLockscreenStatusViewHeight() {
+        return mKeyguardStatusHeight;
     }
 
     private int getClockY(float panelExpansion, float darkAmount) {
