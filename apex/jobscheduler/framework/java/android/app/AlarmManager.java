@@ -1285,14 +1285,20 @@ public class AlarmManager {
     }
 
     /**
-     * Called to check if the caller has the permission
-     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}.
-     *
-     * Apps can start {@link android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM} to
+     * Called to check if the caller can schedule exact alarms.
+     * <p>
+     * Apps targeting {@link Build.VERSION_CODES#S} or higher can schedule exact alarms if they
+     * have the {@link Manifest.permission#SCHEDULE_EXACT_ALARM} permission. These apps can also
+     * start {@link android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM} to
      * request this from the user.
+     * <p>
+     * Apps targeting lower sdk versions, can always schedule exact alarms.
      *
-     * @return {@code true} if the caller has the permission, {@code false} otherwise.
+     * @return {@code true} if the caller can schedule exact alarms.
      * @see android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+     * @see #setExact(int, long, PendingIntent)
+     * @see #setExactAndAllowWhileIdle(int, long, PendingIntent)
+     * @see #setAlarmClock(AlarmClockInfo, PendingIntent)
      */
     public boolean canScheduleExactAlarms() {
         return hasScheduleExactAlarm(mContext.getOpPackageName(), mContext.getUserId());

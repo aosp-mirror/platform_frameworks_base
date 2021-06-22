@@ -2572,6 +2572,9 @@ public class AlarmManagerService extends SystemService {
                 throw new SecurityException("Uid " + callingUid
                         + " cannot query hasScheduleExactAlarm for uid " + uid);
             }
+            if (!isExactAlarmChangeEnabled(packageName, userId)) {
+                return true;
+            }
             return (uid > 0) ? hasScheduleExactAlarmInternal(packageName, uid) : false;
         }
 
