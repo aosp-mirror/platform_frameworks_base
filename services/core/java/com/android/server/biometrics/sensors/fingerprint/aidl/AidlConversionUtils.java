@@ -80,8 +80,7 @@ final class AidlConversionUtils {
             // No framework constant available
             return BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_UNKNOWN;
         } else if (aidlAcquiredInfo == AcquiredInfo.IMMOBILE) {
-            // No framework constant available
-            return BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_UNKNOWN;
+            return BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_IMMOBILE;
         } else if (aidlAcquiredInfo == AcquiredInfo.RETRYING_CAPTURE) {
             // No framework constant available
             return BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_UNKNOWN;

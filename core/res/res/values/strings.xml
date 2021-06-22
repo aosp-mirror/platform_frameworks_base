@@ -1603,6 +1603,8 @@
     <string name="fingerprint_acquired_too_bright">Too bright</string>
     <!-- Message shown during fingerprint acquisition when a fingerprint must be adjusted.[CHAR LIMIT=50] -->
     <string name="fingerprint_acquired_try_adjusting">Try adjusting</string>
+    <!-- Message shown during fingerprint acquisition when a fingeprint area has already been captured during enrollment [CHAR LIMIT=100] -->
+    <string name="fingerprint_acquired_immobile">Change the position of your finger slightly each time</string>
     <!-- Array containing custom messages shown during fingerprint acquisision from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="fingerprint_acquired_vendor">
     </string-array>
