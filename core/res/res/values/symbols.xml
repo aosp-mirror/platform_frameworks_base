@@ -2540,6 +2540,7 @@
   <java-symbol type="string" name="fingerprint_error_hw_not_present" />
   <java-symbol type="string" name="fingerprint_error_security_update_required" />
   <java-symbol type="string" name="fingerprint_error_bad_calibration" />
+  <java-symbol type="string" name="fingerprint_acquired_immobile" />
 
   <!-- Fingerprint config -->
   <java-symbol type="integer" name="config_fingerprintMaxTemplatesPerUser"/>
