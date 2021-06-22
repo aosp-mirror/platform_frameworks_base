@@ -11553,8 +11553,31 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return;
         }
+        final List<String> names = new ArrayList<>();
+        final List<ProviderInfo> infos = new ArrayList<>();
+        final int callingUserId = UserHandle.getCallingUserId();
         mComponentResolver.querySyncProviders(
-                outNames, outInfo, mSafeMode, UserHandle.getCallingUserId());
+                names, infos, mSafeMode, callingUserId);
+        synchronized (mLock) {
+            for (int i = infos.size() - 1; i >= 0; i--) {
+                final ProviderInfo providerInfo = infos.get(i);
+                final PackageSetting ps = mSettings.getPackageLPr(providerInfo.packageName);
+                final ComponentName component =
+                        new ComponentName(providerInfo.packageName, providerInfo.name);
+                if (!shouldFilterApplicationLocked(ps, Binder.getCallingUid(), component,
+                        TYPE_PROVIDER, callingUserId)) {
+                    continue;
+                }
+                infos.remove(i);
+                names.remove(i);
+            }
+        }
+        if (!names.isEmpty()) {
+            outNames.addAll(names);
+        }
+        if (!infos.isEmpty()) {
+            outInfo.addAll(infos);
+        }
     }
 
     @Override
@@ -12987,19 +13010,21 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void dumpProfiles(String packageName) {
+        /* Only the shell, root, or the app user should be able to dump profiles. */
+        final int callingUid = Binder.getCallingUid();
+        final String[] callerPackageNames = getPackagesForUid(callingUid);
+        if (callingUid != Process.SHELL_UID
+                && callingUid != Process.ROOT_UID
+                && !ArrayUtils.contains(callerPackageNames, packageName)) {
+            throw new SecurityException("dumpProfiles");
+        }
+
         AndroidPackage pkg;
         synchronized (mLock) {
             pkg = mPackages.get(packageName);
             if (pkg == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
-        }
-        /* Only the shell, root, or the app user should be able to dump profiles. */
-        int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SHELL_UID &&
-            callingUid != Process.ROOT_UID &&
-            callingUid != pkg.getUid()) {
-            throw new SecurityException("dumpProfiles");
         }
 
         synchronized (mInstallLock) {
@@ -17129,10 +17154,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 callerPackageName);
         synchronized (mLock) {
             PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps == null) {
-                throw new IllegalArgumentException("Unknown target package " + packageName);
-            }
-            if (shouldFilterApplicationLocked(
+            if (ps == null || shouldFilterApplicationLocked(
                     ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
                 throw new IllegalArgumentException("Unknown target package " + packageName);
             }
@@ -23184,15 +23206,16 @@ public class PackageManagerService extends IPackageManager.Stub
         if (UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
             return;
         }
+        final String[] callerPackageNames = getPackagesForUid(callingUid);
+        if (!ArrayUtils.contains(callerPackageNames, pkg)) {
+            throw new SecurityException("Calling uid " + callingUid
+                    + " does not own package " + pkg);
+        }
         final int callingUserId = UserHandle.getUserId(callingUid);
         PackageInfo pi = getPackageInfo(pkg, 0, callingUserId);
         if (pi == null) {
             throw new IllegalArgumentException("Unknown package " + pkg + " on user "
                     + callingUserId);
-        }
-        if (!UserHandle.isSameApp(pi.applicationInfo.uid, callingUid)) {
-            throw new SecurityException("Calling uid " + callingUid
-                    + " does not own package " + pkg);
         }
     }
 
@@ -23990,6 +24013,13 @@ public class PackageManagerService extends IPackageManager.Stub
         final int permission = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE);
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
+        if (!allowedByPermission
+                && !ArrayUtils.contains(getPackagesForUid(callingUid), packageName)) {
+            throw new SecurityException(
+                    "Permission Denial: attempt to change stopped state from pid="
+                            + Binder.getCallingPid()
+                            + ", uid=" + callingUid + ", package=" + packageName);
+        }
         enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 true /* checkShell */, "stop package");
         boolean shouldUnhibernate = false;
@@ -24000,8 +24030,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 shouldUnhibernate = true;
             }
             if (!shouldFilterApplicationLocked(ps, callingUid, userId)
-                    && mSettings.setPackageStoppedStateLPw(this, packageName, stopped,
-                            allowedByPermission, callingUid, userId)) {
+                    && mSettings.setPackageStoppedStateLPw(this, packageName, stopped, userId)) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
         }
@@ -26435,14 +26464,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         synchronized(mLock) {
             final AndroidPackage pkg = mPackages.get(packageName);
-            if (pkg == null) {
+            if (pkg == null
+                    || shouldFilterApplicationLocked(getPackageSetting(pkg.getPackageName()),
+                    Binder.getCallingUid(), UserHandle.getCallingUserId())) {
                 Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
-            final PackageSetting ps = getPackageSetting(pkg.getPackageName());
-            if (shouldFilterApplicationLocked(
-                    ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
-                Slog.w(TAG, "KeySet requested for filtered package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
             final KeySetManagerService ksms = mSettings.getKeySetManagerService();
@@ -26459,14 +26484,10 @@ public class PackageManagerService extends IPackageManager.Stub
             final int callingUid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(callingUid);
             final AndroidPackage pkg = mPackages.get(packageName);
-            if (pkg == null) {
-                Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
-            final PackageSetting ps = getPackageSetting(pkg.getPackageName());
-            if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
-                // filter and pretend the package doesn't exist
-                Slog.w(TAG, "KeySet requested for filtered package: " + packageName
+            if (pkg == null
+                    || shouldFilterApplicationLocked(getPackageSetting(pkg.getPackageName()),
+                    callingUid, callingUserId)) {
+                Slog.w(TAG, "KeySet requested for unknown package: " + packageName
                         + ", uid:" + callingUid);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
@@ -27943,7 +27964,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public List<String> getMimeGroup(String packageName, String mimeGroup) {
-            return PackageManagerService.this.getMimeGroup(packageName, mimeGroup);
+            return PackageManagerService.this.getMimeGroupInternal(packageName, mimeGroup);
         }
 
         @Override
@@ -28569,9 +28590,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void setMimeGroup(String packageName, String mimeGroup, List<String> mimeTypes) {
-        boolean changed = mSettings.getPackageLPr(packageName)
-                .setMimeGroup(mimeGroup, mimeTypes);
-
+        enforceOwnerRights(packageName, Binder.getCallingUid());
+        final boolean changed;
+        synchronized (mLock) {
+            changed = mSettings.getPackageLPr(packageName).setMimeGroup(mimeGroup, mimeTypes);
+        }
         if (changed) {
             applyMimeGroupChanges(packageName, mimeGroup);
         }
@@ -28579,7 +28602,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public List<String> getMimeGroup(String packageName, String mimeGroup) {
-        return mSettings.getPackageLPr(packageName).getMimeGroup(mimeGroup);
+        enforceOwnerRights(packageName, Binder.getCallingUid());
+        return getMimeGroupInternal(packageName, mimeGroup);
+    }
+
+    private List<String> getMimeGroupInternal(String packageName, String mimeGroup) {
+        synchronized (mLock) {
+            return mSettings.getPackageLPr(packageName).getMimeGroup(mimeGroup);
+        }
     }
 
     @Override
