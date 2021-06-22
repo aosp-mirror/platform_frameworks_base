@@ -208,7 +208,8 @@ public interface BiometricFingerprintConstants {
             FINGERPRINT_ACQUIRED_TOO_FAST,
             FINGERPRINT_ACQUIRED_VENDOR,
             FINGERPRINT_ACQUIRED_START,
-            FINGERPRINT_ACQUIRED_UNKNOWN})
+            FINGERPRINT_ACQUIRED_UNKNOWN,
+            FINGERPRINT_ACQUIRED_IMMOBILE})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintAcquired {}
 
@@ -276,6 +277,14 @@ public interface BiometricFingerprintConstants {
      * @hide
      */
     int FINGERPRINT_ACQUIRED_UNKNOWN = 8;
+
+    /**
+     * This message may be sent during enrollment if the same area of the finger has already
+     * been captured during this enrollment session. In general, enrolling multiple areas of the
+     * same finger can help against false rejections.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_IMMOBILE = 9;
 
     /**
      * @hide
