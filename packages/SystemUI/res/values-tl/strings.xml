@@ -480,12 +480,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"Magdagdag ng user"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Bagong user"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Alisin ang bisita?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"I-reset ang session ng bisita?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ide-delete ang lahat ng app at data sa session na ito."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Alisin"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"I-reset"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Welcome ulit, bisita!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Gusto mo bang ipagpatuloy ang iyong session?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Magsimulang muli"</string>
