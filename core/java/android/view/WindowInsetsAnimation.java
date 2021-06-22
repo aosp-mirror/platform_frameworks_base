@@ -360,6 +360,13 @@ public final class WindowInsetsAnimation {
          * finished, and then revert to the starting state of the animation in the first
          * {@link #onProgress} callback by using post-layout view properties like {@link View#setX}
          * and related methods.
+         *
+         * <p>Note that the animation might be cancelled before {@link #onStart} is dispatched. On
+         * {@link android.os.Build.VERSION_CODES#S S} and later, {@link #onEnd} is immediately
+         * dispatched without an {@link #onStart} in that case.
+         * On {@link android.os.Build.VERSION_CODES#R R}, no callbacks are dispatched after
+         * {@code #onPrepare} for such an animation.
+         *
          * <p>
          * Note: If the animation is application controlled by using
          * {@link WindowInsetsController#controlWindowInsetsAnimation}, the end state of the
