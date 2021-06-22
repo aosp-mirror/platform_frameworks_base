@@ -601,6 +601,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nuk ka asnjë gjurmë gishti të regjistruar."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Kjo pajisje nuk ka sensor të gjurmës së gishtit."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensori është çaktivizuar përkohësisht."</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Gishti <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Përdor gjurmën e gishtit"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Përdor gjurmën e gishtit ose kyçjen e ekranit"</string>
