@@ -482,7 +482,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     @VisibleForTesting
     void notifyExpandNotification() {
-        mMainExecutor.execute(() -> mEventCallback.notifyExpandNotification());
+        if (mEventCallback != null) {
+            mMainExecutor.execute(() -> mEventCallback.notifyExpandNotification());
+        }
     }
 
     @VisibleForTesting
