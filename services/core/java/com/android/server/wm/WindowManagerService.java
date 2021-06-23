@@ -2465,6 +2465,17 @@ public class WindowManagerService extends IWindowManager.Stub
             configChanged = displayContent.updateOrientation();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
+            final DisplayInfo rotatedDisplayInfo =
+                    win.mToken.getFixedRotationTransformDisplayInfo();
+            if (rotatedDisplayInfo != null) {
+                outSurfaceControl.setTransformHint(rotatedDisplayInfo.rotation);
+            } else {
+                // We have to update the transform hint of display here, but we need to get if from
+                // SurfaceFlinger, so set it as rotation of display for most cases, then
+                // SurfaceFlinger would still update the transform hint of display in next frame.
+                outSurfaceControl.setTransformHint(displayContent.getDisplayInfo().rotation);
+            }
+
             if (toBeDisplayed && win.mIsWallpaper) {
                 displayContent.mWallpaperController.updateWallpaperOffset(win, false /* sync */);
             }

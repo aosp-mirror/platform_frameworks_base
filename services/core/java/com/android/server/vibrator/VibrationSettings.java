@@ -353,6 +353,7 @@ final class VibrationSettings {
                 + ", mLowPowerMode=" + mLowPowerMode
                 + ", mZenMode=" + Settings.Global.zenModeToString(mZenMode)
                 + ", mProcStatesCache=" + mUidObserver.mProcStatesCache
+                + ", mHapticChannelMaxVibrationAmplitude=" + getHapticChannelMaxVibrationAmplitude()
                 + ", mHapticFeedbackIntensity="
                 + intensityToString(getCurrentIntensity(VibrationAttributes.USAGE_TOUCH))
                 + ", mHapticFeedbackDefaultIntensity="
@@ -408,6 +409,12 @@ final class VibrationSettings {
                 return "HIGH";
             default:
                 return "UNKNOWN INTENSITY " + intensity;
+        }
+    }
+
+    private float getHapticChannelMaxVibrationAmplitude() {
+        synchronized (mLock) {
+            return mVibrator == null ? Float.NaN : mVibrator.getHapticChannelMaximumAmplitude();
         }
     }
 

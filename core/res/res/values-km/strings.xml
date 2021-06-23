@@ -601,6 +601,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"មិន​មាន​ការ​ចុះឈ្មោះស្នាម​ម្រាមដៃទេ។"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ឧបករណ៍នេះ​មិនមាន​ឧបករណ៍ចាប់​ស្នាមម្រាមដៃទេ។"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"បានបិទ​ឧបករណ៍​ចាប់សញ្ញាជា​បណ្តោះអាសន្ន។"</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ម្រាមដៃ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ប្រើស្នាមម្រាមដៃ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ប្រើស្នាមម្រាមដៃ ឬ​ការចាក់សោអេក្រង់"</string>

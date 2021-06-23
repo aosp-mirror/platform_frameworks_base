@@ -56,6 +56,8 @@ static struct {
     jfieldID toolMajor;
     jfieldID toolMinor;
     jfieldID orientation;
+    jfieldID relativeX;
+    jfieldID relativeY;
 } gPointerCoordsClassInfo;
 
 static struct {
@@ -212,6 +214,12 @@ static void pointerCoordsToNative(JNIEnv* env, jobject pointerCoordsObj,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.toolMinor));
     outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.orientation));
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_X,
+                                      env->GetFloatField(pointerCoordsObj,
+                                                         gPointerCoordsClassInfo.relativeX));
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_Y,
+                                      env->GetFloatField(pointerCoordsObj,
+                                                         gPointerCoordsClassInfo.relativeY));
 
     BitSet64 bits =
             BitSet64(env->GetLongField(pointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisBits));
@@ -261,6 +269,12 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
     float rawY = rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_Y);
     vec2 transformed = transform.transform(rawX, rawY);
 
+    float rawRelX = rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_RELATIVE_X);
+    float rawRelY = rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_RELATIVE_Y);
+    // Apply only rotation and scale, not translation.
+    const vec2 transformedOrigin = transform.transform(0, 0);
+    const vec2 transformedRel = transform.transform(rawRelX, rawRelY) - transformedOrigin;
+
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.x, transformed.x);
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.y, transformed.y);
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.pressure,
@@ -277,6 +291,8 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
             rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR));
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.orientation,
             rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
+    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.relativeX, transformedRel.x);
+    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.relativeY, transformedRel.y);
 
     uint64_t outBits = 0;
     BitSet64 bits = BitSet64(rawPointerCoords->bits);
@@ -289,6 +305,8 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
     bits.clearBit(AMOTION_EVENT_AXIS_TOOL_MAJOR);
     bits.clearBit(AMOTION_EVENT_AXIS_TOOL_MINOR);
     bits.clearBit(AMOTION_EVENT_AXIS_ORIENTATION);
+    bits.clearBit(AMOTION_EVENT_AXIS_RELATIVE_X);
+    bits.clearBit(AMOTION_EVENT_AXIS_RELATIVE_Y);
     if (!bits.isEmpty()) {
         uint32_t packedAxesCount = bits.count();
         jfloatArray outValuesArray = obtainPackedAxisValuesArray(env, packedAxesCount,
@@ -872,6 +890,8 @@ int register_android_view_MotionEvent(JNIEnv* env) {
     gPointerCoordsClassInfo.toolMajor = GetFieldIDOrDie(env, clazz, "toolMajor", "F");
     gPointerCoordsClassInfo.toolMinor = GetFieldIDOrDie(env, clazz, "toolMinor", "F");
     gPointerCoordsClassInfo.orientation = GetFieldIDOrDie(env, clazz, "orientation", "F");
+    gPointerCoordsClassInfo.relativeX = GetFieldIDOrDie(env, clazz, "relativeX", "F");
+    gPointerCoordsClassInfo.relativeY = GetFieldIDOrDie(env, clazz, "relativeY", "F");
 
     clazz = FindClassOrDie(env, "android/view/MotionEvent$PointerProperties");
 

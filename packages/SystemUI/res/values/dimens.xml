@@ -735,8 +735,8 @@
     <!-- Minimum distance the user has to drag down to go to the full shade. -->
     <dimen name="keyguard_drag_down_min_distance">100dp</dimen>
 
-    <!-- The margin between the clock and the notifications on Keyguard.-->
-    <dimen name="keyguard_clock_notifications_margin">30dp</dimen>
+    <!-- The margin between the status view and the notifications on Keyguard.-->
+    <dimen name="keyguard_status_view_bottom_margin">20dp</dimen>
     <!-- Minimum margin between clock and status bar -->
     <dimen name="keyguard_clock_top_margin">36dp</dimen>
     <!-- The margin between top of clock and bottom of lock icon. -->

@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -61,7 +60,7 @@ class AppPairsTestCannotPairNonResizeableApps(
                 // TODO pair apps through normal UX flow
                 executeShellCommand(
                     composePairsCommand(primaryTaskId, nonResizeableTaskId, pair = true))
-                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
+                nonResizeableApp?.run { wmHelper.waitForFullScreenApp(nonResizeableApp.component) }
             }
         }
 
