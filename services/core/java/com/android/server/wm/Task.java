@@ -3242,6 +3242,9 @@ class Task extends TaskFragment {
         info.userId = isLeafTask() ? mUserId : mCurrentUser;
         info.taskId = mTaskId;
         info.displayId = getDisplayId();
+        if (tda != null) {
+            info.displayAreaFeatureId = tda.mFeatureId;
+        }
         info.isRunning = getTopNonFinishingActivity() != null;
         final Intent baseIntent = getBaseIntent();
         // Make a copy of base intent because this is like a snapshot info.

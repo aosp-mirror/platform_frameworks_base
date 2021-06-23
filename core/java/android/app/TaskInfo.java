@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -115,6 +116,12 @@ public class TaskInfo {
      * @hide
      */
     public int displayId;
+
+    /**
+     * The feature id of {@link com.android.server.wm.TaskDisplayArea} this task is associated with.
+     * @hide
+     */
+    public int displayAreaFeatureId = FEATURE_UNDEFINED;
 
     /**
      * The recent activity values for the highest activity in the stack to have set the values.
@@ -343,6 +350,7 @@ public class TaskInfo {
         return topActivityType == that.topActivityType
                 && isResizeable == that.isResizeable
                 && supportsMultiWindow == that.supportsMultiWindow
+                && displayAreaFeatureId == that.displayAreaFeatureId
                 && Objects.equals(positionInParent, that.positionInParent)
                 && Objects.equals(pictureInPictureParams, that.pictureInPictureParams)
                 && getWindowingMode() == that.getWindowingMode()
@@ -407,6 +415,7 @@ public class TaskInfo {
         topActivityToken = source.readStrongBinder();
         topActivityInSizeCompat = source.readBoolean();
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
+        displayAreaFeatureId = source.readInt();
     }
 
     /**
@@ -446,6 +455,7 @@ public class TaskInfo {
         dest.writeStrongBinder(topActivityToken);
         dest.writeBoolean(topActivityInSizeCompat);
         dest.writeTypedObject(mTopActivityLocusId, flags);
+        dest.writeInt(displayAreaFeatureId);
     }
 
     @Override
@@ -474,7 +484,8 @@ public class TaskInfo {
                 + " isSleeping=" + isSleeping
                 + " topActivityToken=" + topActivityToken
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
-                + " locusId= " + mTopActivityLocusId
+                + " locusId=" + mTopActivityLocusId
+                + " displayAreaFeatureId=" + displayAreaFeatureId
                 + "}";
     }
 }
