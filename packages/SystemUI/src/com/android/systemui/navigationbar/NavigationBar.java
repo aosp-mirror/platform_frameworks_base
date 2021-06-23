@@ -130,6 +130,7 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -199,6 +200,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final NavigationBarOverlayController mNavbarOverlayController;
     private final UiEventLogger mUiEventLogger;
     private final NavigationBarA11yHelper mNavigationBarA11yHelper;
+    private final UserTracker mUserTracker;
 
     private Bundle mSavedState;
     private NavigationBarView mNavigationBarView;
@@ -460,7 +462,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             @Main Handler mainHandler,
             NavigationBarOverlayController navbarOverlayController,
             UiEventLogger uiEventLogger,
-            NavigationBarA11yHelper navigationBarA11yHelper) {
+            NavigationBarA11yHelper navigationBarA11yHelper,
+            UserTracker userTracker) {
         mContext = context;
         mWindowManager = windowManager;
         mAccessibilityManager = accessibilityManager;
@@ -485,6 +488,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNavbarOverlayController = navbarOverlayController;
         mUiEventLogger = uiEventLogger;
         mNavigationBarA11yHelper = navigationBarA11yHelper;
+        mUserTracker = userTracker;
+
         mNavBarMode = mNavigationModeController.addListener(this);
     }
 
@@ -1375,12 +1380,14 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
         boolean longPressDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
-        mLongPressHomeEnabled = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0) != 0;
+        mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,
+                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
+                mUserTracker.getUserId()) != 0;
         boolean gestureDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistTouchGestureEnabledDefault);
-        mAssistantTouchGestureEnabled = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED, gestureDefault ? 1 : 0) != 0;
+        mAssistantTouchGestureEnabled = Settings.Secure.getIntForUser(mContentResolver,
+                Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED, gestureDefault ? 1 : 0,
+                mUserTracker.getUserId()) != 0;
         if (mOverviewProxyService.getProxy() != null) {
             try {
                 mOverviewProxyService.getProxy().onAssistantAvailable(mAssistantAvailable
