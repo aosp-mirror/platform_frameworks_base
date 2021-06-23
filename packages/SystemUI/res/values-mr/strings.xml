@@ -480,8 +480,12 @@
     <string name="user_add_user" msgid="4336657383006913022">"वापरकर्ता जोडा"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नवीन वापरकर्ता"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथी काढायचे?"</string>
+    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
+    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"या सत्रातील सर्व अ‍ॅप्स आणि डेटा हटवला जाईल."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"काढा"</string>
+    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
+    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"अतिथी, तुमचे पुन्‍हा स्‍वागत आहे!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"तुम्ही तुमचे सत्र सुरू ठेवू इच्छिता?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"येथून सुरू करा"</string>
@@ -1034,8 +1038,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीनचा काही भाग मॅग्निफाय करा"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"स्विच करा"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"अ‍ॅक्सेसिबिलिटी जेश्चर हे आता अ‍ॅक्सेसिबिलिटी बटण आहे \n\n"<annotation id="link">"सेटिंग्ज पाहा"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"तुम्ही अ‍ॅक्सेसिबिलिटी जेश्चरवरून बटणवर स्विच करू शकता \n\n"<annotation id="link">"सेटिंग्ज"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"बटण तात्पुरते लपवण्यासाठी ते कोपर्‍यामध्ये हलवा"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"वर डावीकडे हलवा"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"वर उजवीकडे हलवा"</string>

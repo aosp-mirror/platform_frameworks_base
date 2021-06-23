@@ -480,8 +480,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"Ավելացնել օգտատեր"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Նոր օգտատեր"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Հեռացնե՞լ հյուրին"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Վերակայե՞լ հյուրի աշխատաշրջանը"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր ծրագրերն ու տվյալները կջնջվեն:"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Հեռացնել"</string>
+    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Վերակայել"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Բարի վերադարձ, հյուր"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Շարունակե՞լ աշխատաշրջանը։"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Վերսկսել"</string>

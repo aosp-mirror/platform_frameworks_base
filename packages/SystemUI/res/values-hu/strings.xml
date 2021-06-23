@@ -480,8 +480,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"Felhasználó hozzáadása"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Új felhasználó"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Eltávolítja a vendég munkamenetet?"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Visszaállítja a vendég munkamenetet?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"A munkamenetben található összes alkalmazás és adat törlődni fog."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Eltávolítás"</string>
+    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Visszaállítás"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Örülünk, hogy visszatért, vendég!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Folytatja a munkamenetet?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Újrakezdés"</string>

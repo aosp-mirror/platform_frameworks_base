@@ -263,6 +263,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     private static final int MSG_DETECTION_RESUME = 5;
     private static final int MSG_HOTWORD_REJECTED = 6;
     private static final int MSG_HOTWORD_STATUS_REPORTED = 7;
+    private static final int MSG_PROCESS_RESTARTED = 8;
 
     private final String mText;
     private final Locale mLocale;
@@ -1212,6 +1213,12 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             message.arg1 = status;
             message.sendToTarget();
         }
+
+        @Override
+        public void onProcessRestarted() {
+            Slog.i(TAG, "onProcessRestarted");
+            mHandler.sendEmptyMessage(MSG_PROCESS_RESTARTED);
+        }
     }
 
     class MyHandler extends Handler {
@@ -1245,6 +1252,9 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                     break;
                 case MSG_HOTWORD_STATUS_REPORTED:
                     mExternalCallback.onHotwordDetectionServiceInitialized(msg.arg1);
+                    break;
+                case MSG_PROCESS_RESTARTED:
+                    mExternalCallback.onHotwordDetectionServiceRestarted();
                     break;
                 default:
                     super.handleMessage(msg);

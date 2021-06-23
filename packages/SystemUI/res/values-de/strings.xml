@@ -480,8 +480,12 @@
     <string name="user_add_user" msgid="4336657383006913022">"Nutzer hinzufügen"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Neuer Nutzer"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Gast entfernen?"</string>
+    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
+    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle Apps und Daten in dieser Sitzung werden gelöscht."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Entfernen"</string>
+    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
+    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Willkommen zurück im Gastmodus"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Möchtest du deine Sitzung fortsetzen?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Neu starten"</string>
@@ -1034,8 +1038,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Teil des Bildschirms vergrößern"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Schalter"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Die Schaltfläche „Bedienungshilfen“ ersetzt die Touch-Geste für Bedienungshilfen\n\n"<annotation id="link">"Einstellungen aufrufen"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Du kannst von der barrierefreien Geste zu einer Schaltfläche wechseln\n\n"<annotation id="link">"Einstellungen"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Durch Ziehen an den Rand wird die Schaltfläche zeitweise ausgeblendet"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Nach oben links verschieben"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Nach rechts oben verschieben"</string>

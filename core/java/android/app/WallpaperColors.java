@@ -111,12 +111,15 @@ public final class WallpaperColors implements Parcelable {
     public WallpaperColors(Parcel parcel) {
         mMainColors = new ArrayList<>();
         mAllColors = new HashMap<>();
-        final int count = parcel.readInt();
+        int count = parcel.readInt();
         for (int i = 0; i < count; i++) {
             final int colorInt = parcel.readInt();
             Color color = Color.valueOf(colorInt);
             mMainColors.add(color);
-
+        }
+        count = parcel.readInt();
+        for (int i = 0; i < count; i++) {
+            final int colorInt = parcel.readInt();
             final int population = parcel.readInt();
             mAllColors.put(colorInt, population);
         }
@@ -411,9 +414,16 @@ public final class WallpaperColors implements Parcelable {
         for (int i = 0; i < count; i++) {
             Color color = mainColors.get(i);
             dest.writeInt(color.toArgb());
-            Integer population = mAllColors.get(color.toArgb());
-            int populationInt = (population != null) ? population : 0;
-            dest.writeInt(populationInt);
+        }
+        count = mAllColors.size();
+        dest.writeInt(count);
+        for (Map.Entry<Integer, Integer> colorEntry : mAllColors.entrySet()) {
+            if (colorEntry.getKey() != null) {
+                dest.writeInt(colorEntry.getKey());
+                Integer population = mAllColors.get(colorEntry.getValue());
+                int populationInt = (population != null) ? population : 0;
+                dest.writeInt(populationInt);
+            }
         }
         dest.writeInt(mColorHints);
     }
@@ -476,12 +486,13 @@ public final class WallpaperColors implements Parcelable {
 
         WallpaperColors other = (WallpaperColors) o;
         return mMainColors.equals(other.mMainColors)
+                && mAllColors.equals(other.mAllColors)
                 && mColorHints == other.mColorHints;
     }
 
     @Override
     public int hashCode() {
-        return 31 * mMainColors.hashCode() + mColorHints;
+        return (31 * mMainColors.hashCode() * mAllColors.hashCode()) + mColorHints;
     }
 
     /**

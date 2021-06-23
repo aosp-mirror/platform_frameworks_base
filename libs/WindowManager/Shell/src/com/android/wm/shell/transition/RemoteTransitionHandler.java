@@ -56,14 +56,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     private final ArrayList<Pair<TransitionFilter, IRemoteTransition>> mFilters =
             new ArrayList<>();
 
-    private final IBinder.DeathRecipient mTransitionDeathRecipient =
-            new IBinder.DeathRecipient() {
-                @Override
-                @BinderThread
-                public void binderDied() {
-                    mMainExecutor.execute(() -> mFilters.clear());
-                }
-            };
+    private final ArrayMap<IBinder, RemoteDeathHandler> mDeathHandlers = new ArrayMap<>();
 
     RemoteTransitionHandler(@NonNull ShellExecutor mainExecutor) {
         mMainExecutor = mainExecutor;
@@ -71,7 +64,9 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
 
     void addFiltered(TransitionFilter filter, IRemoteTransition remote) {
         try {
-            remote.asBinder().linkToDeath(mTransitionDeathRecipient, 0 /* flags */);
+            RemoteDeathHandler handler = new RemoteDeathHandler(remote.asBinder());
+            remote.asBinder().linkToDeath(handler, 0 /* flags */);
+            mDeathHandlers.put(remote.asBinder(), handler);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to link to death");
             return;
@@ -88,7 +83,8 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             }
         }
         if (removed) {
-            remote.asBinder().unlinkToDeath(mTransitionDeathRecipient, 0 /* flags */);
+            RemoteDeathHandler handler = mDeathHandlers.remove(remote.asBinder());
+            remote.asBinder().unlinkToDeath(handler, 0 /* flags */);
         }
     }
 
@@ -205,5 +201,26 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "RemoteTransition directly requested"
                 + " for %s: %s", transition, remote);
         return new WindowContainerTransaction();
+    }
+
+    /** NOTE: binder deaths can alter the filter order */
+    private class RemoteDeathHandler implements IBinder.DeathRecipient {
+        private final IBinder mRemote;
+
+        RemoteDeathHandler(IBinder remote) {
+            mRemote = remote;
+        }
+
+        @Override
+        @BinderThread
+        public void binderDied() {
+            mMainExecutor.execute(() -> {
+                for (int i = mFilters.size() - 1; i >= 0; --i) {
+                    if (mRemote.equals(mFilters.get(i).second.asBinder())) {
+                        mFilters.remove(i);
+                    }
+                }
+            });
+        }
     }
 }

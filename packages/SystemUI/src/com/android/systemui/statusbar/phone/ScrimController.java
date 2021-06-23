@@ -1246,6 +1246,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         pw.println(mDefaultScrimAlpha);
         pw.print("  mExpansionFraction=");
         pw.println(mPanelExpansion);
+
+        pw.print("  mState.getMaxLightRevealScrimAlpha=");
+        pw.println(mState.getMaxLightRevealScrimAlpha());
     }
 
     public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
