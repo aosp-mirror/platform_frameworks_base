@@ -95,7 +95,8 @@ class MediaSessionBasedFilter @Inject constructor(
         key: String,
         oldKey: String?,
         data: MediaData,
-        immediately: Boolean
+        immediately: Boolean,
+        isSsReactivated: Boolean
     ) {
         backgroundExecutor.execute {
             data.token?.let {

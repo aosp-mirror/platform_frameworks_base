@@ -10382,4 +10382,8 @@ public final class ViewRootImpl implements ViewParent,
         });
         return true;
     }
+
+    int getSurfaceTransformHint() {
+        return mSurfaceControl.getTransformHint();
+    }
 }

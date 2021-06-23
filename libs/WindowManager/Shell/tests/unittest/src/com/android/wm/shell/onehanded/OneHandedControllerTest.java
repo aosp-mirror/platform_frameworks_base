@@ -435,4 +435,17 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
         verify(mSpiedOneHandedController).notifyShortcutState(anyInt());
     }
+
+    @Test
+    public void testNotifyExpandNotification_withNullCheckProtection() {
+        when(mSpiedOneHandedController.isOneHandedEnabled()).thenReturn(false);
+        when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
+        when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
+        when(mSpiedOneHandedController.isSwipeToNotificationEnabled()).thenReturn(true);
+        mSpiedOneHandedController.setOneHandedEnabled(true);
+        mSpiedOneHandedController.notifyExpandNotification();
+
+        // Verify no NPE crash and mMockShellMainExecutor never be execute.
+        verify(mMockShellMainExecutor, never()).execute(any());
+    }
 }
