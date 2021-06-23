@@ -43,7 +43,11 @@ class RunningTasks {
 
     // Comparator to sort by last active time (descending)
     private static final Comparator<Task> LAST_ACTIVE_TIME_COMPARATOR =
-            (o1, o2) -> Long.signum(o2.lastActiveTime - o1.lastActiveTime);
+            (o1, o2) -> {
+                return o1.lastActiveTime == o2.lastActiveTime
+                        ? Integer.signum(o2.mTaskId - o1.mTaskId) :
+                        Long.signum(o2.lastActiveTime - o1.lastActiveTime);
+            };
 
     private final TreeSet<Task> mTmpSortedSet = new TreeSet<>(LAST_ACTIVE_TIME_COMPARATOR);
 
