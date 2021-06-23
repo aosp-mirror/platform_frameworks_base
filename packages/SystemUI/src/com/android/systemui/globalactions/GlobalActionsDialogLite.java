@@ -119,7 +119,6 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.scrim.ScrimDrawable;
-import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -190,7 +189,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final TelecomManager mTelecomManager;
     private final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
-    private final NotificationShadeDepthController mDepthController;
     private final SysUiState mSysUiState;
 
     // Used for RingerModeTracker
@@ -328,7 +326,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             IActivityManager iActivityManager,
             @Nullable TelecomManager telecomManager,
             MetricsLogger metricsLogger,
-            NotificationShadeDepthController depthController,
             SysuiColorExtractor colorExtractor,
             IStatusBarService statusBarService,
             NotificationShadeWindowController notificationShadeWindowController,
@@ -359,7 +356,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mTelecomManager = telecomManager;
         mMetricsLogger = metricsLogger;
         mUiEventLogger = uiEventLogger;
-        mDepthController = depthController;
         mSysuiColorExtractor = colorExtractor;
         mStatusBarService = statusBarService;
         mNotificationShadeWindowController = notificationShadeWindowController;
@@ -649,11 +645,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     protected ActionsDialogLite createDialog() {
         initDialogItems();
 
-        mDepthController.setShowingHomeControls(false);
         ActionsDialogLite dialog = new ActionsDialogLite(mContext,
                 com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActionsLite,
-                mAdapter, mOverflowAdapter,
-                mDepthController, mSysuiColorExtractor,
+                mAdapter, mOverflowAdapter, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
                 mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter, mUiEventLogger,
                 mStatusBar);
@@ -2122,7 +2116,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         protected boolean mShowing;
         protected float mScrimAlpha;
         protected final NotificationShadeWindowController mNotificationShadeWindowController;
-        protected final NotificationShadeDepthController mDepthController;
         protected final SysUiState mSysUiState;
         private ListPopupWindow mOverflowPopup;
         private Dialog mPowerOptionsDialog;
@@ -2177,7 +2170,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         ActionsDialogLite(Context context, int themeRes, MyAdapter adapter,
                 MyOverflowAdapter overflowAdapter,
-                NotificationShadeDepthController depthController,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
                 SysUiState sysuiState, Runnable onRotateCallback, boolean keyguardShowing,
@@ -2188,7 +2180,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mAdapter = adapter;
             mOverflowAdapter = overflowAdapter;
             mPowerOptionsAdapter = powerAdapter;
-            mDepthController = depthController;
             mColorExtractor = sysuiColorExtractor;
             mStatusBarService = statusBarService;
             mNotificationShadeWindowController = notificationShadeWindowController;
@@ -2400,7 +2391,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 float animatedValue = animation.getAnimatedFraction();
                 int alpha = (int) (animatedValue * mScrimAlpha * 255);
                 mBackgroundDrawable.setAlpha(alpha);
-                mDepthController.updateGlobalDialogVisibility(animatedValue, mGlobalActionsLayout);
             });
 
             ObjectAnimator xAnimator =
@@ -2430,7 +2420,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 float animatedValue = 1f - animation.getAnimatedFraction();
                 int alpha = (int) (animatedValue * mScrimAlpha * 255);
                 mBackgroundDrawable.setAlpha(alpha);
-                mDepthController.updateGlobalDialogVisibility(animatedValue, mGlobalActionsLayout);
             });
 
             float xOffset = mGlobalActionsLayout.getAnimationOffsetX();
@@ -2467,7 +2456,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             dismissOverflow(true);
             dismissPowerOptions(true);
             mNotificationShadeWindowController.setRequestTopUi(false, TAG);
-            mDepthController.updateGlobalDialogVisibility(0, null /* view */);
             mSysUiState.setFlag(SYSUI_STATE_GLOBAL_ACTIONS_SHOWING, false)
                     .commitUpdate(mContext.getDisplayId());
             super.dismiss();
