@@ -721,6 +721,12 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "-1311436264": {
+      "message": "Unregister task fragment organizer=%s uid=%d pid=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
+    },
     "-1305966693": {
       "message": "Sending position change to %s, onTop: %b",
       "level": "VERBOSE",
@@ -1219,6 +1225,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-706481945": {
+      "message": "TaskFragment parent info changed name=%s parentTaskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
+    },
     "-705939410": {
       "message": "Waiting for pause to complete...",
       "level": "VERBOSE",
@@ -1380,6 +1392,12 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowAnimator.java"
+    },
+    "-542756093": {
+      "message": "TaskFragment vanished name=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
     },
     "-532081937": {
       "message": "  Commit activity becoming invisible: %s",
@@ -2743,6 +2761,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
+    "1022095595": {
+      "message": "TaskFragment info changed name=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
+    },
     "1023413388": {
       "message": "Finish waiting for pause of: %s",
       "level": "VERBOSE",
@@ -2928,6 +2952,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1284122013": {
+      "message": "TaskFragment appeared name=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
     },
     "1288731814": {
       "message": "WindowState.hideLw: setting mFocusMayChange true",
@@ -3222,6 +3252,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
+    "1653025361": {
+      "message": "Register task fragment organizer=%s uid=%d pid=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
     },
     "1653210583": {
       "message": "Removing app %s delayed=%b animation=%s animating=%b",
