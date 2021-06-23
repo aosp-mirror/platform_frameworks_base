@@ -28,9 +28,12 @@ import static com.android.systemui.statusbar.notification.ViewGroupFadeHelper.re
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -40,9 +43,13 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.IdRes;
 import android.app.ActivityManager;
+import android.content.ContentResolver;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricSourceType;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserManager;
 import android.testing.AndroidTestingRunner;
@@ -53,6 +60,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
+import android.view.ViewStub;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -63,6 +71,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardClockSwitchController;
@@ -143,6 +152,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private KeyguardBottomAreaView mKeyguardBottomArea;
     @Mock
     private KeyguardBottomAreaView mQsFrame;
+    private KeyguardStatusView mKeyguardStatusView;
     @Mock
     private ViewGroup mBigClockContainer;
     @Mock
@@ -155,6 +165,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private NotificationGroupManagerLegacy mGroupManager;
     @Mock
     private KeyguardStatusBarView mKeyguardStatusBar;
+    @Mock
+    private View mUserSwitcherView;
+    @Mock
+    private ViewStub mUserSwitcherStubView;
     @Mock
     private HeadsUpTouchHelper.Callback mHeadsUpCallback;
     @Mock
@@ -207,7 +221,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private KeyguardClockSwitch mKeyguardClockSwitch;
     private PanelViewController.TouchHandler mTouchHandler;
-    @Mock
     private ConfigurationController mConfigurationController;
     @Mock
     private MediaHierarchyManager mMediaHiearchyManager;
@@ -268,6 +281,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private SecureSettings mSecureSettings;
     @Mock
+    private ContentResolver mContentResolver;
+    @Mock
     private TapAgainViewController mTapAgainViewController;
     @Mock
     private KeyguardIndicationController mKeyguardIndicationController;
@@ -290,6 +305,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger);
 
+        mKeyguardStatusView = new KeyguardStatusView(mContext);
+        mKeyguardStatusView.setId(R.id.keyguard_status_view);
+
         when(mAuthController.isUdfpsEnrolled(anyInt())).thenReturn(false);
         when(mHeadsUpCallback.getContext()).thenReturn(mContext);
         when(mView.getResources()).thenReturn(mResources);
@@ -304,6 +322,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mResources.getDimensionPixelSize(R.dimen.notification_panel_width)).thenReturn(400);
         when(mView.getContext()).thenReturn(getContext());
         when(mView.findViewById(R.id.keyguard_header)).thenReturn(mKeyguardStatusBar);
+        when(mView.findViewById(R.id.keyguard_user_switcher_view)).thenReturn(mUserSwitcherView);
+        when(mView.findViewById(R.id.keyguard_user_switcher_stub)).thenReturn(
+                mUserSwitcherStubView);
         when(mView.findViewById(R.id.keyguard_clock_container)).thenReturn(mKeyguardClockSwitch);
         when(mView.findViewById(R.id.notification_stack_scroller))
                 .thenReturn(mNotificationStackScrollLayout);
@@ -323,7 +344,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mNotificationContainerParent = new NotificationsQuickSettingsContainer(getContext(), null);
         mNotificationContainerParent.addView(newViewWithId(R.id.qs_frame));
         mNotificationContainerParent.addView(newViewWithId(R.id.notification_stack_scroller));
-        mNotificationContainerParent.addView(newViewWithId(R.id.keyguard_status_view));
+        mNotificationContainerParent.addView(mKeyguardStatusView);
         when(mView.findViewById(R.id.notification_container_parent))
                 .thenReturn(mNotificationContainerParent);
         when(mFragmentService.getFragmentHostManager(mView)).thenReturn(mFragmentHostManager);
@@ -351,6 +372,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mFalsingManager,
                 mLockscreenShadeTransitionController,
                 new FalsingCollectorFake());
+        mConfigurationController = new ConfigurationControllerImpl(mContext);
         when(mKeyguardStatusViewComponentFactory.build(any()))
                 .thenReturn(mKeyguardStatusViewComponent);
         when(mKeyguardStatusViewComponent.getKeyguardClockSwitchController())
@@ -361,10 +383,16 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 .thenReturn(mKeyguardStatusBarViewComponent);
         when(mKeyguardStatusBarViewComponent.getKeyguardStatusBarViewController())
                 .thenReturn(mKeyguardStatusBarViewController);
+        when(mLayoutInflater.inflate(eq(R.layout.keyguard_status_view), any(), anyBoolean()))
+                .thenReturn(mKeyguardStatusView);
+        when(mLayoutInflater.inflate(eq(R.layout.keyguard_bottom_area), any(), anyBoolean()))
+                .thenReturn(mKeyguardBottomArea);
 
         reset(mView);
+
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mResources,
+                new Handler(Looper.getMainLooper()),
                 mLayoutInflater,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
                 mFalsingManager, new FalsingCollectorFake(),
@@ -398,6 +426,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mTapAgainViewController,
                 mNavigationModeController,
                 mFragmentService,
+                mContentResolver,
                 mQuickAccessWalletController,
                 new FakeExecutor(new FakeSystemClock()),
                 mSecureSettings,
@@ -549,6 +578,38 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
         assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd)
                 .isEqualTo(R.id.qs_edge_guideline);
+    }
+
+    @Test
+    public void testDisableUserSwitcherAfterEnabling_returnsViewStubToTheViewHierarchy() {
+        givenViewAttached();
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_keyguardUserSwitcher)).thenReturn(true);
+        updateMultiUserSetting(true);
+        clearInvocations(mView);
+
+        updateMultiUserSetting(false);
+
+        ArgumentCaptor<View> captor = ArgumentCaptor.forClass(View.class);
+        verify(mView, atLeastOnce()).addView(captor.capture(), anyInt());
+        final View userSwitcherStub = CollectionUtils.find(captor.getAllValues(),
+                view -> view.getId() == R.id.keyguard_user_switcher_stub);
+        assertThat(userSwitcherStub).isNotNull();
+        assertThat(userSwitcherStub).isInstanceOf(ViewStub.class);
+    }
+
+    @Test
+    public void testChangeSmallestScreenWidthAndUserSwitchEnabled_inflatesUserSwitchView() {
+        givenViewAttached();
+        when(mView.findViewById(R.id.keyguard_user_switcher_view)).thenReturn(null);
+        updateSmallestScreenWidth(300);
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_keyguardUserSwitcher)).thenReturn(true);
+        when(mUserManager.isUserSwitcherEnabled()).thenReturn(true);
+
+        updateSmallestScreenWidth(800);
+
+        verify(mUserSwitcherStubView).inflate();
     }
 
     @Test
@@ -717,6 +778,12 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         return mFalsingManager.getTapListeners().get(0);
     }
 
+    private void givenViewAttached() {
+        for (View.OnAttachStateChangeListener listener : mOnAttachStateChangeListeners) {
+            listener.onViewAttachedToWindow(mView);
+        }
+    }
+
     private View newViewWithId(int id) {
         View view = new View(mContext);
         view.setId(id);
@@ -737,6 +804,21 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
         when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
         mNotificationPanelViewController.updateResources();
+    }
+
+    private void updateMultiUserSetting(boolean enabled) {
+        when(mUserManager.isUserSwitcherEnabled()).thenReturn(enabled);
+        final ArgumentCaptor<ContentObserver> observerCaptor =
+                ArgumentCaptor.forClass(ContentObserver.class);
+        verify(mContentResolver)
+                .registerContentObserver(any(), anyBoolean(), observerCaptor.capture());
+        observerCaptor.getValue().onChange(/* selfChange */ false);
+    }
+
+    private void updateSmallestScreenWidth(int smallestScreenWidthDp) {
+        Configuration configuration = new Configuration();
+        configuration.smallestScreenWidthDp = smallestScreenWidthDp;
+        mConfigurationController.onConfigurationChanged(configuration);
     }
 
     private void onTouchEvent(MotionEvent ev) {
