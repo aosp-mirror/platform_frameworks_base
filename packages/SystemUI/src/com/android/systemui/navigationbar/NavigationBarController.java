@@ -57,6 +57,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -116,6 +117,7 @@ public class NavigationBarController implements Callbacks,
     private final TaskbarDelegate mTaskbarDelegate;
     private int mNavMode;
     private boolean mIsTablet;
+    private final UserTracker mUserTracker;
 
     /** A displayId - nav bar maps. */
     @VisibleForTesting
@@ -151,7 +153,8 @@ public class NavigationBarController implements Callbacks,
             @Main Handler mainHandler,
             UiEventLogger uiEventLogger,
             NavigationBarOverlayController navBarOverlayController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            UserTracker userTracker) {
         mContext = context;
         mWindowManager = windowManager;
         mAssistManagerLazy = assistManagerLazy;
@@ -184,6 +187,7 @@ public class NavigationBarController implements Callbacks,
         mNavigationModeController.addListener(this);
         mTaskbarDelegate = new TaskbarDelegate(mOverviewProxyService);
         mIsTablet = isTablet(mContext.getResources().getConfiguration());
+        mUserTracker = userTracker;
     }
 
     @Override
@@ -361,7 +365,8 @@ public class NavigationBarController implements Callbacks,
                 mSystemActions,
                 mHandler,
                 mNavBarOverlayController,
-                mUiEventLogger);
+                mUiEventLogger,
+                mUserTracker);
         mNavigationBars.put(displayId, navBar);
 
         View navigationBarView = navBar.createView(savedState);
