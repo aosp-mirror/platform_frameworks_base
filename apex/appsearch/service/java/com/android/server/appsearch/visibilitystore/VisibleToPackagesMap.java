@@ -29,7 +29,7 @@ import java.util.Set;
  *
  * This object is not thread safe.
  */
-class PackageAccessibleMap {
+class VisibleToPackagesMap {
     /**
      * Maps packages to databases to prefixed schemas to PackageIdentifiers that have access to that
      * schema.
@@ -42,7 +42,7 @@ class PackageAccessibleMap {
      *
      * <p>Any existing mappings for this prefix are overwritten.
      */
-    public void setPackageAccessible(
+    public void setVisibleToPackages(
             @NonNull String packageName,
             @NonNull String databaseName,
             @NonNull Map<String, Set<PackageIdentifier>> schemaToPackageIdentifier) {

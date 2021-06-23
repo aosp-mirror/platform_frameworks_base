@@ -1473,9 +1473,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * @param why the reason for the wake up
      */
     public void wakeUpIfDozing(long time, View where, String why) {
-        if (mDozing && !(mKeyguardViewMediator.isAnimatingScreenOff()
-                || mUnlockedScreenOffAnimationController
-                    .isScreenOffLightRevealAnimationPlaying())) {
+        if (mDozing && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
             mPowerManager.wakeUp(
                     time, PowerManager.WAKE_REASON_GESTURE, "com.android.systemui:" + why);
             mWakeUpComingFromTouch = true;
@@ -4444,6 +4442,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
+        updateLightRevealScrimVisibility();
+
         Trace.endSection();
     }
 
@@ -4894,6 +4894,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
 
+        mLightRevealScrim.setAlpha(mScrimController.getState().getMaxLightRevealScrimAlpha());
         if (mFeatureFlags.useNewLockscreenAnimations()
                 && (mDozeParameters.getAlwaysOn() || mDozeParameters.isQuickPickupEnabled())) {
             mLightRevealScrim.setVisibility(View.VISIBLE);

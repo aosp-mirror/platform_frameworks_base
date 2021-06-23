@@ -28,10 +28,10 @@ class VisibilityDocument extends GenericDocument {
     /**
      * Property that holds the list of platform-hidden schemas, as part of the visibility settings.
      */
-    private static final String NOT_PLATFORM_SURFACEABLE_PROPERTY = "notPlatformSurfaceable";
+    private static final String NOT_DISPLAYED_BY_SYSTEM_PROPERTY = "notPlatformSurfaceable";
 
     /** Property that holds nested documents of package accessible schemas. */
-    private static final String PACKAGE_ACCESSIBLE_PROPERTY = "packageAccessible";
+    private static final String VISIBLE_TO_PACKAGES_PROPERTY = "packageAccessible";
 
     /**
      * Schema for the VisibilityStore's documents.
@@ -41,11 +41,11 @@ class VisibilityDocument extends GenericDocument {
      */
     public static final AppSearchSchema SCHEMA = new AppSearchSchema.Builder(SCHEMA_TYPE)
             .addProperty(new AppSearchSchema.StringPropertyConfig.Builder(
-                    NOT_PLATFORM_SURFACEABLE_PROPERTY)
+                    NOT_DISPLAYED_BY_SYSTEM_PROPERTY)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_REPEATED)
                     .build())
             .addProperty(new AppSearchSchema.DocumentPropertyConfig.Builder(
-                    PACKAGE_ACCESSIBLE_PROPERTY, PackageAccessibleDocument.SCHEMA_TYPE)
+                    VISIBLE_TO_PACKAGES_PROPERTY, VisibleToPackagesDocument.SCHEMA_TYPE)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_REPEATED)
                     .build())
             .build();
@@ -55,13 +55,13 @@ class VisibilityDocument extends GenericDocument {
     }
 
     @Nullable
-    public String[] getNotPlatformSurfaceableSchemas() {
-        return getPropertyStringArray(NOT_PLATFORM_SURFACEABLE_PROPERTY);
+    public String[] getNotDisplayedBySystem() {
+        return getPropertyStringArray(NOT_DISPLAYED_BY_SYSTEM_PROPERTY);
     }
 
     @Nullable
-    public GenericDocument[] getPackageAccessibleSchemas() {
-        return getPropertyDocumentArray(PACKAGE_ACCESSIBLE_PROPERTY);
+    public GenericDocument[] getVisibleToPackages() {
+        return getPropertyDocumentArray(VISIBLE_TO_PACKAGES_PROPERTY);
     }
 
     /** Builder for {@link VisibilityDocument}. */
@@ -72,17 +72,15 @@ class VisibilityDocument extends GenericDocument {
 
         /** Sets which prefixed schemas have opted out of platform surfacing. */
         @NonNull
-        public Builder setSchemasNotPlatformSurfaceable(
-                @NonNull String[] notPlatformSurfaceableSchemas) {
-            return setPropertyString(
-                    NOT_PLATFORM_SURFACEABLE_PROPERTY, notPlatformSurfaceableSchemas);
+        public Builder setNotDisplayedBySystem(@NonNull String[] notDisplayedBySystemSchemas) {
+            return setPropertyString(NOT_DISPLAYED_BY_SYSTEM_PROPERTY, notDisplayedBySystemSchemas);
         }
 
         /** Sets which prefixed schemas have configured package access. */
         @NonNull
-        public Builder setPackageAccessibleSchemas(
-                @NonNull PackageAccessibleDocument[] packageAccessibleSchemas) {
-            return setPropertyDocument(PACKAGE_ACCESSIBLE_PROPERTY, packageAccessibleSchemas);
+        public Builder setVisibleToPackages(
+                @NonNull VisibleToPackagesDocument[] visibleToPackagesDocuments) {
+            return setPropertyDocument(VISIBLE_TO_PACKAGES_PROPERTY, visibleToPackagesDocuments);
         }
     }
 }
