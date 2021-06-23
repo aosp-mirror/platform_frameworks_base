@@ -1235,11 +1235,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final private BroadcastReceiver mWifiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            synchronized (mUidRulesFirstLock) {
-                synchronized (mNetworkPoliciesSecondLock) {
-                    upgradeWifiMeteredOverrideAL();
-                }
-            }
+            upgradeWifiMeteredOverride();
             // Only need to perform upgrade logic once
             mContext.unregisterReceiver(this);
         }
@@ -2617,34 +2613,43 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Perform upgrade step of moving any user-defined meterness overrides over
      * into {@link WifiConfiguration}.
      */
-    @GuardedBy({"mNetworkPoliciesSecondLock", "mUidRulesFirstLock"})
-    private void upgradeWifiMeteredOverrideAL() {
-        boolean modified = false;
-        final WifiManager wm = mContext.getSystemService(WifiManager.class);
-        final List<WifiConfiguration> configs = wm.getConfiguredNetworks();
-        for (int i = 0; i < mNetworkPolicy.size(); ) {
-            final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
-            if (policy.template.getMatchRule() == NetworkTemplate.MATCH_WIFI
-                    && !policy.inferred) {
-                mNetworkPolicy.removeAt(i);
-                modified = true;
-
-                final String networkId = resolveNetworkId(policy.template.getNetworkId());
-                for (WifiConfiguration config : configs) {
-                    if (Objects.equals(resolveNetworkId(config), networkId)) {
-                        Slog.d(TAG, "Found network " + networkId + "; upgrading metered hint");
-                        config.meteredOverride = policy.metered
-                                ? WifiConfiguration.METERED_OVERRIDE_METERED
-                                : WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
-                        wm.updateNetwork(config);
-                    }
+    private void upgradeWifiMeteredOverride() {
+        final ArrayMap<String, Boolean> wifiNetworkIds = new ArrayMap<>();
+        synchronized (mNetworkPoliciesSecondLock) {
+            for (int i = 0; i < mNetworkPolicy.size();) {
+                final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
+                if (policy.template.getMatchRule() == NetworkTemplate.MATCH_WIFI
+                        && !policy.inferred) {
+                    mNetworkPolicy.removeAt(i);
+                    wifiNetworkIds.put(policy.template.getNetworkId(), policy.metered);
+                } else {
+                    i++;
                 }
-            } else {
-                i++;
             }
         }
-        if (modified) {
-            writePolicyAL();
+
+        if (wifiNetworkIds.isEmpty()) {
+            return;
+        }
+        final WifiManager wm = mContext.getSystemService(WifiManager.class);
+        final List<WifiConfiguration> configs = wm.getConfiguredNetworks();
+        for (int i = 0; i < configs.size(); ++i) {
+            final WifiConfiguration config = configs.get(i);
+            final String networkId = resolveNetworkId(config);
+            final Boolean metered = wifiNetworkIds.get(networkId);
+            if (metered != null) {
+                Slog.d(TAG, "Found network " + networkId + "; upgrading metered hint");
+                config.meteredOverride = metered
+                        ? WifiConfiguration.METERED_OVERRIDE_METERED
+                        : WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
+                wm.updateNetwork(config);
+            }
+        }
+
+        synchronized (mUidRulesFirstLock) {
+            synchronized (mNetworkPoliciesSecondLock) {
+                writePolicyAL();
+            }
         }
     }
 
