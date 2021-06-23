@@ -866,7 +866,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     private void scheduleUpdateActiveUserWithoutHandler(int targetUserId) {
         final boolean hasEnrolled = !getEnrolledFaces(mSensorId, targetUserId).isEmpty();
         final FaceUpdateActiveUserClient client = new FaceUpdateActiveUserClient(mContext,
-                mLazyDaemon, targetUserId, mContext.getOpPackageName(), mSensorId, mCurrentUserId,
+                mLazyDaemon, targetUserId, mContext.getOpPackageName(), mSensorId,
                 hasEnrolled, mAuthenticatorIds);
         mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
             @Override
