@@ -866,7 +866,7 @@ public final class DeviceConfig {
      *     {@link Settings.Config#SYNC_DISABLED_MODE_PERSISTENT} and {@link
      *     Settings.Config#SYNC_DISABLED_MODE_UNTIL_REBOOT}
      *
-     * @see #isSyncDisabled()
+     * @see #getSyncDisabled()
      * @hide
      */
     @RequiresPermission(WRITE_DEVICE_CONFIG)
@@ -876,16 +876,15 @@ public final class DeviceConfig {
     }
 
     /**
-     * Returns the current state of sync disabling, {@code true} when disabled, {@code false}
-     * otherwise.
+     * Returns the current mode of sync disabling.
      *
      * @see #setSyncDisabled(int)
      * @hide
      */
     @RequiresPermission(WRITE_DEVICE_CONFIG)
-    public static boolean isSyncDisabled() {
+    public static @SyncDisabledMode int getSyncDisabled() {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        return Settings.Config.isSyncDisabled(contentResolver);
+        return Settings.Config.getSyncDisabled(contentResolver);
     }
 
     /**

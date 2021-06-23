@@ -776,7 +776,8 @@ public class DeviceConfigTest {
             DeviceConfig.setSyncDisabled(Settings.Config.SYNC_DISABLED_MODE_NONE);
 
             // Assert starting state.
-            assertThat(DeviceConfig.isSyncDisabled()).isFalse();
+            assertThat(DeviceConfig.getSyncDisabled())
+                    .isEqualTo(Settings.Config.SYNC_DISABLED_MODE_NONE);
             assertThat(DeviceConfig.setProperties(properties1)).isTrue();
             assertThat(DeviceConfig.getProperties(NAMESPACE, KEY).getString(KEY, DEFAULT_VALUE))
                     .isEqualTo(VALUE);
@@ -784,14 +785,16 @@ public class DeviceConfigTest {
             // Test disabled (persistent). Persistence is not actually tested, that would require
             // a host test.
             DeviceConfig.setSyncDisabled(Settings.Config.SYNC_DISABLED_MODE_PERSISTENT);
-            assertThat(DeviceConfig.isSyncDisabled()).isTrue();
+            assertThat(DeviceConfig.getSyncDisabled())
+                    .isEqualTo(Settings.Config.SYNC_DISABLED_MODE_PERSISTENT);
             assertThat(DeviceConfig.setProperties(properties2)).isFalse();
             assertThat(DeviceConfig.getProperties(NAMESPACE, KEY).getString(KEY, DEFAULT_VALUE))
                     .isEqualTo(VALUE);
 
             // Return to not disabled.
             DeviceConfig.setSyncDisabled(Settings.Config.SYNC_DISABLED_MODE_NONE);
-            assertThat(DeviceConfig.isSyncDisabled()).isFalse();
+            assertThat(DeviceConfig.getSyncDisabled())
+                    .isEqualTo(Settings.Config.SYNC_DISABLED_MODE_NONE);
             assertThat(DeviceConfig.setProperties(properties2)).isTrue();
             assertThat(DeviceConfig.getProperties(NAMESPACE, KEY).getString(KEY, DEFAULT_VALUE))
                     .isEqualTo(VALUE2);
@@ -799,14 +802,16 @@ public class DeviceConfigTest {
             // Test disabled (persistent). Absence of persistence is not actually tested, that would
             // require a host test.
             DeviceConfig.setSyncDisabled(Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT);
-            assertThat(DeviceConfig.isSyncDisabled()).isTrue();
+            assertThat(DeviceConfig.getSyncDisabled())
+                    .isEqualTo(Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT);
             assertThat(DeviceConfig.setProperties(properties1)).isFalse();
             assertThat(DeviceConfig.getProperties(NAMESPACE, KEY).getString(KEY, DEFAULT_VALUE))
                     .isEqualTo(VALUE2);
 
             // Return to not disabled.
             DeviceConfig.setSyncDisabled(Settings.Config.SYNC_DISABLED_MODE_NONE);
-            assertThat(DeviceConfig.isSyncDisabled()).isFalse();
+            assertThat(DeviceConfig.getSyncDisabled())
+                    .isEqualTo(Settings.Config.SYNC_DISABLED_MODE_NONE);
             assertThat(DeviceConfig.setProperties(properties1)).isTrue();
             assertThat(DeviceConfig.getProperties(NAMESPACE, KEY).getString(KEY, DEFAULT_VALUE))
                     .isEqualTo(VALUE);

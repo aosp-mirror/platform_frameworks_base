@@ -299,8 +299,8 @@ public final class Settings {
     public static final String KEY_CONFIG_SET_ALL_RETURN = "config_set_all_return";
 
     /** @hide */
-    public static final String KEY_CONFIG_IS_SYNC_DISABLED_RETURN =
-            "config_is_sync_disabled_return";
+    public static final String KEY_CONFIG_GET_SYNC_DISABLED_RETURN =
+            "config_get_sync_disabled_return";
 
     /**
      * An int extra specifying a subscription ID.
@@ -2442,10 +2442,10 @@ public final class Settings {
     public static final String CALL_METHOD_SET_SYNC_DISABLED_CONFIG = "SET_SYNC_DISABLED_config";
 
     /**
-     * @hide - Private call() method to return whether syncs are disabled for the 'configuration'
-     * table
+     * @hide - Private call() method to return the current mode of sync disabling for the
+     * 'configuration' table
      */
-    public static final String CALL_METHOD_IS_SYNC_DISABLED_CONFIG = "IS_SYNC_DISABLED_config";
+    public static final String CALL_METHOD_GET_SYNC_DISABLED_CONFIG = "GET_SYNC_DISABLED_config";
 
     /** @hide - Private call() method to register monitor callback for 'configuration' table */
     public static final String CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG =
@@ -16685,25 +16685,25 @@ public final class Settings {
         }
 
         /**
-         * Bridge method between {@link DeviceConfig#isSyncDisabled()} and the
+         * Bridge method between {@link DeviceConfig#getSyncDisabled()} and the
          * {@link com.android.providers.settings.SettingsProvider} implementation.
          *
          * @hide
          */
         @SuppressLint("AndroidFrameworkRequiresPermission")
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static boolean isSyncDisabled(@NonNull ContentResolver resolver) {
+        static int getSyncDisabled(@NonNull ContentResolver resolver) {
             try {
                 Bundle args = Bundle.EMPTY;
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
                 Bundle bundle = cp.call(resolver.getAttributionSource(),
-                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_IS_SYNC_DISABLED_CONFIG,
+                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_GET_SYNC_DISABLED_CONFIG,
                         null, args);
-                return bundle.getBoolean(KEY_CONFIG_IS_SYNC_DISABLED_RETURN);
+                return bundle.getInt(KEY_CONFIG_GET_SYNC_DISABLED_RETURN);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't query sync disabled " + DeviceConfig.CONTENT_URI, e);
             }
-            return false;
+            return -1;
         }
 
         /**
