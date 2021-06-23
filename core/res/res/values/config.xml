@@ -1706,6 +1706,10 @@
          config_enableFusedLocationOverlay is false. -->
     <string name="config_fusedLocationProviderPackageName" translatable="false">com.android.location.fused</string>
 
+    <!-- Default value for the ADAS GNSS Location Enabled setting if this setting has never been
+         set before. -->
+    <bool name="config_defaultAdasGnssLocationEnabled" translatable="false">false</bool>
+
     <string-array name="config_locationExtraPackageNames" translatable="false"></string-array>
 
     <!-- The package name of the default network recommendation app.
