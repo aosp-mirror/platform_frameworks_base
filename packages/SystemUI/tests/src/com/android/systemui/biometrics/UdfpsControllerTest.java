@@ -53,6 +53,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -117,6 +118,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private AccessibilityManager mAccessibilityManager;
     @Mock
+    private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    @Mock
     private ScreenLifecycle mScreenLifecycle;
     @Mock
     private Vibrator mVibrator;
@@ -176,6 +179,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mFalsingManager,
                 mPowerManager,
                 mAccessibilityManager,
+                mLockscreenShadeTransitionController,
                 mScreenLifecycle,
                 mVibrator,
                 Optional.of(mHbmProvider));
