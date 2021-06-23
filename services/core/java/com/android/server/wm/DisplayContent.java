@@ -3833,7 +3833,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // 4. Update the IME control target to apply any inset change and animation.
         // 5. Reparent the IME container surface to either the input target app, or the IME window
         // parent.
-        updateImeControlTarget();
+        updateImeControlTarget(true /* forceUpdateImeParent */);
     }
 
     @VisibleForTesting
@@ -3965,12 +3965,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void updateImeControlTarget() {
+        updateImeControlTarget(false /* forceUpdateImeParent */);
+    }
+
+    void updateImeControlTarget(boolean forceUpdateImeParent) {
         InsetsControlTarget prevImeControlTarget = mImeControlTarget;
         mImeControlTarget = computeImeControlTarget();
         mInsetsStateController.onImeControlTargetChanged(mImeControlTarget);
-        // Update Ime parent when IME insets leash created, which is the best time that default
-        // IME visibility has been settled down after IME control target changed.
-        if (prevImeControlTarget != mImeControlTarget) {
+        // Update Ime parent when IME insets leash created or the new IME layering target might
+        // updated from setImeLayeringTarget, which is the best time that default IME visibility
+        // has been settled down after IME control target changed.
+        if (prevImeControlTarget != mImeControlTarget || forceUpdateImeParent) {
             updateImeParent();
         }
 

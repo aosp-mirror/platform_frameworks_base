@@ -291,9 +291,7 @@ public abstract class HotwordDetectionService extends Service {
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
             @DurationMillisLong long callbackTimeoutMillis,
-            @Nullable IntConsumer statusCallback) {
-        // TODO: Handle the unimplemented case by throwing?
-    }
+            @Nullable IntConsumer statusCallback) {}
 
     /**
      * Called when the {@link VoiceInteractionService} requests that this service
