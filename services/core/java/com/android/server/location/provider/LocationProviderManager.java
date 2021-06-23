@@ -113,6 +113,8 @@ import com.android.server.location.injector.UserInfoHelper;
 import com.android.server.location.injector.UserInfoHelper.UserListener;
 import com.android.server.location.listeners.ListenerMultiplexer;
 import com.android.server.location.listeners.RemoteListenerRegistration;
+import com.android.server.location.settings.LocationSettings;
+import com.android.server.location.settings.LocationUserSettings;
 
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
@@ -549,6 +551,19 @@ public class LocationProviderManager extends
         }
 
         @GuardedBy("mLock")
+        final boolean onAdasGnssLocationEnabledChanged(int userId) {
+            if (Build.IS_DEBUGGABLE) {
+                Preconditions.checkState(Thread.holdsLock(mLock));
+            }
+
+            if (getIdentity().getUserId() == userId) {
+                return onProviderLocationRequestChanged();
+            }
+
+            return false;
+        }
+
+        @GuardedBy("mLock")
         final boolean onForegroundChanged(int uid, boolean foreground) {
             if (Build.IS_DEBUGGABLE) {
                 Preconditions.checkState(Thread.holdsLock(mLock));
@@ -592,8 +607,8 @@ public class LocationProviderManager extends
             onHighPowerUsageChanged();
             updateService();
 
-            // if location settings ignored has changed then the active state may have changed
-            return oldRequest.isLocationSettingsIgnored() != newRequest.isLocationSettingsIgnored();
+            // if bypass state has changed then the active state may have changed
+            return oldRequest.isBypass() != newRequest.isBypass();
         }
 
         private LocationRequest calculateProviderLocationRequest() {
@@ -616,9 +631,24 @@ public class LocationProviderManager extends
                 if (!mSettingsHelper.getIgnoreSettingsAllowlist().contains(
                         getIdentity().getPackageName(), getIdentity().getAttributionTag())
                         && !mLocationManagerInternal.isProvider(null, getIdentity())) {
-                    builder.setLocationSettingsIgnored(false);
                     locationSettingsIgnored = false;
                 }
+
+                builder.setLocationSettingsIgnored(locationSettingsIgnored);
+            }
+
+            boolean adasGnssBypass = baseRequest.isAdasGnssBypass();
+            if (adasGnssBypass) {
+                // if we are not currently allowed use adas gnss bypass, disable it
+                if (!GPS_PROVIDER.equals(mName)) {
+                    Log.e(TAG, "adas gnss bypass request received in non-gps provider");
+                    adasGnssBypass = false;
+                } else if (!mLocationSettings.getUserSettings(
+                        getIdentity().getUserId()).isAdasGnssLocationEnabled()) {
+                    adasGnssBypass = false;
+                }
+
+                builder.setAdasGnssBypass(adasGnssBypass);
             }
 
             if (!locationSettingsIgnored && !isThrottlingExempt()) {
@@ -769,7 +799,7 @@ public class LocationProviderManager extends
                     Location lastLocation = getLastLocationUnsafe(
                             getIdentity().getUserId(),
                             getPermissionLevel(),
-                            getRequest().isLocationSettingsIgnored(),
+                            getRequest().isBypass(),
                             maxLocationAgeMs);
                     if (lastLocation != null) {
                         executeOperation(acceptLocationChange(LocationResult.wrap(lastLocation)));
@@ -1114,7 +1144,7 @@ public class LocationProviderManager extends
             Location lastLocation = getLastLocationUnsafe(
                     getIdentity().getUserId(),
                     getPermissionLevel(),
-                    getRequest().isLocationSettingsIgnored(),
+                    getRequest().isBypass(),
                     MAX_CURRENT_LOCATION_AGE_MS);
             if (lastLocation != null) {
                 executeOperation(acceptLocationChange(LocationResult.wrap(lastLocation)));
@@ -1267,6 +1297,7 @@ public class LocationProviderManager extends
     private final CopyOnWriteArrayList<IProviderRequestListener> mProviderRequestListeners;
 
     protected final LocationManagerInternal mLocationManagerInternal;
+    protected final LocationSettings mLocationSettings;
     protected final SettingsHelper mSettingsHelper;
     protected final UserInfoHelper mUserHelper;
     protected final AlarmHelper mAlarmHelper;
@@ -1280,6 +1311,8 @@ public class LocationProviderManager extends
     protected final LocationFudger mLocationFudger;
 
     private final UserListener mUserChangedListener = this::onUserChanged;
+    private final LocationSettings.LocationUserSettingsListener mLocationUserSettingsListener =
+            this::onLocationUserSettingsChanged;
     private final UserSettingChangedListener mLocationEnabledChangedListener =
             this::onLocationEnabledChanged;
     private final GlobalSettingChangedListener mBackgroundThrottlePackageWhitelistChangedListener =
@@ -1332,6 +1365,7 @@ public class LocationProviderManager extends
 
         mLocationManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(LocationManagerInternal.class));
+        mLocationSettings = injector.getLocationSettings();
         mSettingsHelper = injector.getSettingsHelper();
         mUserHelper = injector.getUserInfoHelper();
         mAlarmHelper = injector.getAlarmHelper();
@@ -1362,6 +1396,7 @@ public class LocationProviderManager extends
             mStateChangedListener = listener;
 
             mUserHelper.addListener(mUserChangedListener);
+            mLocationSettings.registerLocationUserSettingsListener(mLocationUserSettingsListener);
             mSettingsHelper.addOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
 
             final long identity = Binder.clearCallingIdentity();
@@ -1389,6 +1424,7 @@ public class LocationProviderManager extends
             }
 
             mUserHelper.removeListener(mUserChangedListener);
+            mLocationSettings.unregisterLocationUserSettingsListener(mLocationUserSettingsListener);
             mSettingsHelper.removeOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
 
             // if external entities are registering listeners it's their responsibility to
@@ -1550,7 +1586,7 @@ public class LocationProviderManager extends
 
     public @Nullable Location getLastLocation(LastLocationRequest request,
             CallerIdentity identity, @PermissionLevel int permissionLevel) {
-        if (!isActive(request.isLocationSettingsIgnored(), identity)) {
+        if (!isActive(request.isBypass(), identity)) {
             return null;
         }
 
@@ -1564,7 +1600,7 @@ public class LocationProviderManager extends
                 getLastLocationUnsafe(
                         identity.getUserId(),
                         permissionLevel,
-                        request.isLocationSettingsIgnored(),
+                        request.isBypass(),
                         Long.MAX_VALUE),
                 permissionLevel);
 
@@ -1584,7 +1620,7 @@ public class LocationProviderManager extends
      * location if necessary.
      */
     public @Nullable Location getLastLocationUnsafe(int userId,
-            @PermissionLevel int permissionLevel, boolean ignoreLocationSettings,
+            @PermissionLevel int permissionLevel, boolean isBypass,
             long maximumAgeMs) {
         if (userId == UserHandle.USER_ALL) {
             // find the most recent location across all users
@@ -1592,7 +1628,7 @@ public class LocationProviderManager extends
             final int[] runningUserIds = mUserHelper.getRunningUserIds();
             for (int i = 0; i < runningUserIds.length; i++) {
                 Location next = getLastLocationUnsafe(runningUserIds[i], permissionLevel,
-                        ignoreLocationSettings, maximumAgeMs);
+                        isBypass, maximumAgeMs);
                 if (lastLocation == null || (next != null && next.getElapsedRealtimeNanos()
                         > lastLocation.getElapsedRealtimeNanos())) {
                     lastLocation = next;
@@ -1601,7 +1637,7 @@ public class LocationProviderManager extends
             return lastLocation;
         } else if (userId == UserHandle.USER_CURRENT) {
             return getLastLocationUnsafe(mUserHelper.getCurrentUserId(), permissionLevel,
-                    ignoreLocationSettings, maximumAgeMs);
+                    isBypass, maximumAgeMs);
         }
 
         Preconditions.checkArgument(userId >= 0);
@@ -1613,7 +1649,7 @@ public class LocationProviderManager extends
             if (lastLocation == null) {
                 location = null;
             } else {
-                location = lastLocation.get(permissionLevel, ignoreLocationSettings);
+                location = lastLocation.get(permissionLevel, isBypass);
             }
         }
 
@@ -1925,7 +1961,7 @@ public class LocationProviderManager extends
         // provider, under the assumption that once we send the request off, the provider will
         // immediately attempt to deliver a new location satisfying that request.
         long delayMs;
-        if (!oldRequest.isLocationSettingsIgnored() && newRequest.isLocationSettingsIgnored()) {
+        if (!oldRequest.isBypass() && newRequest.isBypass()) {
             delayMs = 0;
         } else if (newRequest.getIntervalMillis() > oldRequest.getIntervalMillis()) {
             // if the interval has increased, tell the provider immediately, so it can save power
@@ -2002,12 +2038,12 @@ public class LocationProviderManager extends
             return false;
         }
 
-        boolean locationSettingsIgnored = registration.getRequest().isLocationSettingsIgnored();
-        if (!isActive(locationSettingsIgnored, registration.getIdentity())) {
+        boolean isBypass = registration.getRequest().isBypass();
+        if (!isActive(isBypass, registration.getIdentity())) {
             return false;
         }
 
-        if (!locationSettingsIgnored) {
+        if (!isBypass) {
             switch (mLocationPowerSaveModeHelper.getLocationPowerSaveMode()) {
                 case LOCATION_MODE_FOREGROUND_ONLY:
                     if (!registration.isForeground()) {
@@ -2036,15 +2072,15 @@ public class LocationProviderManager extends
         return true;
     }
 
-    private boolean isActive(boolean locationSettingsIgnored, CallerIdentity identity) {
+    private boolean isActive(boolean isBypass, CallerIdentity identity) {
         if (identity.isSystemServer()) {
-            if (!locationSettingsIgnored) {
+            if (!isBypass) {
                 if (!isEnabled(mUserHelper.getCurrentUserId())) {
                     return false;
                 }
             }
         } else {
-            if (!locationSettingsIgnored) {
+            if (!isBypass) {
                 if (!isEnabled(identity.getUserId())) {
                     return false;
                 }
@@ -2071,6 +2107,7 @@ public class LocationProviderManager extends
         long intervalMs = ProviderRequest.INTERVAL_DISABLED;
         int quality = LocationRequest.QUALITY_LOW_POWER;
         long maxUpdateDelayMs = Long.MAX_VALUE;
+        boolean adasGnssBypass = false;
         boolean locationSettingsIgnored = false;
         boolean lowPower = true;
 
@@ -2086,6 +2123,7 @@ public class LocationProviderManager extends
             intervalMs = min(request.getIntervalMillis(), intervalMs);
             quality = min(request.getQuality(), quality);
             maxUpdateDelayMs = min(request.getMaxUpdateDelayMillis(), maxUpdateDelayMs);
+            adasGnssBypass |= request.isAdasGnssBypass();
             locationSettingsIgnored |= request.isLocationSettingsIgnored();
             lowPower &= request.isLowPower();
         }
@@ -2123,6 +2161,7 @@ public class LocationProviderManager extends
                 .setIntervalMillis(intervalMs)
                 .setQuality(quality)
                 .setMaxUpdateDelayMillis(maxUpdateDelayMs)
+                .setAdasGnssBypass(adasGnssBypass)
                 .setLocationSettingsIgnored(locationSettingsIgnored)
                 .setLowPower(lowPower)
                 .setWorkSource(workSource)
@@ -2187,6 +2226,16 @@ public class LocationProviderManager extends
                 case UserListener.USER_STOPPED:
                     onUserStopped(userId);
                     break;
+            }
+        }
+    }
+
+    private void onLocationUserSettingsChanged(int userId, LocationUserSettings oldSettings,
+            LocationUserSettings newSettings) {
+        if (oldSettings.isAdasGnssLocationEnabled() != newSettings.isAdasGnssLocationEnabled()) {
+            synchronized (mLock) {
+                updateRegistrations(
+                        registration -> registration.onAdasGnssLocationEnabledChanged(userId));
             }
         }
     }
@@ -2560,16 +2609,16 @@ public class LocationProviderManager extends
         }
 
         public @Nullable Location get(@PermissionLevel int permissionLevel,
-                boolean ignoreLocationSettings) {
+                boolean isBypass) {
             switch (permissionLevel) {
                 case PERMISSION_FINE:
-                    if (ignoreLocationSettings) {
+                    if (isBypass) {
                         return mFineBypassLocation;
                     } else {
                         return mFineLocation;
                     }
                 case PERMISSION_COARSE:
-                    if (ignoreLocationSettings) {
+                    if (isBypass) {
                         return mCoarseBypassLocation;
                     } else {
                         return mCoarseLocation;
