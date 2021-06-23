@@ -10847,11 +10847,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
+        notifyContentCaptureTextChanged();
+    }
+
+    /**
+     * Notifies the ContentCapture service that the text of the view has changed (only if
+     * ContentCapture has been notified of this view's existence already).
+     *
+     * @hide
+     */
+    public void notifyContentCaptureTextChanged() {
         // TODO(b/121045053): should use a flag / boolean to keep status of SHOWN / HIDDEN instead
         // of using isLaidout(), so it's not called in cases where it's laid out but a
         // notifyAppeared was not sent.
-
-        // ContentCapture
         if (isLaidOut() && isImportantForContentCapture() && getNotifiedContentCaptureAppeared()) {
             final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
             if (cm != null && cm.isContentCaptureEnabled()) {
