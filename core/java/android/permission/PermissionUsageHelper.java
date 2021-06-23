@@ -410,7 +410,9 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
 
             int usageAttr = usage.getPackageIdHash();
             // If this usage has a proxy, but is not a proxy, it is the end of a chain.
-            if (!proxies.containsKey(usageAttr) && usage.proxy != null) {
+            // TODO remove once camera converted
+            if (!proxies.containsKey(usageAttr) && usage.proxy != null
+                    && !usage.op.equals(OPSTR_RECORD_AUDIO)) {
                 proxyLabels.put(usage, new ArrayList<>());
                 proxyPackages.add(usage.getPackageIdHash());
             }
