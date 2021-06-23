@@ -178,6 +178,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
+
+        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        mCallback.onClientFinished(this, false /* success */);
     }
 
     @Override
@@ -192,5 +195,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
+
+        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        mCallback.onClientFinished(this, false /* success */);
     }
 }
