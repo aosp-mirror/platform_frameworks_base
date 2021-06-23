@@ -30,9 +30,9 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
+import com.android.server.appsearch.external.localstorage.visibilitystore.VisibilityStore;
 import com.android.server.appsearch.util.PackageUtil;
 
 import com.google.android.icing.proto.PersistType;
@@ -60,22 +60,11 @@ import java.util.Set;
  * <p>This class doesn't handle any locking itself. Its callers should handle the locking at a
  * higher level.
  *
- * <p>NOTE: This class holds an instance of AppSearchImpl and AppSearchImpl holds an instance of
- * this class. Take care to not cause any circular dependencies.
- *
  * @hide
  */
-public class VisibilityStore {
+public class VisibilityStoreImpl implements VisibilityStore {
     /** Version for the visibility schema */
     private static final int SCHEMA_VERSION = 0;
-
-    /**
-     * These cannot have any of the special characters used by AppSearchImpl (e.g. {@code
-     * AppSearchImpl#PACKAGE_DELIMITER} or {@code AppSearchImpl#DATABASE_DELIMITER}.
-     */
-    public static final String PACKAGE_NAME = "VS#Pkg";
-
-    @VisibleForTesting public static final String DATABASE_NAME = "VS#Db";
 
     /** Namespace of documents that contain visibility settings */
     private static final String NAMESPACE = "";
@@ -101,13 +90,13 @@ public class VisibilityStore {
      * @param userContext Context of the user that the call is being made as
      */
     @NonNull
-    public static VisibilityStore create(
+    public static VisibilityStoreImpl create(
             @NonNull AppSearchImpl appSearchImpl, @NonNull Context userContext)
             throws AppSearchException {
-        return new VisibilityStore(appSearchImpl, userContext);
+        return new VisibilityStoreImpl(appSearchImpl, userContext);
     }
 
-    private VisibilityStore(@NonNull AppSearchImpl appSearchImpl, @NonNull Context userContext)
+    private VisibilityStoreImpl(@NonNull AppSearchImpl appSearchImpl, @NonNull Context userContext)
             throws AppSearchException {
         mAppSearchImpl = Objects.requireNonNull(appSearchImpl);
         mUserContext = Objects.requireNonNull(userContext);
@@ -207,18 +196,7 @@ public class VisibilityStore {
         }
     }
 
-    /**
-     * Sets visibility settings for the given database. Any previous visibility settings will be
-     * overwritten.
-     *
-     * @param packageName Package of app that owns the schemas.
-     * @param databaseName Database that owns the schemas.
-     * @param schemasNotDisplayedBySystem Set of prefixed schemas that should be hidden from the
-     *     platform.
-     * @param schemasVisibleToPackages Map of prefixed schemas to a list of package identifiers that
-     *     have access to the schema.
-     * @throws AppSearchException on AppSearchImpl error.
-     */
+    @Override
     public void setVisibility(
             @NonNull String packageName,
             @NonNull String databaseName,
@@ -282,17 +260,7 @@ public class VisibilityStore {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    /**
-     * Checks whether {@code prefixedSchema} can be searched over by the {@code callerUid}.
-     *
-     * @param packageName Package that owns the schema.
-     * @param databaseName Database within the package that owns the schema.
-     * @param prefixedSchema Prefixed schema type the caller is trying to access.
-     * @param callerUid UID of the client making the globalQuery call.
-     * @param callerHasSystemAccess Whether the caller has been identified as having
-     *                              access to schemas marked system surfaceable by {@link
-     *                              #doesCallerHaveSystemAccess}.
-     */
+    @Override
     public boolean isSchemaSearchableByCaller(
             @NonNull String packageName,
             @NonNull String databaseName,
