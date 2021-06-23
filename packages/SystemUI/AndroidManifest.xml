@@ -454,6 +454,14 @@
                   android:finishOnCloseSystemDialogs="true">
         </activity>
 
+        <!-- started from SensoryPrivacyService -->
+        <activity android:name=".sensorprivacy.television.TvUnblockSensorActivity"
+                  android:exported="true"
+                  android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
+                  android:theme="@style/BottomSheet"
+                  android:finishOnCloseSystemDialogs="true">
+        </activity>
+
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbAccessoryUriActivity"
