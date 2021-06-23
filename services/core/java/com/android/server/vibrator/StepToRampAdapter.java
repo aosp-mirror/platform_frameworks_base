@@ -22,6 +22,7 @@ import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,6 +60,7 @@ final class StepToRampAdapter implements VibrationEffectAdapters.SegmentsAdapter
         convertStepsToRamps(segments);
         int newRepeatIndex = addRampDownToZeroAmplitudeSegments(segments, repeatIndex);
         newRepeatIndex = addRampDownToLoop(segments, newRepeatIndex);
+        newRepeatIndex = splitLongRampSegments(info, segments, newRepeatIndex);
         return newRepeatIndex;
     }
 
@@ -210,9 +212,68 @@ final class StepToRampAdapter implements VibrationEffectAdapters.SegmentsAdapter
         return repeatIndex;
     }
 
+    /**
+     * Split {@link RampSegment} entries that have duration longer than {@link
+     * VibratorInfo#getPwlePrimitiveDurationMax()}.
+     */
+    private int splitLongRampSegments(VibratorInfo info, List<VibrationEffectSegment> segments,
+            int repeatIndex) {
+        int maxDuration = info.getPwlePrimitiveDurationMax();
+        if (maxDuration <= 0) {
+            // No limit set to PWLE primitive duration.
+            return repeatIndex;
+        }
+
+        int segmentCount = segments.size();
+        for (int i = 0; i < segmentCount; i++) {
+            if (!(segments.get(i) instanceof RampSegment)) {
+                continue;
+            }
+            RampSegment ramp = (RampSegment) segments.get(i);
+            int splits = ((int) ramp.getDuration() + maxDuration - 1) / maxDuration;
+            if (splits <= 1) {
+                continue;
+            }
+            segments.remove(i);
+            segments.addAll(i, splitRampSegment(ramp, splits));
+            int addedSegments = splits - 1;
+            if (repeatIndex > i) {
+                repeatIndex += addedSegments;
+            }
+            i += addedSegments;
+            segmentCount += addedSegments;
+        }
+
+        return repeatIndex;
+    }
+
     private static RampSegment apply(StepSegment segment) {
         return new RampSegment(segment.getAmplitude(), segment.getAmplitude(),
                 segment.getFrequency(), segment.getFrequency(), (int) segment.getDuration());
+    }
+
+    private static List<RampSegment> splitRampSegment(RampSegment ramp, int splits) {
+        List<RampSegment> ramps = new ArrayList<>(splits);
+        long splitDuration = ramp.getDuration() / splits;
+        float previousAmplitude = ramp.getStartAmplitude();
+        float previousFrequency = ramp.getStartFrequency();
+        long accumulatedDuration = 0;
+
+        for (int i = 1; i < splits; i++) {
+            accumulatedDuration += splitDuration;
+            RampSegment rampSplit = new RampSegment(
+                    previousAmplitude, interpolateAmplitude(ramp, accumulatedDuration),
+                    previousFrequency, interpolateFrequency(ramp, accumulatedDuration),
+                    (int) splitDuration);
+            ramps.add(rampSplit);
+            previousAmplitude = rampSplit.getEndAmplitude();
+            previousFrequency = rampSplit.getEndFrequency();
+        }
+
+        ramps.add(new RampSegment(previousAmplitude, ramp.getEndAmplitude(), previousFrequency,
+                ramp.getEndFrequency(), (int) (ramp.getDuration() - accumulatedDuration)));
+
+        return ramps;
     }
 
     private static RampSegment createRampDown(float amplitude, float frequency, long duration) {
@@ -243,5 +304,20 @@ final class StepToRampAdapter implements VibrationEffectAdapters.SegmentsAdapter
             return ((RampSegment) segment).getEndAmplitude() != 0;
         }
         return false;
+    }
+
+    private static float interpolateAmplitude(RampSegment ramp, long duration) {
+        return interpolate(ramp.getStartAmplitude(), ramp.getEndAmplitude(), duration,
+                ramp.getDuration());
+    }
+
+    private static float interpolateFrequency(RampSegment ramp, long duration) {
+        return interpolate(ramp.getStartFrequency(), ramp.getEndFrequency(), duration,
+                ramp.getDuration());
+    }
+
+    private static float interpolate(float start, float end, long duration, long totalDuration) {
+        float position = (float) duration / totalDuration;
+        return start + position * (end - start);
     }
 }
