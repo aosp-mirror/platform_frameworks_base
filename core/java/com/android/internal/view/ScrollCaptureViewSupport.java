@@ -198,12 +198,9 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         private static final float LIGHT_RADIUS_DP = 800;
         private static final String TAG = "ViewRenderer";
 
-        private HardwareRenderer mRenderer;
-        private RenderNode mCaptureRenderNode;
-        private final RectF mTempRectF = new RectF();
-        private final Rect mSourceRect = new Rect();
+        private final HardwareRenderer mRenderer;
+        private final RenderNode mCaptureRenderNode;
         private final Rect mTempRect = new Rect();
-        private final Matrix mTempMatrix = new Matrix();
         private final int[] mTempLocation = new int[2];
         private long mLastRenderedSourceDrawingId = -1;
         private Surface mSurface;
@@ -313,11 +310,9 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         }
 
         private void transformToRoot(View local, Rect localRect, Rect outRect) {
-            mTempMatrix.reset();
-            local.transformMatrixToGlobal(mTempMatrix);
-            mTempRectF.set(localRect);
-            mTempMatrix.mapRect(mTempRectF);
-            mTempRectF.round(outRect);
+            local.getLocationInWindow(mTempLocation);
+            outRect.set(localRect);
+            outRect.offset(mTempLocation[0], mTempLocation[1]);
         }
 
         public void setColorMode(@ColorMode int colorMode) {

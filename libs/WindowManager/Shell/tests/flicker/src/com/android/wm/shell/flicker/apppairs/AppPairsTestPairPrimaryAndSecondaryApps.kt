@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -29,6 +28,7 @@ import com.android.server.wm.flicker.traces.layers.getVisibleBounds
 import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
+import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,7 +54,7 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
                 // TODO pair apps through normal UX flow
                 executeShellCommand(
                     composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
-                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
+                waitAppsShown(primaryApp, secondaryApp)
             }
         }
 

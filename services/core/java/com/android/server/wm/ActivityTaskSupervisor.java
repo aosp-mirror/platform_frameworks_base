@@ -835,7 +835,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 final ClientTransaction clientTransaction = ClientTransaction.obtain(
                         proc.getThread(), r.appToken);
 
-                final DisplayContent dc = r.mDisplayContent;
+                final boolean isTransitionForward = r.isTransitionForward();
                 clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
@@ -844,7 +844,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
                         r.launchedFromPackage, task.voiceInteractor, proc.getReportedProcState(),
                         r.getSavedState(), r.getPersistentSavedState(), results, newIntents,
-                        r.takeOptions(), dc.isNextTransitionForward(),
+                        r.takeOptions(), isTransitionForward,
                         proc.createProfilerInfoIfNeeded(), r.assistToken, activityClientController,
                         r.createFixedRotationAdjustmentsIfNeeded(), r.shareableActivityToken,
                         r.getLaunchedFromBubble()));
@@ -852,7 +852,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = ResumeActivityItem.obtain(dc.isNextTransitionForward());
+                    lifecycleItem = ResumeActivityItem.obtain(isTransitionForward);
                 } else {
                     lifecycleItem = PauseActivityItem.obtain();
                 }

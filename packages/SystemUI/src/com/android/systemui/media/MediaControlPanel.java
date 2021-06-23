@@ -266,7 +266,7 @@ public class MediaControlPanel {
         }
         mKey = key;
         MediaSession.Token token = data.getToken();
-        mInstanceId = data.getPackageName().hashCode();
+        mInstanceId = SmallHash.hash(data.getPackageName());
 
         mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
@@ -504,7 +504,7 @@ public class MediaControlPanel {
             return;
         }
 
-        mInstanceId = data.getTargetId().hashCode();
+        mInstanceId = SmallHash.hash(data.getTargetId());
         mBackgroundColor = data.getBackgroundColor();
         TransitionLayout recommendationCard = mRecommendationViewHolder.getRecommendations();
         recommendationCard.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));

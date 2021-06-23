@@ -114,9 +114,15 @@ import java.util.Objects;
  *
  * <p>Threading:
  *
- * <p>Calls to {@code report} methods can be made on on any thread and will be passed asynchronously
- * to the system server. Calls to {@link #onStartUpdates(long)} and {@link #onStopUpdates()} will
- * occur on a single thread.
+ * <p>Outgoing calls to {@code report} methods can be made on any thread and will be delivered
+ * asynchronously to the system server. Incoming calls to {@link TimeZoneProviderService}-defined
+ * service methods like {@link #onStartUpdates(long)} and {@link #onStopUpdates()} are also
+ * asynchronous with respect to the system server caller and will be delivered to this service using
+ * a single thread. {@link Service} lifecycle method calls like {@link #onCreate()} and {@link
+ * #onDestroy()} can occur on a different thread from those made to {@link
+ * TimeZoneProviderService}-defined service methods, so implementations must be defensive and not
+ * assume an ordering between them, e.g. a call to {@link #onStopUpdates()} can occur after {@link
+ * #onDestroy()} and should be handled safely.
  *
  * @hide
  */

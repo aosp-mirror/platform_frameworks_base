@@ -1787,6 +1787,16 @@ static jint nativeGetGPUContextPriority(JNIEnv* env, jclass clazz) {
     return static_cast<jint>(SurfaceComposerClient::getGPUContextPriority());
 }
 
+static void nativeSetTransformHint(JNIEnv* env, jclass clazz, jlong nativeSurfaceControl,
+                                   jint transformHint) {
+    sp<SurfaceControl> surface(reinterpret_cast<SurfaceControl*>(nativeSurfaceControl));
+    if (surface == nullptr) {
+        return;
+    }
+    surface->setTransformHint(
+            ui::Transform::toRotationFlags(static_cast<ui::Rotation>(transformHint)));
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -1976,6 +1986,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeCreateJankDataListenerWrapper },
     {"nativeGetGPUContextPriority", "()I",
             (void*)nativeGetGPUContextPriority },
+    {"nativeSetTransformHint", "(JI)V",
+            (void*)nativeSetTransformHint },
         // clang-format on
 };
 

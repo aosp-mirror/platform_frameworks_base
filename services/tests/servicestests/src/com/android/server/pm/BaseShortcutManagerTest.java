@@ -649,7 +649,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected class MockAppSearchManager implements IAppSearchManager {
 
-        protected Map<String, List<PackageIdentifier>> mSchemasPackageAccessible =
+        protected Map<String, List<PackageIdentifier>> mSchemasVisibleToPackages =
                 new ArrayMap<>(1);
         private Map<String, Map<String, GenericDocument>> mDocumentMap = new ArrayMap<>(1);
 
@@ -659,19 +659,19 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         public void setSchema(String packageName, String databaseName, List<Bundle> schemaBundles,
-                List<String> schemasNotPlatformSurfaceable,
-                Map<String, List<Bundle>> schemasPackageAccessibleBundles, boolean forceOverride,
+                List<String> schemasNotDisplayedBySystem,
+                Map<String, List<Bundle>> schemasVisibleToPackagesBundles, boolean forceOverride,
                 int version, UserHandle userHandle, long binderCallStartTimeMillis,
                 IAppSearchResultCallback callback) throws RemoteException {
             for (Map.Entry<String, List<Bundle>> entry :
-                    schemasPackageAccessibleBundles.entrySet()) {
+                    schemasVisibleToPackagesBundles.entrySet()) {
                 final String key = entry.getKey();
                 final List<PackageIdentifier> packageIdentifiers;
-                if (!mSchemasPackageAccessible.containsKey(key)) {
+                if (!mSchemasVisibleToPackages.containsKey(key)) {
                     packageIdentifiers = new ArrayList<>(entry.getValue().size());
-                    mSchemasPackageAccessible.put(key, packageIdentifiers);
+                    mSchemasVisibleToPackages.put(key, packageIdentifiers);
                 } else {
-                    packageIdentifiers = mSchemasPackageAccessible.get(key);
+                    packageIdentifiers = mSchemasVisibleToPackages.get(key);
                 }
                 for (int i = 0; i < entry.getValue().size(); i++) {
                     packageIdentifiers.add(new PackageIdentifier(entry.getValue().get(i)));

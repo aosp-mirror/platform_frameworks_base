@@ -1270,6 +1270,12 @@ package android.hardware.soundtrigger {
 
 package android.inputmethodservice {
 
+  public abstract class AbstractInputMethodService extends android.window.WindowProviderService implements android.view.KeyEvent.Callback {
+    method public final int getInitialDisplayId();
+    method @Nullable public final android.os.Bundle getWindowContextOptions();
+    method public final int getWindowType();
+  }
+
   @UiContext public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
     field public static final long FINISH_INPUT_NO_FALLBACK_CONNECTION = 156215187L; // 0x94fa793L
   }
@@ -3259,6 +3265,7 @@ package android.window {
   @UiContext public abstract class WindowProviderService extends android.app.Service {
     ctor public WindowProviderService();
     method public final void attachToWindowToken(@NonNull android.os.IBinder);
+    method @NonNull public int getInitialDisplayId();
     method @Nullable public android.os.Bundle getWindowContextOptions();
     method public abstract int getWindowType();
   }

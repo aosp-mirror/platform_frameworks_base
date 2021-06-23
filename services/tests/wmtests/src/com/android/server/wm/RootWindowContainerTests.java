@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.KeyguardManager.ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -54,6 +55,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -1013,12 +1015,26 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Create another activity on top and the user id is 1
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task)
                 .setUid(UserHandle.PER_USER_RANGE + 1).build();
+        doReturn(true).when(topActivity).okToShowLocked();
+        topActivity.intent.setAction(Intent.ACTION_MAIN);
 
         // Make sure the listeners will be notified for putting the task to locked state
         TaskChangeNotificationController controller = mAtm.getTaskChangeNotificationController();
         spyOn(controller);
         mWm.mRoot.lockAllProfileTasks(0);
         verify(controller).notifyTaskProfileLocked(eq(taskId), eq(0));
+
+        // Create the work lock activity on top of the task
+        final ActivityRecord workLockActivity = new ActivityBuilder(mAtm).setTask(task)
+                .setUid(UserHandle.PER_USER_RANGE + 1).build();
+        doReturn(true).when(workLockActivity).okToShowLocked();
+        workLockActivity.intent.setAction(ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER);
+        doReturn(workLockActivity.mActivityComponent).when(mAtm).getSysUiServiceComponentLocked();
+
+        // Make sure the listener won't be notified again.
+        clearInvocations(controller);
+        mWm.mRoot.lockAllProfileTasks(0);
+        verify(controller, never()).notifyTaskProfileLocked(anyInt(), anyInt());
     }
 
     /**

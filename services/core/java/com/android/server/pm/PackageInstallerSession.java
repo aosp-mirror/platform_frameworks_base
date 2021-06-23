@@ -149,6 +149,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -2319,6 +2320,26 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
+
+        // Check if APEX update is allowed. We do this check in handleInstall, since this is one of
+        // the places that:
+        //   * Shared between staged and non-staged APEX update flows.
+        //   * Only is called after boot completes.
+        // The later is important, since isApexUpdateAllowed check depends on the
+        // ModuleInfoProvider, which is only populated after device has booted.
+        if (isApexSession()) {
+            boolean checkApexUpdateAllowed =
+                    (params.installFlags & PackageManager.INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK)
+                        == 0;
+            synchronized (mLock) {
+                if (checkApexUpdateAllowed && !isApexUpdateAllowed(mPackageName)) {
+                    onSessionValidationFailure(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                            "Update of APEX package " + mPackageName + " is not allowed");
+                    return;
+                }
+            }
+        }
+
         if (params.isStaged) {
             // TODO(b/136257624): CTS test fails if we don't send session finished broadcast, even
             //  though ideally, we just need to send session committed broadcast.
@@ -2801,6 +2822,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     boolean containsApkSession() {
         return sessionContains((s) -> !s.isApexSession());
+    }
+
+    private boolean isApexUpdateAllowed(String apexPackageName) {
+        return mPm.getModuleInfo(apexPackageName, 0) != null
+                || SystemConfig.getInstance().getAllowedPartnerApexes().contains(apexPackageName);
     }
 
     /**

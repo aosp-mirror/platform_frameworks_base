@@ -71,7 +71,6 @@ public class DozeTriggers implements DozeMachine.Part {
      * Assuming that the screen should start on.
      */
     private static boolean sWakeDisplaySensorState = true;
-    private Runnable mQuickPickupDozeCancellable;
 
     private static final int PROXIMITY_TIMEOUT_DELAY_MS = 500;
 
@@ -279,14 +278,14 @@ public class DozeTriggers implements DozeMachine.Part {
         boolean isWakeDisplayEvent = isQuickPickup || ((isWakeOnPresence || isWakeOnReach)
                 && rawValues != null && rawValues.length > 0 && rawValues[0] != 0);
 
-        if (isWakeOnPresence || isQuickPickup) {
-            onWakeScreen(isQuickPickup || isWakeDisplayEvent,
+        if (isWakeOnPresence) {
+            onWakeScreen(isWakeDisplayEvent,
                     mMachine.isExecutingTransition() ? null : mMachine.getState(),
                     pulseReason);
         } else if (isLongPress) {
             requestPulse(pulseReason, true /* alreadyPerformedProxCheck */,
                     null /* onPulseSuppressedListener */);
-        } else if (isWakeOnReach) {
+        } else if (isWakeOnReach || isQuickPickup) {
             if (isWakeDisplayEvent) {
                 requestPulse(pulseReason, true /* alreadyPerformedProxCheck */,
                         null /* onPulseSuppressedListener */);
@@ -388,11 +387,7 @@ public class DozeTriggers implements DozeMachine.Part {
      */
     private void onWakeScreen(boolean wake, @Nullable DozeMachine.State state, int reason) {
         mDozeLog.traceWakeDisplay(wake, reason);
-        final boolean isWakeOnPresence = reason == DozeLog.REASON_SENSOR_WAKE_UP;
-        final boolean isQuickPickup = reason == DozeLog.REASON_SENSOR_QUICK_PICKUP;
-        if (isWakeOnPresence) {
-            sWakeDisplaySensorState = wake;
-        }
+        sWakeDisplaySensorState = wake;
 
         if (wake) {
             proximityCheckThenCall((result) -> {
@@ -405,41 +400,18 @@ public class DozeTriggers implements DozeMachine.Part {
                     // Log sensor triggered
                     Optional.ofNullable(DozingUpdateUiEvent.fromReason(reason))
                             .ifPresent(mUiEventLogger::log);
-
-                    if (isQuickPickup) {
-                        // schedule runnable to go back to DOZE
-                        onQuickPickup();
-                    }
-                } else if (state == DozeMachine.State.DOZE_AOD && isQuickPickup) {
-                    // elongate time in DOZE_AOD, schedule new runnable to go back to DOZE
-                    onQuickPickup();
                 }
-            }, isQuickPickup /* alreadyPerformedProxCheck */, reason);
+            }, false /* alreadyPerformedProxCheck */, reason);
         } else {
             boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
             boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
-            boolean pulse = (state == DozeMachine.State.DOZE_REQUEST_PULSE)
-                    || (state == DozeMachine.State.DOZE_PULSING)
-                    || (state == DozeMachine.State.DOZE_PULSING_BRIGHT);
-            boolean docked = (state == DozeMachine.State.DOZE_AOD_DOCKED);
+
             if (!pausing && !paused) {
-                if (isQuickPickup && (pulse || docked)) {
-                    return;
-                }
                 mMachine.requestState(DozeMachine.State.DOZE);
                 // log wake timeout
                 mUiEventLogger.log(DozingUpdateUiEvent.DOZING_UPDATE_WAKE_TIMEOUT);
             }
         }
-    }
-
-    private void onQuickPickup() {
-        cancelQuickPickupDelayableDoze();
-        mQuickPickupDozeCancellable = mMainExecutor.executeDelayed(() -> {
-            onWakeScreen(false,
-                    mMachine.isExecutingTransition() ? null : mMachine.getState(),
-                    DozeLog.REASON_SENSOR_QUICK_PICKUP);
-        }, mDozeParameters.getQuickPickupAodDuration());
     }
 
     @Override
@@ -481,7 +453,6 @@ public class DozeTriggers implements DozeMachine.Part {
                 mDozeSensors.requestTemporaryDisable();
                 break;
             case FINISH:
-                cancelQuickPickupDelayableDoze();
                 mBroadcastReceiver.unregister(mBroadcastDispatcher);
                 mDozeHost.removeCallback(mHostCallback);
                 mDockManager.removeListener(mDockEventListener);
@@ -510,16 +481,6 @@ public class DozeTriggers implements DozeMachine.Part {
         }
     }
 
-    /**
-     * Cancels last scheduled Runnable that transitions to STATE_DOZE (blank screen) after
-     * going into STATE_AOD (AOD screen) from the quick pickup gesture.
-     */
-    private void cancelQuickPickupDelayableDoze() {
-        if (mQuickPickupDozeCancellable != null) {
-            mQuickPickupDozeCancellable.run();
-            mQuickPickupDozeCancellable = null;
-        }
-    }
 
     private void checkTriggersAtInit() {
         if (mUiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR

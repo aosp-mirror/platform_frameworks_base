@@ -96,7 +96,6 @@ import android.graphics.Canvas;
 import android.graphics.HardwareRenderer;
 import android.graphics.Typeface;
 import android.hardware.display.DisplayManagerGlobal;
-import android.inputmethodservice.InputMethodService;
 import android.media.MediaFrameworkInitializer;
 import android.media.MediaFrameworkPlatformInitializer;
 import android.media.MediaServiceManager;
@@ -450,7 +449,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @GuardedBy("mLock")
         ContentProviderHolder mHolder; // Temp holder to be used between notifier and waiter
-        Object mLock; // The lock to be used to get notified when the provider is ready
+        final Object mLock; // The lock to be used to get notified when the provider is ready
 
         public ProviderKey(String authority, int userId) {
             this.authority = authority;
@@ -1830,11 +1829,14 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void notifyContentProviderPublishStatus(@NonNull ContentProviderHolder holder,
-                @NonNull String auth, int userId, boolean published) {
-            final ProviderKey key = getGetProviderKey(auth, userId);
-            synchronized (key.mLock) {
-                key.mHolder = holder;
-                key.mLock.notifyAll();
+                @NonNull String authorities, int userId, boolean published) {
+            final String auths[] = authorities.split(";");
+            for (String auth: auths) {
+                final ProviderKey key = getGetProviderKey(auth, userId);
+                synchronized (key.mLock) {
+                    key.mHolder = holder;
+                    key.mLock.notifyAll();
+                }
             }
         }
 
@@ -5779,9 +5781,6 @@ public final class ActivityThread extends ClientTransactionHandler
             final int NSVC = mServices.size();
             for (int i=0; i<NSVC; i++) {
                 final Service service = mServices.valueAt(i);
-                if (service instanceof InputMethodService) {
-                    mHasImeComponent = true;
-                }
                 // If {@code includeUiContext} is set to false, WindowProviderService should not be
                 // collected because WindowProviderService is a UI Context.
                 if (includeUiContexts || !(service instanceof WindowProviderService)) {
@@ -7524,12 +7523,6 @@ public final class ActivityThread extends ClientTransactionHandler
 
         ViewRootImpl.ConfigChangedCallback configChangedCallback = (Configuration globalConfig) -> {
             synchronized (mResourcesManager) {
-                // TODO (b/135719017): Temporary log for debugging IME service.
-                if (Build.IS_DEBUGGABLE && mHasImeComponent) {
-                    Log.d(TAG, "ViewRootImpl.ConfigChangedCallback for IME, "
-                            + "config=" + globalConfig);
-                }
-
                 // We need to apply this change to the resources immediately, because upon returning
                 // the view hierarchy will be informed about it.
                 if (mResourcesManager.applyConfigurationToResources(globalConfig,
@@ -7882,11 +7875,6 @@ public final class ActivityThread extends ClientTransactionHandler
     @Override
     public boolean isInDensityCompatMode() {
         return mDensityCompatMode;
-    }
-
-    @Override
-    public boolean hasImeComponent() {
-        return mHasImeComponent;
     }
 
     // ------------------ Regular JNI ------------------------
