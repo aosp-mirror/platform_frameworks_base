@@ -8,7 +8,7 @@ This document is a more or less comprehensive summary of the state and infrastru
 
 ## What are Quick Settings Tiles?
 
-Quick Settings (from now on, QS) is the expanded panel that contains shortcuts for the user to toggle many settings. This is opened by expanding the notification drawer twice (or once when phone is locked). Quick Quick Settings (QQS) is the smaller panel that appears on top of the notifications before expanding twice and contains some of the toggles with no text.
+Quick Settings (from now on, QS) is the expanded panel that contains shortcuts for the user to toggle many settings. This is opened by expanding the notification drawer twice (or once when phone is locked). Quick Quick Settings (QQS) is the smaller panel that appears on top of the notifications before expanding twice and contains some of the toggles with no secondary line.
 
 Each of these toggles that appear either in QS or QQS are called Quick Settings Tiles (or tiles for short). They allow the user to enable or disable settings quickly and sometimes provides access to more comprehensive settings pages.
 
@@ -69,13 +69,13 @@ For more information on how to implement a tile in SystemUI, see [Implementing a
 
 Each Tile has a couple of associated views for displaying it in QS and QQS. These views are updated after the backend updates the `State` using `QSTileImpl#handleUpdateState`.
 
-* **[`com.android.systemui.plugins.qs.QSTileView`](/packages/SystemUI/plugin/src/com/android/systemui/plugins/qs/QSTileView.java)**: Abstract class that provides basic Tile functionality. These allows external [Factories](#qsfactory) to create Tiles.
-* **[`QSTileBaseView`](/packages/SystemUI/src/com/android/systemui/qs/tileimpl/QSTileBaseView.java)**: Implementation of `QSTileView` used in QQS that takes care of most of the features of the view:
+* **[`QSTileView`](/packages/SystemUI/plugin/src/com/android/systemui/plugins/qs/QSTileView.java)**: Abstract class that provides basic Tile functionality. These allows external [Factories](#qsfactory) to create Tiles.
+* **[`QSTileViewImpl`](/packages/SystemUI/src/com/android/systemui/qs/tileimpl/QSTileViewImpl.java)**: Implementation of `QSTileView`. It takes care of the following:
   * Holding the icon
   * Background color and shape
   * Ripple
   * Click listening
-* **[`QSTileView`](/packages/SystemUI/src/com/android/systemui/qs/tileimpl/QSTileView.java)**: Extends `QSTileBaseView`to add label support. Used in QS.
+  * Labels
 * **[`QSIconView`](/packages/SystemUI/plugin/src/com/android/systemui/plugins/qs/QSIconView.java)**
 * **[`QSIconViewImpl`](/packages/SystemUI/src/com/android/systemui/qs/tileimpl/QSIconViewImpl.java)**
 
@@ -103,7 +103,7 @@ When a container for tiles (`QuickQSPanel` or `QSPanel`) has to display tiles, t
 This is a brief run-down of what happens when a user clicks on a tile. Internal changes on the device (for example, changes from Settings) will trigger this process starting in step 3. Throughout this section, we assume that we are dealing with a `QSTileImpl`.
 
 1. User clicks on tile. The following calls happen in sequence:
-   1. `QSTileBaseView#onClickListener`.
+   1. `QSTileViewImpl#onClickListener`.
    2. `QSTile#click`.
    3. `QSTileImpl#handleClick`. This last call sets the new state for the device by using the associated controller.
 2. State in the device changes. This is normally outside of SystemUI's control.
@@ -113,9 +113,9 @@ This is a brief run-down of what happens when a user clicks on a tile. Internal 
 4. `QSTileImpl#handleUpdateState` is called to update the state with the new information. This information can be obtained both from the `Object` passed to `refreshState` as well as from the controller.
 5. If the state has changed (in at least one element), `QSTileImpl#handleStateChanged` is called. This will trigger a call to all the associated `QSTile.Callback#onStateChanged`, passing the new `State`.
 6. `QSTileView#onStateChanged` is called and this calls `QSTileView#handleStateChanged`. This method maps the state into the view:
-   * The tile is rippled and the color changes to match the new state.
+   * The tile colors change to match the new state.
    * `QSIconView.setIcon` is called to apply the correct state to the icon and the correct icon to the view.
-   * If the tile is a `QSTileView` (in expanded QS), the labels are changed.
+   * The tile labels change to match the new state.
 
 ## Third party tiles (TileService)
 
@@ -305,6 +305,8 @@ This section describes necessary and recommended steps when implementing a Quick
     * Inject a `Provider` for the tile created before.
     * Add a case to the `switch` with a unique String spec for the chosen tile.
 5. In [SystemUI/res/values/config.xml](/packages/SystemUI/res/values/config.xml), modify `quick_settings_tiles_stock` and add the spec defined in the previous step. If necessary, add it also to `quick_settings_tiles_default`. The first one contains a list of all the tiles that SystemUI knows how to create (to show to the user in the customization screen). The second one contains only the default tiles that the user will experience on a fresh boot or after they reset their tiles.
+6. In [SystemUI/res/values/tiles_states_strings.xml](/packages/SystemUI/res/values/tiles_states_strings.xml), add a new array for your tile. The name has to be `tile_states_<spec>`. Use a good description to help the translators.
+7. In [`SystemUI/src/com/android/systemui/qs/tileimpl/QSTileViewImpl.kt`](/packages/SystemUI/src/com/android/systemui/qs/tileimpl/QSTileViewImpl.kt), add a new element to the map in `SubtitleArrayMapping` corresponding to the resource created in the previous step.
 
 #### Abstract methods in QSTileImpl
 

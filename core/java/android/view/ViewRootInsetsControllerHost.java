@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CO
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
 import android.annotation.NonNull;
+import android.content.res.CompatibilityInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -109,6 +110,10 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     @Override
     public void dispatchWindowInsetsAnimationEnd(@NonNull WindowInsetsAnimation animation) {
         if (DEBUG) Log.d(TAG, "windowInsetsAnimation ended");
+        if (mViewRoot.mView == null) {
+            // The view has already detached from window.
+            return;
+        }
         mViewRoot.mView.dispatchWindowInsetsAnimationEnd(animation);
     }
 
@@ -126,7 +131,9 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             // Window doesn't support hardware acceleration, no synchronization for now.
             // TODO(b/149342281): use mViewRoot.mSurface.getNextFrameNumber() to sync on every
             //  frame instead.
-            mApplier.applyParams(new SurfaceControl.Transaction(), -1 /* frame */, params);
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            mApplier.applyParams(t, params);
+            mApplier.applyTransaction(t, -1);
         }
     }
 
@@ -144,7 +151,9 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     @Override
     public void onInsetsModified(InsetsState insetsState) {
         try {
-            mViewRoot.mWindowSession.insetsModified(mViewRoot.mWindow, insetsState);
+            if (mViewRoot.mAdded) {
+                mViewRoot.mWindowSession.insetsModified(mViewRoot.mWindow, insetsState);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call insetsModified", e);
         }
@@ -248,5 +257,13 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             return null;
         }
         return view.getWindowToken();
+    }
+
+    @Override
+    public CompatibilityInfo.Translator getTranslator() {
+        if (mViewRoot != null) {
+            return mViewRoot.mTranslator;
+        }
+        return null;
     }
 }

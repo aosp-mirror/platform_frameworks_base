@@ -15,4 +15,4 @@
 
 package android.media;
 
-parcelable MediaMetadata;
+@JavaOnlyStableParcelable parcelable MediaMetadata;

@@ -49,7 +49,14 @@ bool bootAnimationDisabled() {
     }
 
     property_get("ro.boot.quiescent", value, "0");
-    return atoi(value) > 0;
+    if (atoi(value) > 0) {
+        // Only show the bootanimation for quiescent boots if this system property is set to enabled
+        if (!property_get_bool("ro.bootanim.quiescent.enabled", false)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void waitForSurfaceFlinger() {

@@ -16,10 +16,15 @@
 
 package com.android.internal.widget;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.util.Slog;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Response object for a ILockSettings credential verification request.
@@ -30,78 +35,114 @@ public final class VerifyCredentialResponse implements Parcelable {
     public static final int RESPONSE_ERROR = -1;
     public static final int RESPONSE_OK = 0;
     public static final int RESPONSE_RETRY = 1;
+    @IntDef({RESPONSE_ERROR,
+            RESPONSE_OK,
+            RESPONSE_RETRY})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ResponseCode {}
 
-    public static final VerifyCredentialResponse OK = new VerifyCredentialResponse();
-    public static final VerifyCredentialResponse ERROR
-            = new VerifyCredentialResponse(RESPONSE_ERROR, 0, null);
+    public static final VerifyCredentialResponse OK = new VerifyCredentialResponse.Builder()
+            .build();
+    public static final VerifyCredentialResponse ERROR = fromError();
     private static final String TAG = "VerifyCredentialResponse";
 
-    private int mResponseCode;
-    private byte[] mPayload;
-    private int mTimeout;
+    private final @ResponseCode int mResponseCode;
+    private final int mTimeout;
+    @Nullable private final byte[] mGatekeeperHAT;
+    private final long mGatekeeperPasswordHandle;
 
     public static final Parcelable.Creator<VerifyCredentialResponse> CREATOR
             = new Parcelable.Creator<VerifyCredentialResponse>() {
         @Override
         public VerifyCredentialResponse createFromParcel(Parcel source) {
-            int responseCode = source.readInt();
-            VerifyCredentialResponse response = new VerifyCredentialResponse(responseCode, 0, null);
-            if (responseCode == RESPONSE_RETRY) {
-                response.setTimeout(source.readInt());
-            } else if (responseCode == RESPONSE_OK) {
-                int size = source.readInt();
-                if (size > 0) {
-                    byte[] payload = new byte[size];
-                    source.readByteArray(payload);
-                    response.setPayload(payload);
-                }
-            }
-            return response;
+            final @ResponseCode int responseCode = source.readInt();
+            final int timeout = source.readInt();
+            final byte[] gatekeeperHAT = source.createByteArray();
+            long gatekeeperPasswordHandle = source.readLong();
+
+            return new VerifyCredentialResponse(responseCode, timeout, gatekeeperHAT,
+                    gatekeeperPasswordHandle);
         }
 
         @Override
         public VerifyCredentialResponse[] newArray(int size) {
             return new VerifyCredentialResponse[size];
         }
-
     };
 
-    public VerifyCredentialResponse() {
-        mResponseCode = RESPONSE_OK;
-        mPayload = null;
+    public static class Builder {
+        @Nullable private byte[] mGatekeeperHAT;
+        private long mGatekeeperPasswordHandle;
+
+        /**
+         * @param gatekeeperHAT Gatekeeper HardwareAuthToken, minted upon successful authentication.
+         */
+        public Builder setGatekeeperHAT(byte[] gatekeeperHAT) {
+            mGatekeeperHAT = gatekeeperHAT;
+            return this;
+        }
+
+        public Builder setGatekeeperPasswordHandle(long gatekeeperPasswordHandle) {
+            mGatekeeperPasswordHandle = gatekeeperPasswordHandle;
+            return this;
+        }
+
+        /**
+         * Builds a VerifyCredentialResponse with {@link #RESPONSE_OK} and any other parameters
+         * that were preveiously set.
+         * @return
+         */
+        public VerifyCredentialResponse build() {
+            return new VerifyCredentialResponse(RESPONSE_OK,
+                    0 /* timeout */,
+                    mGatekeeperHAT,
+                    mGatekeeperPasswordHandle);
+        }
     }
 
-
-    public VerifyCredentialResponse(byte[] payload) {
-        mPayload = payload;
-        mResponseCode = RESPONSE_OK;
+    /**
+     * Since timeouts are always an error, provide a way to create the VerifyCredentialResponse
+     * object directly. None of the other fields (Gatekeeper HAT, Gatekeeper Password, etc)
+     * are valid in this case. Similarly, the response code will always be
+     * {@link #RESPONSE_RETRY}.
+     */
+    public static VerifyCredentialResponse fromTimeout(int timeout) {
+        return new VerifyCredentialResponse(RESPONSE_RETRY,
+                timeout,
+                null /* gatekeeperHAT */,
+                0L /* gatekeeperPasswordHandle */);
     }
 
-    public VerifyCredentialResponse(int timeout) {
-        mTimeout = timeout;
-        mResponseCode = RESPONSE_RETRY;
-        mPayload = null;
+    /**
+     * Since error (incorrect password) should never result in any of the other fields from
+     * being populated, provide a default method to return a VerifyCredentialResponse.
+     */
+    public static VerifyCredentialResponse fromError() {
+        return new VerifyCredentialResponse(RESPONSE_ERROR,
+                0 /* timeout */,
+                null /* gatekeeperHAT */,
+                0L /* gatekeeperPasswordHandle */);
     }
 
-    private VerifyCredentialResponse(int responseCode, int timeout, byte[] payload) {
+    private VerifyCredentialResponse(@ResponseCode int responseCode, int timeout,
+            @Nullable byte[] gatekeeperHAT, long gatekeeperPasswordHandle) {
         mResponseCode = responseCode;
         mTimeout = timeout;
-        mPayload = payload;
+        mGatekeeperHAT = gatekeeperHAT;
+        mGatekeeperPasswordHandle = gatekeeperPasswordHandle;
+    }
+
+    public VerifyCredentialResponse stripPayload() {
+        return new VerifyCredentialResponse(mResponseCode, mTimeout,
+                null /* gatekeeperHAT */, 0L /* gatekeeperPasswordHandle */);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mResponseCode);
-        if (mResponseCode == RESPONSE_RETRY) {
-            dest.writeInt(mTimeout);
-        } else if (mResponseCode == RESPONSE_OK) {
-            if (mPayload != null) {
-                dest.writeInt(mPayload.length);
-                dest.writeByteArray(mPayload);
-            } else {
-                dest.writeInt(0);
-            }
-        }
+        dest.writeInt(mTimeout);
+        dest.writeByteArray(mGatekeeperHAT);
+        dest.writeLong(mGatekeeperPasswordHandle);
     }
 
     @Override
@@ -109,48 +150,54 @@ public final class VerifyCredentialResponse implements Parcelable {
         return 0;
     }
 
-    public byte[] getPayload() {
-        return mPayload;
+    @Nullable
+    public byte[] getGatekeeperHAT() {
+        return mGatekeeperHAT;
+    }
+
+    public long getGatekeeperPasswordHandle() {
+        return mGatekeeperPasswordHandle;
+    }
+
+    public boolean containsGatekeeperPasswordHandle() {
+        return mGatekeeperPasswordHandle != 0L;
     }
 
     public int getTimeout() {
         return mTimeout;
     }
 
-    public int getResponseCode() {
+    public @ResponseCode int getResponseCode() {
         return mResponseCode;
     }
 
-    private void setTimeout(int timeout) {
-        mTimeout = timeout;
+    public boolean isMatched() {
+        return mResponseCode == RESPONSE_OK;
     }
 
-    private void setPayload(byte[] payload) {
-        mPayload = payload;
-    }
-
-    public VerifyCredentialResponse stripPayload() {
-        return new VerifyCredentialResponse(mResponseCode, mTimeout, new byte[0]);
+    @Override
+    public String toString() {
+        return "Response: " + mResponseCode
+                + ", GK HAT: " + (mGatekeeperHAT != null)
+                + ", GK PW: " + (mGatekeeperPasswordHandle != 0L);
     }
 
     public static VerifyCredentialResponse fromGateKeeperResponse(
             GateKeeperResponse gateKeeperResponse) {
-        VerifyCredentialResponse response;
         int responseCode = gateKeeperResponse.getResponseCode();
         if (responseCode == GateKeeperResponse.RESPONSE_RETRY) {
-            response = new VerifyCredentialResponse(gateKeeperResponse.getTimeout());
+            return fromTimeout(gateKeeperResponse.getTimeout());
         } else if (responseCode == GateKeeperResponse.RESPONSE_OK) {
             byte[] token = gateKeeperResponse.getPayload();
             if (token == null) {
                 // something's wrong if there's no payload with a challenge
                 Slog.e(TAG, "verifyChallenge response had no associated payload");
-                response = VerifyCredentialResponse.ERROR;
+                return fromError();
             } else {
-                response = new VerifyCredentialResponse(token);
+                return new VerifyCredentialResponse.Builder().setGatekeeperHAT(token).build();
             }
         } else {
-            response = VerifyCredentialResponse.ERROR;
+            return fromError();
         }
-        return response;
     }
 }

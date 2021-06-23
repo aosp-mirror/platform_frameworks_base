@@ -16,16 +16,15 @@
 
 package com.android.protolog.tool
 
+import com.android.internal.protolog.ProtoLogFileProto
+import com.android.internal.protolog.ProtoLogMessage
+import com.android.internal.protolog.common.InvalidFormatStringException
+import com.android.internal.protolog.common.LogDataType
 import com.android.json.stream.JsonReader
-import com.android.server.protolog.common.InvalidFormatStringException
-import com.android.server.protolog.common.LogDataType
-import com.android.server.protolog.ProtoLogMessage
-import com.android.server.protolog.ProtoLogFileProto
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.PrintStream
-import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

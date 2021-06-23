@@ -102,6 +102,10 @@ public class ShellCallback implements Parcelable {
         }
     }
 
+    public IBinder getShellCallbackBinder() {
+        return mShellCallback.asBinder();
+    }
+
     ShellCallback(Parcel in) {
         mLocal = false;
         mShellCallback = IShellCallback.Stub.asInterface(in.readStrongBinder());

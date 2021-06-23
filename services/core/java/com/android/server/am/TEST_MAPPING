@@ -44,6 +44,23 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    },
+    {
+      "file_patterns": ["Battery[^/]*\\.java", "MeasuredEnergy[^/]*\\.java"],
+      "name": "FrameworksCoreTests",
+      "options": [
+        { "include-filter": "com.android.internal.os.BatteryStatsTests" },
+        { "exclude-annotation": "com.android.internal.os.SkipPresubmit" }
+      ]
+    },
+    {
+      "file_patterns": ["Battery[^/]*\\.java", "MeasuredEnergy[^/]*\\.java"],
+      "name": "FrameworksServicesTests",
+      "options": [
+        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
+        { "include-filter": "com.android.server.am.MeasuredEnergySnapshotTest" },
+        { "include-filter": "com.android.server.am.BatteryExternalStatsWorkerTest" }
+      ]
     }
   ],
   "postsubmit": [

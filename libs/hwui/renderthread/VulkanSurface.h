@@ -15,10 +15,9 @@
  */
 #pragma once
 
+#include <android-base/unique_fd.h>
 #include <system/graphics.h>
 #include <system/window.h>
-#include <ui/BufferQueueDefs.h>
-#include <ui/PixelFormat.h>
 #include <vulkan/vulkan.h>
 
 #include <SkRefCnt.h>
@@ -37,7 +36,7 @@ class VulkanManager;
 class VulkanSurface {
 public:
     static VulkanSurface* Create(ANativeWindow* window, ColorMode colorMode, SkColorType colorType,
-                                 sk_sp<SkColorSpace> colorSpace, GrContext* grContext,
+                                 sk_sp<SkColorSpace> colorSpace, GrDirectContext* grContext,
                                  const VulkanManager& vkManager, uint32_t extraBuffers);
     ~VulkanSurface();
 
@@ -59,7 +58,7 @@ private:
         // -1 any other time. When valid, we own the fd, and must ensure it is
         // closed: either by closing it explicitly when queueing the buffer,
         // or by passing ownership e.g. to ANativeWindow::cancelBuffer().
-        int dequeue_fence = -1;
+        base::unique_fd dequeue_fence;
         bool dequeued = false;
         uint32_t lastPresentedCount = 0;
         bool hasValidContents = false;
@@ -91,8 +90,9 @@ private:
 
     struct WindowInfo {
         SkISize size;
-        PixelFormat pixelFormat;
+        uint32_t bufferFormat;
         android_dataspace dataspace;
+        sk_sp<SkColorSpace> colorspace;
         int transform;
         size_t bufferCount;
         uint64_t windowUsageFlags;
@@ -103,7 +103,7 @@ private:
         SkMatrix preTransform;
     };
 
-    VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo, GrContext* grContext);
+    VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo, GrDirectContext* grContext);
     static bool InitializeWindowInfoStruct(ANativeWindow* window, ColorMode colorMode,
                                            SkColorType colorType, sk_sp<SkColorSpace> colorSpace,
                                            const VulkanManager& vkManager, uint32_t extraBuffers,
@@ -111,12 +111,17 @@ private:
     static bool UpdateWindow(ANativeWindow* window, const WindowInfo& windowInfo);
     void releaseBuffers();
 
+    // TODO: This number comes from ui/BufferQueueDefs. We're not pulling the
+    // header in so that we don't need to depend on libui, but we should share
+    // this constant somewhere. But right now it's okay to keep here because we
+    // can't safely change the slot count anyways.
+    static constexpr size_t kNumBufferSlots = 64;
     // TODO: Just use a vector?
-    NativeBufferInfo mNativeBuffers[android::BufferQueueDefs::NUM_BUFFER_SLOTS];
+    NativeBufferInfo mNativeBuffers[kNumBufferSlots];
 
     sp<ANativeWindow> mNativeWindow;
     WindowInfo mWindowInfo;
-    GrContext* mGrContext;
+    GrDirectContext* mGrContext;
 
     uint32_t mPresentCount = 0;
     NativeBufferInfo* mCurrentBufferInfo = nullptr;

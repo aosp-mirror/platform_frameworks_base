@@ -20,6 +20,7 @@ import static com.android.systemui.statusbar.notification.row.NotificationRowCon
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -29,6 +30,8 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
@@ -59,9 +62,28 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     private final ArrayMap<String, Long> mSnoozedPackages;
     private final AccessibilityManagerWrapper mAccessibilityMgr;
 
+    private final UiEventLogger mUiEventLogger;
+
+    /**
+     * Enum entry for notification peek logged from this class.
+     */
+    enum NotificationPeekEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "Heads-up notification peeked on screen.")
+        NOTIFICATION_PEEK(801);
+
+        private final int mId;
+        NotificationPeekEvent(int id) {
+            mId = id;
+        }
+        @Override public int getId() {
+            return mId;
+        }
+    }
+
     public HeadsUpManager(@NonNull final Context context) {
         mContext = context;
         mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
+        mUiEventLogger = Dependency.get(UiEventLogger.class);
         Resources resources = context.getResources();
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
         mAutoDismissNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
@@ -106,9 +128,9 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
     public void updateNotification(@NonNull String key, boolean alert) {
         super.updateNotification(key, alert);
-        AlertEntry alertEntry = getHeadsUpEntry(key);
-        if (alert && alertEntry != null) {
-            setEntryPinned((HeadsUpEntry) alertEntry, shouldHeadsUpBecomePinned(alertEntry.mEntry));
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
+        if (alert && headsUpEntry != null) {
+            setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(headsUpEntry.mEntry));
         }
     }
 
@@ -129,6 +151,11 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         if (entry.isRowPinned() != isPinned) {
             entry.setRowPinned(isPinned);
             updatePinnedMode();
+            if (isPinned && entry.getSbn() != null) {
+                mUiEventLogger.logWithInstanceId(
+                        NotificationPeekEvent.NOTIFICATION_PEEK, entry.getSbn().getUid(),
+                        entry.getSbn().getPackageName(), entry.getSbn().getInstanceId());
+            }
             for (OnHeadsUpChangedListener listener : mListeners) {
                 if (isPinned) {
                     listener.onHeadsUpPinned(entry);
@@ -360,6 +387,19 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     }
 
     /**
+     * Determines if the notification is for a critical call that must display on top of an active
+     * input notification.
+     * The call isOngoing check is for a special case of incoming calls (see b/164291424).
+     */
+    private static boolean isCriticalCallNotif(NotificationEntry entry) {
+        Notification n = entry.getSbn().getNotification();
+        boolean isIncomingCall = n.isStyle(Notification.CallStyle.class) && n.extras.getInt(
+                Notification.EXTRA_CALL_TYPE) == Notification.CallStyle.CALL_TYPE_INCOMING;
+        return isIncomingCall || (entry.getSbn().isOngoing()
+                && Notification.CATEGORY_CALL.equals(n.category));
+    }
+
+    /**
      * This represents a notification and how long it is in a heads up mode. It also manages its
      * lifecycle automatically when created.
      */
@@ -388,6 +428,15 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
             if (selfFullscreen && !otherFullscreen) {
                 return -1;
             } else if (!selfFullscreen && otherFullscreen) {
+                return 1;
+            }
+
+            boolean selfCall = isCriticalCallNotif(mEntry);
+            boolean otherCall = isCriticalCallNotif(headsUpEntry.mEntry);
+
+            if (selfCall && !otherCall) {
+                return -1;
+            } else if (!selfCall && otherCall) {
                 return 1;
             }
 

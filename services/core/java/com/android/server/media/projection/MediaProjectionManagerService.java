@@ -17,6 +17,8 @@
 package com.android.server.media.projection;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IProcessObserver;
@@ -48,6 +50,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.Watchdog;
 
 import java.io.FileDescriptor;
@@ -122,8 +125,8 @@ public final class MediaProjectionManagerService extends SystemService
     }
 
     @Override
-    public void onSwitchUser(int userId) {
-        mMediaRouter.rebindAsUser(userId);
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+        mMediaRouter.rebindAsUser(to.getUserIdentifier());
         synchronized (mLock) {
             if (mProjectionGrant != null) {
                 mProjectionGrant.stop();
@@ -258,7 +261,7 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         public boolean hasProjectionPermission(int uid, String packageName) {
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             boolean hasPermission = false;
             try {
                 hasPermission |= checkPermission(packageName,
@@ -285,7 +288,7 @@ public final class MediaProjectionManagerService extends SystemService
             }
 
             final UserHandle callingUser = Binder.getCallingUserHandle();
-            long callingToken = Binder.clearCallingIdentity();
+            final long callingToken = Binder.clearCallingIdentity();
 
             MediaProjection projection;
             try {

@@ -21,6 +21,7 @@ import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
@@ -74,30 +75,47 @@ public class UriPermissionOwner {
     }
 
     void removeUriPermission(GrantUri grantUri, int mode) {
+        removeUriPermission(grantUri, mode, null, UserHandle.USER_ALL);
+    }
+
+    void removeUriPermission(GrantUri grantUri, int mode, String targetPgk, int targetUserId) {
         if ((mode & FLAG_GRANT_READ_URI_PERMISSION) != 0 && mReadPerms != null) {
             Iterator<UriPermission> it = mReadPerms.iterator();
             while (it.hasNext()) {
                 UriPermission perm = it.next();
-                if (grantUri == null || grantUri.equals(perm.uri)) {
-                    perm.removeReadOwner(this);
-                    mService.removeUriPermissionIfNeeded(perm);
-                    it.remove();
+                if (grantUri != null && !grantUri.equals(perm.uri)) {
+                    continue;
                 }
+                if (targetPgk != null && !targetPgk.equals(perm.targetPkg)) {
+                    continue;
+                }
+                if (targetUserId != UserHandle.USER_ALL && targetUserId != perm.targetUserId) {
+                    continue;
+                }
+                perm.removeReadOwner(this);
+                mService.removeUriPermissionIfNeeded(perm);
+                it.remove();
             }
             if (mReadPerms.isEmpty()) {
                 mReadPerms = null;
             }
         }
-        if ((mode & FLAG_GRANT_WRITE_URI_PERMISSION) != 0
-                && mWritePerms != null) {
+        if ((mode & FLAG_GRANT_WRITE_URI_PERMISSION) != 0 && mWritePerms != null) {
             Iterator<UriPermission> it = mWritePerms.iterator();
             while (it.hasNext()) {
                 UriPermission perm = it.next();
-                if (grantUri == null || grantUri.equals(perm.uri)) {
-                    perm.removeWriteOwner(this);
-                    mService.removeUriPermissionIfNeeded(perm);
-                    it.remove();
+                if (grantUri != null && !grantUri.equals(perm.uri)) {
+                    continue;
                 }
+                if (targetPgk != null && !targetPgk.equals(perm.targetPkg)) {
+                    continue;
+                }
+                if (targetUserId != UserHandle.USER_ALL && targetUserId != perm.targetUserId) {
+                    continue;
+                }
+                perm.removeWriteOwner(this);
+                mService.removeUriPermissionIfNeeded(perm);
+                it.remove();
             }
             if (mWritePerms.isEmpty()) {
                 mWritePerms = null;

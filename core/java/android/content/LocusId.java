@@ -16,6 +16,7 @@
 package android.content;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.contentcapture.ContentCaptureManager;
@@ -33,7 +34,7 @@ import java.io.PrintWriter;
  * by the Android System to correlate state between different subsystems such as content capture,
  * shortcuts, and notifications.
  *
- * <p>For example, if your app provides an activiy representing a chat between 2 users
+ * <p>For example, if your app provides an activity representing a chat between 2 users
  * (say {@code A} and {@code B}, this chat state could be represented by:
  *
  * <pre><code>
@@ -92,7 +93,7 @@ public final class LocusId implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;

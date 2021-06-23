@@ -89,4 +89,9 @@
         <item name="android:theme">@empty</item>
     </style>
 
+    <public type="style" name="StyleDayNight" id="0x7f020007" />
+    <style name="StyleDayNight">
+        <item name="attr_one">10</item>
+    </style>
+
 </resources>

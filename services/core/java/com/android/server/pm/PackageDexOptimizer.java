@@ -31,6 +31,9 @@ import static com.android.server.pm.Installer.DEXOPT_PUBLIC;
 import static com.android.server.pm.Installer.DEXOPT_SECONDARY_DEX;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_CE;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
+import static com.android.server.pm.Installer.PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES;
+import static com.android.server.pm.Installer.PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
+import static com.android.server.pm.Installer.PROFILE_ANALYSIS_OPTIMIZE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -51,6 +54,7 @@ import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.storage.StorageManager;
@@ -62,6 +66,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.ArtManagerService;
+import com.android.server.pm.dex.ArtStatsLogUtils;
+import com.android.server.pm.dex.ArtStatsLogUtils.ArtStatsLogger;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
@@ -77,6 +83,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Helper class for running dexopt command on packages.
@@ -98,6 +105,10 @@ public class PackageDexOptimizer {
     @GuardedBy("mInstallLock")
     private final PowerManager.WakeLock mDexoptWakeLock;
     private volatile boolean mSystemReady;
+
+    private final ArtStatsLogger mArtStatsLogger = new ArtStatsLogger();
+
+    private static final Random sRandom = new Random();
 
     PackageDexOptimizer(Installer installer, Object installLock, Context context,
             String wakeLockTag) {
@@ -166,8 +177,10 @@ public class PackageDexOptimizer {
     private int performDexOptLI(AndroidPackage pkg, @NonNull PackageSetting pkgSetting,
             String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
+        // ClassLoader only refers non-native (jar) shared libraries and must ignore
+        // native (so) shared libraries. See also LoadedApk#createSharedLibraryLoader().
         final List<SharedLibraryInfo> sharedLibraries = pkgSetting.getPkgState()
-                .getUsesLibraryInfos();
+                .getNonNativeUsesLibraryInfos();
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(
                 AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
@@ -193,13 +206,13 @@ public class PackageDexOptimizer {
         String[] classLoaderContexts = DexoptUtils.getClassLoaderContexts(
                 pkg, sharedLibraries, pathsWithCode);
 
-        // Sanity check that we do not call dexopt with inconsistent data.
+        // Validity check that we do not call dexopt with inconsistent data.
         if (paths.size() != classLoaderContexts.length) {
             String[] splitCodePaths = pkg.getSplitCodePaths();
             throw new IllegalStateException("Inconsistent information "
                 + "between PackageParser.Package and its ApplicationInfo. "
                 + "pkg.getAllCodePaths=" + paths
-                + " pkg.getBaseCodePath=" + pkg.getBaseCodePath()
+                + " pkg.getBaseCodePath=" + pkg.getBaseApkPath()
                 + " pkg.getSplitCodePaths="
                 + (splitCodePaths == null ? "null" : Arrays.toString(splitCodePaths)));
         }
@@ -240,8 +253,12 @@ public class PackageDexOptimizer {
                     || packageUseInfo.isUsedByOtherApps(path);
             final String compilerFilter = getRealCompilerFilter(pkg,
                 options.getCompilerFilter(), isUsedByOtherApps);
-            final boolean profileUpdated = options.isCheckForProfileUpdates() &&
-                isProfileUpdated(pkg, sharedGid, profileName, compilerFilter);
+            // If we don't have to check for profiles updates assume
+            // PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA which will be a no-op with respect to
+            // profiles.
+            final int profileAnalysisResult = options.isCheckForProfileUpdates()
+                    ? analyseProfiles(pkg, sharedGid, profileName, compilerFilter)
+                    : PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
 
             // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct
             // flags.
@@ -249,9 +266,33 @@ public class PackageDexOptimizer {
 
             for (String dexCodeIsa : dexCodeInstructionSets) {
                 int newResult = dexOptPath(pkg, pkgSetting, path, dexCodeIsa, compilerFilter,
-                        profileUpdated, classLoaderContexts[i], dexoptFlags, sharedGid,
+                        profileAnalysisResult, classLoaderContexts[i], dexoptFlags, sharedGid,
                         packageStats, options.isDowngrade(), profileName, dexMetadataPath,
                         options.getCompilationReason());
+
+                // OTAPreopt doesn't have stats so don't report in that case.
+                if (packageStats != null) {
+                    Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
+                    try {
+                        long sessionId = sRandom.nextLong();
+                        ArtStatsLogUtils.writeStatsLog(
+                                mArtStatsLogger,
+                                sessionId,
+                                compilerFilter,
+                                pkg.getUid(),
+                                packageStats.getCompileTime(path),
+                                dexMetadataPath,
+                                options.getCompilationReason(),
+                                newResult,
+                                ArtStatsLogUtils.getApkType(path, pkg.getBaseApkPath(),
+                                        pkg.getSplitCodePaths()),
+                                dexCodeIsa,
+                                path);
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
+                    }
+                }
+
                 // The end result is:
                 //  - FAILED if any path failed,
                 //  - PERFORMED if at least one path needed compilation,
@@ -274,11 +315,11 @@ public class PackageDexOptimizer {
      */
     @GuardedBy("mInstallLock")
     private int dexOptPath(AndroidPackage pkg, @NonNull PackageSetting pkgSetting, String path,
-            String isa, String compilerFilter, boolean profileUpdated, String classLoaderContext,
+            String isa, String compilerFilter, int profileAnalysisResult, String classLoaderContext,
             int dexoptFlags, int uid, CompilerStats.PackageStats packageStats, boolean downgrade,
             String profileName, String dexMetadataPath, int compilationReason) {
         int dexoptNeeded = getDexoptNeeded(path, isa, compilerFilter, classLoaderContext,
-                profileUpdated, downgrade);
+                profileAnalysisResult, downgrade);
         if (Math.abs(dexoptNeeded) == DexFile.NO_DEXOPT_NEEDED) {
             return DEX_OPT_SKIPPED;
         }
@@ -332,7 +373,7 @@ public class PackageDexOptimizer {
                     isa,
                     options.getCompilerFilter(),
                     dexUseInfo.getClassLoaderContext(),
-                    /* newProfile= */false,
+                    PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES,
                     /* downgrade= */ false);
 
             if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
@@ -461,9 +502,9 @@ public class PackageDexOptimizer {
         String classLoaderContext = null;
         if (dexUseInfo.isUnsupportedClassLoaderContext()
                 || dexUseInfo.isVariableClassLoaderContext()) {
-            // If we have an unknown (not yet set), or a variable class loader chain. Just extract
+            // If we have an unknown (not yet set), or a variable class loader chain. Just verify
             // the dex file.
-            compilerFilter = "extract";
+            compilerFilter = "verify";
         } else {
             classLoaderContext = dexUseInfo.getClassLoaderContext();
         }
@@ -676,7 +717,7 @@ public class PackageDexOptimizer {
         int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
         // Some apps are executed with restrictions on hidden API usage. If this app is one
         // of them, pass a flag to dexopt to enable the same restrictions during compilation.
-        // TODO we should pass the actual flag value to dexopt, rather than assuming blacklist
+        // TODO we should pass the actual flag value to dexopt, rather than assuming denylist
         // TODO(b/135203078): This flag is no longer set as part of AndroidPackage
         //  and may not be preserved
         int hiddenApiFlag = hiddenApiEnforcementPolicy == HIDDEN_API_ENFORCEMENT_DISABLED
@@ -687,7 +728,8 @@ public class PackageDexOptimizer {
         boolean generateCompactDex = true;
         switch (compilationReason) {
             case PackageManagerService.REASON_FIRST_BOOT:
-            case PackageManagerService.REASON_BOOT:
+            case PackageManagerService.REASON_BOOT_AFTER_OTA:
+            case PackageManagerService.REASON_POST_BOOT:
             case PackageManagerService.REASON_INSTALL:
                  generateCompactDex = false;
         }
@@ -717,11 +759,25 @@ public class PackageDexOptimizer {
      * configuration (isa, compiler filter, profile).
      */
     private int getDexoptNeeded(String path, String isa, String compilerFilter,
-            String classLoaderContext, boolean newProfile, boolean downgrade) {
+            String classLoaderContext, int profileAnalysisResult, boolean downgrade) {
         int dexoptNeeded;
         try {
-            dexoptNeeded = DexFile.getDexOptNeeded(path, isa, compilerFilter, classLoaderContext,
-                    newProfile, downgrade);
+            // A profile guided optimizations with an empty profile is essentially 'verify' and
+            // dex2oat already makes this transformation. However DexFile.getDexOptNeeded() cannot
+            // check the profiles because system server does not have access to them.
+            // As such, we rely on the previous profile analysis (done with dexoptanalyzer) and
+            // manually adjust the actual filter before checking.
+            //
+            // TODO: ideally. we'd move this check in dexoptanalyzer, but that's a large change,
+            // and in the interim we can still improve things here.
+            String actualCompilerFilter = compilerFilter;
+            if (compilerFilterDependsOnProfiles(compilerFilter)
+                    && profileAnalysisResult == PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES) {
+                actualCompilerFilter = "verify";
+            }
+            boolean newProfile = profileAnalysisResult == PROFILE_ANALYSIS_OPTIMIZE;
+            dexoptNeeded = DexFile.getDexOptNeeded(path, isa, actualCompilerFilter,
+                    classLoaderContext, newProfile, downgrade);
         } catch (IOException ioe) {
             Slog.w(TAG, "IOException reading apk: " + path, ioe);
             return DEX_OPT_FAILED;
@@ -732,27 +788,34 @@ public class PackageDexOptimizer {
         return adjustDexoptNeeded(dexoptNeeded);
     }
 
+    /** Returns true if the compiler filter depends on profiles (e.g speed-profile). */
+    private boolean compilerFilterDependsOnProfiles(String compilerFilter) {
+        return compilerFilter.endsWith("-profile");
+    }
+
     /**
      * Checks if there is an update on the profile information of the {@code pkg}.
-     * If the compiler filter is not profile guided the method returns false.
+     * If the compiler filter is not profile guided the method returns a safe default:
+     * PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA.
      *
      * Note that this is a "destructive" operation with side effects. Under the hood the
      * current profile and the reference profile will be merged and subsequent calls
      * may return a different result.
      */
-    private boolean isProfileUpdated(AndroidPackage pkg, int uid, String profileName,
+    private int analyseProfiles(AndroidPackage pkg, int uid, String profileName,
             String compilerFilter) {
         // Check if we are allowed to merge and if the compiler filter is profile guided.
         if (!isProfileGuidedCompilerFilter(compilerFilter)) {
-            return false;
+            return PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
         }
         // Merge profiles. It returns whether or not there was an updated in the profile info.
         try {
             return mInstaller.mergeProfiles(uid, pkg.getPackageName(), profileName);
         } catch (InstallerException e) {
             Slog.w(TAG, "Failed to merge profiles", e);
+            // We don't need to optimize if we failed to merge.
+            return PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
         }
-        return false;
     }
 
     /**
@@ -772,14 +835,15 @@ public class PackageDexOptimizer {
         if (!AndroidPackageUtils.canHaveOatDir(pkg, isUpdatedSystemApp)) {
             return null;
         }
-        File codePath = new File(pkg.getCodePath());
+        File codePath = new File(pkg.getPath());
         if (!codePath.isDirectory()) {
             return null;
         }
         return getOatDir(codePath).getAbsolutePath();
     }
 
-    static File getOatDir(File codePath) {
+    /** Returns the oat dir for the given code path */
+    public static File getOatDir(File codePath) {
         return new File(codePath, OAT_DIR_NAME);
     }
 

@@ -20,6 +20,7 @@ import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_MASK;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_PREDICTED;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_MASK;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACTION;
@@ -36,6 +37,7 @@ import android.app.usage.UsageStatsManager;
 import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -45,7 +47,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.internal.util.IndentingPrintWriter;
 
 import libcore.io.IoUtils;
 
@@ -259,8 +260,10 @@ public class AppIdleHistory {
         int bucketingReason = REASON_MAIN_USAGE | usageReason;
         final boolean isUserUsage = isUserUsage(bucketingReason);
 
-        if (appUsageHistory.currentBucket == STANDBY_BUCKET_RESTRICTED && !isUserUsage) {
-            // Only user usage should bring an app out of the RESTRICTED bucket.
+        if (appUsageHistory.currentBucket == STANDBY_BUCKET_RESTRICTED && !isUserUsage
+                && (appUsageHistory.bucketingReason & REASON_MAIN_MASK) != REASON_MAIN_TIMEOUT) {
+            // Only user usage should bring an app out of the RESTRICTED bucket, unless the app
+            // just timed out into RESTRICTED.
             newBucket = STANDBY_BUCKET_RESTRICTED;
             bucketingReason = appUsageHistory.bucketingReason;
         } else {

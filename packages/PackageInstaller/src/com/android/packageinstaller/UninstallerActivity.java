@@ -342,8 +342,9 @@ public class UninstallerActivity extends Activity {
             broadcastIntent.putExtra(UninstallFinish.EXTRA_APP_LABEL, label);
             broadcastIntent.putExtra(UninstallFinish.EXTRA_UNINSTALL_ID, uninstallId);
 
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, uninstallId,
-                    broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent =
+                    PendingIntent.getBroadcast(this, uninstallId, broadcastIntent,
+                            PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             NotificationChannel uninstallingChannel = new NotificationChannel(UNINSTALLING_CHANNEL,

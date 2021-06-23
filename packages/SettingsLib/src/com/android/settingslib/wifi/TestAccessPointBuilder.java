@@ -108,8 +108,8 @@ public class TestAccessPointBuilder {
     public TestAccessPointBuilder setActive(boolean active) {
         if (active) {
             mNetworkInfo = new NetworkInfo(
-                ConnectivityManager.TYPE_DUMMY,
-                ConnectivityManager.TYPE_DUMMY,
+                ConnectivityManager.TYPE_WIFI,
+                ConnectivityManager.TYPE_WIFI,
                 "TestNetwork",
                 "TestNetwork");
         } else {

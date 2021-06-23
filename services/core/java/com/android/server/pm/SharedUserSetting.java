@@ -93,6 +93,7 @@ public final class SharedUserSetting extends SettingBase {
                     proc.addStateFrom(newProc);
                 }
             }
+            onChanged();
         }
     }
 
@@ -117,6 +118,7 @@ public final class SharedUserSetting extends SettingBase {
         }
         // recalculate processes.
         updateProcesses();
+        onChanged();
         return true;
     }
 
@@ -129,6 +131,7 @@ public final class SharedUserSetting extends SettingBase {
         if (packages.add(packageSetting)) {
             setFlags(this.pkgFlags | packageSetting.pkgFlags);
             setPrivateFlags(this.pkgPrivateFlags | packageSetting.pkgPrivateFlags);
+            onChanged();
         }
         if (packageSetting.pkg != null) {
             addProcesses(packageSetting.pkg.getProcesses());
@@ -169,6 +172,7 @@ public final class SharedUserSetting extends SettingBase {
             }
             if (ps.pkg.getTargetSdkVersion() < seInfoTargetSdkVersion) {
                 seInfoTargetSdkVersion = ps.pkg.getTargetSdkVersion();
+                onChanged();
             }
         }
 
@@ -179,6 +183,7 @@ public final class SharedUserSetting extends SettingBase {
             final boolean isPrivileged = isPrivileged() | ps.pkg.isPrivileged();
             ps.getPkgState().setOverrideSeInfo(SELinuxMMAC.getSeInfo(ps.pkg, isPrivileged,
                     seInfoTargetSdkVersion));
+            onChanged();
         }
     }
 
@@ -234,6 +239,7 @@ public final class SharedUserSetting extends SettingBase {
         } else {
             this.processes = null;
         }
+        onChanged();
         return this;
     }
 }

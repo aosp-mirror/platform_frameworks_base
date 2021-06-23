@@ -24,6 +24,7 @@ import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
 import static android.view.DisplayInfoProto.NAME;
 
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -64,6 +65,11 @@ public final class DisplayInfo implements Parcelable {
      * Logical display identifier.
      */
     public int displayId;
+
+    /**
+     * Display Group identifier.
+     */
+    public int displayGroupId;
 
     /**
      * Display address, or null if none.
@@ -192,6 +198,9 @@ public final class DisplayInfo implements Parcelable {
     /** The display's HDR capabilities */
     public Display.HdrCapabilities hdrCapabilities;
 
+    /** The formats disabled by user **/
+    public int[] userDisabledHdrTypes = {};
+
     /**
      * Indicates whether the display can be switched into a mode with minimal post
      * processing.
@@ -261,6 +270,11 @@ public final class DisplayInfo implements Parcelable {
     public String ownerPackageName;
 
     /**
+     * The refresh rate override for this app. 0 means no override.
+     */
+    public float refreshRateOverride;
+
+    /**
      * @hide
      * Get current remove mode of the display - what actions should be performed with the display's
      * content when it is removed.
@@ -269,6 +283,33 @@ public final class DisplayInfo implements Parcelable {
      */
     // TODO (b/114338689): Remove the flag and use IWindowManager#getRemoveContentMode
     public int removeMode = Display.REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY;
+
+    /**
+     * @hide
+     * The current minimum brightness constraint of the display. Value between 0.0 and 1.0,
+     * derived from the config constraints of the display device of this logical display.
+     */
+    public float brightnessMinimum;
+
+    /**
+     * @hide
+     * The current maximum brightness constraint of the display. Value between 0.0 and 1.0,
+     * derived from the config constraints of the display device of this logical display.
+     */
+    public float brightnessMaximum;
+
+    /**
+     * @hide
+     * The current default brightness of the display. Value between 0.0 and 1.0,
+     * derived from the configuration of the display device of this logical display.
+     */
+    public float brightnessDefault;
+
+    /**
+     * The {@link RoundedCorners} if present, otherwise {@code null}.
+     */
+    @Nullable
+    public RoundedCorners roundedCorners;
 
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
@@ -295,7 +336,7 @@ public final class DisplayInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return o instanceof DisplayInfo && equals((DisplayInfo)o);
     }
 
@@ -305,6 +346,7 @@ public final class DisplayInfo implements Parcelable {
                 && flags == other.flags
                 && type == other.type
                 && displayId == other.displayId
+                && displayGroupId == other.displayGroupId
                 && Objects.equals(address, other.address)
                 && Objects.equals(deviceProductInfo, other.deviceProductInfo)
                 && Objects.equals(uniqueId, other.uniqueId)
@@ -320,9 +362,11 @@ public final class DisplayInfo implements Parcelable {
                 && rotation == other.rotation
                 && modeId == other.modeId
                 && defaultModeId == other.defaultModeId
+                && Arrays.equals(supportedModes, other.supportedModes)
                 && colorMode == other.colorMode
                 && Arrays.equals(supportedColorModes, other.supportedColorModes)
                 && Objects.equals(hdrCapabilities, other.hdrCapabilities)
+                && Arrays.equals(userDisabledHdrTypes, other.userDisabledHdrTypes)
                 && minimalPostProcessingSupported == other.minimalPostProcessingSupported
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi
@@ -332,7 +376,12 @@ public final class DisplayInfo implements Parcelable {
                 && state == other.state
                 && ownerUid == other.ownerUid
                 && Objects.equals(ownerPackageName, other.ownerPackageName)
-                && removeMode == other.removeMode;
+                && removeMode == other.removeMode
+                && getRefreshRate() == other.getRefreshRate()
+                && brightnessMinimum == other.brightnessMinimum
+                && brightnessMaximum == other.brightnessMaximum
+                && brightnessDefault == other.brightnessDefault
+                && Objects.equals(roundedCorners, other.roundedCorners);
     }
 
     @Override
@@ -345,6 +394,7 @@ public final class DisplayInfo implements Parcelable {
         flags = other.flags;
         type = other.type;
         displayId = other.displayId;
+        displayGroupId = other.displayGroupId;
         address = other.address;
         deviceProductInfo = other.deviceProductInfo;
         name = other.name;
@@ -366,6 +416,7 @@ public final class DisplayInfo implements Parcelable {
         supportedColorModes = Arrays.copyOf(
                 other.supportedColorModes, other.supportedColorModes.length);
         hdrCapabilities = other.hdrCapabilities;
+        userDisabledHdrTypes = other.userDisabledHdrTypes;
         minimalPostProcessingSupported = other.minimalPostProcessingSupported;
         logicalDensityDpi = other.logicalDensityDpi;
         physicalXDpi = other.physicalXDpi;
@@ -376,6 +427,11 @@ public final class DisplayInfo implements Parcelable {
         ownerUid = other.ownerUid;
         ownerPackageName = other.ownerPackageName;
         removeMode = other.removeMode;
+        refreshRateOverride = other.refreshRateOverride;
+        brightnessMinimum = other.brightnessMinimum;
+        brightnessMaximum = other.brightnessMaximum;
+        brightnessDefault = other.brightnessDefault;
+        roundedCorners = other.roundedCorners;
     }
 
     public void readFromParcel(Parcel source) {
@@ -383,6 +439,7 @@ public final class DisplayInfo implements Parcelable {
         flags = source.readInt();
         type = source.readInt();
         displayId = source.readInt();
+        displayGroupId = source.readInt();
         address = source.readParcelable(null);
         deviceProductInfo = source.readParcelable(null);
         name = source.readString8();
@@ -421,6 +478,16 @@ public final class DisplayInfo implements Parcelable {
         ownerPackageName = source.readString8();
         uniqueId = source.readString8();
         removeMode = source.readInt();
+        refreshRateOverride = source.readFloat();
+        brightnessMinimum = source.readFloat();
+        brightnessMaximum = source.readFloat();
+        brightnessDefault = source.readFloat();
+        roundedCorners = source.readTypedObject(RoundedCorners.CREATOR);
+        int numUserDisabledFormats = source.readInt();
+        userDisabledHdrTypes = new int[numUserDisabledFormats];
+        for (int i = 0; i < numUserDisabledFormats; i++) {
+            userDisabledHdrTypes[i] = source.readInt();
+        }
     }
 
     @Override
@@ -429,6 +496,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(this.flags);
         dest.writeInt(type);
         dest.writeInt(displayId);
+        dest.writeInt(displayGroupId);
         dest.writeParcelable(address, flags);
         dest.writeParcelable(deviceProductInfo, flags);
         dest.writeString8(name);
@@ -465,11 +533,31 @@ public final class DisplayInfo implements Parcelable {
         dest.writeString8(ownerPackageName);
         dest.writeString8(uniqueId);
         dest.writeInt(removeMode);
+        dest.writeFloat(refreshRateOverride);
+        dest.writeFloat(brightnessMinimum);
+        dest.writeFloat(brightnessMaximum);
+        dest.writeFloat(brightnessDefault);
+        dest.writeTypedObject(roundedCorners, flags);
+        dest.writeInt(userDisabledHdrTypes.length);
+        for (int i = 0; i < userDisabledHdrTypes.length; i++) {
+            dest.writeInt(userDisabledHdrTypes[i]);
+        }
     }
 
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * Returns the refresh rate the application would experience.
+     */
+    public float getRefreshRate() {
+        if (refreshRateOverride > 0) {
+            return refreshRateOverride;
+        }
+
+        return getMode().getRefreshRate();
     }
 
     public Display.Mode getMode() {
@@ -493,16 +581,17 @@ public final class DisplayInfo implements Parcelable {
      * Returns the id of the "default" mode with the given refresh rate, or {@code 0} if no suitable
      * mode could be found.
      */
-    public int findDefaultModeByRefreshRate(float refreshRate) {
+    @Nullable
+    public Display.Mode findDefaultModeByRefreshRate(float refreshRate) {
         Display.Mode[] modes = supportedModes;
         Display.Mode defaultMode = getDefaultMode();
         for (int i = 0; i < modes.length; i++) {
             if (modes[i].matches(
                     defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), refreshRate)) {
-                return modes[i].getModeId();
+                return modes[i];
             }
         }
-        return 0;
+        return null;
     }
 
     /**
@@ -541,9 +630,29 @@ public final class DisplayInfo implements Parcelable {
         getMetricsWithSize(outMetrics, ci, configuration, appWidth, appHeight);
     }
 
+    /**
+     * Populates {@code outMetrics} with details of the logical display. Bounds are limited
+     * by the logical size of the display.
+     *
+     * @param outMetrics the {@link DisplayMetrics} to be populated
+     * @param compatInfo the {@link CompatibilityInfo} to be applied
+     * @param configuration the {@link Configuration}
+     */
     public void getLogicalMetrics(DisplayMetrics outMetrics, CompatibilityInfo compatInfo,
             Configuration configuration) {
         getMetricsWithSize(outMetrics, compatInfo, configuration, logicalWidth, logicalHeight);
+    }
+
+    /**
+     * Similar to {@link #getLogicalMetrics}, but the limiting bounds are determined from
+     * {@link WindowConfiguration#getMaxBounds()}
+     */
+    public void getMaxBoundsMetrics(DisplayMetrics outMetrics, CompatibilityInfo compatInfo,
+            Configuration configuration) {
+        Rect bounds = configuration.windowConfiguration.getMaxBounds();
+        // Pass in null configuration to ensure width and height are not overridden to app bounds.
+        getMetricsWithSize(outMetrics, compatInfo, /* configuration= */ null,
+                bounds.width(), bounds.height());
     }
 
     public int getNaturalWidth() {
@@ -607,6 +716,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(name);
         sb.append("\", displayId ");
         sb.append(displayId);
+        sb.append("\", displayGroupId ");
+        sb.append(displayGroupId);
         sb.append(flagsToString(flags));
         sb.append(", real ");
         sb.append(logicalWidth);
@@ -632,6 +743,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(Arrays.toString(supportedModes));
         sb.append(", hdrCapabilities ");
         sb.append(hdrCapabilities);
+        sb.append(", userDisabledHdrTypes ");
+        sb.append(Arrays.toString(userDisabledHdrTypes));
         sb.append(", minimalPostProcessingSupported ");
         sb.append(minimalPostProcessingSupported);
         sb.append(", rotation ");
@@ -675,6 +788,14 @@ public final class DisplayInfo implements Parcelable {
         }
         sb.append(", removeMode ");
         sb.append(removeMode);
+        sb.append(", refreshRateOverride ");
+        sb.append(refreshRateOverride);
+        sb.append(", brightnessMinimum ");
+        sb.append(brightnessMinimum);
+        sb.append(", brightnessMaximum ");
+        sb.append(brightnessMaximum);
+        sb.append(", brightnessDefault ");
+        sb.append(brightnessDefault);
         sb.append("}");
         return sb.toString();
     }
@@ -725,6 +846,9 @@ public final class DisplayInfo implements Parcelable {
         }
         if ((flags & Display.FLAG_TRUSTED) != 0) {
             result.append(", FLAG_TRUSTED");
+        }
+        if ((flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0) {
+            result.append(", FLAG_OWN_DISPLAY_GROUP");
         }
         return result.toString();
     }

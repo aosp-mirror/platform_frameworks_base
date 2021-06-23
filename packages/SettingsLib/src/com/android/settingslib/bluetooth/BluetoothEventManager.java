@@ -49,6 +49,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class BluetoothEventManager {
     private static final String TAG = "BluetoothEventManager";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
@@ -298,18 +299,12 @@ public class BluetoothEventManager {
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
                 cachedDevice = mDeviceManager.addDevice(device);
-                Log.d(TAG, "DeviceFoundHandler created new CachedBluetoothDevice: "
-                        + cachedDevice);
+                Log.d(TAG, "DeviceFoundHandler created new CachedBluetoothDevice");
             } else if (cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
                     && !cachedDevice.getDevice().isConnected()) {
                 // Dispatch device add callback to show bonded but
                 // not connected devices in discovery mode
                 dispatchDeviceAdded(cachedDevice);
-                Log.d(TAG, "DeviceFoundHandler found bonded and not connected device:"
-                        + cachedDevice);
-            } else {
-                Log.d(TAG, "DeviceFoundHandler found existing CachedBluetoothDevice:"
-                        + cachedDevice);
             }
             cachedDevice.setRssi(rssi);
             cachedDevice.setJustDiscovered(true);
@@ -372,6 +367,9 @@ public class BluetoothEventManager {
          *               BluetoothDevice.UNBOND_REASON_*
          */
         private void showUnbondMessage(Context context, String name, int reason) {
+            if (DEBUG) {
+                Log.d(TAG, "showUnbondMessage() name : " + name + ", reason : " + reason);
+            }
             int errorMsg;
 
             switch (reason) {

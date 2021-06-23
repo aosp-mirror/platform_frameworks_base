@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-
 package android.bluetooth;
 
-import android.Manifest;
 import android.annotation.IntDef;
-import android.annotation.RequiresPermission;
+import android.annotation.RequiresNoPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -185,6 +184,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
+    @SystemApi
     int MAP_CLIENT = 18;
 
     /**
@@ -206,12 +206,19 @@ public interface BluetoothProfile {
     int HEARING_AID = 21;
 
     /**
+     * LE Audio Device
+     *
+     * @hide
+     */
+    int LE_AUDIO = 22;
+
+    /**
      * Max profile ID. This value should be updated whenever a new profile is added to match
      * the largest value assigned to a profile.
      *
      * @hide
      */
-    int MAX_PROFILE_ID = 21;
+    int MAX_PROFILE_ID = 22;
 
     /**
      * Default priority for devices that we try to auto-connect to and
@@ -219,7 +226,7 @@ public interface BluetoothProfile {
      *
      * @hide
      **/
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     int PRIORITY_AUTO_CONNECT = 1000;
 
     /**
@@ -291,7 +298,6 @@ public interface BluetoothProfile {
      *
      * @return List of devices. The list will be empty on error.
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public List<BluetoothDevice> getConnectedDevices();
 
     /**
@@ -305,7 +311,6 @@ public interface BluetoothProfile {
      * #STATE_CONNECTING}, {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING},
      * @return List of devices. The list will be empty on error.
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states);
 
     /**
@@ -315,7 +320,6 @@ public interface BluetoothProfile {
      * @return State of the profile connection. One of {@link #STATE_CONNECTED}, {@link
      * #STATE_CONNECTING}, {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING}
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
     @BtProfileState int getConnectionState(BluetoothDevice device);
 
     /**
@@ -330,6 +334,7 @@ public interface BluetoothProfile {
          * @param profile - One of {@link #HEADSET} or {@link #A2DP}
          * @param proxy - One of {@link BluetoothHeadset} or {@link BluetoothA2dp}
          */
+        @RequiresNoPermission
         public void onServiceConnected(int profile, BluetoothProfile proxy);
 
         /**
@@ -338,6 +343,7 @@ public interface BluetoothProfile {
          *
          * @param profile - One of {@link #HEADSET} or {@link #A2DP}
          */
+        @RequiresNoPermission
         public void onServiceDisconnected(int profile);
     }
 

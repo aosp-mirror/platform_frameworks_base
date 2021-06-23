@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Telephony.Sms.Intents;
@@ -33,7 +34,9 @@ import com.android.internal.telephony.WspTypeDecoder;
 import com.android.internal.telephony.uicc.IccUtils;
 import com.android.internal.util.HexDump;
 import com.android.smspush.WapPushManager;
+import com.android.smspush.WapPushManager.WapPushManDBHelper;
 
+import java.io.File;
 import java.util.Random;
 
 /**
@@ -467,8 +470,9 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
         try {
             super.setUp();
             // get verifier
-            getContext().bindService(new Intent(IDataVerify.class.getName()),
-                    mConn, Context.BIND_AUTO_CREATE);
+            Intent intent = new Intent(IDataVerify.class.getName());
+            intent.setPackage("com.android.smspush.unitTests");
+            getContext().bindService(intent, mConn, Context.BIND_AUTO_CREATE);
         } catch (Exception e) {
             Log.w(LOG_TAG, "super exception");
         }
@@ -552,15 +556,15 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
     }
 
     /**
-     * Add sqlite injection test
+     * Sqlite injection test
      */
-    public void testAddPackage0() {
+    public void testSqliteInjection() {
         String inject = "' union select 0,'com.android.settings','com.android.settings.Settings',0,0,0--";
 
-        // insert new data
+        // update data
         IWapPushManager iwapman = getInterface();
         try {
-            assertFalse(iwapman.addPackage(
+            assertFalse(iwapman.updatePackage(
                     inject,
                     Integer.toString(mContentTypeValue),
                     mPackageName, mClassName,
@@ -2528,4 +2532,45 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
         mMessageBody = originalMessageBody;
     }
 
+    /**
+     * DataBase migration test.
+     */
+    public void testDataBaseMigration() {
+        IWapPushManager iwapman = getInterface();
+        WapPushManager wpman = getService();
+        Context context = getContext();
+
+        addPackageToLegacyDB(mAppIdValue, mContentTypeValue, mPackageName, mClassName,
+                WapPushManagerParams.APP_TYPE_SERVICE, true, true);
+        addPackageToLegacyDB(mAppIdValue + 10, mContentTypeValue, mPackageName, mClassName,
+                WapPushManagerParams.APP_TYPE_SERVICE, true, true);
+
+        File oldDbFile = context.getDatabasePath("wappush.db");
+        assertTrue(oldDbFile.exists());
+        assertTrue(wpman.verifyData(Integer.toString(mAppIdValue),
+                Integer.toString(mContentTypeValue),
+                mPackageName, mClassName,
+                WapPushManagerParams.APP_TYPE_SERVICE, true, true));
+        assertFalse(oldDbFile.exists());
+
+        // Clean up DB
+        try {
+            iwapman.deletePackage(Integer.toString(mAppIdValue),
+                    Integer.toString(mContentTypeValue), mPackageName, mClassName);
+            iwapman.deletePackage(Integer.toString(mAppIdValue + 10),
+                    Integer.toString(mContentTypeValue), mPackageName, mClassName);
+        } catch (RemoteException e) {
+            assertTrue(false);
+        }
+    }
+
+    private void addPackageToLegacyDB(int appId, int contextType, String packagename,
+            String classnName, int appType, boolean signature, boolean furtherProcessing) {
+        WapPushManager wpman = getService();
+        WapPushManDBHelper dbh = new WapPushManDBHelper(getContext());
+        SQLiteDatabase db = dbh.getWritableDatabase();
+
+        wpman.insertPackage(dbh, db, Integer.toString(appId), Integer.toString(contextType),
+                packagename, classnName, appType, signature, furtherProcessing);
+    }
 }

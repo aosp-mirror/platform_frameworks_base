@@ -19,6 +19,7 @@ package android.view;
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
+import android.annotation.FloatRange;
 import android.graphics.RenderNode;
 
 import java.util.ArrayList;
@@ -725,7 +726,7 @@ public class ViewPropertyAnimator {
      * @see View#setAlpha(float)
      * @return This object, allowing calls to methods in this class to be chained.
      */
-    public ViewPropertyAnimator alpha(float value) {
+    public ViewPropertyAnimator alpha(@FloatRange(from = 0.0f, to = 1.0f) float value) {
         animateProperty(ALPHA, value);
         return this;
     }

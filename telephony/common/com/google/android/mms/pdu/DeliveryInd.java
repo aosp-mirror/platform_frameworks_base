@@ -18,6 +18,7 @@
 package com.google.android.mms.pdu;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import com.google.android.mms.InvalidHeaderValueException;
 
@@ -53,7 +54,7 @@ public class DeliveryInd extends GenericPdu {
      *
      * @return the value
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public long getDate() {
         return mPduHeaders.getLongInteger(PduHeaders.DATE);
     }

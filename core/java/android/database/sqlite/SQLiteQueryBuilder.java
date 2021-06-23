@@ -798,6 +798,7 @@ public class SQLiteQueryBuilder {
     }
 
     private void enforceStrictToken(@NonNull String token) {
+        if (TextUtils.isEmpty(token)) return;
         if (isTableOrColumn(token)) return;
         if (SQLiteTokenizer.isFunction(token)) return;
         if (SQLiteTokenizer.isType(token)) return;

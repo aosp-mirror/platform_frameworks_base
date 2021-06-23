@@ -20,5 +20,8 @@ package com.android.server.display;
  * Interface used to update the actual display state.
  */
 public interface DisplayBlanker {
-    void requestDisplayState(int state, float brightness);
+    /**
+     * Requests the specified display state and brightness levels for the specified displayId.
+     */
+    void requestDisplayState(int displayId, int state, float brightness, float sdrBrightness);
 }

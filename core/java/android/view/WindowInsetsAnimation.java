@@ -61,7 +61,7 @@ public final class WindowInsetsAnimation {
     }
 
     /**
-     * @return The bitmask of {@link WindowInsets.Type.InsetsType}s that are animating.
+     * @return The bitmask of {@link WindowInsets.Type}s that are animating.
      */
     @WindowInsets.Type.InsetsType
     public int getTypeMask() {
@@ -140,7 +140,7 @@ public final class WindowInsetsAnimation {
     }
 
     /**
-     * Set fraction of the progress if {@link WindowInsets.Type.InsetsType} animation is
+     * Set fraction of the progress if {@link WindowInsets.Type} animation is
      * controlled by the app.
      * <p>
      * Note: This should only be used for testing, as the system fills in the fraction for the
@@ -159,7 +159,7 @@ public final class WindowInsetsAnimation {
     /**
      * Retrieves the translucency of the windows that are animating.
      *
-     * @return Alpha of windows that cause insets of type {@link WindowInsets.Type.InsetsType}.
+     * @return Alpha of windows that cause insets of type {@link WindowInsets.Type}.
      */
     @FloatRange(from = 0f, to = 1f)
     public float getAlpha() {
@@ -174,8 +174,7 @@ public final class WindowInsetsAnimation {
      * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)} is being
      * used.
      * </p>
-     * @param alpha Alpha of windows that cause insets of type
-     *              {@link WindowInsets.Type.InsetsType}.
+     * @param alpha Alpha of windows that cause insets of type {@link WindowInsets.Type}.
      * @see #getAlpha()
      */
     public void setAlpha(@FloatRange(from = 0f, to = 1f) float alpha) {
@@ -361,6 +360,13 @@ public final class WindowInsetsAnimation {
          * finished, and then revert to the starting state of the animation in the first
          * {@link #onProgress} callback by using post-layout view properties like {@link View#setX}
          * and related methods.
+         *
+         * <p>Note that the animation might be cancelled before {@link #onStart} is dispatched. On
+         * {@link android.os.Build.VERSION_CODES#S S} and later, {@link #onEnd} is immediately
+         * dispatched without an {@link #onStart} in that case.
+         * On {@link android.os.Build.VERSION_CODES#R R}, no callbacks are dispatched after
+         * {@code #onPrepare} for such an animation.
+         *
          * <p>
          * Note: If the animation is application controlled by using
          * {@link WindowInsetsController#controlWindowInsetsAnimation}, the end state of the

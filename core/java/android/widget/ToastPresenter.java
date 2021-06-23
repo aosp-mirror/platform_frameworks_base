@@ -48,6 +48,8 @@ import com.android.internal.util.ArrayUtils;
 public class ToastPresenter {
     private static final String TAG = "ToastPresenter";
     private static final String WINDOW_TITLE = "Toast";
+
+    // exclusively used to guarantee window timeouts
     private static final long SHORT_DURATION_TIMEOUT = 4000;
     private static final long LONG_DURATION_TIMEOUT = 7000;
 
@@ -67,7 +69,7 @@ public class ToastPresenter {
     private final Context mContext;
     private final Resources mResources;
     private final WindowManager mWindowManager;
-    private final AccessibilityManager mAccessibilityManager;
+    private final IAccessibilityManager mAccessibilityManager;
     private final INotificationManager mNotificationManager;
     private final String mPackageName;
     private final WindowManager.LayoutParams mParams;
@@ -81,16 +83,7 @@ public class ToastPresenter {
         mWindowManager = context.getSystemService(WindowManager.class);
         mNotificationManager = notificationManager;
         mPackageName = packageName;
-
-        // We obtain AccessibilityManager manually via its constructor instead of using method
-        // AccessibilityManager.getInstance() for 2 reasons:
-        //   1. We want to be able to inject IAccessibilityManager in tests to verify behavior.
-        //   2. getInstance() caches the instance for the process even if we pass a different
-        //      context to it. This is problematic for multi-user because callers can pass a context
-        //      created via Context.createContextAsUser().
-        mAccessibilityManager = new AccessibilityManager(context, accessibilityManager,
-                context.getUserId());
-
+        mAccessibilityManager = accessibilityManager;
         mParams = createLayoutParams();
     }
 
@@ -145,7 +138,7 @@ public class ToastPresenter {
      */
     private void adjustLayoutParams(WindowManager.LayoutParams params, IBinder windowToken,
             int duration, int gravity, int xOffset, int yOffset, float horizontalMargin,
-            float verticalMargin) {
+            float verticalMargin, boolean removeWindowAnimations) {
         Configuration config = mResources.getConfiguration();
         int absGravity = Gravity.getAbsoluteGravity(gravity, config.getLayoutDirection());
         params.gravity = absGravity;
@@ -163,6 +156,26 @@ public class ToastPresenter {
         params.hideTimeoutMilliseconds =
                 (duration == Toast.LENGTH_LONG) ? LONG_DURATION_TIMEOUT : SHORT_DURATION_TIMEOUT;
         params.token = windowToken;
+
+        if (removeWindowAnimations && params.windowAnimations == R.style.Animation_Toast) {
+            params.windowAnimations = 0;
+        }
+    }
+
+    /**
+     * Update the LayoutParameters of the currently showing toast view. This is used for layout
+     * updates based on orientation changes.
+     */
+    public void updateLayoutParams(int xOffset, int yOffset, float horizontalMargin,
+            float verticalMargin, int gravity) {
+        checkState(mView != null, "Toast must be showing to update its layout parameters.");
+        Configuration config = mResources.getConfiguration();
+        mParams.gravity = Gravity.getAbsoluteGravity(gravity, config.getLayoutDirection());
+        mParams.x = xOffset;
+        mParams.y = yOffset;
+        mParams.horizontalMargin = horizontalMargin;
+        mParams.verticalMargin = verticalMargin;
+        mView.setLayoutParams(mParams);
     }
 
     /**
@@ -193,28 +206,29 @@ public class ToastPresenter {
 
     /**
      * Shows the toast in {@code view} with the parameters passed and callback {@code callback}.
+     * Uses window animations to animate the toast.
      */
     public void show(View view, IBinder token, IBinder windowToken, int duration, int gravity,
             int xOffset, int yOffset, float horizontalMargin, float verticalMargin,
             @Nullable ITransientNotificationCallback callback) {
+        show(view, token, windowToken, duration, gravity, xOffset, yOffset, horizontalMargin,
+                verticalMargin, callback, false /* removeWindowAnimations */);
+    }
+
+    /**
+     * Shows the toast in {@code view} with the parameters passed and callback {@code callback}.
+     * Can optionally remove window animations from the toast window.
+     */
+    public void show(View view, IBinder token, IBinder windowToken, int duration, int gravity,
+            int xOffset, int yOffset, float horizontalMargin, float verticalMargin,
+            @Nullable ITransientNotificationCallback callback, boolean removeWindowAnimations) {
         checkState(mView == null, "Only one toast at a time is allowed, call hide() first.");
         mView = view;
         mToken = token;
 
         adjustLayoutParams(mParams, windowToken, duration, gravity, xOffset, yOffset,
-                horizontalMargin, verticalMargin);
-        if (mView.getParent() != null) {
-            mWindowManager.removeView(mView);
-        }
-        try {
-            mWindowManager.addView(mView, mParams);
-        } catch (WindowManager.BadTokenException e) {
-            // Since the notification manager service cancels the token right after it notifies us
-            // to cancel the toast there is an inherent race and we may attempt to add a window
-            // after the token has been invalidated. Let us hedge against that.
-            Log.w(TAG, "Error while attempting to show toast from " + mPackageName, e);
-            return;
-        }
+                horizontalMargin, verticalMargin, removeWindowAnimations);
+        addToastView();
         trySendAccessibilityEvent(mView, mPackageName);
         if (callback != null) {
             try {
@@ -247,7 +261,8 @@ public class ToastPresenter {
             try {
                 callback.onToastHidden();
             } catch (RemoteException e) {
-                Log.w(TAG, "Error calling back " + mPackageName + " to notify onToastHide()", e);
+                Log.w(TAG, "Error calling back " + mPackageName + " to notify onToastHide()",
+                        e);
             }
         }
         mView = null;
@@ -259,7 +274,16 @@ public class ToastPresenter {
      * enabled.
      */
     public void trySendAccessibilityEvent(View view, String packageName) {
-        if (!mAccessibilityManager.isEnabled()) {
+        // We obtain AccessibilityManager manually via its constructor instead of using method
+        // AccessibilityManager.getInstance() for 2 reasons:
+        //   1. We want to be able to inject IAccessibilityManager in tests to verify behavior.
+        //   2. getInstance() caches the instance for the process even if we pass a different
+        //      context to it. This is problematic for multi-user because callers can pass a context
+        //      created via Context.createContextAsUser().
+        final AccessibilityManager accessibilityManager =
+                new AccessibilityManager(mContext, mAccessibilityManager, mContext.getUserId());
+        if (!accessibilityManager.isEnabled()) {
+            accessibilityManager.removeClient();
             return;
         }
         AccessibilityEvent event = AccessibilityEvent.obtain(
@@ -267,6 +291,25 @@ public class ToastPresenter {
         event.setClassName(Toast.class.getName());
         event.setPackageName(packageName);
         view.dispatchPopulateAccessibilityEvent(event);
-        mAccessibilityManager.sendAccessibilityEvent(event);
+        accessibilityManager.sendAccessibilityEvent(event);
+        // Every new instance of A11yManager registers an IA11yManagerClient object with the
+        // backing service. This client isn't removed until the calling process is destroyed,
+        // causing a leak here. We explicitly remove the client.
+        accessibilityManager.removeClient();
+    }
+
+    private void addToastView() {
+        if (mView.getParent() != null) {
+            mWindowManager.removeView(mView);
+        }
+        try {
+            mWindowManager.addView(mView, mParams);
+        } catch (WindowManager.BadTokenException e) {
+            // Since the notification manager service cancels the token right after it notifies us
+            // to cancel the toast there is an inherent race and we may attempt to add a window
+            // after the token has been invalidated. Let us hedge against that.
+            Log.w(TAG, "Error while attempting to show toast from " + mPackageName, e);
+            return;
+        }
     }
 }

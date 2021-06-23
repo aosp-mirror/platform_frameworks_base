@@ -22,6 +22,9 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_PACKAGE_NAME := SmartCamera-tests
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../NOTICE
 
 LOCAL_SRC_FILES += $(call all-java-files-under, src)
 
