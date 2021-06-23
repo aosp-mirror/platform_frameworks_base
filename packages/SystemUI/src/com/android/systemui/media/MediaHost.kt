@@ -60,7 +60,8 @@ class MediaHost constructor(
             key: String,
             oldKey: String?,
             data: MediaData,
-            immediately: Boolean
+            immediately: Boolean,
+            isSsReactivated: Boolean
         ) {
             if (immediately) {
                 updateViewVisibility()
