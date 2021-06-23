@@ -142,6 +142,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     final ActivityTaskManagerService mAtmService;
     final ActivityTaskSupervisor mTaskSupervisor;
     final RootWindowContainer mRootWindowContainer;
+    private final TaskFragmentOrganizerController mTaskFragmentOrganizerController;
 
     // TODO(b/189384393): this is not set in TaskFragment so far. It should be passed from the
     // parent task when adding to the hierarchy
@@ -272,6 +273,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mTaskSupervisor = atmService.mTaskSupervisor;
         mRootWindowContainer = mAtmService.mRootWindowContainer;
         mCreatedByOrganizer = createdByOrganizer;
+        mTaskFragmentOrganizerController =
+                mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController;
     }
 
     void setAdjacentTaskFragment(TaskFragment taskFragment) {
@@ -1935,6 +1938,34 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return applicationType;
         }
         return getTopChild().getActivityType();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        super.onConfigurationChanged(newParentConfig);
+
+        if (mTaskFragmentOrganizer != null) {
+            // Parent config may have changed. The controller will check if there is any important
+            // config change for the organizer.
+            mTaskFragmentOrganizerController
+                    .onTaskFragmentParentInfoChanged(mTaskFragmentOrganizer, this);
+            mTaskFragmentOrganizerController
+                    .onTaskFragmentInfoChanged(mTaskFragmentOrganizer, this);
+        }
+    }
+
+    // TODO(b/190433129) call when TaskFragment is created from WCT#createTaskFragment
+    private void sendTaskFragmentAppeared() {
+        if (mTaskFragmentOrganizer != null) {
+            mTaskFragmentOrganizerController.onTaskFragmentAppeared(mTaskFragmentOrganizer, this);
+        }
+    }
+
+    // TODO(b/190433129) call when TaskFragment is removed from WCT#deleteTaskFragment
+    private void sendTaskFragmentVanished() {
+        if (mTaskFragmentOrganizer != null) {
+            mTaskFragmentOrganizerController.onTaskFragmentVanished(mTaskFragmentOrganizer, this);
+        }
     }
 
     /**
