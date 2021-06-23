@@ -68,6 +68,38 @@ public class StepToRampAdapterTest {
     }
 
     @Test
+    public void testRampSegments_withPwleDurationLimit_splitsLongRamps() {
+        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
+                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
+                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
+                new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
+                        /* startFrequency= */ 0, /* endFrequency= */ -1, /* duration= */ 25),
+                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude*/ 1,
+                        /* startFrequency= */ 0, /* endFrequency= */ 1, /* duration= */ 5)));
+        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
+                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
+                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
+                new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 0.32f,
+                        /* startFrequency= */ 0, /* endFrequency= */ -0.32f, /* duration= */ 8),
+                new RampSegment(/* startAmplitude= */ 0.32f, /* endAmplitude= */ 0.64f,
+                        /* startFrequency= */ -0.32f, /* endFrequency= */ -0.64f,
+                        /* duration= */ 8),
+                new RampSegment(/* startAmplitude= */ 0.64f, /* endAmplitude= */ 1,
+                        /* startFrequency= */ -0.64f, /* endFrequency= */ -1, /* duration= */ 9),
+                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude*/ 1,
+                        /* startFrequency= */ 0, /* endFrequency= */ 1, /* duration= */ 5));
+
+        VibratorInfo vibratorInfo = new VibratorInfo.Builder(0)
+                .setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)
+                .setPwlePrimitiveDurationMax(10)
+                .build();
+
+        // Update repeat index to skip the ramp splits.
+        assertEquals(4, mAdapter.apply(segments, 2, vibratorInfo));
+        assertEquals(expectedSegments, segments);
+    }
+
+    @Test
     public void testStepAndRampSegments_withoutPwleCapability_keepsListUnchanged() {
         mAdapter = new StepToRampAdapter(50);
 
