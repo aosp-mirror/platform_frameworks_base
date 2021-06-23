@@ -882,18 +882,32 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     FLAGS_ACCESSIBILITY_MANAGER, "userId=" + userId);
         }
 
+        final int resolvedUserId;
+        final List<AccessibilityServiceInfo> serviceInfos;
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
             // performs the current profile parent resolution.
-            final int resolvedUserId = mSecurityPolicy
+            resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
-
-            if (Binder.getCallingPid() == OWN_PROCESS_ID) {
-                return new ArrayList<>(getUserStateLocked(resolvedUserId).mInstalledServices);
-            }
-            return getUserStateLocked(resolvedUserId).mInstalledServices;
+            serviceInfos = new ArrayList<>(
+                    getUserStateLocked(resolvedUserId).mInstalledServices);
         }
+
+        if (Binder.getCallingPid() == OWN_PROCESS_ID) {
+            return serviceInfos;
+        }
+        final PackageManagerInternal pm = LocalServices.getService(
+                PackageManagerInternal.class);
+        final int callingUid = Binder.getCallingUid();
+        for (int i = serviceInfos.size() - 1; i >= 0; i--) {
+            final AccessibilityServiceInfo serviceInfo = serviceInfos.get(i);
+            if (pm.filterAppAccess(serviceInfo.getComponentName().getPackageName(), callingUid,
+                    resolvedUserId)) {
+                serviceInfos.remove(i);
+            }
+        }
+        return serviceInfos;
     }
 
     @Override
