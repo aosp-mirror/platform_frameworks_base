@@ -28148,8 +28148,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void deleteOatArtifactsOfPackage(String packageName) {
-            PackageManagerService.this.deleteOatArtifactsOfPackage(packageName);
+        public long deleteOatArtifactsOfPackage(String packageName) {
+            return PackageManagerService.this.deleteOatArtifactsOfPackage(packageName);
         }
 
         @Override
