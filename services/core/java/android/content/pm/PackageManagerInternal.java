@@ -1151,6 +1151,8 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
 
     /**
      * Deletes the OAT artifacts of a package.
+     * @param packageName a specific package
+     * @return the number of freed bytes or -1 if there was an error in the process.
      */
-    public abstract void deleteOatArtifactsOfPackage(String packageName);
+    public abstract long deleteOatArtifactsOfPackage(String packageName);
 }
