@@ -200,4 +200,11 @@ public interface NotificationListContainer extends
     default void setWillExpand(boolean willExpand) {}
 
     void setNotificationActivityStarter(NotificationActivityStarter notificationActivityStarter);
+
+    /**
+     * @return the start location where we start clipping notifications.
+     */
+    default int getTopClippingStartLocation() {
+        return 0;
+    }
 }
