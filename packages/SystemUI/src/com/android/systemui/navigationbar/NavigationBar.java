@@ -1336,8 +1336,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private void setAccessibilityFloatingMenuModeIfNeeded() {
         if (QuickStepContract.isGesturalMode(mNavBarMode)) {
-            Settings.Secure.putInt(mContentResolver, Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
-                    ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU);
+            Settings.Secure.putIntForUser(mContentResolver,
+                    Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
+                    ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU, UserHandle.USER_CURRENT);
         }
     }
 
