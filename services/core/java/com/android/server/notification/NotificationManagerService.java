@@ -3815,15 +3815,18 @@ public class NotificationManagerService extends SystemService {
             enforceDeletingChannelHasNoFgService(pkg, callingUser, channelId);
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
                     callingUser, REASON_CHANNEL_REMOVED, null);
-            mPreferencesHelper.deleteNotificationChannel(pkg, callingUid, channelId);
-            // Remove from both recent notification archive and notification history
-            mArchive.removeChannelNotifications(pkg, callingUser, channelId);
-            mHistoryManager.deleteNotificationChannel(pkg, callingUid, channelId);
-            mListeners.notifyNotificationChannelChanged(pkg,
-                    UserHandle.getUserHandleForUid(callingUid),
-                    mPreferencesHelper.getNotificationChannel(pkg, callingUid, channelId, true),
-                    NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
-            handleSavePolicyFile();
+            boolean previouslyExisted = mPreferencesHelper.deleteNotificationChannel(
+                    pkg, callingUid, channelId);
+            if (previouslyExisted) {
+                // Remove from both recent notification archive and notification history
+                mArchive.removeChannelNotifications(pkg, callingUser, channelId);
+                mHistoryManager.deleteNotificationChannel(pkg, callingUid, channelId);
+                mListeners.notifyNotificationChannelChanged(pkg,
+                        UserHandle.getUserHandleForUid(callingUid),
+                        mPreferencesHelper.getNotificationChannel(pkg, callingUid, channelId, true),
+                        NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
+                handleSavePolicyFile();
+            }
         }
 
         @Override
