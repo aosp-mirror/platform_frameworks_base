@@ -234,8 +234,8 @@ public class BatteryUsageStatsPulledTest {
         final BatteryUsageStats.Builder builder =
                 new BatteryUsageStats.Builder(new String[0]);
         // If not truncated, this BatteryUsageStats object would generate a proto buffer
-        // larger than 70 Kb
-        for (int i = 0; i < 20000; i++) {
+        // significantly larger than 50 Kb
+        for (int i = 0; i < 3000; i++) {
             BatteryStatsImpl.Uid mockUid = mock(BatteryStatsImpl.Uid.class);
             when(mockUid.getUid()).thenReturn(i);
             builder.getOrCreateUidBatteryConsumerBuilder(mockUid)
@@ -246,7 +246,7 @@ public class BatteryUsageStatsPulledTest {
         }
 
         // Add a UID with much larger battery footprint
-        final int largeConsumerUid = 20001;
+        final int largeConsumerUid = 3001;
         BatteryStatsImpl.Uid largeConsumerMockUid = mock(BatteryStatsImpl.Uid.class);
         when(largeConsumerMockUid.getUid()).thenReturn(largeConsumerUid);
         builder.getOrCreateUidBatteryConsumerBuilder(largeConsumerMockUid)
@@ -256,7 +256,7 @@ public class BatteryUsageStatsPulledTest {
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 400);
 
         // Add a UID with much larger usage duration
-        final int highUsageUid = 20002;
+        final int highUsageUid = 3002;
         BatteryStatsImpl.Uid highUsageMockUid = mock(BatteryStatsImpl.Uid.class);
         when(highUsageMockUid.getUid()).thenReturn(highUsageUid);
         builder.getOrCreateUidBatteryConsumerBuilder(highUsageMockUid)

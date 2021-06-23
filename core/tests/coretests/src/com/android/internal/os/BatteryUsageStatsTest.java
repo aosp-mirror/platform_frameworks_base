@@ -70,18 +70,15 @@ public class BatteryUsageStatsTest {
     @Test
     public void testParcelability_smallNumberOfUids() {
         final BatteryUsageStats outBatteryUsageStats = buildBatteryUsageStats1(true).build();
-        final Parcel outParcel = Parcel.obtain();
-        outParcel.writeParcelable(outBatteryUsageStats, 0);
-        final byte[] bytes = outParcel.marshall();
-        outParcel.recycle();
+        final Parcel parcel = Parcel.obtain();
+        parcel.writeParcelable(outBatteryUsageStats, 0);
 
-        assertThat(bytes.length).isLessThan(2000);
+        assertThat(parcel.dataSize()).isLessThan(5000);
 
-        final Parcel inParcel = Parcel.obtain();
-        inParcel.unmarshall(bytes, 0, bytes.length);
-        inParcel.setDataPosition(0);
+        parcel.setDataPosition(0);
+
         final BatteryUsageStats inBatteryUsageStats =
-                inParcel.readParcelable(getClass().getClassLoader());
+                parcel.readParcelable(getClass().getClassLoader());
         assertThat(inBatteryUsageStats).isNotNull();
         assertBatteryUsageStats1(inBatteryUsageStats, true);
     }
@@ -91,7 +88,7 @@ public class BatteryUsageStatsTest {
         final BatteryUsageStats.Builder builder =
                 new BatteryUsageStats.Builder(new String[0]);
 
-        // Without the use of a blob, this BatteryUsageStats object would generate a Parcel
+        // Without the use of a CursorWindow, this BatteryUsageStats object would generate a Parcel
         // larger than 64 Kb
         final int uidCount = 200;
         for (int i = 0; i < uidCount; i++) {
@@ -108,8 +105,6 @@ public class BatteryUsageStatsTest {
 
         assertThat(parcel.dataSize()).isLessThan(2000);
 
-        // This parcel cannot be marshaled because it contains a file descriptor.
-        // Assuming that parcel marshaling works fine, let's just rewind the parcel.
         parcel.setDataPosition(0);
 
         final BatteryUsageStats inBatteryUsageStats =
