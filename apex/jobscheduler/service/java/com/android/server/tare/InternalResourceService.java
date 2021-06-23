@@ -29,6 +29,7 @@ import android.os.BatteryManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Log;
@@ -213,22 +214,6 @@ public class InternalResourceService extends SystemService {
                 / 100;
     }
 
-    @Nullable
-    @GuardedBy("mLock")
-    ArraySet<String> getPackagesForUidLocked(final int uid) {
-        ArraySet<String> packages = mUidToPackageCache.get(uid);
-        if (packages == null) {
-            final String[] pkgs = mPackageManager.getPackagesForUid(uid);
-            if (pkgs != null) {
-                for (String pkg : pkgs) {
-                    mUidToPackageCache.add(uid, pkg);
-                }
-                packages = mUidToPackageCache.get(uid);
-            }
-        }
-        return packages;
-    }
-
     void onBatteryLevelChanged() {
         synchronized (mLock) {
             final int newBatteryLevel = getCurrentBatteryLevel();
@@ -240,6 +225,9 @@ public class InternalResourceService extends SystemService {
     }
 
     void onDeviceStateChanged() {
+        synchronized (mLock) {
+            mAgent.updateOngoingEventsLocked();
+        }
     }
 
     void onPackageAdded(final int uid, @NonNull final String pkgName) {
@@ -282,6 +270,14 @@ public class InternalResourceService extends SystemService {
     }
 
     void onUidStateChanged(final int uid) {
+        synchronized (mLock) {
+            final ArraySet<String> pkgNames = getPackagesForUidLocked(uid);
+            if (pkgNames == null) {
+                Slog.e(TAG, "Don't have packages for uid " + uid);
+            } else {
+                mAgent.updateOngoingEventsLocked(UserHandle.getUserId(uid), pkgNames);
+            }
+        }
     }
 
     void onUserAdded(final int userId) {
@@ -316,6 +312,22 @@ public class InternalResourceService extends SystemService {
 
     private int getCurrentBatteryLevel() {
         return mBatteryManagerInternal.getBatteryLevel();
+    }
+
+    @Nullable
+    @GuardedBy("mLock")
+    private ArraySet<String> getPackagesForUidLocked(final int uid) {
+        ArraySet<String> packages = mUidToPackageCache.get(uid);
+        if (packages == null) {
+            final String[] pkgs = mPackageManager.getPackagesForUid(uid);
+            if (pkgs != null) {
+                for (String pkg : pkgs) {
+                    mUidToPackageCache.add(uid, pkg);
+                }
+                packages = mUidToPackageCache.get(uid);
+            }
+        }
+        return packages;
     }
 
     @GuardedBy("mLock")
@@ -384,11 +396,20 @@ public class InternalResourceService extends SystemService {
         @Override
         public void noteOngoingEventStarted(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
+            synchronized (mLock) {
+                final long nowElapsed = SystemClock.elapsedRealtime();
+                mAgent.noteOngoingEventLocked(userId, pkgName, eventId, tag, nowElapsed);
+            }
         }
 
         @Override
         public void noteOngoingEventStopped(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
+            final long nowElapsed = SystemClock.elapsedRealtime();
+            final long now = System.currentTimeMillis();
+            synchronized (mLock) {
+                mAgent.stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now);
+            }
         }
     }
 }
