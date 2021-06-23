@@ -76,6 +76,7 @@ import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -277,7 +278,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 mHandler,
                 mock(NavigationBarOverlayController.class),
                 mUiEventLogger,
-                mock(NavigationBarA11yHelper.class)));
+                mock(NavigationBarA11yHelper.class),
+                mock(UserTracker.class)));
     }
 
     private void processAllMessages() {
