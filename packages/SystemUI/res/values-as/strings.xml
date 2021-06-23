@@ -480,8 +480,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"ব্যৱহাৰকাৰী যোগ কৰক"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"নতুন ব্যৱহাৰকাৰী"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"অতিথি আঁতৰাবনে?"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"অতিথিৰ ছেশ্বন ৰিছেট কৰিবনে?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই ছেশ্বনৰ সকলো এপ্ আৰু ডেটা মচা হ\'ব।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"আঁতৰাওক"</string>
+    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"ৰিছেট কৰক"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"অতিথি, আপোনাক পুনৰ স্বাগতম!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপুনি আপোনাৰ ছেশ্বন অব্যাহত ৰাখিব বিচাৰেনে?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"আকৌ আৰম্ভ কৰক"</string>

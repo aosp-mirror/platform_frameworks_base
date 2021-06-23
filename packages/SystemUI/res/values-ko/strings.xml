@@ -480,8 +480,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"사용자 추가"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"신규 사용자"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"게스트를 삭제하시겠습니까?"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"게스트를 초기화하시겠습니까?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"이 세션에 있는 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"삭제"</string>
+    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"초기화"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"게스트 세션 진행"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"세션을 계속 진행하시겠습니까?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"다시 시작"</string>

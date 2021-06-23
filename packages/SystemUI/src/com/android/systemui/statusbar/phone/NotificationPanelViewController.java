@@ -1273,7 +1273,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
                 expandedFraction,
                 totalHeight,
-                mKeyguardStatusViewController.getHeight(),
+                mKeyguardStatusViewController.getLockscreenHeight(),
                 userIconHeight,
                 userSwitcherPreferredY, hasCustomClock(),
                 hasVisibleNotifications, darkamount, mOverStretchAmount,
@@ -2682,14 +2682,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected int getMaxPanelHeight() {
-        if (mKeyguardBypassController.getBypassEnabled() && mBarState == KEYGUARD) {
-            return getMaxPanelHeightBypass();
-        } else {
-            return getMaxPanelHeightNonBypass();
-        }
-    }
-
-    private int getMaxPanelHeightNonBypass() {
         int min = mStatusBarMinHeight;
         if (!(mBarState == KEYGUARD)
                 && mNotificationStackScrollLayoutController.getNotGoneChildCount() == 0) {
@@ -2712,16 +2704,6 @@ public class NotificationPanelViewController extends PanelViewController {
                     + mStatusBarMinHeight + ", mQsMinExpansionHeight = " + mQsMinExpansionHeight);
         }
         return maxHeight;
-    }
-
-    private int getMaxPanelHeightBypass() {
-        int position =
-                mClockPositionAlgorithm.getExpandedClockPosition()
-                        + mKeyguardStatusViewController.getHeight();
-        if (mNotificationStackScrollLayoutController.getVisibleNotificationCount() != 0) {
-            position += mShelfHeight / 2.0f + mDarkIconSize / 2.0f;
-        }
-        return position;
     }
 
     public boolean isInSettings() {
@@ -2795,11 +2777,8 @@ public class NotificationPanelViewController extends PanelViewController {
         maxHeight += mNotificationStackScrollLayoutController.getTopPaddingOverflow();
 
         if (mBarState == KEYGUARD) {
-            int
-                    minKeyguardPanelBottom =
-                    mClockPositionAlgorithm.getExpandedClockPosition()
-                            + mKeyguardStatusViewController.getHeight()
-                            + mNotificationStackScrollLayoutController.getIntrinsicContentHeight();
+            int minKeyguardPanelBottom = mClockPositionAlgorithm.getLockscreenStatusViewHeight()
+                    + mNotificationStackScrollLayoutController.getIntrinsicContentHeight();
             return Math.max(maxHeight, minKeyguardPanelBottom);
         } else {
             return maxHeight;
@@ -3349,7 +3328,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         if (mKeyguardBypassController.getBypassEnabled() && isOnKeyguard()) {
             // The expandedHeight is always the full panel Height when bypassing
-            expandedHeight = getMaxPanelHeightNonBypass();
+            expandedHeight = getMaxPanelHeight();
         }
         mNotificationStackScrollLayoutController.setExpandedHeight(expandedHeight);
         updateKeyguardBottomAreaAlpha();

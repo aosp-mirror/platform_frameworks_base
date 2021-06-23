@@ -480,8 +480,12 @@
     <string name="user_add_user" msgid="4336657383006913022">"Lisää käyttäjä"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Uusi käyttäjä"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Poistetaaanko vieras?"</string>
+    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
+    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Kaikki sovellukset ja tämän istunnon tiedot poistetaan."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Poista"</string>
+    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
+    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Tervetuloa takaisin!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Haluatko jatkaa istuntoa?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Aloita alusta"</string>

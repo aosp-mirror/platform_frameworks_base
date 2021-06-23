@@ -480,8 +480,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"加入使用者"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新使用者"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"移除訪客？"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"要重設訪客嗎？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會被刪除。"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"移除"</string>
+    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"重設"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"訪客您好，歡迎回來！"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"您要繼續您的工作階段嗎？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新開始"</string>
