@@ -17,12 +17,17 @@
 package com.android.server.wm;
 
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_CHILDREN;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
@@ -34,6 +39,7 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -46,10 +52,12 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.IDisplayAreaOrganizerController;
+import android.window.ITaskFragmentOrganizerController;
 import android.window.ITaskOrganizerController;
 import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.IWindowOrganizerController;
+import android.window.TaskFragmentCreationParams;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -95,6 +103,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     final TaskOrganizerController mTaskOrganizerController;
     final DisplayAreaOrganizerController mDisplayAreaOrganizerController;
+    final TaskFragmentOrganizerController mTaskFragmentOrganizerController;
 
     final TransitionController mTransitionController;
 
@@ -103,6 +112,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mGlobalLock = atm.mGlobalLock;
         mTaskOrganizerController = new TaskOrganizerController(mService);
         mDisplayAreaOrganizerController = new DisplayAreaOrganizerController(mService);
+        mTaskFragmentOrganizerController = new TaskFragmentOrganizerController(atm);
         mTransitionController = new TransitionController(atm);
     }
 
@@ -501,13 +511,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             return effects;
         }
 
+        final WindowContainer wc;
+        final IBinder fragmentToken;
         switch (type) {
             case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT:
                 effects |= reparentChildrenTasksHierarchyOp(hop, transition, syncId);
                 break;
             case HIERARCHY_OP_TYPE_REORDER:
             case HIERARCHY_OP_TYPE_REPARENT:
-                final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
+                wc = WindowContainer.fromBinder(hop.getContainer());
                 if (wc == null || !wc.isAttached()) {
                     Slog.e(TAG, "Attempt to operate on detached container: " + wc);
                     break;
@@ -542,6 +554,40 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
                 launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
                 mService.startActivityFromRecents(taskId, launchOpts);
+                break;
+            case HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT:
+                final TaskFragmentCreationParams taskFragmentCreationOptions =
+                        hop.getTaskFragmentCreationOptions();
+                // TODO(b/190433129) add actual implementation on WM Core
+                break;
+            case HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT:
+                wc = WindowContainer.fromBinder(hop.getContainer());
+                if (wc == null || !wc.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on detached container: " + wc);
+                    break;
+                }
+                final TaskFragment taskFragment = wc.asTaskFragment();
+                if (taskFragment == null || taskFragment.asTask() != null) {
+                    throw new IllegalArgumentException(
+                            "Can only delete organized TaskFragment, but not Task.");
+                }
+                // TODO(b/190433129) add actual implementation on WM Core
+                break;
+            case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
+                fragmentToken = hop.getContainer();
+                final Intent activityIntent = hop.getActivityIntent();
+                final Bundle activityOptions = hop.getLaunchOptions();
+                // TODO(b/190433129) add actual implementation on WM Core
+                break;
+            case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
+                fragmentToken = hop.getNewParent();
+                final ActivityRecord activity = ActivityRecord.forTokenLocked(hop.getContainer());
+                // TODO(b/190433129) add actual implementation on WM Core
+                break;
+            case HIERARCHY_OP_TYPE_REPARENT_CHILDREN:
+                final WindowContainer oldParent = WindowContainer.fromBinder(hop.getContainer());
+                final WindowContainer newParent = WindowContainer.fromBinder(hop.getNewParent());
+                // TODO(b/190433129) add actual implementation on WM Core
                 break;
         }
         return effects;
@@ -704,8 +750,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int setAdjacentRootsHierarchyOp(WindowContainerTransaction.HierarchyOp hop) {
-        final Task root1 = WindowContainer.fromBinder(hop.getContainer()).asTask();
-        final Task root2 = WindowContainer.fromBinder(hop.getAdjacentRoot()).asTask();
+        final TaskFragment root1 = WindowContainer.fromBinder(hop.getContainer()).asTaskFragment();
+        final TaskFragment root2 =
+                WindowContainer.fromBinder(hop.getAdjacentRoot()).asTaskFragment();
         if (!root1.mCreatedByOrganizer || !root2.mCreatedByOrganizer) {
             throw new IllegalArgumentException("setAdjacentRootsHierarchyOp: Not created by"
                     + " organizer root1=" + root1 + " root2=" + root2);
@@ -745,6 +792,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     public IDisplayAreaOrganizerController getDisplayAreaOrganizerController() {
         enforceTaskPermission("getDisplayAreaOrganizerController()");
         return mDisplayAreaOrganizerController;
+    }
+
+    @Override
+    public ITaskFragmentOrganizerController getTaskFragmentOrganizerController() {
+        return mTaskFragmentOrganizerController;
     }
 
     @VisibleForTesting
