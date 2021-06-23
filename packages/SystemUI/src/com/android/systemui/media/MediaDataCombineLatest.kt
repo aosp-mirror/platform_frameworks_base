@@ -31,7 +31,8 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
         key: String,
         oldKey: String?,
         data: MediaData,
-        immediately: Boolean
+        immediately: Boolean,
+        isSsReactivated: Boolean
     ) {
         if (oldKey != null && oldKey != key && entries.contains(oldKey)) {
             entries[key] = data to entries.remove(oldKey)?.second
