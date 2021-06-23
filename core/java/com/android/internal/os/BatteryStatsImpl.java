@@ -12141,6 +12141,15 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
         }
+
+        void reset() {
+            idleTimeMs = 0;
+            rxTimeMs = 0;
+            txTimeMs = 0;
+            energy = 0;
+            uidRxBytes.clear();
+            uidTxBytes.clear();
+        }
     }
 
     private final BluetoothActivityInfoCache mLastBluetoothActivityInfo
@@ -12166,6 +12175,15 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         mHasBluetoothReporting = true;
+
+        if (info.getControllerRxTimeMillis() < mLastBluetoothActivityInfo.rxTimeMs
+                || info.getControllerTxTimeMillis() < mLastBluetoothActivityInfo.txTimeMs
+                || info.getControllerIdleTimeMillis() < mLastBluetoothActivityInfo.idleTimeMs
+                || info.getControllerEnergyUsed() < mLastBluetoothActivityInfo.energy) {
+            // A drop in accumulated Bluetooth stats is a sign of a Bluetooth crash.
+            // Reset the preserved previous snapshot in order to restart accumulating deltas.
+            mLastBluetoothActivityInfo.reset();
+        }
 
         final long rxTimeMs =
                 info.getControllerRxTimeMillis() - mLastBluetoothActivityInfo.rxTimeMs;

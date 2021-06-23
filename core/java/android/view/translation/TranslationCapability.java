@@ -61,6 +61,13 @@ public final class TranslationCapability implements Parcelable {
      * was dropped.</p>
      */
     public static final @ModelState int STATE_NOT_AVAILABLE = 4;
+    /**
+     * The translation between the source and target specs were removed from the system, but is
+     * still available to be downloaded again.
+     *
+     * @hide
+     */
+    public static final @ModelState int STATE_REMOVED_AND_AVAILABLE = 1000;
 
     /**
      * The state of translation readiness between {@code mSourceSpec} and {@code mTargetSpec}.
@@ -134,7 +141,8 @@ public final class TranslationCapability implements Parcelable {
         STATE_AVAILABLE_TO_DOWNLOAD,
         STATE_DOWNLOADING,
         STATE_ON_DEVICE,
-        STATE_NOT_AVAILABLE
+        STATE_NOT_AVAILABLE,
+        STATE_REMOVED_AND_AVAILABLE
     })
     @Retention(RetentionPolicy.SOURCE)
     @DataClass.Generated.Member
@@ -152,6 +160,8 @@ public final class TranslationCapability implements Parcelable {
                     return "STATE_ON_DEVICE";
             case STATE_NOT_AVAILABLE:
                     return "STATE_NOT_AVAILABLE";
+            case STATE_REMOVED_AND_AVAILABLE:
+                    return "STATE_REMOVED_AND_AVAILABLE";
             default: return Integer.toHexString(value);
         }
     }
@@ -255,13 +265,15 @@ public final class TranslationCapability implements Parcelable {
         if (!(mState == STATE_AVAILABLE_TO_DOWNLOAD)
                 && !(mState == STATE_DOWNLOADING)
                 && !(mState == STATE_ON_DEVICE)
-                && !(mState == STATE_NOT_AVAILABLE)) {
+                && !(mState == STATE_NOT_AVAILABLE)
+                && !(mState == STATE_REMOVED_AND_AVAILABLE)) {
             throw new java.lang.IllegalArgumentException(
                     "state was " + mState + " but must be one of: "
                             + "STATE_AVAILABLE_TO_DOWNLOAD(" + STATE_AVAILABLE_TO_DOWNLOAD + "), "
                             + "STATE_DOWNLOADING(" + STATE_DOWNLOADING + "), "
                             + "STATE_ON_DEVICE(" + STATE_ON_DEVICE + "), "
-                            + "STATE_NOT_AVAILABLE(" + STATE_NOT_AVAILABLE + ")");
+                            + "STATE_NOT_AVAILABLE(" + STATE_NOT_AVAILABLE + "), "
+                            + "STATE_REMOVED_AND_AVAILABLE(" + STATE_REMOVED_AND_AVAILABLE + ")");
         }
 
         this.mSourceSpec = sourceSpec;
@@ -293,10 +305,10 @@ public final class TranslationCapability implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1621545303074L,
+            time = 1624307114468L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationCapability.java",
-            inputSignatures = "public static final @android.view.translation.TranslationCapability.ModelState int STATE_AVAILABLE_TO_DOWNLOAD\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_DOWNLOADING\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_ON_DEVICE\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_NOT_AVAILABLE\nprivate final @android.view.translation.TranslationCapability.ModelState int mState\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mSourceSpec\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mTargetSpec\nprivate final  boolean mUiTranslationEnabled\nprivate final @android.view.translation.TranslationContext.TranslationFlag int mSupportedTranslationFlags\nclass TranslationCapability extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstDefs=true, genToString=true, genConstructor=false)")
+            inputSignatures = "public static final @android.view.translation.TranslationCapability.ModelState int STATE_AVAILABLE_TO_DOWNLOAD\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_DOWNLOADING\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_ON_DEVICE\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_NOT_AVAILABLE\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_REMOVED_AND_AVAILABLE\nprivate final @android.view.translation.TranslationCapability.ModelState int mState\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mSourceSpec\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mTargetSpec\nprivate final  boolean mUiTranslationEnabled\nprivate final @android.view.translation.TranslationContext.TranslationFlag int mSupportedTranslationFlags\nclass TranslationCapability extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstDefs=true, genToString=true, genConstructor=false)")
     @Deprecated
     private void __metadata() {}
 

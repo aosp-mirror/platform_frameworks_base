@@ -23,8 +23,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toolbar;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.resources.TextAppearanceConfig;
 
@@ -35,6 +38,7 @@ import com.google.android.material.resources.TextAppearanceConfig;
 public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
 
     private CollapsingToolbarLayout mCollapsingToolbarLayout;
+    private AppBarLayout mAppBarLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,6 +47,8 @@ public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
         TextAppearanceConfig.setShouldLoadFontSynchronously(true);
         super.setContentView(R.layout.collapsing_toolbar_base_layout);
         mCollapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
+        mAppBarLayout = findViewById(R.id.app_bar);
+        disableCollapsingToolbarLayoutScrollingBehavior();
 
         final Toolbar toolbar = findViewById(R.id.action_bar);
         setActionBar(toolbar);
@@ -106,5 +112,19 @@ public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
      */
     public CollapsingToolbarLayout getCollapsingToolbarLayout() {
         return mCollapsingToolbarLayout;
+    }
+
+    private void disableCollapsingToolbarLayoutScrollingBehavior() {
+        final CoordinatorLayout.LayoutParams params =
+                (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
+        final AppBarLayout.Behavior behavior = new AppBarLayout.Behavior();
+        behavior.setDragCallback(
+                new AppBarLayout.Behavior.DragCallback() {
+                    @Override
+                    public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
+                        return false;
+                    }
+                });
+        params.setBehavior(behavior);
     }
 }

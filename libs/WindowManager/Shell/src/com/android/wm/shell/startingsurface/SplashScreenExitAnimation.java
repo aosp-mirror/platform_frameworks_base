@@ -235,7 +235,8 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
         }
 
         void onAnimationProgress(float linearProgress) {
-            if (mFirstWindowSurface == null || !mFirstWindowSurface.isValid()) {
+            if (mFirstWindowSurface == null || !mFirstWindowSurface.isValid()
+                    || !mSplashScreenView.isAttachedToWindow()) {
                 return;
             }
 
@@ -267,15 +268,20 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
                 return;
             }
             final SurfaceControl.Transaction tx = mTransactionPool.acquire();
-            tx.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
+            if (mSplashScreenView.isAttachedToWindow()) {
+                tx.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
 
-            SyncRtSurfaceTransactionApplier.SurfaceParams
-                    params = new SyncRtSurfaceTransactionApplier.SurfaceParams
-                    .Builder(mFirstWindowSurface)
-                    .withWindowCrop(null)
-                    .withMergeTransaction(tx)
-                    .build();
-            mApplier.scheduleApply(params);
+                SyncRtSurfaceTransactionApplier.SurfaceParams
+                        params = new SyncRtSurfaceTransactionApplier.SurfaceParams
+                        .Builder(mFirstWindowSurface)
+                        .withWindowCrop(null)
+                        .withMergeTransaction(tx)
+                        .build();
+                mApplier.scheduleApply(params);
+            } else {
+                tx.setWindowCrop(mFirstWindowSurface, null);
+                tx.apply();
+            }
             mTransactionPool.release(tx);
 
             Choreographer.getSfInstance().postCallback(CALLBACK_COMMIT,
@@ -287,13 +293,14 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
         if (DEBUG_EXIT_ANIMATION) {
             Slog.v(TAG, "vanish animation finished");
         }
-        mSplashScreenView.post(() -> {
+
+        if (mSplashScreenView.isAttachedToWindow()) {
             mSplashScreenView.setVisibility(GONE);
             if (mFinishCallback != null) {
                 mFinishCallback.run();
                 mFinishCallback = null;
             }
-        });
+        }
         if (mShiftUpAnimation != null) {
             mShiftUpAnimation.finish();
         }

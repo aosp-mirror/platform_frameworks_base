@@ -601,6 +601,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Бир да манжа изи катталган эмес."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Бул түзмөктө манжа изинин сенсору жок."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сенсор убактылуу өчүрүлгөн."</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>-манжа"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Манжа изин колдонуу"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Манжа изин же экрандын кулпусун колдонуу"</string>

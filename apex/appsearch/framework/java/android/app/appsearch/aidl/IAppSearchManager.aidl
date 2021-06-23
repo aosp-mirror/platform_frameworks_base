@@ -32,7 +32,7 @@ interface IAppSearchManager {
      * @param schemaBundles List of {@link AppSearchSchema} bundles.
      * @param schemasNotDisplayedBySystem Schema types that should not be surfaced on platform
      *     surfaces.
-     * @param schemasPackageAccessibleBundles Schema types that are visible to the specified
+     * @param schemasVisibleToPackagesBundles Schema types that are visible to the specified
      *     packages. The value List contains PackageIdentifier Bundles.
      * @param forceOverride Whether to apply the new schema even if it is incompatible. All
      *     incompatible documents will be deleted.
@@ -48,7 +48,7 @@ interface IAppSearchManager {
         in String databaseName,
         in List<Bundle> schemaBundles,
         in List<String> schemasNotDisplayedBySystem,
-        in Map<String, List<Bundle>> schemasPackageAccessibleBundles,
+        in Map<String, List<Bundle>> schemasVisibleToPackagesBundles,
         boolean forceOverride,
         in int schemaVersion,
         in UserHandle userHandle,

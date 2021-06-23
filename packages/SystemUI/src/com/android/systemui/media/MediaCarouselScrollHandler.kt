@@ -62,7 +62,7 @@ class MediaCarouselScrollHandler(
     private val closeGuts: (immediate: Boolean) -> Unit,
     private val falsingCollector: FalsingCollector,
     private val falsingManager: FalsingManager,
-    private val logSmartspaceImpression: () -> Unit
+    private val logSmartspaceImpression: (Boolean) -> Unit
 ) {
     /**
      * Is the view in RTL
@@ -195,18 +195,22 @@ class MediaCarouselScrollHandler(
             if (playerWidthPlusPadding == 0) {
                 return
             }
+
             val relativeScrollX = scrollView.relativeScrollX
             onMediaScrollingChanged(relativeScrollX / playerWidthPlusPadding,
                     relativeScrollX % playerWidthPlusPadding)
         }
     }
 
+    /**
+     * Whether the media card is visible to user if any
+     */
     var visibleToUser: Boolean = false
-        set(value) {
-            if (field != value) {
-                field = value
-            }
-        }
+
+    /**
+     * Whether the quick setting is expanded or not
+     */
+    var qsExpanded: Boolean = false
 
     init {
         gestureDetector = GestureDetectorCompat(scrollView.context, gestureListener)
@@ -471,7 +475,7 @@ class MediaCarouselScrollHandler(
             val oldIndex = visibleMediaIndex
             visibleMediaIndex = newIndex
             if (oldIndex != visibleMediaIndex && visibleToUser) {
-                logSmartspaceImpression()
+                logSmartspaceImpression(qsExpanded)
             }
             closeGuts(false)
             updatePlayerVisibilities()
