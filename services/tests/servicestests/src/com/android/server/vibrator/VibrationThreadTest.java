@@ -356,7 +356,8 @@ public class VibrationThreadTest {
 
     @Test
     public void vibrate_singleVibratorComposed_runsVibration() throws Exception {
-        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
 
         long vibrationId = 1;
         VibrationEffect effect = VibrationEffect.startComposition()
@@ -374,7 +375,7 @@ public class VibrationThreadTest {
         assertEquals(Arrays.asList(
                 expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 0),
                 expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f, 0)),
-                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+                fakeVibrator.getEffectSegments());
     }
 
     @Test
@@ -392,6 +393,27 @@ public class VibrationThreadTest {
         verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId),
                 eq(Vibration.Status.IGNORED_UNSUPPORTED));
         assertTrue(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments().isEmpty());
+    }
+
+    @Test
+    public void vibrate_singleVibratorLargeComposition_splitsVibratorComposeCalls() {
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        fakeVibrator.setCompositionSizeMax(2);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_SPIN, 0.8f)
+                .compose();
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        // Vibrator compose called twice.
+        verify(mControllerCallbacks, times(2)).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        assertEquals(3, fakeVibrator.getEffectSegments().size());
     }
 
     @Test
@@ -432,12 +454,13 @@ public class VibrationThreadTest {
 
     @Test
     public void vibrate_singleVibratorPwle_runsComposePwle() throws Exception {
-        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        mVibratorProviders.get(VIBRATOR_ID).setSupportedBraking(Braking.CLAB);
-        mVibratorProviders.get(VIBRATOR_ID).setMinFrequency(100);
-        mVibratorProviders.get(VIBRATOR_ID).setResonantFrequency(150);
-        mVibratorProviders.get(VIBRATOR_ID).setFrequencyResolution(50);
-        mVibratorProviders.get(VIBRATOR_ID).setMaxAmplitudes(
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        fakeVibrator.setSupportedBraking(Braking.CLAB);
+        fakeVibrator.setMinFrequency(100);
+        fakeVibrator.setResonantFrequency(150);
+        fakeVibrator.setFrequencyResolution(50);
+        fakeVibrator.setMaxAmplitudes(
                 0.5f /* 100Hz*/, 1 /* 150Hz */, 0.6f /* 200Hz */);
 
         long vibrationId = 1;
@@ -462,8 +485,34 @@ public class VibrationThreadTest {
                 expectedRamp(/* amplitude= */ 0.6f, /* frequency= */ 200, /* duration= */ 30),
                 expectedRamp(/* StartAmplitude= */ 0.6f, /* endAmplitude= */ 0.5f,
                         /* startFrequency= */ 200, /* endFrequency= */ 100, /* duration= */ 40)),
-                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
-        assertEquals(Arrays.asList(Braking.CLAB), mVibratorProviders.get(VIBRATOR_ID).getBraking());
+                fakeVibrator.getEffectSegments());
+        assertEquals(Arrays.asList(Braking.CLAB), fakeVibrator.getBraking());
+    }
+
+    @Test
+    public void vibrate_singleVibratorLargePwle_splitsVibratorComposeCalls() {
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        fakeVibrator.setMinFrequency(100);
+        fakeVibrator.setResonantFrequency(150);
+        fakeVibrator.setFrequencyResolution(50);
+        fakeVibrator.setMaxAmplitudes(1, 1, 1);
+        fakeVibrator.setPwleSizeMax(2);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.startWaveform()
+                .addStep(1, 10)
+                .addRamp(0, 20)
+                .addStep(0.8f, 1, 30)
+                .addRamp(0.6f, -1, 40)
+                .build();
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        // Vibrator compose called twice.
+        verify(mControllerCallbacks, times(2)).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        assertEquals(4, fakeVibrator.getEffectSegments().size());
     }
 
     @Test

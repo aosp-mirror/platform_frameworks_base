@@ -27,7 +27,7 @@ import java.util.Set;
  *
  * This object is not thread safe.
  */
-class NotPlatformSurfaceableMap {
+class NotDisplayedBySystemMap {
     /**
      * Maps packages to databases to the set of prefixed schemas that are platform-hidden within
      * that database.
@@ -39,7 +39,7 @@ class NotPlatformSurfaceableMap {
      *
      * <p>Any existing mappings for this prefix are overwritten.
      */
-    public void setNotPlatformSurfaceable(
+    public void setNotDisplayedBySystem(
             @NonNull String packageName,
             @NonNull String databaseName,
             @NonNull Set<String> prefixedSchemas) {
@@ -55,7 +55,7 @@ class NotPlatformSurfaceableMap {
      * Returns whether the given prefixed schema is platform surfaceable (has not opted out) in the
      * given database.
      */
-    public boolean isSchemaPlatformSurfaceable(
+    public boolean isSchemaDisplayedBySystem(
             @NonNull String packageName,
             @NonNull String databaseName,
             @NonNull String prefixedSchema) {

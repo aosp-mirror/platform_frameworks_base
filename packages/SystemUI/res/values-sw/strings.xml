@@ -480,12 +480,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"Ongeza mtumiaji"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Mtumiaji mpya"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ungependa kumwondoa mgeni?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Ungependa kubadilisha kipindi cha mgeni?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Data na programu zote katika kipindi hiki zitafutwa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ondoa"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Badilisha"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Karibu tena mgeni!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Je, unataka kuendelea na kipindi chako?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Anza upya"</string>
