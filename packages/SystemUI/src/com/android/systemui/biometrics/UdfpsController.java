@@ -70,6 +70,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.concurrency.Execution;
 
 import java.util.Optional;
 
@@ -96,6 +97,7 @@ public class UdfpsController implements DozeReceiver {
     private static final long MIN_TOUCH_LOG_INTERVAL = 50;
 
     private final Context mContext;
+    private final Execution mExecution;
     private final FingerprintManager mFingerprintManager;
     @NonNull private final LayoutInflater mInflater;
     private final WindowManager mWindowManager;
@@ -494,6 +496,7 @@ public class UdfpsController implements DozeReceiver {
 
     @Inject
     public UdfpsController(@NonNull Context context,
+            @NonNull Execution execution,
             @NonNull LayoutInflater inflater,
             @Nullable FingerprintManager fingerprintManager,
             @NonNull WindowManager windowManager,
@@ -511,6 +514,7 @@ public class UdfpsController implements DozeReceiver {
             @Nullable Vibrator vibrator,
             @NonNull Optional<UdfpsHbmProvider> hbmProvider) {
         mContext = context;
+        mExecution = execution;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
         mMainHandler = new Handler(Looper.getMainLooper());
         mVibrator = vibrator;
@@ -815,8 +819,8 @@ public class UdfpsController implements DozeReceiver {
         mIsAodInterruptActive = false;
     }
 
-    // This method can be called from the UI thread.
     private void onFingerDown(int x, int y, float minor, float major) {
+        mExecution.assertIsMainThread();
         if (mView == null) {
             Log.w(TAG, "Null view in onFingerDown");
             return;
@@ -830,8 +834,8 @@ public class UdfpsController implements DozeReceiver {
         });
     }
 
-    // This method can be called from the UI thread.
     private void onFingerUp() {
+        mExecution.assertIsMainThread();
         mActivePointerId = -1;
         mGoodCaptureReceived = false;
         mMainHandler.removeCallbacks(mAcquiredVibration);
