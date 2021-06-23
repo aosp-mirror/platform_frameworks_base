@@ -8151,7 +8151,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (shouldRelaunchLocked(changes, mTmpConfig) || forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             configChangeFlags |= changes;
-            startFreezingScreenLocked(globalChanges);
+            if (!mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+                startFreezingScreenLocked(globalChanges);
+            }
             forceNewConfig = false;
             preserveWindow &= isResizeOnlyChange(changes);
             final boolean hasResizeChange = hasResizeChange(changes & ~info.getRealConfigChanged());
