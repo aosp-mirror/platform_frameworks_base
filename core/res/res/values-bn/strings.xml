@@ -601,6 +601,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনও আঙ্গুলের ছাপ নথিভুক্ত করা হয়নি।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইসে আঙ্গুলের ছাপ নেওয়ার সেন্সর নেই।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"সেন্সর অস্থায়ীভাবে বন্ধ করা আছে।"</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"আঙ্গুল <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"আঙ্গুলের ছাপ ব্যবহার করুন"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"আঙ্গুলের ছাপ অথবা স্ক্রিন লক ব্যবহার করুন"</string>
@@ -1458,10 +1460,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"একটি অ্যাপ্লিকেশানকে প্যাকেজগুলি মুছে দেওয়ার অনুরোধ জানাতে দেয়৷"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"ব্যাটারি অপ্টিমাইজেশন উপেক্ষা করার জন্য অনুমতি চাওয়া"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"কোনো অ্যাপের জন্য ব্যাটারি অপ্টিমাইজেশন উপেক্ষা করতে সেটিকে অনুমতির চাওয়ার মঞ্জুরি দেয়৷"</string>
-    <!-- no translation found for permlab_queryAllPackages (2928450604653281650) -->
-    <skip />
-    <!-- no translation found for permdesc_queryAllPackages (5339069855520996010) -->
-    <skip />
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"অন্যান্য সব প্যাকেজের তথ্য সম্পর্কিত কোয়েরি দেখুন"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"এটি কোনও অ্যাপকে সর্বদা ইনস্টল করা সব প্যাকেজ দেখতে অনুমতি দেয়।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"জুম নিয়ন্ত্রণের জন্য দুবার ট্যাপ করুন"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"উইজেট যোগ করা যায়নি৷"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"যান"</string>

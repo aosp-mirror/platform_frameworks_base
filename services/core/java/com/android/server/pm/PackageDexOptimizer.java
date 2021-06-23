@@ -177,8 +177,10 @@ public class PackageDexOptimizer {
     private int performDexOptLI(AndroidPackage pkg, @NonNull PackageSetting pkgSetting,
             String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
+        // ClassLoader only refers non-native (jar) shared libraries and must ignore
+        // native (so) shared libraries. See also LoadedApk#createSharedLibraryLoader().
         final List<SharedLibraryInfo> sharedLibraries = pkgSetting.getPkgState()
-                .getUsesLibraryInfos();
+                .getNonNativeUsesLibraryInfos();
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(
                 AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),

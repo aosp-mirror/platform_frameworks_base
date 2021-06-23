@@ -205,6 +205,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
     }
 
+    int getNotificationIconAreaHeight() {
+        return mNotificationIconAreaController.getHeight();
+    }
+
     @Override
     protected void onViewDetached() {
         if (CUSTOM_CLOCKS_ENABLED) {

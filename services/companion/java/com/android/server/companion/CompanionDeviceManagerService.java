@@ -753,9 +753,19 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }
             return notMatch;
         }));
+        restartBleScan();
     }
 
     void onAssociationPreRemove(Association association) {
+        if (association.isNotifyOnDeviceNearby()) {
+            ServiceConnector<ICompanionDeviceService> serviceConnector =
+                    mDeviceListenerServiceConnectors.forUser(association.getUserId())
+                            .get(association.getPackageName());
+            if (serviceConnector != null) {
+                serviceConnector.unbind();
+            }
+        }
+
         String deviceProfile = association.getDeviceProfile();
         if (deviceProfile != null) {
             Association otherAssociationWithDeviceProfile = find(
@@ -785,16 +795,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
-            }
-        }
-
-        if (association.isNotifyOnDeviceNearby()) {
-            ServiceConnector<ICompanionDeviceService> serviceConnector =
-                    mDeviceListenerServiceConnectors.forUser(association.getUserId())
-                            .get(association.getPackageName());
-            if (serviceConnector != null) {
-                serviceConnector.unbind();
-                restartBleScan();
             }
         }
     }

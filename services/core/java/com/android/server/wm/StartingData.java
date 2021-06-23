@@ -26,6 +26,12 @@ public abstract class StartingData {
     protected final WindowManagerService mService;
     protected final int mTypeParams;
 
+    /**
+     * Tell whether the launching activity should use
+     * {@link android.view.WindowManager.LayoutParams#SOFT_INPUT_IS_FORWARD_NAVIGATION}.
+     */
+    boolean mIsTransitionForward;
+
     protected StartingData(WindowManagerService service, int typeParams) {
         mService = service;
         mTypeParams = typeParams;
