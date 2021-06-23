@@ -25,6 +25,7 @@ import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.widget.Chronometer
+import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
@@ -122,6 +123,7 @@ class OngoingCallController @Inject constructor(
      * Should only be called from [CollapsedStatusBarFragment].
      */
     fun setChipView(chipView: View) {
+        tearDownChipView()
         this.chipView = chipView
         if (hasOngoingCall()) {
             updateChip()
@@ -165,8 +167,7 @@ class OngoingCallController @Inject constructor(
         val currentCallNotificationInfo = callNotificationInfo ?: return
 
         val currentChipView = chipView
-        val timeView =
-            currentChipView?.findViewById<Chronometer>(R.id.ongoing_call_chip_time)
+        val timeView = currentChipView?.getTimeView()
         val backgroundView =
             currentChipView?.findViewById<View>(R.id.ongoing_call_chip_background)
 
@@ -248,11 +249,18 @@ class OngoingCallController @Inject constructor(
 
     private fun removeChip() {
         callNotificationInfo = null
+        tearDownChipView()
         mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
         if (uidObserver != null) {
             iActivityManager.unregisterUidObserver(uidObserver)
         }
     }
+
+    /** Tear down anything related to the chip view to prevent leaks. */
+    @VisibleForTesting
+    fun tearDownChipView() = chipView?.getTimeView()?.stop()
+
+    private fun View.getTimeView(): Chronometer? = this.findViewById(R.id.ongoing_call_chip_time)
 
     private data class CallNotificationInfo(
         val key: String,
