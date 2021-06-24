@@ -228,8 +228,8 @@ public class LongScreenshotActivity extends Activity {
                 });
 
         // Immediately export to temp image file for saved state
-        mCacheSaveFuture = mImageExporter.exportAsTempFile(mBackgroundExecutor,
-                mLongScreenshot.toBitmap());
+        mCacheSaveFuture = mImageExporter.exportToRawFile(mBackgroundExecutor,
+                mLongScreenshot.toBitmap(), new File(getCacheDir(), "long_screenshot_cache.png"));
         mCacheSaveFuture.addListener(() -> {
             try {
                 // Get the temp file path to persist, used in onSavedInstanceState
