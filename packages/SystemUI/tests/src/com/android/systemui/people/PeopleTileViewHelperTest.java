@@ -35,7 +35,6 @@ import static com.android.systemui.people.PeopleSpaceUtils.VALID_CONTACT;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -541,7 +540,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 tileWithDndBlocking, mOptions).getViews();
         View result = views.apply(mContext, null);
 
-        assertEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(BLOCK_CONVERSATIONS)
@@ -551,7 +552,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 tileWithDndBlocking, mOptions).getViews();
         result = views.apply(mContext, null);
 
-        assertNotEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesNotEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_IMPORTANT_CONVERSATIONS)
@@ -560,7 +563,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 tileWithDndBlocking, mOptions).getViews();
         result = views.apply(mContext, null);
 
-        assertEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_IMPORTANT_CONVERSATIONS)
@@ -570,7 +575,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 tileWithDndBlocking, mOptions).getViews();
         result = views.apply(mContext, null);
 
-        assertNotEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesNotEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_STARRED_CONTACTS)
@@ -580,7 +587,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 tileWithDndBlocking, mOptions).getViews();
         result = views.apply(mContext, null);
 
-        assertEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_STARRED_CONTACTS)
@@ -590,7 +599,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 tileWithDndBlocking, mOptions).getViews();
         result = views.apply(mContext, null);
 
-        assertNotEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesNotEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_CONTACTS)
@@ -600,7 +611,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 tileWithDndBlocking, mOptions).getViews();
         result = views.apply(mContext, null);
 
-        assertNotEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesNotEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_CONTACTS)
@@ -610,7 +623,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 tileWithDndBlocking, mOptions).getViews();
         result = views.apply(mContext, null);
 
-        assertNotEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesNotEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_CONTACTS)
@@ -619,7 +634,11 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 tileWithDndBlocking, mOptions).getViews();
         result = views.apply(mContext, null);
 
-        assertEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
+        assertThat(result.<TextView>findViewById(R.id.text_content).getText().toString())
+                .isEqualTo(mContext.getString(R.string.paused_by_dnd));
     }
 
     @Test
@@ -1067,5 +1086,22 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
     private PeopleTileViewHelper getPeopleTileViewHelper(PeopleSpaceTile tile, Bundle options) {
         return new PeopleTileViewHelper(mContext, tile, 0, options,
                 new PeopleTileKey(tile.getId(), 0, tile.getPackageName()));
+    }
+
+    private void assertResourcesEqual(int expected, int actual) {
+        assertThat(getResourceName(actual)).isEqualTo(getResourceName(expected));
+    }
+
+    private void assertResourcesNotEqual(int expected, int actual) {
+        assertThat(getResourceName(actual)).isNotEqualTo(getResourceName(expected));
+    }
+
+    private String getResourceName(int resId) {
+        Resources resources = mContext.getResources();
+        try {
+            return resources.getResourceEntryName(resId);
+        } catch (Resources.NotFoundException e) {
+            return String.valueOf(resId);
+        }
     }
 }
