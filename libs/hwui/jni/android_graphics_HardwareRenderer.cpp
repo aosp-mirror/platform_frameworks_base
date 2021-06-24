@@ -247,7 +247,7 @@ static jlong android_view_ThreadedRenderer_createProxy(JNIEnv* env, jobject claz
 static void android_view_ThreadedRenderer_deleteProxy(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    delete proxy;
+    RenderProxy::asyncDelete(proxy);
 }
 
 static jboolean android_view_ThreadedRenderer_loadSystemProperties(JNIEnv* env, jobject clazz,
