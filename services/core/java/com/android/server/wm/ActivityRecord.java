@@ -6286,12 +6286,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int resolvedTheme = evaluateStartingWindowTheme(prev, packageName, theme,
                 splashScreenTheme);
 
+        final boolean activityCreated =
+                mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal();
+        // If this activity is just created and all activities below are finish, treat this
+        // scenario as warm launch.
+        final boolean newSingleActivity = !newTask && !activityCreated
+                && task.getActivity((r) -> !r.finishing && r != this) == null;
+
         final boolean shown = addStartingWindow(packageName, resolvedTheme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
-                prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
-                allowTaskSnapshot(),
-                mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal(),
-                mSplashScreenStyleEmpty);
+                prev != null ? prev.appToken : null,
+                newTask || newSingleActivity, taskSwitch, isProcessRunning(),
+                allowTaskSnapshot(), activityCreated, mSplashScreenStyleEmpty);
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }
