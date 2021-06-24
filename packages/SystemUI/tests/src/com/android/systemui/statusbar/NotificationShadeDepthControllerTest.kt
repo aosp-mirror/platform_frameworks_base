@@ -72,6 +72,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Mock private lateinit var shadeSpring: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var shadeAnimation: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var globalActionsSpring: NotificationShadeDepthController.DepthAnimation
+    @Mock private lateinit var brightnessSpring: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var listener: NotificationShadeDepthController.DepthListener
     @Mock private lateinit var dozeParameters: DozeParameters
     @Captor private lateinit var scrimVisibilityCaptor: ArgumentCaptor<Consumer<Int>>
@@ -91,6 +92,9 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         `when`(blurUtils.blurRadiusOfRatio(anyFloat())).then { answer ->
             (answer.arguments[0] as Float * maxBlur).toInt()
         }
+        `when`(blurUtils.ratioOfBlurRadius(anyInt())).then { answer ->
+            answer.arguments[0] as Int / maxBlur.toFloat()
+        }
         `when`(blurUtils.supportsBlursOnWindows()).thenReturn(true)
         `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
         `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
@@ -101,6 +105,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
                 notificationShadeWindowController, dozeParameters, dumpManager)
         notificationShadeDepthController.shadeSpring = shadeSpring
         notificationShadeDepthController.shadeAnimation = shadeAnimation
+        notificationShadeDepthController.brightnessMirrorSpring = brightnessSpring
         notificationShadeDepthController.globalActionsSpring = globalActionsSpring
         notificationShadeDepthController.root = root
 
@@ -274,6 +279,32 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.ignoreShadeBlurUntilHidden = true
         verify(choreographer).postFrameCallback(
                 eq(notificationShadeDepthController.updateBlurCallback))
+    }
+
+    @Test
+    fun brightnessMirrorVisible_whenVisible() {
+        notificationShadeDepthController.brightnessMirrorVisible = true
+        verify(brightnessSpring).animateTo(eq(maxBlur), any())
+    }
+
+    @Test
+    fun brightnessMirrorVisible_whenHidden() {
+        notificationShadeDepthController.brightnessMirrorVisible = false
+        verify(brightnessSpring).animateTo(eq(0), any())
+    }
+
+    @Test
+    fun brightnessMirror_hidesShadeBlur() {
+        // Brightness mirror is fully visible
+        `when`(brightnessSpring.ratio).thenReturn(1f)
+        // And shade is blurred
+        `when`(shadeSpring.radius).thenReturn(maxBlur)
+        `when`(shadeAnimation.radius).thenReturn(maxBlur)
+
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(notificationShadeWindowController).setBackgroundBlurRadius(eq(0))
+        verify(wallpaperManager).setWallpaperZoomOut(any(), eq(1f))
+        verify(blurUtils).applyBlur(eq(viewRootImpl), eq(0), eq(false))
     }
 
     @Test
