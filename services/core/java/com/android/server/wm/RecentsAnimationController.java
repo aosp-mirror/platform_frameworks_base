@@ -221,7 +221,7 @@ public class RecentsAnimationController implements DeathRecipient {
                             final ArraySet<Task> tasks = Sets.newArraySet(task);
                             snapshotController.snapshotTasks(tasks);
                             snapshotController.addSkipClosingAppSnapshotTasks(tasks);
-                            return snapshotController.getSnapshot(taskId, 0 /* userId */,
+                            return snapshotController.getSnapshot(taskId, task.mUserId,
                                     false /* restoreFromDisk */, false /* isLowResolution */);
                         }
                     }
@@ -353,18 +353,23 @@ public class RecentsAnimationController implements DeathRecipient {
 
         @Override
         public void cleanupScreenshot() {
-            synchronized (mService.mGlobalLock) {
-                if (mRecentScreenshotAnimator != null) {
-                    mRecentScreenshotAnimator.cancelAnimation();
-                    mRecentScreenshotAnimator = null;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mService.mGlobalLock) {
+                    if (mRecentScreenshotAnimator != null) {
+                        mRecentScreenshotAnimator.cancelAnimation();
+                        mRecentScreenshotAnimator = null;
+                    }
                 }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
         public void setWillFinishToHome(boolean willFinishToHome) {
             synchronized (mService.getWindowManagerLock()) {
-                mWillFinishToHome = willFinishToHome;
+                RecentsAnimationController.this.setWillFinishToHome(willFinishToHome);
             }
         }
 
@@ -512,7 +517,6 @@ public class RecentsAnimationController implements DeathRecipient {
                 || config.tasksAreFloating()
                 || config.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
     }
-
 
     @VisibleForTesting
     AnimationAdapter addAnimation(Task task, boolean isRecentTaskInvisible) {
@@ -816,6 +820,18 @@ public class RecentsAnimationController implements DeathRecipient {
         cancelAnimation(REORDER_KEEP_IN_PLACE, screenshot, "rootTaskOrderChanged");
     }
 
+    /**
+     * If there is a recents animation running, we need to cancel the animation and snapshot the
+     * tasks before the change (to ensure they are captured at the right configuration)
+     */
+    public void cancelAnimationForDisplayChange() {
+        if (mCanceled) {
+            return;
+        }
+        cancelAnimation(mWillFinishToHome ? REORDER_MOVE_TO_TOP : REORDER_MOVE_TO_ORIGINAL_POSITION,
+                true /* screenshot */, "cancelAnimationForDisplayChange");
+    }
+
     private void cancelAnimation(@ReorderMode int reorderMode, boolean screenshot, String reason) {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "cancelAnimation(): reason=%s", reason);
         synchronized (mService.getWindowManagerLock()) {
@@ -826,7 +842,7 @@ public class RecentsAnimationController implements DeathRecipient {
             mService.mH.removeCallbacks(mFailsafeRunnable);
             mCanceled = true;
 
-            if (screenshot) {
+            if (screenshot && !mPendingAnimations.isEmpty()) {
                 // Screen shot previous task when next task starts transition and notify the runner.
                 // We will actually finish the animation once the runner calls cleanUpScreenshot().
                 final Task task = mPendingAnimations.get(0).mTask;
@@ -851,6 +867,11 @@ public class RecentsAnimationController implements DeathRecipient {
                 mCallbacks.onAnimationFinished(reorderMode, false /* sendUserLeaveHint */);
             }
         }
+    }
+
+    @VisibleForTesting
+    void setWillFinishToHome(boolean willFinishToHome) {
+        mWillFinishToHome = willFinishToHome;
     }
 
     /**
@@ -905,7 +926,8 @@ public class RecentsAnimationController implements DeathRecipient {
             return null;
         }
 
-        final TaskScreenshotAnimatable animatable = new TaskScreenshotAnimatable(mService.mSurfaceControlFactory, task,
+        final TaskScreenshotAnimatable animatable = new TaskScreenshotAnimatable(
+                mService.mSurfaceControlFactory, task,
                 new SurfaceControl.ScreenshotHardwareBuffer(taskSnapshot.getHardwareBuffer(),
                         taskSnapshot.getColorSpace(), false /* containsSecureLayers */));
         mRecentScreenshotAnimator = new SurfaceAnimator(
@@ -1006,7 +1028,16 @@ public class RecentsAnimationController implements DeathRecipient {
 
     @Override
     public void binderDied() {
-        cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "binderDied");
+        if (!mCanceled) {
+            cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "binderDied");
+        } else {
+            synchronized (mService.getWindowManagerLock()) {
+                if (mRecentScreenshotAnimator != null) {
+                    mRecentScreenshotAnimator.cancelAnimation();
+                    mRecentScreenshotAnimator = null;
+                }
+            }
+        }
 
         synchronized (mService.getWindowManagerLock()) {
             // Clear associated input consumers on runner death
