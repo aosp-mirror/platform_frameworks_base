@@ -229,9 +229,6 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
             return;
         }
         mView.setHidden(showing);
-        if (!showing) {
-            mImePositionProcessor.updateAdjustForIme();
-        }
         mIsKeyguardShowing = showing;
     }
 

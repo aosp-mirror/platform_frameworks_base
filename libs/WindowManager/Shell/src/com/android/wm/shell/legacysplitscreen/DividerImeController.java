@@ -91,7 +91,6 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
 
     private boolean mPaused = true;
     private boolean mPausedTargetAdjusted = false;
-    private boolean mAdjustedWhileHidden = false;
 
     DividerImeController(LegacySplitScreenTaskListener splits, TransactionPool pool,
             ShellExecutor mainExecutor, TaskOrganizer taskOrganizer) {
@@ -123,7 +122,6 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     void reset() {
         mPaused = true;
         mPausedTargetAdjusted = false;
-        mAdjustedWhileHidden = false;
         mAnimation = null;
         mAdjusted = mTargetAdjusted = false;
         mImeWasShown = mTargetShown = false;
@@ -140,6 +138,19 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
                 ? ADJUSTED_NONFOCUS_DIM : 0.f;
     }
 
+
+    @Override
+    public void onImeControlTargetChanged(int displayId, boolean controlling) {
+        // Restore the split layout when wm-shell is not controlling IME insets anymore.
+        if (!controlling && mTargetShown) {
+            mPaused = false;
+            mTargetAdjusted = mTargetShown = false;
+            mTargetPrimaryDim = mTargetSecondaryDim = 0.f;
+            updateImeAdjustState(true /* force */);
+            startAsyncAnimation();
+        }
+    }
+
     @Override
     @ImeAnimationFlags
     public int onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
@@ -151,8 +162,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
         mShownTop = shownTop;
         mTargetShown = imeShouldShow;
         mSecondaryHasFocus = getSecondaryHasFocus(displayId);
-        final boolean splitIsVisible = !getView().isHidden();
-        final boolean targetAdjusted = splitIsVisible && imeShouldShow && mSecondaryHasFocus
+        final boolean targetAdjusted = imeShouldShow && mSecondaryHasFocus
                 && !imeIsFloating && !getLayout().mDisplayLayout.isLandscape()
                 && !mSplits.mSplitScreenController.isMinimized();
         if (mLastAdjustTop < 0) {
@@ -176,7 +186,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
         }
         mTargetAdjusted = targetAdjusted;
         updateDimTargets();
-        if (DEBUG) Slog.d(TAG, " ime starting. vis:" + splitIsVisible + "  " + dumpState());
+        if (DEBUG) Slog.d(TAG, " ime starting.  " + dumpState());
         if (mAnimation != null || (mImeWasShown && imeShouldShow
                 && mTargetAdjusted != mAdjusted)) {
             // We need to animate adjustment independently of the IME position, so
@@ -184,13 +194,8 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
             // different split's editor has gained focus while the IME is still visible.
             startAsyncAnimation();
         }
-        if (splitIsVisible) {
-            // If split is hidden, we don't want to trigger any relayouts that would cause the
-            // divider to show again.
-            updateImeAdjustState();
-        } else {
-            mAdjustedWhileHidden = true;
-        }
+        updateImeAdjustState();
+
         return (mTargetAdjusted || mAdjusted) ? IME_ANIMATION_NO_ALPHA : 0;
     }
 
@@ -254,11 +259,6 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
             }
         }
         mSplits.mSplitScreenController.setAdjustedForIme(mTargetShown && !mPaused);
-    }
-
-    public void updateAdjustForIme() {
-        updateImeAdjustState(mAdjustedWhileHidden);
-        mAdjustedWhileHidden = false;
     }
 
     @Override
