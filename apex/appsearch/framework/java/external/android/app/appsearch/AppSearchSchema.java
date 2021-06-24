@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.appsearch.exceptions.IllegalSchemaException;
 import android.app.appsearch.util.BundleUtil;
+import android.app.appsearch.util.IndentingStringBuilder;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.util.ArraySet;
@@ -30,6 +31,7 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -67,8 +69,45 @@ public final class AppSearchSchema {
     }
 
     @Override
+    @NonNull
     public String toString() {
-        return mBundle.toString();
+        IndentingStringBuilder stringBuilder = new IndentingStringBuilder();
+        appendAppSearchSchemaString(stringBuilder);
+        return stringBuilder.toString();
+    }
+
+    /**
+     * Appends a debugging string for the {@link AppSearchSchema} instance to the given string
+     * builder.
+     *
+     * @param builder the builder to append to.
+     */
+    private void appendAppSearchSchemaString(@NonNull IndentingStringBuilder builder) {
+        Objects.requireNonNull(builder);
+
+        builder.append("{\n");
+        builder.increaseIndentLevel();
+        builder.append("schemaType: \"").append(getSchemaType()).append("\",\n");
+        builder.append("properties: [\n");
+
+        AppSearchSchema.PropertyConfig[] sortedProperties =
+                getProperties().toArray(new AppSearchSchema.PropertyConfig[0]);
+        Arrays.sort(sortedProperties, (o1, o2) -> o1.getName().compareTo(o2.getName()));
+
+        for (int i = 0; i < sortedProperties.length; i++) {
+            AppSearchSchema.PropertyConfig propertyConfig = sortedProperties[i];
+            builder.increaseIndentLevel();
+            propertyConfig.appendPropertyConfigString(builder);
+            if (i != sortedProperties.length - 1) {
+                builder.append(",\n");
+            }
+            builder.decreaseIndentLevel();
+        }
+
+        builder.append("\n");
+        builder.append("]\n");
+        builder.decreaseIndentLevel();
+        builder.append("}");
     }
 
     /** Returns the name of this schema type, e.g. Email. */
@@ -255,7 +294,68 @@ public final class AppSearchSchema {
         @Override
         @NonNull
         public String toString() {
-            return mBundle.toString();
+            IndentingStringBuilder stringBuilder = new IndentingStringBuilder();
+            appendPropertyConfigString(stringBuilder);
+            return stringBuilder.toString();
+        }
+
+        /**
+         * Appends a debug string for the {@link AppSearchSchema.PropertyConfig} instance to the
+         * given string builder.
+         *
+         * @param builder the builder to append to.
+         */
+        void appendPropertyConfigString(@NonNull IndentingStringBuilder builder) {
+            Objects.requireNonNull(builder);
+
+            builder.append("{\n");
+            builder.increaseIndentLevel();
+            builder.append("name: \"").append(getName()).append("\",\n");
+
+            if (this instanceof AppSearchSchema.StringPropertyConfig) {
+                ((StringPropertyConfig) this).appendStringPropertyConfigFields(builder);
+            } else if (this instanceof AppSearchSchema.DocumentPropertyConfig) {
+                ((DocumentPropertyConfig) this).appendDocumentPropertyConfigFields(builder);
+            }
+
+            switch (getCardinality()) {
+                case AppSearchSchema.PropertyConfig.CARDINALITY_REPEATED:
+                    builder.append("cardinality: CARDINALITY_REPEATED,\n");
+                    break;
+                case AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL:
+                    builder.append("cardinality: CARDINALITY_OPTIONAL,\n");
+                    break;
+                case AppSearchSchema.PropertyConfig.CARDINALITY_REQUIRED:
+                    builder.append("cardinality: CARDINALITY_REQUIRED,\n");
+                    break;
+                default:
+                    builder.append("cardinality: CARDINALITY_UNKNOWN,\n");
+            }
+
+            switch (getDataType()) {
+                case AppSearchSchema.PropertyConfig.DATA_TYPE_STRING:
+                    builder.append("dataType: DATA_TYPE_STRING,\n");
+                    break;
+                case AppSearchSchema.PropertyConfig.DATA_TYPE_LONG:
+                    builder.append("dataType: DATA_TYPE_LONG,\n");
+                    break;
+                case AppSearchSchema.PropertyConfig.DATA_TYPE_DOUBLE:
+                    builder.append("dataType: DATA_TYPE_DOUBLE,\n");
+                    break;
+                case AppSearchSchema.PropertyConfig.DATA_TYPE_BOOLEAN:
+                    builder.append("dataType: DATA_TYPE_BOOLEAN,\n");
+                    break;
+                case AppSearchSchema.PropertyConfig.DATA_TYPE_BYTES:
+                    builder.append("dataType: DATA_TYPE_BYTES,\n");
+                    break;
+                case AppSearchSchema.PropertyConfig.DATA_TYPE_DOCUMENT:
+                    builder.append("dataType: DATA_TYPE_DOCUMENT,\n");
+                    break;
+                default:
+                    builder.append("dataType: DATA_TYPE_UNKNOWN,\n");
+            }
+            builder.decreaseIndentLevel();
+            builder.append("}");
         }
 
         /** Returns the name of this property. */
@@ -504,6 +604,41 @@ public final class AppSearchSchema {
                 bundle.putInt(INDEXING_TYPE_FIELD, mIndexingType);
                 bundle.putInt(TOKENIZER_TYPE_FIELD, mTokenizerType);
                 return new StringPropertyConfig(bundle);
+            }
+        }
+
+        /**
+         * Appends a debug string for the {@link StringPropertyConfig} instance to the given string
+         * builder.
+         *
+         * <p>This appends fields specific to a {@link StringPropertyConfig} instance.
+         *
+         * @param builder the builder to append to.
+         */
+        void appendStringPropertyConfigFields(@NonNull IndentingStringBuilder builder) {
+            switch (getIndexingType()) {
+                case AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE:
+                    builder.append("indexingType: INDEXING_TYPE_NONE,\n");
+                    break;
+                case AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS:
+                    builder.append("indexingType: INDEXING_TYPE_EXACT_TERMS,\n");
+                    break;
+                case AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES:
+                    builder.append("indexingType: INDEXING_TYPE_PREFIXES,\n");
+                    break;
+                default:
+                    builder.append("indexingType: INDEXING_TYPE_UNKNOWN,\n");
+            }
+
+            switch (getTokenizerType()) {
+                case AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_NONE:
+                    builder.append("tokenizerType: TOKENIZER_TYPE_NONE,\n");
+                    break;
+                case AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_PLAIN:
+                    builder.append("tokenizerType: TOKENIZER_TYPE_PLAIN,\n");
+                    break;
+                default:
+                    builder.append("tokenizerType: TOKENIZER_TYPE_UNKNOWN,\n");
             }
         }
     }
@@ -857,6 +992,22 @@ public final class AppSearchSchema {
                 bundle.putString(SCHEMA_TYPE_FIELD, Objects.requireNonNull(mSchemaType));
                 return new DocumentPropertyConfig(bundle);
             }
+        }
+
+        /**
+         * Appends a debug string for the {@link DocumentPropertyConfig} instance to the given
+         * string builder.
+         *
+         * <p>This appends fields specific to a {@link DocumentPropertyConfig} instance.
+         *
+         * @param builder the builder to append to.
+         */
+        void appendDocumentPropertyConfigFields(@NonNull IndentingStringBuilder builder) {
+            builder.append("shouldIndexNestedProperties: ")
+                    .append(shouldIndexNestedProperties())
+                    .append(",\n");
+
+            builder.append("schemaType: \"").append(getSchemaType()).append("\",\n");
         }
     }
 }
