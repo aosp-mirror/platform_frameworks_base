@@ -28,7 +28,6 @@ import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.util.Slog;
 
@@ -203,22 +202,16 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
     }
 
     @Override
-    protected @NonNull VibrationEffect getSuccessVibrationEffect() {
-        if (!mCustomHaptics) {
-            return super.getSuccessVibrationEffect();
-        }
-
-        return getVibration(Settings.Global.getString(mContentResolver,
-                "face_success_type"), super.getSuccessVibrationEffect());
+    protected boolean successHapticsEnabled() {
+        return mCustomHaptics
+            ? Settings.Global.getInt(mContentResolver, "face_success_enabled", 1) == 0
+            : super.successHapticsEnabled();
     }
 
     @Override
-    protected @NonNull VibrationEffect getErrorVibrationEffect() {
-        if (!mCustomHaptics) {
-            return super.getErrorVibrationEffect();
-        }
-
-        return getVibration(Settings.Global.getString(mContentResolver,
-                "face_error_type"), super.getErrorVibrationEffect());
+    protected boolean errorHapticsEnabled() {
+        return mCustomHaptics
+            ? Settings.Global.getInt(mContentResolver, "face_error_enabled", 1) == 0
+            : super.errorHapticsEnabled();
     }
 }

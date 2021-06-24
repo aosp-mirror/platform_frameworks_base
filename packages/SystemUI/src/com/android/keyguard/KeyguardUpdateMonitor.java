@@ -1369,7 +1369,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     Trace.endSection();
 
                     // on auth success, we sometimes never received an acquired haptic
-                    if (!mPlayedAcquiredHaptic) {
+                    if (!mPlayedAcquiredHaptic && isUdfpsEnrolled()) {
                         playAcquiredHaptic();
                     }
                 }
@@ -1387,7 +1387,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 @Override
                 public void onAuthenticationAcquired(int acquireInfo) {
                     handleFingerprintAcquired(acquireInfo);
-                    if (acquireInfo == FingerprintManager.FINGERPRINT_ACQUIRED_GOOD) {
+                    if (acquireInfo == FingerprintManager.FINGERPRINT_ACQUIRED_GOOD
+                            && isUdfpsEnrolled()) {
+                        mPlayedAcquiredHaptic = true;
                         playAcquiredHaptic();
                     }
                 }
@@ -1402,19 +1404,22 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 public void onUdfpsPointerUp(int sensorId) {
                     Log.d(TAG, "onUdfpsPointerUp, sensorId: " + sensorId);
                 }
-
-                private void playAcquiredHaptic() {
-                    if (mAcquiredHapticEnabled && mVibrator != null && isUdfpsEnrolled()) {
-                        mPlayedAcquiredHaptic = true;
-                        String effect = Settings.Global.getString(
-                                mContext.getContentResolver(),
-                                "udfps_acquired_type");
-                        mVibrator.vibrate(UdfpsController.getVibration(effect,
-                                UdfpsController.EFFECT_TICK),
-                                UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES);
-                    }
-                }
             };
+
+    /**
+     * Play haptic to signal udfps fingeprrint acquired.
+     */
+    @VisibleForTesting
+    public void playAcquiredHaptic() {
+        if (mAcquiredHapticEnabled && mVibrator != null) {
+            String effect = Settings.Global.getString(
+                    mContext.getContentResolver(),
+                    "udfps_acquired_type");
+            mVibrator.vibrate(UdfpsController.getVibration(effect,
+                    UdfpsController.EFFECT_TICK),
+                    UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES);
+        }
+    }
 
     private final FaceManager.FaceDetectionCallback mFaceDetectionCallback
             = (sensorId, userId, isStrongBiometric) -> {
