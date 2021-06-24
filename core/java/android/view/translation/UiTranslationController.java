@@ -424,7 +424,7 @@ public class UiTranslationController {
                     if (callback == null) {
                         if (view instanceof TextView) {
                             // developer doesn't provide their override, we set the default TextView
-                            // implememtation.
+                            // implementation.
                             callback = new TextViewTranslationCallback();
                             view.setViewTranslationCallback(callback);
                         } else {

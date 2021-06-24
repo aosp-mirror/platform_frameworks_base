@@ -129,7 +129,6 @@ import android.text.method.TextKeyListener;
 import android.text.method.TimeKeyListener;
 import android.text.method.TransformationMethod;
 import android.text.method.TransformationMethod2;
-import android.text.method.TranslationTransformationMethod;
 import android.text.method.WordIterator;
 import android.text.style.CharacterStyle;
 import android.text.style.ClickableSpan;
@@ -199,7 +198,6 @@ import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationController;
 import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
-import android.view.translation.ViewTranslationResponse;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -13945,34 +13943,5 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
         requestsCollector.accept(requestBuilder.build());
-    }
-
-    /**
-     *
-     * Called when the content from {@link #onCreateViewTranslationRequest} had been translated by
-     * the TranslationService. The default implementation will replace the current
-     * {@link TransformationMethod} to transform the original text to the translated text display.
-     *
-     * @param response a {@link ViewTranslationResponse} that contains the translated information
-     * which can be shown in the view.
-     */
-    @Override
-    public void onViewTranslationResponse(@NonNull ViewTranslationResponse response) {
-        // set ViewTranslationResponse
-        super.onViewTranslationResponse(response);
-        // TODO(b/178353965): move to ViewTranslationCallback.onShow()
-        ViewTranslationCallback callback = getViewTranslationCallback();
-        if (callback instanceof TextViewTranslationCallback) {
-            TextViewTranslationCallback textViewDefaultCallback =
-                    (TextViewTranslationCallback) callback;
-            TranslationTransformationMethod oldTranslationMethod =
-                    textViewDefaultCallback.getTranslationTransformation();
-            TransformationMethod originalTranslationMethod = oldTranslationMethod != null
-                    ? oldTranslationMethod.getOriginalTransformationMethod() : mTransformation;
-            TranslationTransformationMethod newTranslationMethod =
-                    new TranslationTransformationMethod(response, originalTranslationMethod);
-            // TODO(b/178353965): well-handle setTransformationMethod.
-            textViewDefaultCallback.setTranslationTransformation(newTranslationMethod);
-        }
     }
 }
