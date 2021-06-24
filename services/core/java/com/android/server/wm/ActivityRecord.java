@@ -278,6 +278,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.service.contentcapture.ActivityEvent;
 import android.service.dreams.DreamActivity;
 import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
@@ -328,6 +329,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.PendingIntentRecord;
+import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.uri.NeededUriGrants;
@@ -4877,6 +4879,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     app.updateProcessInfo(false /* updateServiceConnectionActivities */,
                             true /* activityChange */, true /* updateOomAdj */,
                             true /* addPendingTopUid */);
+                }
+                final ContentCaptureManagerInternal contentCaptureService =
+                        LocalServices.getService(ContentCaptureManagerInternal.class);
+                if (contentCaptureService != null) {
+                    contentCaptureService.notifyActivityEvent(mUserId, mActivityComponent,
+                            ActivityEvent.TYPE_ACTIVITY_STARTED);
                 }
                 break;
             case PAUSED:
