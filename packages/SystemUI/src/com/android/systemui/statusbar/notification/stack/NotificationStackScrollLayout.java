@@ -413,6 +413,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mBackwardScrollable;
     private NotificationShelf mShelf;
     private int mMaxDisplayedNotifications = -1;
+    private float mKeyguardBottomPadding = -1;
     private int mStatusBarHeight;
     private int mMinInteractionHeight;
     private final Rect mClipRect = new Rect();
@@ -737,6 +738,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             y = getLayoutHeight();
             mDebugPaint.setColor(Color.YELLOW);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+
+            y = (int) mMaxLayoutHeight;
+            mDebugPaint.setColor(Color.MAGENTA);
+            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+
+            if (mKeyguardBottomPadding >= 0) {
+                y = getHeight() - (int) mKeyguardBottomPadding;
+                mDebugPaint.setColor(Color.GRAY);
+                canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+            }
 
             y = getHeight() - getEmptyBottomMargin();
             mDebugPaint.setColor(Color.GREEN);
@@ -4771,6 +4782,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             updateContentHeight();
             notifyHeightChangeListener(mShelf);
         }
+    }
+
+    /**
+     * This is used for debugging only; it will be used to draw the otherwise invisible line which
+     * NotificationPanelViewController treats as the bottom when calculating how many notifications
+     * appear on the keyguard.
+     * Setting a negative number will disable rendering this line.
+     */
+    public void setKeyguardBottomPadding(float keyguardBottomPadding) {
+        mKeyguardBottomPadding = keyguardBottomPadding;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
