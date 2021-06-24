@@ -29,6 +29,8 @@ import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH;
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
+import static android.util.TypedValue.COMPLEX_UNIT_PX;
 
 import static com.android.systemui.people.PeopleSpaceUtils.STARRED_CONTACT;
 import static com.android.systemui.people.PeopleSpaceUtils.VALID_CONTACT;
@@ -43,11 +45,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.graphics.text.LineBreaker;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.IconDrawableFactory;
 import android.util.Log;
@@ -58,8 +65,11 @@ import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import androidx.annotation.DimenRes;
+import androidx.annotation.Px;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
+import androidx.core.math.MathUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.launcher3.icons.FastBitmapDrawable;
@@ -197,10 +207,14 @@ public class PeopleTileViewHelper {
      */
     private RemoteViews getViewForTile() {
         if (DEBUG) Log.d(TAG, "Creating view for tile key: " + mKey.toString());
-        if (mTile == null || mTile.isPackageSuspended() || mTile.isUserQuieted()
-                || isDndBlockingTileData(mTile)) {
+        if (mTile == null || mTile.isPackageSuspended() || mTile.isUserQuieted()) {
             if (DEBUG) Log.d(TAG, "Create suppressed view: " + mTile);
             return createSuppressedView();
+        }
+
+        if (isDndBlockingTileData(mTile)) {
+            if (DEBUG) Log.d(TAG, "Create dnd view");
+            return createDndRemoteViews().mRemoteViews;
         }
 
         if (Objects.equals(mTile.getNotificationCategory(), CATEGORY_MISSED_CALL)) {
@@ -236,7 +250,9 @@ public class PeopleTileViewHelper {
         return createLastInteractionRemoteViews();
     }
 
-    private boolean isDndBlockingTileData(PeopleSpaceTile tile) {
+    private static boolean isDndBlockingTileData(@Nullable PeopleSpaceTile tile) {
+        if (tile == null) return false;
+
         int notificationPolicyState = tile.getNotificationPolicyState();
         if ((notificationPolicyState & PeopleSpaceTile.SHOW_CONVERSATIONS) != 0) {
             // Not in DND, or all conversations
@@ -413,6 +429,11 @@ public class PeopleTileViewHelper {
             int avatarWidthSpace = mWidth - (14 + 14);
             avatarSize = Math.min(avatarHeightSpace, avatarWidthSpace);
         }
+
+        if (isDndBlockingTileData(mTile)) {
+            avatarSize = createDndRemoteViews().mAvatarSize;
+        }
+
         return Math.min(avatarSize,
                 getSizeInDp(R.dimen.max_people_avatar_size));
     }
@@ -473,6 +494,87 @@ public class PeopleTileViewHelper {
         return views;
     }
 
+    private RemoteViewsAndSizes createDndRemoteViews() {
+        boolean isHorizontal = mLayoutSize == LAYOUT_MEDIUM;
+        int layoutId = isHorizontal
+                ? R.layout.people_tile_with_suppression_detail_content_horizontal
+                : R.layout.people_tile_with_suppression_detail_content_vertical;
+        RemoteViews views = new RemoteViews(mContext.getPackageName(), layoutId);
+
+        int outerPadding = mLayoutSize == LAYOUT_LARGE ? 16 : 8;
+        int outerPaddingPx = dpToPx(outerPadding);
+        views.setViewPadding(
+                R.id.item,
+                outerPaddingPx,
+                outerPaddingPx,
+                outerPaddingPx,
+                outerPaddingPx);
+
+        int mediumAvatarSize = getSizeInDp(R.dimen.avatar_size_for_medium);
+        int maxAvatarSize = getSizeInDp(R.dimen.max_people_avatar_size);
+
+        String text = mContext.getString(R.string.paused_by_dnd);
+        views.setTextViewText(R.id.text_content, text);
+
+        int textSizeResId =
+                mLayoutSize == LAYOUT_LARGE
+                        ? R.dimen.content_text_size_for_large
+                        : R.dimen.content_text_size_for_medium;
+        float textSizePx = mContext.getResources().getDimension(textSizeResId);
+        views.setTextViewTextSize(R.id.text_content, COMPLEX_UNIT_PX, textSizePx);
+        int lineHeight = getLineHeightFromResource(textSizeResId);
+
+        int avatarSize;
+        if (isHorizontal) {
+            int maxTextHeight = mHeight - outerPadding;
+            views.setInt(R.id.text_content, "setMaxLines", maxTextHeight / lineHeight);
+            avatarSize = mediumAvatarSize;
+        } else {
+            int iconSize =
+                    getSizeInDp(
+                            mLayoutSize == LAYOUT_SMALL
+                                    ? R.dimen.regular_predefined_icon
+                                    : R.dimen.largest_predefined_icon);
+            int heightWithoutIcon = mHeight - 2 * outerPadding - iconSize;
+            int paddingBetweenElements =
+                    getSizeInDp(R.dimen.padding_between_suppressed_layout_items);
+            int maxTextWidth = mWidth - outerPadding * 2;
+            int maxTextHeight = heightWithoutIcon - mediumAvatarSize - paddingBetweenElements * 2;
+
+            int availableAvatarHeight;
+            int textHeight = estimateTextHeight(text, textSizeResId, maxTextWidth);
+            if (textHeight <= maxTextHeight) {
+                // If the text will fit, then display it and deduct its height from the space we
+                // have for the avatar.
+                availableAvatarHeight = heightWithoutIcon - textHeight - paddingBetweenElements * 2;
+                views.setViewVisibility(R.id.text_content, View.VISIBLE);
+                views.setInt(R.id.text_content, "setMaxLines", maxTextHeight / lineHeight);
+                views.setContentDescription(R.id.predefined_icon, null);
+            } else {
+                // If the height doesn't fit, then hide it. The dnd icon will still show.
+                availableAvatarHeight = heightWithoutIcon - paddingBetweenElements;
+                views.setViewVisibility(R.id.text_content, View.GONE);
+                // If we don't show the dnd text, set it as the content description on the icon
+                // for a11y.
+                views.setContentDescription(R.id.predefined_icon, text);
+            }
+
+            int availableAvatarWidth = mWidth - outerPadding * 2;
+            avatarSize =
+                    MathUtils.clamp(
+                            /* value= */ Math.min(availableAvatarWidth, availableAvatarHeight),
+                            /* min= */ dpToPx(10),
+                            /* max= */ maxAvatarSize);
+
+            views.setViewLayoutWidth(R.id.predefined_icon, iconSize, COMPLEX_UNIT_DIP);
+            views.setViewLayoutHeight(R.id.predefined_icon, iconSize, COMPLEX_UNIT_DIP);
+            views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_qs_dnd_on);
+        }
+
+        return new RemoteViewsAndSizes(views, avatarSize);
+    }
+
+
     private RemoteViews createMissedCallRemoteViews() {
         RemoteViews views = setViewForContentLayout(new RemoteViews(mContext.getPackageName(),
                 getLayoutForContent()));
@@ -486,8 +588,8 @@ public class PeopleTileViewHelper {
         views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_phone_missed);
         if (mLayoutSize == LAYOUT_LARGE) {
             views.setInt(R.id.content, "setGravity", Gravity.BOTTOM);
-            views.setViewLayoutHeightDimen(R.id.predefined_icon, R.dimen.large_predefined_icon);
-            views.setViewLayoutWidthDimen(R.id.predefined_icon, R.dimen.large_predefined_icon);
+            views.setViewLayoutHeightDimen(R.id.predefined_icon, R.dimen.larger_predefined_icon);
+            views.setViewLayoutWidthDimen(R.id.predefined_icon, R.dimen.larger_predefined_icon);
         }
         setAvailabilityDotPadding(views, R.dimen.availability_dot_notification_padding);
         return views;
@@ -932,6 +1034,14 @@ public class PeopleTileViewHelper {
         Drawable personDrawable = storyIcon.getPeopleTileDrawable(roundedDrawable,
                 tile.getPackageName(), getUserId(tile), tile.isImportantConversation(),
                 hasNewStory);
+
+        if (isDndBlockingTileData(tile)) {
+            // If DND is blocking the conversation, then display the icon in grayscale.
+            ColorMatrix colorMatrix = new ColorMatrix();
+            colorMatrix.setSaturation(0);
+            personDrawable.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+        }
+
         return convertDrawableToBitmap(personDrawable);
     }
 
@@ -958,6 +1068,71 @@ public class PeopleTileViewHelper {
         } else {
             // Over 2 weeks ago
             return context.getString(R.string.over_two_weeks_timestamp);
+        }
+    }
+
+    /**
+     * Estimates the height (in dp) which the text will have given the text size and the available
+     * width. Returns Integer.MAX_VALUE if the estimation couldn't be obtained, as this is intended
+     * to be used an estimate of the maximum.
+     */
+    private int estimateTextHeight(
+            CharSequence text,
+            @DimenRes int textSizeResId,
+            int availableWidthDp) {
+        StaticLayout staticLayout = buildStaticLayout(text, textSizeResId, availableWidthDp);
+        if (staticLayout == null) {
+            // Return max value (rather than e.g. -1) so the value can be used with <= bound checks.
+            return Integer.MAX_VALUE;
+        }
+        return pxToDp(staticLayout.getHeight());
+    }
+
+    /**
+     * Builds a StaticLayout for the text given the text size and available width. This can be used
+     * to obtain information about how TextView will lay out the text. Returns null if any error
+     * occurred creating a TextView.
+     */
+    @Nullable
+    private StaticLayout buildStaticLayout(
+            CharSequence text,
+            @DimenRes int textSizeResId,
+            int availableWidthDp) {
+        try {
+            TextView textView = new TextView(mContext);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    mContext.getResources().getDimension(textSizeResId));
+            textView.setTextAppearance(android.R.style.TextAppearance_DeviceDefault);
+            TextPaint paint = textView.getPaint();
+            return StaticLayout.Builder.obtain(
+                    text, 0, text.length(), paint, dpToPx(availableWidthDp))
+                    // Simple break strategy avoids hyphenation unless there's a single word longer
+                    // than the line width. We use this break strategy so that we consider text to
+                    // "fit" only if it fits in a nice way (i.e. without hyphenation in the middle
+                    // of words).
+                    .setBreakStrategy(LineBreaker.BREAK_STRATEGY_SIMPLE)
+                    .build();
+        } catch (Exception e) {
+            Log.e(TAG, "Could not create static layout: " + e);
+            return null;
+        }
+    }
+
+    private int dpToPx(float dp) {
+        return (int) (dp * mDensity);
+    }
+
+    private int pxToDp(@Px float px) {
+        return (int) (px / mDensity);
+    }
+
+    private static final class RemoteViewsAndSizes {
+        final RemoteViews mRemoteViews;
+        final int mAvatarSize;
+
+        RemoteViewsAndSizes(RemoteViews remoteViews, int avatarSize) {
+            mRemoteViews = remoteViews;
+            mAvatarSize = avatarSize;
         }
     }
 }
