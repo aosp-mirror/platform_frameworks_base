@@ -52,6 +52,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -108,7 +109,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         Dependency.get(Dependency.MAIN_HANDLER),
                         mock(UiEventLogger.class),
                         mock(NavigationBarOverlayController.class),
-                        mock(ConfigurationController.class)));
+                        mock(ConfigurationController.class),
+                        mock(UserTracker.class)));
         initializeNavigationBars();
     }
 

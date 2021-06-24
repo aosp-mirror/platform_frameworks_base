@@ -44,12 +44,19 @@ public final class ProviderRequest implements Parcelable {
     public static final long INTERVAL_DISABLED = Long.MAX_VALUE;
 
     public static final @NonNull ProviderRequest EMPTY_REQUEST = new ProviderRequest(
-            INTERVAL_DISABLED, QUALITY_BALANCED_POWER_ACCURACY, 0, false, false, new WorkSource());
+            INTERVAL_DISABLED,
+            QUALITY_BALANCED_POWER_ACCURACY,
+            0,
+            false,
+            false,
+            false,
+            new WorkSource());
 
     private final long mIntervalMillis;
     private final @Quality int mQuality;
     private final long mMaxUpdateDelayMillis;
     private final boolean mLowPower;
+    private final boolean mAdasGnssBypass;
     private final boolean mLocationSettingsIgnored;
     private final WorkSource mWorkSource;
 
@@ -72,12 +79,14 @@ public final class ProviderRequest implements Parcelable {
             @Quality int quality,
             long maxUpdateDelayMillis,
             boolean lowPower,
+            boolean adasGnssBypass,
             boolean locationSettingsIgnored,
             @NonNull WorkSource workSource) {
         mIntervalMillis = intervalMillis;
         mQuality = quality;
         mMaxUpdateDelayMillis = maxUpdateDelayMillis;
         mLowPower = lowPower;
+        mAdasGnssBypass = adasGnssBypass;
         mLocationSettingsIgnored = locationSettingsIgnored;
         mWorkSource = Objects.requireNonNull(workSource);
     }
@@ -126,12 +135,33 @@ public final class ProviderRequest implements Parcelable {
     }
 
     /**
+     * Returns true if this request may access GNSS even if location settings would normally deny
+     * this, in order to enable automotive safety features. This field is only respected on
+     * automotive devices, and only if the client is recognized as a legitimate ADAS (Advanced
+     * Driving Assistance Systems) application.
+     *
+     * @hide
+     */
+    public boolean isAdasGnssBypass() {
+        return mAdasGnssBypass;
+    }
+
+    /**
      * Whether the provider should ignore all location settings, user consents, power restrictions
      * or any other restricting factors and always satisfy this request to the best of their
      * ability. This should only be used in case of a user initiated emergency.
      */
     public boolean isLocationSettingsIgnored() {
         return mLocationSettingsIgnored;
+    }
+
+    /**
+     * Returns true if any bypass flag is set on this request.
+     *
+     * @hide
+     */
+    public boolean isBypass() {
+        return mAdasGnssBypass || mLocationSettingsIgnored;
     }
 
     /**
@@ -153,6 +183,7 @@ public final class ProviderRequest implements Parcelable {
                         /* quality= */ in.readInt(),
                         /* maxUpdateDelayMillis= */ in.readLong(),
                         /* lowPower= */ in.readBoolean(),
+                        /* adasGnssBypass= */ in.readBoolean(),
                         /* locationSettingsIgnored= */ in.readBoolean(),
                         /* workSource= */ in.readTypedObject(WorkSource.CREATOR));
             }
@@ -176,6 +207,7 @@ public final class ProviderRequest implements Parcelable {
             parcel.writeInt(mQuality);
             parcel.writeLong(mMaxUpdateDelayMillis);
             parcel.writeBoolean(mLowPower);
+            parcel.writeBoolean(mAdasGnssBypass);
             parcel.writeBoolean(mLocationSettingsIgnored);
             parcel.writeTypedObject(mWorkSource, flags);
         }
@@ -198,6 +230,7 @@ public final class ProviderRequest implements Parcelable {
                     && mQuality == that.mQuality
                     && mMaxUpdateDelayMillis == that.mMaxUpdateDelayMillis
                     && mLowPower == that.mLowPower
+                    && mAdasGnssBypass == that.mAdasGnssBypass
                     && mLocationSettingsIgnored == that.mLocationSettingsIgnored
                     && mWorkSource.equals(that.mWorkSource);
         }
@@ -229,8 +262,11 @@ public final class ProviderRequest implements Parcelable {
             if (mLowPower) {
                 s.append(", lowPower");
             }
+            if (mAdasGnssBypass) {
+                s.append(", adasGnssBypass");
+            }
             if (mLocationSettingsIgnored) {
-                s.append(", locationSettingsIgnored");
+                s.append(", settingsBypass");
             }
             if (!mWorkSource.isEmpty()) {
                 s.append(", ").append(mWorkSource);
@@ -246,10 +282,12 @@ public final class ProviderRequest implements Parcelable {
      * A Builder for {@link ProviderRequest}s.
      */
     public static final class Builder {
+
         private long mIntervalMillis = INTERVAL_DISABLED;
         private int mQuality = QUALITY_BALANCED_POWER_ACCURACY;
         private long mMaxUpdateDelayMillis = 0;
         private boolean mLowPower;
+        private boolean mAdasGnssBypass;
         private boolean mLocationSettingsIgnored;
         private WorkSource mWorkSource = new WorkSource();
 
@@ -299,6 +337,16 @@ public final class ProviderRequest implements Parcelable {
         }
 
         /**
+         * Sets whether this ADAS request should bypass GNSS settings. False by default.
+         *
+         * @hide
+         */
+        public @NonNull Builder setAdasGnssBypass(boolean adasGnssBypass) {
+            this.mAdasGnssBypass = adasGnssBypass;
+            return this;
+        }
+
+        /**
          * Sets whether location settings should be ignored. False by default.
          */
         public @NonNull Builder setLocationSettingsIgnored(boolean locationSettingsIgnored) {
@@ -326,6 +374,7 @@ public final class ProviderRequest implements Parcelable {
                         mQuality,
                         mMaxUpdateDelayMillis,
                         mLowPower,
+                        mAdasGnssBypass,
                         mLocationSettingsIgnored,
                         mWorkSource);
             }
