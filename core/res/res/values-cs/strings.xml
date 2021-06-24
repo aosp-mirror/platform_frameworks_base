@@ -341,7 +341,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Umožňuje aplikaci být stavovým řádkem."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"rozbalení a sbalení stavového řádku"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Umožňuje aplikaci rozbalit či sbalit stavový řádek."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalace zástupců"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instalace zástupců"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Umožňuje aplikaci přidat zástupce na plochu bez zásahu uživatele."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"odinstalace zástupců"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Umožňuje aplikaci odebrat zástupce z plochy bez zásahu uživatele."</string>
