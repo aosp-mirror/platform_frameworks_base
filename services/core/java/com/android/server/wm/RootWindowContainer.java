@@ -221,6 +221,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     // transaction from the global transaction.
     private final SurfaceControl.Transaction mDisplayTransaction;
 
+    // The tag for the token to put root tasks on the displays to sleep.
+    private static final String DISPLAY_OFF_SLEEP_TOKEN_TAG = "Display-off";
+
     /** The token acquirer to put root tasks on the displays to sleep */
     final ActivityTaskManagerInternal.SleepTokenAcquirer mDisplayOffTokenAcquirer;
 
@@ -450,7 +453,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mService = service.mAtmService;
         mTaskSupervisor = mService.mTaskSupervisor;
         mTaskSupervisor.mRootWindowContainer = this;
-        mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl("Display-off");
+        mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl(DISPLAY_OFF_SLEEP_TOKEN_TAG);
     }
 
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
@@ -2657,12 +2660,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             Slog.d(TAG, "Remove non-exist sleep token: " + token + " from " + Debug.getCallers(6));
         }
         mSleepTokens.remove(token.mHashKey);
-
         final DisplayContent display = getDisplayContent(token.mDisplayId);
         if (display != null) {
             display.mAllSleepTokens.remove(token);
             if (display.mAllSleepTokens.isEmpty()) {
                 mService.updateSleepIfNeededLocked();
+                if (token.mTag.equals(DISPLAY_OFF_SLEEP_TOKEN_TAG)) {
+                    display.mSkipAppTransitionAnimation = true;
+                }
             }
         }
     }
