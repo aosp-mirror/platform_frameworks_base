@@ -662,16 +662,18 @@ static void android_view_ThreadedRenderer_setASurfaceTransactionCallback(
         auto globalCallbackRef =
                 std::make_shared<JWeakGlobalRefHolder>(vm, aSurfaceTransactionCallback);
         proxy->setASurfaceTransactionCallback(
-                [globalCallbackRef](int64_t transObj, int64_t scObj, int64_t frameNr) {
+                [globalCallbackRef](int64_t transObj, int64_t scObj, int64_t frameNr) -> bool {
                     JNIEnv* env = getenv(globalCallbackRef->vm());
                     jobject localref = env->NewLocalRef(globalCallbackRef->ref());
                     if (CC_UNLIKELY(!localref)) {
-                        return;
+                        return false;
                     }
-                    env->CallVoidMethod(localref, gASurfaceTransactionCallback.onMergeTransaction,
-                                        static_cast<jlong>(transObj), static_cast<jlong>(scObj),
-                                        static_cast<jlong>(frameNr));
+                    jboolean ret = env->CallBooleanMethod(
+                            localref, gASurfaceTransactionCallback.onMergeTransaction,
+                            static_cast<jlong>(transObj), static_cast<jlong>(scObj),
+                            static_cast<jlong>(frameNr));
                     env->DeleteLocalRef(localref);
+                    return ret;
                 });
     }
 }
@@ -1064,7 +1066,7 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
     jclass aSurfaceTransactionCallbackClass =
             FindClassOrDie(env, "android/graphics/HardwareRenderer$ASurfaceTransactionCallback");
     gASurfaceTransactionCallback.onMergeTransaction =
-            GetMethodIDOrDie(env, aSurfaceTransactionCallbackClass, "onMergeTransaction", "(JJJ)V");
+            GetMethodIDOrDie(env, aSurfaceTransactionCallbackClass, "onMergeTransaction", "(JJJ)Z");
 
     jclass prepareSurfaceControlForWebviewCallbackClass = FindClassOrDie(
             env, "android/graphics/HardwareRenderer$PrepareSurfaceControlForWebviewCallback");
