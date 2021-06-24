@@ -16,6 +16,9 @@
 
 package android.window;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.WindowingMode;
+
 import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -46,17 +49,20 @@ public final class TaskFragmentCreationParams implements Parcelable {
     @NonNull
     private final IBinder mOwnerToken;
 
-    /** The initial bounds of the TaskFragment. Fill parent if empty. */
+    /** The initial bounds of the TaskFragment. Fills parent if empty. */
     @NonNull
     private final Rect mInitialBounds = new Rect();
 
+    /** The initial windowing mode of the TaskFragment. Inherits from parent if not set. */
+    @WindowingMode
+    private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
+
     private TaskFragmentCreationParams(
             @NonNull ITaskFragmentOrganizer organizer, @NonNull IBinder fragmentToken,
-            @NonNull IBinder ownerToken, @NonNull Rect initialBounds) {
+            @NonNull IBinder ownerToken) {
         mOrganizer = organizer;
         mFragmentToken = fragmentToken;
         mOwnerToken = ownerToken;
-        mInitialBounds.set(initialBounds);
     }
 
     public ITaskFragmentOrganizer getOrganizer() {
@@ -75,11 +81,17 @@ public final class TaskFragmentCreationParams implements Parcelable {
         return mInitialBounds;
     }
 
+    @WindowingMode
+    public int getWindowingMode() {
+        return mWindowingMode;
+    }
+
     private TaskFragmentCreationParams(Parcel in) {
         mOrganizer = ITaskFragmentOrganizer.Stub.asInterface(in.readStrongBinder());
         mFragmentToken = in.readStrongBinder();
         mOwnerToken = in.readStrongBinder();
         mInitialBounds.readFromParcel(in);
+        mWindowingMode = in.readInt();
     }
 
     @Override
@@ -88,6 +100,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
         dest.writeStrongBinder(mFragmentToken);
         dest.writeStrongBinder(mOwnerToken);
         mInitialBounds.writeToParcel(dest, flags);
+        dest.writeInt(mWindowingMode);
     }
 
     @NonNull
@@ -111,11 +124,59 @@ public final class TaskFragmentCreationParams implements Parcelable {
                 + " fragmentToken=" + mFragmentToken
                 + " ownerToken=" + mOwnerToken
                 + " initialBounds=" + mInitialBounds
+                + " windowingMode=" + mWindowingMode
                 + "}";
     }
 
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /** Builder to construct the options to create TaskFragment with. */
+    public static class Builder {
+
+        @NonNull
+        private final ITaskFragmentOrganizer mOrganizer;
+
+        @NonNull
+        private final IBinder mFragmentToken;
+
+        @NonNull
+        private final IBinder mOwnerToken;
+
+        @NonNull
+        private final Rect mInitialBounds = new Rect();
+
+        @WindowingMode
+        private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
+
+        public Builder(@NonNull ITaskFragmentOrganizer organizer, @NonNull IBinder fragmentToken,
+                @NonNull IBinder ownerToken) {
+            mOrganizer = organizer;
+            mFragmentToken = fragmentToken;
+            mOwnerToken = ownerToken;
+        }
+
+        /** Sets the initial bounds for the TaskFragment. */
+        public Builder setInitialBounds(@NonNull Rect bounds) {
+            mInitialBounds.set(bounds);
+            return this;
+        }
+
+        /** Sets the initial windowing mode for the TaskFragment. */
+        public Builder setWindowingMode(@WindowingMode int windowingMode) {
+            mWindowingMode = windowingMode;
+            return this;
+        }
+
+        /** Constructs the options to create TaskFragment with. */
+        public TaskFragmentCreationParams build() {
+            final TaskFragmentCreationParams result = new TaskFragmentCreationParams(
+                    mOrganizer, mFragmentToken, mOwnerToken);
+            result.mInitialBounds.set(mInitialBounds);
+            result.mWindowingMode = mWindowingMode;
+            return result;
+        }
     }
 }
