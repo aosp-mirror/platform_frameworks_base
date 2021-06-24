@@ -453,14 +453,6 @@ public class ScreenshotView extends FrameLayout implements
                 mCornerSizeX / (mOrientationPortrait ? bounds.width() : bounds.height());
         final float currentScale = 1 / cornerScale;
 
-        mScreenshotPreview.setScaleX(currentScale);
-        mScreenshotPreview.setScaleY(currentScale);
-
-        if (mAccessibilityManager.isEnabled()) {
-            mDismissButton.setAlpha(0);
-            mDismissButton.setVisibility(View.VISIBLE);
-        }
-
         AnimatorSet dropInAnimation = new AnimatorSet();
         ValueAnimator flashInAnimator = ValueAnimator.ofFloat(0, 1);
         flashInAnimator.setDuration(SCREENSHOT_FLASH_IN_DURATION_MS);
@@ -491,6 +483,20 @@ public class ScreenshotView extends FrameLayout implements
 
         ValueAnimator toCorner = ValueAnimator.ofFloat(0, 1);
         toCorner.setDuration(SCREENSHOT_TO_CORNER_Y_DURATION_MS);
+
+        toCorner.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mScreenshotPreview.setScaleX(currentScale);
+                mScreenshotPreview.setScaleY(currentScale);
+                mScreenshotPreview.setVisibility(View.VISIBLE);
+                if (mAccessibilityManager.isEnabled()) {
+                    mDismissButton.setAlpha(0);
+                    mDismissButton.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
         float xPositionPct =
                 SCREENSHOT_TO_CORNER_X_DURATION_MS / (float) SCREENSHOT_TO_CORNER_Y_DURATION_MS;
         float dismissPct =
@@ -531,13 +537,6 @@ public class ScreenshotView extends FrameLayout implements
                 } else {
                     mDismissButton.setX(currentX - mDismissButton.getWidth() / 2f);
                 }
-            }
-        });
-
-        toCorner.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                mScreenshotPreview.setVisibility(View.VISIBLE);
             }
         });
 
