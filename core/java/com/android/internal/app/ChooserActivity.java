@@ -464,8 +464,8 @@ public class ChooserActivity extends ResolverActivity implements
         private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 5;
         private static final int LIST_VIEW_UPDATE_MESSAGE = 6;
 
-        private static final int WATCHDOG_TIMEOUT_MAX_MILLIS = 10000;
-        private static final int WATCHDOG_TIMEOUT_MIN_MILLIS = 3000;
+        private static final int WATCHDOG_TIMEOUT_MAX_MILLIS = 1000;
+        private static final int WATCHDOG_TIMEOUT_MIN_MILLIS = 300;
 
         private boolean mMinTimeoutPassed = false;
 
