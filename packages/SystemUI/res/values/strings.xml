@@ -2952,6 +2952,8 @@
     <string name="people_tile_description">See recent messages, missed calls, and status updates</string>
     <!-- Title text displayed for the Conversation widget [CHAR LIMIT=50] -->
     <string name="people_tile_title">Conversation</string>
+    <!-- Text when the Conversation widget when Do Not Disturb is suppressing the notification. [CHAR LIMIT=50] -->
+    <string name="paused_by_dnd">Paused by Do Not Disturb</string>
     <!-- Content description text on the Conversation widget when a person has sent a new text message [CHAR LIMIT=150] -->
     <string name="new_notification_text_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent a message</string>
     <!-- Content description text on the Conversation widget when a person has sent a new image message [CHAR LIMIT=150] -->
