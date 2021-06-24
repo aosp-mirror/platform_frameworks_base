@@ -23,8 +23,8 @@ import javax.inject.Inject;
 @SysUISingleton
 public final class NavigationBarA11yHelper implements
         AccessibilityButtonModeObserver.ModeChangedListener {
-    private int mA11yBtnMode;
     private final AccessibilityManager mAccessibilityManager;
+    private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final List<NavA11yEventListener> mA11yEventListeners = new ArrayList<>();
 
     @Inject
@@ -32,10 +32,11 @@ public final class NavigationBarA11yHelper implements
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             AccessibilityButtonModeObserver accessibilityButtonModeObserver) {
         mAccessibilityManager = accessibilityManager;
-        mA11yBtnMode = accessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
         accessibilityManagerWrapper.addCallback(
                 accessibilityManager1 -> NavigationBarA11yHelper.this.dispatchEventUpdate());
-        accessibilityButtonModeObserver.addListener(this);
+        mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
+
+        mAccessibilityButtonModeObserver.addListener(this);
     }
 
     public void registerA11yEventListener(NavA11yEventListener listener) {
@@ -54,7 +55,6 @@ public final class NavigationBarA11yHelper implements
 
     @Override
     public void onAccessibilityButtonModeChanged(int mode) {
-        mA11yBtnMode = mode;
         dispatchEventUpdate();
     }
 
@@ -75,7 +75,8 @@ public final class NavigationBarA11yHelper implements
 
         // If accessibility button is floating menu mode, click and long click state should be
         // disabled.
-        if (mA11yBtnMode == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
+        if (mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()
+                == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
             return 0;
         }
 
