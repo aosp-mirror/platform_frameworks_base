@@ -546,6 +546,10 @@ public final class LoadedApk {
         if (aInfo.sharedLibraryFiles != null) {
             int index = 0;
             for (String lib : aInfo.sharedLibraryFiles) {
+                // sharedLibraryFiles might contain native shared libraries that are not APK paths.
+                if (!lib.endsWith(".apk")) {
+                    continue;
+                }
                 if (!outSeenPaths.contains(lib) && !outZipPaths.contains(lib)) {
                     outZipPaths.add(index, lib);
                     index++;
