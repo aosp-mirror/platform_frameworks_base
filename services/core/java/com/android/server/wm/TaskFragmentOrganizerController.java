@@ -17,7 +17,9 @@
 package com.android.server.wm;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
+import static com.android.server.wm.WindowOrganizerController.configurationsAreEqualForOrganizer;
 
+import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -27,11 +29,13 @@ import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
 import android.window.TaskFragmentAppearedInfo;
+import android.window.TaskFragmentInfo;
 
 import com.android.internal.protolog.common.ProtoLog;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * Stores and manages the client {@link android.window.TaskFragmentOrganizer}.
@@ -43,6 +47,10 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     private final WindowManagerGlobalLock mGlobalLock;
     private final Set<ITaskFragmentOrganizer> mOrganizers = new ArraySet<>();
     private final Map<ITaskFragmentOrganizer, DeathRecipient> mDeathRecipients = new ArrayMap<>();
+    private final Map<TaskFragment, TaskFragmentInfo> mLastSentTaskFragmentInfos =
+            new WeakHashMap<>();
+    private final Map<TaskFragment, Configuration> mLastSentTaskFragmentParentConfigs =
+            new WeakHashMap<>();
 
     private class DeathRecipient implements IBinder.DeathRecipient {
         final ITaskFragmentOrganizer mOrganizer;
@@ -118,43 +126,75 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     void onTaskFragmentAppeared(ITaskFragmentOrganizer organizer, TaskFragment tf) {
+        validateOrganizer(organizer);
+
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "TaskFragment appeared name=%s", tf.getName());
+        final TaskFragmentInfo info = tf.getTaskFragmentInfo();
+        final SurfaceControl outSurfaceControl = new SurfaceControl(tf.getSurfaceControl(),
+                "TaskFragmentOrganizerController.onTaskFragmentInfoAppeared");
         try {
-            final SurfaceControl outSurfaceControl = new SurfaceControl(tf.getSurfaceControl(),
-                    "TaskFragmentOrganizerController.onTaskFragmentInfoAppeared");
             organizer.onTaskFragmentAppeared(
-                    new TaskFragmentAppearedInfo(tf.getTaskFragmentInfo(), outSurfaceControl));
+                    new TaskFragmentAppearedInfo(info, outSurfaceControl));
+            mLastSentTaskFragmentInfos.put(tf, info);
         } catch (RemoteException e) {
             // Oh well...
         }
     }
 
     void onTaskFragmentInfoChanged(ITaskFragmentOrganizer organizer, TaskFragment tf) {
+        validateOrganizer(organizer);
+
+        // Check if the info is different from the last reported info.
+        final TaskFragmentInfo info = tf.getTaskFragmentInfo();
+        final TaskFragmentInfo lastInfo = mLastSentTaskFragmentInfos.get(tf);
+        if (info.equalsForTaskFragmentOrganizer(lastInfo) && configurationsAreEqualForOrganizer(
+                info.getConfiguration(), lastInfo.getConfiguration())) {
+            return;
+        }
+
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "TaskFragment info changed name=%s", tf.getName());
         try {
             organizer.onTaskFragmentInfoChanged(tf.getTaskFragmentInfo());
+            mLastSentTaskFragmentInfos.put(tf, info);
         } catch (RemoteException e) {
             // Oh well...
         }
     }
 
     void onTaskFragmentVanished(ITaskFragmentOrganizer organizer, TaskFragment tf) {
+        validateOrganizer(organizer);
+
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "TaskFragment vanished name=%s", tf.getName());
         try {
             organizer.onTaskFragmentVanished(tf.getTaskFragmentInfo());
         } catch (RemoteException e) {
             // Oh well...
         }
+        mLastSentTaskFragmentInfos.remove(tf);
+        mLastSentTaskFragmentParentConfigs.remove(tf);
     }
 
     void onTaskFragmentParentInfoChanged(ITaskFragmentOrganizer organizer, TaskFragment tf) {
+        validateOrganizer(organizer);
+
+        // Check if the parent info is different from the last reported parent info.
+        if (tf.getParent() == null || tf.getParent().asTask() == null) {
+            mLastSentTaskFragmentParentConfigs.remove(tf);
+            return;
+        }
         final Task parent = tf.getParent().asTask();
+        final Configuration parentConfig = parent.getConfiguration();
+        final Configuration lastParentConfig = mLastSentTaskFragmentParentConfigs.get(tf);
+        if (configurationsAreEqualForOrganizer(parentConfig, lastParentConfig)) {
+            return;
+        }
+
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
                 "TaskFragment parent info changed name=%s parentTaskId=%d",
                 tf.getName(), parent.mTaskId);
         try {
-            organizer.onTaskFragmentParentInfoChanged(
-                    tf.getFragmentToken(), parent.getConfiguration());
+            organizer.onTaskFragmentParentInfoChanged(tf.getFragmentToken(), parentConfig);
+            mLastSentTaskFragmentParentConfigs.put(tf, parentConfig);
         } catch (RemoteException e) {
             // Oh well...
         }
@@ -166,5 +206,18 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             mDeathRecipients.remove(organizer);
         }
         // TODO(b/190432728) move child activities of organized TaskFragment to leaf Task
+    }
+
+    /**
+     * Makes sure that the organizer has been correctly registered to prevent any Sidecar
+     * implementation from organizing {@link TaskFragment} without registering first. In such case,
+     * we wouldn't register {@link DeathRecipient} for the organizer, and might not remove the
+     * {@link TaskFragment} after the organizer process died.
+     */
+    private void validateOrganizer(ITaskFragmentOrganizer organizer) {
+        if (!mOrganizers.contains(organizer)) {
+            throw new IllegalArgumentException(
+                    "TaskFragmentOrganizer has not been registered. Organizer=" + organizer);
+        }
     }
 }
