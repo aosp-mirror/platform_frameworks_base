@@ -191,19 +191,18 @@ static void setPowerBoostWithHandle(sp<IPowerAidl> handle, Boost boost, int32_t 
     static std::array<std::atomic<HalSupport>,
                       static_cast<int32_t>(Boost::DISPLAY_UPDATE_IMMINENT) + 1>
             boostSupportedArray = {HalSupport::UNKNOWN};
+    size_t idx = static_cast<size_t>(boost);
 
     // Quick return if boost is not supported by HAL
-    if (boost > Boost::DISPLAY_UPDATE_IMMINENT ||
-        boostSupportedArray[static_cast<int32_t>(boost)] == HalSupport::OFF) {
+    if (idx >= boostSupportedArray.size() || boostSupportedArray[idx] == HalSupport::OFF) {
         ALOGV("Skipped setPowerBoost %s because HAL doesn't support it", toString(boost).c_str());
         return;
     }
 
-    if (boostSupportedArray[static_cast<int32_t>(boost)] == HalSupport::UNKNOWN) {
+    if (boostSupportedArray[idx] == HalSupport::UNKNOWN) {
         bool isSupported = false;
         handle->isBoostSupported(boost, &isSupported);
-        boostSupportedArray[static_cast<int32_t>(boost)] =
-            isSupported ? HalSupport::ON : HalSupport::OFF;
+        boostSupportedArray[idx] = isSupported ? HalSupport::ON : HalSupport::OFF;
         if (!isSupported) {
             ALOGV("Skipped setPowerBoost %s because HAL doesn't support it",
                   toString(boost).c_str());
@@ -231,19 +230,18 @@ static bool setPowerModeWithHandle(sp<IPowerAidl> handle, Mode mode, bool enable
     // Need to increase the array if more mode supported.
     static std::array<std::atomic<HalSupport>, static_cast<int32_t>(Mode::DISPLAY_INACTIVE) + 1>
             modeSupportedArray = {HalSupport::UNKNOWN};
+    size_t idx = static_cast<size_t>(mode);
 
     // Quick return if mode is not supported by HAL
-    if (mode > Mode::DISPLAY_INACTIVE ||
-        modeSupportedArray[static_cast<int32_t>(mode)] == HalSupport::OFF) {
+    if (idx >= modeSupportedArray.size() || modeSupportedArray[idx] == HalSupport::OFF) {
         ALOGV("Skipped setPowerMode %s because HAL doesn't support it", toString(mode).c_str());
         return false;
     }
 
-    if (modeSupportedArray[static_cast<int32_t>(mode)] == HalSupport::UNKNOWN) {
+    if (modeSupportedArray[idx] == HalSupport::UNKNOWN) {
         bool isSupported = false;
         handle->isModeSupported(mode, &isSupported);
-        modeSupportedArray[static_cast<int32_t>(mode)] =
-            isSupported ? HalSupport::ON : HalSupport::OFF;
+        modeSupportedArray[idx] = isSupported ? HalSupport::ON : HalSupport::OFF;
         if (!isSupported) {
             ALOGV("Skipped setPowerMode %s because HAL doesn't support it", toString(mode).c_str());
             return false;

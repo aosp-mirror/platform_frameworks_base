@@ -18,6 +18,7 @@ package android.telephony.ims.aidl;
 
 import android.telephony.ims.DelegateRegistrationState;
 import android.telephony.ims.FeatureTagState;
+import android.telephony.ims.SipDelegateConfiguration;
 import android.telephony.ims.SipDelegateImsConfiguration;
 import android.telephony.ims.aidl.ISipDelegate;
 
@@ -30,5 +31,6 @@ oneway interface ISipDelegateConnectionStateCallback {
     void onFeatureTagStatusChanged(in DelegateRegistrationState registrationState,
                 in List<FeatureTagState> deniedFeatureTags);
     void onImsConfigurationChanged(in SipDelegateImsConfiguration registeredSipConfig);
+    void onConfigurationChanged(in SipDelegateConfiguration registeredSipConfig);
     void onDestroyed(int reason);
 }

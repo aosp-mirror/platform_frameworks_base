@@ -305,7 +305,7 @@ public abstract class CallScreeningService extends Service {
              * called with {@code false}, and all other parameters in this builder will be ignored.
              * <p>
              * This request will only be honored if the {@link CallScreeningService} shares the same
-             * uid as the default dialer app. Otherwise, the call will go through as usual.
+             * uid as the system dialer app. Otherwise, the call will go through as usual.
              * <p>
              * Apps built with SDK version {@link android.os.Build.VERSION_CODES#R} or later which
              * are using the microphone as part of audio processing should specify the

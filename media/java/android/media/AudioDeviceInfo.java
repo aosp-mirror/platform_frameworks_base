@@ -23,6 +23,7 @@ import android.util.SparseIntArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.TreeSet;
 
@@ -467,9 +468,32 @@ public final class AudioDeviceInfo {
      * @see AudioFormat
      *
      * Note: an empty array indicates that the device supports arbitrary encodings.
+     * For forward compatibility, applications should ignore entries it does not recognize.
      */
     public @NonNull int[] getEncodings() {
-        return AudioFormat.filterPublicFormats(mPort.formats());
+        final int[] encodings = AudioFormat.filterPublicFormats(mPort.formats());
+        boolean hasFloat = false;
+        boolean hasExtendedIntegerPrecision = false;
+
+        for (int encoding : encodings) {
+            if (AudioFormat.isEncodingLinearPcm(encoding)) {
+                if (encoding == AudioFormat.ENCODING_PCM_FLOAT) {
+                    hasFloat = true;
+                } else if (AudioFormat.getBytesPerSample(encoding) > 2) {
+                    hasExtendedIntegerPrecision = true;
+                }
+            }
+        }
+        if (hasExtendedIntegerPrecision && !hasFloat) {
+            // R and earlier compatibility - add ENCODING_PCM_FLOAT to the end
+            // (replacing the zero pad). This ensures pre-S apps that look
+            // for ENCODING_PCM_FLOAT continue to see that encoding if the device supports
+            // extended precision integers.
+            int[] encodingsPlusFloat = Arrays.copyOf(encodings, encodings.length + 1);
+            encodingsPlusFloat[encodings.length] = AudioFormat.ENCODING_PCM_FLOAT;
+            return encodingsPlusFloat;
+        }
+        return encodings;
     }
 
     /**

@@ -25,6 +25,7 @@ import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
+import android.apex.CompressedApexInfoList;
 import android.apex.IApexService;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -355,6 +356,21 @@ public abstract class ApexManager {
      * Inform apexd that the boot has completed.
      */
     public abstract void markBootCompleted();
+
+    /**
+     * Estimate how much storage space is needed on /data/ for decompressing apexes
+     * @param infoList List of apexes that are compressed in target build.
+     * @return Size, in bytes, the amount of space needed on /data/
+     */
+    public abstract long calculateSizeForCompressedApex(CompressedApexInfoList infoList)
+            throws RemoteException;
+
+    /**
+     * Reserve space on /data so that apexes can be decompressed after OTA
+     * @param infoList List of apexes that are compressed in target build.
+     */
+    public abstract void reserveSpaceForCompressedApex(CompressedApexInfoList infoList)
+            throws RemoteException;
 
     /**
      * Dumps various state information to the provided {@link PrintWriter} object.
@@ -766,12 +782,15 @@ public abstract class ApexManager {
         void registerApkInApex(AndroidPackage pkg) {
             synchronized (mLock) {
                 for (ActiveApexInfo aai : mActiveApexInfosCache) {
-                    if (pkg.getBaseCodePath().startsWith(aai.apexDirectory.getAbsolutePath())) {
+                    if (pkg.getBaseCodePath().startsWith(
+                            aai.apexDirectory.getAbsolutePath() + File.separator)) {
                         List<String> apks = mApksInApex.get(aai.apexModuleName);
                         if (apks == null) {
                             apks = Lists.newArrayList();
                             mApksInApex.put(aai.apexModuleName, apks);
                         }
+                        Slog.i(TAG, "Registering " + pkg.getPackageName() + " as apk-in-apex of "
+                                + aai.apexModuleName);
                         apks.add(pkg.getPackageName());
                     }
                 }
@@ -896,6 +915,18 @@ public abstract class ApexManager {
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
             }
+        }
+
+        @Override
+        public long calculateSizeForCompressedApex(CompressedApexInfoList infoList)
+                throws RemoteException {
+            return waitForApexService().calculateSizeForCompressedApex(infoList);
+        }
+
+        @Override
+        public void reserveSpaceForCompressedApex(CompressedApexInfoList infoList)
+                throws RemoteException {
+            waitForApexService().reserveSpaceForCompressedApex(infoList);
         }
 
         /**
@@ -1147,6 +1178,16 @@ public abstract class ApexManager {
         @Override
         public void markBootCompleted() {
             // No-op
+        }
+
+        @Override
+        public long calculateSizeForCompressedApex(CompressedApexInfoList infoList) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void reserveSpaceForCompressedApex(CompressedApexInfoList infoList) {
+            throw new UnsupportedOperationException();
         }
 
         @Override

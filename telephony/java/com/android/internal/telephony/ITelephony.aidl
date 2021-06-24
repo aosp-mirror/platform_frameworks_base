@@ -2032,6 +2032,11 @@ interface ITelephony {
     int setImsProvisioningString(int subId, int key, String value);
 
     /**
+     * Start emergency callback mode for testing.
+     */
+    void startEmergencyCallbackMode();
+
+    /**
      * Update Emergency Number List for Test Mode.
      */
     void updateEmergencyNumberListTestMode(int action, in EmergencyNumber num);
@@ -2396,6 +2401,18 @@ interface ITelephony {
      * Note: This is designed for a SHELL command only.
      */
     String getLastUcePidfXmlShell(int subId);
+
+    /**
+      * Remove UCE requests cannot be sent to the network status.
+      * Note: This is designed for a SHELL command only.
+      */
+    boolean removeUceRequestDisallowedStatus(int subId);
+
+    /**
+     * Set the timeout for contact capabilities request.
+     * Note: This is designed for a SHELL command only.
+     */
+    boolean setCapabilitiesRequestTimeout(int subId, long timeoutAfterMs);
 
     /**
      * Set a SignalStrengthUpdateRequest to receive notification when Signal Strength breach the

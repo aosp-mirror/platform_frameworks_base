@@ -21,6 +21,11 @@ import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static android.content.pm.UserInfo.FLAG_PROFILE;
 import static android.os.UserHandle.USER_SYSTEM;
 
+import static com.android.internal.widget.LockSettingsInternal.ARM_REBOOT_ERROR_ESCROW_NOT_READY;
+import static com.android.internal.widget.LockSettingsInternal.ARM_REBOOT_ERROR_NONE;
+import static com.android.internal.widget.LockSettingsInternal.ARM_REBOOT_ERROR_PROVIDER_MISMATCH;
+import static com.android.internal.widget.LockSettingsInternal.ARM_REBOOT_ERROR_STORE_ESCROW_KEY;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -107,13 +112,12 @@ public class RebootEscrowManagerTests {
     private MockableRebootEscrowInjected mInjected;
     private RebootEscrowManager mService;
     private SecretKey mAesKey;
+    private MockInjector mMockInjector;
 
     public interface MockableRebootEscrowInjected {
         int getBootCount();
 
         long getCurrentTimeMillis();
-
-        boolean forceServerBased();
 
         void reportMetric(boolean success, int errorCode, int serviceType, int attemptCount,
                 int escrowDurationInSeconds, int vbmetaDigestStatus, int durationSinceBootComplete);
@@ -122,11 +126,12 @@ public class RebootEscrowManagerTests {
     static class MockInjector extends RebootEscrowManager.Injector {
         private final IRebootEscrow mRebootEscrow;
         private final ResumeOnRebootServiceConnection mServiceConnection;
-        private final RebootEscrowProviderInterface mRebootEscrowProvider;
+        private final RebootEscrowProviderInterface mDefaultRebootEscrowProvider;
         private final UserManager mUserManager;
         private final MockableRebootEscrowInjected mInjected;
         private final RebootEscrowKeyStoreManager mKeyStoreManager;
-        private final boolean mServerBased;
+        private boolean mServerBased;
+        private RebootEscrowProviderInterface mRebootEscrowProviderInUse;
 
         MockInjector(Context context, UserManager userManager,
                 IRebootEscrow rebootEscrow,
@@ -144,7 +149,7 @@ public class RebootEscrowManagerTests {
                             return mRebootEscrow;
                         }
                     };
-            mRebootEscrowProvider = new RebootEscrowProviderHalImpl(halInjector);
+            mDefaultRebootEscrowProvider = new RebootEscrowProviderHalImpl(halInjector);
             mUserManager = userManager;
             mKeyStoreManager = keyStoreManager;
             mInjected = injected;
@@ -160,8 +165,19 @@ public class RebootEscrowManagerTests {
             mRebootEscrow = null;
             mServerBased = true;
             RebootEscrowProviderServerBasedImpl.Injector injector =
-                    new RebootEscrowProviderServerBasedImpl.Injector(serviceConnection);
-            mRebootEscrowProvider = new RebootEscrowProviderServerBasedImpl(storage, injector);
+                    new RebootEscrowProviderServerBasedImpl.Injector(serviceConnection) {
+                        @Override
+                        long getServiceTimeoutInSeconds() {
+                            return 30;
+                        }
+
+                        @Override
+                        long getServerBlobLifetimeInMillis() {
+                            return 600_000;
+                        }
+                    };
+            mDefaultRebootEscrowProvider = new RebootEscrowProviderServerBasedImpl(
+                    storage, injector);
             mUserManager = userManager;
             mKeyStoreManager = keyStoreManager;
             mInjected = injected;
@@ -179,15 +195,28 @@ public class RebootEscrowManagerTests {
 
         @Override
         public boolean serverBasedResumeOnReboot() {
-            if (mInjected.forceServerBased()) {
-                return true;
-            }
             return mServerBased;
         }
 
         @Override
+        public boolean isNetworkConnected() {
+            return false;
+        }
+
+        @Override
+        public RebootEscrowProviderInterface createRebootEscrowProviderIfNeeded() {
+            mRebootEscrowProviderInUse = mDefaultRebootEscrowProvider;
+            return mRebootEscrowProviderInUse;
+        }
+
+        @Override
         public RebootEscrowProviderInterface getRebootEscrowProvider() {
-            return mRebootEscrowProvider;
+            return mRebootEscrowProviderInUse;
+        }
+
+        @Override
+        public void clearRebootEscrowProvider() {
+            mRebootEscrowProviderInUse = null;
         }
 
         @Override
@@ -259,13 +288,15 @@ public class RebootEscrowManagerTests {
         when(mCallbacks.isUserSecure(NONSECURE_SECONDARY_USER_ID)).thenReturn(false);
         when(mCallbacks.isUserSecure(SECURE_SECONDARY_USER_ID)).thenReturn(true);
         mInjected = mock(MockableRebootEscrowInjected.class);
-        mService = new RebootEscrowManager(new MockInjector(mContext, mUserManager, mRebootEscrow,
-                mKeyStoreManager, mStorage, mInjected), mCallbacks, mStorage);
+        mMockInjector = new MockInjector(mContext, mUserManager, mRebootEscrow,
+                mKeyStoreManager, mStorage, mInjected);
+        mService = new RebootEscrowManager(mMockInjector, mCallbacks, mStorage);
     }
 
     private void setServerBasedRebootEscrowProvider() throws Exception {
-        mService = new RebootEscrowManager(new MockInjector(mContext, mUserManager,
-                mServiceConnection, mKeyStoreManager, mStorage, mInjected), mCallbacks, mStorage);
+        mMockInjector = new MockInjector(mContext, mUserManager, mServiceConnection,
+                mKeyStoreManager, mStorage, mInjected);
+        mService = new RebootEscrowManager(mMockInjector, mCallbacks, mStorage);
     }
 
     @Test
@@ -312,6 +343,7 @@ public class RebootEscrowManagerTests {
         doThrow(ServiceSpecificException.class).when(mRebootEscrow).storeKey(any());
         mService.clearRebootEscrow();
         verify(mRebootEscrow).storeKey(eq(new byte[32]));
+        assertNull(mMockInjector.getRebootEscrowProvider());
     }
 
     @Test
@@ -327,7 +359,7 @@ public class RebootEscrowManagerTests {
 
         assertNull(
                 mStorage.getString(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, null, USER_SYSTEM));
-        assertTrue(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_NONE, mService.armRebootEscrowIfNeeded());
         assertNotNull(
                 mStorage.getString(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, null, USER_SYSTEM));
         verify(mRebootEscrow).storeKey(any());
@@ -351,7 +383,7 @@ public class RebootEscrowManagerTests {
 
         when(mServiceConnection.wrapBlob(any(), anyLong(), anyLong()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        assertTrue(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_NONE, mService.armRebootEscrowIfNeeded());
         verify(mServiceConnection).wrapBlob(any(), anyLong(), anyLong());
 
         assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
@@ -373,7 +405,7 @@ public class RebootEscrowManagerTests {
         assertNull(
                 mStorage.getString(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, null, USER_SYSTEM));
         doThrow(ServiceSpecificException.class).when(mRebootEscrow).storeKey(any());
-        assertFalse(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_STORE_ESCROW_KEY, mService.armRebootEscrowIfNeeded());
         verify(mRebootEscrow).storeKey(any());
     }
 
@@ -396,7 +428,7 @@ public class RebootEscrowManagerTests {
 
         assertNull(
                 mStorage.getString(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, null, USER_SYSTEM));
-        assertTrue(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_NONE, mService.armRebootEscrowIfNeeded());
         assertNotNull(
                 mStorage.getString(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, null, USER_SYSTEM));
         verify(mRebootEscrow, times(1)).storeKey(any());
@@ -408,15 +440,24 @@ public class RebootEscrowManagerTests {
 
     @Test
     public void armService_NoInitialization_Failure() throws Exception {
-        assertFalse(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_ESCROW_NOT_READY, mService.armRebootEscrowIfNeeded());
         verifyNoMoreInteractions(mRebootEscrow);
     }
 
     @Test
     public void armService_RebootEscrowServiceException_Failure() throws Exception {
+        RebootEscrowListener mockListener = mock(RebootEscrowListener.class);
+        mService.setRebootEscrowListener(mockListener);
+        mService.prepareRebootEscrow();
+
+        clearInvocations(mRebootEscrow);
+        mService.callToRebootEscrowIfNeeded(PRIMARY_USER_ID, FAKE_SP_VERSION, FAKE_AUTH_TOKEN);
+        verify(mockListener).onPreparedForReboot(eq(true));
+        verify(mRebootEscrow, never()).storeKey(any());
+
         doThrow(RemoteException.class).when(mRebootEscrow).storeKey(any());
-        assertFalse(mService.armRebootEscrowIfNeeded());
-        verifyNoMoreInteractions(mRebootEscrow);
+        assertEquals(ARM_REBOOT_ERROR_STORE_ESCROW_KEY, mService.armRebootEscrowIfNeeded());
+        verify(mRebootEscrow).storeKey(any());
     }
 
     @Test
@@ -439,7 +480,7 @@ public class RebootEscrowManagerTests {
         verify(mRebootEscrow, never()).storeKey(any());
 
         ArgumentCaptor<byte[]> keyByteCaptor = ArgumentCaptor.forClass(byte[].class);
-        assertTrue(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_NONE, mService.armRebootEscrowIfNeeded());
         verify(mRebootEscrow).storeKey(keyByteCaptor.capture());
         verify(mKeyStoreManager).getKeyStoreEncryptionKey();
 
@@ -483,7 +524,7 @@ public class RebootEscrowManagerTests {
         // Use x -> x for both wrap & unwrap functions.
         when(mServiceConnection.wrapBlob(any(), anyLong(), anyLong()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        assertTrue(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_NONE, mService.armRebootEscrowIfNeeded());
         verify(mServiceConnection).wrapBlob(any(), anyLong(), anyLong());
         assertTrue(mStorage.hasRebootEscrowServerBlob());
 
@@ -520,7 +561,7 @@ public class RebootEscrowManagerTests {
         // Use x -> x for both wrap & unwrap functions.
         when(mServiceConnection.wrapBlob(any(), anyLong(), anyLong()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        assertTrue(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_NONE, mService.armRebootEscrowIfNeeded());
         verify(mServiceConnection).wrapBlob(any(), anyLong(), anyLong());
         assertTrue(mStorage.hasRebootEscrowServerBlob());
 
@@ -557,7 +598,7 @@ public class RebootEscrowManagerTests {
         // Use x -> x for both wrap & unwrap functions.
         when(mServiceConnection.wrapBlob(any(), anyLong(), anyLong()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        assertTrue(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_NONE, mService.armRebootEscrowIfNeeded());
         verify(mServiceConnection).wrapBlob(any(), anyLong(), anyLong());
         assertTrue(mStorage.hasRebootEscrowServerBlob());
 
@@ -576,7 +617,7 @@ public class RebootEscrowManagerTests {
         // Sleep 5s for the retry to complete
         Thread.sleep(5 * 1000);
         assertFalse(metricsSuccessCaptor.getValue());
-        assertEquals(Integer.valueOf(RebootEscrowManager.ERROR_RETRY_COUNT_EXHAUSTED),
+        assertEquals(Integer.valueOf(RebootEscrowManager.ERROR_NO_NETWORK),
                 metricsErrorCodeCaptor.getValue());
     }
 
@@ -597,7 +638,7 @@ public class RebootEscrowManagerTests {
         // Use x -> x for both wrap & unwrap functions.
         when(mServiceConnection.wrapBlob(any(), anyLong(), anyLong()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        assertTrue(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_NONE, mService.armRebootEscrowIfNeeded());
         verify(mServiceConnection).wrapBlob(any(), anyLong(), anyLong());
         assertTrue(mStorage.hasRebootEscrowServerBlob());
 
@@ -635,7 +676,7 @@ public class RebootEscrowManagerTests {
 
         verify(mRebootEscrow, never()).storeKey(any());
 
-        assertTrue(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_NONE, mService.armRebootEscrowIfNeeded());
         verify(mRebootEscrow).storeKey(any());
 
         assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
@@ -695,7 +736,7 @@ public class RebootEscrowManagerTests {
         verify(mRebootEscrow, never()).storeKey(any());
 
         ArgumentCaptor<byte[]> keyByteCaptor = ArgumentCaptor.forClass(byte[].class);
-        assertTrue(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_NONE, mService.armRebootEscrowIfNeeded());
         verify(mRebootEscrow).storeKey(keyByteCaptor.capture());
 
         assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
@@ -732,8 +773,7 @@ public class RebootEscrowManagerTests {
         verify(mockListener).onPreparedForReboot(eq(true));
 
         verify(mRebootEscrow, never()).storeKey(any());
-
-        assertTrue(mService.armRebootEscrowIfNeeded());
+        assertEquals(ARM_REBOOT_ERROR_NONE, mService.armRebootEscrowIfNeeded());
         verify(mRebootEscrow).storeKey(any());
 
         assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
@@ -755,5 +795,29 @@ public class RebootEscrowManagerTests {
         assertFalse(metricsSuccessCaptor.getValue());
         assertEquals(Integer.valueOf(RebootEscrowManager.ERROR_LOAD_ESCROW_KEY),
                 metricsErrorCodeCaptor.getValue());
+    }
+
+    @Test
+    public void armServiceProviderMismatch_Failure() throws Exception {
+        RebootEscrowListener mockListener = mock(RebootEscrowListener.class);
+        mService.setRebootEscrowListener(mockListener);
+        mService.prepareRebootEscrow();
+
+        clearInvocations(mRebootEscrow);
+        mService.callToRebootEscrowIfNeeded(PRIMARY_USER_ID, FAKE_SP_VERSION, FAKE_AUTH_TOKEN);
+        verify(mockListener).onPreparedForReboot(eq(true));
+        assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
+        verify(mRebootEscrow, never()).storeKey(any());
+
+        assertNull(
+                mStorage.getString(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, null, USER_SYSTEM));
+        // Change the provider to server based, expect the reboot to fail
+        mMockInjector.mServerBased = true;
+        assertEquals(ARM_REBOOT_ERROR_PROVIDER_MISMATCH, mService.armRebootEscrowIfNeeded());
+        assertNull(
+                mStorage.getString(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, null, USER_SYSTEM));
+        // Verify that the escrow key & data have been cleared.
+        verify(mRebootEscrow).storeKey(eq(new byte[32]));
+        assertFalse(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
     }
 }

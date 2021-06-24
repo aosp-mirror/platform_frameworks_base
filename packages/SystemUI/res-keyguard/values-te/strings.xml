@@ -38,6 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • వేగంగా ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • నెమ్మదిగా ఛార్జ్ అవుతోంది"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • బ్యాటరీ జీవితకాలాన్ని పెంచడం కోసం ఆప్టిమైజ్ చేస్తోంది"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"మీ ఛార్జర్‌ను కనెక్ట్ చేయండి."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"అన్‌లాక్ చేయడానికి మెనుని నొక్కండి."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"నెట్‌వర్క్ లాక్ చేయబడింది"</string>
@@ -134,7 +135,7 @@
       <item quantity="other">SIM ఇప్పుడు నిలిపివేయబడింది. PUK కోడ్‌ను నమోదు చేయండి. SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="_NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి. వివరాల కోసం కారియర్‌ను సంప్రదించండి.</item>
       <item quantity="one">SIM ఇప్పుడు నిలిపివేయబడింది. PUK కోడ్‌ను నమోదు చేయండి. SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="_NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది వివరాల కోసం కారియర్‌ను సంప్రదించండి.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6342735240617459864">"డిఫాల్ట్"</string>
+    <string name="clock_title_default" msgid="6342735240617459864">"ఆటోమేటిక్"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"బబుల్"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ఎనలాగ్"</string>
 </resources>

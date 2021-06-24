@@ -14,6 +14,8 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import static androidx.lifecycle.Lifecycle.State.CREATED;
+import static androidx.lifecycle.Lifecycle.State.DESTROYED;
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
 import static androidx.lifecycle.Lifecycle.State.STARTED;
 
@@ -54,7 +56,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.plugins.ActivityStarter;
@@ -92,12 +93,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     protected final QSHost mHost;
     protected final Context mContext;
     // @NonFinalForTesting
-    protected H mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
-    protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
+    protected final H mHandler;
+    protected final Handler mUiHandler;
     private final ArraySet<Object> mListeners = new ArraySet<>();
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
-    private final StatusBarStateController
-            mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+    private final MetricsLogger mMetricsLogger;
+    private final StatusBarStateController mStatusBarStateController;
+    protected final ActivityStarter mActivityStarter;
     private final UiEventLogger mUiEventLogger;
     private final QSLogger mQSLogger;
 
@@ -150,14 +151,30 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      */
     abstract public int getMetricsCategory();
 
-    protected QSTileImpl(QSHost host) {
+    protected QSTileImpl(
+            QSHost host,
+            Looper backgroundLooper,
+            Handler mainHandler,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger
+    ) {
         mHost = host;
         mContext = host.getContext();
         mInstanceId = host.getNewInstanceId();
+        mUiEventLogger = host.getUiEventLogger();
+
+        mUiHandler = mainHandler;
+        mHandler = new H(backgroundLooper);
+        mQSLogger = qsLogger;
+        mMetricsLogger = metricsLogger;
+        mStatusBarStateController = statusBarStateController;
+        mActivityStarter = activityStarter;
+
         mState = newTileState();
         mTmpState = newTileState();
-        mQSLogger = host.getQSLogger();
-        mUiEventLogger = host.getUiEventLogger();
+        mUiHandler.post(() -> mLifecycle.setCurrentState(CREATED));
     }
 
     protected final void resetStates() {
@@ -357,8 +374,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      * {@link QSTileImpl#getLongClickIntent}
      */
     protected void handleLongClick() {
-        Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
-                getLongClickIntent(), 0);
+        mActivityStarter.postStartActivityDismissingKeyguard(getLongClickIntent(), 0);
     }
 
     /**
@@ -437,15 +453,24 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         if (listening) {
             if (mListeners.add(listener) && mListeners.size() == 1) {
                 if (DEBUG) Log.d(TAG, "handleSetListening true");
-                mLifecycle.setCurrentState(RESUMED);
                 handleSetListening(listening);
-                refreshState(); // Ensure we get at least one refresh after listening.
+                mUiHandler.post(() -> {
+                    // This tile has been destroyed, the state should not change anymore and we
+                    // should not refresh it anymore.
+                    if (mLifecycle.getCurrentState().equals(DESTROYED)) return;
+                    mLifecycle.setCurrentState(RESUMED);
+                    refreshState(); // Ensure we get at least one refresh after listening.
+                });
             }
         } else {
             if (mListeners.remove(listener) && mListeners.size() == 0) {
                 if (DEBUG) Log.d(TAG, "handleSetListening false");
-                mLifecycle.setCurrentState(STARTED);
                 handleSetListening(listening);
+                mUiHandler.post(() -> {
+                    // This tile has been destroyed, the state should not change anymore.
+                    if (mLifecycle.getCurrentState().equals(DESTROYED)) return;
+                    mLifecycle.setCurrentState(STARTED);
+                });
             }
         }
         updateIsFullQs();
@@ -472,9 +497,14 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mQSLogger.logTileDestroyed(mTileSpec, "Handle destroy");
         if (mListeners.size() != 0) {
             handleSetListening(false);
+            mListeners.clear();
         }
         mCallbacks.clear();
         mHandler.removeCallbacksAndMessages(null);
+        // This will force it to be removed from all controllers that may have it registered.
+        mUiHandler.post(() -> {
+            mLifecycle.setCurrentState(DESTROYED);
+        });
     }
 
     protected void checkIfRestrictionEnforcedByAdminOnly(State state, String userRestriction) {
@@ -530,7 +560,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         private static final int REMOVE_CALLBACKS = 11;
         private static final int REMOVE_CALLBACK = 12;
         private static final int SET_LISTENING = 13;
-        private static final int STALE = 14;
+        @VisibleForTesting
+        protected static final int STALE = 14;
 
         @VisibleForTesting
         protected H(Looper looper) {
@@ -555,8 +586,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                     if (mState.disabledByPolicy) {
                         Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
                                 mContext, mEnforcedAdmin);
-                        Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
-                                intent, 0);
+                        mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
                     } else {
                         handleClick();
                     }

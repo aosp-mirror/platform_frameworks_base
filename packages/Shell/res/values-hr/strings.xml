@@ -28,7 +28,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Odaberite za dijeljenje izvješća o pogrešci bez snimke zaslona ili pričekajte da se izradi snimka"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Dodirnite za dijeljenje izvješća o pogrešci bez snimke zaslona ili pričekajte da se izradi snimka"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Dodirnite za dijeljenje izvješća o pogrešci bez snimke zaslona ili pričekajte da se izradi snimka"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"Izvješća o programskim pogreškama sadržavaju podatke iz različitih datoteka zapisnika sustava, što može uključivati podatke koje smatrate osjetljivima (na primjer podatke o upotrebi aplikacije i lokaciji). Izvješća o programskim pogreškama dijelite samo s osobama i aplikacijama koje smatrate pouzdanima."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Izvješća o programskim pogreškama sadržavaju podatke iz različitih datoteka zapisnika sustava, što može uključivati podatke koje smatrate osjetljivim (na primjer podatke o upotrebi aplikacije i lokaciji). Izvješća o programskim pogreškama dijelite samo s osobama i aplikacijama koje smatrate pouzdanim."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Ne prikazuj ponovo"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Izvj. o prog. pogreš."</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Izvješće o programskoj pogrešci nije pročitano"</string>

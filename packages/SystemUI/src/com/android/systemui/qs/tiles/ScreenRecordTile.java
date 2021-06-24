@@ -17,15 +17,22 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Switch;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
@@ -44,9 +51,19 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     private Callback mCallback = new Callback();
 
     @Inject
-    public ScreenRecordTile(QSHost host, RecordingController controller,
-            KeyguardDismissUtil keyguardDismissUtil) {
-        super(host);
+    public ScreenRecordTile(
+            QSHost host,
+            @Background Looper backgroundLooper,
+            @Main Handler mainHandler,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            RecordingController controller,
+            KeyguardDismissUtil keyguardDismissUtil
+    ) {
+        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
+                activityStarter, qsLogger);
         mController = controller;
         mController.observe(this, mCallback);
         mKeyguardDismissUtil = keyguardDismissUtil;

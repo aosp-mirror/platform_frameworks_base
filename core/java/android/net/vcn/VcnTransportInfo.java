@@ -16,6 +16,9 @@
 
 package android.net.vcn;
 
+import static android.net.NetworkCapabilities.REDACT_NONE;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.TransportInfo;
@@ -37,6 +40,9 @@ import java.util.Objects;
  * SubscriptionManager#INVALID_SUBSCRIPTION_ID}. If the underlying Network is Cellular, the WifiInfo
  * will be {@code null}.
  *
+ * <p>Receipt of a VcnTransportInfo requires the NETWORK_SETTINGS permission; else the entire
+ * VcnTransportInfo instance will be redacted.
+ *
  * @hide
  */
 public class VcnTransportInfo implements TransportInfo, Parcelable {
@@ -44,7 +50,7 @@ public class VcnTransportInfo implements TransportInfo, Parcelable {
     private final int mSubId;
 
     public VcnTransportInfo(@NonNull WifiInfo wifiInfo) {
-        this(wifiInfo, SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+        this(wifiInfo, INVALID_SUBSCRIPTION_ID);
     }
 
     public VcnTransportInfo(int subId) {
@@ -52,11 +58,6 @@ public class VcnTransportInfo implements TransportInfo, Parcelable {
     }
 
     private VcnTransportInfo(@Nullable WifiInfo wifiInfo, int subId) {
-        if (wifiInfo == null && subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-            throw new IllegalArgumentException(
-                    "VcnTransportInfo requires either non-null WifiInfo or valid subId");
-        }
-
         mWifiInfo = wifiInfo;
         mSubId = subId;
     }
@@ -80,7 +81,7 @@ public class VcnTransportInfo implements TransportInfo, Parcelable {
      * SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
      *
      * @return the Subscription ID if a cellular underlying Network is present, else {@link
-     *     android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID}.
+     *     android.telephony.SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
      */
     public int getSubId() {
         return mSubId;
@@ -95,7 +96,6 @@ public class VcnTransportInfo implements TransportInfo, Parcelable {
     public boolean equals(Object o) {
         if (!(o instanceof VcnTransportInfo)) return false;
         final VcnTransportInfo that = (VcnTransportInfo) o;
-
         return Objects.equals(mWifiInfo, that.mWifiInfo) && mSubId == that.mSubId;
     }
 
@@ -105,17 +105,37 @@ public class VcnTransportInfo implements TransportInfo, Parcelable {
         return 0;
     }
 
+    @Override
+    @NonNull
+    public TransportInfo makeCopy(long redactions) {
+        return new VcnTransportInfo(
+                (mWifiInfo == null) ? null : mWifiInfo.makeCopy(redactions), mSubId);
+    }
+
+    @Override
+    public long getApplicableRedactions() {
+        return (mWifiInfo == null) ? REDACT_NONE : mWifiInfo.getApplicableRedactions();
+    }
+
     /** {@inheritDoc} */
     @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {}
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(mSubId);
+        dest.writeParcelable(mWifiInfo, flags);
+    }
+
+    @Override
+    public String toString() {
+        return "VcnTransportInfo { mWifiInfo = " + mWifiInfo + ", mSubId = " + mSubId + " }";
+    }
 
     /** Implement the Parcelable interface */
     public static final @NonNull Creator<VcnTransportInfo> CREATOR =
             new Creator<VcnTransportInfo>() {
                 public VcnTransportInfo createFromParcel(Parcel in) {
-                    // return null instead of a default VcnTransportInfo to avoid leaking
-                    // information about this being a VCN Network (instead of macro cellular, etc)
-                    return null;
+                    final int subId = in.readInt();
+                    final WifiInfo wifiInfo = in.readParcelable(null);
+                    return new VcnTransportInfo(wifiInfo, subId);
                 }
 
                 public VcnTransportInfo[] newArray(int size) {

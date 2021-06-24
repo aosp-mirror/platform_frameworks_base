@@ -386,10 +386,9 @@ public final class BatteryStatsManager {
      * @param uid Uid of this event. For the active state it represents the uid that was responsible
      *            for waking the radio, or -1 if the system was responsible for waking the radio.
      *            For inactive state, the UID should always be -1.
-     * @throws RuntimeException if there are binder remote-invocation errors.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void reportMobileRadioPowerState(boolean isActive, int uid) throws RuntimeException {
+    public void reportMobileRadioPowerState(boolean isActive, int uid) {
         try {
             mBatteryStats.noteMobileRadioPowerState(getDataConnectionPowerState(isActive),
                     SystemClock.elapsedRealtimeNanos(), uid);
@@ -405,10 +404,9 @@ public final class BatteryStatsManager {
      * @param uid Uid of this event. For the active state it represents the uid that was responsible
      *            for waking the radio, or -1 if the system was responsible for waking the radio.
      *            For inactive state, the UID should always be -1.
-     * @throws RuntimeException if there are binder remote-invocation errors.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void reportWifiRadioPowerState(boolean isActive, int uid) throws RuntimeException {
+    public void reportWifiRadioPowerState(boolean isActive, int uid) {
         try {
             mBatteryStats.noteWifiRadioPowerState(getDataConnectionPowerState(isActive),
                     SystemClock.elapsedRealtimeNanos(), uid);

@@ -313,7 +313,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private final LocalLog mListenLog = new LocalLog(200);
 
-    private List<PhysicalChannelConfig> mPhysicalChannelConfigs;
+    private List<List<PhysicalChannelConfig>> mPhysicalChannelConfigs;
 
     private boolean[] mIsDataEnabled;
 
@@ -583,9 +583,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPreciseDataConnectionStates.add(new ArrayMap<>());
             mBarringInfo.add(i, new BarringInfo());
             mTelephonyDisplayInfos[i] = null;
-            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
             mIsDataEnabled[i] = false;
             mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
+            mPhysicalChannelConfigs.add(i, new ArrayList<>());
             mAllowedNetworkTypeReason[i] = -1;
             mAllowedNetworkTypeValue[i] = -1;
             mLinkCapacityEstimateLists.add(i, new ArrayList<>());
@@ -683,9 +683,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPreciseDataConnectionStates.add(new ArrayMap<>());
             mBarringInfo.add(i, new BarringInfo());
             mTelephonyDisplayInfos[i] = null;
-            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
             mIsDataEnabled[i] = false;
             mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
+            mPhysicalChannelConfigs.add(i, new ArrayList<>());
             mAllowedNetworkTypeReason[i] = -1;
             mAllowedNetworkTypeValue[i] = -1;
             mLinkCapacityEstimateLists.add(i, new ArrayList<>());
@@ -1176,8 +1176,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onPhysicalChannelConfigChanged(
                                 shouldSanitizeLocationForPhysicalChannelConfig(r)
-                                        ? getLocationSanitizedConfigs(mPhysicalChannelConfigs)
-                                        : mPhysicalChannelConfigs);
+                                        ? getLocationSanitizedConfigs(
+                                                mPhysicalChannelConfigs.get(phoneId))
+                                        : mPhysicalChannelConfigs.get(phoneId));
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -2369,11 +2370,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
      * Send a notification to registrants that the configs of physical channel has changed for
      * a particular subscription.
      *
+     * @param phoneId the phone id.
      * @param subId the subId
      * @param configs a list of {@link PhysicalChannelConfig}, the configs of physical channel.
      */
-    public void notifyPhysicalChannelConfigForSubscriber(
-            int subId, List<PhysicalChannelConfig> configs) {
+    public void notifyPhysicalChannelConfigForSubscriber(int phoneId, int subId,
+            List<PhysicalChannelConfig> configs) {
         if (!checkNotifyPermission("notifyPhysicalChannelConfig()")) {
             return;
         }
@@ -2385,9 +2387,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
 
         synchronized (mRecords) {
-            int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
-                mPhysicalChannelConfigs.set(phoneId, configs.get(phoneId));
+                mPhysicalChannelConfigs.set(phoneId, configs);
                 for (Record r : mRecords) {
                     if (r.matchTelephonyCallbackEvent(
                             TelephonyCallback.EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED)
@@ -2594,6 +2595,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mDataEnabledReason=" + mDataEnabledReason);
                 pw.println("mAllowedNetworkTypeReason=" + mAllowedNetworkTypeReason[i]);
                 pw.println("mAllowedNetworkTypeValue=" + mAllowedNetworkTypeValue[i]);
+                pw.println("mPhysicalChannelConfigs=" + mPhysicalChannelConfigs.get(i));
                 pw.println("mLinkCapacityEstimateList=" + mLinkCapacityEstimateLists.get(i));
                 pw.decreaseIndent();
             }
@@ -2604,7 +2606,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mEmergencyNumberList=" + mEmergencyNumberList);
             pw.println("mDefaultPhoneId=" + mDefaultPhoneId);
             pw.println("mDefaultSubId=" + mDefaultSubId);
-            pw.println("mPhysicalChannelConfigs=" + mPhysicalChannelConfigs);
 
             pw.decreaseIndent();
 
@@ -2872,6 +2873,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             // If we're enforcing fine starting in Q, we also want to enforce coarse even for
             // older SDK versions.
             locationQueryBuilder.setMinSdkVersionForCoarse(0);
+            locationQueryBuilder.setMinSdkVersionForCoarse(0);
+            locationQueryBuilder.setMinSdkVersionForEnforcement(0);
             shouldCheckLocationPermissions = true;
         }
 
@@ -3000,6 +3003,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    private boolean checkFineLocationAccess(Record r) {
+        return checkFineLocationAccess(r, Build.VERSION_CODES.BASE);
+    }
+
+    private boolean checkCoarseLocationAccess(Record r) {
+        return checkCoarseLocationAccess(r, Build.VERSION_CODES.BASE);
+    }
+
     /**
      * Note -- this method should only be used at the site of a permission check if you need to
      * explicitly allow apps below a certain SDK level access regardless of location permissions.
@@ -3015,6 +3026,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         .setMethod("TelephonyRegistry push")
                         .setLogAsInfo(true) // we don't need to log an error every time we push
                         .setMinSdkVersionForFine(minSdk)
+                        .setMinSdkVersionForCoarse(minSdk)
+                        .setMinSdkVersionForEnforcement(minSdk)
                         .build();
 
         return Binder.withCleanCallingIdentity(() -> {
@@ -3039,6 +3052,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         .setMethod("TelephonyRegistry push")
                         .setLogAsInfo(true) // we don't need to log an error every time we push
                         .setMinSdkVersionForCoarse(minSdk)
+                        .setMinSdkVersionForFine(Integer.MAX_VALUE)
+                        .setMinSdkVersionForEnforcement(minSdk)
                         .build();
 
         return Binder.withCleanCallingIdentity(() -> {

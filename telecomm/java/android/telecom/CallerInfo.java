@@ -406,8 +406,7 @@ public class CallerInfo {
         // Change the callerInfo number ONLY if it is an emergency number
         // or if it is the voicemail number.  If it is either, take a
         // shortcut and skip the query.
-        TelephonyManager tm = context.getSystemService(TelephonyManager.class);
-        if (tm.isEmergencyNumber(number)) {
+        if (PhoneNumberUtils.isLocalEmergencyNumber(context, number)) {
             return new CallerInfo().markAsEmergency(context);
         } else if (PhoneNumberUtils.isVoiceMailNumber(null, subId, number)) {
             return new CallerInfo().markAsVoiceMail(context, subId);

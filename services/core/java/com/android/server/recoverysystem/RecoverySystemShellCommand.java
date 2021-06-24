@@ -17,6 +17,7 @@
 package com.android.server.recoverysystem;
 
 import android.os.IRecoverySystem;
+import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 
@@ -76,7 +77,8 @@ public class RecoverySystemShellCommand extends ShellCommand {
     private int rebootAndApply() throws RemoteException {
         String packageName = getNextArgRequired();
         String rebootReason = getNextArgRequired();
-        boolean success = mService.rebootWithLskf(packageName, rebootReason, false);
+        boolean success = (mService.rebootWithLskf(packageName, rebootReason, false)
+                == RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_NONE);
         PrintWriter pw = getOutPrintWriter();
         // Keep the old message for cts test.
         pw.printf("%s Reboot and apply status: %s\n", packageName,

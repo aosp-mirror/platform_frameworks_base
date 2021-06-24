@@ -146,79 +146,23 @@ stubs_defaults {
         " --hide-package com.google.android.startop.iorap" +
         " --hide DeprecationMismatch" +
         " --hide HiddenTypedefConstant",
-    visibility: ["//visibility:private"],
+    visibility: ["//frameworks/base:__subpackages__"],
     filter_packages: ["com.android."],
 }
 
 droidstubs {
-    name: "services-stubs.sources",
-    srcs: [":services-all-sources"],
+    name: "services-non-updatable-stubs",
+    srcs: [":services-non-updatable-sources"],
     defaults: ["services-stubs-default"],
     check_api: {
         current: {
             api_file: "api/current.txt",
             removed_api_file: "api/removed.txt",
         },
-        last_released: {
-            api_file: ":android.api.system-server.latest",
-            removed_api_file: ":removed.api.system-server.latest",
-            baseline_file: ":android-incompatibilities.api.system-server.latest",
-        },
-        api_lint: {
-            enabled: true,
-            new_since: ":android.api.system-server.latest",
-            baseline_file: "api/lint-baseline.txt",
-        },
-    },
-    dists: [
-        {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
-            dir: "apistubs/android/system-server/api",
-            dest: "android.txt",
-            tag: ".api.txt",
-        },
-        {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
-            dir: "apistubs/android/system-server/api",
-            dest: "removed.txt",
-            tag: ".removed-api.txt",
-        },
-    ],
-}
-
-java_library {
-    name: "android_system_server_stubs_current",
-    defaults: ["android_stubs_dists_default"],
-    srcs: [":services-stubs.sources"],
-    installable: false,
-    static_libs: ["android_module_lib_stubs_current"],
-    sdk_version: "none",
-    system_modules: "none",
-    java_version: "1.8",
-    dist: {
-        dir: "apistubs/android/system-server",
-    },
-}
-
-droidstubs {
-    name: "services-non-updatable-stubs.sources",
-    srcs: [":services-non-updatable-sources"],
-    defaults: ["services-stubs-default"],
-    check_api: {
-        current: {
-            api_file: "api/non-updatable-current.txt",
-            removed_api_file: "api/non-updatable-removed.txt",
-        },
         api_lint: {
             enabled: true,
             new_since: ":android-non-updatable.api.system-server.latest",
-            baseline_file: "api/non-updatable-lint-baseline.txt",
+            baseline_file: "api/lint-baseline.txt",
         },
     },
     dists: [

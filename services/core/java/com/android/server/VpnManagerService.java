@@ -605,7 +605,7 @@ public class VpnManagerService extends IVpnManager.Stub {
             return null;
         } else {
             final UnderlyingNetworkInfo info = vpn.getUnderlyingNetworkInfo();
-            return (info == null || info.ownerUid != uid) ? null : vpn;
+            return (info == null || info.getOwnerUid() != uid) ? null : vpn;
         }
     }
 

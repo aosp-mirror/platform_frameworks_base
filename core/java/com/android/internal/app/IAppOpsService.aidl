@@ -32,7 +32,7 @@ import com.android.internal.app.MessageSamplingConfig;
 
 interface IAppOpsService {
     // These methods are also called by native code, so must
-    // be kept in sync with frameworks/native/libs/binder/include/binder/IAppOpsService.h
+    // be kept in sync with frameworks/native/libs/permission/include/binder/IAppOpsService.h
     // and not be reordered
     int checkOperation(int code, int uid, String packageName);
     int noteOperation(int code, int uid, String packageName, @nullable String attributionTag,

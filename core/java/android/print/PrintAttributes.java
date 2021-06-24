@@ -635,6 +635,50 @@ public final class PrintAttributes implements Parcelable {
         public static final MediaSize NA_FOOLSCAP =
                 new MediaSize("NA_FOOLSCAP", "android",
                         R.string.mediasize_na_foolscap, 8000, 13000);
+        /** North America ANSI C media size: 17" x 22" (432mm x 559mm) */
+        public static final @NonNull MediaSize ANSI_C =
+                new MediaSize("ANSI_C", "android",
+                        R.string.mediasize_na_ansi_c, 17000, 22000);
+        /** North America ANSI D media size: 22" x 34" (559mm x 864mm) */
+        public static final @NonNull MediaSize ANSI_D =
+                new MediaSize("ANSI_D", "android",
+                        R.string.mediasize_na_ansi_d, 22000, 34000);
+        /** North America ANSI E media size: 34" x 44" (864mm x 1118mm) */
+        public static final @NonNull MediaSize ANSI_E =
+                new MediaSize("ANSI_E", "android",
+                        R.string.mediasize_na_ansi_e, 34000, 44000);
+        /** North America ANSI F media size: 28" x 40" (711mm x 1016mm) */
+        public static final @NonNull MediaSize ANSI_F =
+                new MediaSize("ANSI_F", "android",
+                        R.string.mediasize_na_ansi_f, 28000, 40000);
+        /** North America Arch A media size: 9" x 12" (229mm x 305mm) */
+        public static final @NonNull MediaSize NA_ARCH_A =
+                new MediaSize("NA_ARCH_A", "android",
+                        R.string.mediasize_na_arch_a, 9000, 12000);
+        /** North America Arch B media size: 12" x 18" (305mm x 457mm) */
+        public static final @NonNull MediaSize NA_ARCH_B =
+                new MediaSize("NA_ARCH_B", "android",
+                        R.string.mediasize_na_arch_b, 12000, 18000);
+        /** North America Arch C media size: 18" x 24" (457mm x 610mm) */
+        public static final @NonNull MediaSize NA_ARCH_C =
+                new MediaSize("NA_ARCH_C", "android",
+                        R.string.mediasize_na_arch_c, 18000, 24000);
+        /** North America Arch D media size: 24" x 36" (610mm x 914mm) */
+        public static final @NonNull MediaSize NA_ARCH_D =
+                new MediaSize("NA_ARCH_D", "android",
+                        R.string.mediasize_na_arch_d, 24000, 36000);
+        /** North America Arch E media size: 36" x 48" (914mm x 1219mm) */
+        public static final @NonNull MediaSize NA_ARCH_E =
+                new MediaSize("NA_ARCH_E", "android",
+                        R.string.mediasize_na_arch_e, 36000, 48000);
+        /** North America Arch E1 media size: 30" x 42" (762mm x 1067mm) */
+        public static final @NonNull MediaSize NA_ARCH_E1 =
+                new MediaSize("NA_ARCH_E1", "android",
+                        R.string.mediasize_na_arch_e1, 30000, 42000);
+        /** North America Super B media size: 13" x 19" (330mm x 483mm) */
+        public static final @NonNull MediaSize NA_SUPER_B =
+                new MediaSize("NA_SUPER_B", "android",
+                        R.string.mediasize_na_super_b, 13000, 19000);
 
         // Chinese
 
@@ -792,6 +836,10 @@ public final class PrintAttributes implements Parcelable {
         public static final MediaSize JPN_YOU4 =
                 new MediaSize("JPN_YOU4", "android",
                         R.string.mediasize_japanese_you4, 4134, 9252);
+        /** Japanese Photo L media size: 89mm x 127mm (3.5 x 5") */
+        public static final @NonNull MediaSize JPN_OE_PHOTO_L =
+                new MediaSize("JPN_OE_PHOTO_L", "android",
+                        R.string.mediasize_japanese_l, 3500, 5000);
 
         private final @NonNull String mId;
         /**@hide */

@@ -800,7 +800,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         if (!mService.isPowerStandbyOrTransient()) {
             addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
-            if (isConnected(avr.getPortId()) && isArcFeatureEnabled(avr.getPortId())
+            if (!isDirectConnectAddress(avr.getPhysicalAddress())) {
+                startArcAction(false);
+            } else if (isConnected(avr.getPortId()) && isArcFeatureEnabled(avr.getPortId())
                     && !hasAction(SetArcTransmissionStateAction.class)) {
                 startArcAction(true);
             }

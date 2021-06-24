@@ -637,18 +637,18 @@ public final class AccessNetworkConstants {
             this.band = band;
             this.downlinkLowKhz = downlinkLowKhz;
             this.downlinkOffset = downlinkOffset;
+            this.downlinkRange = downlinkRange;
             this.uplinkLowKhz = uplinkLowKhz;
             this.uplinkOffset = uplinkOffset;
-            this.downlinkRange = downlinkRange;
             this.uplinkRange = uplinkRange;
         }
 
         int band;
         int downlinkLowKhz;
         int downlinkOffset;
+        int downlinkRange;
         int uplinkLowKhz;
         int uplinkOffset;
-        int downlinkRange;
         int uplinkRange;
     }
 

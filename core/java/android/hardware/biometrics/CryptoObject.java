@@ -18,7 +18,7 @@ package android.hardware.biometrics;
 
 import android.annotation.NonNull;
 import android.security.identity.IdentityCredential;
-import android.security.keystore.AndroidKeyStoreProvider;
+import android.security.keystore2.AndroidKeyStoreProvider;
 
 import java.security.Signature;
 

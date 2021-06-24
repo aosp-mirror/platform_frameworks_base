@@ -561,7 +561,20 @@ public class DynamicSystemInstallationService extends Service
                 break;
         }
 
-        Log.d(TAG, "status=" + statusString + ", cause=" + causeString + ", detail=" + detail);
+        StringBuilder msg = new StringBuilder();
+        msg.append("status: " + statusString + ", cause: " + causeString);
+        if (status == STATUS_IN_PROGRESS) {
+            msg.append(
+                    String.format(
+                            ", partition name: %s, progress: %d/%d",
+                            mCurrentPartitionName,
+                            mCurrentPartitionInstalledSize,
+                            mCurrentPartitionSize));
+        }
+        if (detail != null) {
+            msg.append(", detail: " + detail);
+        }
+        Log.d(TAG, msg.toString());
 
         if (notifyOnNotificationBar) {
             mNM.notify(NOTIFICATION_ID, buildNotification(status, cause, detail));

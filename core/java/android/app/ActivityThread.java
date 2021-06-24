@@ -1123,7 +1123,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             InetAddress.clearDnsCache();
             // Allow libcore to perform the necessary actions as it sees fit upon a network
             // configuration change.
-            NetworkEventDispatcher.getInstance().onNetworkConfigurationChanged();
+            NetworkEventDispatcher.getInstance().dispatchNetworkConfigurationChange();
         }
 
         public void updateHttpProxy() {
@@ -4602,6 +4602,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         if (r.isTopResumedActivity == onTop) {
+            if (!Build.IS_DEBUGGABLE) {
+                Slog.w(TAG, "Activity top position already set to onTop=" + onTop);
+                return;
+            }
             throw new IllegalStateException("Activity top position already set to onTop=" + onTop);
         }
 
@@ -6381,7 +6385,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             VMDebug.setAllocTrackerStackDepth(Integer.parseInt(property));
         }
         if (data.trackAllocation) {
-            DdmVmInternal.enableRecentAllocations(true);
+            DdmVmInternal.setRecentAllocationsTrackingEnabled(true);
         }
         // Note when this process has started.
         Process.setStartTimes(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());

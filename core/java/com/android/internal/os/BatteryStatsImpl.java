@@ -40,6 +40,7 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBatteryPropertiesRegistrar;
@@ -71,6 +72,7 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.IntArray;
 import android.util.KeyValueListParser;
@@ -122,6 +124,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -6126,6 +6129,18 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    /**
+     * Records timing data related to an incoming Binder call in order to attribute
+     * the power consumption to the calling app.
+     */
+    public void noteBinderCallStats(int workSourceUid, long incrementalCallCount,
+            Collection<BinderCallsStats.CallStat> callStats) {
+        synchronized (this) {
+            getUidStatsLocked(workSourceUid).noteBinderCallStatsLocked(incrementalCallCount,
+                    callStats);
+        }
+    }
+
     public String[] getWifiIfaces() {
         synchronized (mWifiNetworkLock) {
             return mWifiIfaces;
@@ -6569,6 +6584,65 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     /**
+     * Accumulates stats for a specific binder transaction.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    protected static class BinderCallStats {
+        static final Comparator<BinderCallStats> COMPARATOR =
+                Comparator.comparing(BinderCallStats::getClassName)
+                        .thenComparing(BinderCallStats::getMethodName);
+
+        public Class<? extends Binder> binderClass;
+        public int transactionCode;
+        public String methodName;
+
+        public long callCount;
+        public long recordedCallCount;
+        public long recordedCpuTimeMicros;
+
+
+        @Override
+        public int hashCode() {
+            return binderClass.hashCode() * 31 + transactionCode;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof BinderCallStats)) {
+                return false;
+            }
+            BinderCallStats bcsk = (BinderCallStats) obj;
+            return binderClass.equals(bcsk.binderClass) && transactionCode == bcsk.transactionCode;
+        }
+
+        public String getClassName() {
+            return binderClass.getName();
+        }
+
+        public String getMethodName() {
+            return methodName;
+        }
+
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void ensureMethodName(BinderTransactionNameResolver resolver) {
+            if (methodName == null) {
+                methodName = resolver.getMethodName(binderClass, transactionCode);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "BinderCallStats{"
+                    + binderClass
+                    + " transaction=" + transactionCode
+                    + " callCount=" + callCount
+                    + " recordedCallCount=" + recordedCallCount
+                    + " recorderCpuTimeMicros=" + recordedCpuTimeMicros
+                    + "}";
+        }
+    }
+
+    /**
      * The statistics associated with a particular uid.
      */
     public static class Uid extends BatteryStats.Uid {
@@ -6741,6 +6815,16 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         final SparseArray<Pid> mPids = new SparseArray<>();
 
+        /**
+         * Grand total of system server binder calls made by this uid.
+         */
+        private long mBinderCallCount;
+
+        /**
+         * Detailed information about system server binder calls made by this uid.
+         */
+        private final ArraySet<BinderCallStats> mBinderCallStats = new ArraySet<>();
+
         public Uid(BatteryStatsImpl bsi, int uid) {
             mBsi = bsi;
             mUid = uid;
@@ -6847,6 +6931,14 @@ public class BatteryStatsImpl extends BatteryStats {
                 return null;
             }
             return nullIfAllZeros(mProcStateScreenOffTimeMs[procState], which);
+        }
+
+        public long getBinderCallCount() {
+            return mBinderCallCount;
+        }
+
+        public ArraySet<BinderCallStats> getBinderCallStats() {
+            return mBinderCallStats;
         }
 
         public void addIsolatedUid(int isolatedUid) {
@@ -7937,6 +8029,9 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             mPackageStats.clear();
 
+            mBinderCallCount = 0;
+            mBinderCallStats.clear();
+
             mLastStepUserTime = mLastStepSystemTime = 0;
             mCurStepUserTime = mCurStepSystemTime = 0;
 
@@ -8689,6 +8784,40 @@ public class BatteryStatsImpl extends BatteryStats {
                         break;
                     }
                 }
+            }
+        }
+
+        // Reusable object used as a key to lookup values in mBinderCallStats
+        private static BinderCallStats sTempBinderCallStats = new BinderCallStats();
+
+        /**
+         * Notes incoming binder call stats associated with this work source UID.
+         */
+        public void noteBinderCallStatsLocked(long incrementalCallCount,
+                Collection<BinderCallsStats.CallStat> callStats) {
+            if (DEBUG) {
+                Slog.d(TAG, "noteBinderCalls() workSourceUid = [" + mUid + "], "
+                        + " incrementalCallCount: " + incrementalCallCount + " callStats = ["
+                        + new ArrayList<>(callStats) + "]");
+            }
+            mBinderCallCount += incrementalCallCount;
+            for (BinderCallsStats.CallStat stat : callStats) {
+                BinderCallStats bcs;
+                sTempBinderCallStats.binderClass = stat.binderClass;
+                sTempBinderCallStats.transactionCode = stat.transactionCode;
+                int index = mBinderCallStats.indexOf(sTempBinderCallStats);
+                if (index >= 0) {
+                    bcs = mBinderCallStats.valueAt(index);
+                } else {
+                    bcs = new BinderCallStats();
+                    bcs.binderClass = stat.binderClass;
+                    bcs.transactionCode = stat.transactionCode;
+                    mBinderCallStats.add(bcs);
+                }
+
+                bcs.callCount += stat.incrementalCallCount;
+                bcs.recordedCallCount = stat.recordedCallCount;
+                bcs.recordedCpuTimeMicros = stat.cpuTimeMicros;
             }
         }
 
@@ -13212,6 +13341,45 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.print("  "); pw.print(u); pw.print(": ");
             pw.print(uid.getUserCpuTimeUs(STATS_SINCE_CHARGED) / 1000); pw.print(" ");
             pw.println(uid.getSystemCpuTimeUs(STATS_SINCE_CHARGED) / 1000);
+        }
+        pw.println("Per UID system service calls:");
+        BinderTransactionNameResolver nameResolver = new BinderTransactionNameResolver();
+        for (int i = 0; i < size; i++) {
+            int u = mUidStats.keyAt(i);
+            Uid uid = mUidStats.get(u);
+            long binderCallCount = uid.getBinderCallCount();
+            if (binderCallCount != 0) {
+                pw.print(" ");
+                pw.print(u);
+                pw.print(" system service calls: ");
+                pw.print(binderCallCount);
+                ArraySet<BinderCallStats> binderCallStats = uid.getBinderCallStats();
+                if (!binderCallStats.isEmpty()) {
+                    pw.println(", including");
+                    BinderCallStats[] bcss = new BinderCallStats[binderCallStats.size()];
+                    binderCallStats.toArray(bcss);
+                    for (BinderCallStats bcs : bcss) {
+                        bcs.ensureMethodName(nameResolver);
+                    }
+                    Arrays.sort(bcss, BinderCallStats.COMPARATOR);
+                    for (BinderCallStats callStats : bcss) {
+                        pw.print("    ");
+                        pw.print(callStats.getClassName());
+                        pw.print('#');
+                        pw.print(callStats.getMethodName());
+                        pw.print(" calls: ");
+                        pw.print(callStats.callCount);
+                        if (callStats.recordedCallCount != 0) {
+                            pw.print(" time: ");
+                            pw.print(callStats.callCount * callStats.recordedCpuTimeMicros
+                                    / callStats.recordedCallCount / 1000);
+                        }
+                        pw.println();
+                    }
+                } else {
+                    pw.println();
+                }
+            }
         }
         pw.println("Per UID CPU active time in ms:");
         for (int i = 0; i < size; i++) {

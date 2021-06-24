@@ -3047,7 +3047,7 @@
     <!-- attribute definitions go here -->
     <public name="requireDeviceScreenOn" />
     <public name="memtagMode" />
-    <public name="nativeHeapZeroInit" />
+    <public name="nativeHeapZeroInitialized" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">

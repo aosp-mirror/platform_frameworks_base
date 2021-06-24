@@ -48,7 +48,7 @@ public interface SipDelegateConnection {
      * sending the message.
      * @param sipMessage The SipMessage to be sent.
      * @param configVersion The SipDelegateImsConfiguration version used to construct the
-     *                      SipMessage. See {@link SipDelegateImsConfiguration#getVersion} for more
+     *                      SipMessage. See {@link SipDelegateConfiguration#getVersion} for more
      */
     void sendMessage(@NonNull SipMessage sipMessage, long configVersion);
 
@@ -62,20 +62,22 @@ public interface SipDelegateConnection {
     void notifyMessageReceived(@NonNull String viaTransactionId);
 
     /**
-     * The SIP Dialog associated with the provided Call-ID is being closed and routing resources
-     * associated with the SIP dialog are free to be released.
+     * The SIP session associated with the provided Call-ID is being closed and routing resources
+     * associated with the session are free to be released. Each SIP session may contain multiple
+     * dialogs due to SIP INVITE forking, so this method must be called after all SIP dialogs
+     * associated with the session has closed.
      * <p>
      * Calling this method is also mandatory for situations where the framework IMS stack is waiting
-     * for pending SIP dialogs to be closed before it can perform a handover or apply a provisioning
-     * change. See {@link DelegateRegistrationState} for more information about
+     * for pending SIP sessions to be closed before it can perform a handover or apply a
+     * provisioning change. See {@link DelegateRegistrationState} for more information about
      * the scenarios where this can occur.
      * <p>
-     * This method will need to be called for each SIP dialog managed by this application when it is
-     * closed.
+     * This method will need to be called for each SIP session managed by this application when it
+     * is closed.
      * @param callId The call-ID header value associated with the ongoing SIP Dialog that is
      *         closing.
      */
-    void closeDialog(@NonNull String callId);
+    void cleanupSession(@NonNull String callId);
 
     /**
      * Notify the SIP delegate that the SIP message has been received from

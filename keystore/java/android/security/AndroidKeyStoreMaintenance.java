@@ -22,6 +22,7 @@ import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.security.maintenance.IKeystoreMaintenance;
 import android.system.keystore2.Domain;
+import android.system.keystore2.KeyDescriptor;
 import android.system.keystore2.ResponseCode;
 import android.util.Log;
 
@@ -33,6 +34,9 @@ public class AndroidKeyStoreMaintenance {
     private static final String TAG = "AndroidKeyStoreMaintenance";
 
     public static final int SYSTEM_ERROR = ResponseCode.SYSTEM_ERROR;
+    public static final int INVALID_ARGUMENT = ResponseCode.INVALID_ARGUMENT;
+    public static final int PERMISSION_DENIED = ResponseCode.PERMISSION_DENIED;
+    public static final int KEY_NOT_FOUND = ResponseCode.KEY_NOT_FOUND;
 
     private static IKeystoreMaintenance getService() {
         return IKeystoreMaintenance.Stub.asInterface(
@@ -146,6 +150,37 @@ public class AndroidKeyStoreMaintenance {
             // TODO This fails open. This is not a regression with respect to keystore1 but it
             //      should get fixed.
             Log.e(TAG, "Error while reporting device off body event.", e);
+        }
+    }
+
+    /**
+     * Migrates a key given by the source descriptor to the location designated by the destination
+     * descriptor.
+     *
+     * @param source - The key to migrate may be specified by Domain.APP, Domain.SELINUX, or
+     *               Domain.KEY_ID. The caller needs the permissions use, delete, and grant for the
+     *               source namespace.
+     * @param destination - The new designation for the key may be specified by Domain.APP or
+     *                    Domain.SELINUX. The caller need the permission rebind for the destination
+     *                    namespace.
+     *
+     * @return * 0 on success
+     *         * KEY_NOT_FOUND if the source did not exists.
+     *         * PERMISSION_DENIED if any of the required permissions was missing.
+     *         * INVALID_ARGUMENT if the destination was occupied or any domain value other than
+     *                   the allowed once were specified.
+     *         * SYSTEM_ERROR if an unexpected error occurred.
+     */
+    public static int migrateKeyNamespace(KeyDescriptor source, KeyDescriptor destination) {
+        try {
+            getService().migrateKeyNamespace(source, destination);
+            return 0;
+        } catch (ServiceSpecificException e) {
+            Log.e(TAG, "migrateKeyNamespace failed", e);
+            return e.errorCode;
+        } catch (Exception e) {
+            Log.e(TAG, "Can not connect to keystore", e);
+            return SYSTEM_ERROR;
         }
     }
 }

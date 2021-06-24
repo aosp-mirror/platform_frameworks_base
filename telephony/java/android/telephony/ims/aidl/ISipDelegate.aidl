@@ -26,5 +26,5 @@ oneway interface ISipDelegate {
     void sendMessage(in SipMessage sipMessage, long configVersion);
     void notifyMessageReceived(in String viaTransactionId);
     void notifyMessageReceiveError(in String viaTransactionId, int reason);
-    void closeDialog(in String callId);
+    void cleanupSession(in String callId);
 }

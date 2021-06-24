@@ -43,6 +43,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -623,7 +624,8 @@ class Bubble implements BubbleViewProvider {
 
     private int getUid(final Context context) {
         if (mAppUid != -1) return mAppUid;
-        final PackageManager pm = context.getPackageManager();
+        final PackageManager pm = StatusBar.getPackageManagerForUser(context,
+                mUser.getIdentifier());
         if (pm == null) return -1;
         try {
             final ApplicationInfo info = pm.getApplicationInfo(mShortcutInfo.getPackage(), 0);

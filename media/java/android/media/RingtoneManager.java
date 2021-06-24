@@ -521,12 +521,12 @@ public class RingtoneManager {
     public int getRingtonePosition(Uri ringtoneUri) {
         try {
             if (ringtoneUri == null) return -1;
-            final long ringtoneId = ContentUris.parseId(ringtoneUri);
 
             final Cursor cursor = getCursor();
             cursor.moveToPosition(-1);
             while (cursor.moveToNext()) {
-                if (ringtoneId == cursor.getLong(ID_COLUMN_INDEX)) {
+                Uri uriFromCursor = getUriFromCursor(mContext, cursor);
+                if (ringtoneUri.equals(uriFromCursor)) {
                     return cursor.getPosition();
                 }
             }

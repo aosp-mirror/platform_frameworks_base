@@ -21,8 +21,8 @@ import android.annotation.SystemApi;
 import android.telephony.ims.DelegateMessageCallback;
 import android.telephony.ims.DelegateRegistrationState;
 import android.telephony.ims.ImsService;
+import android.telephony.ims.SipDelegateConfiguration;
 import android.telephony.ims.SipDelegateConnection;
-import android.telephony.ims.SipDelegateImsConfiguration;
 import android.telephony.ims.SipDelegateManager;
 import android.telephony.ims.SipMessage;
 
@@ -38,7 +38,7 @@ import android.telephony.ims.SipMessage;
  * modified to include the features managed by these SipDelegates.
  * <p>
  * This SipDelegate will need to notify the remote application of the registration of these features
- * as well as the associated {@link SipDelegateImsConfiguration} before the application can start
+ * as well as the associated {@link SipDelegateConfiguration} before the application can start
  * sending/receiving SIP messages via the transport. See
  * {@link android.telephony.ims.DelegateStateCallback} for more information.
  * @hide
@@ -55,29 +55,30 @@ public interface SipDelegate {
      * {@link DelegateMessageCallback#onMessageSendFailure(String, int)}.
      * @param message The SIP message to be sent over the operator’s network.
      * @param configVersion The SipDelegateImsConfiguration version used to construct the
-     *         SipMessage. See {@link SipDelegateImsConfiguration} for more information. If the
+     *         SipMessage. See {@link SipDelegateConfiguration} for more information. If the
      *         version specified here does not match the most recently constructed
-     *         {@link SipDelegateImsConfiguration}, this message should fail validation checks and
+     *         {@link SipDelegateConfiguration}, this message should fail validation checks and
      *         {@link DelegateMessageCallback#onMessageSendFailure} should be called with code
      *         {@link SipDelegateManager#MESSAGE_FAILURE_REASON_STALE_IMS_CONFIGURATION}.
      */
     void sendMessage(@NonNull SipMessage message, long configVersion);
 
     /**
-     * The framework is requesting that routing resources associated with the SIP dialog using the
-     * provided Call-ID to be cleaned up.
+     * The remote IMS application has closed a SIP session and the routing resources associated
+     * with the SIP session using the provided Call-ID may now be cleaned up.
      * <p>
-     * Typically, a SIP Dialog close event will be signalled by that dialog receiving a BYE or
-     * 200 OK message, however, the IMS application will still call
-     * {@link SipDelegateConnection#closeDialog(String)} to signal to the framework that resources
-     * can be released. In some cases, the framework will request that the ImsService close the
-     * dialog due to the open dialog holding up an event such as applying a provisioning change or
-     * handing over to another transport type. See {@link DelegateRegistrationState}.
+     * Typically, a SIP session will be considered closed when all associated dialogs receive a
+     * BYE request. After the session has been closed, the IMS application will call
+     * {@link SipDelegateConnection#cleanupSession(String)} to signal to the framework that
+     * resources can be released. In some cases, the framework will request that the ImsService
+     * close the session due to the open SIP session holding up an event such as applying a
+     * provisioning change or handing over to another transport type. See
+     * {@link DelegateRegistrationState}.
      *
-     * @param callId The call-ID header value associated with the ongoing SIP Dialog that the
-     *         framework is requesting be closed.
+     * @param callId The call-ID header value associated with the ongoing SIP Session that the
+     *         framework is requesting be cleaned up.
      */
-    void closeDialog(@NonNull String callId);
+    void cleanupSession(@NonNull String callId);
 
     /**
      * The remote application has received the SIP message and is processing it.

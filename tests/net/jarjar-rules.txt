@@ -1,2 +1,0 @@
-# Module library in frameworks/libs/net
-rule com.android.net.module.util.** android.net.frameworktests.util.@1

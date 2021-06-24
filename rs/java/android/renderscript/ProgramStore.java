@@ -34,7 +34,11 @@ import android.os.Build;
  *     framebuffer</li>
  *  </ul>
  *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public class ProgramStore extends BaseObj {
     /**
     * Specifies the function used to determine whether a fragment

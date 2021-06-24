@@ -5860,6 +5860,10 @@ public class AudioService extends IAudioService.Stub
                     if (index == -1) {
                         continue;
                     }
+                    if (mPublicStreamType == AudioSystem.STREAM_SYSTEM_ENFORCED
+                            && mCameraSoundForced) {
+                        index = mIndexMax;
+                    }
                     if (DEBUG_VOL) {
                         Log.v(TAG, "readSettings: found stored index " + getValidIndex(index)
                                  + " for group " + mAudioVolumeGroup.name() + ", device: " + name);
