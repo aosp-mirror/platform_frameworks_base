@@ -1344,7 +1344,8 @@ public final class PowerManagerService extends SystemService
         mDirty |= DIRTY_SETTINGS;
     }
 
-    private void handleSettingsChangedLocked() {
+    @VisibleForTesting
+    void handleSettingsChangedLocked() {
         updateSettingsLocked();
         updatePowerStateLocked();
     }
@@ -2651,9 +2652,6 @@ public final class PowerManagerService extends SystemService
 
     private void updateAttentiveStateLocked(long now, int dirty) {
         long attentiveTimeout = getAttentiveTimeoutLocked();
-        if (attentiveTimeout < 0) {
-            return;
-        }
         // Attentive state only applies to the default display group.
         long goToSleepTime = mDisplayGroupPowerStateMapper.getLastUserActivityTimeLocked(
                 Display.DEFAULT_DISPLAY_GROUP) + attentiveTimeout;
@@ -2661,10 +2659,10 @@ public final class PowerManagerService extends SystemService
 
         boolean warningDismissed = maybeHideInattentiveSleepWarningLocked(now, showWarningTime);
 
-        if (warningDismissed ||
-                (dirty & (DIRTY_ATTENTIVE | DIRTY_STAY_ON | DIRTY_SCREEN_BRIGHTNESS_BOOST
-                        | DIRTY_PROXIMITY_POSITIVE | DIRTY_WAKEFULNESS | DIRTY_BOOT_COMPLETED
-                        | DIRTY_SETTINGS)) != 0) {
+        if (attentiveTimeout >= 0 && (warningDismissed
+                || (dirty & (DIRTY_ATTENTIVE | DIRTY_STAY_ON | DIRTY_SCREEN_BRIGHTNESS_BOOST
+                | DIRTY_PROXIMITY_POSITIVE | DIRTY_WAKEFULNESS | DIRTY_BOOT_COMPLETED
+                | DIRTY_SETTINGS)) != 0)) {
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "Updating attentive state");
             }

@@ -761,6 +761,25 @@ public class PowerManagerServiceTest {
     }
 
     @Test
+    public void testInattentiveSleep_hideWarningIfInattentiveSleepIsDisabled() throws Exception {
+        setMinimumScreenOffTimeoutConfig(5);
+        setAttentiveWarningDuration(120);
+        setAttentiveTimeout(100);
+
+        createService();
+        startSystem();
+
+        verify(mInattentiveSleepWarningControllerMock, times(1)).show();
+        verify(mInattentiveSleepWarningControllerMock, never()).dismiss(anyBoolean());
+        when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(true);
+
+        setAttentiveTimeout(-1);
+        mService.handleSettingsChangedLocked();
+
+        verify(mInattentiveSleepWarningControllerMock, atLeastOnce()).dismiss(true);
+    }
+
+    @Test
     public void testInattentiveSleep_userActivityDismissesWarning() throws Exception {
         final DisplayInfo info = new DisplayInfo();
         info.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
