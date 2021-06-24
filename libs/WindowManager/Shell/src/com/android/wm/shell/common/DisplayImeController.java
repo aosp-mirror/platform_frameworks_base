@@ -249,6 +249,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                                 !activeControl.getSurfacePosition().equals(lastSurfacePosition);
                         final boolean leashChanged =
                                 !haveSameLeash(mImeSourceControl, activeControl);
+                        final InsetsSourceControl lastImeControl = mImeSourceControl;
                         mImeSourceControl = activeControl;
                         if (mAnimation != null) {
                             if (positionChanged) {
@@ -261,6 +262,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             if (!mImeShowing) {
                                 removeImeSurface();
                             }
+                        }
+                        if (lastImeControl != null) {
+                            lastImeControl.release(SurfaceControl::release);
                         }
                     }
                 }

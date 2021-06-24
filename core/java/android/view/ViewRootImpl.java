@@ -5290,7 +5290,16 @@ public final class ViewRootImpl implements ViewParent,
                     // b) When loosing control, controller can restore server state by taking last
                     // dispatched state as truth.
                     mInsetsController.onStateChanged((InsetsState) args.arg1);
-                    mInsetsController.onControlsChanged((InsetsSourceControl[]) args.arg2);
+                    InsetsSourceControl[] controls = (InsetsSourceControl[]) args.arg2;
+                    if (mAdded) {
+                        mInsetsController.onControlsChanged(controls);
+                    } else if (controls != null) {
+                        for (InsetsSourceControl control : controls) {
+                            if (control != null) {
+                                control.release(SurfaceControl::release);
+                            }
+                        }
+                    }
                     args.recycle();
                     break;
                 }
@@ -8135,6 +8144,10 @@ public final class ViewRootImpl implements ViewParent,
                     destroySurface();
                 }
             }
+
+            // If our window is removed, we might not get notified about losing control.
+            // Invoking this can release the leashes as soon as possible instead of relying on GC.
+            mInsetsController.onControlsChanged(null);
 
             mAdded = false;
         }
