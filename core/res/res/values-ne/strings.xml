@@ -349,7 +349,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"एपलाई स्थिति पट्टि विस्तार वा संकुचन गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"लक गरिएको डिभाइसमा स्क्रिनभरि देखिने सूचनाहरू देखाइयोस्"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"यो अनुमति दिइएमा एपले लक गरिएको डिभाइसमा स्क्रिनभरि देखिने सूचनाहरू देखाउन सक्छ"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"सर्टकट स्थापना गर्नुहोस्"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"सर्टकट इन्स्टल गर्ने"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा थप्नको लागि अनुमति दिन्छ।"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"सर्टकटहरूको स्थापन रद्द गर्नुहोस्"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा हटाउनको लागि अनुमति दिन्छ।"</string>
@@ -438,9 +438,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"अधिक स्थान प्रदायक आदेशहरू पहुँच गर्नुहोस्"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"एपलाई अतिरिक्त स्थान प्रदायक आदेशहरू पहुँच गर्न अनुमति दिन्छ। यो एपलाई GPS वा अन्य स्थान स्रोतहरूको संचालन साथै हस्तक्षेप गर्न अनुमति दिन सक्छ।"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"अग्रभूमिमा मात्र सटीक स्थानमाथि पहुँच राख्नुहोस्"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"यो एप चलाएका बेला यसले लोकेसनमा आधारित सेवाहरूबाट तपाईंको स्थानको सटीक जानकारी प्राप्त गर्न सक्छ। तपाईंको डिभाइसमा लोकेसनमा आधारित सेवाहरू सक्रिय गरिएको छ भने मात्र यो एपले स्थानको जानकारी प्राप्त गर्न सक्छ। यसले ब्याट्रीको उपयोग बढाउन सक्छ।"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"यो एप चलाएका बेला यसले लोकेसन सर्भिसबाट तपाईंको स्थानको सटीक जानकारी प्राप्त गर्न सक्छ। तपाईंको डिभाइसमा लोकेसन सर्भिस सक्रिय गरिएको छ भने मात्र यो एपले स्थानको जानकारी प्राप्त गर्न सक्छ। यसले ब्याट्रीको उपयोग बढाउन सक्छ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"अग्रभागमा मात्र अनुमानित स्थानमाथि पहुँच राख्नुहोस्"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"यो एप चलाएका बेला यसले लोकेसनमा आधारित सेवाहरूबाट तपाईंको स्थानको अनुमानित जानकारी प्राप्त गर्न सक्छ। तपाईंको डिभाइसमा लोकेसनमा आधारित सेवाहरू सक्रिय गरिएको छ भने मात्र यो एपले स्थानको जानकारी प्राप्त गर्न सक्छ।"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"यो एप चलाएका बेला यसले लोकेसन सर्भिसबाट तपाईंको स्थानको अनुमानित जानकारी प्राप्त गर्न सक्छ। तपाईंको डिभाइसमा लोकेसन सर्भिस सक्रिय गरिएको छ भने मात्र यो एपले स्थानको जानकारी प्राप्त गर्न सक्छ।"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"पृष्ठभूमिमा स्थानसम्बन्धी पहुँच"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"यो एपले जुनसुकै बेला (एप नचलाएका बेलामा पनि) स्थानमाथि पहुँच राख्न सक्छ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"तपाईँका अडियो सेटिङहरू परिवर्तन गर्नुहोस्"</string>
@@ -585,6 +585,8 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"अर्को फिंगरप्रिन्ट प्रयोग गरी हेर्नुहोस्"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ज्यादै उज्यालो छ"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"सेन्सरमा सही तरिकाले औँला राखेर हेर्नुहोस्"</string>
+    <!-- no translation found for fingerprint_acquired_immobile (1621891895241888048) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिन्ट प्रमाणीकरण गरियो"</string>
