@@ -128,7 +128,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
             mBottomDivider.setVisibility(View.GONE);
             mCheckBox.setVisibility(View.GONE);
-            if (currentlyConnected && mController.isActiveRemoteDevice(device)) {
+            if (currentlyConnected && mController.isActiveRemoteDevice(device)
+                    && mController.getSelectableMediaDevice().size() > 0) {
                 // Init active device layout
                 mDivider.setVisibility(View.VISIBLE);
                 mDivider.setTransitionAlpha(1);
@@ -186,11 +187,16 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 mConnectedItem = mContainerLayout;
                 mBottomDivider.setVisibility(View.GONE);
                 mCheckBox.setVisibility(View.GONE);
-                mDivider.setVisibility(View.VISIBLE);
-                mDivider.setTransitionAlpha(1);
-                mAddIcon.setVisibility(View.VISIBLE);
-                mAddIcon.setTransitionAlpha(1);
-                mAddIcon.setOnClickListener(v -> onEndItemClick());
+                if (mController.getSelectableMediaDevice().size() > 0) {
+                    mDivider.setVisibility(View.VISIBLE);
+                    mDivider.setTransitionAlpha(1);
+                    mAddIcon.setVisibility(View.VISIBLE);
+                    mAddIcon.setTransitionAlpha(1);
+                    mAddIcon.setOnClickListener(v -> onEndItemClick());
+                } else {
+                    mDivider.setVisibility(View.GONE);
+                    mAddIcon.setVisibility(View.GONE);
+                }
                 mTitleIcon.setImageDrawable(getSpeakerDrawable());
                 final CharSequence sessionName = mController.getSessionName();
                 final CharSequence title = TextUtils.isEmpty(sessionName)
