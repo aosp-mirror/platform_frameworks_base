@@ -292,6 +292,7 @@ public final class SplashScreenView extends FrameLayout {
 
         private SurfaceView createSurfaceView(@NonNull SplashScreenView view) {
             final SurfaceView surfaceView = new SurfaceView(view.getContext());
+            surfaceView.setPadding(0, 0, 0, 0);
             if (mSurfacePackage == null) {
                 if (DEBUG) {
                     Log.d(TAG,
