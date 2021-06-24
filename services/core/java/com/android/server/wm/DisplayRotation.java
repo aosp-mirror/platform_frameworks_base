@@ -480,6 +480,16 @@ public class DisplayRotation {
             return false;
         }
 
+        // Preemptively cancel the running recents animation -- SysUI can't currently handle this
+        // case properly since the signals it receives all happen post-change. We do this earlier
+        // in the rotation flow, since DisplayContent.updateDisplayOverrideConfigurationLocked seems
+        // to happen too late.
+        final RecentsAnimationController recentsAnimationController =
+                mService.getRecentsAnimationController();
+        if (recentsAnimationController != null) {
+            recentsAnimationController.cancelAnimationForDisplayChange();
+        }
+
         final Transition t = (useShellTransitions
                 && !mService.mAtmService.getTransitionController().isCollecting())
                 ? mService.mAtmService.getTransitionController().createTransition(TRANSIT_CHANGE)
