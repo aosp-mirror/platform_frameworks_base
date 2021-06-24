@@ -198,6 +198,13 @@ final class ActivityManagerConstants extends ContentObserver {
             "default_fgs_starts_restriction_enabled";
 
     /**
+     * Default value for mFgsStartRestrictionNotificationEnabled if not explicitly set in
+     * Settings.Global.
+     */
+    private static final String KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED =
+            "default_fgs_starts_restriction_notification_enabled";
+
+    /**
      * Default value for mFgsStartRestrictionCheckCallerTargetSdk if not explicitly set in
      * Settings.Global.
      */
@@ -432,6 +439,10 @@ final class ActivityManagerConstants extends ContentObserver {
     // at all.
     volatile boolean mFlagFgsStartRestrictionEnabled = true;
 
+    // Whether to display a notification when a service is restricted from startForeground due to
+    // foreground service background start restriction.
+    volatile boolean mFgsStartRestrictionNotificationEnabled = false;
+
     /**
      * Indicates whether the foreground service background start restriction is enabled for
      * caller app that is targeting S+.
@@ -651,6 +662,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED:
                                 updateFgsStartsRestriction();
+                                break;
+                            case KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED:
+                                updateFgsStartsRestrictionNotification();
                                 break;
                             case KEY_DEFAULT_FGS_STARTS_RESTRICTION_CHECK_CALLER_TARGET_SDK:
                                 updateFgsStartsRestrictionCheckCallerTargetSdk();
@@ -951,6 +965,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED,
                 /*defaultValue*/ true);
+    }
+
+    private void updateFgsStartsRestrictionNotification() {
+        mFgsStartRestrictionNotificationEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED,
+                /*defaultValue*/ false);
     }
 
     private void updateFgsStartsRestrictionCheckCallerTargetSdk() {
@@ -1272,6 +1293,9 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mFlagBackgroundFgsStartRestrictionEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED); pw.print("=");
         pw.println(mFlagFgsStartRestrictionEnabled);
+        pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_NOTIFICATION_ENABLED);
+                pw.print("=");
+        pw.println(mFgsStartRestrictionNotificationEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_CHECK_CALLER_TARGET_SDK);
         pw.print("="); pw.println(mFgsStartRestrictionCheckCallerTargetSdk);
         pw.print("  "); pw.print(KEY_FGS_ATOM_SAMPLE_RATE);
