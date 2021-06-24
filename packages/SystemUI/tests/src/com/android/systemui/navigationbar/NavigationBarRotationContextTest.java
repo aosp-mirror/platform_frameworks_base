@@ -59,7 +59,16 @@ public class NavigationBarRotationContextTest extends SysuiTestCase {
         final View view = new View(mContext);
         mRotationButton = mock(RotationButton.class);
         mRotationButtonController = new RotationButtonController(mContext, 0, 0);
-        mRotationButtonController.setRotationButton(mRotationButton, (visibility) -> {});
+        mRotationButtonController.setRotationButton(mRotationButton,
+                new RotationButton.RotationButtonUpdatesCallback() {
+                    @Override
+                    public void onVisibilityChanged(boolean isVisible) {
+                    }
+
+                    @Override
+                    public void onPositionChanged() {
+                    }
+                });
         // Due to a mockito issue, only spy the object after setting the initial state
         mRotationButtonController = spy(mRotationButtonController);
         doReturn(view).when(mRotationButton).getCurrentView();
