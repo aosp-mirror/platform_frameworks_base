@@ -847,6 +847,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
+    /** Whether the configuration changes are important to report back to an organizer. */
+    static boolean configurationsAreEqualForOrganizer(
+            Configuration newConfig, @Nullable Configuration oldConfig) {
+        if (oldConfig == null) {
+            return false;
+        }
+        int cfgChanges = newConfig.diff(oldConfig);
+        final int winCfgChanges = (cfgChanges & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0
+                ? (int) newConfig.windowConfiguration.diff(oldConfig.windowConfiguration,
+                true /* compareUndefined */) : 0;
+        if ((winCfgChanges & CONTROLLABLE_WINDOW_CONFIGS) == 0) {
+            cfgChanges &= ~ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+        }
+        return (cfgChanges & CONTROLLABLE_CONFIGS) == 0;
+    }
+
     private void enforceTaskPermission(String func) {
         mService.enforceTaskPermission(func);
     }
