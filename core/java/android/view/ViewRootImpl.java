@@ -1371,8 +1371,12 @@ public final class ViewRootImpl implements ViewParent,
         HardwareRenderer.ASurfaceTransactionCallback callback = (nativeTransactionObj,
                                                                  nativeSurfaceControlObj,
                                                                  frameNr) -> {
-            Transaction t = new Transaction(nativeTransactionObj);
-            mergeWithNextTransaction(t, frameNr);
+            if (mBlastBufferQueue == null) {
+                return false;
+            } else {
+                mBlastBufferQueue.mergeWithNextTransaction(nativeTransactionObj, frameNr);
+                return true;
+            }
         };
         mAttachInfo.mThreadedRenderer.setASurfaceTransactionCallback(callback);
     }
