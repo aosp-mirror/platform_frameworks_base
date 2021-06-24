@@ -77,6 +77,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.CommandQueue;
@@ -90,6 +91,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
@@ -139,6 +141,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     // adb shell setprop persist.debug.nssl true && adb reboot
     private static final boolean DEBUG = SystemProperties.getBoolean("persist.debug.nssl",
             false /* default */);
+    // TODO(b/187291379) disable again before release
+    private static final boolean DEBUG_REMOVE_ANIMATION = SystemProperties.getBoolean(
+            "persist.debug.nssl.dismiss", true /* default */);
 
     private static final float RUBBER_BAND_FACTOR_NORMAL = 0.35f;
     private static final float RUBBER_BAND_FACTOR_AFTER_EXPAND = 0.15f;
@@ -471,6 +476,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final Path mRoundedClipPath = new Path();
 
     /**
+     * The clip Path used to clip the launching notification. This may be different
+     * from the normal path, as the views launch animation could start clipped.
+     */
+    private final Path mLaunchedNotificationClipPath = new Path();
+
+    /**
      * Should we use rounded rect clipping right now
      */
     private boolean mShouldUseRoundedRectClipping = false;
@@ -491,6 +502,26 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Are we launching a notification right now
      */
     private boolean mLaunchingNotification;
+
+    /**
+     * Does the launching notification need to be clipped
+     */
+    private boolean mLaunchingNotificationNeedsToBeClipped;
+
+    /**
+     * The current launch animation params when launching a notification
+     */
+    private ExpandAnimationParameters mLaunchAnimationParams;
+
+    /**
+     * Corner radii of the launched notification if it's clipped
+     */
+    private float[] mLaunchedNotificationRadii = new float[8];
+
+    /**
+     * The notification that is being launched currently.
+     */
+    private ExpandableNotificationRow mExpandingNotificationRow;
 
     /**
      * Do notifications dismiss with normal transitioning
@@ -2647,7 +2678,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     boolean generateRemoveAnimation(ExpandableView child) {
+        String key = "";
+        if (DEBUG_REMOVE_ANIMATION) {
+            if (child instanceof ExpandableNotificationRow) {
+                key = ((ExpandableNotificationRow) child).getEntry().getKey();
+            }
+            Log.d(TAG, "generateRemoveAnimation " + key);
+        }
         if (removeRemovedChildFromHeadsUpChangeAnimations(child)) {
+            if (DEBUG_REMOVE_ANIMATION) {
+                Log.d(TAG, "removedBecauseOfHeadsUp " + key);
+            }
             mAddedHeadsUpChildren.remove(child);
             return false;
         }
@@ -2656,8 +2697,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mClearTransientViewsWhenFinished.add(child);
             return true;
         }
+        if (DEBUG_REMOVE_ANIMATION) {
+            Log.d(TAG, "generateRemove " + key
+                    + "\nmIsExpanded " + mIsExpanded
+                    + "\nmAnimationsEnabled " + mAnimationsEnabled
+                    + "\n!invisible group " + !isChildInInvisibleGroup(child));
+        }
         if (mIsExpanded && mAnimationsEnabled && !isChildInInvisibleGroup(child)) {
             if (!mChildrenToAddAnimated.contains(child)) {
+                if (DEBUG_REMOVE_ANIMATION) {
+                    Log.d(TAG, "needsAnimation = true " + key);
+                }
                 // Generate Animations
                 mChildrenToRemoveAnimated.add(child);
                 mNeedsAnimation = true;
@@ -2679,7 +2729,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * Remove a removed child view from the heads up animations if it was just added there
      *
-     * @return whether any child was removed from the list to animate
+     * @return whether any child was removed from the list to animate and the view was just added
      */
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private boolean removeRemovedChildFromHeadsUpChangeAnimations(View child) {
@@ -2698,7 +2748,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             ((ExpandableNotificationRow) child).setHeadsUpAnimatingAway(false);
         }
         mTmpList.clear();
-        return hasAddEvent;
+        return hasAddEvent && mAddedHeadsUpChildren.contains(child);
     }
 
     // TODO (b/162832756): remove since this won't happen in new pipeline (we prune groups in
@@ -2749,6 +2799,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @return the amount of scrolling needed to start clipping notifications.
      */
     private int getScrollAmountToScrollBoundary() {
+        if (mShouldUseSplitNotificationShade) {
+            return mSidePaddings;
+        }
         return mTopPadding - mQsScrollBoundaryPosition;
     }
 
@@ -2892,7 +2945,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void setExpandingNotification(ExpandableNotificationRow row) {
-        mAmbientState.setExpandingNotification(row);
+        if (mExpandingNotificationRow != null && row == null) {
+            // Let's unset the clip path being set during launch
+            mExpandingNotificationRow.setExpandingClipPath(null);
+            ExpandableNotificationRow parent = mExpandingNotificationRow.getNotificationParent();
+            if (parent != null) {
+                parent.setExpandingClipPath(null);
+            }
+        }
+        mExpandingNotificationRow = row;
+        updateLaunchedNotificationClipPath();
         requestChildrenUpdate();
     }
 
@@ -2902,10 +2964,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void applyExpandAnimationParams(ExpandAnimationParameters params) {
-        mAmbientState.setExpandAnimationTopChange(params == null ? 0 : params.getTopChange());
-
-        // Disable clipping for launches
+        // Modify the clipping for launching notifications
+        mLaunchAnimationParams = params;
         setLaunchingNotification(params != null);
+        updateLaunchedNotificationClipPath();
         requestChildrenUpdate();
     }
 
@@ -5353,7 +5415,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return;
         }
         mLaunchingNotification = launching;
-        updateUseRoundedRectClipping();
+        mLaunchingNotificationNeedsToBeClipped = mLaunchAnimationParams != null
+                && (mLaunchAnimationParams.getStartRoundedTopClipping() > 0
+                        || mLaunchAnimationParams.getParentStartRoundedTopClipping() > 0);
+        if (!mLaunchingNotificationNeedsToBeClipped || !mLaunchingNotification) {
+            mLaunchedNotificationClipPath.reset();
+        }
+        // When launching notifications, we're clipping the children individually instead of in
+        // dispatchDraw
+        invalidate();
     }
 
     /**
@@ -5363,20 +5433,95 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         // We don't want to clip notifications when QS is expanded, because incoming heads up on
         // the bottom would be clipped otherwise
         boolean qsAllowsClipping = mQsExpansionFraction < 0.5f || mShouldUseSplitNotificationShade;
-        boolean clip = !mLaunchingNotification && mIsExpanded && qsAllowsClipping;
+        boolean clip = mIsExpanded && qsAllowsClipping;
         if (clip != mShouldUseRoundedRectClipping) {
             mShouldUseRoundedRectClipping = clip;
             invalidate();
         }
     }
 
+    /**
+     * Update the clip path for launched notifications in case they were originally clipped
+     */
+    private void updateLaunchedNotificationClipPath() {
+        if (!mLaunchingNotificationNeedsToBeClipped || !mLaunchingNotification
+                || mExpandingNotificationRow == null) {
+            return;
+        }
+        int left = Math.min(mLaunchAnimationParams.getLeft(), mRoundedRectClippingLeft);
+        int right = Math.max(mLaunchAnimationParams.getRight(), mRoundedRectClippingRight);
+        int bottom = Math.max(mLaunchAnimationParams.getBottom(), mRoundedRectClippingBottom);
+        float expandProgress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
+                mLaunchAnimationParams.getProgress(0,
+                        NotificationLaunchAnimatorController.ANIMATION_DURATION_TOP_ROUNDING));
+        int top = (int) Math.min(MathUtils.lerp(mRoundedRectClippingTop,
+                mLaunchAnimationParams.getTop(), expandProgress),
+                mRoundedRectClippingTop);
+        float topRadius = mLaunchAnimationParams.getTopCornerRadius();
+        float bottomRadius = mLaunchAnimationParams.getBottomCornerRadius();
+        mLaunchedNotificationRadii[0] = topRadius;
+        mLaunchedNotificationRadii[1] = topRadius;
+        mLaunchedNotificationRadii[2] = topRadius;
+        mLaunchedNotificationRadii[3] = topRadius;
+        mLaunchedNotificationRadii[4] = bottomRadius;
+        mLaunchedNotificationRadii[5] = bottomRadius;
+        mLaunchedNotificationRadii[6] = bottomRadius;
+        mLaunchedNotificationRadii[7] = bottomRadius;
+        mLaunchedNotificationClipPath.reset();
+        mLaunchedNotificationClipPath.addRoundRect(left, top, right, bottom,
+                mLaunchedNotificationRadii, Path.Direction.CW);
+        // Offset into notification clip coordinates instead of parent ones.
+        // This is needed since the notification changes in translationZ, where clipping via
+        // canvas dispatching won't work.
+        ExpandableNotificationRow expandingRow = mExpandingNotificationRow;
+        if (expandingRow.getNotificationParent() != null) {
+            expandingRow = expandingRow.getNotificationParent();
+        }
+        mLaunchedNotificationClipPath.offset(
+                -expandingRow.getLeft() - expandingRow.getTranslationX(),
+                -expandingRow.getTop() - expandingRow.getTranslationY());
+        expandingRow.setExpandingClipPath(mLaunchedNotificationClipPath);
+        if (mShouldUseRoundedRectClipping) {
+            invalidate();
+        }
+    }
+
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        if (mShouldUseRoundedRectClipping) {
+        if (mShouldUseRoundedRectClipping && !mLaunchingNotification) {
+            // When launching notifications, we're clipping the children individually instead of in
+            // dispatchDraw
             // Let's clip rounded.
             canvas.clipPath(mRoundedClipPath);
         }
         super.dispatchDraw(canvas);
+    }
+
+    @Override
+    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+        if (mShouldUseRoundedRectClipping && mLaunchingNotification) {
+            // Let's clip children individually during notification launch
+            canvas.save();
+            ExpandableView expandableView = (ExpandableView) child;
+            Path clipPath;
+            if (expandableView.isExpandAnimationRunning()
+                    || ((ExpandableView) child).hasExpandingChild()) {
+                // When launching the notification, it is not clipped by this layout, but by the
+                // view itself. This is because the view is Translating in Z, where this clipPath
+                // wouldn't apply.
+                clipPath = null;
+            } else {
+                clipPath = mRoundedClipPath;
+            }
+            if (clipPath != null) {
+                canvas.clipPath(clipPath);
+            }
+            boolean result = super.drawChild(canvas, child, drawingTime);
+            canvas.restore();
+            return result;
+        } else {
+            return super.drawChild(canvas, child, drawingTime);
+        }
     }
 
     /**
@@ -5390,6 +5535,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         int containerWidth = getMeasuredWidth();
         float padding = (containerWidth - notificationWidth) / 2.0f;
         return containerWidth - padding;
+    }
+
+    /**
+     * @return the start location where we start clipping notifications.
+     */
+    public int getTopClippingStartLocation() {
+        return mIsExpanded ? mQsScrollBoundaryPosition : 0;
     }
 
     /**

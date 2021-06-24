@@ -1456,7 +1456,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void setQsExpansionEnabled() {
         mQsExpansionEnabled = mQsExpansionEnabledPolicy && mQsExpansionEnabledAmbient;
-        Log.d(TAG, "Set qsExpansionEnabled: " + mQsExpansionEnabled);
         if (mQs == null) return;
         mQs.setHeaderClickable(mQsExpansionEnabled);
     }
@@ -2234,8 +2233,9 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void updateQSExpansionEnabledAmbient() {
         final float scrollRangeToTop = mAmbientState.getTopPadding() - mQuickQsOffsetHeight;
-        mQsExpansionEnabledAmbient =
-                mAmbientState.getScrollY() <= scrollRangeToTop && !mAmbientState.isShadeOpening();
+        mQsExpansionEnabledAmbient = mShouldUseSplitNotificationShade
+                || (mAmbientState.getScrollY() <= scrollRangeToTop
+                && !mAmbientState.isShadeOpening());
         setQsExpansionEnabled();
     }
 

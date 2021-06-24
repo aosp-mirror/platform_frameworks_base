@@ -20,6 +20,7 @@ import android.view.SurfaceControl;
 
 import android.os.IBinder;
 import android.window.IDisplayAreaOrganizerController;
+import android.window.ITaskFragmentOrganizerController;
 import android.window.ITaskOrganizerController;
 import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
@@ -76,6 +77,9 @@ interface IWindowOrganizerController {
 
     /** @return An interface enabling the management of display area organizers. */
     IDisplayAreaOrganizerController getDisplayAreaOrganizerController();
+
+    /** @return An interface enabling the management of task fragment organizers. */
+    ITaskFragmentOrganizerController getTaskFragmentOrganizerController();
 
     /**
      * Registers a transition player with Core. There is only one of these at a time and calling

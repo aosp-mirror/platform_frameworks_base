@@ -418,6 +418,9 @@
     <!-- Permission required for running networking unit tests -->
     <uses-permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
 
+    <!-- Permission required for CTS test - CtsHostsideNetworkTests -->
+    <uses-permission android:name="android.permission.OBSERVE_NETWORK_POLICY" />
+
     <!-- Permissions required for CTS test - TunerTest -->
     <uses-permission android:name="android.permission.ACCESS_TV_DESCRAMBLER" />
     <uses-permission android:name="android.permission.ACCESS_TV_TUNER" />
