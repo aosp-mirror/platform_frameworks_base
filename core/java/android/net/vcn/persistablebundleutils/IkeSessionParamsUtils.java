@@ -78,12 +78,13 @@ public final class IkeSessionParamsUtils {
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_ACCEPT_ANY_REMOTE_ID);
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_EAP_ONLY_AUTH);
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_MOBIKE);
+        IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_FORCE_PORT_4500);
     }
 
     /** Serializes an IkeSessionParams to a PersistableBundle. */
     @NonNull
     public static PersistableBundle toPersistableBundle(@NonNull IkeSessionParams params) {
-        if (params.getConfiguredNetwork() != null || params.getIke3gppExtension() != null) {
+        if (params.getNetwork() != null || params.getIke3gppExtension() != null) {
             throw new IllegalStateException(
                     "Cannot convert a IkeSessionParams with a caller configured network or with"
                             + " 3GPP extension enabled");
@@ -124,6 +125,8 @@ public final class IkeSessionParamsUtils {
         result.putInt(DPD_DELAY_SEC_KEY, params.getDpdDelaySeconds());
         result.putInt(NATT_KEEPALIVE_DELAY_SEC_KEY, params.getNattKeepAliveDelaySeconds());
 
+        // TODO: b/185941731 Make sure IkeSessionParamsUtils is automatically updated when a new
+        // IKE_OPTION is defined in IKE module and added in the IkeSessionParams
         final List<Integer> enabledIkeOptions = new ArrayList<>();
         for (int option : IKE_OPTIONS) {
             if (params.hasIkeOption(option)) {

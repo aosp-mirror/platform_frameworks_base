@@ -128,6 +128,18 @@ public final class RcsContactUceCapability implements Parcelable {
         }
 
         /**
+         * Create the Builder, which can be used to set UCE capabilities as well as custom
+         * capability extensions.
+         * @param contact The contact URI that the capabilities are attached to.
+         * @param sourceType The type where the capabilities of this contact were retrieved from.
+         * @hide
+         */
+        public OptionsBuilder(@NonNull Uri contact, @SourceType int sourceType) {
+            mCapabilities = new RcsContactUceCapability(contact, CAPABILITY_MECHANISM_OPTIONS,
+                    sourceType);
+        }
+
+        /**
          * Set the result of the capabilities request.
          * @param requestResult the request result
          * @return this OptionBuilder

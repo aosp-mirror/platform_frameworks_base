@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -153,6 +154,66 @@ public class RecoverySystem {
     private static final Object sRequestLock = new Object();
 
     private final IRecoverySystem mService;
+
+    /**
+     * The error codes for reboots initiated by resume on reboot clients.
+     *  @hide
+     */
+    @IntDef(prefix = { "RESUME_ON_REBOOT_REBOOT_ERROR_" }, value = {
+            RESUME_ON_REBOOT_REBOOT_ERROR_NONE,
+            RESUME_ON_REBOOT_REBOOT_ERROR_UNSPECIFIED,
+            RESUME_ON_REBOOT_REBOOT_ERROR_INVALID_PACKAGE_NAME,
+            RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED,
+            RESUME_ON_REBOOT_REBOOT_ERROR_SLOT_MISMATCH,
+            RESUME_ON_REBOOT_REBOOT_ERROR_PROVIDER_PREPARATION_FAILURE})
+    public @interface ResumeOnRebootRebootErrorCode {}
+
+    /**
+     * The preparation of resume on reboot succeeds.
+     *
+     * <p> Don't expose it because a successful reboot should just reboot the device.
+     *  @hide
+     */
+    public static final int RESUME_ON_REBOOT_REBOOT_ERROR_NONE = 0;
+
+    /**
+     * The resume on reboot fails due to an unknown reason.
+     *  @hide
+     */
+    @SystemApi
+    public static final int RESUME_ON_REBOOT_REBOOT_ERROR_UNSPECIFIED = 1000;
+
+    /**
+     * The resume on reboot fails because the package name of the client is invalid, e.g. null
+     * packageName, name contains invalid characters, etc.
+     *  @hide
+     */
+    @SystemApi
+    public static final int RESUME_ON_REBOOT_REBOOT_ERROR_INVALID_PACKAGE_NAME = 2000;
+
+    /**
+     * The resume on reboot fails because the Lock Screen Knowledge Factor hasn't been captured.
+     * This error is also reported if the client attempts to reboot without preparing RoR.
+     *  @hide
+     */
+    @SystemApi
+    public static final int RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED = 3000;
+
+    /**
+     * The resume on reboot fails because the client expects a different boot slot for the next boot
+     * on A/B devices.
+     *  @hide
+     */
+    @SystemApi
+    public static final int RESUME_ON_REBOOT_REBOOT_ERROR_SLOT_MISMATCH = 4000;
+
+    /**
+     * The resume on reboot fails because the resume on reboot provider, e.g. HAL / server based,
+     * fails to arm/store the escrow key.
+     *  @hide
+     */
+    @SystemApi
+    public static final int RESUME_ON_REBOOT_REBOOT_ERROR_PROVIDER_PREPARATION_FAILURE = 5000;
 
     /**
      * Interface definition for a callback to be invoked regularly as
@@ -611,6 +672,14 @@ public class RecoverySystem {
             if (!rs.setupBcb(command)) {
                 throw new IOException("Setup BCB failed");
             }
+            try {
+                if (!rs.allocateSpaceForUpdate(packageFile)) {
+                    throw new IOException("Failed to allocate space for update "
+                            + packageFile.getAbsolutePath());
+                }
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
 
             // Having set up the BCB (bootloader control block), go ahead and reboot
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -723,7 +792,8 @@ public class RecoverySystem {
         }
         RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
         // OTA is the sole user, who expects a slot switch.
-        if (!rs.rebootWithLskfAssumeSlotSwitch(context.getPackageName(), reason)) {
+        if (rs.rebootWithLskfAssumeSlotSwitch(context.getPackageName(), reason)
+                != RESUME_ON_REBOOT_REBOOT_ERROR_NONE) {
             throw new IOException("system not prepared to apply update");
         }
     }
@@ -752,19 +822,19 @@ public class RecoverySystem {
      * @param context the Context to use.
      * @param reason the reboot reason to give to the {@link PowerManager}
      * @param slotSwitch true if the caller expects the slot to be switched on A/B devices.
-     * @throws IOException if the reboot couldn't proceed because the device wasn't ready for an
-     *               unattended reboot.
+     *
+     * @return 0 on success, and a non-zero error code if the reboot couldn't proceed because the
+     *         device wasn't ready for an unattended reboot.
+     * @throws IOException on remote exceptions from the RecoverySystemService
      * @hide
      */
     @SystemApi
     @RequiresPermission(anyOf = {android.Manifest.permission.RECOVERY,
             android.Manifest.permission.REBOOT})
-    public static void rebootAndApply(@NonNull Context context,
+    public static @ResumeOnRebootRebootErrorCode int rebootAndApply(@NonNull Context context,
             @NonNull String reason, boolean slotSwitch) throws IOException {
         RecoverySystem rs = context.getSystemService(RecoverySystem.class);
-        if (!rs.rebootWithLskf(context.getPackageName(), reason, slotSwitch)) {
-            throw new IOException("system not prepared to apply update");
-        }
+        return rs.rebootWithLskf(context.getPackageName(), reason, slotSwitch);
     }
 
     /**
@@ -1330,6 +1400,13 @@ public class RecoverySystem {
     }
 
     /**
+     * Talks to RecoverySystemService via Binder to allocate space
+     */
+    private boolean allocateSpaceForUpdate(File packageFile) throws RemoteException {
+        return mService.allocateSpaceForUpdate(packageFile.getAbsolutePath());
+    }
+
+    /**
      * Talks to RecoverySystemService via Binder to clear up the BCB.
      */
     private boolean clearBcb() {
@@ -1361,8 +1438,8 @@ public class RecoverySystem {
     private boolean requestLskf(String packageName, IntentSender sender) throws IOException {
         try {
             return mService.requestLskf(packageName, sender);
-        } catch (RemoteException e) {
-            throw new IOException("could request LSKF capture");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not request LSKF capture", e);
         }
     }
 
@@ -1375,8 +1452,8 @@ public class RecoverySystem {
     private boolean clearLskf(String packageName) throws IOException {
         try {
             return mService.clearLskf(packageName);
-        } catch (RemoteException e) {
-            throw new IOException("could not clear LSKF");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not clear LSKF", e);
         }
     }
 
@@ -1390,8 +1467,8 @@ public class RecoverySystem {
     private boolean isLskfCaptured(String packageName) throws IOException {
         try {
             return mService.isLskfCaptured(packageName);
-        } catch (RemoteException e) {
-            throw new IOException("could not get LSKF capture state");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not get LSKF capture state", e);
         }
     }
 
@@ -1399,27 +1476,26 @@ public class RecoverySystem {
      * Calls the recovery system service to reboot and apply update.
      *
      */
-    private boolean rebootWithLskf(String packageName, String reason, boolean slotSwitch)
-            throws IOException {
+    private @ResumeOnRebootRebootErrorCode int rebootWithLskf(String packageName, String reason,
+            boolean slotSwitch) throws IOException {
         try {
             return mService.rebootWithLskf(packageName, reason, slotSwitch);
-        } catch (RemoteException e) {
-            throw new IOException("could not reboot for update");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not reboot for update", e);
         }
     }
-
 
     /**
      * Calls the recovery system service to reboot and apply update. This is the legacy API and
      * expects a slot switch for A/B devices.
      *
      */
-    private boolean rebootWithLskfAssumeSlotSwitch(String packageName, String reason)
-            throws IOException {
+    private @ResumeOnRebootRebootErrorCode int rebootWithLskfAssumeSlotSwitch(String packageName,
+            String reason) throws IOException {
         try {
             return mService.rebootWithLskfAssumeSlotSwitch(packageName, reason);
-        } catch (RemoteException e) {
-            throw new IOException("could not reboot for update");
+        } catch (RemoteException | RuntimeException e) {
+            throw new IOException("could not reboot for update", e);
         }
     }
 

@@ -904,6 +904,7 @@ public abstract class KeyProperties {
     @IntDef(prefix = { "NAMESPACE_" }, value = {
             NAMESPACE_APPLICATION,
             NAMESPACE_WIFI,
+            NAMESPACE_LOCKSETTINGS,
     })
     public @interface Namespace {}
 
@@ -923,6 +924,13 @@ public abstract class KeyProperties {
      */
     @SystemApi
     public static final int NAMESPACE_WIFI = 102;
+
+    /**
+     * The namespace identifier for the LOCKSETTINGS Keystore namespace.
+     * This must be kept in sync with system/sepolicy/private/keystore2_key_contexts
+     * @hide
+     */
+    public static final int NAMESPACE_LOCKSETTINGS = 103;
 
     /**
      * For legacy support, translate namespaces into known UIDs.

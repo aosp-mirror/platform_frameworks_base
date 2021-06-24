@@ -91,6 +91,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
     private boolean mPendingStatusChangeBroadcast;
 
+    private static final String[] RECEIVER_PERMISSIONS_FOR_BROADCAST = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+    };
+
     // Called with SyncRoot lock held.
     public WifiDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener,
@@ -432,7 +436,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         }
 
         // Send protected broadcast about wifi display status to registered receivers.
-        getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
+        getContext().createContextAsUser(UserHandle.ALL, 0)
+                .sendBroadcastWithMultiplePermissions(intent, RECEIVER_PERMISSIONS_FOR_BROADCAST);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

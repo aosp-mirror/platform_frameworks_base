@@ -38,6 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc nhanh"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc chậm"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang tối ưu hóa để cải thiện độ bền của pin"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"Kết nối bộ sạc của bạn."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Nhấn vào Menu để mở khóa."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Mạng đã bị khóa"</string>
@@ -60,7 +61,7 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Không thể tắt eSIM do lỗi."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Nhập"</string>
     <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"Đã quên hình mở khóa"</string>
-    <string name="kg_wrong_pattern" msgid="5907301342430102842">"Hình không chính xác"</string>
+    <string name="kg_wrong_pattern" msgid="5907301342430102842">"Hình mở khóa không chính xác"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Mật khẩu sai"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Mã PIN sai"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">

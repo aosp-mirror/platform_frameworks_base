@@ -254,36 +254,6 @@ applications that come with the platform
         <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.networkstack">
-        <permission name="android.permission.ACCESS_NETWORK_CONDITIONS"/>
-        <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
-        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
-        <permission name="android.permission.CONTROL_VPN"/>
-        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-        <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
-        <permission name="android.permission.MANAGE_SUBSCRIPTION_PLANS"/>
-        <permission name="android.permission.MANAGE_USB"/>
-        <permission name="android.permission.NETWORK_BYPASS_PRIVATE_DNS"/>
-        <permission name="android.permission.PACKET_KEEPALIVE_OFFLOAD"/>
-        <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
-        <permission name="android.permission.READ_PRECISE_PHONE_STATE"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-        <permission name="android.permission.READ_WIFI_CREDENTIAL"/>
-        <permission name="android.permission.RECEIVE_DATA_ACTIVITY_CHANGE"/>
-        <permission name="android.permission.TETHER_PRIVILEGED"/>
-        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.networkstack.tethering">
-        <permission name="android.permission.BLUETOOTH_PRIVILEGED" />
-        <permission name="android.permission.MANAGE_USB"/>
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
-        <permission name="android.permission.TETHER_PRIVILEGED"/>
-        <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
-        <permission name="android.permission.UPDATE_DEVICE_STATS"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.server.telecom">
         <permission name="android.permission.BIND_CONNECTION_SERVICE"/>
         <permission name="android.permission.BIND_INCALL_SERVICE"/>
@@ -383,6 +353,7 @@ applications that come with the platform
         <permission name="android.permission.SUSPEND_APPS" />
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
+        <permission name="android.permission.UWB_PRIVILEGED"/>
         <permission name="android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
@@ -410,6 +381,7 @@ applications that come with the platform
         <permission name="android.permission.LOG_COMPAT_CHANGE" />
         <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
         <permission name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG" />
+        <permission name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD" />
         <!-- Permissions required to test ambient display. -->
         <permission name="android.permission.READ_DREAM_STATE" />
         <permission name="android.permission.WRITE_DREAM_STATE" />
@@ -442,6 +414,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_DEBUGGING" />
         <!-- Permissions required for CTS test - TimeManagerTest -->
         <permission name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
+        <permission name="android.permission.SUGGEST_EXTERNAL_TIME" />
         <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->
         <permission name="android.permission.HDMI_CEC"/>
         <!-- Permission required for CTS test - MediaPlayerTest -->
@@ -458,6 +431,21 @@ applications that come with the platform
         <permission name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
         <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
         <permission name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
+        <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
+        <permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
+        <permission name="android.permission.READ_LOGS" />
+        <permission name="android.permission.BRIGHTNESS_SLIDER_USAGE" />
+        <permission name="android.permission.ACCESS_AMBIENT_LIGHT_STATS" />
+        <permission name="android.permission.CONFIGURE_DISPLAY_BRIGHTNESS" />
+        <permission name="android.permission.GET_TOP_ACTIVITY_INFO" />
+        <permission name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER" />
+        <permission name="android.permission.SET_MEDIA_KEY_LISTENER" />
+        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
+        <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
+        <permission name="android.permission.UPDATE_DEVICE_STATS" />
+        <!-- Permission required for hotword detection service CTS tests -->
+        <permission name="android.permission.MANAGE_HOTWORD_DETECTION" />
+        <permission name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

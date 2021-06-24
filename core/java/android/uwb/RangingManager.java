@@ -165,7 +165,8 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
     }
 
     @Override
-    public void onRangingStopped(SessionHandle sessionHandle) {
+    public void onRangingStopped(SessionHandle sessionHandle, @RangingChangeReason int reason,
+            PersistableBundle params) {
         synchronized (this) {
             if (!hasSession(sessionHandle)) {
                 Log.w(TAG, "onRangingStopped - received unexpected SessionHandle: "
@@ -174,7 +175,7 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
             }
 
             RangingSession session = mRangingSessionTable.get(sessionHandle);
-            session.onRangingStopped();
+            session.onRangingStopped(convertToReason(reason), params);
         }
     }
 

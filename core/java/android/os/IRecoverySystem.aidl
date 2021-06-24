@@ -23,6 +23,7 @@ import android.os.IRecoverySystemProgressListener;
 /** @hide */
 
 interface IRecoverySystem {
+    boolean allocateSpaceForUpdate(in String packageFilePath);
     boolean uncrypt(in String packageFile, IRecoverySystemProgressListener listener);
     boolean setupBcb(in String command);
     boolean clearBcb();
@@ -30,6 +31,6 @@ interface IRecoverySystem {
     boolean requestLskf(in String packageName, in IntentSender sender);
     boolean clearLskf(in String packageName);
     boolean isLskfCaptured(in String packageName);
-    boolean rebootWithLskfAssumeSlotSwitch(in String packageName, in String reason);
-    boolean rebootWithLskf(in String packageName, in String reason, in boolean slotSwitch);
+    int rebootWithLskfAssumeSlotSwitch(in String packageName, in String reason);
+    int rebootWithLskf(in String packageName, in String reason, in boolean slotSwitch);
 }

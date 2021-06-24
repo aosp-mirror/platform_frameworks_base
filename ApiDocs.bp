@@ -56,9 +56,23 @@ framework_docs_only_libs = [
 ]
 
 stubs_defaults {
+    name: "android-non-updatable-doc-stubs-defaults",
+    defaults: ["android-non-updatable-stubs-defaults"],
+    srcs: [
+        // No longer part of the stubs, but are included in the docs.
+        "test-base/src/**/*.java",
+        "test-mock/src/**/*.java",
+        "test-runner/src/**/*.java",
+    ],
+    libs: framework_docs_only_libs,
+    create_doc_stubs: true,
+    write_sdk_values: true,
+}
+
+stubs_defaults {
     name: "framework-doc-stubs-default",
     srcs: [
-        ":framework-non-updatable-stub-sources",
+        ":android-non-updatable-stub-sources",
 
         // Module sources
         ":art.module.public.api{.public.stubs.source}",
@@ -75,13 +89,14 @@ stubs_defaults {
         ":updatable-media-srcs",
 
         // No longer part of the stubs, but are included in the docs.
-        "test-base/src/**/*.java",
-        "test-mock/src/**/*.java",
-        "test-runner/src/**/*.java",
+        ":android-test-base-sources",
+        ":android-test-mock-sources",
+        ":android-test-runner-sources",
     ],
     libs: framework_docs_only_libs,
     create_doc_stubs: true,
     annotations_enabled: true,
+    filter_packages: packages_to_document,
     api_levels_annotations_enabled: true,
     api_levels_annotations_dirs: [
         "sdk-dir",
@@ -94,14 +109,25 @@ stubs_defaults {
 }
 
 droidstubs {
+    name: "android-non-updatable-doc-stubs",
+    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    args: metalava_framework_docs_args,
+}
+
+droidstubs {
+    name: "android-non-updatable-doc-stubs-system",
+    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    args: metalava_framework_docs_args +
+        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
+}
+
+droidstubs {
     name: "framework-doc-stubs",
     defaults: ["framework-doc-stubs-default"],
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
-    args: metalava_framework_docs_args +
-        // Needed for hidden libcore annotations for now.
-        " --ignore-classes-on-classpath ",
+    args: metalava_framework_docs_args,
     write_sdk_values: true,
 }
 
@@ -112,8 +138,6 @@ droidstubs {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args +
-        // Needed for hidden libcore annotations for now.
-        " --ignore-classes-on-classpath " +
         " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
     write_sdk_values: true,
 }

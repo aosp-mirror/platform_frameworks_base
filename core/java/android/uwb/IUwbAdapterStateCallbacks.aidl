@@ -17,16 +17,17 @@
 package android.uwb;
 
 import android.uwb.StateChangeReason;
+import android.uwb.AdapterState;
 
 /**
  * @hide
  */
 interface IUwbAdapterStateCallbacks {
   /**
-   * Called whenever the adapter state changes
-   *
-   * @param isEnabled true if the adapter is enabled, false otherwise
-   * @param reason the reason that the state has changed
-   */
-  void onAdapterStateChanged(boolean isEnabled, StateChangeReason reason);
+     * Called whenever the adapter state changes
+     *
+     * @param state UWB state; enabled_active, enabled_inactive, or disabled.
+     * @param reason the reason that the state has changed
+     */
+    void onAdapterStateChanged(AdapterState state, StateChangeReason reason);
 }

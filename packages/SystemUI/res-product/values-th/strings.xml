@@ -40,4 +40,7 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"คุณปลดล็อกโทรศัพท์ไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้งแล้ว ระบบจะนำโปรไฟล์งานออก ซึ่งจะเป็นการลบข้อมูลทั้งหมดในโปรไฟล์"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล\n\n โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้บัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"ปลดล็อกโทรศัพท์เพื่อดูตัวเลือกเพิ่มเติม"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"ปลดล็อกแท็บเล็ตเพื่อดูตัวเลือกเพิ่มเติม"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"ปลดล็อกอุปกรณ์เพื่อดูตัวเลือกเพิ่มเติม"</string>
 </resources>

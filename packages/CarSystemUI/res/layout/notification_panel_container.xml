@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<FrameLayout
+<com.android.car.ui.FocusArea
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/notification_container"
     android:layout_width="match_parent"

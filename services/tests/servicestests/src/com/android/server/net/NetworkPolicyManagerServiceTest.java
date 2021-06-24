@@ -18,6 +18,12 @@ package com.android.server.net;
 
 import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
 import static android.Manifest.permission.NETWORK_STACK;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED;
+import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
+import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_REASON_DOZE;
+import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
@@ -29,18 +35,27 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
+import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_FOREGROUND;
+import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_SYSTEM;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_FOREGROUND;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_SYSTEM;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
+import static android.net.NetworkPolicyManager.allowedReasonsToString;
+import static android.net.NetworkPolicyManager.blockedReasonsToString;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.METERED_NO;
+import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
-import static android.net.NetworkTemplate.buildTemplateMobileAll;
+import static android.net.NetworkTemplate.buildTemplateCarrierMetered;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
@@ -59,6 +74,7 @@ import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
+import static com.android.server.net.NetworkPolicyManagerService.UidBlockedState.getEffectiveBlockedReasons;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -134,8 +150,10 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DataUnit;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Range;
 import android.util.RecurrenceRule;
+import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
@@ -143,13 +161,13 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.BroadcastInterceptingContext.FutureIntent;
+import com.android.internal.util.test.FsUtil;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.usage.AppStandbyInternal;
 
 import com.google.common.util.concurrent.AbstractFuture;
 
-import libcore.io.IoUtils;
 import libcore.io.Streams;
 
 import org.junit.After;
@@ -213,7 +231,8 @@ public class NetworkPolicyManagerServiceTest {
     private static final int TEST_NET_ID = 24;
 
     private static NetworkTemplate sTemplateWifi = buildTemplateWifi(TEST_SSID);
-    private static NetworkTemplate sTemplateMobileAll = buildTemplateMobileAll(TEST_IMSI);
+    private static NetworkTemplate sTemplateCarrierMetered =
+            buildTemplateCarrierMetered(TEST_IMSI);
 
     /**
      * Path on assets where files used by {@link NetPolicyXml} are located.
@@ -434,7 +453,7 @@ public class NetworkPolicyManagerServiceTest {
         verify(mNetworkManager).registerObserver(networkObserver.capture());
         mNetworkObserver = networkObserver.getValue();
 
-        NetworkPolicy defaultPolicy = mService.buildDefaultMobilePolicy(0, "");
+        NetworkPolicy defaultPolicy = mService.buildDefaultCarrierPolicy(0, "");
         mDefaultWarningBytes = defaultPolicy.warningBytes;
         mDefaultLimitBytes = defaultPolicy.limitBytes;
     }
@@ -1075,7 +1094,7 @@ public class NetworkPolicyManagerServiceTest {
         // first, pretend that wifi network comes online. no policy active,
         // which means we shouldn't push limit to interface.
         snapshots = List.of(buildWifi());
-        when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
+        when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
 
         mPolicyListener.expect().onMeteredIfacesChanged(any());
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
@@ -1083,7 +1102,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // now change cycle to be on 15th, and test in early march, to verify we
         // pick cycle day in previous month.
-        when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
+        when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
 
         // pretend that 512 bytes total have happened
         stats = new NetworkStats(getElapsedRealtime(), 1)
@@ -1213,7 +1232,7 @@ public class NetworkPolicyManagerServiceTest {
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
 
-            mService.snoozeLimit(NetworkTemplate.buildTemplateMobileAll(TEST_IMSI));
+            mService.snoozeLimit(NetworkTemplate.buildTemplateCarrierMetered(TEST_IMSI));
             mService.updateNetworks();
 
             verify(tmSub, atLeastOnce()).setPolicyDataEnabled(true);
@@ -1344,7 +1363,7 @@ public class NetworkPolicyManagerServiceTest {
                 .insertEntry(TEST_IFACE, 0L, 0L, 0L, 0L);
 
         {
-            when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
+            when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
             when(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15,
                     currentTimeMillis())).thenReturn(stats.getTotalBytes());
 
@@ -1466,27 +1485,27 @@ public class NetworkPolicyManagerServiceTest {
         assertEquals(mDefaultLimitBytes, actualLimitBytes);
     }
 
-    private PersistableBundle setupUpdateMobilePolicyCycleTests() throws RemoteException {
-        when(mConnManager.getAllNetworkStateSnapshot())
+    private PersistableBundle setupUpdateCarrierPolicyCycleTests() throws RemoteException {
+        when(mConnManager.getAllNetworkStateSnapshots())
                 .thenReturn(new ArrayList<NetworkStateSnapshot>());
 
         setupTelephonySubscriptionManagers(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
 
         PersistableBundle bundle = CarrierConfigManager.getDefaultConfig();
         when(mCarrierConfigManager.getConfigForSubId(FAKE_SUB_ID)).thenReturn(bundle);
-        setNetworkPolicies(buildDefaultFakeMobilePolicy());
+        setNetworkPolicies(buildDefaultFakeCarrierPolicy());
         return bundle;
     }
 
     @Test
-    public void testUpdateMobilePolicyCycleWithNullConfig() throws RemoteException {
-        when(mConnManager.getAllNetworkStateSnapshot())
+    public void testUpdateCarrierPolicyCycleWithNullConfig() throws RemoteException {
+        when(mConnManager.getAllNetworkStateSnapshots())
                 .thenReturn(new ArrayList<NetworkStateSnapshot>());
 
         setupTelephonySubscriptionManagers(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
 
         when(mCarrierConfigManager.getConfigForSubId(FAKE_SUB_ID)).thenReturn(null);
-        setNetworkPolicies(buildDefaultFakeMobilePolicy());
+        setNetworkPolicies(buildDefaultFakeCarrierPolicy());
         // smoke test to make sure no errors are raised
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
@@ -1497,8 +1516,8 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    public void testUpdateMobilePolicyCycleWithInvalidConfig() throws RemoteException {
-        PersistableBundle bundle = setupUpdateMobilePolicyCycleTests();
+    public void testUpdateCarrierPolicyCycleWithInvalidConfig() throws RemoteException {
+        PersistableBundle bundle = setupUpdateCarrierPolicyCycleTests();
         // Test with an invalid CarrierConfig, there should be no changes or crashes.
         bundle.putInt(CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT, -100);
         bundle.putLong(CarrierConfigManager.KEY_DATA_WARNING_THRESHOLD_BYTES_LONG, -100);
@@ -1513,8 +1532,8 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    public void testUpdateMobilePolicyCycleWithDefaultConfig() throws RemoteException {
-        PersistableBundle bundle = setupUpdateMobilePolicyCycleTests();
+    public void testUpdateCarrierPolicyCycleWithDefaultConfig() throws RemoteException {
+        PersistableBundle bundle = setupUpdateCarrierPolicyCycleTests();
         // Test that we respect the platform values when told to
         bundle.putInt(CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT,
                 DATA_CYCLE_USE_PLATFORM_DEFAULT);
@@ -1532,11 +1551,11 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    public void testUpdateMobilePolicyCycleWithUserOverrides() throws RemoteException {
-        PersistableBundle bundle = setupUpdateMobilePolicyCycleTests();
+    public void testUpdateCarrierPolicyCycleWithUserOverrides() throws RemoteException {
+        PersistableBundle bundle = setupUpdateCarrierPolicyCycleTests();
 
         // inferred = false implies that a user manually modified this policy.
-        NetworkPolicy policy = buildDefaultFakeMobilePolicy();
+        NetworkPolicy policy = buildDefaultFakeCarrierPolicy();
         policy.inferred = false;
         setNetworkPolicies(policy);
 
@@ -1555,8 +1574,8 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    public void testUpdateMobilePolicyCycleUpdatesDataCycle() throws RemoteException {
-        PersistableBundle bundle = setupUpdateMobilePolicyCycleTests();
+    public void testUpdateCarrierPolicyCycleUpdatesDataCycle() throws RemoteException {
+        PersistableBundle bundle = setupUpdateCarrierPolicyCycleTests();
 
         bundle.putInt(CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT, 31);
         bundle.putLong(CarrierConfigManager.KEY_DATA_WARNING_THRESHOLD_BYTES_LONG, 9999);
@@ -1570,8 +1589,8 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    public void testUpdateMobilePolicyCycleDisableThresholds() throws RemoteException {
-        PersistableBundle bundle = setupUpdateMobilePolicyCycleTests();
+    public void testUpdateCarrierPolicyCycleDisableThresholds() throws RemoteException {
+        PersistableBundle bundle = setupUpdateCarrierPolicyCycleTests();
 
         bundle.putInt(CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT, 31);
         bundle.putLong(CarrierConfigManager.KEY_DATA_WARNING_THRESHOLD_BYTES_LONG,
@@ -1587,8 +1606,8 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    public void testUpdateMobilePolicyCycleRevertsToDefault() throws RemoteException {
-        PersistableBundle bundle = setupUpdateMobilePolicyCycleTests();
+    public void testUpdateCarrierPolicyCycleRevertsToDefault() throws RemoteException {
+        PersistableBundle bundle = setupUpdateCarrierPolicyCycleTests();
 
         bundle.putInt(CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT, 31);
         bundle.putLong(CarrierConfigManager.KEY_DATA_WARNING_THRESHOLD_BYTES_LONG,
@@ -1758,7 +1777,7 @@ public class NetworkPolicyManagerServiceTest {
     @Test
     public void testSetNetworkPolicies_withNullPolicies_doesNotThrow() {
         NetworkPolicy[] policies = new NetworkPolicy[3];
-        policies[1] = buildDefaultFakeMobilePolicy();
+        policies[1] = buildDefaultFakeCarrierPolicy();
         setNetworkPolicies(policies);
 
         assertNetworkPolicyEquals(DEFAULT_CYCLE_DAY, mDefaultWarningBytes, mDefaultLimitBytes,
@@ -1804,7 +1823,8 @@ public class NetworkPolicyManagerServiceTest {
 
         // Set warning to 7KB and limit to 10KB.
         setNetworkPolicies(new NetworkPolicy(
-                sTemplateMobileAll, CYCLE_DAY, TIMEZONE_UTC, 7000L, 10000L, true));
+                sTemplateCarrierMetered, CYCLE_DAY, TIMEZONE_UTC, 7000L, 10000L,
+                true));
         postMsgAndWaitForCompletion();
 
         // Verifies that remaining quotas are set to providers.
@@ -1896,6 +1916,99 @@ public class NetworkPolicyManagerServiceTest {
         assertFalse(mService.isUidNetworkingBlocked(UID_E, false));
     }
 
+    @Test
+    public void testUpdateEffectiveBlockedReasons() {
+        final SparseArray<Pair<Integer, Integer>> effectiveBlockedReasons = new SparseArray<>();
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_REASON_NONE, ALLOWED_REASON_NONE));
+
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER, ALLOWED_REASON_SYSTEM));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_REASON_DOZE,
+                        ALLOWED_REASON_SYSTEM));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER,
+                        ALLOWED_METERED_REASON_SYSTEM));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER
+                                | BLOCKED_METERED_REASON_USER_RESTRICTED,
+                        ALLOWED_METERED_REASON_SYSTEM));
+
+        effectiveBlockedReasons.put(BLOCKED_METERED_REASON_DATA_SAVER,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_METERED_REASON_DATA_SAVER,
+                        ALLOWED_REASON_SYSTEM));
+        effectiveBlockedReasons.put(BLOCKED_REASON_APP_STANDBY,
+                Pair.create(BLOCKED_REASON_APP_STANDBY | BLOCKED_METERED_REASON_USER_RESTRICTED,
+                        ALLOWED_METERED_REASON_SYSTEM));
+
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER, ALLOWED_REASON_FOREGROUND));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_REASON_DOZE,
+                        ALLOWED_REASON_FOREGROUND));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER, ALLOWED_METERED_REASON_FOREGROUND));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER
+                                | BLOCKED_METERED_REASON_USER_RESTRICTED,
+                        ALLOWED_METERED_REASON_FOREGROUND));
+        effectiveBlockedReasons.put(BLOCKED_METERED_REASON_DATA_SAVER,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_METERED_REASON_DATA_SAVER,
+                        ALLOWED_REASON_FOREGROUND));
+        effectiveBlockedReasons.put(BLOCKED_REASON_BATTERY_SAVER,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER
+                                | BLOCKED_METERED_REASON_USER_RESTRICTED,
+                        ALLOWED_METERED_REASON_FOREGROUND));
+        // TODO: test more combinations of blocked reasons.
+
+        for (int i = 0; i < effectiveBlockedReasons.size(); ++i) {
+            final int expectedEffectiveBlockedReasons = effectiveBlockedReasons.keyAt(i);
+            final int blockedReasons = effectiveBlockedReasons.valueAt(i).first;
+            final int allowedReasons = effectiveBlockedReasons.valueAt(i).second;
+            final String errorMsg = "Expected="
+                    + blockedReasonsToString(expectedEffectiveBlockedReasons)
+                    + "; blockedReasons=" + blockedReasonsToString(blockedReasons)
+                    + ", allowedReasons=" + allowedReasonsToString(allowedReasons);
+            assertEquals(errorMsg, expectedEffectiveBlockedReasons,
+                    getEffectiveBlockedReasons(blockedReasons, allowedReasons));
+        }
+    }
+
+    @Test
+    @NetPolicyXml("network-policy-mobile.xml")
+    public void testStartToSupportCarrierUsagePolicy() throws Exception {
+        NetworkPolicy[] policies = mService.getNetworkPolicies(
+                mServiceContext.getOpPackageName());
+        assertEquals("Unexpected number of network policies", 1, policies.length);
+        NetworkPolicy actualPolicy = policies[0];
+        assertEquals("Unexpected template match rule in network policies",
+                NetworkTemplate.MATCH_CARRIER,
+                actualPolicy.template.getMatchRule());
+        assertEquals("Unexpected subscriberId match rule in network policies",
+                NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_EXACT,
+                actualPolicy.template.getSubscriberIdMatchRule());
+        assertEquals("Unexpected template meteredness in network policies",
+                METERED_YES, actualPolicy.template.getMeteredness());
+    }
+
+    @Test
+    @NetPolicyXml("network-policy-wifi-with-subscriberId-match-rule-all-and-templateMetered-no.xml")
+    public void testSupportedCarrierUsagePolicy() throws Exception {
+        NetworkPolicy[] policies = mService.getNetworkPolicies(
+                mServiceContext.getOpPackageName());
+        assertEquals("Unexpected number of network policies", 1, policies.length);
+        NetworkPolicy actualPolicy = policies[0];
+        assertEquals("Unexpected template match rule in network policies",
+                NetworkTemplate.MATCH_WIFI,
+                actualPolicy.template.getMatchRule());
+        assertEquals("Unexpected subscriberId match rule in network policies",
+                NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_ALL,
+                actualPolicy.template.getSubscriberIdMatchRule());
+        assertEquals("Unexpected template meteredness in network policies",
+                METERED_NO, actualPolicy.template.getMeteredness());
+    }
+
     private String formatBlockedStateError(int uid, int rule, boolean metered,
             boolean backgroundRestricted) {
         return String.format(
@@ -1948,8 +2061,8 @@ public class NetworkPolicyManagerServiceTest {
         return nc;
     }
 
-    private NetworkPolicy buildDefaultFakeMobilePolicy() {
-        NetworkPolicy p = mService.buildDefaultMobilePolicy(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
+    private NetworkPolicy buildDefaultFakeCarrierPolicy() {
+        NetworkPolicy p = mService.buildDefaultCarrierPolicy(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
         // set a deterministic cycle date
         p.cycleRule = new RecurrenceRule(
                 p.cycleRule.start.withDayOfMonth(DEFAULT_CYCLE_DAY),
@@ -1957,9 +2070,9 @@ public class NetworkPolicyManagerServiceTest {
         return p;
     }
 
-    private static NetworkPolicy buildFakeMobilePolicy(int cycleDay, long warningBytes,
+    private static NetworkPolicy buildFakeCarrierPolicy(int cycleDay, long warningBytes,
             long limitBytes, boolean inferred) {
-        final NetworkTemplate template = buildTemplateMobileAll(FAKE_SUBSCRIBER_ID);
+        final NetworkTemplate template = buildTemplateCarrierMetered(FAKE_SUBSCRIBER_ID);
         return new NetworkPolicy(template, cycleDay, TimeZone.getDefault().getID(), warningBytes,
                 limitBytes, SNOOZE_NEVER, SNOOZE_NEVER, true, inferred);
     }
@@ -1970,8 +2083,8 @@ public class NetworkPolicyManagerServiceTest {
                 mServiceContext.getOpPackageName());
         assertEquals("Unexpected number of network policies", 1, policies.length);
         NetworkPolicy actualPolicy = policies[0];
-        NetworkPolicy expectedPolicy = buildFakeMobilePolicy(expectedCycleDay, expectedWarningBytes,
-                expectedLimitBytes, expectedInferred);
+        NetworkPolicy expectedPolicy = buildFakeCarrierPolicy(expectedCycleDay,
+                expectedWarningBytes, expectedLimitBytes, expectedInferred);
         assertEquals(expectedPolicy, actualPolicy);
     }
 
@@ -2014,7 +2127,7 @@ public class NetworkPolicyManagerServiceTest {
                 new Network(TEST_NET_ID),
                 buildNetworkCapabilities(TEST_SUB_ID, roaming),
                 buildLinkProperties(TEST_IFACE), TEST_IMSI, TYPE_MOBILE));
-        when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
+        when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
     }
 
     private void expectDefaultCarrierConfig() throws Exception {
@@ -2272,7 +2385,7 @@ public class NetworkPolicyManagerServiceTest {
     private void setNetpolicyXml(Context context) throws Exception {
         mPolicyDir = context.getFilesDir();
         if (mPolicyDir.exists()) {
-            IoUtils.deleteContents(mPolicyDir);
+            FsUtil.deleteContents(mPolicyDir);
         }
         if (!TextUtils.isEmpty(mNetpolicyXml)) {
             final String assetPath = NETPOLICY_DIR + "/" + mNetpolicyXml;

@@ -37,8 +37,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doAnswer;
@@ -55,17 +57,18 @@ import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkCapabilities.Transport;
 import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnConfigTest;
+import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
 import android.os.IBinder;
@@ -77,11 +80,11 @@ import android.os.test.TestLooper;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.net.module.util.LocationPermissionChecker;
 import com.android.server.VcnManagementService.VcnCallback;
 import com.android.server.VcnManagementService.VcnStatusCallbackInfo;
 import com.android.server.vcn.TelephonySubscriptionTracker;
@@ -97,7 +100,9 @@ import org.mockito.ArgumentCaptor;
 
 import java.io.FileNotFoundException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -162,8 +167,6 @@ public class VcnManagementServiceTest {
             mock(PersistableBundleUtils.LockingReadWriteHelper.class);
     private final TelephonySubscriptionTracker mSubscriptionTracker =
             mock(TelephonySubscriptionTracker.class);
-    private final LocationPermissionChecker mLocationPermissionChecker =
-            mock(LocationPermissionChecker.class);
 
     private final ArgumentCaptor<VcnCallback> mVcnCallbackCaptor =
             ArgumentCaptor.forClass(VcnCallback.class);
@@ -197,7 +200,8 @@ public class VcnManagementServiceTest {
                 .newVcnContext(
                         eq(mMockContext),
                         eq(mTestLooper.getLooper()),
-                        any(VcnNetworkProvider.class));
+                        any(VcnNetworkProvider.class),
+                        anyBoolean());
         doReturn(mSubscriptionTracker)
                 .when(mMockDeps)
                 .newTelephonySubscriptionTracker(
@@ -207,9 +211,6 @@ public class VcnManagementServiceTest {
         doReturn(mConfigReadWriteHelper)
                 .when(mMockDeps)
                 .newPersistableBundleLockingReadWriteHelper(any());
-        doReturn(mLocationPermissionChecker)
-                .when(mMockDeps)
-                .newLocationPermissionChecker(eq(mMockContext));
 
         // Setup VCN instance generation
         doAnswer((invocation) -> {
@@ -331,6 +332,17 @@ public class VcnManagementServiceTest {
             return subIdToGroupMap.get(invocation.getArgument(0));
         }).when(snapshot).getGroupForSubId(anyInt());
 
+        doAnswer(invocation -> {
+            final ParcelUuid subGrp = invocation.getArgument(0);
+            final Set<Integer> subIds = new ArraySet<>();
+            for (Entry<Integer, ParcelUuid> entry : subIdToGroupMap.entrySet()) {
+                if (entry.getValue().equals(subGrp)) {
+                    subIds.add(entry.getKey());
+                }
+            }
+            return subIds;
+        }).when(snapshot).getAllSubIdsInGroup(any());
+
         final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
         cb.onNewSnapshot(snapshot);
 
@@ -362,6 +374,12 @@ public class VcnManagementServiceTest {
     public void testTelephonyNetworkTrackerCallbackStartsInstances() throws Exception {
         TelephonySubscriptionSnapshot snapshot =
                 triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(TEST_UUID_1));
+        verify(mMockDeps)
+                .newVcnContext(
+                        eq(mMockContext),
+                        eq(mTestLooper.getLooper()),
+                        any(VcnNetworkProvider.class),
+                        anyBoolean());
         verify(mMockDeps)
                 .newVcn(eq(mVcnContext), eq(TEST_UUID_1), eq(TEST_VCN_CONFIG), eq(snapshot), any());
     }
@@ -520,11 +538,29 @@ public class VcnManagementServiceTest {
     }
 
     @Test
+    public void testSetVcnConfigTestModeRequiresPermission() throws Exception {
+        doThrow(new SecurityException("Requires MANAGE_TEST_NETWORKS"))
+                .when(mMockContext)
+                .enforceCallingPermission(
+                        eq(android.Manifest.permission.MANAGE_TEST_NETWORKS), any());
+
+        final VcnConfig vcnConfig =
+                new VcnConfig.Builder(mMockContext)
+                        .addGatewayConnectionConfig(
+                                VcnGatewayConnectionConfigTest.buildTestConfig())
+                        .setIsTestModeProfile()
+                        .build();
+
+        try {
+            mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, vcnConfig, TEST_PACKAGE_NAME);
+            fail("Expected exception due to using test-mode without permission");
+        } catch (SecurityException e) {
+            verify(mMockPolicyListener, never()).onPolicyChanged();
+        }
+    }
+
+    @Test
     public void testSetVcnConfigNotifiesStatusCallback() throws Exception {
-        mVcnMgmtSvc.systemReady();
-        doReturn(true)
-                .when(mLocationPermissionChecker)
-                .checkLocationPermission(eq(TEST_PACKAGE_NAME), any(), eq(TEST_UID), any());
         triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(TEST_UUID_2));
 
         mVcnMgmtSvc.registerVcnStatusCallback(TEST_UUID_2, mMockStatusCallback, TEST_PACKAGE_NAME);
@@ -627,6 +663,43 @@ public class VcnManagementServiceTest {
     }
 
     @Test
+    public void testGetConfiguredSubscriptionGroupsRequiresSystemUser() throws Exception {
+        doReturn(UserHandle.getUid(UserHandle.MIN_SECONDARY_USER_ID, TEST_UID))
+                .when(mMockDeps)
+                .getBinderCallingUid();
+
+        try {
+            mVcnMgmtSvc.getConfiguredSubscriptionGroups(TEST_PACKAGE_NAME);
+            fail("Expected security exception for non system user");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
+    public void testGetConfiguredSubscriptionGroupsMismatchedPackages() throws Exception {
+        final String badPackage = "IncorrectPackage";
+        doThrow(new SecurityException()).when(mAppOpsMgr).checkPackage(TEST_UID, badPackage);
+
+        try {
+            mVcnMgmtSvc.getConfiguredSubscriptionGroups(badPackage);
+            fail("Expected security exception due to mismatched packages");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
+    public void testGetConfiguredSubscriptionGroups() throws Exception {
+        mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, TEST_VCN_CONFIG, TEST_PACKAGE_NAME);
+
+        // Assert that if both UUID 1 and 2 are provisioned, the caller only gets ones that they are
+        // privileged for.
+        triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(TEST_UUID_1));
+        final List<ParcelUuid> subGrps =
+                mVcnMgmtSvc.getConfiguredSubscriptionGroups(TEST_PACKAGE_NAME);
+        assertEquals(Collections.singletonList(TEST_UUID_1), subGrps);
+    }
+
+    @Test
     public void testAddVcnUnderlyingNetworkPolicyListener() throws Exception {
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
@@ -635,10 +708,9 @@ public class VcnManagementServiceTest {
 
     @Test(expected = SecurityException.class)
     public void testAddVcnUnderlyingNetworkPolicyListenerInvalidPermission() {
-        doThrow(new SecurityException())
+        doReturn(PackageManager.PERMISSION_DENIED)
                 .when(mMockContext)
-                .enforceCallingOrSelfPermission(
-                        eq(android.Manifest.permission.NETWORK_FACTORY), any());
+                .checkCallingOrSelfPermission(any());
 
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
     }
@@ -652,10 +724,9 @@ public class VcnManagementServiceTest {
 
     @Test(expected = SecurityException.class)
     public void testRemoveVcnUnderlyingNetworkPolicyListenerInvalidPermission() {
-        doThrow(new SecurityException())
+        doReturn(PackageManager.PERMISSION_DENIED)
                 .when(mMockContext)
-                .enforceCallingOrSelfPermission(
-                        eq(android.Manifest.permission.NETWORK_FACTORY), any());
+                .checkCallingOrSelfPermission(any());
 
         mVcnMgmtSvc.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
     }
@@ -667,7 +738,7 @@ public class VcnManagementServiceTest {
 
     private void verifyMergedNetworkCapabilities(
             NetworkCapabilities mergedCapabilities,
-            @Transport int transportType,
+            int transportType,
             boolean isVcnManaged,
             boolean isRestricted) {
         assertTrue(mergedCapabilities.hasTransport(transportType));
@@ -697,10 +768,6 @@ public class VcnManagementServiceTest {
         doReturn(isVcnActive ? VCN_STATUS_CODE_ACTIVE : VCN_STATUS_CODE_SAFE_MODE)
                 .when(vcn)
                 .getStatus();
-
-        doReturn(true)
-                .when(mLocationPermissionChecker)
-                .checkLocationPermission(eq(TEST_PACKAGE_NAME), any(), eq(TEST_UID), any());
     }
 
     private NetworkCapabilities.Builder getNetworkCapabilitiesBuilderForTransport(
@@ -710,7 +777,7 @@ public class VcnManagementServiceTest {
                         .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED)
                         .addTransportType(transport);
         if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-            ncBuilder.setSubIds(Collections.singleton(subId));
+            ncBuilder.setSubscriptionIds(Collections.singleton(subId));
         }
 
         return ncBuilder;
@@ -793,7 +860,7 @@ public class VcnManagementServiceTest {
                 .registerNetworkCallback(
                         eq(new NetworkRequest.Builder().clearCapabilities().build()),
                         captor.capture());
-        captor.getValue().onCapabilitiesChanged(new Network(0), caps);
+        captor.getValue().onCapabilitiesChanged(mock(Network.class, CALLS_REAL_METHODS), caps);
     }
 
     @Test
@@ -851,10 +918,9 @@ public class VcnManagementServiceTest {
 
     @Test(expected = SecurityException.class)
     public void testGetUnderlyingNetworkPolicyInvalidPermission() {
-        doThrow(new SecurityException())
+        doReturn(PackageManager.PERMISSION_DENIED)
                 .when(mMockContext)
-                .enforceCallingOrSelfPermission(
-                        eq(android.Manifest.permission.NETWORK_FACTORY), any());
+                .checkCallingOrSelfPermission(any());
 
         mVcnMgmtSvc.getUnderlyingNetworkPolicy(new NetworkCapabilities(), new LinkProperties());
     }
@@ -886,6 +952,18 @@ public class VcnManagementServiceTest {
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
         mVcnMgmtSvc.clearVcnConfig(TEST_UUID_2, TEST_PACKAGE_NAME);
+
+        verify(mMockPolicyListener).onPolicyChanged();
+    }
+
+    @Test
+    public void testVcnSubIdChangeUpdatesPolicyListener() throws Exception {
+        startAndGetVcnInstance(TEST_UUID_2);
+        mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+
+        triggerSubscriptionTrackerCbAndGetSnapshot(
+                Collections.singleton(TEST_UUID_2),
+                Collections.singletonMap(TEST_SUBSCRIPTION_ID, TEST_UUID_2));
 
         verify(mMockPolicyListener).onPolicyChanged();
     }
@@ -933,8 +1011,7 @@ public class VcnManagementServiceTest {
             @NonNull ParcelUuid subGroup,
             @NonNull String pkgName,
             int uid,
-            boolean hasPermissionsforSubGroup,
-            boolean hasLocationPermission)
+            boolean hasPermissionsforSubGroup)
             throws Exception {
         TelephonySubscriptionSnapshot snapshot =
                 triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(subGroup));
@@ -946,10 +1023,6 @@ public class VcnManagementServiceTest {
                 .when(snapshot)
                 .packageHasPermissionsForSubscriptionGroup(eq(subGroup), eq(pkgName));
 
-        doReturn(hasLocationPermission)
-                .when(mLocationPermissionChecker)
-                .checkLocationPermission(eq(pkgName), any(), eq(uid), any());
-
         mVcnMgmtSvc.registerVcnStatusCallback(subGroup, mMockStatusCallback, pkgName);
 
         triggerVcnSafeMode(subGroup, snapshot, true /* enterSafeMode */);
@@ -959,11 +1032,7 @@ public class VcnManagementServiceTest {
     public void testVcnStatusCallbackOnSafeModeStatusChangedWithCarrierPrivileges()
             throws Exception {
         triggerVcnStatusCallbackOnSafeModeStatusChanged(
-                TEST_UUID_1,
-                TEST_PACKAGE_NAME,
-                TEST_UID,
-                true /* hasPermissionsforSubGroup */,
-                true /* hasLocationPermission */);
+                TEST_UUID_1, TEST_PACKAGE_NAME, TEST_UID, true /* hasPermissionsforSubGroup */);
 
         verify(mMockStatusCallback).onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_SAFE_MODE);
     }
@@ -972,25 +1041,7 @@ public class VcnManagementServiceTest {
     public void testVcnStatusCallbackOnSafeModeStatusChangedWithoutCarrierPrivileges()
             throws Exception {
         triggerVcnStatusCallbackOnSafeModeStatusChanged(
-                TEST_UUID_1,
-                TEST_PACKAGE_NAME,
-                TEST_UID,
-                false /* hasPermissionsforSubGroup */,
-                true /* hasLocationPermission */);
-
-        verify(mMockStatusCallback, never())
-                .onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_SAFE_MODE);
-    }
-
-    @Test
-    public void testVcnStatusCallbackOnSafeModeStatusChangedWithoutLocationPermission()
-            throws Exception {
-        triggerVcnStatusCallbackOnSafeModeStatusChanged(
-                TEST_UUID_1,
-                TEST_PACKAGE_NAME,
-                TEST_UID,
-                true /* hasPermissionsforSubGroup */,
-                false /* hasLocationPermission */);
+                TEST_UUID_1, TEST_PACKAGE_NAME, TEST_UID, false /* hasPermissionsforSubGroup */);
 
         verify(mMockStatusCallback, never())
                 .onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_SAFE_MODE);
@@ -1052,9 +1103,6 @@ public class VcnManagementServiceTest {
                 .when(snapshot)
                 .packageHasPermissionsForSubscriptionGroup(
                         eq(TEST_UUID_1), eq(TEST_CB_PACKAGE_NAME));
-        doReturn(true)
-                .when(mLocationPermissionChecker)
-                .checkLocationPermission(eq(TEST_CB_PACKAGE_NAME), any(), eq(TEST_UID), any());
 
         mVcnMgmtSvc.registerVcnStatusCallback(
                 TEST_UUID_1, mMockStatusCallback, TEST_CB_PACKAGE_NAME);

@@ -17,10 +17,8 @@
 package android.uwb;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -55,7 +53,7 @@ public class AdapterStateListenerTest {
             Object[] args = invocation.getArguments();
             IUwbAdapterStateCallbacks cb = (IUwbAdapterStateCallbacks) args[0];
             try {
-                cb.onAdapterStateChanged(false, StateChangeReason.UNKNOWN);
+                cb.onAdapterStateChanged(AdapterState.STATE_DISABLED, StateChangeReason.UNKNOWN);
             } catch (RemoteException e) {
                 // Nothing to do
             }
@@ -76,7 +74,7 @@ public class AdapterStateListenerTest {
 
     private static void verifyCallbackStateChangedInvoked(
             AdapterStateCallback callback, int numTimes) {
-        verify(callback, times(numTimes)).onStateChanged(anyBoolean(), anyInt());
+        verify(callback, times(numTimes)).onStateChanged(anyInt(), anyInt());
     }
 
     @Test
@@ -115,30 +113,6 @@ public class AdapterStateListenerTest {
     }
 
     @Test
-    public void testRegister_FirstRegisterFails() throws RemoteException {
-        AdapterStateListener adapterStateListener = new AdapterStateListener(mUwbAdapter);
-        AdapterStateCallback callback1 = mock(AdapterStateCallback.class);
-        AdapterStateCallback callback2 = mock(AdapterStateCallback.class);
-
-        // Throw a remote exception whenever first registering
-        doThrow(mThrowRemoteException).when(mUwbAdapter).registerAdapterStateCallbacks(any());
-
-        adapterStateListener.register(getExecutor(), callback1);
-        verify(mUwbAdapter, times(1)).registerAdapterStateCallbacks(any());
-
-        // No longer throw an exception, instead succeed
-        doAnswer(mRegisterSuccessAnswer).when(mUwbAdapter).registerAdapterStateCallbacks(any());
-
-        // Register a different callback
-        adapterStateListener.register(getExecutor(), callback2);
-        verify(mUwbAdapter, times(2)).registerAdapterStateCallbacks(any());
-
-        // Ensure first callback was invoked again
-        verifyCallbackStateChangedInvoked(callback1, 2);
-        verifyCallbackStateChangedInvoked(callback2, 1);
-    }
-
-    @Test
     public void testRegister_RegisterSameCallbackTwice() throws RemoteException {
         AdapterStateListener adapterStateListener = new AdapterStateListener(mUwbAdapter);
         AdapterStateCallback callback = mock(AdapterStateCallback.class);
@@ -151,7 +125,8 @@ public class AdapterStateListenerTest {
         verifyCallbackStateChangedInvoked(callback, 1);
 
         // Invoke a state change and ensure the callback is only called once
-        adapterStateListener.onAdapterStateChanged(false, StateChangeReason.UNKNOWN);
+        adapterStateListener.onAdapterStateChanged(AdapterState.STATE_DISABLED,
+                StateChangeReason.UNKNOWN);
         verifyCallbackStateChangedInvoked(callback, 2);
     }
 
@@ -159,13 +134,6 @@ public class AdapterStateListenerTest {
     public void testCallback_RunViaExecutor_Success() throws RemoteException {
         // Verify that the callbacks are invoked on the executor when successful
         doAnswer(mRegisterSuccessAnswer).when(mUwbAdapter).registerAdapterStateCallbacks(any());
-        runViaExecutor();
-    }
-
-    @Test
-    public void testCallback_RunViaExecutor_Failure() throws RemoteException {
-        // Verify that the callbacks are invoked on the executor when there is a remote exception
-        doThrow(mThrowRemoteException).when(mUwbAdapter).registerAdapterStateCallbacks(any());
         runViaExecutor();
     }
 
@@ -182,13 +150,15 @@ public class AdapterStateListenerTest {
         verifyCallbackStateChangedInvoked(callback, 0);
 
         // Manually invoke the callback and ensure callback is not invoked
-        adapterStateListener.onAdapterStateChanged(false, StateChangeReason.UNKNOWN);
+        adapterStateListener.onAdapterStateChanged(AdapterState.STATE_DISABLED,
+                StateChangeReason.UNKNOWN);
         verify(executor, times(2)).execute(any());
         verifyCallbackStateChangedInvoked(callback, 0);
 
         // Run the command that the executor receives
         doAnswer(new ExecutorAnswer(true)).when(executor).execute(any());
-        adapterStateListener.onAdapterStateChanged(false, StateChangeReason.UNKNOWN);
+        adapterStateListener.onAdapterStateChanged(AdapterState.STATE_DISABLED,
+                StateChangeReason.UNKNOWN);
         verify(executor, times(3)).execute(any());
         verifyCallbackStateChangedInvoked(callback, 1);
     }
@@ -227,7 +197,8 @@ public class AdapterStateListenerTest {
         }
 
         // Invoke a state change and ensure all callbacks are invoked
-        adapterStateListener.onAdapterStateChanged(true, StateChangeReason.ALL_SESSIONS_CLOSED);
+        adapterStateListener.onAdapterStateChanged(AdapterState.STATE_DISABLED,
+                StateChangeReason.ALL_SESSIONS_CLOSED);
         for (AdapterStateCallback callback : callbacks) {
             verifyCallbackStateChangedInvoked(callback, 2);
         }
@@ -242,32 +213,36 @@ public class AdapterStateListenerTest {
         adapterStateListener.register(getExecutor(), callback);
 
         runStateChangeValue(StateChangeReason.ALL_SESSIONS_CLOSED,
-                AdapterStateCallback.STATE_CHANGED_REASON_ALL_SESSIONS_CLOSED);
+                AdapterState.STATE_ENABLED_INACTIVE,
+                AdapterStateCallback.STATE_CHANGED_REASON_ALL_SESSIONS_CLOSED,
+                AdapterStateCallback.STATE_ENABLED_INACTIVE);
 
-        runStateChangeValue(StateChangeReason.SESSION_STARTED,
-                AdapterStateCallback.STATE_CHANGED_REASON_SESSION_STARTED);
+        runStateChangeValue(StateChangeReason.SESSION_STARTED, AdapterState.STATE_ENABLED_ACTIVE,
+                AdapterStateCallback.STATE_CHANGED_REASON_SESSION_STARTED,
+                AdapterStateCallback.STATE_ENABLED_ACTIVE);
 
-        runStateChangeValue(StateChangeReason.SYSTEM_BOOT,
-                AdapterStateCallback.STATE_CHANGED_REASON_SYSTEM_BOOT);
+        runStateChangeValue(StateChangeReason.SYSTEM_BOOT, AdapterState.STATE_DISABLED,
+                AdapterStateCallback.STATE_CHANGED_REASON_SYSTEM_BOOT,
+                AdapterStateCallback.STATE_DISABLED);
 
-        runStateChangeValue(StateChangeReason.SYSTEM_POLICY,
-                AdapterStateCallback.STATE_CHANGED_REASON_SYSTEM_POLICY);
+        runStateChangeValue(StateChangeReason.SYSTEM_POLICY, AdapterState.STATE_DISABLED,
+                AdapterStateCallback.STATE_CHANGED_REASON_SYSTEM_POLICY,
+                AdapterStateCallback.STATE_DISABLED);
 
-        runStateChangeValue(StateChangeReason.UNKNOWN,
-                AdapterStateCallback.STATE_CHANGED_REASON_ERROR_UNKNOWN);
+        runStateChangeValue(StateChangeReason.UNKNOWN, AdapterState.STATE_DISABLED,
+                AdapterStateCallback.STATE_CHANGED_REASON_ERROR_UNKNOWN,
+                AdapterStateCallback.STATE_DISABLED);
     }
 
-    private void runStateChangeValue(@StateChangeReason int reasonIn,
-            @AdapterStateCallback.StateChangedReason int reasonOut) {
+    private void runStateChangeValue(@StateChangeReason int reasonIn, @AdapterState int stateIn,
+            @AdapterStateCallback.StateChangedReason int reasonOut,
+            @AdapterStateCallback.State int stateOut) {
         AdapterStateListener adapterStateListener = new AdapterStateListener(mUwbAdapter);
         AdapterStateCallback callback = mock(AdapterStateCallback.class);
         adapterStateListener.register(getExecutor(), callback);
 
-        adapterStateListener.onAdapterStateChanged(false, reasonIn);
-        verify(callback, times(1)).onStateChanged(false, reasonOut);
-
-        adapterStateListener.onAdapterStateChanged(true, reasonIn);
-        verify(callback, times(1)).onStateChanged(true, reasonOut);
+        adapterStateListener.onAdapterStateChanged(stateIn, reasonIn);
+        verify(callback, times(1)).onStateChanged(stateOut, reasonOut);
     }
 
     @Test
@@ -280,7 +255,8 @@ public class AdapterStateListenerTest {
                 Object[] args = invocation.getArguments();
                 IUwbAdapterStateCallbacks cb = (IUwbAdapterStateCallbacks) args[0];
                 try {
-                    cb.onAdapterStateChanged(true, StateChangeReason.SESSION_STARTED);
+                    cb.onAdapterStateChanged(AdapterState.STATE_ENABLED_ACTIVE,
+                            StateChangeReason.SESSION_STARTED);
                 } catch (RemoteException e) {
                     // Nothing to do
                 }
@@ -291,7 +267,7 @@ public class AdapterStateListenerTest {
         doAnswer(registerAnswer).when(mUwbAdapter).registerAdapterStateCallbacks(any());
 
         adapterStateListener.register(getExecutor(), callback);
-        verify(callback).onStateChanged(true,
+        verify(callback).onStateChanged(AdapterStateCallback.STATE_ENABLED_ACTIVE,
                 AdapterStateCallback.STATE_CHANGED_REASON_SESSION_STARTED);
     }
 
@@ -302,10 +278,11 @@ public class AdapterStateListenerTest {
         AdapterStateCallback callback2 = mock(AdapterStateCallback.class);
 
         adapterStateListener.register(getExecutor(), callback1);
-        adapterStateListener.onAdapterStateChanged(true, StateChangeReason.SYSTEM_BOOT);
+        adapterStateListener.onAdapterStateChanged(AdapterState.STATE_ENABLED_ACTIVE,
+                StateChangeReason.SYSTEM_BOOT);
 
         adapterStateListener.register(getExecutor(), callback2);
-        verify(callback2).onStateChanged(true,
+        verify(callback2).onStateChanged(AdapterStateCallback.STATE_ENABLED_ACTIVE,
                 AdapterStateCallback.STATE_CHANGED_REASON_SYSTEM_BOOT);
     }
 }

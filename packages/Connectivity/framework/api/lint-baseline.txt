@@ -1,4 +1,0 @@
-// Baseline format: 1.0
-VisiblySynchronized: android.net.NetworkInfo#toString():
-    Internal locks must not be exposed (synchronizing on this or class is still
-    externally observable): method android.net.NetworkInfo.toString()

@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.net.Uri;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Utility methods for parsing parts of {@link android.telephony.ims.SipMessage}s.
@@ -70,6 +73,24 @@ public class SipMessageParsingUtils {
     // compact form of the call-id header key
     private static final String CALL_ID_SIP_HEADER_KEY_COMPACT = "i";
 
+    // from header key
+    private static final String FROM_HEADER_KEY = "from";
+    // compact form of the from header key
+    private static final String FROM_HEADER_KEY_COMPACT = "f";
+
+    // to header key
+    private static final String TO_HEADER_KEY = "to";
+    // compact form of the to header key
+    private static final String TO_HEADER_KEY_COMPACT = "t";
+
+    // The tag parameter found in both the from and to headers
+    private static final String TAG_PARAM_KEY = "tag";
+
+    // accept-contact header key
+    private static final String ACCEPT_CONTACT_HEADER_KEY = "accept-contact";
+    // compact form of the accept-contact header key
+    private static final String ACCEPT_CONTACT_HEADER_KEY_COMPACT = "a";
+
     /**
      * @return true if the SIP message start line is considered a request (based on known request
      * methods).
@@ -78,6 +99,15 @@ public class SipMessageParsingUtils {
         String[] splitLine = splitStartLineAndVerify(startLine);
         if (splitLine == null) return false;
         return verifySipRequest(splitLine);
+    }
+
+    /**
+     * @return true if the SIP message start line is considered a response.
+     */
+    public static boolean isSipResponse(String startLine) {
+        String[] splitLine = splitStartLineAndVerify(startLine);
+        if (splitLine == null) return false;
+        return verifySipResponse(splitLine);
     }
 
     /**
@@ -95,35 +125,42 @@ public class SipMessageParsingUtils {
             // branch param YY1.
             String[] subHeaders = header.second.split(SUBHEADER_VALUE_SEPARATOR);
             for (String subHeader : subHeaders) {
-                // Search for ;branch=z9hG4bKXXXXXX and return parameter value
-                String[] params = subHeader.split(PARAM_SEPARATOR);
-                if (params.length < 2) {
-                    // This param doesn't include a branch param, move to next param.
-                    Log.w(TAG, "getTransactionId: via detected without branch param:"
-                            + subHeader);
-                    continue;
-                }
-                // by spec, each param can only appear once in a header.
-                for (String param : params) {
-                    String[] pair = param.split(PARAM_KEY_VALUE_SEPARATOR);
-                    if (pair.length < 2) {
-                        // ignore info before the first parameter
-                        continue;
-                    }
-                    if (pair.length > 2) {
-                        Log.w(TAG,
-                                "getTransactionId: unexpected parameter" + Arrays.toString(pair));
-                    }
-                    // Trim whitespace in parameter
-                    pair[0] = pair[0].trim();
-                    pair[1] = pair[1].trim();
-                    if (BRANCH_PARAM_KEY.equalsIgnoreCase(pair[0])) {
-                        // There can be multiple "Via" headers in the SIP message, however we want
-                        // to return the first once found, as this corresponds with the transaction
-                        // that is relevant here.
-                        return pair[1];
-                    }
-                }
+                String paramValue = getParameterValue(subHeader, BRANCH_PARAM_KEY);
+                if (paramValue == null) continue;
+                return paramValue;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Search a header's value for a specific parameter.
+     * @param headerValue The header key's value.
+     * @param parameterKey The parameter key we are looking for.
+     * @return The value associated with the specified parameter key or {@link null} if that key is
+     * not found.
+     */
+    private static String getParameterValue(String headerValue, String parameterKey) {
+        String[] params = headerValue.split(PARAM_SEPARATOR);
+        if (params.length < 2) {
+            return null;
+        }
+        // by spec, each param can only appear once in a header.
+        for (String param : params) {
+            String[] pair = param.split(PARAM_KEY_VALUE_SEPARATOR);
+            if (pair.length < 2) {
+                // ignore info before the first parameter
+                continue;
+            }
+            if (pair.length > 2) {
+                Log.w(TAG,
+                        "getParameterValue: unexpected parameter" + Arrays.toString(pair));
+            }
+            // Trim whitespace in parameter
+            pair[0] = pair[0].trim();
+            pair[1] = pair[1].trim();
+            if (parameterKey.equalsIgnoreCase(pair[0])) {
+                return pair[1];
             }
         }
         return null;
@@ -134,16 +171,103 @@ public class SipMessageParsingUtils {
      * @param headerString The string containing the headers of the SIP message.
      */
     public static String getCallId(String headerString) {
-        // search for the call-Id header, there should only be one in the header.
+        // search for the call-Id header, there should only be one in the headers.
         List<Pair<String, String>> headers = parseHeaders(headerString, true,
                 CALL_ID_SIP_HEADER_KEY, CALL_ID_SIP_HEADER_KEY_COMPACT);
         return !headers.isEmpty() ? headers.get(0).second : null;
     }
 
-    private static String[] splitStartLineAndVerify(String startLine) {
-        String[] splitLine = startLine.split(" ");
+    /**
+     * @return Return the from header's tag parameter or {@code null} if it doesn't exist.
+     */
+    public static String getFromTag(String headerString) {
+        // search for the from header, there should only be one in the headers.
+        List<Pair<String, String>> headers = parseHeaders(headerString, true,
+                FROM_HEADER_KEY, FROM_HEADER_KEY_COMPACT);
+        if (headers.isEmpty()) {
+            return null;
+        }
+        // There should only be one from header in the SIP message
+        return getParameterValue(headers.get(0).second, TAG_PARAM_KEY);
+    }
+
+    /**
+     * @return Return the to header's tag parameter or {@code null} if it doesn't exist.
+     */
+    public static String getToTag(String headerString) {
+        // search for the to header, there should only be one in the headers.
+        List<Pair<String, String>> headers = parseHeaders(headerString, true,
+                TO_HEADER_KEY, TO_HEADER_KEY_COMPACT);
+        if (headers.isEmpty()) {
+            return null;
+        }
+        // There should only be one from header in the SIP message
+        return getParameterValue(headers.get(0).second, TAG_PARAM_KEY);
+    }
+
+    /**
+     * Validate that the start line is correct and split into its three segments.
+     * @param startLine The start line to verify and split.
+     * @return The split start line, which will always have three segments.
+     */
+    public static String[] splitStartLineAndVerify(String startLine) {
+        String[] splitLine = startLine.split(" ", 3);
         if (isStartLineMalformed(splitLine)) return null;
         return splitLine;
+    }
+
+
+    /**
+     * @return All feature tags starting with "+" in the Accept-Contact header.
+     */
+    public static Set<String> getAcceptContactFeatureTags(String headerString) {
+        List<Pair<String, String>> headers = SipMessageParsingUtils.parseHeaders(headerString,
+                false, ACCEPT_CONTACT_HEADER_KEY, ACCEPT_CONTACT_HEADER_KEY_COMPACT);
+        if (headerString.isEmpty()) {
+            return Collections.emptySet();
+        }
+        Set<String> featureTags = new ArraySet<>();
+        for (Pair<String, String> header : headers) {
+            String[] splitParams = header.second.split(PARAM_SEPARATOR);
+            if (splitParams.length < 2) {
+                continue;
+            }
+            // Start at 1 here, since the first entry is the header value and not params.
+            // We only care about IMS feature tags here, so filter tags with a "+"
+            Set<String> fts = Arrays.asList(splitParams).subList(1, splitParams.length).stream()
+                    .map(String::trim).filter(p -> p.startsWith("+")).collect(Collectors.toSet());
+            for (String ft : fts) {
+                String[] paramKeyValue = ft.split(PARAM_KEY_VALUE_SEPARATOR, 2);
+                if (paramKeyValue.length < 2) {
+                    featureTags.add(ft);
+                    continue;
+                }
+                // Splits keys like +a="b,c" into +a="b" and +a="c"
+                String[] splitValue = splitParamValue(paramKeyValue[1]);
+                for (String value : splitValue) {
+                    featureTags.add(paramKeyValue[0] + PARAM_KEY_VALUE_SEPARATOR + value);
+                }
+            }
+        }
+        return featureTags;
+    }
+
+    /**
+     * Takes a string such as "\"a,b,c,d\"" and splits it by "," into a String array of
+     * [\"a\", \"b\", \"c\", \"d\"]
+     */
+    private static String[] splitParamValue(String paramValue) {
+        if (!paramValue.startsWith("\"") && !paramValue.endsWith("\"")) {
+            return new String[] {paramValue};
+        }
+        // Remove quotes on outside
+        paramValue = paramValue.substring(1, paramValue.length() - 1);
+        String[] splitValues = paramValue.split(",");
+        for (int i = 0; i < splitValues.length; i++) {
+            // Encapsulate each split value in its own quotations.
+            splitValues[i] = "\"" + splitValues[i] + "\"";
+        }
+        return splitValues;
     }
 
     private static boolean isStartLineMalformed(String[] startLine) {
@@ -158,18 +282,27 @@ public class SipMessageParsingUtils {
 
     private static boolean verifySipRequest(String[] request) {
         // Request-Line  =  Method SP Request-URI SP SIP-Version CRLF
-        boolean verified = request[2].contains(SIP_VERSION_2);
-        verified &= (Uri.parse(request[1]).getScheme() != null);
+        if (!request[2].contains(SIP_VERSION_2)) return false;
+        boolean verified;
+        try {
+            verified = (Uri.parse(request[1]).getScheme() != null);
+        } catch (NumberFormatException e) {
+            return false;
+        }
         verified &= Arrays.stream(SIP_REQUEST_METHODS).anyMatch(s -> request[0].contains(s));
         return verified;
     }
 
     private static boolean verifySipResponse(String[] response) {
         // Status-Line = SIP-Version SP Status-Code SP Reason-Phrase CRLF
-        boolean verified = response[0].contains(SIP_VERSION_2);
-        int statusCode = Integer.parseInt(response[1]);
-        verified &= (statusCode >= 100  && statusCode < 700);
-        return verified;
+        if (!response[0].contains(SIP_VERSION_2)) return false;
+        int statusCode;
+        try {
+            statusCode = Integer.parseInt(response[1]);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return (statusCode >= 100  && statusCode < 700);
     }
 
     /**
@@ -184,7 +317,7 @@ public class SipMessageParsingUtils {
      *                           (This is internally an equalsIgnoreMatch comparison).
      * @return the matched header keys and values.
      */
-    private static List<Pair<String, String>> parseHeaders(String headerString,
+    public static List<Pair<String, String>> parseHeaders(String headerString,
             boolean stopAtFirstMatch, String... matchingHeaderKeys) {
         // Ensure there is no leading whitespace
         headerString = removeLeadingWhitespace(headerString);

@@ -37,36 +37,56 @@ import java.util.Objects;
 @SystemApi(client = MODULE_LIBRARIES)
 public final class UnderlyingNetworkInfo implements Parcelable {
     /** The owner of this network. */
-    public final int ownerUid;
+    private final int mOwnerUid;
+
     /** The interface name of this network. */
     @NonNull
-    public final String iface;
+    private final String mIface;
+
     /** The names of the interfaces underlying this network. */
     @NonNull
-    public final List<String> underlyingIfaces;
+    private final List<String> mUnderlyingIfaces;
 
     public UnderlyingNetworkInfo(int ownerUid, @NonNull String iface,
             @NonNull List<String> underlyingIfaces) {
         Objects.requireNonNull(iface);
         Objects.requireNonNull(underlyingIfaces);
-        this.ownerUid = ownerUid;
-        this.iface = iface;
-        this.underlyingIfaces = Collections.unmodifiableList(new ArrayList<>(underlyingIfaces));
+        mOwnerUid = ownerUid;
+        mIface = iface;
+        mUnderlyingIfaces = Collections.unmodifiableList(new ArrayList<>(underlyingIfaces));
     }
 
     private UnderlyingNetworkInfo(@NonNull Parcel in) {
-        this.ownerUid = in.readInt();
-        this.iface = in.readString();
-        this.underlyingIfaces = new ArrayList<>();
-        in.readList(this.underlyingIfaces, null /*classLoader*/);
+        mOwnerUid = in.readInt();
+        mIface = in.readString();
+        List<String> underlyingIfaces = new ArrayList<>();
+        in.readList(underlyingIfaces, null /*classLoader*/);
+        mUnderlyingIfaces = Collections.unmodifiableList(underlyingIfaces);
+    }
+
+    /** Get the owner of this network. */
+    public int getOwnerUid() {
+        return mOwnerUid;
+    }
+
+    /** Get the interface name of this network. */
+    @NonNull
+    public String getInterface() {
+        return mIface;
+    }
+
+    /** Get the names of the interfaces underlying this network. */
+    @NonNull
+    public List<String> getUnderlyingInterfaces() {
+        return mUnderlyingIfaces;
     }
 
     @Override
     public String toString() {
         return "UnderlyingNetworkInfo{"
-                + "ownerUid=" + ownerUid
-                + ", iface='" + iface + '\''
-                + ", underlyingIfaces='" + underlyingIfaces.toString() + '\''
+                + "ownerUid=" + mOwnerUid
+                + ", iface='" + mIface + '\''
+                + ", underlyingIfaces='" + mUnderlyingIfaces.toString() + '\''
                 + '}';
     }
 
@@ -77,9 +97,9 @@ public final class UnderlyingNetworkInfo implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(ownerUid);
-        dest.writeString(iface);
-        dest.writeList(underlyingIfaces);
+        dest.writeInt(mOwnerUid);
+        dest.writeString(mIface);
+        dest.writeList(mUnderlyingIfaces);
     }
 
     @NonNull
@@ -103,13 +123,13 @@ public final class UnderlyingNetworkInfo implements Parcelable {
         if (this == o) return true;
         if (!(o instanceof UnderlyingNetworkInfo)) return false;
         final UnderlyingNetworkInfo that = (UnderlyingNetworkInfo) o;
-        return ownerUid == that.ownerUid
-                && Objects.equals(iface, that.iface)
-                && Objects.equals(underlyingIfaces, that.underlyingIfaces);
+        return mOwnerUid == that.getOwnerUid()
+                && Objects.equals(mIface, that.getInterface())
+                && Objects.equals(mUnderlyingIfaces, that.getUnderlyingInterfaces());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ownerUid, iface, underlyingIfaces);
+        return Objects.hash(mOwnerUid, mIface, mUnderlyingIfaces);
     }
 }

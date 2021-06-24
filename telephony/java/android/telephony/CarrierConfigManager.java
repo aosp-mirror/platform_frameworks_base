@@ -36,6 +36,7 @@ import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.ImsSsData;
+import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
 
@@ -3222,6 +3223,14 @@ public class CarrierConfigManager {
     public static final String KEY_USE_CALLER_ID_USSD_BOOL = "use_caller_id_ussd_bool";
 
     /**
+     * Call waiting uses USSD command without SS command.
+     * When {@code true}, the call waiting query/set by ussd command.
+     * When {@code false}, doesn't use USSD to query/set call waiting.
+     * @hide
+     */
+    public static final String KEY_USE_CALL_WAITING_USSD_BOOL = "use_call_waiting_ussd_bool";
+
+    /**
      * Specifies the service class for call waiting service.
      * Default value is
      * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_VOICE}.
@@ -3377,6 +3386,31 @@ public class CarrierConfigManager {
      */
     public static final String KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL =
             "nr_timers_reset_if_non_endc_and_rrc_idle_bool";
+
+    /**
+     * A list of additional NR advanced band would map to
+     * {@link TelephonyDisplayInfo#OVERRIDE_NETWORK_TYPE_NR_ADVANCED} when the device is on that
+     * band.
+     *
+     * @hide
+     */
+    public static final String KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY =
+            "additional_nr_advanced_bands_int_array";
+
+    /**
+     * This configuration allows the framework to control the NR advanced capable by protocol
+     * configuration options(PCO).
+     *
+     * If this config is 0, then the nr advanced capable is enabled.
+     * If this config is not 0 and PCO container with this config's address is 1, then the nr
+     * advanced capable is enabled.
+     * If this config is not 0 and PCO container with this config's address is 0, then the nr
+     * advanced capable is disabled.
+     *
+     * @hide
+     */
+    public static final String KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT =
+            "nr_advanced_capable_pco_id_int";
 
     /**
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
@@ -3570,6 +3604,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY =
             "emergency_number_prefix_string_array";
+
+    /**
+     * Indicates whether carrier treats "*67" or "*82" as a temporary mode CLIR.
+     * @hide
+     */
+    public static final String KEY_CARRIER_SUPPORTS_CALLER_ID_VERTICAL_SERVICE_CODES_BOOL =
+            "carrier_supports_caller_id_vertical_service_codes_bool";
 
     /**
      * Smart forwarding config. Smart forwarding is a feature to configure call forwarding to a
@@ -4035,7 +4076,6 @@ public class CarrierConfigManager {
          * it will override the framework default.
          * @hide
          */
-        @SystemApi
         public static final String KEY_PUBLISH_SERVICE_DESC_FEATURE_TAG_MAP_OVERRIDE_STRING_ARRAY =
                 KEY_PREFIX + "publish_service_desc_feature_tag_map_override_string_array";
 
@@ -4064,6 +4104,9 @@ public class CarrierConfigManager {
          * If this flag is disabled, the capabilities cache will not be refreshed internally at all
          * and will only be updated if the cached capabilities are stale when an application
          * requests them.
+         *
+         * @see RcsUceAdapter#isUceSettingEnabled() more information about this feature and how
+         * it is enabled by the user.
          */
         public static final String KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL =
                 KEY_PREFIX + "rcs_bulk_capability_exchange_bool";
@@ -4099,6 +4142,26 @@ public class CarrierConfigManager {
         public static final String KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY =
                 KEY_PREFIX + "rcs_feature_tag_allowed_string_array";
 
+        /**
+         * Flag indicating whether or not carrier forbids device send the RCS request when the
+         * device receive the network response with the SIP code 489 BAD EVENT.
+         * <p>
+         * The default value for this key is {@code false}.
+         * @hide
+         */
+        public static final String KEY_RCS_REQUEST_FORBIDDEN_BY_SIP_489_BOOL =
+                KEY_PREFIX + "rcs_request_forbidden_by_sip_489_bool";
+
+        /**
+         * Indicates the interval that SUBSCRIBE requests from applications will be retried at when
+         * the carrier network has responded to a previous request with a forbidden error.
+         * <p>
+         * The default value for this key is 20 minutes.
+         * @hide
+         */
+        public static final String KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG =
+                KEY_PREFIX + "rcs_request_retry_interval_millis_long";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
@@ -4112,13 +4175,15 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL, true);
             defaults.putInt(KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT, 30 * 24 * 60 * 60);
+            defaults.putBoolean(KEY_RCS_REQUEST_FORBIDDEN_BY_SIP_489_BOOL, false);
+            defaults.putLong(KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG, 20 * 60 * 1000);
             defaults.putStringArray(KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY, new String[]{
                     "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.msg\"",
                     "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.largemsg\"",
                     "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.deferred\"",
                     "+g.gsma.rcs.cpm.pager-large",
                     "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.session\"",
-                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.session\"",
+                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.filetransfer\"",
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.fthttp\"",
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.ftsms\"",
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.gsma.callcomposer\"",
@@ -4359,6 +4424,14 @@ public class CarrierConfigManager {
      */
     public static final String KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL =
             "display_no_data_notification_on_permanent_failure_bool";
+
+    /**
+     * Determine whether unthrottle data retry when tracking area code (TAC/LAC) from cell changes
+     *
+     * @hide
+     */
+    public static final String KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL =
+            "unthrottle_data_retry_when_tac_changes_bool";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -4820,6 +4893,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_EMERGENCY_DIALER_SHORTCUT_BOOL, true);
         sDefaults.putBoolean(KEY_USE_CALL_FORWARDING_USSD_BOOL, false);
         sDefaults.putBoolean(KEY_USE_CALLER_ID_USSD_BOOL, false);
+        sDefaults.putBoolean(KEY_USE_CALL_WAITING_USSD_BOOL, false);
         sDefaults.putInt(KEY_CALL_WAITING_SERVICE_CLASS_INT, 1 /* SERVICE_CLASS_VOICE */);
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:5G,connected:5G,not_restricted_rrc_idle:5G,"
@@ -4829,6 +4903,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL, false);
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
+        sDefaults.putIntArray(KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY, new int[0]);
+        sDefaults.putInt(KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT, 0);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
@@ -4868,6 +4944,7 @@ public class CarrierConfigManager {
                         1 /* Roaming Indicator Off */
                 });
         sDefaults.putStringArray(KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY, new String[0]);
+        sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_CALLER_ID_VERTICAL_SERVICE_CODES_BOOL, false);
         sDefaults.putBoolean(KEY_USE_USIM_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_WFC_LOCATION_PRIVACY_POLICY_BOOL, false);
         sDefaults.putBoolean(KEY_AUTO_CANCEL_CS_REJECT_NOTIFICATION, true);
@@ -4909,7 +4986,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
         sDefaults.putStringArray(KEY_APN_PRIORITY_STRING_ARRAY, new String[] {
-                "default:0", "enterprise:1", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
+                "enterprise:0", "default:1", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
                 "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
         });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
@@ -4919,13 +4996,14 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING, "");
         sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
         sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
-        sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, false);
+        sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, true);
         sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
         sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
-                new String[]{"ia", "default", "ims", "mms", "dun", "emergency"});
+                new String[]{"ia", "default", "mms", "dun"});
         sDefaults.putBoolean(KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_ENABLE_2G, false);
         sDefaults.putBoolean(KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL, false);
+        sDefaults.putBoolean(KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL, false);
     }
 
     /**

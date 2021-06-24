@@ -481,4 +481,113 @@ final class HdmiCecKeycode {
         // return muting ? CEC_KEYCODE_MUTE_FUNCTION : CEC_KEYCODE_RESTORE_VOLUME_FUNCTION;
         return CEC_KEYCODE_MUTE;
     }
+
+    public static String getKeycodeType(byte keycode) {
+        switch (keycode) {
+            case CEC_KEYCODE_UP:
+            case CEC_KEYCODE_DOWN:
+            case CEC_KEYCODE_LEFT:
+            case CEC_KEYCODE_RIGHT:
+            case CEC_KEYCODE_RIGHT_UP:
+            case CEC_KEYCODE_RIGHT_DOWN:
+            case CEC_KEYCODE_LEFT_UP:
+            case CEC_KEYCODE_LEFT_DOWN:
+            case CEC_KEYCODE_PAGE_UP:
+            case CEC_KEYCODE_PAGE_DOWN:
+            case CEC_KEYCODE_EXIT:
+                return "Navigation";
+            case CEC_KEYCODE_ROOT_MENU:
+            case CEC_KEYCODE_SETUP_MENU:
+            case CEC_KEYCODE_CONTENTS_MENU:
+            case CEC_KEYCODE_FAVORITE_MENU:
+            case CEC_KEYCODE_MEDIA_TOP_MENU:
+            case CEC_KEYCODE_MEDIA_CONTEXT_SENSITIVE_MENU:
+                return "Menu";
+            case CEC_KEYCODE_VOLUME_UP:
+                return "Volume up";
+            case CEC_KEYCODE_VOLUME_DOWN:
+                return "Volume down";
+            case CEC_KEYCODE_MUTE:
+                return "Volume mute";
+            case CEC_KEYCODE_POWER:
+                return "Power";
+            case CEC_KEYCODE_POWER_TOGGLE_FUNCTION:
+                return "Power toggle";
+            case CEC_KEYCODE_POWER_OFF_FUNCTION:
+                return "Power off";
+            case CEC_KEYCODE_POWER_ON_FUNCTION:
+                return "Power on";
+            case CEC_KEYCODE_F1_BLUE:
+            case CEC_KEYCODE_F2_RED:
+            case CEC_KEYCODE_F3_GREEN:
+            case CEC_KEYCODE_F4_YELLOW:
+            case CEC_KEYCODE_F5:
+                return "Function key";
+            case CEC_KEYCODE_NEXT_FAVORITE:
+            case CEC_KEYCODE_CHANNEL_UP:
+            case CEC_KEYCODE_CHANNEL_DOWN:
+            case CEC_KEYCODE_PREVIOUS_CHANNEL:
+                return "Channel";
+            case CEC_KEYCODE_NUMBER_11:
+            case CEC_KEYCODE_NUMBER_12:
+            case CEC_KEYCODE_NUMBER_0_OR_NUMBER_10:
+            case CEC_KEYCODE_NUMBERS_1:
+            case CEC_KEYCODE_NUMBERS_2:
+            case CEC_KEYCODE_NUMBERS_3:
+            case CEC_KEYCODE_NUMBERS_4:
+            case CEC_KEYCODE_NUMBERS_5:
+            case CEC_KEYCODE_NUMBERS_6:
+            case CEC_KEYCODE_NUMBERS_7:
+            case CEC_KEYCODE_NUMBERS_8:
+            case CEC_KEYCODE_NUMBERS_9:
+                return "Number";
+            case CEC_KEYCODE_PLAY:
+            case CEC_KEYCODE_STOP:
+            case CEC_KEYCODE_PAUSE:
+            case CEC_KEYCODE_RECORD:
+            case CEC_KEYCODE_REWIND:
+            case CEC_KEYCODE_FAST_FORWARD:
+            case CEC_KEYCODE_EJECT:
+            case CEC_KEYCODE_FORWARD:
+            case CEC_KEYCODE_BACKWARD:
+            case CEC_KEYCODE_STOP_RECORD:
+            case CEC_KEYCODE_PAUSE_RECORD:
+            case CEC_KEYCODE_ANGLE:
+            case CEC_KEYCODE_SUB_PICTURE:
+            case CEC_KEYCODE_VIDEO_ON_DEMAND:
+                return "Media";
+            case CEC_KEYCODE_PLAY_FUNCTION:
+            case CEC_KEYCODE_PAUSE_PLAY_FUNCTION:
+            case CEC_KEYCODE_RECORD_FUNCTION:
+            case CEC_KEYCODE_PAUSE_RECORD_FUNCTION:
+            case CEC_KEYCODE_STOP_FUNCTION:
+            case CEC_KEYCODE_MUTE_FUNCTION:
+            case CEC_KEYCODE_RESTORE_VOLUME_FUNCTION:
+            case CEC_KEYCODE_TUNE_FUNCTION:
+            case CEC_KEYCODE_SELECT_MEDIA_FUNCTION:
+            case CEC_KEYCODE_SELECT_AV_INPUT_FUNCTION:
+            case CEC_KEYCODE_SELECT_AUDIO_INPUT_FUNCTION:
+                return "Functional";
+            case CEC_KEYCODE_ELECTRONIC_PROGRAM_GUIDE:
+            case CEC_KEYCODE_TIMER_PROGRAMMING:
+                return "Timer";
+            case CEC_KEYCODE_SOUND_SELECT:
+            case CEC_KEYCODE_SELECT_SOUND_PRESENTATION:
+            case CEC_KEYCODE_SELECT_BROADCAST_TYPE:
+            case CEC_KEYCODE_INPUT_SELECT:
+            case CEC_KEYCODE_SELECT:
+                return "Select";
+            case CEC_KEYCODE_NUMBER_ENTRY_MODE:
+            case CEC_KEYCODE_DOT:
+            case CEC_KEYCODE_CLEAR:
+            case CEC_KEYCODE_ENTER:
+            case CEC_KEYCODE_DISPLAY_INFORMATION:
+            case CEC_KEYCODE_HELP:
+            case CEC_KEYCODE_DATA:
+            case CEC_KEYCODE_INITIAL_CONFIGURATION:
+                return "General";
+            default:
+                return "Unknown";
+        }
+    }
 }

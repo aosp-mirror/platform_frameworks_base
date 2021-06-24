@@ -79,6 +79,16 @@ public final class IpSecManager {
     public static final int DIRECTION_OUT = 1;
 
     /**
+     * Used when applying a transform to direct traffic through an {@link IpSecTransform} for
+     * forwarding between interfaces.
+     *
+     * <p>See {@link #applyTransportModeTransform(Socket, int, IpSecTransform)}.
+     *
+     * @hide
+     */
+    public static final int DIRECTION_FWD = 2;
+
+    /**
      * The Security Parameter Index (SPI) 0 indicates an unknown or invalid index.
      *
      * <p>No IPsec packet may contain an SPI of 0.
@@ -800,7 +810,9 @@ public final class IpSecManager {
          *
          * @param underlyingNetwork the new {@link Network} that will carry traffic for this tunnel.
          *     This network MUST never be the network exposing this IpSecTunnelInterface, otherwise
-         *     this method will throw an {@link IllegalArgumentException}.
+         *     this method will throw an {@link IllegalArgumentException}. If the
+         *     IpSecTunnelInterface is later added to this network, all outbound traffic will be
+         *     blackholed.
          */
         // TODO: b/169171001 Update the documentation when transform migration is supported.
         // The purpose of making updating network and applying transforms separate is to leave open

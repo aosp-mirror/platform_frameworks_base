@@ -44,6 +44,7 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.Executor;
 
@@ -1585,9 +1586,24 @@ public class AudioTrack extends PlayerBase
             AudioFormat.CHANNEL_OUT_LOW_FREQUENCY |
             AudioFormat.CHANNEL_OUT_BACK_LEFT |
             AudioFormat.CHANNEL_OUT_BACK_RIGHT |
+            AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER |
+            AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER |
             AudioFormat.CHANNEL_OUT_BACK_CENTER |
             AudioFormat.CHANNEL_OUT_SIDE_LEFT |
-            AudioFormat.CHANNEL_OUT_SIDE_RIGHT;
+            AudioFormat.CHANNEL_OUT_SIDE_RIGHT |
+            AudioFormat.CHANNEL_OUT_TOP_CENTER |
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT |
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_CENTER |
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT |
+            AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT |
+            AudioFormat.CHANNEL_OUT_TOP_BACK_CENTER |
+            AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT |
+            AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT |
+            AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT |
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT |
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_CENTER |
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT |
+            AudioFormat.CHANNEL_OUT_LOW_FREQUENCY_2;
 
     // Returns a boolean whether the attributes, format, bufferSizeInBytes, mode allow
     // power saving to be automatically enabled for an AudioTrack. Returns false if
@@ -1696,9 +1712,10 @@ public class AudioTrack extends PlayerBase
                 mChannelCount = 0;
                 break; // channel index configuration only
             }
-            if (!isMultichannelConfigSupported(channelConfig)) {
-                // input channel configuration features unsupported channels
-                throw new IllegalArgumentException("Unsupported channel configuration.");
+            if (!isMultichannelConfigSupported(channelConfig, audioFormat)) {
+                throw new IllegalArgumentException(
+                        "Unsupported channel mask configuration " + channelConfig
+                        + " for encoding " + audioFormat);
             }
             mChannelMask = channelConfig;
             mChannelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
@@ -1706,13 +1723,17 @@ public class AudioTrack extends PlayerBase
         // check the channel index configuration (if present)
         mChannelIndexMask = channelIndexMask;
         if (mChannelIndexMask != 0) {
-            // restrictive: indexMask could allow up to AUDIO_CHANNEL_BITS_LOG2
-            final int indexMask = (1 << AudioSystem.OUT_CHANNEL_COUNT_MAX) - 1;
-            if ((channelIndexMask & ~indexMask) != 0) {
-                throw new IllegalArgumentException("Unsupported channel index configuration "
-                        + channelIndexMask);
+            // As of S, we accept up to 24 channel index mask.
+            final int fullIndexMask = (1 << AudioSystem.FCC_24) - 1;
+            final int channelIndexCount = Integer.bitCount(channelIndexMask);
+            final boolean accepted = (channelIndexMask & ~fullIndexMask) == 0
+                    && (!AudioFormat.isEncodingLinearFrames(audioFormat)  // compressed OK
+                            || channelIndexCount <= AudioSystem.OUT_CHANNEL_COUNT_MAX); // PCM
+            if (!accepted) {
+                throw new IllegalArgumentException(
+                        "Unsupported channel index mask configuration " + channelIndexMask
+                        + " for encoding " + audioFormat);
             }
-            int channelIndexCount = Integer.bitCount(channelIndexMask);
             if (mChannelCount == 0) {
                  mChannelCount = channelIndexCount;
             } else if (mChannelCount != channelIndexCount) {
@@ -1740,21 +1761,44 @@ public class AudioTrack extends PlayerBase
         mDataLoadMode = mode;
     }
 
+    // General pair map
+    private static final HashMap<String, Integer> CHANNEL_PAIR_MAP = new HashMap<>() {{
+        put("front", AudioFormat.CHANNEL_OUT_FRONT_LEFT
+                | AudioFormat.CHANNEL_OUT_FRONT_RIGHT);
+        put("back", AudioFormat.CHANNEL_OUT_BACK_LEFT
+                | AudioFormat.CHANNEL_OUT_BACK_RIGHT);
+        put("front of center", AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER
+                | AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER);
+        put("side", AudioFormat.CHANNEL_OUT_SIDE_LEFT
+                | AudioFormat.CHANNEL_OUT_SIDE_RIGHT);
+        put("top front", AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT
+                | AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT);
+        put("top back", AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT
+                | AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT);
+        put("top side", AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT
+                | AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT);
+        put("bottom front", AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT
+                | AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT);
+    }};
+
     /**
      * Convenience method to check that the channel configuration (a.k.a channel mask) is supported
      * @param channelConfig the mask to validate
      * @return false if the AudioTrack can't be used with such a mask
      */
-    private static boolean isMultichannelConfigSupported(int channelConfig) {
+    private static boolean isMultichannelConfigSupported(int channelConfig, int encoding) {
         // check for unsupported channels
         if ((channelConfig & SUPPORTED_OUT_CHANNELS) != channelConfig) {
             loge("Channel configuration features unsupported channels");
             return false;
         }
         final int channelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
-        if (channelCount > AudioSystem.OUT_CHANNEL_COUNT_MAX) {
-            loge("Channel configuration contains too many channels " +
-                    channelCount + ">" + AudioSystem.OUT_CHANNEL_COUNT_MAX);
+        final int channelCountLimit = AudioFormat.isEncodingLinearFrames(encoding)
+                ? AudioSystem.OUT_CHANNEL_COUNT_MAX  // PCM limited to OUT_CHANNEL_COUNT_MAX
+                : AudioSystem.FCC_24;                // Compressed limited to 24 channels
+        if (channelCount > channelCountLimit) {
+            loge("Channel configuration contains too many channels for encoding "
+                    + encoding + "(" + channelCount + " > " + channelCountLimit + ")");
             return false;
         }
         // check for unsupported multichannel combinations:
@@ -1766,20 +1810,14 @@ public class AudioTrack extends PlayerBase
                 loge("Front channels must be present in multichannel configurations");
                 return false;
         }
-        final int backPair =
-                AudioFormat.CHANNEL_OUT_BACK_LEFT | AudioFormat.CHANNEL_OUT_BACK_RIGHT;
-        if ((channelConfig & backPair) != 0) {
-            if ((channelConfig & backPair) != backPair) {
-                loge("Rear channels can't be used independently");
+        // Check all pairs to see that they are matched (front duplicated here).
+        for (HashMap.Entry<String, Integer> e : CHANNEL_PAIR_MAP.entrySet()) {
+            final int positionPair = e.getValue();
+            if ((channelConfig & positionPair) != 0
+                    && (channelConfig & positionPair) != positionPair) {
+                loge("Channel pair (" + e.getKey() + ") cannot be used independently");
                 return false;
             }
-        }
-        final int sidePair =
-                AudioFormat.CHANNEL_OUT_SIDE_LEFT | AudioFormat.CHANNEL_OUT_SIDE_RIGHT;
-        if ((channelConfig & sidePair) != 0
-                && (channelConfig & sidePair) != sidePair) {
-            loge("Side channels can't be used independently");
-            return false;
         }
         return true;
     }
@@ -2271,7 +2309,7 @@ public class AudioTrack extends PlayerBase
             channelCount = 2;
             break;
         default:
-            if (!isMultichannelConfigSupported(channelConfig)) {
+            if (!isMultichannelConfigSupported(channelConfig, audioFormat)) {
                 loge("getMinBufferSize(): Invalid channel configuration.");
                 return ERROR_BAD_VALUE;
             } else {
@@ -2962,7 +3000,7 @@ public class AudioTrack extends PlayerBase
      */
     public int write(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes,
             @WriteMode int writeMode) {
-
+        // Note: we allow writes of extended integers and compressed formats from a byte array.
         if (mState == STATE_UNINITIALIZED || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
             return ERROR_INVALID_OPERATION;
         }
@@ -3076,7 +3114,10 @@ public class AudioTrack extends PlayerBase
     public int write(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts,
             @WriteMode int writeMode) {
 
-        if (mState == STATE_UNINITIALIZED || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
+        if (mState == STATE_UNINITIALIZED
+                || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT
+                // use ByteBuffer or byte[] instead for later encodings
+                || mAudioFormat > AudioFormat.ENCODING_LEGACY_SHORT_ARRAY_THRESHOLD) {
             return ERROR_INVALID_OPERATION;
         }
 

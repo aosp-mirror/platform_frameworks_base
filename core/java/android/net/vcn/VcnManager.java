@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -72,6 +73,36 @@ import java.util.concurrent.Executor;
 @SystemService(Context.VCN_MANAGEMENT_SERVICE)
 public class VcnManager {
     @NonNull private static final String TAG = VcnManager.class.getSimpleName();
+
+    /**
+     * Key for WiFi entry RSSI thresholds
+     *
+     * <p>The VCN will only migrate to a Carrier WiFi network that has a signal strength greater
+     * than, or equal to this threshold.
+     *
+     * <p>WARNING: The VCN does not listen for changes to this key made after VCN startup.
+     *
+     * @hide
+     */
+    @NonNull
+    public static final String VCN_NETWORK_SELECTION_WIFI_ENTRY_RSSI_THRESHOLD_KEY =
+            "vcn_network_selection_wifi_entry_rssi_threshold";
+
+    /**
+     * Key for WiFi entry RSSI thresholds
+     *
+     * <p>If the VCN's selected Carrier WiFi network has a signal strength less than this threshold,
+     * the VCN will attempt to migrate away from the Carrier WiFi network.
+     *
+     * <p>WARNING: The VCN does not listen for changes to this key made after VCN startup.
+     *
+     * @hide
+     */
+    @NonNull
+    public static final String VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY =
+            "vcn_network_selection_wifi_exit_rssi_threshold";
+
+    // TODO: Add separate signal strength thresholds for 2.4 GHz and 5GHz
 
     private static final Map<
                     VcnNetworkPolicyChangeListener, VcnUnderlyingNetworkPolicyListenerBinder>
@@ -157,6 +188,23 @@ public class VcnManager {
             mService.clearVcnConfig(subscriptionGroup, mContext.getOpPackageName());
         } catch (ServiceSpecificException e) {
             throw new IOException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves the list of Subscription Groups for which a VCN Configuration has been set.
+     *
+     * <p>The returned list will include only subscription groups for which the carrier app is
+     * privileged, and which have an associated {@link VcnConfig}.
+     *
+     * @throws SecurityException if the caller is not running as the primary user
+     */
+    @NonNull
+    public List<ParcelUuid> getConfiguredSubscriptionGroups() {
+        try {
+            return mService.getConfiguredSubscriptionGroups(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

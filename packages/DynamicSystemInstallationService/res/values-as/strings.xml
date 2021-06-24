@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"অনুগ্ৰহ কৰি আপোনাৰ পাছৱৰ্ডটো দিয়ক আৰু ডায়নামিক ছিষ্টেম আপডে\'টসমূহলৈ অব্যাহত ৰাখক"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"ডায়নামিক ছিষ্টেমটো সাজু। এইটো ব্যৱহাৰ কৰা আৰম্ভ কৰিবলৈ আপোনাৰ ডিভাইচটো ৰিষ্টাৰ্ট কৰক।"</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"ইনষ্টল চলি আছে"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"ইনষ্টল কৰিব পৰা নগ’ল"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"প্ৰতিচ্ছবিখন সত্যাপন কৰিব পৰা নগ’ল। ইনষ্টলেশ্বন বাতিল কৰক।"</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"বৰ্তমান এটা ডায়নামিক ছিষ্টেম চলি আছে। মূল Android সংস্কৰণটো ব্যৱহাৰ কৰিবলৈ ৰিষ্টাৰ্ট কৰক।"</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"বাতিল কৰক"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"বাতিল কৰক"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"ৰিষ্টাৰ্ট কৰক"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"ৰিষ্টাৰ্ট কৰক"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"বাতিল কৰা ডায়নামিক ছিষ্টেম"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"ডায়নামিক ছিষ্টেম ৰিষ্টার্ট অথবা ল\'ড কৰিব নোৱাৰি"</string>
+    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"ডায়নামিক ছিষ্টেম অক্ষম কৰিব পৰা নগ’ল"</string>
+</resources>

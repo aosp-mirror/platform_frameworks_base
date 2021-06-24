@@ -43,4 +43,103 @@ package {
 // done correctly.
 platform_bootclasspath {
     name: "platform-bootclasspath",
+
+    // The bootclasspath_fragments that contribute to the platform
+    // bootclasspath.
+    fragments: [
+        {
+            apex: "com.android.art",
+            module: "art-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.conscrypt",
+            module: "com.android.conscrypt-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.i18n",
+            module: "i18n-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.ipsec",
+            module: "com.android.ipsec-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.media",
+            module: "com.android.media-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.mediaprovider",
+            module: "com.android.mediaprovider-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.os.statsd",
+            module: "com.android.os.statsd-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.permission",
+            module: "com.android.permission-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.sdkext",
+            module: "com.android.sdkext-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.tethering",
+            module: "com.android.tethering-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.wifi",
+            module: "com.android.wifi-bootclasspath-fragment",
+        },
+    ],
+
+    // Additional information needed by hidden api processing.
+    hidden_api: {
+        unsupported: [
+            "hiddenapi/hiddenapi-unsupported.txt",
+        ],
+        removed: [
+            ":combined-removed-dex",
+        ],
+        max_target_r_low_priority: [
+            "hiddenapi/hiddenapi-max-target-r-loprio.txt",
+        ],
+        max_target_q: [
+            "hiddenapi/hiddenapi-max-target-q.txt",
+        ],
+        max_target_p: [
+            "hiddenapi/hiddenapi-max-target-p.txt",
+        ],
+        max_target_o_low_priority: [
+            "hiddenapi/hiddenapi-max-target-o.txt",
+        ],
+        unsupported_packages: [
+            "hiddenapi/hiddenapi-unsupported-packages.txt",
+        ],
+    },
+
+    dists: [
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-flags.csv",
+        },
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-index.csv",
+        },
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-metadata.csv",
+            // Legacy name
+            dest: "hiddenapi-unsupported.csv",
+        },
+    ],
+
+    required: [
+        "platform-systemserverclasspath",
+    ],
+}
+
+platform_systemserverclasspath {
+    name: "platform-systemserverclasspath",
 }

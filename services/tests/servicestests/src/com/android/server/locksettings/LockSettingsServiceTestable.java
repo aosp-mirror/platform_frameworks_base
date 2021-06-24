@@ -155,7 +155,8 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
-        public ManagedProfilePasswordCache getManagedProfilePasswordCache() {
+        public ManagedProfilePasswordCache getManagedProfilePasswordCache(
+                java.security.KeyStore ks) {
             return mock(ManagedProfilePasswordCache.class);
         }
 
@@ -207,5 +208,10 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         } finally {
             parcel.recycle();
         }
+    }
+
+    @Override
+    void setKeystorePassword(byte[] password, int userHandle) {
+
     }
 }

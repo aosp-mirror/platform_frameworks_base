@@ -87,9 +87,10 @@ public class DataUsageControllerTest {
         ShadowSubscriptionManager.setDefaultDataSubscriptionId(mDefaultSubscriptionId);
         doReturn(SUB_ID).when(mTelephonyManager).getSubscriberId();
 
-        mNetworkTemplate = NetworkTemplate.buildTemplateMobileAll(SUB_ID);
-        mNetworkTemplate2 = NetworkTemplate.buildTemplateMobileAll(SUB_ID_2);
-        mWifiNetworkTemplate = NetworkTemplate.buildTemplateWifiWildcard();
+        mNetworkTemplate = NetworkTemplate.buildTemplateCarrierMetered(SUB_ID);
+        mNetworkTemplate2 = NetworkTemplate.buildTemplateCarrierMetered(SUB_ID_2);
+        mWifiNetworkTemplate = NetworkTemplate.buildTemplateWifi(
+                NetworkTemplate.WIFI_NETWORKID_ALL, null);
     }
 
     @Test

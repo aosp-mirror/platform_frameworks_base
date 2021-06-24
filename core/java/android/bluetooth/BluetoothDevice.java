@@ -931,6 +931,21 @@ public final class BluetoothDevice implements Parcelable {
     @SystemApi
     public static final int ACCESS_REJECTED = 2;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+        prefix = { "TRANSPORT_" },
+        value = {
+            /** Allow host to automatically select a transport (dual-mode only) */
+            TRANSPORT_AUTO,
+            /** Use Classic or BR/EDR transport.*/
+            TRANSPORT_BREDR,
+            /** Use Low Energy transport.*/
+            TRANSPORT_LE,
+        }
+    )
+    public @interface Transport {}
+
     /**
      * No preference of physical transport for GATT connections to remote dual-mode devices
      */
@@ -1062,6 +1077,10 @@ public final class BluetoothDevice implements Parcelable {
 
         public void onBrEdrDown() {
             if (DBG) Log.d(TAG, "onBrEdrDown: reached BLE ON state");
+        }
+
+        public void onOobData(@Transport int transport, OobData oobData) {
+            if (DBG) Log.d(TAG, "onOobData: got data");
         }
     };
 
@@ -1586,13 +1605,13 @@ public final class BluetoothDevice implements Parcelable {
      *
      * <p>This API is asynchronous and {@link #ACTION_UUID} intent is sent,
      * with the UUIDs supported by the remote end. If there is an error
-     * in getting the SDP records or if the process takes a long time,
-     * {@link #ACTION_UUID} intent is sent with the UUIDs that is currently
-     * present in the cache. Clients should use the {@link #getUuids} to get UUIDs
+     * in getting the SDP records or if the process takes a long time, or the device is bonding and
+     * we have its UUIDs cached, {@link #ACTION_UUID} intent is sent with the UUIDs that is
+     * currently present in the cache. Clients should use the {@link #getUuids} to get UUIDs
      * if service discovery is not to be performed.
      *
      * @return False if the check fails, True if the process of initiating an ACL connection
-     * to the remote device was started.
+     * to the remote device was started or cached UUIDs will be broadcast.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean fetchUuidsWithSdp() {

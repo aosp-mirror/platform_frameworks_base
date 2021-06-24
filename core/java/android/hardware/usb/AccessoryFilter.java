@@ -101,7 +101,7 @@ public class AccessoryFilter {
     public boolean matches(UsbAccessory acc) {
         if (mManufacturer != null && !acc.getManufacturer().equals(mManufacturer)) return false;
         if (mModel != null && !acc.getModel().equals(mModel)) return false;
-        return !(mVersion != null && !acc.getVersion().equals(mVersion));
+        return !(mVersion != null && !mVersion.equals(acc.getVersion()));
     }
 
     /**

@@ -37,47 +37,76 @@ import java.util.Objects;
 public final class NetworkStateSnapshot implements Parcelable {
     /** The network associated with this snapshot. */
     @NonNull
-    public final Network network;
+    private final Network mNetwork;
 
     /** The {@link NetworkCapabilities} of the network associated with this snapshot. */
     @NonNull
-    public final NetworkCapabilities networkCapabilities;
+    private final NetworkCapabilities mNetworkCapabilities;
 
     /** The {@link LinkProperties} of the network associated with this snapshot. */
     @NonNull
-    public final LinkProperties linkProperties;
+    private final LinkProperties mLinkProperties;
 
     /**
      * The Subscriber Id of the network associated with this snapshot. See
      * {@link android.telephony.TelephonyManager#getSubscriberId()}.
      */
     @Nullable
-    public final String subscriberId;
+    private final String mSubscriberId;
 
     /**
      * The legacy type of the network associated with this snapshot. See
      * {@code ConnectivityManager#TYPE_*}.
      */
-    public final int legacyType;
+    private final int mLegacyType;
 
     public NetworkStateSnapshot(@NonNull Network network,
             @NonNull NetworkCapabilities networkCapabilities,
             @NonNull LinkProperties linkProperties,
             @Nullable String subscriberId, int legacyType) {
-        this.network = Objects.requireNonNull(network);
-        this.networkCapabilities = Objects.requireNonNull(networkCapabilities);
-        this.linkProperties = Objects.requireNonNull(linkProperties);
-        this.subscriberId = subscriberId;
-        this.legacyType = legacyType;
+        mNetwork = Objects.requireNonNull(network);
+        mNetworkCapabilities = Objects.requireNonNull(networkCapabilities);
+        mLinkProperties = Objects.requireNonNull(linkProperties);
+        mSubscriberId = subscriberId;
+        mLegacyType = legacyType;
     }
 
     /** @hide */
     public NetworkStateSnapshot(@NonNull Parcel in) {
-        network = in.readParcelable(null);
-        networkCapabilities = in.readParcelable(null);
-        linkProperties = in.readParcelable(null);
-        subscriberId = in.readString();
-        legacyType = in.readInt();
+        mNetwork = in.readParcelable(null);
+        mNetworkCapabilities = in.readParcelable(null);
+        mLinkProperties = in.readParcelable(null);
+        mSubscriberId = in.readString();
+        mLegacyType = in.readInt();
+    }
+
+    /** Get the network associated with this snapshot */
+    @NonNull
+    public Network getNetwork() {
+        return mNetwork;
+    }
+
+    /** Get {@link NetworkCapabilities} of the network associated with this snapshot. */
+    @NonNull
+    public NetworkCapabilities getNetworkCapabilities() {
+        return mNetworkCapabilities;
+    }
+
+    /** Get the {@link LinkProperties} of the network associated with this snapshot. */
+    @NonNull
+    public LinkProperties getLinkProperties() {
+        return mLinkProperties;
+    }
+
+    /** Get the Subscriber Id of the network associated with this snapshot. */
+    @Nullable
+    public String getSubscriberId() {
+        return mSubscriberId;
+    }
+
+    /** Get the legacy type of the network associated with this snapshot. */
+    public int getLegacyType() {
+        return mLegacyType;
     }
 
     @Override
@@ -87,11 +116,11 @@ public final class NetworkStateSnapshot implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
-        out.writeParcelable(network, flags);
-        out.writeParcelable(networkCapabilities, flags);
-        out.writeParcelable(linkProperties, flags);
-        out.writeString(subscriberId);
-        out.writeInt(legacyType);
+        out.writeParcelable(mNetwork, flags);
+        out.writeParcelable(mNetworkCapabilities, flags);
+        out.writeParcelable(mLinkProperties, flags);
+        out.writeString(mSubscriberId);
+        out.writeInt(mLegacyType);
     }
 
     @NonNull
@@ -115,26 +144,27 @@ public final class NetworkStateSnapshot implements Parcelable {
         if (this == o) return true;
         if (!(o instanceof NetworkStateSnapshot)) return false;
         NetworkStateSnapshot that = (NetworkStateSnapshot) o;
-        return legacyType == that.legacyType
-                && Objects.equals(network, that.network)
-                && Objects.equals(networkCapabilities, that.networkCapabilities)
-                && Objects.equals(linkProperties, that.linkProperties)
-                && Objects.equals(subscriberId, that.subscriberId);
+        return mLegacyType == that.mLegacyType
+                && Objects.equals(mNetwork, that.mNetwork)
+                && Objects.equals(mNetworkCapabilities, that.mNetworkCapabilities)
+                && Objects.equals(mLinkProperties, that.mLinkProperties)
+                && Objects.equals(mSubscriberId, that.mSubscriberId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(network, networkCapabilities, linkProperties, subscriberId, legacyType);
+        return Objects.hash(mNetwork,
+                mNetworkCapabilities, mLinkProperties, mSubscriberId, mLegacyType);
     }
 
     @Override
     public String toString() {
         return "NetworkStateSnapshot{"
-                + "network=" + network
-                + ", networkCapabilities=" + networkCapabilities
-                + ", linkProperties=" + linkProperties
-                + ", subscriberId='" + NetworkIdentityUtils.scrubSubscriberId(subscriberId) + '\''
-                + ", legacyType=" + legacyType
+                + "network=" + mNetwork
+                + ", networkCapabilities=" + mNetworkCapabilities
+                + ", linkProperties=" + mLinkProperties
+                + ", subscriberId='" + NetworkIdentityUtils.scrubSubscriberId(mSubscriberId) + '\''
+                + ", legacyType=" + mLegacyType
                 + '}';
     }
 }

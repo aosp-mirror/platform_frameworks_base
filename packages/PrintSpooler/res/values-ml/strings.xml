@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"PDF-ൽ സംരക്ഷിക്കുക"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"പ്രിന്റ് ചെയ്യാനുള്ള ഓപ്‌ഷനുകൾ വിപുലീകരിച്ചു"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"പ്രിന്റ് ചെയ്യാനുള്ള ഓപ്‌ഷനുകൾ ചുരുക്കി"</string>
-    <string name="search" msgid="5421724265322228497">"തിരയൽ"</string>
+    <string name="search" msgid="5421724265322228497">"Search"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"എല്ലാ പ്രിന്ററുകളും"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"സേവനം ചേർക്കുക"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"തിരയൽ ബോക്‌സ് ദൃശ്യമാക്കിയിരിക്കുന്നു"</string>

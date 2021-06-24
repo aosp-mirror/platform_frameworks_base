@@ -50,6 +50,7 @@
 #include "jni.h"
 
 using namespace android;
+using android::base::GetBoolProperty;
 using android::base::GetProperty;
 
 extern int register_android_os_Binder(JNIEnv* env);
@@ -629,6 +630,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char hotstartupsamplesOptsBuf[sizeof("-Xps-hot-startup-method-samples:")-1 + PROPERTY_VALUE_MAX];
     char saveResolvedClassesDelayMsOptsBuf[
             sizeof("-Xps-save-resolved-classes-delay-ms:")-1 + PROPERTY_VALUE_MAX];
+    char profileMinSavePeriodOptsBuf[sizeof("-Xps-min-save-period-ms:")-1 + PROPERTY_VALUE_MAX];
+    char profileMinFirstSaveOptsBuf[
+            sizeof("-Xps-min-first-save-ms:")-1 + PROPERTY_VALUE_MAX];
     char madviseRandomOptsBuf[sizeof("-XX:MadviseRandomAccess:")-1 + PROPERTY_VALUE_MAX];
     char madviseWillNeedFileSizeVdex[
             sizeof("-XMadviseWillNeedVdexFileSize:")-1 + PROPERTY_VALUE_MAX];
@@ -661,6 +665,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char extraOptsBuf[PROPERTY_VALUE_MAX];
     char voldDecryptBuf[PROPERTY_VALUE_MAX];
     char perfettoHprofOptBuf[sizeof("-XX:PerfettoHprof=") + PROPERTY_VALUE_MAX];
+    char perfettoJavaHeapStackOptBuf[
+            sizeof("-XX:PerfettoJavaHeapStackProf=") + PROPERTY_VALUE_MAX];
     enum {
       kEMDefault,
       kEMIntPortable,
@@ -727,17 +733,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
         ALOGI("Leaving lock profiling enabled");
     }
 
-    bool checkJni = false;
-    property_get("dalvik.vm.checkjni", propBuf, "");
-    if (strcmp(propBuf, "true") == 0) {
-        checkJni = true;
-    } else if (strcmp(propBuf, "false") != 0) {
-        /* property is neither true nor false; fall back on kernel parameter */
-        property_get("ro.kernel.android.checkjni", propBuf, "");
-        if (propBuf[0] == '1') {
-            checkJni = true;
-        }
-    }
+    const bool checkJni = GetBoolProperty("dalvik.vm.checkjni", false);
     ALOGV("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
     if (checkJni) {
         /* extended JNI checking */
@@ -784,6 +780,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     // and we do not want to enable it in tests.
     parseRuntimeOption("dalvik.vm.perfetto_hprof", perfettoHprofOptBuf, "-XX:PerfettoHprof=",
                        "true");
+
+    // Enable PerfettoJavaHeapStackProf in the zygote
+    parseRuntimeOption("dalvik.vm.perfetto_javaheap", perfettoJavaHeapStackOptBuf,
+                       "-XX:PerfettoJavaHeapStackProf=", "true");
 
     if (primary_zygote) {
         addOption("-Xprimaryzygote");
@@ -867,6 +867,12 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
 
     parseRuntimeOption("dalvik.vm.ps-resolved-classes-delay-ms", saveResolvedClassesDelayMsOptsBuf,
             "-Xps-save-resolved-classes-delay-ms:");
+
+    parseRuntimeOption("dalvik.vm.ps-min-save-period-ms", profileMinSavePeriodOptsBuf,
+            "-Xps-min-save-period-ms:");
+
+    parseRuntimeOption("dalvik.vm.ps-min-first-save-ms", profileMinFirstSaveOptsBuf,
+            "-Xps-min-first-save-ms:");
 
     property_get("ro.config.low_ram", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {

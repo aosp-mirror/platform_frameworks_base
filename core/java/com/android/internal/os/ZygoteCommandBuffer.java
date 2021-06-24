@@ -176,7 +176,7 @@ class ZygoteCommandBuffer implements AutoCloseable {
 
     /*
      * Repeatedly fork children as above. It commonly does not return in the parent, but it may.
-     * @return true in the chaild, false in the parent if we encounter a command we couldn't handle.
+     * @return true in the child, false in the parent if we encounter a command we couldn't handle.
      */
     private static native boolean nativeForkRepeatedly(long /* NativeCommandBuffer* */ nbuffer,
                                                    int zygoteSocketRawFd,

@@ -191,8 +191,11 @@ public final class RangingSession implements AutoCloseable {
 
         /**
          * Invoked when a request to stop the session succeeds
+         *
+         * @param reason reason for the session stop
+         * @param parameters protocol specific parameters related to the stop reason
          */
-        void onStopped();
+        void onStopped(@Reason int reason, @NonNull PersistableBundle parameters);
 
         /**
          * Invoked when a request to stop the session fails
@@ -434,14 +437,15 @@ public final class RangingSession implements AutoCloseable {
     /**
      * @hide
      */
-    public void onRangingStopped() {
+    public void onRangingStopped(@Callback.Reason int reason,
+            @NonNull PersistableBundle params) {
         if (mState == State.CLOSED) {
             Log.w(TAG, "onRangingStopped invoked for a closed session");
             return;
         }
 
         mState = State.IDLE;
-        executeCallback(() -> mCallback.onStopped());
+        executeCallback(() -> mCallback.onStopped(reason, params));
     }
 
     /**

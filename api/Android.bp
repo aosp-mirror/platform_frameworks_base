@@ -24,12 +24,52 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+python_binary_host {
+    name: "api_versions_trimmer",
+    srcs: ["api_versions_trimmer.py"],
+    version: {
+        py2: {
+            enabled: false,
+        },
+        py3: {
+            enabled: true,
+            embedded_launcher: false,
+        },
+    },
+}
+
+python_test_host {
+    name: "api_versions_trimmer_unittests",
+    main: "api_versions_trimmer_unittests.py",
+    srcs: [
+        "api_versions_trimmer_unittests.py",
+        "api_versions_trimmer.py",
+    ],
+    test_options: {
+        unit_test: true,
+    },
+    version: {
+        py2: {
+            enabled: false,
+        },
+        py3: {
+            enabled: true,
+            embedded_launcher: false,
+        },
+    },
+}
+
+metalava_cmd = "$(location metalava)"
+// Silence reflection warnings. See b/168689341
+metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
+metalava_cmd += " --no-banner --format=v2 "
+
 genrule {
     name: "current-api-xml",
     tools: ["metalava"],
     srcs: [":frameworks-base-api-current.txt"],
     out: ["current.api"],
-    cmd: "$(location metalava) --no-banner -convert2xmlnostrip $(in) $(out)",
+    cmd: metalava_cmd + "-convert2xmlnostrip $(in) $(out)",
     visibility: ["//visibility:public"],
 }
 
@@ -52,7 +92,7 @@ genrule {
     ],
     out: ["current.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -60,7 +100,10 @@ genrule {
             dest: "current.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/public/api",
             dest: "android.txt",
         },
@@ -77,7 +120,7 @@ genrule {
     ],
     out: ["stdout.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 " +
+    cmd: metalava_cmd +
         "--check-compatibility:api:released $(location :android.api.public.latest) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.public.latest) " +
         "$(location :frameworks-base-api-current.txt) " +
@@ -126,7 +169,7 @@ genrule {
     ],
     out: ["removed.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -134,7 +177,10 @@ genrule {
             dest: "removed.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/public/api",
             dest: "removed.txt",
         },
@@ -144,6 +190,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-system-current.txt",
     srcs: [
+        ":art.module.public.api{.system.api.txt}",
         ":android.net.ipsec.ike{.system.api.txt}",
         ":framework-connectivity{.system.api.txt}",
         ":framework-media{.system.api.txt}",
@@ -157,7 +204,7 @@ genrule {
     ],
     out: ["system-current.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -165,7 +212,10 @@ genrule {
             dest: "system-current.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system/api",
             dest: "android.txt",
         },
@@ -183,7 +233,7 @@ genrule {
     ],
     out: ["stdout.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 " +
+    cmd: metalava_cmd +
         "--check-compatibility:api:released $(location :android.api.system.latest) " +
         "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.system.latest) " +
@@ -194,6 +244,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-system-removed.txt",
     srcs: [
+        ":art.module.public.api{.system.removed-api.txt}",
         ":android.net.ipsec.ike{.system.removed-api.txt}",
         ":framework-connectivity{.system.removed-api.txt}",
         ":framework-media{.system.removed-api.txt}",
@@ -207,7 +258,7 @@ genrule {
     ],
     out: ["system-removed.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -215,7 +266,10 @@ genrule {
             dest: "system-removed.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system/api",
             dest: "removed.txt",
         },
@@ -226,6 +280,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-module-lib-current.txt",
     srcs: [
+        ":art.module.public.api{.module-lib.api.txt}",
         ":android.net.ipsec.ike{.module-lib.api.txt}",
         ":framework-connectivity{.module-lib.api.txt}",
         ":framework-media{.module-lib.api.txt}",
@@ -239,7 +294,7 @@ genrule {
     ],
     out: ["module-lib-current.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -247,7 +302,10 @@ genrule {
             dest: "module-lib-current.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/module-lib/api",
             dest: "android.txt",
         },
@@ -264,7 +322,7 @@ genrule {
     ],
     out: ["stdout.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 " +
+    cmd: metalava_cmd +
         "--check-compatibility:api:released $(location :android.api.module-lib.latest) " +
         // Note: having "public" be the base of module-lib is not perfect -- it should
         // ideally be a merged public+system), but this will  help when migrating from
@@ -278,6 +336,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-module-lib-removed.txt",
     srcs: [
+        ":art.module.public.api{.module-lib.removed-api.txt}",
         ":android.net.ipsec.ike{.module-lib.removed-api.txt}",
         ":framework-connectivity{.module-lib.removed-api.txt}",
         ":framework-media{.module-lib.removed-api.txt}",
@@ -291,7 +350,7 @@ genrule {
     ],
     out: ["module-lib-removed.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -299,7 +358,10 @@ genrule {
             dest: "module-lib-removed.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/module-lib/api",
             dest: "removed.txt",
         },
@@ -308,6 +370,9 @@ genrule {
 
 genrule {
     name: "combined-removed-dex",
+    visibility: [
+        "//frameworks/base/boot",
+    ],
     srcs: [
         ":frameworks-base-api-removed.txt",
         ":frameworks-base-api-system-removed.txt",
@@ -328,7 +393,7 @@ genrule {
     ],
     out: ["system-server-current.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -336,9 +401,12 @@ genrule {
             dest: "system-server-current.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system-server/api",
-            dest: "merge-android.txt",
+            dest: "android.txt",
         },
     ],
 }
@@ -351,7 +419,7 @@ genrule {
     ],
     out: ["system-server-removed.txt"],
     tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    cmd: metalava_cmd + "$(in) --api $(out)",
     dists: [
         {
             targets: ["droidcore"],
@@ -359,9 +427,46 @@ genrule {
             dest: "system-server-removed.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system-server/api",
-            dest: "merge-removed.txt",
+            dest: "removed.txt",
         },
     ],
+}
+
+// This rule will filter classes present in the jar files of mainline modules
+// from the lint database in api-versions.xml.
+// This is done to reduce the number of false positive NewApi findings in
+// java libraries that compile against the module SDK
+genrule {
+    name: "api-versions-xml-public-filtered",
+    srcs: [
+        // Note: order matters: first parameter is the full api-versions.xml
+        // after that the stubs files in any order
+        // stubs files are all modules that export API surfaces EXCEPT ART
+        ":framework-doc-stubs{.api_versions.xml}",
+        ":android.net.ipsec.ike.stubs{.jar}",
+        ":conscrypt.module.public.api.stubs{.jar}",
+        ":framework-connectivity.stubs{.jar}",
+        ":framework-media.stubs{.jar}",
+        ":framework-mediaprovider.stubs{.jar}",
+        ":framework-permission.stubs{.jar}",
+        ":framework-sdkextensions.stubs{.jar}",
+        ":framework-statsd.stubs{.jar}",
+        ":framework-tethering.stubs{.jar}",
+        ":framework-wifi.stubs{.jar}",
+        ":i18n.module.public.api.stubs{.jar}",
+    ],
+    out: ["api-versions-public-filtered.xml"],
+    tools: ["api_versions_trimmer"],
+    cmd: "$(location api_versions_trimmer) $(out) $(in)",
+    dist: {
+        targets: [
+            "sdk",
+            "win_sdk",
+        ],
+    },
 }

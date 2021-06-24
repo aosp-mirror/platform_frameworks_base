@@ -101,11 +101,34 @@ public class AudioSystem
      */
     public static final int NUM_STREAMS = 5;
 
-    /** Maximum value for AudioTrack channel count
-     * @hide public for MediaCode only, do not un-hide or change to a numeric literal
+    /*
+     * Framework static final constants that are primitives or Strings
+     * accessed by CTS tests or internal applications must be set from methods
+     * (or in a static block) to prevent Java compile-time replacement.
+     * We set them from methods so they are read from the device framework.
+     * Do not un-hide or change to a numeric literal.
      */
-    public static final int OUT_CHANNEL_COUNT_MAX = native_get_FCC_8();
-    private static native int native_get_FCC_8();
+
+    /** Maximum value for AudioTrack channel count
+     * @hide
+     */
+    public static final int OUT_CHANNEL_COUNT_MAX = native_getMaxChannelCount();
+    private static native int native_getMaxChannelCount();
+
+    /** Maximum value for sample rate, used by AudioFormat.
+     * @hide
+     */
+    public static final int SAMPLE_RATE_HZ_MAX = native_getMaxSampleRate();
+    private static native int native_getMaxSampleRate();
+
+    /** Minimum value for sample rate, used by AudioFormat.
+     * @hide
+     */
+    public static final int SAMPLE_RATE_HZ_MIN = native_getMinSampleRate();
+    private static native int native_getMinSampleRate();
+
+    /** @hide */
+    public static final int FCC_24 = 24; // fixed channel count 24; do not change.
 
     // Expose only the getter method publicly so we can change it in the future
     private static final int NUM_STREAM_TYPES = 12;
@@ -424,6 +447,10 @@ public class AudioSystem
                 return "AUDIO_FORMAT_MAT_2_0"; // (MAT | MAT_SUB_2_0)
             case /* AUDIO_FORMAT_MAT_2_1           */ 0x24000003:
                 return "AUDIO_FORMAT_MAT_2_1"; // (MAT | MAT_SUB_2_1)
+            case /* AUDIO_FORMAT_DTS_UHD */           0x2E000000:
+                return "AUDIO_FORMAT_DTS_UHD";
+            case /* AUDIO_FORMAT_DRA */           0x2F000000:
+                return "AUDIO_FORMAT_DRA";
             default:
                 return "AUDIO_FORMAT_(" + audioFormat + ")";
         }

@@ -353,7 +353,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         super.disableDevice(initiatedByCec, callback);
         assertRunOnServiceThread();
         mService.unregisterTvInputCallback(mTvInputCallback);
-        // TODO(b/129088603): check disableDevice and onStandby behaviors per spec
     }
 
     @Override
@@ -557,8 +556,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected boolean handleReportArcInitiate(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        // TODO(amyjojo): implement report arc initiate handler
-        HdmiLogger.debug(TAG + "Stub handleReportArcInitiate");
+        /*
+         * Ideally, we should have got this response before the {@link ArcInitiationActionFromAvr}
+         * has timed out. Even if the response is late, {@link ArcInitiationActionFromAvr
+         * #handleInitiateArcTimeout()} would not have disabled ARC. So nothing needs to be done
+         * here.
+         */
         return true;
     }
 
@@ -566,8 +569,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected boolean handleReportArcTermination(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        // TODO(amyjojo): implement report arc terminate handler
-        HdmiLogger.debug(TAG + "Stub handleReportArcTermination");
+        processArcTermination();
         return true;
     }
 
@@ -804,7 +806,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                     Arrays.stream(device.getEncodings()).mapToObj(
                             AudioFormat::toLogFriendlyEncoding
                     ).collect(Collectors.joining(", ")));
-            // TODO(b/80297701) use the actual device type that system audio mode is connected to.
             if (device.getType() == AudioDeviceInfo.TYPE_HDMI_ARC) {
                 return device;
             }
@@ -910,6 +911,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         notifyArcStatusToAudioService(enabled);
         // 3. Update arc status;
         mArcEstablished = enabled;
+    }
+
+    void processArcTermination() {
+        setArcStatus(false);
+        // Switch away from ARC input when ARC is terminated.
+        if (getLocalActivePort() == Constants.CEC_SWITCH_ARC) {
+            routeToInputFromPortId(getRoutingPort());
+        }
     }
 
     /** Switch hardware ARC circuit in the system. */
@@ -1035,7 +1044,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     protected void switchToAudioInput() {
-        // TODO(b/111396634): switch input according to PROPERTY_SYSTEM_AUDIO_MODE_AUDIO_PORT
     }
 
     protected boolean isDirectConnectToTv() {
@@ -1216,7 +1224,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if (isSystemAudioActivated() && port < 0) {
             // If system audio mode is on and the new active source is not under the current device,
             // Will switch to ARC input.
-            // TODO(b/115637145): handle system aduio without ARC
             routeToInputFromPortId(Constants.CEC_SWITCH_ARC);
         } else if (mIsSwitchDevice && port >= 0) {
             // If current device is a switch and the new active source is under it,
@@ -1317,7 +1324,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     // Handle the system audio(ARC) part of the logic on receiving routing change or information.
     private void handleRoutingChangeAndInformationForSystemAudio() {
-        // TODO(b/115637145): handle system aduio without ARC
         routeToInputFromPortId(Constants.CEC_SWITCH_ARC);
     }
 

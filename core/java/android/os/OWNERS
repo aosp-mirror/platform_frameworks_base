@@ -63,3 +63,6 @@ per-file *Zygote* = file:/ZYGOTE_OWNERS
 
 # RecoverySystem
 per-file *Recovery* = file:/services/core/java/com/android/server/recoverysystem/OWNERS
+
+# Bugreporting
+per-file Bugreport* = file:/platform/frameworks/native:/cmds/dumpstate/OWNERS

@@ -29,7 +29,9 @@ import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.service.quicksettings.IQSTileService;
@@ -42,15 +44,26 @@ import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import android.widget.Switch;
 
+import androidx.annotation.NonNull;
+
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 import java.util.Objects;
+
+import javax.inject.Inject;
+
+import dagger.Lazy;
 
 public class CustomTile extends QSTileImpl<State> implements TileChangeListener {
     public static final String PREFIX = "custom(";
@@ -79,8 +92,19 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private boolean mIsTokenGranted;
     private boolean mIsShowingDialog;
 
-    private CustomTile(QSHost host, String action, Context userContext) {
-        super(host);
+    private CustomTile(
+            QSHost host,
+            Looper backgroundLooper,
+            Handler mainHandler,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            String action,
+            Context userContext
+    ) {
+        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
+                activityStarter, qsLogger);
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         mComponent = ComponentName.unflattenFromString(action);
         mTile = new Tile();
@@ -397,7 +421,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         return ComponentName.unflattenFromString(action);
     }
 
-    public static CustomTile create(QSHost host, String spec, Context userContext) {
+    private static String getAction(String spec) {
         if (spec == null || !spec.startsWith(PREFIX) || !spec.endsWith(")")) {
             throw new IllegalArgumentException("Bad custom tile spec: " + spec);
         }
@@ -405,6 +429,81 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         if (action.isEmpty()) {
             throw new IllegalArgumentException("Empty custom tile spec action");
         }
-        return new CustomTile(host, action, userContext);
+        return action;
+    }
+
+    /**
+     * Create a {@link CustomTile} for a given spec and user.
+     *
+     * @param builder including injected common dependencies.
+     * @param spec as provided by {@link CustomTile#toSpec}
+     * @param userContext context for the user that is creating this tile.
+     * @return a new {@link CustomTile}
+     */
+    public static CustomTile create(Builder builder, String spec, Context userContext) {
+        return builder
+                .setSpec(spec)
+                .setUserContext(userContext)
+                .build();
+    }
+
+    public static class Builder {
+        final Lazy<QSHost> mQSHostLazy;
+        final Looper mBackgroundLooper;
+        final Handler mMainHandler;
+        final MetricsLogger mMetricsLogger;
+        final StatusBarStateController mStatusBarStateController;
+        final ActivityStarter mActivityStarter;
+        final QSLogger mQSLogger;
+
+        Context mUserContext;
+        String mSpec = "";
+
+        @Inject
+        public Builder(
+                Lazy<QSHost> hostLazy,
+                @Background Looper backgroundLooper,
+                @Main Handler mainHandler,
+                MetricsLogger metricsLogger,
+                StatusBarStateController statusBarStateController,
+                ActivityStarter activityStarter,
+                QSLogger qsLogger
+        ) {
+            mQSHostLazy = hostLazy;
+            mBackgroundLooper = backgroundLooper;
+            mMainHandler = mainHandler;
+            mMetricsLogger = metricsLogger;
+            mStatusBarStateController = statusBarStateController;
+            mActivityStarter = activityStarter;
+            mQSLogger = qsLogger;
+        }
+
+        Builder setSpec(@NonNull String spec) {
+            mSpec = spec;
+            return this;
+        }
+
+        Builder setUserContext(@NonNull Context userContext) {
+            mUserContext = userContext;
+            return this;
+        }
+
+        CustomTile build() {
+            if (mUserContext == null) {
+                throw new NullPointerException("UserContext cannot be null");
+            }
+            String action = getAction(mSpec);
+            return new CustomTile(
+                    mQSHostLazy.get(),
+                    mBackgroundLooper,
+                    mMainHandler,
+                    mMetricsLogger,
+                    mStatusBarStateController,
+                    mActivityStarter,
+                    mQSLogger,
+                    action,
+                    mUserContext
+            );
+        }
     }
 }

@@ -18,27 +18,27 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"מעטפת"</string>
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"דוחות על באגים"</string>
-    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"יצירת הדוח על הבאג <xliff:g id="ID">#%d</xliff:g> מתבצעת"</string>
-    <string name="bugreport_finished_title" msgid="4429132808670114081">"הדוח על הבאג <xliff:g id="ID">#%d</xliff:g> צולם"</string>
-    <string name="bugreport_updating_title" msgid="4423539949559634214">"מוסיף פרטים לדוח על הבאג"</string>
-    <string name="bugreport_updating_wait" msgid="3322151947853929470">"המתן…"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"בתהליך יצירה של דוח על באג (<xliff:g id="ID">#%d</xliff:g>)"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"הדוח על הבאג (<xliff:g id="ID">#%d</xliff:g>) צולם"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"בתהליך הוספת פרטים לדוח על הבאג"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"רק רגע…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"הדוח על הבאג יופיע בטלפון בקרוב"</string>
-    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"הקש כדי לשתף את הדוח על הבאג"</string>
-    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"הקש כדי לשתף את הדוח על הבאג"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"החלק ימינה כדי לשתף את הדוח על הבאג ללא צילום מסך או המתן להשלמת צילום המסך"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"הקש כדי לשתף את הדוח על הבאג ללא צילום מסך, או המתן להשלמת צילום המסך"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"הקש כדי לשתף את הדוח על הבאג ללא צילום מסך, או המתן להשלמת צילום המסך"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"דוחות על באגים כוללים נתונים מקובצי היומן השונים במערכת, שעשויים לכלול נתונים הנחשבים רגישים (כגון שימוש באפליקציות ונתוני מיקום). שתף דוחות על באגים רק עם אפליקציות ואנשים שאתה סומך עליהם."</string>
-    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"אל תציג שוב"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"דוחות באגים"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"יש להקיש כדי לשתף את הדוח על הבאג"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"יש להקיש כדי לשתף את הדוח על הבאג"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"אפשר להחליק ימינה כדי לשתף את הדוח על הבאג ללא צילום מסך, או להמתין להשלמת צילום המסך"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"יש להקיש כדי לשתף את הדוח על הבאג ללא צילום מסך, או להמתין להשלמת צילום המסך"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"יש להקיש כדי לשתף את הדוח על הבאג ללא צילום מסך, או להמתין להשלמת צילום המסך"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"דוחות על באגים כוללים נתונים מקובצי היומן השונים במערכת, שעשויים לכלול נתונים הנחשבים רגישים (כגון שימוש באפליקציות ונתוני מיקום). כדאי לשתף דוחות על באגים רק עם אפליקציות ואנשים מהימנים."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"אל תציגו זאת שוב"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"דוחות על באגים"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"לא ניתן היה לקרוא את קובץ הדוח על הבאג"</string>
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"‏לא ניתן היה להוסיף את פרטי הדוח על הבאג לקובץ ה-zip"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ללא שם"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"פרטים"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"צילום מסך"</string>
     <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"צילום המסך בוצע בהצלחה."</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"לא ניתן היה לצלם מסך."</string>
-    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"פרטי הדוח על הבאג <xliff:g id="ID">#%d</xliff:g>"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"לא ניתן היה לצלם את המסך."</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"פרטי הדוח על הבאג (<xliff:g id="ID">#%d</xliff:g>)"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"שם קובץ"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"כותרת הבאג"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"סיכום הבאג"</string>
