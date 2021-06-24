@@ -21,6 +21,9 @@ java_defaults {
             // "-XepPatchLocation:/tmp/refaster/",
         ],
     },
+    lint: {
+        extra_check_modules: ["AndroidFrameworkLintChecker"],
+    },
 }
 
 filegroup {
