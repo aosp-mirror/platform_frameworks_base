@@ -1450,7 +1450,7 @@
     <dimen name="people_space_messages_count_radius">12dp</dimen>
     <dimen name="people_space_widget_background_padding">6dp</dimen>
     <dimen name="required_width_for_medium">136dp</dimen>
-    <dimen name="required_width_for_large">138dp</dimen>
+    <dimen name="required_width_for_large">120dp</dimen>
     <dimen name="required_height_for_large">168dp</dimen>
     <dimen name="default_width">146dp</dimen>
     <dimen name="default_height">92dp</dimen>
@@ -1469,10 +1469,12 @@
     <dimen name="below_name_text_padding">16dp</dimen>
     <dimen name="above_notification_text_padding">22dp</dimen>
     <dimen name="regular_predefined_icon">18dp</dimen>
-    <dimen name="large_predefined_icon">24dp</dimen>
+    <dimen name="larger_predefined_icon">24dp</dimen>
+    <dimen name="largest_predefined_icon">32dp</dimen>
     <dimen name="availability_dot_status_padding">8dp</dimen>
     <dimen name="availability_dot_notification_padding">12dp</dimen>
     <dimen name="medium_content_padding_above_name">4dp</dimen>
+    <dimen name="padding_between_suppressed_layout_items">8dp</dimen>
 
     <!-- Accessibility floating menu -->
     <dimen name="accessibility_floating_menu_elevation">3dp</dimen>
