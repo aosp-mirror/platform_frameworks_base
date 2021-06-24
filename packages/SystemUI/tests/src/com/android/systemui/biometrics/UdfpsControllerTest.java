@@ -338,7 +338,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         moveEvent.recycle();
 
         // THEN click haptic is played
-        verify(mVibrator).vibrate(mUdfpsController.mEffectClick,
+        verify(mVibrator).vibrate(mUdfpsController.EFFECT_CLICK,
                 UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES);
     }
 }

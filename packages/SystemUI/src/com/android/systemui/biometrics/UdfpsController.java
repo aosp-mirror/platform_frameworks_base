@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import static android.os.VibrationEffect.Composition.PRIMITIVE_LOW_TICK;
+
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
@@ -145,32 +147,22 @@ public class UdfpsController implements DozeReceiver {
     private Runnable mAodInterruptRunnable;
 
     @VisibleForTesting
-    static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
+    public static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
             new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                     .build();
 
-    private final VibrationEffect mEffectTick = VibrationEffect.get(VibrationEffect.EFFECT_TICK);
-    private final VibrationEffect mEffectTextureTick =
+    public static final VibrationEffect EFFECT_TICK =
+            VibrationEffect.get(VibrationEffect.EFFECT_TICK);
+    private static final VibrationEffect EFFECT_TEXTURE_TICK =
             VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK);
     @VisibleForTesting
-    final VibrationEffect mEffectClick = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
-    private final VibrationEffect mEffectHeavy =
+    static final VibrationEffect EFFECT_CLICK = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+    private static final VibrationEffect EFFECT_HEAVY =
             VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
-    private final VibrationEffect mDoubleClick =
+    private static final VibrationEffect EFFECT_DOUBLE_CLICK =
             VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
-    private final Runnable mAcquiredVibration = new Runnable() {
-        @Override
-        public void run() {
-            if (mVibrator == null) {
-                return;
-            }
-            String effect = Settings.Global.getString(mContext.getContentResolver(),
-                    "udfps_acquired_type");
-            mVibrator.vibrate(getVibration(effect, mEffectTick), VIBRATION_SONIFICATION_ATTRIBUTES);
-        }
-    };
 
     private final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
         @Override
@@ -447,16 +439,7 @@ public class UdfpsController implements DozeReceiver {
                                     String startEffectSetting = Settings.Global.getString(
                                             contentResolver, "udfps_start_type");
                                     mVibrator.vibrate(getVibration(startEffectSetting,
-                                            mEffectClick), VIBRATION_SONIFICATION_ATTRIBUTES);
-                                }
-
-                                int acquiredEnabled = Settings.Global.getInt(contentResolver,
-                                        "udfps_acquired", 0);
-                                if (acquiredEnabled > 0) {
-                                    int delay = Settings.Global.getInt(contentResolver,
-                                            "udfps_acquired_delay", 500);
-                                    mMainHandler.removeCallbacks(mAcquiredVibration);
-                                    mMainHandler.postDelayed(mAcquiredVibration, delay);
+                                            EFFECT_CLICK), VIBRATION_SONIFICATION_ATTRIBUTES);
                                 }
                             }
 
@@ -839,7 +822,6 @@ public class UdfpsController implements DozeReceiver {
     private void onFingerUp() {
         mActivePointerId = -1;
         mGoodCaptureReceived = false;
-        mMainHandler.removeCallbacks(mAcquiredVibration);
         if (mView == null) {
             Log.w(TAG, "Null view in onFingerUp");
             return;
@@ -851,23 +833,34 @@ public class UdfpsController implements DozeReceiver {
     }
 
 
-    private VibrationEffect getVibration(String effect, VibrationEffect defaultEffect) {
+    /**
+     * get vibration to play given string
+     * used for testing purposes (b/185124905)
+     */
+    public static VibrationEffect getVibration(String effect, VibrationEffect defaultEffect) {
         if (TextUtils.isEmpty(effect)) {
             return defaultEffect;
         }
 
         switch (effect.toLowerCase()) {
             case "click":
-                return mEffectClick;
+                return EFFECT_CLICK;
             case "heavy":
-                return mEffectHeavy;
+                return EFFECT_HEAVY;
             case "texture_tick":
-                return mEffectTextureTick;
+                return EFFECT_TEXTURE_TICK;
             case "tick":
-                return mEffectTick;
+                return EFFECT_TICK;
             case "double_tap":
-                return mDoubleClick;
+                return EFFECT_DOUBLE_CLICK;
             default:
+                try {
+                    int primitive = Integer.parseInt(effect);
+                    if (primitive <= PRIMITIVE_LOW_TICK && primitive > -1) {
+                        return VibrationEffect.startComposition().addPrimitive(primitive).compose();
+                    }
+                } catch (NumberFormatException e) {
+                }
                 return defaultEffect;
         }
     }
