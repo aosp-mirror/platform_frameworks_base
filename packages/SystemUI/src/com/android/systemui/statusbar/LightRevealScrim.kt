@@ -51,7 +51,7 @@ object LiftReveal : LightRevealEffect {
     private const val OVAL_INITIAL_WIDTH_PERCENT = 0.5f
 
     /** The initial top value of the light oval, in percent of scrim height. */
-    private const val OVAL_INITIAL_TOP_PERCENT = 1.05f
+    private const val OVAL_INITIAL_TOP_PERCENT = 1.1f
 
     /** The initial bottom value of the light oval, in percent of scrim height. */
     private const val OVAL_INITIAL_BOTTOM_PERCENT = 1.2f
