@@ -778,8 +778,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
-            mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
-                    getCurrentUser());
+            mFingerprintLockedOutPermanent = true;
+            requireStrongAuthIfAllLockedOut();
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT
@@ -800,6 +800,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void handleFingerprintLockoutReset() {
         mFingerprintLockedOut = false;
+        mFingerprintLockedOutPermanent = false;
         updateFingerprintListeningState();
     }
 
@@ -960,8 +961,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         if (msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
-            mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
-                    getCurrentUser());
+            mFaceLockedOutPermanent = true;
+            requireStrongAuthIfAllLockedOut();
         }
 
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -974,6 +975,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private void handleFaceLockoutReset() {
+        mFaceLockedOutPermanent = false;
         updateFaceListeningState();
     }
 
@@ -1049,6 +1051,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 || isSimPinSecure());
     }
 
+    private void requireStrongAuthIfAllLockedOut() {
+        final boolean faceLock =
+                mFaceLockedOutPermanent || !shouldListenForFace();
+        final boolean fpLock =
+                mFingerprintLockedOutPermanent || !shouldListenForFingerprint(isUdfpsEnrolled());
+
+        if (faceLock && fpLock) {
+            Log.d(TAG, "All biometrics locked out - requiring strong auth");
+            mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
+                    getCurrentUser());
+        }
+    }
 
     public boolean getUserCanSkipBouncer(int userId) {
         return getUserHasTrust(userId) || getUserUnlockedWithBiometric(userId);
@@ -1332,7 +1346,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 handleFingerprintAuthenticated(userId, isStrongBiometric);
             };
 
-    private final FingerprintManager.AuthenticationCallback mFingerprintAuthenticationCallback
+    @VisibleForTesting
+    final FingerprintManager.AuthenticationCallback mFingerprintAuthenticationCallback
             = new AuthenticationCallback() {
 
         @Override
@@ -1380,7 +1395,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             };
 
     @VisibleForTesting
-    FaceManager.AuthenticationCallback mFaceAuthenticationCallback
+    final FaceManager.AuthenticationCallback mFaceAuthenticationCallback
             = new FaceManager.AuthenticationCallback() {
 
         @Override
@@ -1417,6 +1432,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private FaceManager mFaceManager;
     private List<FaceSensorPropertiesInternal> mFaceSensorProperties;
     private boolean mFingerprintLockedOut;
+    private boolean mFingerprintLockedOutPermanent;
+    private boolean mFaceLockedOutPermanent;
     private TelephonyManager mTelephonyManager;
 
     /**
