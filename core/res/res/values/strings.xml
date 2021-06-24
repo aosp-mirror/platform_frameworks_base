@@ -1659,9 +1659,9 @@
     <!-- Notification name shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_name">Face Unlock</string>
     <!-- Notification title shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
-    <string name="face_recalibrate_notification_title">Re-enroll your face</string>
+    <string name="face_recalibrate_notification_title">Issue with Face Unlock</string>
     <!-- Notification content shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
-    <string name="face_recalibrate_notification_content">To improve recognition, please re-enroll your face</string>
+    <string name="face_recalibrate_notification_content">Tap to delete your face model, then add your face again</string>
     <!-- Title of a notification that directs the user to set up Face Unlock by enrolling their face. [CHAR LIMIT=NONE] -->
     <string name="face_setup_notification_title">Set up Face Unlock</string>
     <!-- Contents of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
