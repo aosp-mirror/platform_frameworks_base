@@ -31,7 +31,7 @@ import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.layerBecomesVisible
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.appPairsDividerBecomesVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
@@ -77,7 +77,7 @@ class OpenAppToLegacySplitScreen(
 
     @Presubmit
     @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+    fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
     @Presubmit
     @Test

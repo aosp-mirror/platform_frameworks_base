@@ -27,9 +27,9 @@ import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
@@ -67,14 +67,14 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
 
     @Presubmit
     @Test
-    open fun navBarWindowIsAlwaysVisible() {
-        testSpec.navBarWindowIsAlwaysVisible()
+    open fun navBarWindowIsVisible() {
+        testSpec.navBarWindowIsVisible()
     }
 
     @Presubmit
     @Test
-    open fun navBarLayerIsAlwaysVisible() {
-        testSpec.navBarLayerIsAlwaysVisible(rotatesScreen = true)
+    open fun navBarLayerIsVisible() {
+        testSpec.navBarLayerIsVisible()
     }
 
     @Presubmit
