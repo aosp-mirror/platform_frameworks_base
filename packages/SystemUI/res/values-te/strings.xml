@@ -480,12 +480,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"యూజర్‌ను జోడించండి"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"కొత్త వినియోగదారు"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"గెస్ట్‌ను తీసివేయాలా?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"గెస్ట్ సెషన్‌ను రీసెట్ చేయాలా?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"తీసివేయి"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"రీసెట్ చేయండి"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"గెస్ట్‌కు తిరిగి స్వాగతం!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"మొదటి నుండి ప్రారంభించు"</string>
@@ -1038,8 +1036,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"స్క్రీన్‌లో భాగాన్ని మాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"స్విచ్ చేయి"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"యాక్సెసిబిలిటీ బటన్, యాక్సెసిబిలిటీ సంజ్ఞను భర్తీ చేసింది\n\n"<annotation id="link">"సెట్టింగ్‌లను చూడండి"</annotation></string>
-    <!-- no translation found for accessibility_floating_button_switch_migration_tooltip (6248529129221218770) -->
-    <skip />
+    <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"మీరు యాక్సెసిబిలిటీ సంజ్ఞ నుండి బటన్ మధ్య మారవచ్చు\n\n"<annotation id="link">"సెట్టింగ్‌లు"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"తాత్కాలికంగా దానిని దాచడానికి బటన్‌ను చివరకు తరలించండి"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ఎగువ ఎడమ వైపునకు తరలించు"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ఎగువ కుడి వైపునకు తరలించు"</string>
