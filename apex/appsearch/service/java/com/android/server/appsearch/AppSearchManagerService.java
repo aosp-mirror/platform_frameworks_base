@@ -220,9 +220,10 @@ public class AppSearchManagerService extends SystemService {
             }
             // Only clear the package's data if AppSearch exists for this user.
             if (AppSearchUserInstanceManager.getAppSearchDir(userHandle).exists()) {
+                Context userContext = mContext.createContextAsUser(userHandle, /*flags=*/ 0);
                 AppSearchUserInstance instance =
                         mAppSearchUserInstanceManager.getOrCreateUserInstance(
-                                mContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
+                                userContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
                 //TODO(b/145759910) clear visibility setting for package.
                 instance.getAppSearchImpl().clearPackageData(packageName);
                 instance.getLogger().removeCachedUidForPackage(packageName);
@@ -243,11 +244,11 @@ public class AppSearchManagerService extends SystemService {
             try {
                 // Only clear the package's data if AppSearch exists for this user.
                 if (AppSearchUserInstanceManager.getAppSearchDir(userHandle).exists()) {
+                    Context userContext = mContext.createContextAsUser(userHandle, /*flags=*/ 0);
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getOrCreateUserInstance(
-                                    mContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
-                    List<PackageInfo> installedPackageInfos = mContext
-                            .createContextAsUser(userHandle, /*flags=*/0)
+                                    userContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
+                    List<PackageInfo> installedPackageInfos = userContext
                             .getPackageManager()
                             .getInstalledPackages(/*flags=*/0);
                     Set<String> packagesToKeep = new ArraySet<>(installedPackageInfos.size());
@@ -327,8 +328,10 @@ public class AppSearchManagerService extends SystemService {
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     List<AppSearchSchema> schemas = new ArrayList<>(schemaBundles.size());
                     for (int i = 0; i < schemaBundles.size(); i++) {
                         schemas.add(new AppSearchSchema(schemaBundles.get(i)));
@@ -401,8 +404,10 @@ public class AppSearchManagerService extends SystemService {
             UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     GetSchemaResponse response =
@@ -431,8 +436,10 @@ public class AppSearchManagerService extends SystemService {
             UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     List<String> namespaces =
@@ -468,8 +475,10 @@ public class AppSearchManagerService extends SystemService {
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     AppSearchBatchResult.Builder<String, Void> resultBuilder =
                             new AppSearchBatchResult.Builder<>();
                     instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
@@ -548,8 +557,10 @@ public class AppSearchManagerService extends SystemService {
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     AppSearchBatchResult.Builder<String, Bundle> resultBuilder =
                             new AppSearchBatchResult.Builder<>();
                     instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
@@ -627,8 +638,10 @@ public class AppSearchManagerService extends SystemService {
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     SearchResultPage searchResultPage = instance.getAppSearchImpl().query(
                             packageName,
@@ -691,8 +704,10 @@ public class AppSearchManagerService extends SystemService {
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
 
                     boolean callerHasSystemAccess =
@@ -738,9 +753,11 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void getNextPage(
+                @NonNull String packageName,
                 long nextPageToken,
                 @NonNull UserHandle userHandle,
                 @NonNull IAppSearchResultCallback callback) {
+            Objects.requireNonNull(packageName);
             Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
 
@@ -750,7 +767,10 @@ public class AppSearchManagerService extends SystemService {
             // opened it
             EXECUTOR.execute(() -> {
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     SearchResultPage searchResultPage =
@@ -765,14 +785,19 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void invalidateNextPageToken(long nextPageToken, @NonNull UserHandle userHandle) {
+        public void invalidateNextPageToken(@NonNull String packageName, long nextPageToken,
+                @NonNull UserHandle userHandle) {
+            Objects.requireNonNull(packageName);
             Objects.requireNonNull(userHandle);
 
             int callingUid = Binder.getCallingUid();
             UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     instance.getAppSearchImpl().invalidateNextPageToken(nextPageToken);
@@ -803,7 +828,10 @@ public class AppSearchManagerService extends SystemService {
             UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     // we don't need to append the file. The file is always brand new.
@@ -849,7 +877,10 @@ public class AppSearchManagerService extends SystemService {
             UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
+                    verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
 
@@ -908,8 +939,10 @@ public class AppSearchManagerService extends SystemService {
             UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
 
@@ -957,8 +990,10 @@ public class AppSearchManagerService extends SystemService {
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     AppSearchBatchResult.Builder<String, Void> resultBuilder =
                             new AppSearchBatchResult.Builder<>();
                     instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
@@ -1039,8 +1074,10 @@ public class AppSearchManagerService extends SystemService {
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     instance.getAppSearchImpl().removeByQuery(
                             packageName,
@@ -1095,8 +1132,10 @@ public class AppSearchManagerService extends SystemService {
             UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
             EXECUTOR.execute(() -> {
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
-                    verifyCallingPackage(callingUser, callingUid, packageName);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     AppSearchUserInstance instance =
                             mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     StorageInfo storageInfo = instance.getAppSearchImpl()
@@ -1112,8 +1151,10 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void persistToDisk(
+                @NonNull String packageName,
                 @NonNull UserHandle userHandle,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis) {
+            Objects.requireNonNull(packageName);
             Objects.requireNonNull(userHandle);
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
@@ -1125,7 +1166,10 @@ public class AppSearchManagerService extends SystemService {
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     instance.getAppSearchImpl().persistToDisk(PersistType.Code.FULL);
                     ++operationSuccessCount;
@@ -1157,24 +1201,30 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void initialize(
+                @NonNull String packageName,
                 @NonNull UserHandle userHandle,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchResultCallback callback) {
+            Objects.requireNonNull(packageName);
             Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
             int callingUid = Binder.getCallingUid();
             UserHandle callingUser = handleIncomingUser(userHandle, callingUid);
+
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
                 AppSearchUserInstance instance = null;
                 int operationSuccessCount = 0;
                 int operationFailureCount = 0;
                 try {
+                    Context userContext = mContext.createContextAsUser(callingUser, /*flags=*/ 0);
                     verifyUserUnlocked(callingUser);
+                    verifyCallingPackage(userContext, callingUser, callingUid, packageName);
+                    verifyNotInstantApp(userContext, packageName);
                     instance = mAppSearchUserInstanceManager.getOrCreateUserInstance(
-                            mContext, callingUser, AppSearchConfig.getInstance(EXECUTOR));
+                            userContext, callingUser, AppSearchConfig.getInstance(EXECUTOR));
                     ++operationSuccessCount;
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
                 } catch (Throwable t) {
@@ -1204,14 +1254,15 @@ public class AppSearchManagerService extends SystemService {
         }
 
         private void verifyCallingPackage(
+                @NonNull Context userContext,
                 @NonNull UserHandle actualCallingUser,
                 int actualCallingUid,
                 @NonNull String claimedCallingPackage) {
             Objects.requireNonNull(actualCallingUser);
             Objects.requireNonNull(claimedCallingPackage);
 
-            int claimedCallingUid = PackageUtil.getPackageUidAsUser(
-                    mContext, claimedCallingPackage, actualCallingUser);
+            int claimedCallingUid = PackageUtil.getPackageUid(
+                    userContext, claimedCallingPackage);
             if (claimedCallingUid == INVALID_UID) {
                 throw new SecurityException(
                         "Specified calling package [" + claimedCallingPackage + "] not found");
@@ -1317,6 +1368,21 @@ public class AppSearchManagerService extends SystemService {
                         + Manifest.permission.INTERACT_ACROSS_USERS_FULL);
     }
 
+    /**
+     * Helper for ensuring instant apps can't make calls to AppSearch.
+     *
+     * @param userContext Context of the user making the call.
+     * @param packageName Package name of the caller.
+     * @throws SecurityException if the caller is an instant app.
+     */
+    private void verifyNotInstantApp(@NonNull Context userContext, @NonNull String packageName) {
+        PackageManager callingPackageManager = userContext.getPackageManager();
+        if (callingPackageManager.isInstantApp(packageName)) {
+            throw new SecurityException("Caller not allowed to create AppSearch session"
+                    + "; userHandle=" + userContext.getUser() + ", callingPackage=" + packageName);
+        }
+    }
+
     // TODO(b/179160886): Cache the previous storage stats.
     private class AppSearchStorageStatsAugmenter implements StorageStatsAugmenter {
         @Override
@@ -1331,9 +1397,10 @@ public class AppSearchManagerService extends SystemService {
 
             try {
                 verifyUserUnlocked(userHandle);
+                Context userContext = mContext.createContextAsUser(userHandle, /*flags=*/ 0);
                 AppSearchUserInstance instance =
                         mAppSearchUserInstanceManager.getOrCreateUserInstance(
-                                mContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
+                                userContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
                 stats.dataSize += instance.getAppSearchImpl()
                         .getStorageInfoForPackage(packageName).getSizeBytes();
             } catch (Throwable t) {
@@ -1359,9 +1426,10 @@ public class AppSearchManagerService extends SystemService {
                 if (packagesForUid == null) {
                     return;
                 }
+                Context userContext = mContext.createContextAsUser(userHandle, /*flags=*/ 0);
                 AppSearchUserInstance instance =
                         mAppSearchUserInstanceManager.getOrCreateUserInstance(
-                                mContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
+                                userContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
                 for (int i = 0; i < packagesForUid.length; i++) {
                     stats.dataSize += instance.getAppSearchImpl()
                             .getStorageInfoForPackage(packagesForUid[i]).getSizeBytes();
@@ -1387,9 +1455,10 @@ public class AppSearchManagerService extends SystemService {
                 if (packagesForUser == null) {
                     return;
                 }
+                Context userContext = mContext.createContextAsUser(userHandle, /*flags=*/ 0);
                 AppSearchUserInstance instance =
                         mAppSearchUserInstanceManager.getOrCreateUserInstance(
-                                mContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
+                                userContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
                 for (int i = 0; i < packagesForUser.size(); i++) {
                     String packageName = packagesForUser.get(i).packageName;
                     stats.dataSize += instance.getAppSearchImpl()
