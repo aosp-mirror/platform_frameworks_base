@@ -865,10 +865,6 @@ public class ScreenshotView extends FrameLayout implements
     }
 
     private void animateDismissal(Animator dismissAnimation) {
-        if (DEBUG_WINDOW) {
-            Log.d(TAG, "removing OnComputeInternalInsetsListener");
-        }
-        getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
         mDismissAnimation = dismissAnimation;
         mDismissAnimation.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled = false;
