@@ -76,6 +76,7 @@ public abstract class HotwordDetectionService extends Service {
     private static final boolean DBG = true;
 
     private static final long UPDATE_TIMEOUT_MILLIS = 5000;
+
     /** @hide */
     public static final String KEY_INITIALIZATION_STATUS = "initialization_status";
 
@@ -388,6 +389,14 @@ public abstract class HotwordDetectionService extends Service {
          */
         public void onDetected(@NonNull HotwordDetectedResult result) {
             requireNonNull(result);
+            final PersistableBundle persistableBundle = result.getExtras();
+            if (!persistableBundle.isEmpty() && HotwordDetectedResult.getParcelableSize(
+                    persistableBundle) > HotwordDetectedResult.getMaxBundleSize()) {
+                throw new IllegalArgumentException(
+                        "The bundle size of result is larger than max bundle size ("
+                                + HotwordDetectedResult.getMaxBundleSize()
+                                + ") of HotwordDetectedResult");
+            }
             try {
                 mRemoteCallback.onDetected(result);
             } catch (RemoteException e) {

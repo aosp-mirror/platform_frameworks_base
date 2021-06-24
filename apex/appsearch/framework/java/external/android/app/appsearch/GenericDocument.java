@@ -50,9 +50,6 @@ import java.util.Set;
 public class GenericDocument {
     private static final String TAG = "AppSearchGenericDocumen";
 
-    /** The maximum number of elements in a repeatable field. */
-    private static final int MAX_REPEATED_PROPERTY_LENGTH = 100;
-
     /** The maximum {@link String#length} of a {@link String} field. */
     private static final int MAX_STRING_LENGTH = 20_000;
 
@@ -1187,8 +1184,8 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code String} values of the property.
-         * @throws IllegalArgumentException if no values are provided, if provided values exceed
-         *     maximum repeated property length, or if a passed in {@code String} is {@code null}.
+         * @throws IllegalArgumentException if no values are provided, or if a passed in {@code
+         *     String} is {@code null}.
          */
         @NonNull
         public BuilderType setPropertyString(@NonNull String name, @NonNull String... values) {
@@ -1206,7 +1203,6 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code boolean} values of the property.
-         * @throws IllegalArgumentException if values exceed maximum repeated property length.
          */
         @NonNull
         public BuilderType setPropertyBoolean(@NonNull String name, @NonNull boolean... values) {
@@ -1223,7 +1219,6 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code long} values of the property.
-         * @throws IllegalArgumentException if values exceed maximum repeated property length.
          */
         @NonNull
         public BuilderType setPropertyLong(@NonNull String name, @NonNull long... values) {
@@ -1240,7 +1235,6 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code double} values of the property.
-         * @throws IllegalArgumentException if values exceed maximum repeated property length.
          */
         @NonNull
         public BuilderType setPropertyDouble(@NonNull String name, @NonNull double... values) {
@@ -1257,8 +1251,8 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@code byte[]} of the property.
-         * @throws IllegalArgumentException if no values are provided, if provided values exceed
-         *     maximum repeated property length, or if a passed in {@code byte[]} is {@code null}.
+         * @throws IllegalArgumentException if no values are provided, or if a passed in {@code
+         *     byte[]} is {@code null}.
          */
         @NonNull
         public BuilderType setPropertyBytes(@NonNull String name, @NonNull byte[]... values) {
@@ -1276,8 +1270,7 @@ public class GenericDocument {
          * @param name the name associated with the {@code values}. Must match the name for this
          *     property as given in {@link AppSearchSchema.PropertyConfig#getName}.
          * @param values the {@link GenericDocument} values of the property.
-         * @throws IllegalArgumentException if no values are provided, if provided values exceed if
-         *     provided values exceed maximum repeated property length, or if a passed in {@link
+         * @throws IllegalArgumentException if no values are provided, or if a passed in {@link
          *     GenericDocument} is {@code null}.
          */
         @NonNull
@@ -1308,7 +1301,6 @@ public class GenericDocument {
 
         private void putInPropertyBundle(@NonNull String name, @NonNull String[] values)
                 throws IllegalArgumentException {
-            validateRepeatedPropertyLength(name, values.length);
             for (int i = 0; i < values.length; i++) {
                 if (values[i] == null) {
                     throw new IllegalArgumentException("The String at " + i + " is null.");
@@ -1327,17 +1319,14 @@ public class GenericDocument {
         }
 
         private void putInPropertyBundle(@NonNull String name, @NonNull boolean[] values) {
-            validateRepeatedPropertyLength(name, values.length);
             mProperties.putBooleanArray(name, values);
         }
 
         private void putInPropertyBundle(@NonNull String name, @NonNull double[] values) {
-            validateRepeatedPropertyLength(name, values.length);
             mProperties.putDoubleArray(name, values);
         }
 
         private void putInPropertyBundle(@NonNull String name, @NonNull long[] values) {
-            validateRepeatedPropertyLength(name, values.length);
             mProperties.putLongArray(name, values);
         }
 
@@ -1348,7 +1337,6 @@ public class GenericDocument {
          * into ArrayList<Bundle>, and each elements will contain a one dimension byte[].
          */
         private void putInPropertyBundle(@NonNull String name, @NonNull byte[][] values) {
-            validateRepeatedPropertyLength(name, values.length);
             ArrayList<Bundle> bundles = new ArrayList<>(values.length);
             for (int i = 0; i < values.length; i++) {
                 if (values[i] == null) {
@@ -1362,7 +1350,6 @@ public class GenericDocument {
         }
 
         private void putInPropertyBundle(@NonNull String name, @NonNull GenericDocument[] values) {
-            validateRepeatedPropertyLength(name, values.length);
             Parcelable[] documentBundles = new Parcelable[values.length];
             for (int i = 0; i < values.length; i++) {
                 if (values[i] == null) {
@@ -1371,18 +1358,6 @@ public class GenericDocument {
                 documentBundles[i] = values[i].mBundle;
             }
             mProperties.putParcelableArray(name, documentBundles);
-        }
-
-        private static void validateRepeatedPropertyLength(@NonNull String name, int length) {
-            if (length > MAX_REPEATED_PROPERTY_LENGTH) {
-                throw new IllegalArgumentException(
-                        "Repeated property \""
-                                + name
-                                + "\" has length "
-                                + length
-                                + ", which exceeds the limit of "
-                                + MAX_REPEATED_PROPERTY_LENGTH);
-            }
         }
 
         /** Builds the {@link GenericDocument} object. */

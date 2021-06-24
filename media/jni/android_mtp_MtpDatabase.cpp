@@ -1131,6 +1131,7 @@ static const PropertyTableEntry   kDevicePropertyTable[] = {
     {   MTP_DEVICE_PROPERTY_IMAGE_SIZE,                 MTP_TYPE_STR },
     {   MTP_DEVICE_PROPERTY_BATTERY_LEVEL,              MTP_TYPE_UINT8 },
     {   MTP_DEVICE_PROPERTY_PERCEIVED_DEVICE_TYPE,      MTP_TYPE_UINT32 },
+    {   MTP_DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO,     MTP_TYPE_STR },
 };
 
 bool MtpDatabase::getObjectPropertyInfo(MtpObjectProperty property, int& type) {
@@ -1289,6 +1290,7 @@ MtpProperty* MtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
         switch (property) {
             case MTP_DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
             case MTP_DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
+            case MTP_DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO:
                 writable = true;
                 // fall through
                 FALLTHROUGH_INTENDED;

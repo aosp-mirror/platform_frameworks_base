@@ -47,6 +47,7 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.doThrow
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
@@ -90,7 +91,8 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         `when`(blurUtils.blurRadiusOfRatio(anyFloat())).then { answer ->
             (answer.arguments[0] as Float * maxBlur).toInt()
         }
-        `when`(blurUtils.minBlurRadius).thenReturn(0)
+        `when`(blurUtils.supportsBlursOnWindows()).thenReturn(true)
+        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
         `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
 
         notificationShadeDepthController = NotificationShadeDepthController(
@@ -188,6 +190,14 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.transitionToFullShadeProgress = 1f
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
+    }
+
+    @Test
+    fun setFullShadeTransition_appliesBlur_onlyIfSupported() {
+        reset(blurUtils)
+        notificationShadeDepthController.transitionToFullShadeProgress = 1f
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(blurUtils).applyBlur(any(), eq(0), eq(false))
     }
 
     @Test

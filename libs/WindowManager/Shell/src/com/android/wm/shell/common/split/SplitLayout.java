@@ -311,9 +311,8 @@ public final class SplitLayout {
         return context.getSystemService(WindowManager.class)
                 .getMaximumWindowMetrics()
                 .getWindowInsets()
-                .getInsets(WindowInsets.Type.navigationBars()
-                        | WindowInsets.Type.statusBars()
-                        | WindowInsets.Type.displayCutout()).toRect();
+                .getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout())
+                .toRect();
     }
 
     private static boolean isLandscape(Rect bounds) {

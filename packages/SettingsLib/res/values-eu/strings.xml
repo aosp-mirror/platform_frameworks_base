@@ -528,7 +528,7 @@
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio-gailu kableduna"</string>
     <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritziak"</string>
     <string name="storage_category" msgid="2287342585424631813">"Biltegiratzea"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"Partekatutako datuak"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Datu partekatuak"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Ikusi eta aldatu partekatutako datuak"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Ez dago erabiltzaile honen datu partekaturik."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Errore bat gertatu da datu partekatuak eskuratzean. Saiatu berriro."</string>
@@ -566,6 +566,7 @@
     <string name="user_nickname" msgid="262624187455825083">"Goitizena"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Gehitu gonbidatua"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Kendu gonbidatua"</string>
+    <string name="guest_reset_guest" msgid="6110013010356013758">"Berrezarri gonbidatuentzako saioa"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gonbidatua"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Atera argazki bat"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Aukeratu irudi bat"</string>

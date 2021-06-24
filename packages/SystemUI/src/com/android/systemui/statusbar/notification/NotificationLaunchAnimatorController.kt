@@ -40,6 +40,11 @@ class NotificationLaunchAnimatorController(
     private val headsUpManager: HeadsUpManagerPhone,
     private val notification: ExpandableNotificationRow
 ) : ActivityLaunchAnimator.Controller {
+
+    companion object {
+        const val ANIMATION_DURATION_TOP_ROUNDING = 100L
+    }
+
     private val notificationEntry = notification.entry
     private val notificationKey = notificationEntry.sbn.key
 
@@ -54,18 +59,37 @@ class NotificationLaunchAnimatorController(
         val height = max(0, notification.actualHeight - notification.clipBottomAmount)
         val location = notification.locationOnScreen
 
+        val clipStartLocation = notificationListContainer.getTopClippingStartLocation()
+        val roundedTopClipping = Math.max(clipStartLocation - location[1], 0)
+        val windowTop = location[1] + roundedTopClipping
+        val topCornerRadius = if (roundedTopClipping > 0) {
+            // Because the rounded Rect clipping is complex, we start the top rounding at
+            // 0, which is pretty close to matching the real clipping.
+            // We'd have to clipOut the overlaid drawable too with the outer rounded rect in case
+            // if we'd like to have this perfect, but this is close enough.
+            0f
+        } else {
+            notification.currentBackgroundRadiusTop
+        }
         val params = ExpandAnimationParameters(
-                top = location[1],
+                top = windowTop,
                 bottom = location[1] + height,
                 left = location[0],
                 right = location[0] + notification.width,
-                topCornerRadius = notification.currentBackgroundRadiusTop,
+                topCornerRadius = topCornerRadius,
                 bottomCornerRadius = notification.currentBackgroundRadiusBottom
         )
 
         params.startTranslationZ = notification.translationZ
+        params.startNotificationTop = notification.translationY
+        params.startRoundedTopClipping = roundedTopClipping
         params.startClipTopAmount = notification.clipTopAmount
         if (notification.isChildInGroup) {
+            params.startNotificationTop += notification.notificationParent.translationY
+            val parentRoundedClip = Math.max(clipStartLocation
+                - notification.notificationParent.locationOnScreen[1], 0)
+            params.parentStartRoundedTopClipping = parentRoundedClip
+
             val parentClip = notification.notificationParent.clipTopAmount
             params.parentStartClipTopAmount = parentClip
 

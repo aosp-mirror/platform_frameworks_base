@@ -18,7 +18,7 @@ package android.app.appsearch;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.testng.Assert.expectThrows;
+import static org.junit.Assert.assertThrows;
 
 import org.junit.Test;
 
@@ -26,7 +26,7 @@ public class AppSearchResultTest {
     @Test
     public void testMapNullPointerException() {
         NullPointerException e =
-                expectThrows(
+                assertThrows(
                         NullPointerException.class,
                         () -> {
                             Object o = null;

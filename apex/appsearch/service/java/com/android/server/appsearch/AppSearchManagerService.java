@@ -60,8 +60,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
+import com.android.server.appsearch.external.localstorage.visibilitystore.VisibilityStore;
 import com.android.server.appsearch.util.PackageUtil;
-import com.android.server.appsearch.visibilitystore.VisibilityStore;
 import com.android.server.usage.StorageStatsManagerLocal;
 import com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter;
 
@@ -333,7 +333,7 @@ public class AppSearchManagerService extends SystemService {
                     for (int i = 0; i < schemaBundles.size(); i++) {
                         schemas.add(new AppSearchSchema(schemaBundles.get(i)));
                     }
-                    Map<String, List<PackageIdentifier>> schemasPackageAccessible =
+                    Map<String, List<PackageIdentifier>> schemasVisibleToPackages =
                             new ArrayMap<>(schemasVisibleToPackagesBundles.size());
                     for (Map.Entry<String, List<Bundle>> entry :
                             schemasVisibleToPackagesBundles.entrySet()) {
@@ -343,7 +343,7 @@ public class AppSearchManagerService extends SystemService {
                             packageIdentifiers.add(
                                     new PackageIdentifier(entry.getValue().get(i)));
                         }
-                        schemasPackageAccessible.put(entry.getKey(), packageIdentifiers);
+                        schemasVisibleToPackages.put(entry.getKey(), packageIdentifiers);
                     }
                     instance = mAppSearchUserInstanceManager.getUserInstance(callingUser);
                     SetSchemaResponse setSchemaResponse = instance.getAppSearchImpl().setSchema(
@@ -352,7 +352,7 @@ public class AppSearchManagerService extends SystemService {
                             schemas,
                             instance.getVisibilityStore(),
                             schemasNotDisplayedBySystem,
-                            schemasPackageAccessible,
+                            schemasVisibleToPackages,
                             forceOverride,
                             schemaVersion);
                     ++operationSuccessCount;

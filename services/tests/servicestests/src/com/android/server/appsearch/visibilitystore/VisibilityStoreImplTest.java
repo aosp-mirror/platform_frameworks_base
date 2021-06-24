@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-// TODO(b/169883602): This is purposely a different package from the path so that it can access
-// AppSearchImpl methods without having to make methods public. This should be moved into a proper
-// package once AppSearchImpl-VisibilityStore's dependencies are refactored.
-package com.android.server.appsearch.external.localstorage;
+package com.android.server.appsearch.visibilitystore;
 
 import static android.Manifest.permission.READ_GLOBAL_APP_SEARCH_DATA;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
@@ -39,8 +36,10 @@ import android.util.ArrayMap;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.server.appsearch.external.localstorage.AppSearchImpl;
+import com.android.server.appsearch.external.localstorage.OptimizeStrategy;
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
-import com.android.server.appsearch.visibilitystore.VisibilityStore;
+import com.android.server.appsearch.external.localstorage.visibilitystore.VisibilityStore;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -55,7 +54,7 @@ import org.mockito.Mockito;
 import java.util.Collections;
 import java.util.Map;
 
-public class VisibilityStoreTest {
+public class VisibilityStoreImplTest {
     /**
      * Always trigger optimize in this class. OptimizeStrategy will be tested in its own test class.
      */
@@ -64,7 +63,7 @@ public class VisibilityStoreTest {
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
     private final Map<UserHandle, PackageManager> mMockPackageManagers = new ArrayMap<>();
     private Context mContext;
-    private VisibilityStore mVisibilityStore;
+    private VisibilityStoreImpl mVisibilityStore;
     private int mUid;
 
     @Before
@@ -90,7 +89,7 @@ public class VisibilityStoreTest {
         // Give ourselves global query permissions
         AppSearchImpl appSearchImpl = AppSearchImpl.create(
                 mTemporaryFolder.newFolder(), /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE);
-        mVisibilityStore = VisibilityStore.create(appSearchImpl, mContext);
+        mVisibilityStore = VisibilityStoreImpl.create(appSearchImpl, mContext);
         mUid = mContext.getPackageManager().getPackageUid(mContext.getPackageName(), /*flags=*/ 0);
     }
 
@@ -132,7 +131,7 @@ public class VisibilityStoreTest {
     }
 
     @Test
-    public void testSetVisibility_platformSurfaceable() throws Exception {
+    public void testSetVisibility_displayedBySystem() throws Exception {
         // Make sure we have global query privileges
         PackageManager mockPackageManager = getMockPackageManager(mContext.getUser());
         when(mockPackageManager
@@ -143,9 +142,9 @@ public class VisibilityStoreTest {
         mVisibilityStore.setVisibility(
                 "package",
                 "database",
-                /*schemasNotPlatformSurfaceable=*/ ImmutableSet.of(
+                /*schemasNotDisplayedBySystem=*/ ImmutableSet.of(
                         "prefix/schema1", "prefix/schema2"),
-                /*schemasPackageAccessible=*/ Collections.emptyMap());
+                /*schemasVisibleToPackages=*/ Collections.emptyMap());
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package",
@@ -168,9 +167,9 @@ public class VisibilityStoreTest {
         mVisibilityStore.setVisibility(
                 "package",
                 "database",
-                /*schemasNotPlatformSurfaceable=*/ ImmutableSet.of(
+                /*schemasNotDisplayedBySystem=*/ ImmutableSet.of(
                         "prefix/schema1", "prefix/schema3"),
-                /*schemasPackageAccessible=*/ Collections.emptyMap());
+                /*schemasVisibleToPackages=*/ Collections.emptyMap());
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package",
@@ -200,8 +199,8 @@ public class VisibilityStoreTest {
         mVisibilityStore.setVisibility(
                 "package",
                 "database",
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptySet(),
-                /*schemasPackageAccessible=*/ Collections.emptyMap());
+                /*schemasNotDisplayedBySystem=*/ Collections.emptySet(),
+                /*schemasVisibleToPackages=*/ Collections.emptyMap());
         assertThat(
                         mVisibilityStore.isSchemaSearchableByCaller(
                                 "package",
@@ -229,7 +228,7 @@ public class VisibilityStoreTest {
     }
 
     @Test
-    public void testSetVisibility_packageAccessible() throws Exception {
+    public void testSetVisibility_visibleToPackages() throws Exception {
         // Values for a "foo" client
         String packageNameFoo = "packageFoo";
         byte[] sha256CertFoo = new byte[] {10};
@@ -272,8 +271,8 @@ public class VisibilityStoreTest {
         mVisibilityStore.setVisibility(
                 "package",
                 "database",
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptySet(),
-                /*schemasPackageAccessible=*/ ImmutableMap.of(
+                /*schemasNotDisplayedBySystem=*/ Collections.emptySet(),
+                /*schemasVisibleToPackages=*/ ImmutableMap.of(
                         "prefix/schemaFoo",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo)),
                         "prefix/schemaBar",
@@ -339,8 +338,8 @@ public class VisibilityStoreTest {
         mVisibilityStore.setVisibility(
                 "package",
                 "database",
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptySet(),
-                /*schemasPackageAccessible=*/ ImmutableMap.of(
+                /*schemasNotDisplayedBySystem=*/ Collections.emptySet(),
+                /*schemasVisibleToPackages=*/ ImmutableMap.of(
                         "prefix/schemaFoo",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))));
 
@@ -392,8 +391,8 @@ public class VisibilityStoreTest {
         mVisibilityStore.setVisibility(
                 "package",
                 "database",
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptySet(),
-                /*schemasPackageAccessible=*/ ImmutableMap.of(
+                /*schemasNotDisplayedBySystem=*/ Collections.emptySet(),
+                /*schemasVisibleToPackages=*/ ImmutableMap.of(
                         "prefix/schemaFoo",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))));
 
@@ -425,8 +424,8 @@ public class VisibilityStoreTest {
         mVisibilityStore.setVisibility(
                 /*packageName=*/ "",
                 /*databaseName=*/ "",
-                /*schemasNotPlatformSurfaceable=*/ Collections.emptySet(),
-                /*schemasPackageAccessible=*/ ImmutableMap.of(
+                /*schemasNotDisplayedBySystem=*/ Collections.emptySet(),
+                /*schemasVisibleToPackages=*/ ImmutableMap.of(
                         "schema",
                         ImmutableList.of(new PackageIdentifier(packageNameFoo, sha256CertFoo))));
 

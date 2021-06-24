@@ -597,6 +597,14 @@ public final class DeviceConfig {
     @TestApi
     public static final String NAMESPACE_CONSTRAIN_DISPLAY_APIS = "constrain_display_apis";
 
+    /**
+     * Namespace for App Compat Overrides related features.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String NAMESPACE_APP_COMPAT_OVERRIDES = "app_compat_overrides";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =
