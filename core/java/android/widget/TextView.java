@@ -13931,8 +13931,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     Log.w(LOG_TAG, "Cannot create translation request. editable = "
                             + isTextEditable() + ", isPassword = " + isPassword + ", selectable = "
                             + isTextSelectable());
-                    return;
                 }
+                return;
             }
             // TODO(b/176488462): apply the view's important for translation
             requestBuilder.setValue(ViewTranslationRequest.ID_TEXT,
