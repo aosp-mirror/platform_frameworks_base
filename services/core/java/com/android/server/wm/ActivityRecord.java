@@ -38,6 +38,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -1887,17 +1888,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /**
      * Evaluate the theme for a starting window.
+     * @param prev Previous activity which may have a starting window.
      * @param originalTheme The original theme which read from activity or application.
      * @param replaceTheme The replace theme which requested from starter.
      * @return Resolved theme.
      */
-    private int evaluateStartingWindowTheme(String pkg, int originalTheme, int replaceTheme) {
+    private int evaluateStartingWindowTheme(ActivityRecord prev, String pkg, int originalTheme,
+            int replaceTheme) {
         // Skip if the package doesn't want a starting window.
-        if (!validateStartingWindowTheme(pkg, originalTheme)) {
+        if (!validateStartingWindowTheme(prev, pkg, originalTheme)) {
             return 0;
         }
         int selectedTheme = originalTheme;
-        if (replaceTheme != 0 && validateStartingWindowTheme(pkg, replaceTheme)) {
+        if (replaceTheme != 0 && validateStartingWindowTheme(prev, pkg, replaceTheme)) {
             // allow to replace theme
             selectedTheme = replaceTheme;
         }
@@ -1934,7 +1937,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return LAUNCH_SOURCE_TYPE_APPLICATION;
     }
 
-    private boolean validateStartingWindowTheme(String pkg, int theme) {
+    private boolean validateStartingWindowTheme(ActivityRecord prev, String pkg, int theme) {
         // If this is a translucent window, then don't show a starting window -- the current
         // effect (a full-screen opaque starting window that fades away to the real contents
         // when it is ready) does not work for this.
@@ -1971,7 +1974,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         if (windowDisableStarting && !launchedFromSystemSurface()) {
-            return false;
+            // Check if previous activity can transfer the starting window to this activity.
+            return prev != null && prev.getActivityType() == ACTIVITY_TYPE_STANDARD
+                    && prev.mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_IDLE
+                    && (prev.mStartingData != null
+                    || (prev.mStartingWindow != null && prev.mStartingSurface != null));
         }
         return true;
     }
@@ -6393,7 +6400,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mSplashScreenStyleEmpty = shouldUseEmptySplashScreen(sourceRecord);
 
-        final int resolvedTheme = evaluateStartingWindowTheme(packageName, theme,
+        final int resolvedTheme = evaluateStartingWindowTheme(prev, packageName, theme,
                 splashScreenTheme);
 
         final boolean shown = addStartingWindow(packageName, resolvedTheme,
