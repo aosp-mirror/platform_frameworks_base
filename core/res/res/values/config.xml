@@ -4635,6 +4635,15 @@
     <!-- The package name for the default bug report handler app from power menu short press. This app must be allowlisted. -->
     <string name="config_defaultBugReportHandlerApp" translatable="false"></string>
 
+    <!-- When true, enables the allowlisted app to upload profcollect reports. -->
+    <bool name="config_profcollectReportUploaderEnabled">false</bool>
+
+    <!-- The package name for the default profcollect report uploader app. This app must be allowlisted. -->
+    <string name="config_defaultProfcollectReportUploaderApp" translatable="false"></string>
+
+    <!-- The action name for the default profcollect report uploader app. -->
+    <string name="config_defaultProfcollectReportUploaderAction" translatable="false"></string>
+
     <!-- The default value used for RawContacts.ACCOUNT_NAME when contacts are inserted without this
          column set. These contacts are stored locally on the device and will not be removed even
          if no android.account.Account with this name exists. A null string will be used if the
