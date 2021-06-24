@@ -999,8 +999,8 @@
     <string name="last_month" msgid="1528906781083518683">"Azken hilabetea"</string>
     <string name="older" msgid="1645159827884647400">"Zaharragoa"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="preposition_for_time" msgid="4336835286453822053">"ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="preposition_for_year" msgid="3149809685340130039">"urtea: <xliff:g id="YEAR">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="4336835286453822053">"<xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_year" msgid="3149809685340130039">"<xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8394717255950176156">"egun"</string>
     <string name="days" msgid="4570879797423034973">"egun"</string>
     <string name="hour" msgid="7796325297097314653">"ordu"</string>
