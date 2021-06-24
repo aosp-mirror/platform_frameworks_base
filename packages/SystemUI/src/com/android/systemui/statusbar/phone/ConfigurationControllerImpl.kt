@@ -27,6 +27,7 @@ class ConfigurationControllerImpl(context: Context) : ConfigurationController {
     private val listeners: MutableList<ConfigurationController.ConfigurationListener> = ArrayList()
     private val lastConfig = Configuration()
     private var density: Int = 0
+    private var smallestScreenWidth: Int = 0
     private var fontScale: Float = 0.toFloat()
     private val inCarMode: Boolean
     private var uiMode: Int = 0
@@ -38,6 +39,7 @@ class ConfigurationControllerImpl(context: Context) : ConfigurationController {
         this.context = context
         fontScale = currentConfig.fontScale
         density = currentConfig.densityDpi
+        smallestScreenWidth = currentConfig.smallestScreenWidthDp
         inCarMode = currentConfig.uiMode and Configuration.UI_MODE_TYPE_MASK ==
                 Configuration.UI_MODE_TYPE_CAR
         uiMode = currentConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK
@@ -70,6 +72,14 @@ class ConfigurationControllerImpl(context: Context) : ConfigurationController {
             }
             this.density = density
             this.fontScale = fontScale
+        }
+
+        val smallestScreenWidth = newConfig.smallestScreenWidthDp
+        if (smallestScreenWidth != this.smallestScreenWidth) {
+            this.smallestScreenWidth = smallestScreenWidth
+            listeners.filterForEach({ this.listeners.contains(it) }) {
+                it.onSmallestScreenWidthChanged()
+            }
         }
 
         val localeList = newConfig.locales

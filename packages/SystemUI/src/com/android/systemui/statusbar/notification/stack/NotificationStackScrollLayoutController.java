@@ -1533,6 +1533,11 @@ public class NotificationStackScrollLayoutController {
         }
 
         @Override
+        public int getTopClippingStartLocation() {
+            return mView.getTopClippingStartLocation();
+        }
+
+        @Override
         public View getContainerChildAt(int i) {
             return mView.getContainerChildAt(i);
         }

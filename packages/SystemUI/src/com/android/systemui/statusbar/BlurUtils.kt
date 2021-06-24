@@ -22,6 +22,7 @@ import android.app.ActivityManager
 import android.content.res.Resources
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
+import android.view.CrossWindowBlurListeners
 import android.view.SurfaceControl
 import android.view.ViewRootImpl
 import androidx.annotation.VisibleForTesting
@@ -37,6 +38,7 @@ import javax.inject.Inject
 @SysUISingleton
 open class BlurUtils @Inject constructor(
     @Main private val resources: Resources,
+    private val crossWindowBlurListeners: CrossWindowBlurListeners,
     dumpManager: DumpManager
 ) : Dumpable {
     val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
@@ -97,7 +99,8 @@ open class BlurUtils @Inject constructor(
      * @return {@code true} when supported.
      */
     open fun supportsBlursOnWindows(): Boolean {
-        return CROSS_WINDOW_BLUR_SUPPORTED && ActivityManager.isHighEndGfx()
+        return CROSS_WINDOW_BLUR_SUPPORTED && ActivityManager.isHighEndGfx() &&
+                crossWindowBlurListeners.isCrossWindowBlurEnabled()
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {

@@ -1706,6 +1706,10 @@
          config_enableFusedLocationOverlay is false. -->
     <string name="config_fusedLocationProviderPackageName" translatable="false">com.android.location.fused</string>
 
+    <!-- Default value for the ADAS GNSS Location Enabled setting if this setting has never been
+         set before. -->
+    <bool name="config_defaultAdasGnssLocationEnabled" translatable="false">false</bool>
+
     <string-array name="config_locationExtraPackageNames" translatable="false"></string-array>
 
     <!-- The package name of the default network recommendation app.
@@ -5006,6 +5010,10 @@
     <bool name="config_assistLongPressHomeEnabledDefault">true</bool>
     <!-- Default value for Settings.ASSIST_TOUCH_GESTURE_ENABLED -->
     <bool name="config_assistTouchGestureEnabledDefault">true</bool>
+
+    <!-- The maximum byte size of the information contained in the bundle of
+    HotwordDetectedResult. -->
+    <integer translatable="false" name="config_hotwordDetectedResultMaxBundleSize">0</integer>
 
     <!-- The amount of dimming to apply to wallpapers with mid range luminance. 0 displays
          the wallpaper at full brightness. 1 displays the wallpaper as fully black. -->
