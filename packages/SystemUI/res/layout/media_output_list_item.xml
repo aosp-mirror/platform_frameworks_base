@@ -81,6 +81,7 @@
                 android:visibility="gone"/>
             <SeekBar
                 android:id="@+id/volume_seekbar"
+                style="@*android:style/Widget.DeviceDefault.SeekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"/>
