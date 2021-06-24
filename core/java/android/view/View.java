@@ -21190,19 +21190,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mRoundScrollbarRenderer == null) {
             getStraightVerticalScrollBarBounds(bounds, touchBounds);
         } else {
-            getRoundVerticalScrollBarBounds(bounds != null ? bounds : touchBounds);
+            mRoundScrollbarRenderer.getRoundVerticalScrollBarBounds(
+                    bounds != null ? bounds : touchBounds);
         }
-    }
-
-    private void getRoundVerticalScrollBarBounds(Rect bounds) {
-        final int width = mRight - mLeft;
-        final int height = mBottom - mTop;
-        // Do not take padding into account as we always want the scrollbars
-        // to hug the screen for round wearable devices.
-        bounds.left = mScrollX;
-        bounds.top = mScrollY;
-        bounds.right = bounds.left + width;
-        bounds.bottom = mScrollY + height;
     }
 
     private void getStraightVerticalScrollBarBounds(@Nullable Rect drawBounds,
@@ -21314,8 +21304,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (drawVerticalScrollBar) {
                     final Rect bounds = cache.mScrollBarBounds;
                     getVerticalScrollBarBounds(bounds, null);
+                    boolean shouldDrawScrollbarAtLeft =
+                            (mVerticalScrollbarPosition == SCROLLBAR_POSITION_LEFT)
+                                    || (mVerticalScrollbarPosition == SCROLLBAR_POSITION_DEFAULT
+                                    && isLayoutRtl());
+
                     mRoundScrollbarRenderer.drawRoundScrollbars(
-                            canvas, (float) cache.scrollBar.getAlpha() / 255f, bounds);
+                            canvas, (float) cache.scrollBar.getAlpha() / 255f, bounds,
+                            shouldDrawScrollbarAtLeft);
                     if (invalidate) {
                         invalidate();
                     }
