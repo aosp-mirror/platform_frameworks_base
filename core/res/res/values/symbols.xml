@@ -2526,6 +2526,7 @@
   <java-symbol type="string" name="fingerprint_acquired_imager_dirty" />
   <java-symbol type="string" name="fingerprint_acquired_too_slow" />
   <java-symbol type="string" name="fingerprint_acquired_too_fast" />
+  <java-symbol type="string" name="fingerprint_acquired_too_bright" />
   <java-symbol type="array" name="fingerprint_acquired_vendor" />
   <java-symbol type="string" name="fingerprint_error_canceled" />
   <java-symbol type="string" name="fingerprint_error_user_canceled" />
