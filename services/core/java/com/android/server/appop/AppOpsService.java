@@ -19,11 +19,13 @@ package com.android.server.appop;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
 import static android.app.AppOpsManager.CALL_BACK_ON_SWITCHED_OP;
 import static android.app.AppOpsManager.FILTER_BY_ATTRIBUTION_TAG;
 import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
 import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
 import static android.app.AppOpsManager.FILTER_BY_UID;
+import static android.app.AppOpsManager.HISTORY_FLAG_GET_ATTRIBUTION_CHAINS;
 import static android.app.AppOpsManager.HistoricalOpsRequestFilter;
 import static android.app.AppOpsManager.KEY_BG_STATE_SETTLE_TIME;
 import static android.app.AppOpsManager.KEY_FG_SERVICE_STATE_SETTLE_TIME;
@@ -130,6 +132,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManagerInternal;
+import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -200,8 +203,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class AppOpsService extends IAppOpsService.Stub {
@@ -2357,10 +2360,21 @@ public class AppOpsService extends IAppOpsService.Stub {
         final String[] opNamesArray = (opNames != null)
                 ? opNames.toArray(new String[opNames.size()]) : null;
 
+        Set<String> attributionChainExemptPackages = null;
+        if ((dataType & HISTORY_FLAG_GET_ATTRIBUTION_CHAINS) != 0) {
+            attributionChainExemptPackages =
+                    PermissionManager.getIndicatorExemptedPackages(mContext);
+        }
+
+        final String[] chainExemptPkgArray = attributionChainExemptPackages != null
+                ? attributionChainExemptPackages.toArray(
+                        new String[attributionChainExemptPackages.size()]) : null;
+
         // Must not hold the appops lock
         mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::getHistoricalOps,
                 mHistoricalRegistry, uid, packageName, attributionTag, opNamesArray, dataType,
-                filter, beginTimeMillis, endTimeMillis, flags, callback).recycleOnUse());
+                filter, beginTimeMillis, endTimeMillis, flags, chainExemptPkgArray,
+                callback).recycleOnUse());
     }
 
     @Override
@@ -2377,10 +2391,21 @@ public class AppOpsService extends IAppOpsService.Stub {
         final String[] opNamesArray = (opNames != null)
                 ? opNames.toArray(new String[opNames.size()]) : null;
 
+        Set<String> attributionChainExemptPackages = null;
+        if ((dataType & HISTORY_FLAG_GET_ATTRIBUTION_CHAINS) != 0) {
+            attributionChainExemptPackages =
+                    PermissionManager.getIndicatorExemptedPackages(mContext);
+        }
+
+        final String[] chainExemptPkgArray = attributionChainExemptPackages != null
+                ? attributionChainExemptPackages.toArray(
+                new String[attributionChainExemptPackages.size()]) : null;
+
         // Must not hold the appops lock
         mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::getHistoricalOpsFromDiskRaw,
                 mHistoricalRegistry, uid, packageName, attributionTag, opNamesArray, dataType,
-                filter, beginTimeMillis, endTimeMillis, flags, callback).recycleOnUse());
+                filter, beginTimeMillis, endTimeMillis, flags, chainExemptPkgArray,
+                callback).recycleOnUse());
     }
 
     @Override
@@ -3838,7 +3863,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
         final boolean isProxyTrusted = mContext.checkPermission(
                 Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
-                == PackageManager.PERMISSION_GRANTED || isSelfBlame;
+                == PackageManager.PERMISSION_GRANTED || isSelfBlame
+                || attributionChainId != ATTRIBUTION_CHAIN_ID_NONE;
 
         String resolvedProxiedPackageName = AppOpsManager.resolvePackageName(proxiedUid,
                 proxiedPackageName);
@@ -5174,8 +5200,6 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     static class Shell extends ShellCommand {
-        static final AtomicInteger sAttributionChainIds = new AtomicInteger(0);
-
         final IAppOpsService mInterface;
         final AppOpsService mInternal;
 
@@ -5645,8 +5669,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         shell.mInterface.startOperation(shell.mToken, shell.op, shell.packageUid,
                                 shell.packageName, shell.attributionTag, true, true,
                                 "appops start shell command", true,
-                                AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR,
-                                shell.sAttributionChainIds.incrementAndGet());
+                                AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR, ATTRIBUTION_CHAIN_ID_NONE);
                     } else {
                         return -1;
                     }

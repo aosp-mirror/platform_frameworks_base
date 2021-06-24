@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.WindowConfiguration;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -325,7 +326,8 @@ public final class WindowContainerTransaction implements Parcelable {
 
     /**
      * Sets to containers adjacent to each other. Containers below two visible adjacent roots will
-     * be made invisible. This currently only applies to Task containers created by organizer.
+     * be made invisible. This currently only applies to TaskFragment containers created by
+     * organizer.
      * @param root1 the first root.
      * @param root2 the second root.
      */
@@ -374,6 +376,102 @@ public final class WindowContainerTransaction implements Parcelable {
     @NonNull
     public WindowContainerTransaction startTask(int taskId, @Nullable Bundle options) {
         mHierarchyOps.add(HierarchyOp.createForTaskLaunch(taskId, options));
+        return this;
+    }
+
+    /**
+     * Creates a new TaskFragment with the given options.
+     * @param taskFragmentOptions the options used to create the TaskFragment.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction createTaskFragment(
+            @NonNull TaskFragmentCreationParams taskFragmentOptions) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT)
+                        .setTaskFragmentCreationOptions(taskFragmentOptions)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
+     * Deletes an existing TaskFragment. Any remaining activities below it will be destroyed.
+     * @param taskFragment  the TaskFragment to be removed.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction deleteTaskFragment(
+            @NonNull WindowContainerToken taskFragment) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT)
+                        .setContainer(taskFragment.asBinder())
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
+     * Starts an activity in the TaskFragment.
+     * @param fragmentToken client assigned unique token to create TaskFragment with specified in
+     *                      {@link TaskFragmentCreationParams#fragmentToken}.
+     * @param activityIntent    intent to start the activity.
+     * @param activityOptions    ActivityOptions to start the activity with.
+     * @see android.content.Context#startActivity(Intent, Bundle).
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction startActivityInTaskFragment(
+            @NonNull IBinder fragmentToken, @NonNull Intent activityIntent,
+            @Nullable Bundle activityOptions) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(
+                        HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT)
+                        .setContainer(fragmentToken)
+                        .setActivityIntent(activityIntent)
+                        .setLaunchOptions(activityOptions)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
+     * Moves an activity into the TaskFragment.
+     * @param fragmentToken client assigned unique token to create TaskFragment with specified in
+     *                      {@link TaskFragmentCreationParams#fragmentToken}.
+     * @param activityToken activity to be reparented.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction reparentActivityToTaskFragment(
+            @NonNull IBinder fragmentToken, @NonNull IBinder activityToken) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(
+                        HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT)
+                        .setReparentContainer(fragmentToken)
+                        .setContainer(activityToken)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
+     * Reparents all children of one TaskFragment to another.
+     * @param oldParent children of this TaskFragment will be reparented.
+     * @param newParent the new parent TaskFragment to move the children to. If {@code null}, the
+     *                  children will be moved to the leaf Task.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction reparentChildren(
+            @NonNull WindowContainerToken oldParent,
+            @Nullable WindowContainerToken newParent) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_CHILDREN)
+                        .setContainer(oldParent.asBinder())
+                        .setReparentContainer(newParent.asBinder())
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
         return this;
     }
 
@@ -705,6 +803,11 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS = 4;
         public static final int HIERARCHY_OP_TYPE_LAUNCH_TASK = 5;
         public static final int HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT = 6;
+        public static final int HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT = 7;
+        public static final int HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT = 8;
+        public static final int HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT = 9;
+        public static final int HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT = 10;
+        public static final int HIERARCHY_OP_TYPE_REPARENT_CHILDREN = 11;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -731,6 +834,13 @@ public final class WindowContainerTransaction implements Parcelable {
 
         @Nullable
         private Bundle mLaunchOptions;
+
+        @Nullable
+        private Intent mActivityIntent;
+
+        // Used as options for WindowContainerTransaction#createTaskFragment().
+        @Nullable
+        private TaskFragmentCreationParams mTaskFragmentCreationOptions;
 
         public static HierarchyOp createForReparent(
                 @NonNull IBinder container, @Nullable IBinder reparent, boolean toTop) {
@@ -808,6 +918,8 @@ public final class WindowContainerTransaction implements Parcelable {
             mWindowingModes = copy.mWindowingModes;
             mActivityTypes = copy.mActivityTypes;
             mLaunchOptions = copy.mLaunchOptions;
+            mActivityIntent = copy.mActivityIntent;
+            mTaskFragmentCreationOptions = copy.mTaskFragmentCreationOptions;
         }
 
         protected HierarchyOp(Parcel in) {
@@ -818,6 +930,8 @@ public final class WindowContainerTransaction implements Parcelable {
             mWindowingModes = in.createIntArray();
             mActivityTypes = in.createIntArray();
             mLaunchOptions = in.readBundle();
+            mActivityIntent = in.readTypedObject(Intent.CREATOR);
+            mTaskFragmentCreationOptions = in.readTypedObject(TaskFragmentCreationParams.CREATOR);
         }
 
         public int getType() {
@@ -860,6 +974,16 @@ public final class WindowContainerTransaction implements Parcelable {
             return mLaunchOptions;
         }
 
+        @Nullable
+        public Intent getActivityIntent() {
+            return mActivityIntent;
+        }
+
+        @Nullable
+        public TaskFragmentCreationParams getTaskFragmentCreationOptions() {
+            return mTaskFragmentCreationOptions;
+        }
+
         @Override
         public String toString() {
             switch (mType) {
@@ -884,6 +1008,19 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT:
                     return "{SetAdjacentFlagRoot: container=" + mContainer + " clearRoot=" + mToTop
                             + "}";
+                case HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT:
+                    return "{CreateTaskFragment: options=" + mTaskFragmentCreationOptions + "}";
+                case HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT:
+                    return "{DeleteTaskFragment: taskFragment=" + mContainer + "}";
+                case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
+                    return "{StartActivityInTaskFragment: fragmentToken=" + mContainer + " intent="
+                            + mActivityIntent + " options=" + mLaunchOptions + "}";
+                case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
+                    return "{ReparentActivityToTaskFragment: fragmentToken=" + mReparent
+                            + " activity=" + mContainer + "}";
+                case HIERARCHY_OP_TYPE_REPARENT_CHILDREN:
+                    return "{ReparentChildren: oldParent=" + mContainer + " newParent=" + mReparent
+                            + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
                             + " mToTop=" + mToTop + " mWindowingMode=" + mWindowingModes
@@ -900,6 +1037,8 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeIntArray(mWindowingModes);
             dest.writeIntArray(mActivityTypes);
             dest.writeBundle(mLaunchOptions);
+            dest.writeTypedObject(mActivityIntent, flags);
+            dest.writeTypedObject(mTaskFragmentCreationOptions, flags);
         }
 
         @Override
@@ -940,6 +1079,12 @@ public final class WindowContainerTransaction implements Parcelable {
             @Nullable
             private Bundle mLaunchOptions;
 
+            @Nullable
+            private Intent mActivityIntent;
+
+            @Nullable
+            private TaskFragmentCreationParams mTaskFragmentCreationOptions;
+
             Builder(int type) {
                 mType = type;
             }
@@ -974,6 +1119,17 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setActivityIntent(@Nullable Intent activityIntent) {
+                mActivityIntent = activityIntent;
+                return this;
+            }
+
+            Builder setTaskFragmentCreationOptions(
+                    @Nullable TaskFragmentCreationParams taskFragmentCreationOptions) {
+                mTaskFragmentCreationOptions = taskFragmentCreationOptions;
+                return this;
+            }
+
             HierarchyOp build() {
                 final HierarchyOp hierarchyOp = new HierarchyOp(mType);
                 hierarchyOp.mContainer = mContainer;
@@ -986,6 +1142,8 @@ public final class WindowContainerTransaction implements Parcelable {
                         : null;
                 hierarchyOp.mToTop = mToTop;
                 hierarchyOp.mLaunchOptions = mLaunchOptions;
+                hierarchyOp.mActivityIntent = mActivityIntent;
+                hierarchyOp.mTaskFragmentCreationOptions = mTaskFragmentCreationOptions;
 
                 return hierarchyOp;
             }

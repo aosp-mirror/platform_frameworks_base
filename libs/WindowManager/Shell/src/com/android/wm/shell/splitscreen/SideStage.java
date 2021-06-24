@@ -16,8 +16,12 @@
 
 package com.android.wm.shell.splitscreen;
 
+import android.annotation.CallSuper;
 import android.app.ActivityManager;
+import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -28,15 +32,19 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 /**
  * Side stage for split-screen mode. Only tasks that are explicitly pinned to this stage show up
  * here. All other task are launch in the {@link MainStage}.
+ *
  * @see StageCoordinator
  */
 class SideStage extends StageTaskListener {
     private static final String TAG = SideStage.class.getSimpleName();
+    private final Context mContext;
+    private OutlineManager mOutlineManager;
 
-    SideStage(ShellTaskOrganizer taskOrganizer, int displayId,
+    SideStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
             SurfaceSession surfaceSession) {
         super(taskOrganizer, displayId, callbacks, syncQueue, surfaceSession);
+        mContext = context;
     }
 
     void addTask(ActivityManager.RunningTaskInfo task, Rect rootBounds,
@@ -68,5 +76,27 @@ class SideStage extends StageTaskListener {
         if (task == null) return false;
         wct.reparent(task.token, newParent, false /* onTop */);
         return true;
+    }
+
+    @Override
+    @CallSuper
+    public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
+        super.onTaskAppeared(taskInfo, leash);
+        if (mRootTaskInfo != null && mRootTaskInfo.taskId == taskInfo.taskId) {
+            mOutlineManager = new OutlineManager(mContext, mRootTaskInfo.configuration,
+                    () -> mRootLeash,
+                    Color.YELLOW);
+        }
+    }
+
+    @Override
+    @CallSuper
+    public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        super.onTaskInfoChanged(taskInfo);
+        if (mRootTaskInfo != null && mRootTaskInfo.taskId == taskInfo.taskId
+                && mRootTaskInfo.isRunning) {
+            mOutlineManager.updateOutlineBounds(
+                    mRootTaskInfo.configuration.windowConfiguration.getBounds());
+        }
     }
 }

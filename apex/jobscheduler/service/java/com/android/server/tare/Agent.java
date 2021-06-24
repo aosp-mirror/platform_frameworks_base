@@ -16,6 +16,9 @@
 
 package com.android.server.tare;
 
+import static android.text.format.DateUtils.HOUR_IN_MILLIS;
+import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+
 import static com.android.server.tare.EconomicPolicy.REGULATION_BASIC_INCOME;
 import static com.android.server.tare.EconomicPolicy.REGULATION_BIRTHRIGHT;
 import static com.android.server.tare.EconomicPolicy.TYPE_ACTION;
@@ -26,11 +29,17 @@ import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AlarmManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArrayMap;
 
@@ -39,6 +48,8 @@ import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.PriorityQueue;
 
 /**
  * Other half of the IRS. The agent handles the nitty gritty details, interacting directly with
@@ -50,8 +61,18 @@ class Agent {
     private static final boolean DEBUG = InternalResourceService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
+    /**
+     * The maximum amount of time we'll keep a transaction around for.
+     * For now, only keep transactions we actually have a use for. We can increase it if we want
+     * to use older transactions or provide older transactions to apps.
+     */
+    private static final long MAX_TRANSACTION_AGE_MS = 24 * HOUR_IN_MILLIS;
+
+    private static final String ALARM_TAG_LEDGER_CLEANUP = "*tare.ledger_cleanup*";
+
     private final Object mLock;
     private final CompleteEconomicPolicy mCompleteEconomicPolicy;
+    private final Handler mHandler;
     private final InternalResourceService mIrs;
 
     @GuardedBy("mLock")
@@ -60,11 +81,22 @@ class Agent {
     @GuardedBy("mLock")
     private long mCurrentNarcsInCirculation;
 
+    /**
+     * Listener to track and manage when we remove old transactions from ledgers.
+     */
+    @GuardedBy("mLock")
+    private final LedgerCleanupAlarmListener mLedgerCleanupAlarmListener =
+            new LedgerCleanupAlarmListener();
+
+    private static final int MSG_CLEAN_LEDGER = 1;
+    private static final int MSG_SET_ALARMS = 2;
+
     Agent(@NonNull InternalResourceService irs,
             @NonNull CompleteEconomicPolicy completeEconomicPolicy) {
         mLock = irs.getLock();
         mIrs = irs;
         mCompleteEconomicPolicy = completeEconomicPolicy;
+        mHandler = new AgentHandler(TareHandlerThread.get().getLooper());
     }
 
     @GuardedBy("mLock")
@@ -150,6 +182,13 @@ class Agent {
         }
         ledger.recordTransaction(transaction);
         mCurrentNarcsInCirculation += transaction.delta;
+        if (!mLedgerCleanupAlarmListener.hasAlarmScheduledLocked(userId, pkgName)) {
+            // The earliest transaction won't change until we clean up the ledger, so no point
+            // continuing to reschedule an existing cleanup.
+            final long cleanupAlarmElapsed = SystemClock.elapsedRealtime() + MAX_TRANSACTION_AGE_MS
+                    - (System.currentTimeMillis() - ledger.getEarliestTransaction().endTimeMs);
+            mLedgerCleanupAlarmListener.addAlarmLocked(userId, pkgName, cleanupAlarmElapsed);
+        }
         // TODO: save changes to disk in a background thread
         final long newBalance = ledger.getCurrentBalance();
         if (originalBalance <= 0 && newBalance > 0) {
@@ -237,6 +276,7 @@ class Agent {
     @GuardedBy("mLock")
     void onPackageRemovedLocked(final int userId, @NonNull final String pkgName) {
         reclaimAssetsLocked(userId, pkgName);
+        mLedgerCleanupAlarmListener.removeAlarmLocked(userId, pkgName);
     }
 
     /**
@@ -256,6 +296,7 @@ class Agent {
     @GuardedBy("mLock")
     void onUserRemovedLocked(final int userId, @NonNull final List<String> pkgNames) {
         reclaimAssetsLocked(userId, pkgNames);
+        mLedgerCleanupAlarmListener.removeAlarmsLocked(userId);
     }
 
     @GuardedBy("mLock")
@@ -265,9 +306,293 @@ class Agent {
         }
     }
 
+    /**
+     * An {@link AlarmManager.OnAlarmListener} that will queue up all pending alarms and only
+     * schedule one alarm for the earliest alarm.
+     */
+    private abstract class AlarmQueueListener implements AlarmManager.OnAlarmListener {
+        final class Package {
+            public final String packageName;
+            public final int userId;
+
+            Package(int userId, String packageName) {
+                this.userId = userId;
+                this.packageName = packageName;
+            }
+
+            @Override
+            public String toString() {
+                return "<" + userId + ">" + packageName;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == null) {
+                    return false;
+                }
+                if (this == obj) {
+                    return true;
+                }
+                if (obj instanceof Package) {
+                    Package other = (Package) obj;
+                    return userId == other.userId && Objects.equals(packageName, other.packageName);
+                } else {
+                    return false;
+                }
+            }
+
+            @Override
+            public int hashCode() {
+                return packageName.hashCode() + userId;
+            }
+        }
+
+        class AlarmQueue extends PriorityQueue<Pair<Package, Long>> {
+            AlarmQueue() {
+                super(1, (o1, o2) -> (int) (o1.second - o2.second));
+            }
+
+            boolean contains(@NonNull Package pkg) {
+                Pair[] alarms = toArray(new Pair[size()]);
+                for (int i = alarms.length - 1; i >= 0; --i) {
+                    if (pkg.equals(alarms[i].first)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            /**
+             * Remove any instances of the Package from the queue.
+             *
+             * @return true if an instance was removed, false otherwise.
+             */
+            boolean remove(@NonNull Package pkg) {
+                boolean removed = false;
+                Pair[] alarms = toArray(new Pair[size()]);
+                for (int i = alarms.length - 1; i >= 0; --i) {
+                    if (pkg.equals(alarms[i].first)) {
+                        remove(alarms[i]);
+                        removed = true;
+                    }
+                }
+                return removed;
+            }
+        }
+
+        @GuardedBy("mLock")
+        private final AlarmQueue mAlarmQueue = new AlarmQueue();
+        private final String mAlarmTag;
+        /** Whether to use an exact alarm or an inexact alarm. */
+        private final boolean mExactAlarm;
+        /** The minimum amount of time between check alarms. */
+        private final long mMinTimeBetweenAlarmsMs;
+        /** The next time the alarm is set to go off, in the elapsed realtime timebase. */
+        @GuardedBy("mLock")
+        private long mTriggerTimeElapsed = 0;
+
+        protected AlarmQueueListener(@NonNull String alarmTag, boolean exactAlarm,
+                long minTimeBetweenAlarmsMs) {
+            mAlarmTag = alarmTag;
+            mExactAlarm = exactAlarm;
+            mMinTimeBetweenAlarmsMs = minTimeBetweenAlarmsMs;
+        }
+
+        @GuardedBy("mLock")
+        boolean hasAlarmScheduledLocked(int userId, @NonNull String pkgName) {
+            final Package pkg = new Package(userId, pkgName);
+            return mAlarmQueue.contains(pkg);
+        }
+
+        @GuardedBy("mLock")
+        void addAlarmLocked(int userId, @NonNull String pkgName, long alarmTimeElapsed) {
+            final Package pkg = new Package(userId, pkgName);
+            mAlarmQueue.remove(pkg);
+            mAlarmQueue.offer(new Pair<>(pkg, alarmTimeElapsed));
+            setNextAlarmLocked();
+        }
+
+        @GuardedBy("mLock")
+        void removeAlarmLocked(@NonNull Package pkg) {
+            if (mAlarmQueue.remove(pkg)) {
+                setNextAlarmLocked();
+            }
+        }
+
+        @GuardedBy("mLock")
+        void removeAlarmLocked(int userId, @NonNull String packageName) {
+            removeAlarmLocked(new Package(userId, packageName));
+        }
+
+        @GuardedBy("mLock")
+        void removeAlarmsLocked(int userId) {
+            boolean removed = false;
+            Pair[] alarms = mAlarmQueue.toArray(new Pair[mAlarmQueue.size()]);
+            for (int i = alarms.length - 1; i >= 0; --i) {
+                final Package pkg = (Package) alarms[i].first;
+                if (userId == pkg.userId) {
+                    mAlarmQueue.remove(alarms[i]);
+                    removed = true;
+                }
+            }
+            if (removed) {
+                setNextAlarmLocked();
+            }
+        }
+
+        /** Sets an alarm with {@link AlarmManager} for the earliest alarm in the queue. */
+        @GuardedBy("mLock")
+        void setNextAlarmLocked() {
+            setNextAlarmLocked(SystemClock.elapsedRealtime());
+        }
+
+        /**
+         * Sets an alarm with {@link AlarmManager} for the earliest alarm in the queue, using
+         * {@code earliestTriggerElapsed} as a floor.
+         */
+        @GuardedBy("mLock")
+        private void setNextAlarmLocked(long earliestTriggerElapsed) {
+            if (mAlarmQueue.size() > 0) {
+                final Pair<Package, Long> alarm = mAlarmQueue.peek();
+                final long nextTriggerTimeElapsed = Math.max(earliestTriggerElapsed, alarm.second);
+                // Only schedule the alarm if one of the following is true:
+                // 1. There isn't one currently scheduled
+                // 2. The new alarm is significantly earlier than the previous alarm. If it's
+                // earlier but not significantly so, then we essentially delay the check for some
+                // apps by up to a minute.
+                // 3. The alarm is after the current alarm.
+                if (mTriggerTimeElapsed == 0
+                        || nextTriggerTimeElapsed < mTriggerTimeElapsed - MINUTE_IN_MILLIS
+                        || mTriggerTimeElapsed < nextTriggerTimeElapsed) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Scheduling start alarm at " + nextTriggerTimeElapsed
+                                + " for app " + alarm.first);
+                    }
+                    mHandler.post(() -> {
+                        // Never call out to AlarmManager with the lock held. This sits below AM.
+                        AlarmManager alarmManager =
+                                mIrs.getContext().getSystemService(AlarmManager.class);
+                        if (alarmManager != null) {
+                            if (mExactAlarm) {
+                                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
+                                        nextTriggerTimeElapsed, mAlarmTag, this, mHandler);
+                            } else {
+                                alarmManager.setWindow(AlarmManager.ELAPSED_REALTIME,
+                                        nextTriggerTimeElapsed, mMinTimeBetweenAlarmsMs / 2,
+                                        mAlarmTag, this, mHandler);
+                            }
+                        } else {
+                            mHandler.sendEmptyMessageDelayed(MSG_SET_ALARMS, 30_000);
+                        }
+                    });
+                    mTriggerTimeElapsed = nextTriggerTimeElapsed;
+                }
+            } else {
+                mHandler.post(() -> {
+                    // Never call out to AlarmManager with the lock held. This sits below AM.
+                    AlarmManager alarmManager =
+                            mIrs.getContext().getSystemService(AlarmManager.class);
+                    if (alarmManager != null) {
+                        // This should only be null at boot time. No concerns around not
+                        // cancelling if we get null here.
+                        alarmManager.cancel(this);
+                    }
+                });
+                mTriggerTimeElapsed = 0;
+            }
+        }
+
+        @GuardedBy("mLock")
+        protected abstract void processExpiredAlarmLocked(int userId, @NonNull String packageName);
+
+        @Override
+        public void onAlarm() {
+            synchronized (mLock) {
+                final long nowElapsed = SystemClock.elapsedRealtime();
+                while (mAlarmQueue.size() > 0) {
+                    final Pair<Package, Long> alarm = mAlarmQueue.peek();
+                    if (alarm.second <= nowElapsed) {
+                        processExpiredAlarmLocked(alarm.first.userId, alarm.first.packageName);
+                        mAlarmQueue.remove(alarm);
+                    } else {
+                        break;
+                    }
+                }
+                setNextAlarmLocked(nowElapsed + mMinTimeBetweenAlarmsMs);
+            }
+        }
+
+        @GuardedBy("mLock")
+        void dumpLocked(IndentingPrintWriter pw) {
+            pw.print(mAlarmTag);
+            pw.println(" alarms:");
+            pw.increaseIndent();
+
+            if (mAlarmQueue.size() == 0) {
+                pw.println("NOT WAITING");
+            } else {
+                Pair[] alarms = mAlarmQueue.toArray(new Pair[mAlarmQueue.size()]);
+                for (int i = 0; i < alarms.length; ++i) {
+                    final Package pkg = (Package) alarms[i].first;
+                    pw.print(pkg);
+                    pw.print(": ");
+                    pw.print(alarms[i].second);
+                    pw.println();
+                }
+            }
+
+            pw.decreaseIndent();
+        }
+    }
+
+    /** Clean up old transactions from {@link Ledger}s. */
+    private class LedgerCleanupAlarmListener extends AlarmQueueListener {
+        private LedgerCleanupAlarmListener() {
+            // We don't need to run cleanup too frequently.
+            super(ALARM_TAG_LEDGER_CLEANUP, false, HOUR_IN_MILLIS);
+        }
+
+        @Override
+        @GuardedBy("mLock")
+        protected void processExpiredAlarmLocked(int userId, @NonNull String packageName) {
+            mHandler.obtainMessage(MSG_CLEAN_LEDGER, userId, 0, packageName).sendToTarget();
+        }
+    }
+
+    private final class AgentHandler extends Handler {
+        AgentHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_CLEAN_LEDGER: {
+                    final int userId = msg.arg1;
+                    final String pkgName = (String) msg.obj;
+                    synchronized (mLock) {
+                        final Ledger ledger = getLedgerLocked(userId, pkgName);
+                        ledger.removeOldTransactions(MAX_TRANSACTION_AGE_MS);
+                    }
+                }
+                break;
+
+                case MSG_SET_ALARMS: {
+                    synchronized (mLock) {
+                        mLedgerCleanupAlarmListener.setNextAlarmLocked();
+                    }
+                }
+                break;
+            }
+        }
+    }
+
     @GuardedBy("mLock")
     void dumpLocked(IndentingPrintWriter pw) {
         pw.print("Current GDP: ");
         pw.println(narcToString(mCurrentNarcsInCirculation));
+
+        pw.println();
+        mLedgerCleanupAlarmListener.dumpLocked(pw);
     }
 }

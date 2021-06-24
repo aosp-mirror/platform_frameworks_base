@@ -5711,10 +5711,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 boolean fromDatasource, int attributedOp) {
             // Now let's check the identity chain...
             final int op = AppOpsManager.permissionToOpCode(permission);
-            final int attributionChainId = (startDataDelivery)
-                    ? sAttributionChainIds.incrementAndGet()
-                    : AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
-
+            final int attributionChainId =
+                    getAttributionChainId(startDataDelivery, attributionSource);
             AttributionSource current = attributionSource;
             AttributionSource next = null;
 
@@ -5870,9 +5868,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 return PermissionChecker.PERMISSION_HARD_DENIED;
             }
 
-            final int attributionChainId = (startDataDelivery)
-                    ? sAttributionChainIds.incrementAndGet()
-                    : AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
+            final int attributionChainId =
+                    getAttributionChainId(startDataDelivery, attributionSource);
 
             AttributionSource current = attributionSource;
             AttributionSource next = null;
@@ -6053,6 +6050,21 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 }
                 return Math.max(checkedOpResult, notedOpResult);
             }
+        }
+
+        private static int getAttributionChainId(boolean startDataDelivery,
+                AttributionSource source) {
+            if (source == null || source.getNext() == null || !startDataDelivery) {
+                return AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
+            }
+            int attributionChainId = sAttributionChainIds.incrementAndGet();
+
+            // handle overflow
+            if (attributionChainId < 0) {
+                attributionChainId = 0;
+                sAttributionChainIds.set(0);
+            }
+            return attributionChainId;
         }
 
         private static @Nullable String resolvePackageName(@NonNull Context context,

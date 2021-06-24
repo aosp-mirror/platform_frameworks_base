@@ -368,7 +368,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                     final CharSequence lastText = lastEvent.getText();
                     final boolean bothNonEmpty = !TextUtils.isEmpty(lastText)
                             && !TextUtils.isEmpty(text);
-                    boolean equalContent = TextUtils.equals(lastText, text);
+                    boolean equalContent =
+                            TextUtils.equals(lastText, text)
+                            && lastEvent.hasSameComposingSpan(event)
+                            && lastEvent.hasSameSelectionSpan(event);
                     if (equalContent) {
                         addEvent = false;
                     } else if (bothNonEmpty) {

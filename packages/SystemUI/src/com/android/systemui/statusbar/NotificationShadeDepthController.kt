@@ -186,7 +186,7 @@ class NotificationShadeDepthController @Inject constructor(
         var blur = max(shadeRadius.toInt(), globalActionsRadius)
 
         // Make blur be 0 if it is necessary to stop blur effect.
-        if (scrimsVisible) {
+        if (scrimsVisible || !blurUtils.supportsBlursOnWindows()) {
             blur = 0
         }
 

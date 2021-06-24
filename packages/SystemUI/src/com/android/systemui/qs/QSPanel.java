@@ -425,7 +425,7 @@ public class QSPanel extends LinearLayout implements Tunable {
             LinearLayout.LayoutParams layoutParams = (LayoutParams) hostView.getLayoutParams();
             layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
             layoutParams.width = horizontal ? 0 : ViewGroup.LayoutParams.MATCH_PARENT;
-            layoutParams.weight = horizontal ? 1.2f : 0;
+            layoutParams.weight = horizontal ? 1f : 0;
             // Add any bottom margin, such that the total spacing is correct. This is only
             // necessary if the view isn't horizontal, since otherwise the padding is
             // carried in the parent of this view (to ensure correct vertical alignment)

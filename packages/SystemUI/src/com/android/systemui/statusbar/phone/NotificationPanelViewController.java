@@ -38,9 +38,11 @@ import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.app.Fragment;
 import android.app.StatusBarManager;
+import android.content.ContentResolver;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -52,10 +54,12 @@ import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.os.VibrationEffect;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.LayoutInflater;
@@ -212,6 +216,8 @@ public class NotificationPanelViewController extends PanelViewController {
             new MyOnHeadsUpChangedListener();
     private final HeightListener mHeightListener = new HeightListener();
     private final ConfigurationListener mConfigurationListener = new ConfigurationListener();
+    private final SettingsChangeObserver mSettingsChangeObserver;
+
     @VisibleForTesting final StatusBarStateListener mStatusBarStateListener =
             new StatusBarStateListener();
     private final BiometricUnlockController mBiometricUnlockController;
@@ -596,6 +602,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mScreenCornerRadius;
     private boolean mQSAnimatingHiddenFromCollapsed;
 
+    private final ContentResolver mContentResolver;
+
     private final Executor mUiExecutor;
     private final SecureSettings mSecureSettings;
 
@@ -637,6 +645,7 @@ public class NotificationPanelViewController extends PanelViewController {
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
             @Main Resources resources,
+            @Main Handler handler,
             LayoutInflater layoutInflater,
             NotificationWakeUpCoordinator coordinator, PulseExpansionHandler pulseExpansionHandler,
             DynamicPrivacyController dynamicPrivacyController,
@@ -680,6 +689,7 @@ public class NotificationPanelViewController extends PanelViewController {
             TapAgainViewController tapAgainViewController,
             NavigationModeController navigationModeController,
             FragmentService fragmentService,
+            ContentResolver contentResolver,
             QuickAccessWalletController quickAccessWalletController,
             @Main Executor uiExecutor,
             SecureSettings secureSettings,
@@ -706,15 +716,12 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusBarViewComponentFactory = keyguardStatusBarViewComponentFactory;
         mDepthController = notificationShadeDepthController;
         mFeatureFlags = featureFlags;
+        mContentResolver = contentResolver;
         mKeyguardQsUserSwitchComponentFactory = keyguardQsUserSwitchComponentFactory;
         mKeyguardUserSwitcherComponentFactory = keyguardUserSwitcherComponentFactory;
         mQSDetailDisplayer = qsDetailDisplayer;
         mFragmentService = fragmentService;
-        mKeyguardUserSwitcherEnabled = mResources.getBoolean(
-                com.android.internal.R.bool.config_keyguardUserSwitcher);
-        mKeyguardQsUserSwitchEnabled =
-                mKeyguardUserSwitcherEnabled && mResources.getBoolean(
-                        R.bool.config_keyguard_user_switch_opens_qs_details);
+        mSettingsChangeObserver = new SettingsChangeObserver(handler);
         mShouldUseSplitNotificationShade =
                 Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources);
         mView.setWillNotDraw(!DEBUG);
@@ -797,6 +804,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         mMaxKeyguardNotifications = resources.getInteger(R.integer.keyguard_max_notification_count);
+        updateUserSwitcherFlags();
         onFinishInflate();
     }
 
@@ -1036,6 +1044,10 @@ public class NotificationPanelViewController extends PanelViewController {
                 view = mLayoutInflater.inflate(layoutId, mView, false);
                 mView.addView(view, index);
             } else {
+                // Add the stub back so we can re-inflate it again if necessary
+                ViewStub stub = new ViewStub(mView.getContext(), layoutId);
+                stub.setId(stubId);
+                mView.addView(stub, index);
                 view = null;
             }
         } else if (enabled) {
@@ -1063,6 +1075,7 @@ public class NotificationPanelViewController extends PanelViewController {
         updateResources();
 
         // Re-inflate the keyguard user switcher group.
+        updateUserSwitcherFlags();
         boolean isUserSwitcherEnabled = mUserManager.isUserSwitcherEnabled();
         boolean showQsUserSwitch = mKeyguardQsUserSwitchEnabled && isUserSwitcherEnabled;
         boolean showKeyguardUserSwitcher =
@@ -1456,7 +1469,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void setQsExpansionEnabled() {
         mQsExpansionEnabled = mQsExpansionEnabledPolicy && mQsExpansionEnabledAmbient;
-        Log.d(TAG, "Set qsExpansionEnabled: " + mQsExpansionEnabled);
         if (mQs == null) return;
         mQs.setHeaderClickable(mQsExpansionEnabled);
     }
@@ -2234,8 +2246,9 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void updateQSExpansionEnabledAmbient() {
         final float scrollRangeToTop = mAmbientState.getTopPadding() - mQuickQsOffsetHeight;
-        mQsExpansionEnabledAmbient =
-                mAmbientState.getScrollY() <= scrollRangeToTop && !mAmbientState.isShadeOpening();
+        mQsExpansionEnabledAmbient = mShouldUseSplitNotificationShade
+                || (mAmbientState.getScrollY() <= scrollRangeToTop
+                && !mAmbientState.isShadeOpening());
         setQsExpansionEnabled();
     }
 
@@ -3887,6 +3900,26 @@ public class NotificationPanelViewController extends PanelViewController {
         return false;
     }
 
+    private void updateUserSwitcherFlags() {
+        mKeyguardUserSwitcherEnabled = mResources.getBoolean(
+                com.android.internal.R.bool.config_keyguardUserSwitcher);
+        mKeyguardQsUserSwitchEnabled =
+                mKeyguardUserSwitcherEnabled && mResources.getBoolean(
+                        R.bool.config_keyguard_user_switch_opens_qs_details);
+    }
+
+    private void registerSettingsChangeListener() {
+        mContentResolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.USER_SWITCHER_ENABLED),
+                /* notifyForDescendants */ false,
+                mSettingsChangeObserver
+        );
+    }
+
+    private void unregisterSettingsChangeListener() {
+        mContentResolver.unregisterContentObserver(mSettingsChangeObserver);
+    }
+
     private class OnHeightChangedListener implements ExpandableView.OnHeightChangedListener {
         @Override
         public void onHeightChanged(ExpandableView view, boolean needsAnimation) {
@@ -4208,6 +4241,15 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         @Override
+        public void onSmallestScreenWidthChanged() {
+            if (DEBUG) Log.d(TAG, "onSmallestScreenWidthChanged");
+
+            // Can affect multi-user switcher visibility as it depends on screen size by default:
+            // it is enabled only for devices with large screens (see config_keyguardUserSwitcher)
+            reInflateViews();
+        }
+
+        @Override
         public void onOverlayChanged() {
             if (DEBUG) Log.d(TAG, "onOverlayChanged");
             reInflateViews();
@@ -4216,6 +4258,21 @@ public class NotificationPanelViewController extends PanelViewController {
         @Override
         public void onDensityOrFontScaleChanged() {
             if (DEBUG) Log.d(TAG, "onDensityOrFontScaleChanged");
+            reInflateViews();
+        }
+    }
+
+    private class SettingsChangeObserver extends ContentObserver {
+
+        SettingsChangeObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            if (DEBUG) Log.d(TAG, "onSettingsChanged");
+
+            // Can affect multi-user switcher visibility
             reInflateViews();
         }
     }
@@ -4335,10 +4392,12 @@ public class NotificationPanelViewController extends PanelViewController {
             mConfigurationListener.onThemeChanged();
             mFalsingManager.addTapListener(mFalsingTapListener);
             mKeyguardIndicationController.init();
+            registerSettingsChangeListener();
         }
 
         @Override
         public void onViewDetachedFromWindow(View v) {
+            unregisterSettingsChangeListener();
             mFragmentService.getFragmentHostManager(mView)
                             .removeTagListener(QS.TAG, mFragmentListener);
             mStatusBarStateController.removeCallback(mStatusBarStateListener);

@@ -19,4 +19,19 @@
 <resources>
     <color name="volume_dialog_background_color">#E61F232B</color>
     <color name="volume_dialog_background_color_above_blur">#C71F232B</color>
+
+    <color name="bottom_sheet_icon_color">#D2E3FC</color>
+
+    <color name="bottom_sheet_title_color">#E8F0FE</color>
+    <color name="bottom_sheet_body_color">#D2E3FC</color>
+
+    <color name="bottom_sheet_background_color">#1F232C</color>
+    <color name="bottom_sheet_background_color_with_blur">#AA1A2734</color>
+
+    <color name="bottom_sheet_button_background_color_focused">#E8F0FE</color>
+    <color name="bottom_sheet_button_background_color_unfocused">#0FE8EAED</color>
+
+    <color name="bottom_sheet_button_text_color_focused">#DB202124</color>
+    <color name="bottom_sheet_button_text_color_unfocused">#B5E8EAED</color>
+
 </resources>

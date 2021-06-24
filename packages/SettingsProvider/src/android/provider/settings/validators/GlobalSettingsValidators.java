@@ -196,15 +196,6 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS,
                 ANY_INTEGER_VALIDATOR);
-        VALIDATORS.put(
-                Global.Wearable.WIRELESS_DEBUG_MODE,
-                new DiscreteValueValidator(
-                        new String[] {
-                            String.valueOf(Global.Wearable.WIRELESS_DEBUG_OFF),
-                            String.valueOf(Global.Wearable.WIRELESS_DEBUG_WIFI),
-                            String.valueOf(Global.Wearable.WIRELESS_DEBUG_BLUETOOTH)
-                        }));
-        VALIDATORS.put(Global.Wearable.WIFI_DEBUG_PORT, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.UPDOWN_GESTURES_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Global.Wearable.SETUP_SKIPPED,
@@ -248,15 +239,22 @@ public class GlobalSettingsValidators {
                         }));
         VALIDATORS.put(Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.ALTERNATE_LAUNCHER_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.CORNER_ROUNDNESS, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.SIDE_BUTTON, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.BUTTON_SET, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.ANDROID_WEAR_VERSION, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.SYSTEM_CAPABILITIES, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.SYSTEM_EDITION, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.WEAR_PLATFORM_MR_NUMBER, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.BOTTOM_OFFSET, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(
-                Global.Wearable.CARD_PREVIEW_MODE,
+                Global.Wearable.DISPLAY_SHAPE,
                 new DiscreteValueValidator(
                         new String[] {
-                            String.valueOf(Global.Wearable.CARD_PREVIEW_MODE_LOW),
-                            String.valueOf(Global.Wearable.CARD_PREVIEW_MODE_NORMAL),
-                            String.valueOf(Global.Wearable.CARD_PREVIEW_MODE_HIGH)
+                            String.valueOf(Global.Wearable.DISPLAY_SHAPE_ROUND),
+                            String.valueOf(Global.Wearable.DISPLAY_SHAPE_SQUARE)
                         }));
-        VALIDATORS.put(Global.Wearable.CORNER_ROUNDNESS, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.MOBILE_SIGNAL_DETECTOR, BOOLEAN_VALIDATOR);
     }
 }
 

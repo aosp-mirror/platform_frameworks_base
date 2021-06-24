@@ -610,8 +610,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.AUTO_WIFI,
                     Settings.Global.Wearable.WIFI_POWER_SAVE,
                     Settings.Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS,
-                    Settings.Global.Wearable.WIRELESS_DEBUG_MODE,
-                    Settings.Global.Wearable.WIFI_DEBUG_PORT,
                     Settings.Global.Wearable.UPDOWN_GESTURES_ENABLED,
                     Settings.Global.Wearable.SETUP_SKIPPED,
                     Settings.Global.Wearable.LAST_CALL_FORWARD_ACTION,
@@ -627,8 +625,17 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED,
                     Settings.Global.Wearable.WEAR_OS_VERSION_STRING,
                     Settings.Global.Wearable.ALTERNATE_LAUNCHER_ENABLED,
-                    Settings.Global.Wearable.CARD_PREVIEW_MODE,
-                    Settings.Global.Wearable.CORNER_ROUNDNESS);
+                    Settings.Global.Wearable.CORNER_ROUNDNESS,
+                    Settings.Global.Wearable.BUTTON_SET,
+                    Settings.Global.Wearable.SIDE_BUTTON,
+                    Settings.Global.Wearable.ANDROID_WEAR_VERSION,
+                    Settings.Global.Wearable.SYSTEM_CAPABILITIES,
+                    Settings.Global.Wearable.SYSTEM_EDITION,
+                    Settings.Global.Wearable.WEAR_PLATFORM_MR_NUMBER,
+                    Settings.Global.Wearable.DISPLAY_SHAPE,
+                    Settings.Global.Wearable.BOTTOM_OFFSET,
+                    Settings.Global.Wearable.SCREEN_BRIGHTNESS_LEVEL,
+                    Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

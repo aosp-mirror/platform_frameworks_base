@@ -16337,6 +16337,12 @@ public final class Settings {
              */
             public static final String AUTO_WIFI = "auto_wifi";
 
+            // Possible force wifi on states
+            /** @hide */
+            public static final int AUTO_WIFI_DISABLED = 0;
+            /** @hide */
+            public static final int AUTO_WIFI_ENABLED = 1;
+
             /**
              * The number of minutes after the WiFi enters power save mode.
              * @hide
@@ -16350,26 +16356,6 @@ public final class Settings {
              */
             public static final String ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS =
                     "alt_bypass_wifi_requirement_time_millis";
-
-            /**
-             * Wireless debug settings for wear.
-             * @hide
-             */
-            public static final String WIRELESS_DEBUG_MODE = "wireless_debug_mode";
-
-            // Possible wireless debug settings.
-            /** @hide */
-            public static final int WIRELESS_DEBUG_OFF = 0;
-            /** @hide */
-            public static final int WIRELESS_DEBUG_BLUETOOTH = 1 << 0;
-            /** @hide */
-            public static final int WIRELESS_DEBUG_WIFI = 1 << 1;
-
-            /**
-             * Wifi debug port for wear.
-             * @hide
-             */
-            public static final String WIFI_DEBUG_PORT = "wireless_debug_wifi_port";
 
             /**
              * Whether or not Up/Down Gestures are enabled.
@@ -16452,24 +16438,76 @@ public final class Settings {
             public static final String ALTERNATE_LAUNCHER_ENABLED = "alternate_launcher_enabled";
 
             /**
-             * Wear card preview mode.
-             * @hide
-             */
-            public static final String CARD_PREVIEW_MODE = "card_preview_mode";
-
-            // Possible CARD_PREVIEW_MODE values.
-            /** @hide */
-            public static final int CARD_PREVIEW_MODE_LOW = 0;
-            /** @hide */
-            public static final int CARD_PREVIEW_MODE_NORMAL = 1;
-            /** @hide */
-            public static final int CARD_PREVIEW_MODE_HIGH = 2;
-
-            /**
              * How round the corners of square screens are.
              * @hide
              */
             public static final String CORNER_ROUNDNESS = "corner_roundness";
+
+            /**
+             * Whether the physical button has been set.
+             * @hide
+             */
+            public static final String BUTTON_SET = "button_set";
+
+            /**
+             * Whether there is a side button.
+             * @hide
+             */
+            public static final String SIDE_BUTTON = "side_button";
+
+            /**
+             * The android wear system version.
+             * @hide
+             */
+            public static final String ANDROID_WEAR_VERSION = "android_wear_version";
+
+            /**
+             * The wear system capabiltiies.
+             * @hide
+             */
+            public static final String SYSTEM_CAPABILITIES = "system_capabilities";
+
+            /**
+             * The android wear system edition.
+             * @hide
+             */
+            public static final String SYSTEM_EDITION = "android_wear_system_edition";
+
+            /**
+             * The Wear platform MR number.
+             * @hide
+             */
+            public static final String WEAR_PLATFORM_MR_NUMBER = "wear_platform_mr_number";
+
+            /**
+             * The offset of the visible screen from the display bottom (overscan bottom).
+             * @hide
+             */
+            public static final String BOTTOM_OFFSET = "bottom_offset";
+
+            /**
+             * The shape of the display.
+             * @hide
+             */
+            public static final String DISPLAY_SHAPE = "display_shape";
+
+            // Possible display shapes
+            /** @hide */
+            public static final int DISPLAY_SHAPE_SQUARE = 0;
+            /** @hide */
+            public static final int DISPLAY_SHAPE_ROUND = 1;
+
+            /**
+             * The different levels of screen brightness the user can select.
+             * @hide
+             */
+            public static final String SCREEN_BRIGHTNESS_LEVEL = "screen_brightness_level";
+
+            /**
+             * The mobile signal detector setting.
+             * @hide
+             */
+            public static final String MOBILE_SIGNAL_DETECTOR = "mobile_signal_detector";
         }
     }
 
