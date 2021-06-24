@@ -68,8 +68,6 @@ import android.os.AsyncTask;
 import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -137,13 +135,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // The AGPS SUPL mode
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
     private static final int AGPS_SUPL_MODE_MSB = 0x01;
-
-    // handler messages
-    private static final int INJECT_NTP_TIME = 5;
-    private static final int DOWNLOAD_PSDS_DATA = 6;
-    private static final int REQUEST_LOCATION = 16;
-    private static final int REPORT_LOCATION = 17; // HAL reports location
-    private static final int REPORT_SV_STATUS = 18; // HAL reports SV status
 
     // TCP/IP constants.
     // Valid TCP/UDP port range is (0, 65535].
@@ -402,7 +393,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 BatteryStats.SERVICE_NAME));
 
         // Construct internal handler
-        mHandler = new ProviderHandler(FgThread.getHandler().getLooper());
+        mHandler = FgThread.getHandler();
 
         // Load GPS configuration and register listeners in the background:
         // some operations, such as opening files and registering broadcast receivers, can take a
@@ -530,7 +521,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (mSupportsPsds) {
             synchronized (mLock) {
                 for (int psdsType : mPendingDownloadPsdsTypes) {
-                    sendMessage(DOWNLOAD_PSDS_DATA, psdsType, null);
+                    postWithWakeLockHeld(() -> handleDownloadPsdsData(psdsType));
                 }
                 mPendingDownloadPsdsTypes.clear();
             }
@@ -654,9 +645,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 synchronized (mLock) {
                     backoffMillis = mPsdsBackOff.nextBackoffMillis();
                 }
-                mHandler.sendMessageDelayed(
-                        mHandler.obtainMessage(DOWNLOAD_PSDS_DATA, psdsType, 0, null),
-                        backoffMillis);
+                mHandler.postDelayed(() -> handleDownloadPsdsData(psdsType), backoffMillis);
             }
 
             // Release wake lock held by task, synchronize on mLock in case multiple
@@ -976,8 +965,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             requestUtcTime();
         } else if ("force_psds_injection".equals(command)) {
             if (mSupportsPsds) {
-                sendMessage(DOWNLOAD_PSDS_DATA, GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX,
-                        null);
+                postWithWakeLockHeld(() -> handleDownloadPsdsData(
+                        GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX));
             }
         } else if ("request_power_stats".equals(command)) {
             mGnssNative.requestPowerStats();
@@ -1314,7 +1303,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private void requestUtcTime() {
         if (DEBUG) Log.d(TAG, "utcTimeRequest");
-        sendMessage(INJECT_NTP_TIME, 0, null);
+        postWithWakeLockHeld(mNtpTimeHelper::retrieveAndInjectNtpTime);
     }
 
     private void requestRefLocation() {
@@ -1348,75 +1337,17 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    boolean isInEmergencySession() {
-        return mNIHandler.getInEmergency();
-    }
-
-    private void sendMessage(int message, int arg, Object obj) {
+    private void postWithWakeLockHeld(Runnable runnable) {
         // hold a wake lock until this message is delivered
         // note that this assumes the message will not be removed from the queue before
         // it is handled (otherwise the wake lock would be leaked).
         mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
-        if (DEBUG) {
-            Log.d(TAG, "WakeLock acquired by sendMessage(" + messageIdAsString(message) + ", " + arg
-                    + ", " + obj + ")");
-        }
-        mHandler.obtainMessage(message, arg, 1, obj).sendToTarget();
-    }
-
-    private final class ProviderHandler extends Handler {
-        ProviderHandler(Looper looper) {
-            super(looper, null, true /*async*/);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            int message = msg.what;
-            switch (message) {
-                case INJECT_NTP_TIME:
-                    mNtpTimeHelper.retrieveAndInjectNtpTime();
-                    break;
-                case REQUEST_LOCATION:
-                    handleRequestLocation(msg.arg1 == 1, (boolean) msg.obj);
-                    break;
-                case DOWNLOAD_PSDS_DATA:
-                    handleDownloadPsdsData(msg.arg1);
-                    break;
-                case REPORT_LOCATION:
-                    handleReportLocation(msg.arg1 == 1, (Location) msg.obj);
-                    break;
-                case REPORT_SV_STATUS:
-                    handleReportSvStatus((GnssStatus) msg.obj);
-                    break;
-            }
-            if (msg.arg2 == 1) {
-                // wakelock was taken for this message, release it
-                mWakeLock.release();
-                if (DEBUG) {
-                    Log.d(TAG, "WakeLock released by handleMessage(" + messageIdAsString(message)
-                            + ", " + msg.arg1 + ", " + msg.obj + ")");
-                }
-            }
-        }
-    }
-
-    /**
-     * @return A string representing the given message ID.
-     */
-    private String messageIdAsString(int message) {
-        switch (message) {
-            case INJECT_NTP_TIME:
-                return "INJECT_NTP_TIME";
-            case REQUEST_LOCATION:
-                return "REQUEST_LOCATION";
-            case DOWNLOAD_PSDS_DATA:
-                return "DOWNLOAD_PSDS_DATA";
-            case REPORT_LOCATION:
-                return "REPORT_LOCATION";
-            case REPORT_SV_STATUS:
-                return "REPORT_SV_STATUS";
-            default:
-                return "<Unknown>";
+        boolean success = mHandler.post(() -> {
+            runnable.run();
+            mWakeLock.release();
+        });
+        if (!success) {
+            mWakeLock.release();
         }
     }
 
@@ -1476,7 +1407,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     @Override
     public void onReportLocation(boolean hasLatLong, Location location) {
-        sendMessage(REPORT_LOCATION, hasLatLong ? 1 : 0, location);
+        postWithWakeLockHeld(() -> handleReportLocation(hasLatLong, location));
     }
 
     @Override
@@ -1502,7 +1433,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     @Override
     public void onReportSvStatus(GnssStatus gnssStatus) {
-        sendMessage(REPORT_SV_STATUS, 0, gnssStatus);
+        postWithWakeLockHeld(() -> handleReportSvStatus(gnssStatus));
     }
 
     @Override
@@ -1512,7 +1443,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     @Override
     public void onRequestPsdsDownload(int psdsType) {
-        sendMessage(DOWNLOAD_PSDS_DATA, psdsType, null);
+        postWithWakeLockHeld(() -> handleDownloadPsdsData(psdsType));
     }
 
     @Override
@@ -1558,7 +1489,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     + ", isUserEmergency: "
                     + isUserEmergency);
         }
-        sendMessage(REQUEST_LOCATION, independentFromGnss ? 1 : 0, isUserEmergency);
+        postWithWakeLockHeld(() -> handleRequestLocation(independentFromGnss, isUserEmergency));
     }
 
     @Override
