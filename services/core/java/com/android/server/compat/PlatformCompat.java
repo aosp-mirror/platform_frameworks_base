@@ -36,6 +36,7 @@ import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -359,7 +360,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     private ApplicationInfo getApplicationInfo(String packageName, int userId) {
         return LocalServices.getService(PackageManagerInternal.class).getApplicationInfo(
-                packageName, 0, userId, userId);
+                packageName, 0, Process.myUid(), userId);
     }
 
     private void killPackage(String packageName) {
