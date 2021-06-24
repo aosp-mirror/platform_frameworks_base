@@ -140,6 +140,7 @@ import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.ITransientNotificationCallback;
 import android.app.IUriGrantsManager;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
@@ -548,6 +549,8 @@ public class NotificationManagerService extends SystemService {
 
     // Used for rate limiting toasts by package.
     private MultiRateLimiter mToastRateLimiter;
+
+    private KeyguardManager mKeyguardManager;
 
     // The last key in this list owns the hardware.
     ArrayList<String> mLights = new ArrayList<>();
@@ -2008,6 +2011,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    void setKeyguardManager(KeyguardManager keyguardManager) {
+        mKeyguardManager = keyguardManager;
+    }
+
+    @VisibleForTesting
     ShortcutHelper getShortcutHelper() {
         return mShortcutHelper;
     }
@@ -2653,6 +2661,7 @@ public class NotificationManagerService extends SystemService {
             mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
             mAudioManagerInternal = getLocalService(AudioManagerInternal.class);
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+            mKeyguardManager = getContext().getSystemService(KeyguardManager.class);
             mZenModeHelper.onSystemReady();
             RoleObserver roleObserver = new RoleObserver(getContext(),
                     getContext().getSystemService(RoleManager.class),
@@ -3806,15 +3815,18 @@ public class NotificationManagerService extends SystemService {
             enforceDeletingChannelHasNoFgService(pkg, callingUser, channelId);
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
                     callingUser, REASON_CHANNEL_REMOVED, null);
-            mPreferencesHelper.deleteNotificationChannel(pkg, callingUid, channelId);
-            // Remove from both recent notification archive and notification history
-            mArchive.removeChannelNotifications(pkg, callingUser, channelId);
-            mHistoryManager.deleteNotificationChannel(pkg, callingUid, channelId);
-            mListeners.notifyNotificationChannelChanged(pkg,
-                    UserHandle.getUserHandleForUid(callingUid),
-                    mPreferencesHelper.getNotificationChannel(pkg, callingUid, channelId, true),
-                    NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
-            handleSavePolicyFile();
+            boolean previouslyExisted = mPreferencesHelper.deleteNotificationChannel(
+                    pkg, callingUid, channelId);
+            if (previouslyExisted) {
+                // Remove from both recent notification archive and notification history
+                mArchive.removeChannelNotifications(pkg, callingUser, channelId);
+                mHistoryManager.deleteNotificationChannel(pkg, callingUid, channelId);
+                mListeners.notifyNotificationChannelChanged(pkg,
+                        UserHandle.getUserHandleForUid(callingUid),
+                        mPreferencesHelper.getNotificationChannel(pkg, callingUid, channelId, true),
+                        NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
+                handleSavePolicyFile();
+            }
         }
 
         @Override
@@ -7388,7 +7400,6 @@ public class NotificationManagerService extends SystemService {
         boolean beep = false;
         boolean blink = false;
 
-        final Notification notification = record.getSbn().getNotification();
         final String key = record.getKey();
 
         // Should this notification make noise, vibe, or use the LED?
@@ -7410,7 +7421,7 @@ public class NotificationManagerService extends SystemService {
         if (!record.isUpdate
                 && record.getImportance() > IMPORTANCE_MIN
                 && !suppressedByDnd) {
-            sendAccessibilityEvent(notification, record.getSbn().getPackageName());
+            sendAccessibilityEvent(record);
             sentAccessibilityEvent = true;
         }
 
@@ -7433,7 +7444,7 @@ public class NotificationManagerService extends SystemService {
                 boolean hasAudibleAlert = hasValidSound || hasValidVibrate;
                 if (hasAudibleAlert && !shouldMuteNotificationLocked(record)) {
                     if (!sentAccessibilityEvent) {
-                        sendAccessibilityEvent(notification, record.getSbn().getPackageName());
+                        sendAccessibilityEvent(record);
                         sentAccessibilityEvent = true;
                     }
                     if (DBG) Slog.v(TAG, "Interrupting!");
@@ -8261,17 +8272,30 @@ public class NotificationManagerService extends SystemService {
         return (x < low) ? low : ((x > high) ? high : x);
     }
 
-    void sendAccessibilityEvent(Notification notification, CharSequence packageName) {
+    void sendAccessibilityEvent(NotificationRecord record) {
         if (!mAccessibilityManager.isEnabled()) {
             return;
         }
 
-        AccessibilityEvent event =
+        final Notification notification = record.getNotification();
+        final CharSequence packageName = record.getSbn().getPackageName();
+        final AccessibilityEvent event =
             AccessibilityEvent.obtain(AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
         event.setPackageName(packageName);
         event.setClassName(Notification.class.getName());
-        event.setParcelableData(notification);
-        CharSequence tickerText = notification.tickerText;
+        final int visibilityOverride = record.getPackageVisibilityOverride();
+        final int notifVisibility = visibilityOverride == NotificationManager.VISIBILITY_NO_OVERRIDE
+                ? notification.visibility : visibilityOverride;
+        final int userId = record.getUser().getIdentifier();
+        final boolean needPublic = userId >= 0 && mKeyguardManager.isDeviceLocked(userId);
+        if (needPublic && notifVisibility != Notification.VISIBILITY_PUBLIC) {
+            // Emit the public version if we're on the lockscreen and this notification isn't
+            // publicly visible.
+            event.setParcelableData(notification.publicVersion);
+        } else {
+            event.setParcelableData(notification);
+        }
+        final CharSequence tickerText = notification.tickerText;
         if (!TextUtils.isEmpty(tickerText)) {
             event.getText().add(tickerText);
         }

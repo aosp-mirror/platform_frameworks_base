@@ -2799,7 +2799,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private boolean isApexUpdateAllowed(String apexPackageName) {
         return mPm.getModuleInfo(apexPackageName, 0) != null
-                || SystemConfig.getInstance().getAllowedPartnerApexes().contains(apexPackageName);
+                || SystemConfig.getInstance().getAllowedVendorApexes().contains(apexPackageName);
     }
 
     /**

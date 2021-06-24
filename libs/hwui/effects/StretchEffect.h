@@ -113,6 +113,10 @@ public:
         return !isEmpty();
     }
 
+    void clear() {
+        mBuilder = nullptr;
+    }
+
 private:
     static sk_sp<SkRuntimeEffect> getStretchEffect();
     mutable SkVector mStretchDirection{0, 0};

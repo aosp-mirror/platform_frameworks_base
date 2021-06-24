@@ -212,9 +212,9 @@ public final class CameraExtensionCharacteristics {
      */
     private static final class CameraExtensionManagerGlobal {
         private static final String TAG = "CameraExtensionManagerGlobal";
-        private static final String PROXY_PACKAGE_NAME = "com.android.camera";
+        private static final String PROXY_PACKAGE_NAME = "com.android.cameraextensions";
         private static final String PROXY_SERVICE_NAME =
-                "com.android.camera.CameraExtensionsProxyService";
+                "com.android.cameraextensions.CameraExtensionsProxyService";
 
         // Singleton instance
         private static final CameraExtensionManagerGlobal GLOBAL_CAMERA_MANAGER =

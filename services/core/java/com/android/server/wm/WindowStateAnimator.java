@@ -683,8 +683,9 @@ class WindowStateAnimator {
         }
 
         // We don't apply animation for application main window here since this window type
-        // should be controlled by AppWindowToken in general.
-        if (mAttrType != TYPE_BASE_APPLICATION) {
+        // should be controlled by ActivityRecord in general. Wallpaper is also excluded because
+        // WallpaperController should handle it.
+        if (mAttrType != TYPE_BASE_APPLICATION && !mIsWallpaper) {
             applyAnimationLocked(transit, true);
         }
 
