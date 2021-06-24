@@ -32,6 +32,7 @@ import android.widget.ImageView
 import com.android.internal.app.AlertActivity
 import com.android.internal.widget.DialogTitle
 import com.android.systemui.R
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -46,13 +47,15 @@ import javax.inject.Inject
 class SensorUseStartedActivity @Inject constructor(
     private val sensorPrivacyController: IndividualSensorPrivacyController,
     private val keyguardStateController: KeyguardStateController,
-    private val keyguardDismissUtil: KeyguardDismissUtil
+    private val keyguardDismissUtil: KeyguardDismissUtil,
+    @Background private val bgHandler: Handler
 ) : AlertActivity(), DialogInterface.OnClickListener {
 
     companion object {
         private val LOG_TAG = SensorUseStartedActivity::class.java.simpleName
 
         private const val SUPPRESS_REMINDERS_REMOVAL_DELAY_MILLIS = 2000L
+        private const val UNLOCK_DELAY_MILLIS = 200L
 
         private const val CAMERA = SensorPrivacyManager.Sensors.CAMERA
         private const val MICROPHONE = SensorPrivacyManager.Sensors.MICROPHONE
@@ -179,9 +182,12 @@ class SensorUseStartedActivity @Inject constructor(
             BUTTON_POSITIVE -> {
                 if (keyguardStateController.isMethodSecure && keyguardStateController.isShowing) {
                     keyguardDismissUtil.executeWhenUnlocked({
-                        disableSensorPrivacy()
+                        bgHandler.postDelayed({
+                            disableSensorPrivacy()
+                        }, UNLOCK_DELAY_MILLIS)
+
                         false
-                    }, false, false)
+                    }, false, true)
                 } else {
                     disableSensorPrivacy()
                 }
@@ -201,7 +207,7 @@ class SensorUseStartedActivity @Inject constructor(
             sensorPrivacyController
                     .suppressSensorPrivacyReminders(sensorUsePackageName, false)
         } else {
-            Handler(mainLooper).postDelayed({
+            bgHandler.postDelayed({
                 sensorPrivacyController
                         .suppressSensorPrivacyReminders(sensorUsePackageName, false)
             }, SUPPRESS_REMINDERS_REMOVAL_DELAY_MILLIS)
