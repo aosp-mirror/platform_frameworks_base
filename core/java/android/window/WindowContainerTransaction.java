@@ -49,11 +49,15 @@ public final class WindowContainerTransaction implements Parcelable {
     // Flat list because re-order operations are order-dependent
     private final ArrayList<HierarchyOp> mHierarchyOps = new ArrayList<>();
 
+    @Nullable
+    private IBinder mErrorCallbackToken;
+
     public WindowContainerTransaction() {}
 
     private WindowContainerTransaction(Parcel in) {
         in.readMap(mChanges, null /* loader */);
         in.readList(mHierarchyOps, null /* loader */);
+        mErrorCallbackToken = in.readStrongBinder();
     }
 
     private Change getOrCreateChange(IBinder token) {
@@ -476,6 +480,23 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * When this {@link WindowContainerTransaction} failed to finish on the server side, it will
+     * trigger callback with this {@param errorCallbackToken}.
+     * @param errorCallbackToken    client provided token that will be passed back as parameter in
+     *                              the callback if there is an error on the server side.
+     * @see ITaskFragmentOrganizer#onTaskFragmentError
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setErrorCallbackToken(@NonNull IBinder errorCallbackToken) {
+        if (mErrorCallbackToken != null) {
+            throw new IllegalStateException("Can't set multiple error token for one transaction.");
+        }
+        mErrorCallbackToken = errorCallbackToken;
+        return this;
+    }
+
+    /**
      * Merges another WCT into this one.
      * @param transfer When true, this will transfer everything from other potentially leaving
      *                 other in an unusable state. When false, other is left alone, but
@@ -496,6 +517,13 @@ public final class WindowContainerTransaction implements Parcelable {
             mHierarchyOps.add(transfer ? other.mHierarchyOps.get(i)
                     : new HierarchyOp(other.mHierarchyOps.get(i)));
         }
+        if (mErrorCallbackToken != null && other.mErrorCallbackToken != null && mErrorCallbackToken
+                != other.mErrorCallbackToken) {
+            throw new IllegalArgumentException("Can't merge two WCT with different error token");
+        }
+        mErrorCallbackToken = mErrorCallbackToken != null
+                ? mErrorCallbackToken
+                : other.mErrorCallbackToken;
     }
 
     /** @hide */
@@ -513,11 +541,17 @@ public final class WindowContainerTransaction implements Parcelable {
         return mHierarchyOps;
     }
 
+    /** @hide */
+    @Nullable
+    public IBinder getErrorCallbackToken() {
+        return mErrorCallbackToken;
+    }
+
     @Override
     @NonNull
     public String toString() {
         return "WindowContainerTransaction { changes = " + mChanges + " hops = " + mHierarchyOps
-                + " }";
+                + " errorCallbackToken=" + mErrorCallbackToken + " }";
     }
 
     @Override
@@ -525,6 +559,7 @@ public final class WindowContainerTransaction implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeMap(mChanges);
         dest.writeList(mHierarchyOps);
+        dest.writeStrongBinder(mErrorCallbackToken);
     }
 
     @Override

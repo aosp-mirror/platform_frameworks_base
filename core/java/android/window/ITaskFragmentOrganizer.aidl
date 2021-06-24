@@ -17,6 +17,7 @@
 package android.window;
 
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.window.TaskFragmentAppearedInfo;
 import android.window.TaskFragmentInfo;
@@ -37,4 +38,15 @@ oneway interface ITaskFragmentOrganizer {
      * bounds.
      */
     void onTaskFragmentParentInfoChanged(in IBinder fragmentToken, in Configuration parentConfig);
+
+    /**
+     * Called when the {@link WindowContainerTransaction} created with
+     * {@link WindowContainerTransaction#setErrorCallbackToken(IBinder)} failed on the server side.
+     *
+     * @param errorCallbackToken    Token set through {@link
+     *                              WindowContainerTransaction#setErrorCallbackToken(IBinder)}
+     * @param exceptionBundle   Bundle containing the exception. Should be created with
+     *                          {@link TaskFragmentOrganizer#putExceptionInBundle}.
+     */
+    void onTaskFragmentError(in IBinder errorCallbackToken, in Bundle exceptionBundle);
 }
