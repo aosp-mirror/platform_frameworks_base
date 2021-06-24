@@ -585,6 +585,8 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Erabili beste hatz-marka bat"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Argi gehiegi dago"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Saiatu doituta"</string>
+    <!-- no translation found for fingerprint_acquired_immobile (1621891895241888048) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Autentifikatu da hatz-marka"</string>
@@ -601,6 +603,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ez da erregistratu hatz-markarik."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Gailu honek ez du hatz-marken sentsorerik."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sentsorea aldi baterako desgaitu da."</string>
+    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"Sentsorea kalibratu egin behar da"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. hatza"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Erabili hatz-marka"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Erabili hatz-marka edo pantailaren blokeoa"</string>
@@ -1053,8 +1056,8 @@
     <string name="last_month" msgid="1528906781083518683">"Azken hilabetea"</string>
     <string name="older" msgid="1645159827884647400">"Zaharragoa"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="preposition_for_time" msgid="4336835286453822053">"ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="preposition_for_year" msgid="3149809685340130039">"urtea: <xliff:g id="YEAR">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="4336835286453822053">"<xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_year" msgid="3149809685340130039">"<xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8394717255950176156">"egun"</string>
     <string name="days" msgid="4570879797423034973">"egun"</string>
     <string name="hour" msgid="7796325297097314653">"ordu"</string>
