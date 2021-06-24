@@ -2378,7 +2378,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 if (displayShouldSleep) {
                     rootTask.goToSleepIfPossible(false /* shuttingDown */);
                 } else {
-                    rootTask.forAllLeafTaskFragments(
+                    rootTask.forAllLeafTasksAndLeafTaskFragments(
                             taskFragment -> taskFragment.awakeFromSleeping(),
                             true /* traverseTopToBottom */);
                     if (rootTask.isFocusedRootTaskOnDisplay()
