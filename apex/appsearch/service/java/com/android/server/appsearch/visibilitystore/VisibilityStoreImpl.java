@@ -30,9 +30,9 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
+import com.android.server.appsearch.external.localstorage.visibilitystore.VisibilityStore;
 import com.android.server.appsearch.util.PackageUtil;
 
 import com.google.android.icing.proto.PersistType;
@@ -60,25 +60,11 @@ import java.util.Set;
  * <p>This class doesn't handle any locking itself. Its callers should handle the locking at a
  * higher level.
  *
- * <p>NOTE: This class holds an instance of AppSearchImpl and AppSearchImpl holds an instance of
- * this class. Take care to not cause any circular dependencies.
- *
  * @hide
  */
-public class VisibilityStore {
-    /** No-op uid that won't have any visibility settings. */
-    public static final int NO_OP_UID = -1;
-
+public class VisibilityStoreImpl implements VisibilityStore {
     /** Version for the visibility schema */
     private static final int SCHEMA_VERSION = 0;
-
-    /**
-     * These cannot have any of the special characters used by AppSearchImpl (e.g. {@code
-     * AppSearchImpl#PACKAGE_DELIMITER} or {@code AppSearchImpl#DATABASE_DELIMITER}.
-     */
-    public static final String PACKAGE_NAME = "VS#Pkg";
-
-    @VisibleForTesting public static final String DATABASE_NAME = "VS#Db";
 
     /** Namespace of documents that contain visibility settings */
     private static final String NAMESPACE = "";
@@ -92,11 +78,10 @@ public class VisibilityStore {
     private final Context mUserContext;
 
     /** Stores the schemas that are platform-hidden. All values are prefixed. */
-    private final NotPlatformSurfaceableMap mNotPlatformSurfaceableMap =
-            new NotPlatformSurfaceableMap();
+    private final NotDisplayedBySystemMap mNotDisplayedBySystemMap = new NotDisplayedBySystemMap();
 
-    /** Stores the schemas that are package accessible. All values are prefixed. */
-    private final PackageAccessibleMap mPackageAccessibleMap = new PackageAccessibleMap();
+    /** Stores the schemas that are visible to 3p packages. All values are prefixed. */
+    private final VisibleToPackagesMap mVisibleToPackagesMap = new VisibleToPackagesMap();
 
     /**
      * Creates and initializes VisibilityStore.
@@ -105,41 +90,41 @@ public class VisibilityStore {
      * @param userContext Context of the user that the call is being made as
      */
     @NonNull
-    public static VisibilityStore create(
+    public static VisibilityStoreImpl create(
             @NonNull AppSearchImpl appSearchImpl, @NonNull Context userContext)
             throws AppSearchException {
-        return new VisibilityStore(appSearchImpl, userContext);
+        return new VisibilityStoreImpl(appSearchImpl, userContext);
     }
 
-    private VisibilityStore(@NonNull AppSearchImpl appSearchImpl, @NonNull Context userContext)
+    private VisibilityStoreImpl(@NonNull AppSearchImpl appSearchImpl, @NonNull Context userContext)
             throws AppSearchException {
         mAppSearchImpl = Objects.requireNonNull(appSearchImpl);
         mUserContext = Objects.requireNonNull(userContext);
 
         GetSchemaResponse getSchemaResponse = mAppSearchImpl.getSchema(PACKAGE_NAME, DATABASE_NAME);
         boolean hasVisibilityType = false;
-        boolean hasPackageAccessibleType = false;
+        boolean hasVisibleToPackagesType = false;
         for (AppSearchSchema schema : getSchemaResponse.getSchemas()) {
             if (schema.getSchemaType().equals(VisibilityDocument.SCHEMA_TYPE)) {
                 hasVisibilityType = true;
-            } else if (schema.getSchemaType().equals(PackageAccessibleDocument.SCHEMA_TYPE)) {
-                hasPackageAccessibleType = true;
+            } else if (schema.getSchemaType().equals(VisibleToPackagesDocument.SCHEMA_TYPE)) {
+                hasVisibleToPackagesType = true;
             }
 
-            if (hasVisibilityType && hasPackageAccessibleType) {
+            if (hasVisibilityType && hasVisibleToPackagesType) {
                 // Found both our types, can exit early.
                 break;
             }
         }
-        if (!hasVisibilityType || !hasPackageAccessibleType) {
+        if (!hasVisibilityType || !hasVisibleToPackagesType) {
             // Schema type doesn't exist yet. Add it.
             mAppSearchImpl.setSchema(
                     PACKAGE_NAME,
                     DATABASE_NAME,
-                    Arrays.asList(VisibilityDocument.SCHEMA, PackageAccessibleDocument.SCHEMA),
+                    Arrays.asList(VisibilityDocument.SCHEMA, VisibleToPackagesDocument.SCHEMA),
                     /*visibilityStore=*/ null,  // Avoid recursive calls
-                    /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
-                    /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                    /*schemasNotDisplayedBySystem=*/ Collections.emptyList(),
+                    /*schemasVisibleToPackages=*/ Collections.emptyMap(),
                     /*forceOverride=*/ false,
                     /*version=*/ SCHEMA_VERSION);
         }
@@ -177,26 +162,25 @@ public class VisibilityStore {
                 }
 
                 // Update platform visibility settings
-                String[] notPlatformSurfaceableSchemas =
-                        visibilityDocument.getNotPlatformSurfaceableSchemas();
-                if (notPlatformSurfaceableSchemas != null) {
-                    mNotPlatformSurfaceableMap.setNotPlatformSurfaceable(
+                String[] notDisplayedBySystemSchemas = visibilityDocument.getNotDisplayedBySystem();
+                if (notDisplayedBySystemSchemas != null) {
+                    mNotDisplayedBySystemMap.setNotDisplayedBySystem(
                             packageName,
                             databaseName,
-                            new ArraySet<>(notPlatformSurfaceableSchemas));
+                            new ArraySet<>(notDisplayedBySystemSchemas));
                 }
 
                 // Update 3p package visibility settings
                 Map<String, Set<PackageIdentifier>> schemaToPackageIdentifierMap = new ArrayMap<>();
-                GenericDocument[] packageAccessibleDocuments =
-                        visibilityDocument.getPackageAccessibleSchemas();
-                if (packageAccessibleDocuments != null) {
-                    for (int i = 0; i < packageAccessibleDocuments.length; i++) {
-                        PackageAccessibleDocument packageAccessibleDocument =
-                                new PackageAccessibleDocument(packageAccessibleDocuments[i]);
+                GenericDocument[] visibleToPackagesDocuments =
+                        visibilityDocument.getVisibleToPackages();
+                if (visibleToPackagesDocuments != null) {
+                    for (int i = 0; i < visibleToPackagesDocuments.length; i++) {
+                        VisibleToPackagesDocument visibleToPackagesDocument =
+                                new VisibleToPackagesDocument(visibleToPackagesDocuments[i]);
                         PackageIdentifier packageIdentifier =
-                                packageAccessibleDocument.getPackageIdentifier();
-                        String prefixedSchema = packageAccessibleDocument.getAccessibleSchemaType();
+                                visibleToPackagesDocument.getPackageIdentifier();
+                        String prefixedSchema = visibleToPackagesDocument.getAccessibleSchemaType();
                         Set<PackageIdentifier> packageIdentifiers =
                                 schemaToPackageIdentifierMap.get(prefixedSchema);
                         if (packageIdentifiers == null) {
@@ -206,61 +190,50 @@ public class VisibilityStore {
                         schemaToPackageIdentifierMap.put(prefixedSchema, packageIdentifiers);
                     }
                 }
-                mPackageAccessibleMap.setPackageAccessible(
+                mVisibleToPackagesMap.setVisibleToPackages(
                         packageName, databaseName, schemaToPackageIdentifierMap);
             }
         }
     }
 
-    /**
-     * Sets visibility settings for the given database. Any previous visibility settings will be
-     * overwritten.
-     *
-     * @param packageName Package of app that owns the {@code schemasNotPlatformSurfaceable}.
-     * @param databaseName Database that owns the {@code schemasNotPlatformSurfaceable}.
-     * @param schemasNotPlatformSurfaceable Set of prefixed schemas that should be hidden from the
-     *     platform.
-     * @param schemasPackageAccessible Map of prefixed schemas to a list of package identifiers that
-     *     have access to the schema.
-     * @throws AppSearchException on AppSearchImpl error.
-     */
+    @Override
     public void setVisibility(
             @NonNull String packageName,
             @NonNull String databaseName,
-            @NonNull Set<String> schemasNotPlatformSurfaceable,
-            @NonNull Map<String, List<PackageIdentifier>> schemasPackageAccessible)
+            @NonNull Set<String> schemasNotDisplayedBySystem,
+            @NonNull Map<String, List<PackageIdentifier>> schemasVisibleToPackages)
             throws AppSearchException {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(databaseName);
-        Objects.requireNonNull(schemasNotPlatformSurfaceable);
-        Objects.requireNonNull(schemasPackageAccessible);
+        Objects.requireNonNull(schemasNotDisplayedBySystem);
+        Objects.requireNonNull(schemasVisibleToPackages);
 
         // Persist the document
         VisibilityDocument.Builder visibilityDocument =
                 new VisibilityDocument.Builder(
                         NAMESPACE, /*id=*/ getVisibilityDocumentId(packageName, databaseName));
-        if (!schemasNotPlatformSurfaceable.isEmpty()) {
-            visibilityDocument.setSchemasNotPlatformSurfaceable(
-                    schemasNotPlatformSurfaceable.toArray(new String[0]));
+        if (!schemasNotDisplayedBySystem.isEmpty()) {
+            visibilityDocument.setNotDisplayedBySystem(
+                    schemasNotDisplayedBySystem.toArray(new String[0]));
         }
 
         Map<String, Set<PackageIdentifier>> schemaToPackageIdentifierMap = new ArrayMap<>();
-        List<PackageAccessibleDocument> packageAccessibleDocuments = new ArrayList<>();
+        List<VisibleToPackagesDocument> visibleToPackagesDocuments = new ArrayList<>();
         for (Map.Entry<String, List<PackageIdentifier>> entry :
-                schemasPackageAccessible.entrySet()) {
+                schemasVisibleToPackages.entrySet()) {
             for (int i = 0; i < entry.getValue().size(); i++) {
-                PackageAccessibleDocument packageAccessibleDocument =
-                        new PackageAccessibleDocument.Builder(NAMESPACE, /*id=*/ "")
+                VisibleToPackagesDocument visibleToPackagesDocument =
+                        new VisibleToPackagesDocument.Builder(NAMESPACE, /*id=*/ "")
                                 .setAccessibleSchemaType(entry.getKey())
                                 .setPackageIdentifier(entry.getValue().get(i))
                                 .build();
-                packageAccessibleDocuments.add(packageAccessibleDocument);
+                visibleToPackagesDocuments.add(visibleToPackagesDocument);
             }
             schemaToPackageIdentifierMap.put(entry.getKey(), new ArraySet<>(entry.getValue()));
         }
-        if (!packageAccessibleDocuments.isEmpty()) {
-            visibilityDocument.setPackageAccessibleSchemas(
-                    packageAccessibleDocuments.toArray(new PackageAccessibleDocument[0]));
+        if (!visibleToPackagesDocuments.isEmpty()) {
+            visibilityDocument.setVisibleToPackages(
+                    visibleToPackagesDocuments.toArray(new VisibleToPackagesDocument[0]));
         }
 
         mAppSearchImpl.putDocument(
@@ -269,9 +242,9 @@ public class VisibilityStore {
         mAppSearchImpl.persistToDisk(PersistType.Code.LITE);
 
         // Update derived data structures.
-        mNotPlatformSurfaceableMap.setNotPlatformSurfaceable(
-                packageName, databaseName, schemasNotPlatformSurfaceable);
-        mPackageAccessibleMap.setPackageAccessible(
+        mNotDisplayedBySystemMap.setNotDisplayedBySystem(
+                packageName, databaseName, schemasNotDisplayedBySystem);
+        mVisibleToPackagesMap.setVisibleToPackages(
                 packageName, databaseName, schemaToPackageIdentifierMap);
     }
 
@@ -287,17 +260,7 @@ public class VisibilityStore {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    /**
-     * Checks whether {@code prefixedSchema} can be searched over by the {@code callerUid}.
-     *
-     * @param packageName Package that owns the schema.
-     * @param databaseName Database within the package that owns the schema.
-     * @param prefixedSchema Prefixed schema type the caller is trying to access.
-     * @param callerUid UID of the client making the globalQuery call.
-     * @param callerHasSystemAccess Whether the caller has been identified as having
-     *                              access to schemas marked system surfaceable by {@link
-     *                              #doesCallerHaveSystemAccess}.
-     */
+    @Override
     public boolean isSchemaSearchableByCaller(
             @NonNull String packageName,
             @NonNull String databaseName,
@@ -313,13 +276,13 @@ public class VisibilityStore {
         }
 
         if (callerHasSystemAccess
-                && mNotPlatformSurfaceableMap.isSchemaPlatformSurfaceable(
+                && mNotDisplayedBySystemMap.isSchemaDisplayedBySystem(
                 packageName, databaseName, prefixedSchema)) {
             return true;
         }
 
         // May not be platform surfaceable, but might still be accessible through 3p access.
-        return isSchemaPackageAccessible(packageName, databaseName, prefixedSchema, callerUid);
+        return isSchemaVisibleToPackages(packageName, databaseName, prefixedSchema, callerUid);
     }
 
     /**
@@ -331,13 +294,13 @@ public class VisibilityStore {
      * certificate was once used to sign the package, the package will still be granted access. This
      * does not handle packages that have been signed by multiple certificates.
      */
-    private boolean isSchemaPackageAccessible(
+    private boolean isSchemaVisibleToPackages(
             @NonNull String packageName,
             @NonNull String databaseName,
             @NonNull String prefixedSchema,
             int callerUid) {
         Set<PackageIdentifier> packageIdentifiers =
-                mPackageAccessibleMap.getAccessiblePackages(
+                mVisibleToPackagesMap.getAccessiblePackages(
                         packageName, databaseName, prefixedSchema);
         if (packageIdentifiers.isEmpty()) {
             return false;

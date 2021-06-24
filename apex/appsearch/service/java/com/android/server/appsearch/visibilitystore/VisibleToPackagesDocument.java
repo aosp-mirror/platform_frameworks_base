@@ -26,7 +26,7 @@ import android.app.appsearch.PackageIdentifier;
  *
  * @see android.app.appsearch.SetSchemaRequest.Builder#setSchemaTypeVisibilityForPackage
  */
-class PackageAccessibleDocument extends GenericDocument {
+class VisibleToPackagesDocument extends GenericDocument {
     /** Schema type for nested documents that hold package accessible information. */
     public static final String SCHEMA_TYPE = "PackageAccessibleType";
 
@@ -59,7 +59,7 @@ class PackageAccessibleDocument extends GenericDocument {
                     .build())
             .build();
 
-    public PackageAccessibleDocument(@NonNull GenericDocument genericDocument) {
+    VisibleToPackagesDocument(@NonNull GenericDocument genericDocument) {
         super(genericDocument);
     }
 
@@ -76,9 +76,9 @@ class PackageAccessibleDocument extends GenericDocument {
         return new PackageIdentifier(packageName, sha256Cert);
     }
 
-    /** Builder for {@link PackageAccessibleDocument} instances. */
-    public static class Builder extends GenericDocument.Builder<PackageAccessibleDocument.Builder> {
-        public Builder(@NonNull String namespace, @NonNull String id) {
+    /** Builder for {@link VisibleToPackagesDocument} instances. */
+    public static class Builder extends GenericDocument.Builder<VisibleToPackagesDocument.Builder> {
+        Builder(@NonNull String namespace, @NonNull String id) {
             super(namespace, id, SCHEMA_TYPE);
         }
 
@@ -98,8 +98,8 @@ class PackageAccessibleDocument extends GenericDocument {
 
         @Override
         @NonNull
-        public PackageAccessibleDocument build() {
-            return new PackageAccessibleDocument(super.build());
+        public VisibleToPackagesDocument build() {
+            return new VisibleToPackagesDocument(super.build());
         }
     }
 }

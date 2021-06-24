@@ -33,6 +33,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -46,7 +47,7 @@ import org.mockito.Spy;
 /** Tests for {@link SideStage} */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class SideStageTests {
+public class SideStageTests extends ShellTestCase {
     @Mock private ShellTaskOrganizer mTaskOrganizer;
     @Mock private StageTaskListener.StageListenerCallbacks mCallbacks;
     @Mock private SyncTransactionQueue mSyncQueue;
@@ -60,8 +61,8 @@ public class SideStageTests {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mRootTask = new TestRunningTaskInfoBuilder().build();
-        mSideStage = new SideStage(mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks, mSyncQueue,
-                mSurfaceSession);
+        mSideStage = new SideStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks,
+                mSyncQueue, mSurfaceSession);
         mSideStage.onTaskAppeared(mRootTask, mRootLeash);
     }
 

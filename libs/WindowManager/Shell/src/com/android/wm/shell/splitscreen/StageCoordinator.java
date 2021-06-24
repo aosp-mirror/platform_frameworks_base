@@ -152,6 +152,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSyncQueue,
                 mSurfaceSession);
         mSideStage = new SideStage(
+                mContext,
                 mTaskOrganizer,
                 mDisplayId,
                 mSideStageListener,

@@ -602,18 +602,6 @@ class Task extends TaskFragment {
      */
     private boolean mForceNotOrganized;
 
-    /**
-     * This task was created by the task organizer which has the following implementations.
-     * <ul>
-     *     <lis>The task won't be removed when it is empty. Removal has to be an explicit request
-     *     from the task organizer.</li>
-     *     <li>Unlike other non-root tasks, it's direct children are visible to the task
-     *     organizer for ordering purposes.</li>
-     * </ul>
-     */
-    @VisibleForTesting
-    boolean mCreatedByOrganizer;
-
     // Tracking cookie for the creation of this task.
     IBinder mLaunchCookie;
 
@@ -641,7 +629,7 @@ class Task extends TaskFragment {
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
             boolean _createdByOrganizer, IBinder _launchCookie, boolean _deferTaskAppear,
             boolean _removeWithTaskOrganizer) {
-        super(atmService);
+        super(atmService, _createdByOrganizer);
 
         mTaskId = _taskId;
         mUserId = _userId;
@@ -693,7 +681,6 @@ class Task extends TaskFragment {
         mHandler = new ActivityTaskHandler(mTaskSupervisor.mLooper);
         mCurrentUser = mAtmService.mAmInternal.getCurrentUserId();
 
-        mCreatedByOrganizer = _createdByOrganizer;
         mLaunchCookie = _launchCookie;
         mDeferTaskAppear = _deferTaskAppear;
         mRemoveWithTaskOrganizer = _removeWithTaskOrganizer;
@@ -754,10 +741,7 @@ class Task extends TaskFragment {
     }
 
     void removeIfPossible(String reason) {
-        final boolean isRootTask = isRootTask();
-        if (!isRootTask) {
-            mAtmService.getLockTaskController().clearLockedTask(this);
-        }
+        mAtmService.getLockTaskController().clearLockedTask(this);
         if (shouldDeferRemoval()) {
             if (DEBUG_ROOT_TASK) Slog.i(TAG,
                     "removeTask:" + reason + " deferring removing taskId=" + mTaskId);
