@@ -82,8 +82,8 @@ public class PipSurfaceTransactionHelper {
         final float scale = sourceBounds.width() <= sourceBounds.height()
                 ? (float) destinationBounds.width() / sourceBounds.width()
                 : (float) destinationBounds.height() / sourceBounds.height();
-        final float left = destinationBounds.left - insets.left * scale;
-        final float top = destinationBounds.top - insets.top * scale;
+        final float left = destinationBounds.left - (insets.left + sourceBounds.left) * scale;
+        final float top = destinationBounds.top - (insets.top + sourceBounds.top) * scale;
         mTmpTransform.setScale(scale, scale);
         final float cornerRadius = getScaledCornerRadius(mTmpDestinationRect, destinationBounds);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
