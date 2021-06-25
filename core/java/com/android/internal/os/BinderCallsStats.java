@@ -1196,15 +1196,12 @@ public class BinderCallsStats implements BinderInternal.Observer {
         private final Context mContext;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
         private final BinderCallsStats mBinderCallsStats;
-        private final int mProcessSource;
 
-        public SettingsObserver(Context context, BinderCallsStats binderCallsStats,
-                    int processSource) {
+        public SettingsObserver(Context context, BinderCallsStats binderCallsStats) {
             super(BackgroundThread.getHandler());
             mContext = context;
             context.getContentResolver().registerContentObserver(mUri, false, this);
             mBinderCallsStats = binderCallsStats;
-            mProcessSource = processSource;
             // Always kick once to ensure that we match current state
             onChange();
         }
