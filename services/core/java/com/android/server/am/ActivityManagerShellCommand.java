@@ -912,14 +912,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
             t.set(System.currentTimeMillis());
             heapFile = "/data/local/tmp/heapdump-" + t.format("%Y%m%d-%H%M%S") + ".prof";
         }
-        pw.println("File: " + heapFile);
-        pw.flush();
 
         // Writes an error message to stderr on failure
         ParcelFileDescriptor fd = openFileForSystem(heapFile, "w");
         if (fd == null) {
             return -1;
         }
+
+        pw.println("File: " + heapFile);
+        pw.flush();
 
         final CountDownLatch latch = new CountDownLatch(1);
 
