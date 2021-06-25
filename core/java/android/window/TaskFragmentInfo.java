@@ -16,7 +16,10 @@
 
 package android.window;
 
+import static android.app.WindowConfiguration.WindowingMode;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.os.IBinder;
@@ -92,6 +95,28 @@ public final class TaskFragmentInfo implements Parcelable {
 
     public boolean isVisible() {
         return mIsVisible;
+    }
+
+    @WindowingMode
+    public int getWindowingMode() {
+        return mConfiguration.windowConfiguration.getWindowingMode();
+    }
+
+    /**
+     * Returns {@code true} if the parameters that are important for task fragment organizers are
+     * equal between this {@link TaskFragmentInfo} and {@param that}.
+     */
+    public boolean equalsForTaskFragmentOrganizer(@Nullable TaskFragmentInfo that) {
+        if (that == null) {
+            return false;
+        }
+
+        return mFragmentToken.equals(that.mFragmentToken)
+                && mInitialComponentName.equals(that.mInitialComponentName)
+                && mToken.equals(that.mToken)
+                && mIsEmpty == that.mIsEmpty
+                && mIsVisible == that.mIsVisible
+                && getWindowingMode() == that.getWindowingMode();
     }
 
     private TaskFragmentInfo(Parcel in) {
