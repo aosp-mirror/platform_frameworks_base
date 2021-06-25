@@ -23,15 +23,13 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANI
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_STARTING_REVEAL;
-import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_CONFIGS;
-import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_WINDOW_CONFIGS;
+import static com.android.server.wm.WindowOrganizerController.configurationsAreEqualForOrganizer;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -68,13 +66,6 @@ import java.util.function.Consumer;
  */
 class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private static final String TAG = "TaskOrganizerController";
-
-    /**
-     * Masks specifying which configurations are important to report back to an organizer when
-     * changed.
-     */
-    private static final int REPORT_CONFIGS = CONTROLLABLE_CONFIGS;
-    private static final int REPORT_WINDOW_CONFIGS = CONTROLLABLE_WINDOW_CONFIGS;
 
     // The set of modes that are currently supports
     // TODO: Remove once the task organizer can support all modes
@@ -790,18 +781,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         mTmpTaskInfo.configuration.unset();
         task.fillTaskInfo(mTmpTaskInfo);
 
-        boolean changed = !mTmpTaskInfo.equalsForTaskOrganizer(lastInfo);
-        if (!changed) {
-            int cfgChanges = mTmpTaskInfo.configuration.diff(lastInfo.configuration);
-            final int winCfgChanges = (cfgChanges & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0
-                    ? (int) mTmpTaskInfo.configuration.windowConfiguration.diff(
-                            lastInfo.configuration.windowConfiguration,
-                            true /* compareUndefined */) : 0;
-            if ((winCfgChanges & REPORT_WINDOW_CONFIGS) == 0) {
-                cfgChanges &= ~ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
-            }
-            changed = (cfgChanges & REPORT_CONFIGS) != 0;
-        }
+        boolean changed = !mTmpTaskInfo.equalsForTaskOrganizer(lastInfo)
+                || !configurationsAreEqualForOrganizer(
+                        mTmpTaskInfo.configuration, lastInfo.configuration);
         if (!(changed || force)) {
             // mTmpTaskInfo will be reused next time.
             return;
