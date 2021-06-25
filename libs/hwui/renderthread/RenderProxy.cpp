@@ -26,7 +26,6 @@
 #include "renderthread/CanvasContext.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
-#include "thread/CommonPool.h"
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
 
@@ -41,17 +40,6 @@ RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode,
         return CanvasContext::create(mRenderThread, translucent, rootRenderNode, contextFactory);
     });
     mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode);
-}
-
-void RenderProxy::asyncDelete(RenderProxy* proxy) {
-    if (!proxy) return;
-
-    if (proxy->mContext) {
-        // Use the common pool because ~RenderProxy blocks on calling into RenderThread
-        CommonPool::post([proxy]() { delete proxy; });
-    } else {
-        delete proxy;
-    }
 }
 
 RenderProxy::~RenderProxy() {
