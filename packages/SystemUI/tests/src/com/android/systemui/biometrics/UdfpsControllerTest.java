@@ -56,6 +56,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.util.concurrency.Execution;
+import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -75,7 +77,7 @@ import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 public class UdfpsControllerTest extends SysuiTestCase {
 
     // Use this for inputs going into SystemUI. Use UdfpsController.mUdfpsSensorId for things
@@ -89,6 +91,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private UdfpsController mUdfpsController;
 
     // Dependencies
+    private Execution mExecution;
     @Mock
     private LayoutInflater mLayoutInflater;
     @Mock
@@ -145,6 +148,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         setUpResources();
+        mExecution = new FakeExecution();
+
         when(mLayoutInflater.inflate(R.layout.udfps_view, null, false)).thenReturn(mUdfpsView);
         final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
 
@@ -166,6 +171,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mFgExecutor = new FakeExecutor(new FakeSystemClock());
         mUdfpsController = new UdfpsController(
                 mContext,
+                mExecution,
                 mLayoutInflater,
                 mFingerprintManager,
                 mWindowManager,
