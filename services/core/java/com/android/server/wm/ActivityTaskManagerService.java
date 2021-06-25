@@ -5256,11 +5256,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition) {
-            ActivityTaskManagerService.this.cancelRecentsAnimation(restoreHomeRootTaskPosition);
-        }
-
-        @Override
         public boolean checkCanCloseSystemDialogs(int pid, int uid, @Nullable String packageName) {
             return ActivityTaskManagerService.this.checkCanCloseSystemDialogs(pid, uid,
                     packageName);
