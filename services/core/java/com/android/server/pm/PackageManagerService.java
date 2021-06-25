@@ -245,7 +245,6 @@ import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingPackageUtils.ParseFlags;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
-import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
@@ -17102,9 +17101,15 @@ public class PackageManagerService extends IPackageManager.Stub
             return new ParceledListSlice<IntentFilter>(result) {
                 @Override
                 protected void writeElement(IntentFilter parcelable, Parcel dest, int callFlags) {
-                    // WatchedIntentFilter has final Parcelable methods, so redirect to the subclass
-                    ((ParsedIntentInfo) parcelable).writeIntentInfoToParcel(dest,
-                            callFlags);
+                    parcelable.writeToParcel(dest, callFlags);
+                }
+
+                @Override
+                protected void writeParcelableCreator(IntentFilter parcelable, Parcel dest) {
+                    // All Parcel#writeParcelableCreator does is serialize the class name to
+                    // access via reflection to grab its CREATOR. This does that manually, pointing
+                    // to the parent IntentFilter so that all of the subclass fields are ignored.
+                    dest.writeString(IntentFilter.class.getName());
                 }
             };
         }
