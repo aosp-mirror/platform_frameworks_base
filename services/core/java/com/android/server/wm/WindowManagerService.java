@@ -8183,11 +8183,11 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP, displayContent,
                     true /* includingParents */);
         }
-        handleTaskFocusChange(touchedWindow.getTask());
+        handleTaskFocusChange(touchedWindow.getTask(), touchedWindow.mActivityRecord);
     }
 
     @VisibleForTesting
-    void handleTaskFocusChange(Task task) {
+    void handleTaskFocusChange(Task task, ActivityRecord touchedActivity) {
         if (task == null) {
             return;
         }
@@ -8206,7 +8206,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        mAtmService.setFocusedTask(task.mTaskId);
+        mAtmService.setFocusedTask(task.mTaskId, touchedActivity);
     }
 
     /**

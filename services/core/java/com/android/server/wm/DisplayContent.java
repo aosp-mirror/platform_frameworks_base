@@ -770,6 +770,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mTmpWindow = null;
                 return true;
             }
+
+            if (focusedApp.getTask() == activity.getTask()
+                    && focusedApp.getTaskFragment() != activity.getTaskFragment()) {
+                // Do not use the activity window of another TaskFragment in the same leaf Task
+                return false;
+            }
         }
 
         ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "findFocusedWindow: Found new focus @ %s", w);

@@ -79,12 +79,6 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
-    "-2029985709": {
-      "message": "setFocusedTask: taskId=%d",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_FOCUS",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
     "-2024464438": {
       "message": "app-onAnimationFinished(): mOuter=%s",
       "level": "DEBUG",
@@ -168,12 +162,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
-    },
-    "-1939358269": {
-      "message": "mRecentScreenshotAnimator finish",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
     "-1938839202": {
       "message": "SURFACE LEAK DESTROY: %s",
@@ -1782,6 +1770,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
+    "-55185509": {
+      "message": "setFocusedTask: taskId=%d touchedActivity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "-50336993": {
       "message": "moveFocusableActivityToTop: activity=%s",
@@ -3534,12 +3528,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
-    },
-    "1984470582": {
-      "message": "Creating TaskScreenshotAnimatable: task: %s width: %d height: %d",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/TaskScreenshotAnimatable.java"
     },
     "1984782949": {
       "message": ">>> OPEN TRANSACTION animate",
