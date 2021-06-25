@@ -681,6 +681,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
+    char javaZygoteForkLoopBuf[sizeof("-XX:ForceJavaZygoteForkLoop=") + PROPERTY_VALUE_MAX];
     char jdwpProviderBuf[sizeof("-XjdwpProvider:") - 1 + PROPERTY_VALUE_MAX];
     char opaqueJniIds[sizeof("-Xopaque-jni-ids:") - 1 + PROPERTY_VALUE_MAX];
     char bootImageBuf[sizeof("-Ximage:") - 1 + PROPERTY_VALUE_MAX];
@@ -897,6 +898,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     }
 
     parseRuntimeOption("dalvik.vm.backgroundgctype", backgroundgcOptsBuf, "-XX:BackgroundGC=");
+
+    /*
+     * Enable/disable zygote native fork loop.
+     */
+    parseRuntimeOption("dalvik.vm.force-java-zygote-fork-loop",
+                       javaZygoteForkLoopBuf,
+                       "-XX:ForceJavaZygoteForkLoop=");
 
     /*
      * Enable debugging only for apps forked from zygote.
