@@ -566,8 +566,7 @@
     <string name="user_nickname" msgid="262624187455825083">"Biệt hiệu"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Thêm khách"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Xóa phiên khách"</string>
-    <!-- no translation found for guest_reset_guest (6110013010356013758) -->
-    <skip />
+    <string name="guest_reset_guest" msgid="6110013010356013758">"Đặt lại phiên khách"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Khách"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Chụp ảnh"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Chọn một hình ảnh"</string>
