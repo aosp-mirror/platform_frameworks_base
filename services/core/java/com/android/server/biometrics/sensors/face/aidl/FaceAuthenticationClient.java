@@ -40,11 +40,11 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.LockoutTracker;
-import com.android.server.biometrics.sensors.face.ReEnrollNotificationUtils;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
 import java.util.ArrayList;
@@ -182,7 +182,7 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
                 }
                 break;
             case BiometricConstants.BIOMETRIC_ERROR_RE_ENROLL:
-                ReEnrollNotificationUtils.showReEnrollmentNotification(getContext());
+                BiometricNotificationUtils.showReEnrollmentNotification(getContext());
                 break;
             default:
                 break;
