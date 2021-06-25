@@ -569,7 +569,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Stop scanning when bouncer becomes visible
         setKeyguardBouncerVisibility(true);
         clearInvocations(mFaceManager);
-        mKeyguardUpdateMonitor.requestFaceAuth();
+        mKeyguardUpdateMonitor.requestFaceAuth(true);
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt());
     }
 
