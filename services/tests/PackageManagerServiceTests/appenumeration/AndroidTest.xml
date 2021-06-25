@@ -32,6 +32,7 @@
     <!-- Load additional APKs onto device -->
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
         <option name="push" value="AppEnumerationSyncProviderTestApp.apk->/data/local/tmp/appenumerationtests/AppEnumerationSyncProviderTestApp.apk" />
+        <option name="push" value="AppEnumerationHasAppOpPermissionTestApp.apk->/data/local/tmp/appenumerationtests/AppEnumerationHasAppOpPermissionTestApp.apk" />
     </target_preparer>
 
     <option name="test-tag" value="AppEnumerationInternalTest" />
