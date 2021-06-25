@@ -62,10 +62,14 @@ enum {
  * references RenderProxy fields. This is safe as RenderProxy cannot
  * be deleted if it is blocked inside a call.
  */
-class RenderProxy {
+class RenderProxy final {
 public:
     RenderProxy(bool opaque, RenderNode* rootNode, IContextFactory* contextFactory);
-    virtual ~RenderProxy();
+    ~RenderProxy();
+
+    // Schedules a delete of the RenderProxy at a later date. Avoids blocking the current thread
+    // on destruction which ~RenderProxy does by default.
+    static void asyncDelete(RenderProxy*);
 
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
