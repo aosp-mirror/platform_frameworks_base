@@ -4019,6 +4019,11 @@
   <java-symbol type="bool" name="config_bugReportHandlerEnabled" />
   <java-symbol type="string" name="config_defaultBugReportHandlerApp" />
 
+  <!-- For profcollect report uploader -->
+  <java-symbol type="bool" name="config_profcollectReportUploaderEnabled" />
+  <java-symbol type="string" name="config_defaultProfcollectReportUploaderApp" />
+  <java-symbol type="string" name="config_defaultProfcollectReportUploaderAction" />
+
   <java-symbol type="string" name="usb_device_resolve_prompt_warn" />
 
   <!-- For Accessibility system actions -->
@@ -4408,4 +4413,6 @@
   <java-symbol type="integer" name="config_hotwordDetectedResultMaxBundleSize" />
 
   <java-symbol type="dimen" name="config_wallpaperDimAmount" />
+
+  <java-symbol type="bool" name="config_volumeShowRemoteSessions" />
 </resources>

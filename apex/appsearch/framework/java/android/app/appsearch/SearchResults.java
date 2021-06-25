@@ -124,7 +124,8 @@ public class SearchResults implements Closeable {
                             wrapCallback(executor, callback));
                 }
             } else {
-                mService.getNextPage(mNextPageToken, mUserHandle, wrapCallback(executor, callback));
+                mService.getNextPage(mPackageName, mNextPageToken, mUserHandle,
+                        wrapCallback(executor, callback));
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -135,7 +136,7 @@ public class SearchResults implements Closeable {
     public void close() {
         if (!mIsClosed) {
             try {
-                mService.invalidateNextPageToken(mNextPageToken, mUserHandle);
+                mService.invalidateNextPageToken(mPackageName, mNextPageToken, mUserHandle);
                 mIsClosed = true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to close the SearchResults", e);

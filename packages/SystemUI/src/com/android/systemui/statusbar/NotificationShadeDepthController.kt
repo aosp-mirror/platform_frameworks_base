@@ -96,6 +96,15 @@ class NotificationShadeDepthController @Inject constructor(
     var globalActionsSpring = DepthAnimation()
     var showingHomeControls: Boolean = false
 
+    @VisibleForTesting
+    var brightnessMirrorSpring = DepthAnimation()
+    var brightnessMirrorVisible: Boolean = false
+        set(value) {
+            field = value
+            brightnessMirrorSpring.animateTo(if (value) blurUtils.blurRadiusOfRatio(1f)
+                else 0)
+        }
+
     var qsPanelExpansion = 0f
         set(value) {
             if (field == value) return
@@ -189,10 +198,13 @@ class NotificationShadeDepthController @Inject constructor(
         if (scrimsVisible || !blurUtils.supportsBlursOnWindows()) {
             blur = 0
         }
+        val zoomOut = blurUtils.ratioOfBlurRadius(blur)
+
+        // Brightness slider removes blur, but doesn't affect zooms
+        blur = (blur * (1f - brightnessMirrorSpring.ratio)).toInt()
 
         val opaque = scrimsVisible && !ignoreShadeBlurUntilHidden
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur, opaque)
-        val zoomOut = blurUtils.ratioOfBlurRadius(blur)
         try {
             if (root.isAttachedToWindow && root.windowToken != null) {
                 wallpaperManager.setWallpaperZoomOut(root.windowToken, zoomOut)
@@ -260,6 +272,7 @@ class NotificationShadeDepthController @Inject constructor(
                 shadeSpring.finishIfRunning()
                 shadeAnimation.finishIfRunning()
                 globalActionsSpring.finishIfRunning()
+                brightnessMirrorSpring.finishIfRunning()
             }
         }
 
@@ -425,6 +438,7 @@ class NotificationShadeDepthController @Inject constructor(
             it.println("shadeRadius: ${shadeSpring.radius}")
             it.println("shadeAnimation: ${shadeAnimation.radius}")
             it.println("globalActionsRadius: ${globalActionsSpring.radius}")
+            it.println("brightnessMirrorRadius: ${brightnessMirrorSpring.radius}")
             it.println("wakeAndUnlockBlur: $wakeAndUnlockBlurRadius")
             it.println("ignoreShadeBlurUntilHidden: $ignoreShadeBlurUntilHidden")
         }
