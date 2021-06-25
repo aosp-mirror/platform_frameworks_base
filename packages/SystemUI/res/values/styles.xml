@@ -404,6 +404,7 @@
         <item name="offStateColor">@android:color/system_neutral1_800</item>
         <item name="underSurfaceColor">@android:color/system_neutral1_1000</item>
         <item name="android:colorBackground">@android:color/system_neutral1_900</item>
+        <item name="android:itemTextAppearance">@style/Control.MenuItem</item>
     </style>
 
     <style name="Theme.SystemUI.QuickSettings.BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
