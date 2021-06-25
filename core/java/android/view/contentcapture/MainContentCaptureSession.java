@@ -323,9 +323,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (!hasStarted() && eventType != ContentCaptureEvent.TYPE_SESSION_STARTED
                 && eventType != ContentCaptureEvent.TYPE_CONTEXT_UPDATED) {
             // TODO(b/120494182): comment when this could happen (dialogs?)
-            Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
-                    + ContentCaptureEvent.getTypeAsString(eventType)
-                    + "): dropping because session not started yet");
+            if (sVerbose) {
+                Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
+                        + ContentCaptureEvent.getTypeAsString(eventType)
+                        + "): dropping because session not started yet");
+            }
             return;
         }
         if (mDisabled.get()) {
