@@ -40,6 +40,7 @@
 #include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
+#include "gnss/GnssAntennaInfoCallback.h"
 #include "gnss/GnssConfiguration.h"
 #include "gnss/GnssMeasurement.h"
 #include "gnss/Utils.h"
@@ -60,12 +61,7 @@
 
 static jclass class_location;
 static jclass class_gnssNavigationMessage;
-static jclass class_gnssAntennaInfoBuilder;
 static jclass class_gnssPowerStats;
-static jclass class_phaseCenterOffset;
-static jclass class_sphericalCorrections;
-static jclass class_arrayList;
-static jclass class_doubleArray;
 
 jobject android::mCallbacksObj = nullptr;
 
@@ -89,7 +85,6 @@ static jmethodID method_reportGeofenceAddStatus;
 static jmethodID method_reportGeofenceRemoveStatus;
 static jmethodID method_reportGeofencePauseStatus;
 static jmethodID method_reportGeofenceResumeStatus;
-static jmethodID method_reportAntennaInfo;
 static jmethodID method_reportNavigationMessages;
 static jmethodID method_reportLocationBatch;
 static jmethodID method_reportGnssServiceDied;
@@ -123,24 +118,8 @@ static jmethodID method_reportNfwNotification;
 static jmethodID method_isInEmergencySession;
 static jmethodID method_locationCtor;
 static jmethodID method_gnssNavigationMessageCtor;
-static jmethodID method_gnssAntennaInfoBuilderCtor;
 static jmethodID method_gnssPowerStatsCtor;
-static jmethodID method_phaseCenterOffsetCtor;
-static jmethodID method_sphericalCorrectionsCtor;
-static jmethodID method_arrayListCtor;
-static jmethodID method_arrayListAdd;
-static jmethodID method_gnssAntennaInfoBuilderSetCarrierFrequencyMHz;
-static jmethodID method_gnssAntennaInfoBuilderSetPhaseCenterOffset;
-static jmethodID method_gnssAntennaInfoBuilderSetPhaseCenterVariationCorrections;
-static jmethodID method_gnssAntennaInfoBuilderSetSignalGainCorrections;
-static jmethodID method_gnssAntennaInfoBuilderBuild;
 static jmethodID method_setSubHalPowerIndicationCapabilities;
-
-/*
- * Save a pointer to JavaVm to attach/detach threads executing
- * callback methods that need to make JNI calls.
- */
-JavaVM* android::ScopedJniThreadAttach::sJvm;
 
 using android::OK;
 using android::sp;
@@ -193,7 +172,6 @@ using IGnssCallback_V2_1 = android::hardware::gnss::V2_1::IGnssCallback;
 using IGnssDebug_V1_0 = android::hardware::gnss::V1_0::IGnssDebug;
 using IGnssDebug_V2_0 = android::hardware::gnss::V2_0::IGnssDebug;
 using IGnssAntennaInfo = android::hardware::gnss::V2_1::IGnssAntennaInfo;
-using IGnssAntennaInfoCallback = android::hardware::gnss::V2_1::IGnssAntennaInfoCallback;
 using IAGnssRil_V1_0 = android::hardware::gnss::V1_0::IAGnssRil;
 using IAGnssRil_V2_0 = android::hardware::gnss::V2_0::IAGnssRil;
 using IAGnss_V1_0 = android::hardware::gnss::V1_0::IAGnss;
@@ -954,208 +932,6 @@ Return<void> GnssNavigationMessageCallback::gnssNavigationMessageCb(
 }
 
 /*
- * GnssAntennaInfoCallback implements the callback methods required for the
- * GnssAntennaInfo interface.
- */
-struct GnssAntennaInfoCallback : public IGnssAntennaInfoCallback {
-    // Methods from V2_1::GnssAntennaInfoCallback follow.
-    Return<void> gnssAntennaInfoCb(
-            const hidl_vec<IGnssAntennaInfoCallback::GnssAntennaInfo>& gnssAntennaInfos);
-
-private:
-    jobject translateAllGnssAntennaInfos(
-            JNIEnv* env,
-            const hidl_vec<IGnssAntennaInfoCallback::GnssAntennaInfo>& gnssAntennaInfos);
-    jobject translateSingleGnssAntennaInfo(
-            JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo);
-    jobject translatePhaseCenterOffset(
-            JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo);
-    jobject translatePhaseCenterVariationCorrections(
-            JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo);
-    jobject translateSignalGainCorrections(
-            JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo);
-    jobjectArray translate2dDoubleArray(JNIEnv* env,
-                                        const hidl_vec<IGnssAntennaInfoCallback::Row>& array);
-    void translateAndReportGnssAntennaInfo(
-            const hidl_vec<IGnssAntennaInfoCallback::GnssAntennaInfo>& gnssAntennaInfos);
-    void reportAntennaInfo(JNIEnv* env, const jobject antennaInfosArray);
-};
-
-Return<void> GnssAntennaInfoCallback::gnssAntennaInfoCb(
-        const hidl_vec<IGnssAntennaInfoCallback::GnssAntennaInfo>& gnssAntennaInfos) {
-    translateAndReportGnssAntennaInfo(gnssAntennaInfos);
-    return Void();
-}
-
-jobjectArray GnssAntennaInfoCallback::translate2dDoubleArray(
-        JNIEnv* env, const hidl_vec<IGnssAntennaInfoCallback::Row>& array) {
-    jsize numRows = array.size();
-    if (numRows == 0) {
-        // Empty array
-        return NULL;
-    }
-    jsize numCols = array[0].row.size();
-    if (numCols <= 1) {
-        // phi angle separation is computed as 180.0 / (numColumns - 1), so can't be < 2.
-        return NULL;
-    }
-
-    // Allocate array of double arrays
-    jobjectArray returnArray = env->NewObjectArray(numRows, class_doubleArray, NULL);
-
-    // Create each double array
-    for (uint8_t i = 0; i < numRows; i++) {
-        jdoubleArray doubleArray = env->NewDoubleArray(numCols);
-        env->SetDoubleArrayRegion(doubleArray, (jsize)0, numCols, array[i].row.data());
-        env->SetObjectArrayElement(returnArray, (jsize)i, doubleArray);
-        env->DeleteLocalRef(doubleArray);
-    }
-    return returnArray;
-}
-
-jobject GnssAntennaInfoCallback::translateAllGnssAntennaInfos(
-        JNIEnv* env, const hidl_vec<IGnssAntennaInfoCallback::GnssAntennaInfo>& gnssAntennaInfos) {
-    jobject arrayList = env->NewObject(class_arrayList,
-                                       method_arrayListCtor); // Create new ArrayList instance
-
-    for (auto gnssAntennaInfo : gnssAntennaInfos) {
-        jobject gnssAntennaInfoObject = translateSingleGnssAntennaInfo(env, gnssAntennaInfo);
-
-        env->CallBooleanMethod(arrayList, method_arrayListAdd,
-                               gnssAntennaInfoObject); // Add the antennaInfo to the ArrayList
-
-        // Delete Local Refs
-        env->DeleteLocalRef(gnssAntennaInfoObject);
-    }
-    return arrayList;
-}
-
-jobject GnssAntennaInfoCallback::translatePhaseCenterOffset(
-        JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo) {
-    jobject phaseCenterOffset =
-            env->NewObject(class_phaseCenterOffset, method_phaseCenterOffsetCtor,
-                           gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.x,
-                           gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.xUncertainty,
-                           gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.y,
-                           gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.yUncertainty,
-                           gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.z,
-                           gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.zUncertainty);
-
-    return phaseCenterOffset;
-}
-
-jobject GnssAntennaInfoCallback::translatePhaseCenterVariationCorrections(
-        JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo) {
-    if (gnssAntennaInfo.phaseCenterVariationCorrectionMillimeters == NULL ||
-        gnssAntennaInfo.phaseCenterVariationCorrectionUncertaintyMillimeters == NULL) {
-        return NULL;
-    }
-
-    jobjectArray phaseCenterVariationCorrectionsArray =
-            translate2dDoubleArray(env, gnssAntennaInfo.phaseCenterVariationCorrectionMillimeters);
-    jobjectArray phaseCenterVariationCorrectionsUncertaintiesArray =
-            translate2dDoubleArray(env,
-                                   gnssAntennaInfo
-                                           .phaseCenterVariationCorrectionUncertaintyMillimeters);
-
-    if (phaseCenterVariationCorrectionsArray == NULL ||
-        phaseCenterVariationCorrectionsUncertaintiesArray == NULL) {
-        return NULL;
-    }
-
-    jobject phaseCenterVariationCorrections =
-            env->NewObject(class_sphericalCorrections, method_sphericalCorrectionsCtor,
-                           phaseCenterVariationCorrectionsArray,
-                           phaseCenterVariationCorrectionsUncertaintiesArray);
-
-    env->DeleteLocalRef(phaseCenterVariationCorrectionsArray);
-    env->DeleteLocalRef(phaseCenterVariationCorrectionsUncertaintiesArray);
-
-    return phaseCenterVariationCorrections;
-}
-
-jobject GnssAntennaInfoCallback::translateSignalGainCorrections(
-        JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo) {
-    if (gnssAntennaInfo.signalGainCorrectionDbi == NULL ||
-        gnssAntennaInfo.signalGainCorrectionUncertaintyDbi == NULL) {
-        return NULL;
-    }
-    jobjectArray signalGainCorrectionsArray =
-            translate2dDoubleArray(env, gnssAntennaInfo.signalGainCorrectionDbi);
-    jobjectArray signalGainCorrectionsUncertaintiesArray =
-            translate2dDoubleArray(env, gnssAntennaInfo.signalGainCorrectionUncertaintyDbi);
-
-    if (signalGainCorrectionsArray == NULL || signalGainCorrectionsUncertaintiesArray == NULL) {
-        return NULL;
-    }
-
-    jobject signalGainCorrections =
-            env->NewObject(class_sphericalCorrections, method_sphericalCorrectionsCtor,
-                           signalGainCorrectionsArray, signalGainCorrectionsUncertaintiesArray);
-
-    env->DeleteLocalRef(signalGainCorrectionsArray);
-    env->DeleteLocalRef(signalGainCorrectionsUncertaintiesArray);
-
-    return signalGainCorrections;
-}
-
-jobject GnssAntennaInfoCallback::translateSingleGnssAntennaInfo(
-        JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo) {
-    jobject phaseCenterOffset = translatePhaseCenterOffset(env, gnssAntennaInfo);
-
-    // Nullable
-    jobject phaseCenterVariationCorrections =
-            translatePhaseCenterVariationCorrections(env, gnssAntennaInfo);
-
-    // Nullable
-    jobject signalGainCorrections = translateSignalGainCorrections(env, gnssAntennaInfo);
-
-    // Get builder
-    jobject gnssAntennaInfoBuilderObject =
-            env->NewObject(class_gnssAntennaInfoBuilder, method_gnssAntennaInfoBuilderCtor);
-
-    // Set fields
-    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
-                          method_gnssAntennaInfoBuilderSetCarrierFrequencyMHz,
-                          gnssAntennaInfo.carrierFrequencyMHz);
-    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
-                          method_gnssAntennaInfoBuilderSetPhaseCenterOffset, phaseCenterOffset);
-    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
-                          method_gnssAntennaInfoBuilderSetPhaseCenterVariationCorrections,
-                          phaseCenterVariationCorrections);
-    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
-                          method_gnssAntennaInfoBuilderSetSignalGainCorrections,
-                          signalGainCorrections);
-
-    // build
-    jobject gnssAntennaInfoObject =
-            env->CallObjectMethod(gnssAntennaInfoBuilderObject, method_gnssAntennaInfoBuilderBuild);
-
-    // Delete Local Refs
-    env->DeleteLocalRef(phaseCenterOffset);
-    env->DeleteLocalRef(phaseCenterVariationCorrections);
-    env->DeleteLocalRef(signalGainCorrections);
-
-    return gnssAntennaInfoObject;
-}
-
-void GnssAntennaInfoCallback::translateAndReportGnssAntennaInfo(
-        const hidl_vec<IGnssAntennaInfoCallback::GnssAntennaInfo>& gnssAntennaInfos) {
-    JNIEnv* env = getJniEnv();
-
-    jobject arrayList = translateAllGnssAntennaInfos(env, gnssAntennaInfos);
-
-    reportAntennaInfo(env, arrayList);
-
-    env->DeleteLocalRef(arrayList);
-}
-
-void GnssAntennaInfoCallback::reportAntennaInfo(JNIEnv* env, const jobject antennaInfosArray) {
-    env->CallVoidMethod(mCallbacksObj, method_reportAntennaInfo, antennaInfosArray);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-}
-
-/*
  * MeasurementCorrectionsCallback implements callback methods of interface
  * IMeasurementCorrectionsCallback.hal.
  */
@@ -1515,7 +1291,6 @@ static void android_location_gnss_hal_GnssNative_class_init_once(JNIEnv* env, jc
             "(II)V");
     method_reportGeofencePauseStatus = env->GetMethodID(clazz, "reportGeofencePauseStatus",
             "(II)V");
-    method_reportAntennaInfo = env->GetMethodID(clazz, "reportAntennaInfo", "(Ljava/util/List;)V");
     method_reportNavigationMessages = env->GetMethodID(
             clazz,
             "reportNavigationMessage",
@@ -1589,39 +1364,6 @@ static void android_location_gnss_hal_GnssNative_class_init_once(JNIEnv* env, jc
     method_correctionPlaneAltDeg = env->GetMethodID(refPlaneClass, "getAltitudeMeters", "()D");
     method_correctionPlaneAzimDeg = env->GetMethodID(refPlaneClass, "getAzimuthDegrees", "()D");
 
-    jclass gnssAntennaInfoBuilder = env->FindClass("android/location/GnssAntennaInfo$Builder");
-    class_gnssAntennaInfoBuilder = (jclass)env->NewGlobalRef(gnssAntennaInfoBuilder);
-    method_gnssAntennaInfoBuilderCtor =
-            env->GetMethodID(class_gnssAntennaInfoBuilder, "<init>", "()V");
-    method_gnssAntennaInfoBuilderSetCarrierFrequencyMHz =
-            env->GetMethodID(class_gnssAntennaInfoBuilder, "setCarrierFrequencyMHz",
-                             "(D)Landroid/location/GnssAntennaInfo$Builder;");
-    method_gnssAntennaInfoBuilderSetPhaseCenterOffset =
-            env->GetMethodID(class_gnssAntennaInfoBuilder, "setPhaseCenterOffset",
-                             "(Landroid/location/GnssAntennaInfo$PhaseCenterOffset;)"
-                             "Landroid/location/GnssAntennaInfo$Builder;");
-    method_gnssAntennaInfoBuilderSetPhaseCenterVariationCorrections =
-            env->GetMethodID(class_gnssAntennaInfoBuilder, "setPhaseCenterVariationCorrections",
-                             "(Landroid/location/GnssAntennaInfo$SphericalCorrections;)"
-                             "Landroid/location/GnssAntennaInfo$Builder;");
-    method_gnssAntennaInfoBuilderSetSignalGainCorrections =
-            env->GetMethodID(class_gnssAntennaInfoBuilder, "setSignalGainCorrections",
-                             "(Landroid/location/GnssAntennaInfo$SphericalCorrections;)"
-                             "Landroid/location/GnssAntennaInfo$Builder;");
-    method_gnssAntennaInfoBuilderBuild = env->GetMethodID(class_gnssAntennaInfoBuilder, "build",
-                                                          "()Landroid/location/GnssAntennaInfo;");
-
-    jclass phaseCenterOffsetClass =
-            env->FindClass("android/location/GnssAntennaInfo$PhaseCenterOffset");
-    class_phaseCenterOffset = (jclass)env->NewGlobalRef(phaseCenterOffsetClass);
-    method_phaseCenterOffsetCtor = env->GetMethodID(class_phaseCenterOffset, "<init>", "(DDDDDD)V");
-
-    jclass sphericalCorrectionsClass =
-            env->FindClass("android/location/GnssAntennaInfo$SphericalCorrections");
-    class_sphericalCorrections = (jclass)env->NewGlobalRef(sphericalCorrectionsClass);
-    method_sphericalCorrectionsCtor =
-            env->GetMethodID(class_sphericalCorrections, "<init>", "([[D[[D)V");
-
     jclass gnssPowerStatsClass = env->FindClass("com/android/server/location/gnss/GnssPowerStats");
     class_gnssPowerStats = (jclass)env->NewGlobalRef(gnssPowerStatsClass);
     method_gnssPowerStatsCtor = env->GetMethodID(class_gnssPowerStats, "<init>", "(IJDDDDDD[D)V");
@@ -1634,16 +1376,9 @@ static void android_location_gnss_hal_GnssNative_class_init_once(JNIEnv* env, jc
     class_gnssNavigationMessage = (jclass) env->NewGlobalRef(gnssNavigationMessageClass);
     method_gnssNavigationMessageCtor = env->GetMethodID(class_gnssNavigationMessage, "<init>", "()V");
 
-    jclass arrayListClass = env->FindClass("java/util/ArrayList");
-    class_arrayList = (jclass)env->NewGlobalRef(arrayListClass);
-    method_arrayListCtor = env->GetMethodID(class_arrayList, "<init>", "()V");
-    method_arrayListAdd = env->GetMethodID(class_arrayList, "add", "(Ljava/lang/Object;)Z");
-
-    jclass doubleArrayClass = env->FindClass("[D");
-    class_doubleArray = (jclass)env->NewGlobalRef(doubleArrayClass);
-
     gnss::GnssConfiguration_class_init_once(env);
     gnss::GnssMeasurement_class_init_once(env, clazz);
+    gnss::GnssAntennaInfo_class_init_once(env, clazz);
 }
 
 /* Initialization needed at system boot and whenever GNSS service dies. */
@@ -2626,7 +2361,7 @@ static jboolean android_location_gnss_hal_GnssNative_start_antenna_info_listenin
         return JNI_FALSE;
     }
 
-    sp<GnssAntennaInfoCallback> cbIface = new GnssAntennaInfoCallback();
+    sp<gnss::GnssAntennaInfoCallback> cbIface = new gnss::GnssAntennaInfoCallback(mCallbacksObj);
 
     auto result = gnssAntennaInfoIface->setCallback(cbIface);
 

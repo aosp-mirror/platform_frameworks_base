@@ -34,6 +34,7 @@
 
 namespace android::gnss {
 
+namespace {
 extern jclass class_gnssMeasurementsEvent;
 extern jclass class_gnssMeasurement;
 extern jclass class_gnssClock;
@@ -42,6 +43,7 @@ extern jmethodID method_gnssMeasurementsEventCtor;
 extern jmethodID method_gnssClockCtor;
 extern jmethodID method_gnssMeasurementCtor;
 extern jmethodID method_reportMeasurementData;
+} // anonymous namespace
 
 void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz);
 

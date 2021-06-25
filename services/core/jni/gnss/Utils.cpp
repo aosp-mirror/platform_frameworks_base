@@ -18,6 +18,12 @@
 
 #include "Utils.h"
 
+/*
+ * Save a pointer to JavaVm to attach/detach threads executing
+ * callback methods that need to make JNI calls.
+ */
+JavaVM* android::ScopedJniThreadAttach::sJvm;
+
 namespace android {
 
 namespace {
