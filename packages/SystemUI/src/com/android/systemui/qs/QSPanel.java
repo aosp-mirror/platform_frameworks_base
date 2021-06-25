@@ -46,7 +46,6 @@ import com.android.systemui.util.animation.UniqueObjectHostView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /** View that represents the quick settings tile panel (when expanded/pulled down). **/
 public class QSPanel extends LinearLayout implements Tunable {
@@ -105,7 +104,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected QSTileLayout mTileLayout;
     private int mLastOrientation = -1;
     private int mMediaTotalBottomMargin;
-    private Consumer<Boolean> mMediaVisibilityChangedListener;
 
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -145,12 +143,6 @@ public class QSPanel extends LinearLayout implements Tunable {
 
             lp = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1);
             addView(mHorizontalLinearLayout, lp);
-        }
-    }
-
-    protected void onMediaVisibilityChanged(Boolean visible) {
-        if (mMediaVisibilityChangedListener != null) {
-            mMediaVisibilityChangedListener.accept(visible);
         }
     }
 
@@ -665,10 +657,6 @@ public class QSPanel extends LinearLayout implements Tunable {
      */
     public void setHeaderContainer(@NonNull ViewGroup headerContainer) {
         mHeaderContainer = headerContainer;
-    }
-
-    public void setMediaVisibilityChangedListener(Consumer<Boolean> visibilityChangedListener) {
-        mMediaVisibilityChangedListener = visibilityChangedListener;
     }
 
     public boolean isListening() {
