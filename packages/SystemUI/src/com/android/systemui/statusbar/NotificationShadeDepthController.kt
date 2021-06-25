@@ -122,7 +122,7 @@ class NotificationShadeDepthController @Inject constructor(
      * When launching an app from the shade, the animations progress should affect how blurry the
      * shade is, overriding the expansion amount.
      */
-    var ignoreShadeBlurUntilHidden: Boolean = false
+    var blursDisabledForAppLaunch: Boolean = false
         set(value) {
             if (field == value) {
                 return
@@ -131,6 +131,10 @@ class NotificationShadeDepthController @Inject constructor(
             scheduleUpdate()
 
             if (shadeSpring.radius == 0 && shadeAnimation.radius == 0) {
+                return
+            }
+            // Do not remove blurs when we're re-enabling them
+            if (!value) {
                 return
             }
             shadeSpring.animateTo(0)
@@ -174,12 +178,8 @@ class NotificationShadeDepthController @Inject constructor(
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))
         var shadeRadius = max(combinedBlur, wakeAndUnlockBlurRadius).toFloat()
 
-        if (ignoreShadeBlurUntilHidden) {
-            if (shadeRadius == 0f) {
-                ignoreShadeBlurUntilHidden = false
-            } else {
-                shadeRadius = 0f
-            }
+        if (blursDisabledForAppLaunch) {
+            shadeRadius = 0f
         }
 
         var blur = shadeRadius.toInt()
@@ -193,7 +193,7 @@ class NotificationShadeDepthController @Inject constructor(
         // Brightness slider removes blur, but doesn't affect zooms
         blur = (blur * (1f - brightnessMirrorSpring.ratio)).toInt()
 
-        val opaque = scrimsVisible && !ignoreShadeBlurUntilHidden
+        val opaque = scrimsVisible && !blursDisabledForAppLaunch
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur, opaque)
         try {
             if (root.isAttachedToWindow && root.windowToken != null) {
@@ -424,7 +424,7 @@ class NotificationShadeDepthController @Inject constructor(
             it.println("shadeAnimation: ${shadeAnimation.radius}")
             it.println("brightnessMirrorRadius: ${brightnessMirrorSpring.radius}")
             it.println("wakeAndUnlockBlur: $wakeAndUnlockBlurRadius")
-            it.println("ignoreShadeBlurUntilHidden: $ignoreShadeBlurUntilHidden")
+            it.println("blursDisabledForAppLaunch: $blursDisabledForAppLaunch")
         }
     }
 
