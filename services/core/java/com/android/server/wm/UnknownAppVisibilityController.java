@@ -133,7 +133,7 @@ class UnknownAppVisibilityController {
             Slog.d(TAG, "App relayouted appWindow=" + activity);
         }
         int state = mUnknownApps.get(activity);
-        if (state == UNKNOWN_STATE_WAITING_RELAYOUT) {
+        if (state == UNKNOWN_STATE_WAITING_RELAYOUT || activity.mStartingWindow != null) {
             mUnknownApps.put(activity, UNKNOWN_STATE_WAITING_VISIBILITY_UPDATE);
             mService.notifyKeyguardFlagsChanged(this::notifyVisibilitiesUpdated,
                     activity.getDisplayContent().getDisplayId());
