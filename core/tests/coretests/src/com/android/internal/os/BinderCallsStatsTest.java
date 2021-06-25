@@ -991,6 +991,40 @@ public class BinderCallsStatsTest {
         assertEquals(true, bcs.getCollectLatencyData());
     }
 
+    @Test
+    public void testProcessSource() {
+        BinderCallsStats defaultCallsStats = new BinderCallsStats(
+                new BinderCallsStats.Injector());
+
+        BinderCallsStats systemServerCallsStats = new BinderCallsStats(
+                new BinderCallsStats.Injector(),
+                com.android.internal.os.BinderLatencyProto.Dims.SYSTEM_SERVER);
+
+        BinderCallsStats telephonyCallsStats = new BinderCallsStats(
+                new BinderCallsStats.Injector(),
+                com.android.internal.os.BinderLatencyProto.Dims.TELEPHONY);
+
+        BinderCallsStats bluetoothCallsStats = new BinderCallsStats(
+                new BinderCallsStats.Injector(),
+                com.android.internal.os.BinderLatencyProto.Dims.BLUETOOTH);
+
+        assertEquals(
+                com.android.internal.os.BinderLatencyProto.Dims.SYSTEM_SERVER,
+                defaultCallsStats.getLatencyObserver().getProcessSource());
+
+        assertEquals(
+                com.android.internal.os.BinderLatencyProto.Dims.SYSTEM_SERVER,
+                systemServerCallsStats.getLatencyObserver().getProcessSource());
+
+        assertEquals(
+                com.android.internal.os.BinderLatencyProto.Dims.TELEPHONY,
+                telephonyCallsStats.getLatencyObserver().getProcessSource());
+
+        assertEquals(
+                com.android.internal.os.BinderLatencyProto.Dims.BLUETOOTH,
+                bluetoothCallsStats.getLatencyObserver().getProcessSource());
+    }
+
     private static class TestHandler extends Handler {
         ArrayList<Runnable> mRunnables = new ArrayList<>();
 
