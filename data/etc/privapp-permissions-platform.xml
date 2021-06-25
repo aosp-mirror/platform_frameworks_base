@@ -197,6 +197,8 @@ applications that come with the platform
         <permission name="android.permission.READ_PRECISE_PHONE_STATE"/>
         <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
         <permission name="com.android.voicemail.permission.WRITE_VOICEMAIL"/>
+        <permission name="android.permission.LOG_COMPAT_CHANGE"/>
+        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.calendar">
