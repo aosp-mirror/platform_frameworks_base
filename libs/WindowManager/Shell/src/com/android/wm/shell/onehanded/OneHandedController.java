@@ -498,6 +498,11 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     @VisibleForTesting
     void onActivatedActionChanged() {
+        if (!isShortcutEnabled()) {
+            Slog.w(TAG, "Shortcut not enabled, skip onActivatedActionChanged()");
+            return;
+        }
+
         if (!isOneHandedEnabled()) {
             final boolean success = mOneHandedSettingsUtil.setOneHandedModeEnabled(
                     mContext.getContentResolver(), 1 /* Enabled for shortcut */, mUserId);
@@ -608,6 +613,11 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     }
 
     @VisibleForTesting
+    boolean isShortcutEnabled() {
+        return mOneHandedSettingsUtil.getShortcutEnabled(mContext.getContentResolver(), mUserId);
+    }
+
+    @VisibleForTesting
     boolean isSwipeToNotificationEnabled() {
         return mIsSwipeToNotificationEnabled;
     }
@@ -617,8 +627,11 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
             mMainExecutor.execute(() -> stopOneHanded());
         }
 
-        // Reset and align shortcut one_handed_mode_activated status with current mState
-        notifyShortcutState(mState.getState());
+        // If setting is pull screen, notify shortcut one_handed_mode_activated to reset
+        // and align status with current mState when function enabled.
+        if (isOneHandedEnabled() && !isSwipeToNotificationEnabled()) {
+            notifyShortcutState(mState.getState());
+        }
 
         mTouchHandler.onOneHandedEnabled(mIsOneHandedEnabled);
 
@@ -717,6 +730,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         pw.println(mLockedDisabled);
         pw.print(innerPrefix + "mUserId=");
         pw.println(mUserId);
+        pw.print(innerPrefix + "isShortcutEnabled=");
+        pw.println(isShortcutEnabled());
 
         if (mBackgroundPanelOrganizer != null) {
             mBackgroundPanelOrganizer.dump(pw);
