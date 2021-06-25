@@ -143,7 +143,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             false /* default */);
     // TODO(b/187291379) disable again before release
     private static final boolean DEBUG_REMOVE_ANIMATION = SystemProperties.getBoolean(
-            "persist.debug.nssl.dismiss", true /* default */);
+            "persist.debug.nssl.dismiss", false /* default */);
 
     private static final float RUBBER_BAND_FACTOR_NORMAL = 0.35f;
     private static final float RUBBER_BAND_FACTOR_AFTER_EXPAND = 0.15f;
@@ -3205,6 +3205,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     ignoreChildren);
             mAnimationEvents.add(event);
             mSwipedOutViews.remove(child);
+            if (DEBUG_REMOVE_ANIMATION) {
+                String key = "";
+                if (child instanceof ExpandableNotificationRow) {
+                    key = ((ExpandableNotificationRow) child).getEntry().getKey();
+                }
+                Log.d(TAG, "created Remove Event - SwipedOut: " + childWasSwipedOut + " " + key);
+            }
         }
         mChildrenToRemoveAnimated.clear();
     }
