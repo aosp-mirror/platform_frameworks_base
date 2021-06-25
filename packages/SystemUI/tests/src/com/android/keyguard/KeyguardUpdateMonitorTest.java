@@ -64,6 +64,7 @@ import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.Vibrator;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -108,6 +109,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -168,6 +170,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private TelephonyListenerManager mTelephonyListenerManager;
     @Mock
     private FeatureFlags mFeatureFlags;
+    @Mock
+    private Vibrator mVibrator;
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
     // Direct executor
@@ -979,7 +983,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mBroadcastDispatcher, mDumpManager,
                     mRingerModeTracker, mBackgroundExecutor,
                     mStatusBarStateController, mLockPatternUtils,
-                    mAuthController, mTelephonyListenerManager, mFeatureFlags);
+                    mAuthController, mTelephonyListenerManager, mFeatureFlags,
+                    mVibrator);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

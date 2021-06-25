@@ -71,6 +71,7 @@ import android.os.ServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
@@ -85,6 +86,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -95,6 +97,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -281,6 +284,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mSecureCameraLaunched;
     @VisibleForTesting
     protected boolean mTelephonyCapable;
+
+    private final boolean mAcquiredHapticEnabled;
+    @Nullable private final Vibrator mVibrator;
 
     // Device provisioning state
     private boolean mDeviceProvisioned;
@@ -1334,44 +1340,66 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private final FingerprintManager.AuthenticationCallback mFingerprintAuthenticationCallback
             = new AuthenticationCallback() {
+                private boolean mPlayedAcquiredHaptic;
 
-        @Override
-        public void onAuthenticationFailed() {
-            handleFingerprintAuthFailed();
-        }
+                @Override
+                public void onAuthenticationFailed() {
+                    handleFingerprintAuthFailed();
+                }
 
-        @Override
-        public void onAuthenticationSucceeded(AuthenticationResult result) {
-            Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationSucceeded");
-            handleFingerprintAuthenticated(result.getUserId(), result.isStrongBiometric());
-            Trace.endSection();
-        }
+                @Override
+                public void onAuthenticationSucceeded(AuthenticationResult result) {
+                    Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationSucceeded");
+                    handleFingerprintAuthenticated(result.getUserId(), result.isStrongBiometric());
+                    Trace.endSection();
 
-        @Override
-        public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
-            handleFingerprintHelp(helpMsgId, helpString.toString());
-        }
+                    // on auth success, we sometimes never received an acquired haptic
+                    if (!mPlayedAcquiredHaptic) {
+                        playAcquiredHaptic();
+                    }
+                }
 
-        @Override
-        public void onAuthenticationError(int errMsgId, CharSequence errString) {
-            handleFingerprintError(errMsgId, errString.toString());
-        }
+                @Override
+                public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
+                    handleFingerprintHelp(helpMsgId, helpString.toString());
+                }
 
-        @Override
-        public void onAuthenticationAcquired(int acquireInfo) {
-            handleFingerprintAcquired(acquireInfo);
-        }
+                @Override
+                public void onAuthenticationError(int errMsgId, CharSequence errString) {
+                    handleFingerprintError(errMsgId, errString.toString());
+                }
 
-        @Override
-        public void onUdfpsPointerDown(int sensorId) {
-            Log.d(TAG, "onUdfpsPointerDown, sensorId: " + sensorId);
-        }
+                @Override
+                public void onAuthenticationAcquired(int acquireInfo) {
+                    handleFingerprintAcquired(acquireInfo);
+                    if (acquireInfo == FingerprintManager.FINGERPRINT_ACQUIRED_GOOD) {
+                        playAcquiredHaptic();
+                    }
+                }
 
-        @Override
-        public void onUdfpsPointerUp(int sensorId) {
-            Log.d(TAG, "onUdfpsPointerUp, sensorId: " + sensorId);
-        }
-    };
+                @Override
+                public void onUdfpsPointerDown(int sensorId) {
+                    Log.d(TAG, "onUdfpsPointerDown, sensorId: " + sensorId);
+                    mPlayedAcquiredHaptic = false;
+                }
+
+                @Override
+                public void onUdfpsPointerUp(int sensorId) {
+                    Log.d(TAG, "onUdfpsPointerUp, sensorId: " + sensorId);
+                }
+
+                private void playAcquiredHaptic() {
+                    if (mAcquiredHapticEnabled && mVibrator != null && isUdfpsEnrolled()) {
+                        mPlayedAcquiredHaptic = true;
+                        String effect = Settings.Global.getString(
+                                mContext.getContentResolver(),
+                                "udfps_acquired_type");
+                        mVibrator.vibrate(UdfpsController.getVibration(effect,
+                                UdfpsController.EFFECT_TICK),
+                                UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES);
+                    }
+                }
+            };
 
     private final FaceManager.FaceDetectionCallback mFaceDetectionCallback
             = (sensorId, userId, isStrongBiometric) -> {
@@ -1663,7 +1691,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             LockPatternUtils lockPatternUtils,
             AuthController authController,
             TelephonyListenerManager telephonyListenerManager,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            @Nullable Vibrator vibrator) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mTelephonyListenerManager = telephonyListenerManager;
@@ -1678,6 +1707,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mLockPatternUtils = lockPatternUtils;
         mAuthController = authController;
         dumpManager.registerDumpable(getClass().getName(), this);
+        mAcquiredHapticEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+            "udfps_acquired", 0) == 1;
+        mVibrator = vibrator;
 
         mHandler = new Handler(mainLooper) {
             @Override
