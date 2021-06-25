@@ -27,9 +27,11 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <functional>
+#include <iterator>
 #include <list>
 #include <optional>
 #include <sstream>
@@ -2005,6 +2007,9 @@ void zygote::ZygoteFailure(JNIEnv* env,
   __builtin_unreachable();
 }
 
+static std::set<int>* gPreloadFds = nullptr;
+static bool gPreloadFdsExtracted = false;
+
 // Utility routine to fork a process from the zygote.
 pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
                          const std::vector<int>& fds_to_close,
@@ -2030,9 +2035,12 @@ pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
   __android_log_close();
   AStatsSocket_close();
 
-  // If this is the first fork for this zygote, create the open FD table.  If
-  // it isn't, we just need to check whether the list of open files has changed
-  // (and it shouldn't in the normal case).
+  // If this is the first fork for this zygote, create the open FD table,
+  // verifying that files are of supported type and allowlisted.  Otherwise (not
+  // the first fork), check that the open files have not changed.  Newly open
+  // files are not expected, and will be disallowed in the future.  Currently
+  // they are allowed if they pass the same checks as in the
+  // FileDescriptorTable::Create() above.
   if (gOpenFdTable == nullptr) {
     gOpenFdTable = FileDescriptorTable::Create(fds_to_ignore, fail_fn);
   } else {
@@ -2128,7 +2136,12 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         fds_to_ignore.push_back(gSystemServerSocketFd);
     }
 
-    pid_t pid = zygote::ForkCommon(env, false, fds_to_close, fds_to_ignore, true);
+    if (gPreloadFds && gPreloadFdsExtracted) {
+        fds_to_ignore.insert(fds_to_ignore.end(), gPreloadFds->begin(), gPreloadFds->end());
+    }
+
+    pid_t pid = zygote::ForkCommon(env, /* is_system_server= */ false, fds_to_close, fds_to_ignore,
+                                   true);
 
     if (pid == 0) {
         SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits, capabilities, capabilities,
@@ -2265,6 +2278,10 @@ int zygote::forkApp(JNIEnv* env,
       }
       fds_to_ignore.push_back(gSystemServerSocketFd);
   }
+  if (gPreloadFds && gPreloadFdsExtracted) {
+      fds_to_ignore.insert(fds_to_ignore.end(), gPreloadFds->begin(), gPreloadFds->end());
+  }
+
   return zygote::ForkCommon(env, /* is_system_server= */ false, fds_to_close,
                             fds_to_ignore, is_priority_fork == JNI_TRUE, purge);
 }
@@ -2568,6 +2585,35 @@ static jint com_android_internal_os_Zygote_nativeCurrentTaggingLevel(JNIEnv* env
 #endif // defined(__aarch64__)
 }
 
+static void com_android_internal_os_Zygote_nativeMarkOpenedFilesBeforePreload(JNIEnv* env, jclass) {
+    // Ignore invocations when too early or too late.
+    if (gPreloadFds) {
+        return;
+    }
+
+    // App Zygote Preload starts soon. Save FDs remaining open.  After the
+    // preload finishes newly open files will be determined.
+    auto fail_fn = std::bind(zygote::ZygoteFailure, env, "zygote", nullptr, _1);
+    gPreloadFds = GetOpenFds(fail_fn).release();
+}
+
+static void com_android_internal_os_Zygote_nativeAllowFilesOpenedByPreload(JNIEnv* env, jclass) {
+    // Ignore invocations when too early or too late.
+    if (!gPreloadFds || gPreloadFdsExtracted) {
+        return;
+    }
+
+    // Find the newly open FDs, if any.
+    auto fail_fn = std::bind(zygote::ZygoteFailure, env, "zygote", nullptr, _1);
+    std::unique_ptr<std::set<int>> current_fds = GetOpenFds(fail_fn);
+    auto difference = std::make_unique<std::set<int>>();
+    std::set_difference(current_fds->begin(), current_fds->end(), gPreloadFds->begin(),
+                        gPreloadFds->end(), std::inserter(*difference, difference->end()));
+    delete gPreloadFds;
+    gPreloadFds = difference.release();
+    gPreloadFdsExtracted = true;
+}
+
 static const JNINativeMethod gMethods[] = {
         {"nativeForkAndSpecialize",
          "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/"
@@ -2616,6 +2662,10 @@ static const JNINativeMethod gMethods[] = {
          (void*)com_android_internal_os_Zygote_nativeSupportsTaggedPointers},
         {"nativeCurrentTaggingLevel", "()I",
          (void*)com_android_internal_os_Zygote_nativeCurrentTaggingLevel},
+        {"nativeMarkOpenedFilesBeforePreload", "()V",
+         (void*)com_android_internal_os_Zygote_nativeMarkOpenedFilesBeforePreload},
+        {"nativeAllowFilesOpenedByPreload", "()V",
+         (void*)com_android_internal_os_Zygote_nativeAllowFilesOpenedByPreload},
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {

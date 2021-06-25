@@ -288,6 +288,7 @@ public class StartingSurfaceDrawer {
         // create splash screen view finished.
         final SplashScreenViewSupplier viewSupplier = new SplashScreenViewSupplier();
         final FrameLayout rootLayout = new FrameLayout(context);
+        rootLayout.setPadding(0, 0, 0, 0);
         final Runnable setViewSynchronized = () -> {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "addSplashScreenView");
             // waiting for setContentView before relayoutWindow

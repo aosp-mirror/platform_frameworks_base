@@ -955,8 +955,7 @@ public class StagingManager {
                 continue;
             } else if (isApexSessionFailed(apexSession)) {
                 hasFailedApexSession = true;
-                String errorMsg = "APEX activation failed. Check logcat messages from apexd "
-                        + "for more information.";
+                String errorMsg = "APEX activation failed. " + apexSession.errorMessage;
                 if (!TextUtils.isEmpty(apexSession.crashingNativeProcess)) {
                     prepareForLoggingApexdRevert(session, apexSession.crashingNativeProcess);
                     errorMsg = "Session reverted due to crashing native process: "

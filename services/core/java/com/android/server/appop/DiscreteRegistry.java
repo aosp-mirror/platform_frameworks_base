@@ -542,7 +542,7 @@ final class DiscreteRegistry {
 
         private OpEvent getLastVisible() {
             // Search all nodes but the first one, which is the start node
-            for (int i = mChain.size() - 1; i > 0; i++) {
+            for (int i = mChain.size() - 1; i > 0; i--) {
                 OpEvent event = mChain.get(i);
                 if (!mExemptPkgs.contains(event.mPkgName)) {
                     return event;
