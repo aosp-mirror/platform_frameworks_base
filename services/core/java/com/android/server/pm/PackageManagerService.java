@@ -14252,9 +14252,15 @@ public class PackageManagerService extends IPackageManager.Stub
             return new ParceledListSlice<IntentFilter>(result) {
                 @Override
                 protected void writeElement(IntentFilter parcelable, Parcel dest, int callFlags) {
-                    // IntentFilter has final Parcelable methods, so redirect to the subclass
-                    ((ParsedIntentInfo) parcelable).writeIntentInfoToParcel(dest,
-                            callFlags);
+                    parcelable.writeToParcel(dest, callFlags);
+                }
+
+                @Override
+                protected void writeParcelableCreator(IntentFilter parcelable, Parcel dest) {
+                    // All Parcel#writeParcelableCreator does is serialize the class name to
+                    // access via reflection to grab its CREATOR. This does that manually, pointing
+                    // to the parent IntentFilter so that all of the subclass fields are ignored.
+                    dest.writeString(IntentFilter.class.getName());
                 }
             };
         }
