@@ -25,30 +25,21 @@ import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
+import android.widget.ListView;
 
 /**
- * ScrollCapture for RecyclerView and <i>RecyclerView-like</i> ViewGroups.
- * <p>
- * Requirements for proper operation:
- * <ul>
- * <li>at least one visible child view</li>
- * <li>scrolls by pixels in response to {@link View#scrollBy(int, int)}.
- * <li>reports ability to scroll with {@link View#canScrollVertically(int)}
- * <li>properly implements {@link ViewParent#requestChildRectangleOnScreen(View, Rect, boolean)}
- * </ul>
+ * Scroll capture support for ListView.
  *
  * @see ScrollCaptureViewSupport
  */
-public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGroup> {
-    private static final String TAG = "RVCaptureHelper";
+public class ListViewCaptureHelper implements ScrollCaptureViewHelper<ListView> {
+    private static final String TAG = "LVCaptureHelper";
     private int mScrollDelta;
     private boolean mScrollBarWasEnabled;
     private int mOverScrollMode;
 
     @Override
-    public void onPrepareForStart(@NonNull ViewGroup view, Rect scrollBounds) {
+    public void onPrepareForStart(@NonNull ListView view, Rect scrollBounds) {
         mScrollDelta = 0;
 
         mOverScrollMode = view.getOverScrollMode();
@@ -59,7 +50,7 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
     }
 
     @Override
-    public ScrollResult onScrollRequested(@NonNull ViewGroup recyclerView, Rect scrollBounds,
+    public ScrollResult onScrollRequested(@NonNull ListView listView, Rect scrollBounds,
             Rect requestRect) {
         Log.d(TAG, "-----------------------------------------------------------");
         Log.d(TAG, "onScrollRequested(scrollBounds=" + scrollBounds + ", "
@@ -70,8 +61,8 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
         result.scrollDelta = mScrollDelta;
         result.availableArea = new Rect(); // empty
 
-        if (!recyclerView.isVisibleToUser() || recyclerView.getChildCount() == 0) {
-            Log.w(TAG, "recyclerView is empty or not visible, cannot continue");
+        if (!listView.isVisibleToUser() || listView.getChildCount() == 0) {
+            Log.w(TAG, "listView is empty or not visible, cannot continue");
             return result; // result.availableArea == empty Rect
         }
 
@@ -80,7 +71,7 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
                 transformFromRequestToContainer(mScrollDelta, scrollBounds, requestRect);
 
         Rect recyclerLocalVisible = new Rect();
-        recyclerView.getLocalVisibleRect(recyclerLocalVisible);
+        listView.getLocalVisibleRect(recyclerLocalVisible);
 
         // Expand request rect match visible bounds to center the requested rect vertically
         Rect adjustedContainerBounds = new Rect(requestedContainerBounds);
@@ -97,20 +88,12 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
         }
         Log.d(TAG, "scrollAmount: " + scrollAmount);
 
-        View refView = findScrollingReferenceView(recyclerView, scrollAmount);
+        View refView = findScrollingReferenceView(listView, scrollAmount);
         int refTop = refView.getTop();
 
-        // Map the request into the child view coords
-        Rect requestedContentBounds = new Rect(adjustedContainerBounds);
-        recyclerView.offsetRectIntoDescendantCoords(refView, requestedContentBounds);
-        Log.d(TAG, "request rect, in child view space = " + requestedContentBounds);
-
-        // Note: requestChildRectangleOnScreen may modify rectangle, must pass pass in a copy here
-        Rect request = new Rect(requestedContentBounds);
-        recyclerView.requestChildRectangleOnScreen(refView, request, true);
-
+        listView.scrollListBy(scrollAmount);
         int scrollDistance = refTop - refView.getTop();
-        Log.d(TAG, "Parent view scrolled vertically by " + scrollDistance + " px");
+        Log.d(TAG, "Parent view has scrolled vertically by " + scrollDistance + " px");
 
         mScrollDelta += scrollDistance;
         result.scrollDelta = mScrollDelta;
@@ -122,8 +105,7 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
         requestedContainerBounds = new Rect(
                 transformFromRequestToContainer(mScrollDelta, scrollBounds, requestRect));
 
-        // in case it might have changed (nested scrolling)
-        recyclerView.getLocalVisibleRect(recyclerLocalVisible);
+        listView.getLocalVisibleRect(recyclerLocalVisible);
         if (requestedContainerBounds.intersect(recyclerLocalVisible)) {
             result.availableArea = transformFromContainerToRequest(
                     mScrollDelta, scrollBounds, requestedContainerBounds);
@@ -132,11 +114,12 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
         return result;
     }
 
+
     @Override
-    public void onPrepareForEnd(@NonNull ViewGroup view) {
+    public void onPrepareForEnd(@NonNull ListView listView) {
         // Restore original position and state
-        view.scrollBy(0, -mScrollDelta);
-        view.setOverScrollMode(mOverScrollMode);
-        view.setVerticalScrollBarEnabled(mScrollBarWasEnabled);
+        listView.scrollListBy(-mScrollDelta);
+        listView.setOverScrollMode(mOverScrollMode);
+        listView.setVerticalScrollBarEnabled(mScrollBarWasEnabled);
     }
 }
