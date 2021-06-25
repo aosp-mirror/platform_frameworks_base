@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.appsearch.util.BundleUtil;
+import android.app.appsearch.util.IndentingStringBuilder;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -858,6 +859,7 @@ public class GenericDocument {
      *
      * @hide
      */
+    // TODO(b/171882200): Expose this API in Android T
     @NonNull
     public GenericDocument.Builder<GenericDocument.Builder<?>> toBuilder() {
         Bundle clonedBundle = BundleUtil.deepCopy(mBundle);
@@ -887,121 +889,101 @@ public class GenericDocument {
     @Override
     @NonNull
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        appendGenericDocumentString(this, /*indentLevel=*/ 0, stringBuilder);
+        IndentingStringBuilder stringBuilder = new IndentingStringBuilder();
+        appendGenericDocumentString(stringBuilder);
         return stringBuilder.toString();
     }
 
-    private static void appendGenericDocumentString(
-            @NonNull GenericDocument document, int indentLevel, @NonNull StringBuilder builder) {
-        Objects.requireNonNull(document);
+    /**
+     * Appends a debug string for the {@link GenericDocument} instance to the given string builder.
+     *
+     * @param builder the builder to append to.
+     */
+    void appendGenericDocumentString(@NonNull IndentingStringBuilder builder) {
         Objects.requireNonNull(builder);
 
-        builder.append(getIndent(indentLevel)).append("{\n");
+        builder.append("{\n");
+        builder.increaseIndentLevel();
 
-        String indent1 = getIndent(indentLevel + 1);
-
-        builder.append(indent1)
-                .append("namespace: \"")
-                .append(document.getNamespace())
-                .append("\",\n");
-
-        builder.append(indent1).append("id: \"").append(document.getId()).append("\",\n");
-
-        builder.append(indent1).append("score: ").append(document.getScore()).append(",\n");
-
-        builder.append(indent1)
-                .append("schemaType: \"")
-                .append(document.getSchemaType())
-                .append("\",\n");
-
-        builder.append(indent1)
-                .append("creationTimestampMillis: ")
-                .append(document.getCreationTimestampMillis())
+        builder.append("namespace: \"").append(getNamespace()).append("\",\n");
+        builder.append("id: \"").append(getId()).append("\",\n");
+        builder.append("score: ").append(getScore()).append(",\n");
+        builder.append("schemaType: \"").append(getSchemaType()).append("\",\n");
+        builder.append("creationTimestampMillis: ")
+                .append(getCreationTimestampMillis())
                 .append(",\n");
+        builder.append("timeToLiveMillis: ").append(getTtlMillis()).append(",\n");
 
-        builder.append(indent1)
-                .append("timeToLiveMillis: ")
-                .append(document.getTtlMillis())
-                .append(",\n");
+        builder.append("properties: {\n");
 
-        builder.append(indent1).append("properties: {\n");
-
-        String[] sortedProperties = document.getPropertyNames().toArray(new String[0]);
+        String[] sortedProperties = getPropertyNames().toArray(new String[0]);
         Arrays.sort(sortedProperties);
 
         for (int i = 0; i < sortedProperties.length; i++) {
-            Object property = document.getProperty(sortedProperties[i]);
-            builder.append(getIndent(indentLevel + 2))
-                    .append("\"")
-                    .append(sortedProperties[i])
-                    .append("\"")
-                    .append(": ");
-            appendPropertyString(property, indentLevel + 2, builder);
+            Object property = getProperty(sortedProperties[i]);
+            builder.increaseIndentLevel();
+            appendPropertyString(sortedProperties[i], property, builder);
             if (i != sortedProperties.length - 1) {
                 builder.append(",\n");
             }
+            builder.decreaseIndentLevel();
         }
 
         builder.append("\n");
-        builder.append(indent1).append("}");
+        builder.append("}");
 
+        builder.decreaseIndentLevel();
         builder.append("\n");
-        builder.append(getIndent(indentLevel)).append("}");
+        builder.append("}");
     }
 
     /**
-     * Appends a string for the given property to the given builder.
+     * Appends a debug string for the given document property to the given string builder.
      *
+     * @param propertyName name of property to create string for.
      * @param property property object to create string for.
-     * @param indentLevel base indent level for property.
      * @param builder the builder to append to.
      */
-    private static void appendPropertyString(
-            @NonNull Object property, int indentLevel, @NonNull StringBuilder builder) {
+    private void appendPropertyString(
+            @NonNull String propertyName,
+            @NonNull Object property,
+            @NonNull IndentingStringBuilder builder) {
+        Objects.requireNonNull(propertyName);
         Objects.requireNonNull(property);
         Objects.requireNonNull(builder);
 
-        builder.append("[");
+        builder.append("\"").append(propertyName).append("\": [");
         if (property instanceof GenericDocument[]) {
             GenericDocument[] documentValues = (GenericDocument[]) property;
             for (int i = 0; i < documentValues.length; ++i) {
                 builder.append("\n");
-                appendGenericDocumentString(documentValues[i], indentLevel + 1, builder);
+                builder.increaseIndentLevel();
+                documentValues[i].appendGenericDocumentString(builder);
                 if (i != documentValues.length - 1) {
-                    builder.append(", ");
+                    builder.append(",");
                 }
                 builder.append("\n");
+                builder.decreaseIndentLevel();
             }
-            builder.append(getIndent(indentLevel));
+            builder.append("]");
         } else {
             int propertyArrLength = Array.getLength(property);
             for (int i = 0; i < propertyArrLength; i++) {
                 Object propertyElement = Array.get(property, i);
                 if (propertyElement instanceof String) {
-                    builder.append("\"").append(propertyElement).append("\"");
+                    builder.append("\"").append((String) propertyElement).append("\"");
                 } else if (propertyElement instanceof byte[]) {
                     builder.append(Arrays.toString((byte[]) propertyElement));
                 } else {
-                    builder.append(propertyElement);
+                    builder.append(propertyElement.toString());
                 }
                 if (i != propertyArrLength - 1) {
                     builder.append(", ");
+                } else {
+                    builder.append("]");
                 }
             }
         }
-
-        builder.append("]");
-    }
-
-    /** Appends a string for given indent level to the given builder. */
-    @NonNull
-    private static String getIndent(int indentLevel) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < indentLevel; ++i) {
-            builder.append("  ");
-        }
-        return builder.toString();
     }
 
     /**

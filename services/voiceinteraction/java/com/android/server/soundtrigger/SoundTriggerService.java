@@ -863,7 +863,12 @@ public class SoundTriggerService extends SystemService {
         }
 
         private void enforceCallingPermission(String permission) {
-            PermissionUtil.checkPermissionForPreflight(mContext, mOriginatorIdentity, permission);
+            if (PermissionUtil.checkPermissionForPreflight(mContext, mOriginatorIdentity,
+                    permission) != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "Identity " + mOriginatorIdentity + " does not have permission "
+                                + permission);
+            }
         }
 
         private void enforceDetectionPermissions(ComponentName detectionService) {
