@@ -42,10 +42,10 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+import android.view.DisplayInfo;
 import android.window.WindowContext;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -251,12 +250,6 @@ public class ResourcesManager {
             new WeakHashMap<>();
 
     /**
-     * A cache of DisplayId, DisplayAdjustments to Display.
-     */
-    private final ArrayMap<Pair<Integer, DisplayAdjustments>, SoftReference<Display>>
-            mAdjustedDisplays = new ArrayMap<>();
-
-    /**
      * Callback implementation for handling updates to Resources objects.
      */
     private final UpdateHandler mUpdateCallbacks = new UpdateHandler();
@@ -331,10 +324,12 @@ public class ResourcesManager {
      */
     @VisibleForTesting
     protected @NonNull DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments da) {
-        DisplayMetrics dm = new DisplayMetrics();
-        final Display display = getAdjustedDisplay(displayId, da);
-        if (display != null) {
-            display.getMetrics(dm);
+        final DisplayManagerGlobal displayManagerGlobal = DisplayManagerGlobal.getInstance();
+        final DisplayMetrics dm = new DisplayMetrics();
+        final DisplayInfo displayInfo = displayManagerGlobal != null
+                ? displayManagerGlobal.getDisplayInfo(displayId) : null;
+        if (displayInfo != null) {
+            displayInfo.getAppMetrics(dm, da);
         } else {
             dm.setToDefaults();
         }
@@ -372,45 +367,6 @@ public class ResourcesManager {
             }
             return false;
         }
-    }
-
-    /**
-     * Returns an adjusted {@link Display} object based on the inputs or null if display isn't
-     * available. This method is only used within {@link ResourcesManager} to calculate display
-     * metrics based on a set {@link DisplayAdjustments}. All other usages should instead call
-     * {@link ResourcesManager#getAdjustedDisplay(int, Resources)}.
-     *
-     * @param displayId display Id.
-     * @param displayAdjustments display adjustments.
-     */
-    private Display getAdjustedDisplay(final int displayId,
-            @Nullable DisplayAdjustments displayAdjustments) {
-        final DisplayAdjustments displayAdjustmentsCopy = (displayAdjustments != null)
-                ? new DisplayAdjustments(displayAdjustments) : new DisplayAdjustments();
-        final Pair<Integer, DisplayAdjustments> key =
-                Pair.create(displayId, displayAdjustmentsCopy);
-        SoftReference<Display> sd;
-        synchronized (mLock) {
-            sd = mAdjustedDisplays.get(key);
-        }
-        if (sd != null) {
-            final Display display = sd.get();
-            if (display != null) {
-                return display;
-            }
-        }
-        final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
-        if (dm == null) {
-            // may be null early in system startup
-            return null;
-        }
-        final Display display = dm.getCompatibleDisplay(displayId, key.second);
-        if (display != null) {
-            synchronized (mLock) {
-                mAdjustedDisplays.put(key, new SoftReference<>(display));
-            }
-        }
-        return display;
     }
 
     /**
@@ -1331,9 +1287,6 @@ public class ResourcesManager {
                     }
                     return false;
                 }
-
-                // Things might have changed in display manager, so clear the cached displays.
-                mAdjustedDisplays.clear();
 
                 int changes = mResConfiguration.updateFrom(config);
                 if (compat != null && (mResCompatibilityInfo == null

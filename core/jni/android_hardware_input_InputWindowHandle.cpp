@@ -66,7 +66,6 @@ static struct {
     jfieldID packageName;
     jfieldID inputFeatures;
     jfieldID displayId;
-    jfieldID portalToDisplayId;
     jfieldID replaceTouchableRegionWithCrop;
     WeakRefHandleField touchableRegionSurfaceControl;
 } gInputWindowHandleClassInfo;
@@ -163,8 +162,6 @@ bool NativeInputWindowHandle::updateInfo() {
             env->GetIntField(obj, gInputWindowHandleClassInfo.inputFeatures));
     mInfo.displayId = env->GetIntField(obj,
             gInputWindowHandleClassInfo.displayId);
-    mInfo.portalToDisplayId = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.portalToDisplayId);
 
     jobject inputApplicationHandleObj = env->GetObjectField(obj,
             gInputWindowHandleClassInfo.inputApplicationHandle);
@@ -347,9 +344,6 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.displayId, clazz,
             "displayId", "I");
-
-    GET_FIELD_ID(gInputWindowHandleClassInfo.portalToDisplayId, clazz,
-            "portalToDisplayId", "I");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.replaceTouchableRegionWithCrop, clazz,
             "replaceTouchableRegionWithCrop", "Z");

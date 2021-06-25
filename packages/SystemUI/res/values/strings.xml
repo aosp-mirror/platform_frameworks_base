@@ -1148,17 +1148,11 @@
     <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_title">Remove guest?</string>
 
-    <!-- Title of the confirmation dialog when resetting guest session [CHAR LIMIT=NONE] -->
-    <string name="guest_reset_guest_dialog_title">Reset guest?</string>
-
     <!-- Message of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_message">All apps and data in this session will be deleted.</string>
 
     <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
     <string name="guest_exit_guest_dialog_remove">Remove</string>
-
-    <!-- Label for button in confirmation dialog when resetting guest session [CHAR LIMIT=35] -->
-    <string name="guest_reset_guest_dialog_remove">Reset</string>
 
     <!-- Title of the notification when resuming an existing guest session [CHAR LIMIT=NONE] -->
     <string name="guest_wipe_session_title">Welcome back, guest!</string>
@@ -2938,7 +2932,7 @@
     <string name="audio_status">Listening</string>
     <!-- Status text on the Conversation widget for playing a game [CHAR LIMIT=20] -->
     <string name="game_status">Playing</string>
-    <!-- Empty user name before user has selected a friend for their Conversation widget [CHAR LIMIT=20] -->
+    <!-- Empty user name before user has selected a friend for their Conversation widget [CHAR LIMIT=10] -->
     <string name="empty_user_name">Friends</string>
     <!-- Empty status shown before user has selected a friend for their Conversation widget [CHAR LIMIT=20] -->
     <string name="empty_status">Let’s chat tonight!</string>

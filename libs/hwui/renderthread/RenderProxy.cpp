@@ -26,6 +26,7 @@
 #include "renderthread/CanvasContext.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
+#include "thread/CommonPool.h"
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
 
@@ -40,6 +41,17 @@ RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode,
         return CanvasContext::create(mRenderThread, translucent, rootRenderNode, contextFactory);
     });
     mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode);
+}
+
+void RenderProxy::asyncDelete(RenderProxy* proxy) {
+    if (!proxy) return;
+
+    if (proxy->mContext) {
+        // Use the common pool because ~RenderProxy blocks on calling into RenderThread
+        CommonPool::post([proxy]() { delete proxy; });
+    } else {
+        delete proxy;
+    }
 }
 
 RenderProxy::~RenderProxy() {
@@ -314,7 +326,7 @@ void RenderProxy::setPictureCapturedCallback(
 }
 
 void RenderProxy::setASurfaceTransactionCallback(
-        const std::function<void(int64_t, int64_t, int64_t)>& callback) {
+        const std::function<bool(int64_t, int64_t, int64_t)>& callback) {
     mRenderThread.queue().post(
             [this, cb = callback]() { mContext->setASurfaceTransactionCallback(cb); });
 }

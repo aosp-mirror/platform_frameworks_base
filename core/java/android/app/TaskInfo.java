@@ -331,11 +331,10 @@ public class TaskInfo {
     }
 
     /**
-      * Returns {@code true} if parameters that are important for task organizers have changed
-      * and {@link com.android.server.wm.TaskOrginizerController} needs to notify listeners
-      * about that.
-      * @hide
-      */
+     * Returns {@code true} if the parameters that are important for task organizers are equal
+     * between this {@link TaskInfo} and {@param that}.
+     * @hide
+     */
     public boolean equalsForTaskOrganizer(@Nullable TaskInfo that) {
         if (that == null) {
             return false;

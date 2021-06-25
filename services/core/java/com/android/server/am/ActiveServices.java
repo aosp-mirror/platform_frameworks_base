@@ -1976,7 +1976,7 @@ public final class ActiveServices {
                 r.foregroundId = 0;
                 r.foregroundNoti = null;
             } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
-                r.stripForegroundServiceFlagFromNotification();
+                dropFgsNotificationStateLocked(r);
                 if ((flags & Service.STOP_FOREGROUND_DETACH) != 0) {
                     r.foregroundId = 0;
                     r.foregroundNoti = null;
@@ -4225,9 +4225,10 @@ public final class ActiveServices {
         }
 
         r.isForeground = false;
+        r.mFgsNotificationWasDeferred = false;
+        dropFgsNotificationStateLocked(r);
         r.foregroundId = 0;
         r.foregroundNoti = null;
-        r.mFgsNotificationWasDeferred = false;
         resetFgsRestrictionLocked(r);
 
         // Clear start entries.
@@ -4289,6 +4290,35 @@ public final class ActiveServices {
         }
 
         smap.ensureNotStartingBackgroundLocked(r);
+    }
+
+    private void dropFgsNotificationStateLocked(ServiceRecord r) {
+        // If this is the only FGS using this notification, clear its FGS flag
+        boolean shared = false;
+        final ServiceMap smap = mServiceMap.get(r.userId);
+        if (smap != null) {
+            // Is any other FGS using this notification?
+            final int numServices = smap.mServicesByInstanceName.size();
+            for (int i = 0; i < numServices; i++) {
+                final ServiceRecord sr = smap.mServicesByInstanceName.valueAt(i);
+                if (sr == r) {
+                    continue;
+                }
+                if (sr.isForeground
+                        && r.foregroundId == sr.foregroundId
+                        && r.appInfo.packageName.equals(sr.appInfo.packageName)) {
+                    shared = true;
+                    break;
+                }
+            }
+        } else {
+            Slog.wtf(TAG, "FGS " + r + " not found!");
+        }
+
+        // No other FGS is sharing this notification, so we're done with it
+        if (!shared) {
+            r.stripForegroundServiceFlagFromNotification();
+        }
     }
 
     void removeConnectionLocked(ConnectionRecord c, ProcessRecord skipApp,

@@ -5364,7 +5364,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         portalWindowHandle.scaleFactor = 1f;
         portalWindowHandle.ownerPid = Process.myPid();
         portalWindowHandle.ownerUid = Process.myUid();
-        portalWindowHandle.portalToDisplayId = mDisplayId;
         return portalWindowHandle;
     }
 
@@ -5501,6 +5500,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     boolean updateDisplayOverrideConfigurationLocked() {
+        // Preemptively cancel the running recents animation -- SysUI can't currently handle this
+        // case properly since the signals it receives all happen post-change
+        final RecentsAnimationController recentsAnimationController =
+                mWmService.getRecentsAnimationController();
+        if (recentsAnimationController != null) {
+            recentsAnimationController.cancelAnimationForDisplayChange();
+        }
+
         Configuration values = new Configuration();
         computeScreenConfiguration(values);
 

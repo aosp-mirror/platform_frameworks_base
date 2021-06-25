@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
   Copyright (C) 2021 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +13,9 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-  -->
+   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-       android:shape="rectangle">
-    <solid android:color="?androidprv:attr/colorSurface" />
-    <corners
-        android:radius="?android:attr/dialogCornerRadius"
-    />
-</shape>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="settingslib_learn_more_text" msgid="7385478101223578464">"વધુ જાણો"</string>
+</resources>
