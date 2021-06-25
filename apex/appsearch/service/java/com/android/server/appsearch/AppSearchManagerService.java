@@ -86,6 +86,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * The main service implementation which contains AppSearch's platform functionality.
+ *
  * @hide
  */
 public class AppSearchManagerService extends SystemService {
@@ -183,7 +184,6 @@ public class AppSearchManagerService extends SystemService {
      * when a user is removed.
      *
      * @param userHandle The multi-user handle of the user that need to be removed.
-     *
      * @see android.os.Environment#getDataSystemCeDirectory
      */
     private void handleUserRemoved(@NonNull UserHandle userHandle) {
@@ -1500,7 +1500,6 @@ public class AppSearchManagerService extends SystemService {
         }
     }
 
-    // TODO(b/179160886): Cache the previous storage stats.
     private class AppSearchStorageStatsAugmenter implements StorageStatsAugmenter {
         @Override
         public void augmentStatsForPackageForUser(
@@ -1514,12 +1513,19 @@ public class AppSearchManagerService extends SystemService {
 
             try {
                 verifyUserUnlocked(userHandle);
-                Context userContext = mContext.createContextAsUser(userHandle, /*flags=*/ 0);
                 AppSearchUserInstance instance =
-                        mAppSearchUserInstanceManager.getOrCreateUserInstance(
-                                userContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
-                stats.dataSize += instance.getAppSearchImpl()
-                        .getStorageInfoForPackage(packageName).getSizeBytes();
+                        mAppSearchUserInstanceManager.getUserInstanceOrNull(userHandle);
+                if (instance == null) {
+                    // augment storage info from file
+                    UserStorageInfo userStorageInfo =
+                            mAppSearchUserInstanceManager.getOrCreateUserStorageInfoInstance(
+                                    userHandle);
+                    stats.dataSize +=
+                            userStorageInfo.getSizeBytesForPackage(packageName);
+                } else {
+                    stats.dataSize += instance.getAppSearchImpl()
+                            .getStorageInfoForPackage(packageName).getSizeBytes();
+                }
             } catch (Throwable t) {
                 Log.e(
                         TAG,
@@ -1543,13 +1549,22 @@ public class AppSearchManagerService extends SystemService {
                 if (packagesForUid == null) {
                     return;
                 }
-                Context userContext = mContext.createContextAsUser(userHandle, /*flags=*/ 0);
                 AppSearchUserInstance instance =
-                        mAppSearchUserInstanceManager.getOrCreateUserInstance(
-                                userContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
-                for (int i = 0; i < packagesForUid.length; i++) {
-                    stats.dataSize += instance.getAppSearchImpl()
-                            .getStorageInfoForPackage(packagesForUid[i]).getSizeBytes();
+                        mAppSearchUserInstanceManager.getUserInstanceOrNull(userHandle);
+                if (instance == null) {
+                    // augment storage info from file
+                    UserStorageInfo userStorageInfo =
+                            mAppSearchUserInstanceManager.getOrCreateUserStorageInfoInstance(
+                                    userHandle);
+                    for (int i = 0; i < packagesForUid.length; i++) {
+                        stats.dataSize += userStorageInfo.getSizeBytesForPackage(
+                                packagesForUid[i]);
+                    }
+                } else {
+                    for (int i = 0; i < packagesForUid.length; i++) {
+                        stats.dataSize += instance.getAppSearchImpl()
+                                .getStorageInfoForPackage(packagesForUid[i]).getSizeBytes();
+                    }
                 }
             } catch (Throwable t) {
                 Log.e(TAG, "Unable to augment storage stats for uid " + uid, t);
@@ -1567,19 +1582,24 @@ public class AppSearchManagerService extends SystemService {
 
             try {
                 verifyUserUnlocked(userHandle);
-                List<PackageInfo> packagesForUser = mPackageManager.getInstalledPackagesAsUser(
-                        /*flags=*/0, userHandle.getIdentifier());
-                if (packagesForUser == null) {
-                    return;
-                }
-                Context userContext = mContext.createContextAsUser(userHandle, /*flags=*/ 0);
                 AppSearchUserInstance instance =
-                        mAppSearchUserInstanceManager.getOrCreateUserInstance(
-                                userContext, userHandle, AppSearchConfig.getInstance(EXECUTOR));
-                for (int i = 0; i < packagesForUser.size(); i++) {
-                    String packageName = packagesForUser.get(i).packageName;
-                    stats.dataSize += instance.getAppSearchImpl()
-                            .getStorageInfoForPackage(packageName).getSizeBytes();
+                        mAppSearchUserInstanceManager.getUserInstanceOrNull(userHandle);
+                if (instance == null) {
+                    // augment storage info from file
+                    UserStorageInfo userStorageInfo =
+                            mAppSearchUserInstanceManager.getOrCreateUserStorageInfoInstance(
+                                    userHandle);
+                    stats.dataSize += userStorageInfo.getTotalSizeBytes();
+                } else {
+                    List<PackageInfo> packagesForUser = mPackageManager.getInstalledPackagesAsUser(
+                            /*flags=*/0, userHandle.getIdentifier());
+                    if (packagesForUser != null) {
+                        for (int i = 0; i < packagesForUser.size(); i++) {
+                            String packageName = packagesForUser.get(i).packageName;
+                            stats.dataSize += instance.getAppSearchImpl()
+                                    .getStorageInfoForPackage(packageName).getSizeBytes();
+                        }
+                    }
                 }
             } catch (Throwable t) {
                 Log.e(TAG, "Unable to augment storage stats for " + userHandle, t);
