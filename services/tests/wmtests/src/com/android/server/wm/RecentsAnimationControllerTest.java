@@ -655,6 +655,36 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertFalse(win1.mHasSurface);
     }
 
+    @Test
+    public void testCancelForRotation_ReorderToTop() throws Exception {
+        mWm.setRecentsAnimationController(mController);
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
+        activity.addWindow(win1);
+
+        mController.addAnimation(activity.getTask(), false /* isRecentTaskInvisible */);
+        mController.setWillFinishToHome(true);
+        mController.cancelAnimationForDisplayChange();
+
+        verify(mMockRunner).onAnimationCanceled(any());
+        verify(mAnimationCallbacks).onAnimationFinished(REORDER_MOVE_TO_TOP, false);
+    }
+
+    @Test
+    public void testCancelForRotation_ReorderToOriginalPosition() throws Exception {
+        mWm.setRecentsAnimationController(mController);
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
+        activity.addWindow(win1);
+
+        mController.addAnimation(activity.getTask(), false /* isRecentTaskInvisible */);
+        mController.setWillFinishToHome(false);
+        mController.cancelAnimationForDisplayChange();
+
+        verify(mMockRunner).onAnimationCanceled(any());
+        verify(mAnimationCallbacks).onAnimationFinished(REORDER_MOVE_TO_ORIGINAL_POSITION, false);
+    }
+
     private ActivityRecord createHomeActivity() {
         final ActivityRecord homeActivity = new ActivityBuilder(mWm.mAtmService)
                 .setParentTask(mRootHomeTask)
