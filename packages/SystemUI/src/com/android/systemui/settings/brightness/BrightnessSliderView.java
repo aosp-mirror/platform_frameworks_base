@@ -180,6 +180,8 @@ public class BrightnessSliderView extends FrameLayout {
      * Sets the scale for the progress bar (for brightness_progress_drawable.xml)
      *
      * This will only scale the thick progress bar and not the icon inside
+     *
+     * Used in {@link com.android.systemui.qs.QSAnimator}.
      */
     public void setSliderScaleY(float scale) {
         if (scale != mScale) {
