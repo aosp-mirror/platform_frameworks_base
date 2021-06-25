@@ -159,7 +159,6 @@ class ActivityLaunchAnimator(
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
         // never started.
         if (willAnimate) {
-            keyguardHandler.disableKeyguardBlurs()
             runner.postTimeout()
 
             // Hide the keyguard using the launch animation instead of the default unlock animation.
@@ -220,8 +219,8 @@ class ActivityLaunchAnimator(
         /** Hide the keyguard and animate using [runner]. */
         fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner)
 
-        /** Disable window blur so they don't overlap with the window launch animation **/
-        fun disableKeyguardBlurs()
+        /** Enable/disable window blur so they don't overlap with the window launch animation **/
+        fun setBlursDisabledForAppLaunch(disabled: Boolean)
     }
 
     /**
@@ -491,6 +490,7 @@ class ActivityLaunchAnimator(
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
                     Log.d(TAG, "Animation started")
+                    keyguardHandler.setBlursDisabledForAppLaunch(true)
                     controller.onLaunchAnimationStart(isExpandingFullyAbove)
 
                     // Add the drawable to the launch container overlay. Overlays always draw
@@ -501,6 +501,7 @@ class ActivityLaunchAnimator(
 
                 override fun onAnimationEnd(animation: Animator?) {
                     Log.d(TAG, "Animation ended")
+                    keyguardHandler.setBlursDisabledForAppLaunch(false)
                     iCallback?.invoke()
                     controller.onLaunchAnimationEnd(isExpandingFullyAbove)
                     launchContainerOverlay.remove(windowBackgroundLayer)

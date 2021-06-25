@@ -254,7 +254,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun updateBlurCallback_ignoreShadeBlurUntilHidden_overridesZoom() {
         `when`(shadeSpring.radius).thenReturn(maxBlur)
         `when`(shadeAnimation.radius).thenReturn(maxBlur)
-        notificationShadeDepthController.ignoreShadeBlurUntilHidden = true
+        notificationShadeDepthController.blursDisabledForAppLaunch = true
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(blurUtils).applyBlur(any(), eq(0), eq(false))
     }
@@ -276,7 +276,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
     @Test
     fun ignoreShadeBlurUntilHidden_schedulesFrame() {
-        notificationShadeDepthController.ignoreShadeBlurUntilHidden = true
+        notificationShadeDepthController.blursDisabledForAppLaunch = true
         verify(choreographer).postFrameCallback(
                 eq(notificationShadeDepthController.updateBlurCallback))
     }
@@ -311,7 +311,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun ignoreShadeBlurUntilHidden_whennNull_ignoresIfShadeHasNoBlur() {
         `when`(shadeSpring.radius).thenReturn(0)
         `when`(shadeAnimation.radius).thenReturn(0)
-        notificationShadeDepthController.ignoreShadeBlurUntilHidden = true
+        notificationShadeDepthController.blursDisabledForAppLaunch = true
         verify(shadeSpring, never()).animateTo(anyInt(), any())
         verify(shadeAnimation, never()).animateTo(anyInt(), any())
     }
