@@ -297,20 +297,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     boolean switchTileLayout(boolean force) {
-        /** Whether or not the QuickQSPanel currently contains a media player. */
+        /* Whether or not the panel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
         if (horizontal != mUsingHorizontalLayout || force) {
             mUsingHorizontalLayout = horizontal;
-            for (QSPanelControllerBase.TileRecord record : mRecords) {
-                mView.removeTile(record);
-                record.tile.removeCallback(record.callback);
-            }
-            mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force,
-                    mUiEventLogger);
+            mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force);
             updateMediaDisappearParameters();
-
-            setTiles();
-
             return true;
         }
         return false;
