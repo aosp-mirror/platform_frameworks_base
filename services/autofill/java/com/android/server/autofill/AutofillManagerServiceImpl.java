@@ -76,6 +76,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.os.IResultReceiver;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.AutofillManagerService.DisabledInfoCache;
@@ -1178,6 +1179,15 @@ final class AutofillManagerServiceImpl
             return mInfo.isInlineSuggestionsEnabled();
         }
         return false;
+    }
+
+    @GuardedBy("mLock")
+    void requestSavedPasswordCount(IResultReceiver receiver) {
+        RemoteFillService remoteService =
+                new RemoteFillService(
+                        getContext(), mInfo.getServiceInfo().getComponentName(), mUserId,
+                        /* callbacks= */ null, mMaster.isInstantServiceAllowed());
+        remoteService.onSavedPasswordCountRequest(receiver);
     }
 
     @GuardedBy("mLock")

@@ -3054,6 +3054,9 @@ public final class BluetoothAdapter {
                 return true;
             }
             return false;
+        } else if (profile == BluetoothProfile.LE_AUDIO) {
+            BluetoothLeAudio leAudio = new BluetoothLeAudio(context, listener, this);
+            return true;
         } else {
             return false;
         }
@@ -3142,6 +3145,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.HEARING_AID:
                 BluetoothHearingAid hearingAid = (BluetoothHearingAid) proxy;
                 hearingAid.close();
+                break;
+            case BluetoothProfile.LE_AUDIO:
+                BluetoothLeAudio leAudio = (BluetoothLeAudio) proxy;
+                leAudio.close();
         }
     }
 

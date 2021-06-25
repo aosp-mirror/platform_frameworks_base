@@ -56,6 +56,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -116,6 +117,7 @@ public class NavigationBarController implements Callbacks,
     private final TaskbarDelegate mTaskbarDelegate;
     private int mNavMode;
     private boolean mIsTablet;
+    private final UserTracker mUserTracker;
 
     /** A displayId - nav bar maps. */
     @VisibleForTesting
@@ -153,7 +155,8 @@ public class NavigationBarController implements Callbacks,
             NavigationBarOverlayController navBarOverlayController,
             ConfigurationController configurationController,
             NavigationBarA11yHelper navigationBarA11yHelper,
-            TaskbarDelegate taskbarDelegate) {
+            TaskbarDelegate taskbarDelegate,
+            UserTracker userTracker) {
         mContext = context;
         mWindowManager = windowManager;
         mAssistManagerLazy = assistManagerLazy;
@@ -189,6 +192,7 @@ public class NavigationBarController implements Callbacks,
         mTaskbarDelegate.setOverviewProxyService(overviewProxyService,
                 navigationBarA11yHelper, mSysUiFlagsContainer);
         mIsTablet = isTablet(mContext.getResources().getConfiguration());
+        mUserTracker = userTracker;
     }
 
     @Override
@@ -370,7 +374,8 @@ public class NavigationBarController implements Callbacks,
                 mHandler,
                 mNavBarOverlayController,
                 mUiEventLogger,
-                mNavigationBarA11yHelper);
+                mNavigationBarA11yHelper,
+                mUserTracker);
         mNavigationBars.put(displayId, navBar);
 
         View navigationBarView = navBar.createView(savedState);

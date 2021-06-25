@@ -33,7 +33,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_ROOT_TASK;
 import static com.android.server.wm.DisplayContent.alwaysCreateRootTask;
@@ -1451,18 +1450,30 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      */
     boolean pauseBackTasks(ActivityRecord resuming) {
         final int[] someActivityPaused = {0};
-        forAllLeafTaskFragments((taskFragment) -> {
-            final ActivityRecord resumedActivity = taskFragment.getResumedActivity();
-            if (resumedActivity != null
-                    && (taskFragment.getVisibility(resuming) != TASK_FRAGMENT_VISIBILITY_VISIBLE
-                    || !taskFragment.isTopActivityFocusable())) {
-                ProtoLog.d(WM_DEBUG_STATES, "pauseBackTasks: taskFrag=%s "
-                        + "mResumedActivity=%s", taskFragment, resumedActivity);
-                if (taskFragment.startPausing(false /* uiSleeping*/,
-                        resuming, "pauseBackTasks")) {
-                    someActivityPaused[0]++;
+        forAllLeafTasks(leafTask -> {
+            // Check if the direct child resumed activity in the leaf task needed to be paused if
+            // the leaf task is not a leaf task fragment.
+            if (!leafTask.isLeafTaskFragment()) {
+                final ActivityRecord top = topRunningActivity();
+                final ActivityRecord resumedActivity = leafTask.getResumedActivity();
+                if (resumedActivity != null && top.getTaskFragment() != leafTask) {
+                    // Pausing the resumed activity because it is occluded by other task fragment.
+                    if (leafTask.startPausing(false /* uiSleeping*/, resuming, "pauseBackTasks")) {
+                        someActivityPaused[0]++;
+                    }
                 }
             }
+
+            leafTask.forAllLeafTaskFragments((taskFrag) -> {
+                final ActivityRecord resumedActivity = taskFrag.getResumedActivity();
+                if (resumedActivity != null
+                        && (taskFrag.getVisibility(resuming) != TASK_FRAGMENT_VISIBILITY_VISIBLE
+                        || !taskFrag.isTopActivityFocusable())) {
+                    if (taskFrag.startPausing(false /* uiSleeping*/, resuming, "pauseBackTasks")) {
+                        someActivityPaused[0]++;
+                    }
+                }
+            }, true /* traverseTopToBottom */);
         }, true /* traverseTopToBottom */);
         return someActivityPaused[0] > 0;
     }

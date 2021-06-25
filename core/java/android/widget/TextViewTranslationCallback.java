@@ -56,26 +56,6 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
 
     private CharSequence mContentDescription;
 
-    /**
-     * Invoked by the platform when receiving the successful {@link ViewTranslationResponse} for the
-     * view that provides the translatable information by {@link View#createTranslationRequest} and
-     * sent by the platform.
-     */
-    void setTranslationTransformation(TranslationTransformationMethod method) {
-        if (method == null) {
-            if (DEBUG) {
-                Log.w(TAG, "setTranslationTransformation: should not set null "
-                        + "TranslationTransformationMethod");
-            }
-            return;
-        }
-        mTranslationTransformation = method;
-    }
-
-    TranslationTransformationMethod getTranslationTransformation() {
-        return mTranslationTransformation;
-    }
-
     private void clearTranslationTransformation() {
         if (DEBUG) {
             Log.v(TAG, "clearTranslationTransformation: " + mTranslationTransformation);
@@ -88,34 +68,33 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
      */
     @Override
     public boolean onShowTranslation(@NonNull View view) {
-        if (view.getViewTranslationResponse() == null) {
-            Log.wtf(TAG, "onShowTranslation() shouldn't be called before "
+        ViewTranslationResponse response = view.getViewTranslationResponse();
+        if (response == null) {
+            Log.e(TAG, "onShowTranslation() shouldn't be called before "
                     + "onViewTranslationResponse().");
             return false;
         }
-        if (mTranslationTransformation != null) {
-            final TransformationMethod transformation = mTranslationTransformation;
-            runWithAnimation(
-                    (TextView) view,
-                    () -> {
-                        mIsShowingTranslation = true;
-                        ((TextView) view).setTransformationMethod(transformation);
-                    });
-            ViewTranslationResponse response = view.getViewTranslationResponse();
-            if (response.getKeys().contains(ViewTranslationRequest.ID_CONTENT_DESCRIPTION)) {
-                CharSequence translatedContentDescription =
-                        response.getValue(ViewTranslationRequest.ID_CONTENT_DESCRIPTION).getText();
-                if (!TextUtils.isEmpty(translatedContentDescription)) {
-                    mContentDescription = view.getContentDescription();
-                    view.setContentDescription(translatedContentDescription);
-                }
+        if (mTranslationTransformation == null) {
+            TransformationMethod originalTranslationMethod =
+                    ((TextView) view).getTransformationMethod();
+            mTranslationTransformation = new TranslationTransformationMethod(response,
+                    originalTranslationMethod);
+        }
+        final TransformationMethod transformation = mTranslationTransformation;
+        runWithAnimation(
+                (TextView) view,
+                () -> {
+                    mIsShowingTranslation = true;
+                    // TODO(b/178353965): well-handle setTransformationMethod.
+                    ((TextView) view).setTransformationMethod(transformation);
+                });
+        if (response.getKeys().contains(ViewTranslationRequest.ID_CONTENT_DESCRIPTION)) {
+            CharSequence translatedContentDescription =
+                    response.getValue(ViewTranslationRequest.ID_CONTENT_DESCRIPTION).getText();
+            if (!TextUtils.isEmpty(translatedContentDescription)) {
+                mContentDescription = view.getContentDescription();
+                view.setContentDescription(translatedContentDescription);
             }
-        } else {
-            if (DEBUG) {
-                // TODO(b/182433547): remove before S release
-                Log.w(TAG, "onShowTranslation(): no translated text.");
-            }
-            return false;
         }
         return true;
     }
@@ -126,7 +105,7 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
     @Override
     public boolean onHideTranslation(@NonNull View view) {
         if (view.getViewTranslationResponse() == null) {
-            Log.wtf(TAG, "onHideTranslation() shouldn't be called before "
+            Log.e(TAG, "onHideTranslation() shouldn't be called before "
                     + "onViewTranslationResponse().");
             return false;
         }

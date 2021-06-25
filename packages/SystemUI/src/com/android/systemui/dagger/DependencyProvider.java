@@ -235,7 +235,8 @@ public class DependencyProvider {
             NavigationBarOverlayController navBarOverlayController,
             ConfigurationController configurationController,
             NavigationBarA11yHelper navigationBarA11yHelper,
-            TaskbarDelegate taskbarDelegate) {
+            TaskbarDelegate taskbarDelegate,
+            UserTracker userTracker) {
         return new NavigationBarController(context,
                 windowManager,
                 assistManagerLazy,
@@ -262,7 +263,8 @@ public class DependencyProvider {
                 navBarOverlayController,
                 configurationController,
                 navigationBarA11yHelper,
-                taskbarDelegate);
+                taskbarDelegate,
+                userTracker);
     }
 
     /** */
