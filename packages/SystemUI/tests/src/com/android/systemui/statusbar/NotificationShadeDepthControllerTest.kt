@@ -200,9 +200,19 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Test
     fun setFullShadeTransition_appliesBlur_onlyIfSupported() {
         reset(blurUtils)
+        `when`(blurUtils.blurRadiusOfRatio(anyFloat())).then { answer ->
+            (answer.arguments[0] as Float * maxBlur).toInt()
+        }
+        `when`(blurUtils.ratioOfBlurRadius(anyInt())).then { answer ->
+            answer.arguments[0] as Int / maxBlur.toFloat()
+        }
+        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
+        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
+
         notificationShadeDepthController.transitionToFullShadeProgress = 1f
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(blurUtils).applyBlur(any(), eq(0), eq(false))
+        verify(wallpaperManager).setWallpaperZoomOut(any(), eq(1f))
     }
 
     @Test

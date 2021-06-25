@@ -195,10 +195,14 @@ class NotificationShadeDepthController @Inject constructor(
         var blur = max(shadeRadius.toInt(), globalActionsRadius)
 
         // Make blur be 0 if it is necessary to stop blur effect.
-        if (scrimsVisible || !blurUtils.supportsBlursOnWindows()) {
+        if (scrimsVisible) {
             blur = 0
         }
         val zoomOut = blurUtils.ratioOfBlurRadius(blur)
+
+        if (!blurUtils.supportsBlursOnWindows()) {
+            blur = 0
+        }
 
         // Brightness slider removes blur, but doesn't affect zooms
         blur = (blur * (1f - brightnessMirrorSpring.ratio)).toInt()
