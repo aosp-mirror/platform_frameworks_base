@@ -1570,6 +1570,7 @@ public abstract class WallpaperService extends Service {
                         + page.getBitmap().getWidth() + " x " + page.getBitmap().getHeight());
             }
             for (RectF area: page.getAreas()) {
+                if (area == null) continue;
                 RectF subArea = generateSubRect(area, pageIndx, numPages);
                 Bitmap b = page.getBitmap();
                 int x = Math.round(b.getWidth() * subArea.left);
@@ -1933,6 +1934,7 @@ public abstract class WallpaperService extends Service {
     }
 
     private boolean isValid(RectF area) {
+        if (area == null) return false;
         boolean valid = area.bottom > area.top && area.left < area.right
                 && LOCAL_COLOR_BOUNDS.contains(area);
         return valid;
