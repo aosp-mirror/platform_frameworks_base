@@ -264,7 +264,7 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     }
 
     @Override
-    protected @NonNull VibrationEffect getSuccessVibrationEffect() {
+    protected @Nullable VibrationEffect getSuccessVibrationEffect() {
         if (!mCustomHaptics) {
             return super.getSuccessVibrationEffect();
         }
@@ -274,7 +274,7 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     }
 
     @Override
-    protected @NonNull VibrationEffect getErrorVibrationEffect() {
+    protected @Nullable VibrationEffect getErrorVibrationEffect() {
         if (!mCustomHaptics) {
             return super.getErrorVibrationEffect();
         }

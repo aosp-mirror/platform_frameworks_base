@@ -344,9 +344,13 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     }
 
     @Override
-    protected @NonNull VibrationEffect getSuccessVibrationEffect() {
+    protected @Nullable VibrationEffect getSuccessVibrationEffect() {
         if (!mCustomHaptics) {
             return super.getSuccessVibrationEffect();
+        }
+
+        if (Settings.Global.getInt(mContentResolver, "fp_success_enabled", 1) == 0) {
+            return null;
         }
 
         return getVibration(Settings.Global.getString(mContentResolver,
@@ -354,9 +358,13 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     }
 
     @Override
-    protected @NonNull VibrationEffect getErrorVibrationEffect() {
+    protected @Nullable VibrationEffect getErrorVibrationEffect() {
         if (!mCustomHaptics) {
             return super.getErrorVibrationEffect();
+        }
+
+        if (Settings.Global.getInt(mContentResolver, "fp_error_enabled", 1) == 0) {
+            return null;
         }
 
         return getVibration(Settings.Global.getString(mContentResolver,
