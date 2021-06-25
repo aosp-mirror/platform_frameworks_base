@@ -34,12 +34,15 @@ import java.util.Objects;
 public final class LastLocationRequest implements Parcelable {
 
     private final boolean mHiddenFromAppOps;
+    private final boolean mAdasGnssBypass;
     private final boolean mLocationSettingsIgnored;
 
     private LastLocationRequest(
             boolean hiddenFromAppOps,
+            boolean adasGnssBypass,
             boolean locationSettingsIgnored) {
         mHiddenFromAppOps = hiddenFromAppOps;
+        mAdasGnssBypass = adasGnssBypass;
         mLocationSettingsIgnored = locationSettingsIgnored;
     }
 
@@ -56,6 +59,21 @@ public final class LastLocationRequest implements Parcelable {
     }
 
     /**
+     * Returns true if this request may access GNSS even if location settings would normally deny
+     * this, in order to enable automotive safety features. This field is only respected on
+     * automotive devices, and only if the client is recognized as a legitimate ADAS (Advanced
+     * Driving Assistance Systems) application.
+     *
+     * @return true if all limiting factors will be ignored to satisfy GNSS request
+     * @hide
+     */
+    // TODO: make this system api
+    public boolean isAdasGnssBypass() {
+        return mAdasGnssBypass;
+    }
+
+
+    /**
      * Returns true if location settings, throttling, background location limits, and any other
      * possible limiting factors will be ignored in order to satisfy this last location request.
      *
@@ -65,12 +83,22 @@ public final class LastLocationRequest implements Parcelable {
         return mLocationSettingsIgnored;
     }
 
+    /**
+     * Returns true if any bypass flag is set on this request. For internal use only.
+     *
+     * @hide
+     */
+    public boolean isBypass() {
+        return mAdasGnssBypass || mLocationSettingsIgnored;
+    }
+
     public static final @NonNull Parcelable.Creator<LastLocationRequest> CREATOR =
             new Parcelable.Creator<LastLocationRequest>() {
                 @Override
                 public LastLocationRequest createFromParcel(Parcel in) {
                     return new LastLocationRequest(
                             /* hiddenFromAppOps= */ in.readBoolean(),
+                            /* adasGnssBypass= */ in.readBoolean(),
                             /* locationSettingsIgnored= */ in.readBoolean());
                 }
                 @Override
@@ -86,6 +114,7 @@ public final class LastLocationRequest implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeBoolean(mHiddenFromAppOps);
+        parcel.writeBoolean(mAdasGnssBypass);
         parcel.writeBoolean(mLocationSettingsIgnored);
     }
 
@@ -99,12 +128,13 @@ public final class LastLocationRequest implements Parcelable {
         }
         LastLocationRequest that = (LastLocationRequest) o;
         return mHiddenFromAppOps == that.mHiddenFromAppOps
+                && mAdasGnssBypass == that.mAdasGnssBypass
                 && mLocationSettingsIgnored == that.mLocationSettingsIgnored;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mHiddenFromAppOps, mLocationSettingsIgnored);
+        return Objects.hash(mHiddenFromAppOps, mAdasGnssBypass, mLocationSettingsIgnored);
     }
 
     @NonNull
@@ -115,8 +145,11 @@ public final class LastLocationRequest implements Parcelable {
         if (mHiddenFromAppOps) {
             s.append("hiddenFromAppOps, ");
         }
+        if (mAdasGnssBypass) {
+            s.append("adasGnssBypass, ");
+        }
         if (mLocationSettingsIgnored) {
-            s.append("locationSettingsIgnored, ");
+            s.append("settingsBypass, ");
         }
         if (s.length() > "LastLocationRequest[".length()) {
             s.setLength(s.length() - 2);
@@ -131,6 +164,7 @@ public final class LastLocationRequest implements Parcelable {
     public static final class Builder {
 
         private boolean mHiddenFromAppOps;
+        private boolean mAdasGnssBypass;
         private boolean mLocationSettingsIgnored;
 
         /**
@@ -138,6 +172,7 @@ public final class LastLocationRequest implements Parcelable {
          */
         public Builder() {
             mHiddenFromAppOps = false;
+            mAdasGnssBypass = false;
             mLocationSettingsIgnored = false;
         }
 
@@ -146,6 +181,7 @@ public final class LastLocationRequest implements Parcelable {
          */
         public Builder(@NonNull LastLocationRequest lastLocationRequest) {
             mHiddenFromAppOps = lastLocationRequest.mHiddenFromAppOps;
+            mAdasGnssBypass = lastLocationRequest.mAdasGnssBypass;
             mLocationSettingsIgnored = lastLocationRequest.mLocationSettingsIgnored;
         }
 
@@ -160,6 +196,25 @@ public final class LastLocationRequest implements Parcelable {
         @RequiresPermission(Manifest.permission.UPDATE_APP_OPS_STATS)
         public @NonNull Builder setHiddenFromAppOps(boolean hiddenFromAppOps) {
             mHiddenFromAppOps = hiddenFromAppOps;
+            return this;
+        }
+
+        /**
+         * If set to true, indicates that the client is an ADAS (Advanced Driving Assistance
+         * Systems) client, which requires access to GNSS even if location settings would normally
+         * deny this, in order to enable auto safety features. This field is only respected on
+         * automotive devices, and only if the client is recognized as a legitimate ADAS
+         * application. Defaults to false.
+         *
+         * <p>Permissions enforcement occurs when resulting location request is actually used, not
+         * when this method is invoked.
+         *
+         * @hide
+         */
+        // TODO: make this system api
+        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        public @NonNull LastLocationRequest.Builder setAdasGnssBypass(boolean adasGnssBypass) {
+            mAdasGnssBypass = adasGnssBypass;
             return this;
         }
 
@@ -186,6 +241,7 @@ public final class LastLocationRequest implements Parcelable {
         public @NonNull LastLocationRequest build() {
             return new LastLocationRequest(
                     mHiddenFromAppOps,
+                    mAdasGnssBypass,
                     mLocationSettingsIgnored);
         }
     }

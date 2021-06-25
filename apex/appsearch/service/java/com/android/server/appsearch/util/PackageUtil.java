@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Process;
-import android.os.UserHandle;
 
 /**
  * Utilities for interacting with {@link android.content.pm.PackageManager},
@@ -30,16 +29,6 @@ import android.os.UserHandle;
  */
 public class PackageUtil {
     private PackageUtil() {}
-
-    /**
-     * Finds the UID of the {@code packageName}. Returns {@link Process#INVALID_UID} if unable to
-     * find the UID.
-     */
-    public static int getPackageUidAsUser(
-            @NonNull Context context, @NonNull String packageName, @NonNull UserHandle user) {
-        Context userContext = context.createContextAsUser(user, /*flags=*/ 0);
-        return getPackageUid(userContext, packageName);
-    }
 
     /**
      * Finds the UID of the {@code packageName} in the given {@code context}. Returns
