@@ -2932,7 +2932,7 @@
     <string name="audio_status">Listening</string>
     <!-- Status text on the Conversation widget for playing a game [CHAR LIMIT=20] -->
     <string name="game_status">Playing</string>
-    <!-- Empty user name before user has selected a friend for their Conversation widget [CHAR LIMIT=20] -->
+    <!-- Empty user name before user has selected a friend for their Conversation widget [CHAR LIMIT=10] -->
     <string name="empty_user_name">Friends</string>
     <!-- Empty status shown before user has selected a friend for their Conversation widget [CHAR LIMIT=20] -->
     <string name="empty_status">Let’s chat tonight!</string>
