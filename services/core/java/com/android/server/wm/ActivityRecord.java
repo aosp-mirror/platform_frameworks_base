@@ -38,6 +38,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -277,6 +278,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.service.contentcapture.ActivityEvent;
 import android.service.dreams.DreamActivity;
 import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
@@ -330,6 +332,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.PendingIntentRecord;
+import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.uri.NeededUriGrants;
@@ -1185,7 +1188,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
             }
         }
-        pw.print(prefix); pw.print(full ? "  * " : "    "); pw.print(label);
+        pw.print(prefix); pw.print(full ? "* " : "    "); pw.print(label);
         pw.print(" #"); pw.print(index); pw.print(": ");
         pw.println(r);
         if (full) {
@@ -1887,17 +1890,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /**
      * Evaluate the theme for a starting window.
+     * @param prev Previous activity which may have a starting window.
      * @param originalTheme The original theme which read from activity or application.
      * @param replaceTheme The replace theme which requested from starter.
      * @return Resolved theme.
      */
-    private int evaluateStartingWindowTheme(String pkg, int originalTheme, int replaceTheme) {
+    private int evaluateStartingWindowTheme(ActivityRecord prev, String pkg, int originalTheme,
+            int replaceTheme) {
         // Skip if the package doesn't want a starting window.
-        if (!validateStartingWindowTheme(pkg, originalTheme)) {
+        if (!validateStartingWindowTheme(prev, pkg, originalTheme)) {
             return 0;
         }
         int selectedTheme = originalTheme;
-        if (replaceTheme != 0 && validateStartingWindowTheme(pkg, replaceTheme)) {
+        if (replaceTheme != 0 && validateStartingWindowTheme(prev, pkg, replaceTheme)) {
             // allow to replace theme
             selectedTheme = replaceTheme;
         }
@@ -1934,7 +1939,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return LAUNCH_SOURCE_TYPE_APPLICATION;
     }
 
-    private boolean validateStartingWindowTheme(String pkg, int theme) {
+    private boolean validateStartingWindowTheme(ActivityRecord prev, String pkg, int theme) {
         // If this is a translucent window, then don't show a starting window -- the current
         // effect (a full-screen opaque starting window that fades away to the real contents
         // when it is ready) does not work for this.
@@ -1971,7 +1976,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         if (windowDisableStarting && !launchedFromSystemSurface()) {
-            return false;
+            // Check if previous activity can transfer the starting window to this activity.
+            return prev != null && prev.getActivityType() == ACTIVITY_TYPE_STANDARD
+                    && prev.mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_IDLE
+                    && (prev.mStartingData != null
+                    || (prev.mStartingWindow != null && prev.mStartingSurface != null));
         }
         return true;
     }
@@ -3062,12 +3071,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Tell window manager to prepare for this one to be removed.
                 setVisibility(false);
 
-                if (task.getTopPausingActivity() == null) {
+                if (getTaskFragment().getPausingActivity() == null) {
                     ProtoLog.v(WM_DEBUG_STATES, "Finish needs to pause: %s", this);
                     if (DEBUG_USER_LEAVING) {
                         Slog.v(TAG_USER_LEAVING, "finish() => pause with userLeaving=false");
                     }
-                    task.startPausing(false /* userLeaving */, false /* uiSleeping */,
+                    getTaskFragment().startPausing(false /* userLeaving */, false /* uiSleeping */,
                             null /* resuming */, "finish");
                 }
 
@@ -4997,6 +5006,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                             true /* activityChange */, true /* updateOomAdj */,
                             true /* addPendingTopUid */);
                 }
+                final ContentCaptureManagerInternal contentCaptureService =
+                        LocalServices.getService(ContentCaptureManagerInternal.class);
+                if (contentCaptureService != null) {
+                    contentCaptureService.notifyActivityEvent(mUserId, mActivityComponent,
+                            ActivityEvent.TYPE_ACTIVITY_STARTED);
+                }
                 break;
             case PAUSED:
                 mAtmService.updateBatteryStats(this, false);
@@ -5419,7 +5434,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!task.hasChild(this)) {
             throw new IllegalStateException("Activity not found in its task");
         }
-        return task.topRunningActivity() == this;
+        return getTaskFragment().topRunningActivity() == this;
     }
 
     void handleAlreadyVisible() {
@@ -6396,15 +6411,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mSplashScreenStyleEmpty = shouldUseEmptySplashScreen(sourceRecord);
 
-        final int resolvedTheme = evaluateStartingWindowTheme(packageName, theme,
+        final int resolvedTheme = evaluateStartingWindowTheme(prev, packageName, theme,
                 splashScreenTheme);
+
+        final boolean activityCreated =
+                mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal();
+        // If this activity is just created and all activities below are finish, treat this
+        // scenario as warm launch.
+        final boolean newSingleActivity = !newTask && !activityCreated
+                && task.getActivity((r) -> !r.finishing && r != this) == null;
 
         final boolean shown = addStartingWindow(packageName, resolvedTheme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
-                prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
-                allowTaskSnapshot(),
-                mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal(),
-                mSplashScreenStyleEmpty);
+                prev != null ? prev.appToken : null,
+                newTask || newSingleActivity, taskSwitch, isProcessRunning(),
+                allowTaskSnapshot(), activityCreated, mSplashScreenStyleEmpty);
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }

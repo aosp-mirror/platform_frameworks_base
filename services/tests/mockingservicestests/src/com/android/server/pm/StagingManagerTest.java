@@ -286,6 +286,7 @@ public class StagingManagerTest {
         ApexSessionInfo activationFailed = new ApexSessionInfo();
         activationFailed.sessionId = 1543;
         activationFailed.isActivationFailed = true;
+        activationFailed.errorMessage = "Failed for test";
 
         ApexSessionInfo staged = new ApexSessionInfo();
         staged.sessionId = 101;
@@ -309,8 +310,8 @@ public class StagingManagerTest {
 
         assertThat(apexSession1.getErrorCode())
                 .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);
-        assertThat(apexSession1.getErrorMessage()).isEqualTo("APEX activation failed. Check logcat "
-                + "messages from apexd for more information.");
+        assertThat(apexSession1.getErrorMessage()).isEqualTo("APEX activation failed. "
+                + "Failed for test");
 
         assertThat(apexSession2.getErrorCode())
                 .isEqualTo(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED);

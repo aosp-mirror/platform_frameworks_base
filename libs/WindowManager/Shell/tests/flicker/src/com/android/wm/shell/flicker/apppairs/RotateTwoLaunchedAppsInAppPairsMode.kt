@@ -63,8 +63,8 @@ class RotateTwoLaunchedAppsInAppPairsMode(
 
     @FlakyTest
     @Test
-    override fun statusBarLayerIsAlwaysVisible() {
-        super.statusBarLayerIsAlwaysVisible()
+    override fun statusBarLayerIsVisible() {
+        super.statusBarLayerIsVisible()
     }
 
     @Presubmit

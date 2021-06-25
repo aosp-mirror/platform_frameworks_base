@@ -100,11 +100,11 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
 
     @Presubmit
     @Test
-    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
     @Presubmit
     @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
 
     @Presubmit
     @Test
@@ -125,11 +125,11 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
 
     @Presubmit
     @Test
-    override fun navBarLayerIsAlwaysVisible() = super.navBarLayerIsAlwaysVisible()
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
     @Presubmit
     @Test
-    override fun statusBarLayerIsAlwaysVisible() = super.statusBarLayerIsAlwaysVisible()
+    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
     companion object {
         const val TEST_REPETITIONS = 2

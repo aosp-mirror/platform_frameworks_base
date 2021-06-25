@@ -37,8 +37,8 @@ abstract class RotateTwoLaunchedAppsTransition(
                 test {
                     device.wakeUpAndGoToHomeScreen()
                     this.setRotation(Surface.ROTATION_0)
-                    primaryApp.launchViaIntent()
-                    secondaryApp.launchViaIntent()
+                    primaryApp.launchViaIntent(wmHelper)
+                    secondaryApp.launchViaIntent(wmHelper)
                     updateTasksId()
                 }
             }
@@ -54,8 +54,8 @@ abstract class RotateTwoLaunchedAppsTransition(
 
     @FlakyTest
     @Test
-    override fun navBarLayerIsAlwaysVisible() {
-        super.navBarLayerIsAlwaysVisible()
+    override fun navBarLayerIsVisible() {
+        super.navBarLayerIsVisible()
     }
 
     @FlakyTest

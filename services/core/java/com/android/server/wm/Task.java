@@ -1242,22 +1242,35 @@ class Task extends TaskFragment {
     /** Returns the currently topmost resumed activity. */
     @Nullable
     ActivityRecord getTopResumedActivity() {
-        if (isLeafTask()) {
-            final ActivityRecord[] resumedActivity = new ActivityRecord[1];
-            forAllLeafTaskFragments(fragment -> {
-                if (fragment.getResumedActivity() != null) {
-                    resumedActivity[0] = fragment.getResumedActivity();
-                    return true;
+        if (!isLeafTask()) {
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                ActivityRecord resumedActivity = mChildren.get(i).asTask().getTopResumedActivity();
+                if (resumedActivity != null) {
+                    return resumedActivity;
                 }
-                return false;
-            });
-            return resumedActivity[0];
+            }
         }
 
+        final ActivityRecord taskResumedActivity = getResumedActivity();
+        ActivityRecord topResumedActivity = null;
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            ActivityRecord resumedActivity = mChildren.get(i).asTask().getTopResumedActivity();
-            if (resumedActivity != null) {
-                return resumedActivity;
+            final WindowContainer child = mChildren.get(i);
+            if (child.asTaskFragment() != null) {
+                final ActivityRecord[] resumedActivity = new ActivityRecord[1];
+                child.asTaskFragment().forAllLeafTaskFragments(fragment -> {
+                    if (fragment.getResumedActivity() != null) {
+                        resumedActivity[0] = fragment.getResumedActivity();
+                        return true;
+                    }
+                    return false;
+                });
+                topResumedActivity = resumedActivity[0];
+            } else if (taskResumedActivity != null
+                    && child.asActivityRecord() == taskResumedActivity) {
+                topResumedActivity = taskResumedActivity;
+            }
+            if (topResumedActivity != null) {
+                return topResumedActivity;
             }
         }
         return null;
@@ -1268,22 +1281,35 @@ class Task extends TaskFragment {
      */
     @Nullable
     ActivityRecord getTopPausingActivity() {
-        if (isLeafTask()) {
-            final ActivityRecord[] pausingActivity = new ActivityRecord[1];
-            forAllLeafTaskFragments(fragment -> {
-                if (fragment.getPausingActivity() != null) {
-                    pausingActivity[0] = fragment.getPausingActivity();
-                    return true;
+        if (!isLeafTask()) {
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                ActivityRecord pausingActivity = mChildren.get(i).asTask().getTopPausingActivity();
+                if (pausingActivity != null) {
+                    return pausingActivity;
                 }
-                return false;
-            });
-            return pausingActivity[0];
+            }
         }
 
+        final ActivityRecord taskPausingActivity = getPausingActivity();
+        ActivityRecord topPausingActivity = null;
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            ActivityRecord pausingActivity = mChildren.get(i).asTask().getTopPausingActivity();
-            if (pausingActivity != null) {
-                return pausingActivity;
+            final WindowContainer child = mChildren.get(i);
+            if (child.asTaskFragment() != null) {
+                final ActivityRecord[] pausingActivity = new ActivityRecord[1];
+                child.asTaskFragment().forAllLeafTaskFragments(fragment -> {
+                    if (fragment.getPausingActivity() != null) {
+                        pausingActivity[0] = fragment.getPausingActivity();
+                        return true;
+                    }
+                    return false;
+                });
+                topPausingActivity = pausingActivity[0];
+            } else if (taskPausingActivity != null
+                    && child.asActivityRecord() == taskPausingActivity) {
+                topPausingActivity = taskPausingActivity;
+            }
+            if (topPausingActivity != null) {
+                return topPausingActivity;
             }
         }
         return null;
@@ -1434,12 +1460,6 @@ class Task extends TaskFragment {
 
     @Override
     void addChild(WindowContainer child, int index) {
-        // If this task had any child before we added this one.
-        boolean hadChild = hasChild();
-        // getActivityType() looks at the top child, so we need to read the type before adding
-        // a new child in case the new child is on top and UNDEFINED.
-        final int activityType = getActivityType();
-
         index = getAdjustedChildPosition(child, index);
         super.addChild(child, index);
 
@@ -1454,11 +1474,11 @@ class Task extends TaskFragment {
         // Make sure the list of display UID allowlists is updated
         // now that this record is in a new task.
         mRootWindowContainer.updateUIDsPresentOnDisplay();
+    }
 
-        final ActivityRecord r = child.asActivityRecord();
-        if (r == null) return;
-
-        r.inHistory = true;
+    /** Called when an {@link ActivityRecord} is added as a descendant */
+    void onDescendantActivityAdded(boolean hadChild, int activityType, ActivityRecord r) {
+        warnForNonLeafTask("onDescendantActivityAdded");
 
         // Only set this based on the first activity
         if (!hadChild) {
@@ -1483,10 +1503,6 @@ class Task extends TaskFragment {
         }
 
         updateEffectiveIntent();
-    }
-
-    void addChild(ActivityRecord r) {
-        addChild(r, Integer.MAX_VALUE /* add on top */);
     }
 
     @Override
@@ -3072,6 +3088,41 @@ class Task extends TaskFragment {
         return false;
     }
 
+    /** Iterates through all leaf task fragments and the leaf tasks. */
+    void forAllLeafTasksAndLeafTaskFragments(final Consumer<TaskFragment> callback,
+            boolean traverseTopToBottom) {
+        forAllLeafTasks(task -> {
+            if (task.isLeafTaskFragment()) {
+                callback.accept(task);
+                return;
+            }
+
+            // A leaf task that may contains both activities and task fragments.
+            boolean consumed = false;
+            if (traverseTopToBottom) {
+                for (int i = task.mChildren.size() - 1; i >= 0; --i) {
+                    final WindowContainer child = mChildren.get(i);
+                    if (child.asTaskFragment() != null) {
+                        child.forAllLeafTaskFragments(callback, traverseTopToBottom);
+                    } else if (child.asActivityRecord() != null && !consumed) {
+                        callback.accept(task);
+                        consumed = true;
+                    }
+                }
+            } else {
+                for (int i = 0; i < task.mChildren.size(); i++) {
+                    final WindowContainer child = mChildren.get(i);
+                    if (child.asTaskFragment() != null) {
+                        child.forAllLeafTaskFragments(callback, traverseTopToBottom);
+                    } else if (child.asActivityRecord() != null && !consumed) {
+                        callback.accept(task);
+                        consumed = true;
+                    }
+                }
+            }
+        }, traverseTopToBottom);
+    }
+
     @Override
     boolean forAllRootTasks(Function<Task, Boolean> callback, boolean traverseTopToBottom) {
         return isRootTask() ? callback.apply(this) : false;
@@ -4602,11 +4653,11 @@ class Task extends TaskFragment {
      */
     boolean goToSleepIfPossible(boolean shuttingDown) {
         final int[] sleepInProgress = {0};
-        forAllLeafTaskFragments((f) -> {
-            if (!f.sleepIfPossible(shuttingDown)) {
+        forAllLeafTasksAndLeafTaskFragments(taskFragment -> {
+            if (!taskFragment.sleepIfPossible(shuttingDown)) {
                 sleepInProgress[0]++;
             }
-        }, true);
+        }, true /* traverseTopToBottom */);
         return sleepInProgress[0] == 0;
     }
 
@@ -4661,8 +4712,8 @@ class Task extends TaskFragment {
             boolean preserveWindows, boolean notifyClients) {
         mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
-            forAllLeafTaskFragments(fragment -> {
-                fragment.updateActivityVisibilities(starting, configChanges, preserveWindows,
+            forAllLeafTasks(task -> {
+                task.updateActivityVisibilities(starting, configChanges, preserveWindows,
                         notifyClients);
             }, true /* traverseTopToBottom */);
 
@@ -4829,13 +4880,20 @@ class Task extends TaskFragment {
 
         mRootWindowContainer.cancelInitializingActivities();
 
-        if (topRunningActivity(true /* focusableOnly */) == null) {
+        final ActivityRecord topActivity = topRunningActivity(true /* focusableOnly */);
+        if (topActivity == null) {
             // There are no activities left in this task, let's look somewhere else.
             return resumeNextFocusableActivityWhenRootTaskIsEmpty(prev, options);
         }
 
         final boolean[] resumed = new boolean[1];
+        final TaskFragment topFragment = topActivity.getTaskFragment();
+        resumed[0] = topFragment.resumeTopActivity(prev, options, deferPause);
         forAllLeafTaskFragments(f -> {
+            if (topFragment == f) {
+                return;
+            }
+
             resumed[0] |= f.resumeTopActivity(prev, options, deferPause);
         }, true);
         return resumed[0];
