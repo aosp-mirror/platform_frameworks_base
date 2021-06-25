@@ -35,6 +35,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.HardwareAuthTokenUtils;
+import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnrollClient;
@@ -150,6 +151,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
                 UdfpsHelper.getReasonFromEnrollReason(mEnrollReason),
                 mUdfpsOverlayController, this);
         SidefpsHelper.showOverlay(mSidefpsController);
+        BiometricNotificationUtils.cancelBadCalibrationNotification(getContext());
         try {
             mCancellationSignal = getFreshDaemon().enroll(
                     HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken));
