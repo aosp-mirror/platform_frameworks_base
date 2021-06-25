@@ -35,9 +35,9 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
-import com.android.server.biometrics.sensors.face.ReEnrollNotificationUtils;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
 import java.util.ArrayList;
@@ -195,7 +195,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
         mLastAcquire = acquireInfo;
 
         if (acquireInfo == FaceManager.FACE_ACQUIRED_RECALIBRATE) {
-            ReEnrollNotificationUtils.showReEnrollmentNotification(getContext());
+            BiometricNotificationUtils.showReEnrollmentNotification(getContext());
         }
 
         final boolean shouldSend = shouldSend(acquireInfo, vendorCode);
