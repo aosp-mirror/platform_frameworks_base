@@ -620,11 +620,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         final int windowingMode = getWindowingMode();
         final boolean isAssistantType = isActivityTypeAssistant();
         for (int i = parent.getChildCount() - 1; i >= 0; --i) {
-            final WindowContainer wc = parent.getChildAt(i);
-            final TaskFragment other = wc.asTaskFragment();
+            final WindowContainer other = parent.getChildAt(i);
             if (other == null) continue;
 
-            final boolean hasRunningActivities = other.topRunningActivity() != null;
+            final boolean hasRunningActivities = hasRunningActivity(other);
             if (other == this) {
                 // Should be visible if there is no other fragment occluding it, unless it doesn't
                 // have any running activities, not starting one and not home stack.
@@ -640,7 +639,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             final int otherWindowingMode = other.getWindowingMode();
             if (otherWindowingMode == WINDOWING_MODE_FULLSCREEN) {
-                if (other.isTranslucent(starting)) {
+                if (isTranslucent(other, starting)) {
                     // Can be visible behind a translucent fullscreen TaskFragment.
                     gotTranslucentFullscreen = true;
                     continue;
@@ -648,7 +647,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 return TASK_FRAGMENT_VISIBILITY_INVISIBLE;
             } else if (otherWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                     && other.matchParentBounds()) {
-                if (other.isTranslucent(starting)) {
+                if (isTranslucent(other, starting)) {
                     // Can be visible behind a translucent TaskFragment.
                     gotTranslucentFullscreen = true;
                     continue;
@@ -658,7 +657,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     && !gotOpaqueSplitScreenPrimary) {
                 gotRootSplitScreenFragment = true;
-                gotTranslucentSplitScreenPrimary = other.isTranslucent(starting);
+                gotTranslucentSplitScreenPrimary = isTranslucent(other, starting);
                 gotOpaqueSplitScreenPrimary = !gotTranslucentSplitScreenPrimary;
                 if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                         && gotOpaqueSplitScreenPrimary) {
@@ -668,7 +667,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                     && !gotOpaqueSplitScreenSecondary) {
                 gotRootSplitScreenFragment = true;
-                gotTranslucentSplitScreenSecondary = other.isTranslucent(starting);
+                gotTranslucentSplitScreenSecondary = isTranslucent(other, starting);
                 gotOpaqueSplitScreenSecondary = !gotTranslucentSplitScreenSecondary;
                 if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                         && gotOpaqueSplitScreenSecondary) {
@@ -688,10 +687,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 return TASK_FRAGMENT_VISIBILITY_INVISIBLE;
             }
 
-            if (other.mAdjacentTaskFragment != null) {
-                if (adjacentTaskFragments.contains(other.mAdjacentTaskFragment)) {
-                    if (other.isTranslucent(starting)
-                            || other.mAdjacentTaskFragment.isTranslucent(starting)) {
+            final TaskFragment otherTaskFrag = other.asTaskFragment();
+            if (otherTaskFrag != null && otherTaskFrag.mAdjacentTaskFragment != null) {
+                if (adjacentTaskFragments.contains(otherTaskFrag.mAdjacentTaskFragment)) {
+                    if (otherTaskFrag.isTranslucent(starting)
+                            || otherTaskFrag.mAdjacentTaskFragment.isTranslucent(starting)) {
                         // Can be visible behind a translucent adjacent TaskFragments.
                         gotTranslucentFullscreen = true;
                         continue;
@@ -699,7 +699,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     // Can not be visible behind adjacent TaskFragments.
                     return TASK_FRAGMENT_VISIBILITY_INVISIBLE;
                 } else {
-                    adjacentTaskFragments.add(other);
+                    adjacentTaskFragments.add(otherTaskFrag);
                 }
             }
 
@@ -743,12 +743,26 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 : TASK_FRAGMENT_VISIBILITY_VISIBLE;
     }
 
-    private boolean isTopActivityLaunchedBehind() {
-        final ActivityRecord top = topRunningActivity();
-        if (top != null && top.mLaunchTaskBehind) {
-            return true;
+    private static boolean hasRunningActivity(WindowContainer wc) {
+        if (wc.asTaskFragment() != null) {
+            return wc.asTaskFragment().topRunningActivity() != null;
+        }
+        return wc.asActivityRecord() != null && !wc.asActivityRecord().finishing;
+    }
+
+    private static boolean isTranslucent(WindowContainer wc, ActivityRecord starting) {
+        if (wc.asTaskFragment() != null) {
+            return wc.asTaskFragment().isTranslucent(starting);
+        } else if (wc.asActivityRecord() != null) {
+            return !wc.asActivityRecord().occludesParent();
         }
         return false;
+    }
+
+
+    private boolean isTopActivityLaunchedBehind() {
+        final ActivityRecord top = topRunningActivity();
+        return top != null && top.mLaunchTaskBehind;
     }
 
     final void updateActivityVisibilities(@Nullable ActivityRecord starting, int configChanges,
@@ -838,7 +852,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         boolean pausing = !deferPause && taskDisplayArea.pauseBackTasks(next);
         if (mResumedActivity != null) {
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivity: Pausing %s", mResumedActivity);
-            pausing |= startPausingInner(mTaskSupervisor.mUserLeaving, false /* uiSleeping */,
+            pausing |= startPausing(mTaskSupervisor.mUserLeaving, false /* uiSleeping */,
                     next, "resumeTopActivity");
         }
         if (pausing) {
@@ -1146,17 +1160,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return startPausing(mTaskSupervisor.mUserLeaving, uiSleeping, resuming, reason);
     }
 
-    final boolean startPausing(boolean userLeaving, boolean uiSleeping,
-            ActivityRecord resuming, String reason) {
-        final int[] pausing = {0};
-        forAllLeafTaskFragments((f) -> {
-            if (f.startPausingInner(userLeaving, uiSleeping, resuming, reason)) {
-                pausing[0]++;
-            }
-        }, true /* traverseTopToBottom */);
-        return pausing[0] > 0;
-    }
-
     /**
      * Start pausing the currently resumed activity.  It is an error to call this if there
      * is already an activity being paused or there is no resumed activity.
@@ -1171,11 +1174,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * @return Returns true if an activity now is in the PAUSING state, and we are waiting for
      * it to tell us when it is done.
      */
-    private boolean startPausingInner(boolean userLeaving, boolean uiSleeping,
-            ActivityRecord resuming, String reason) {
+    boolean startPausing(boolean userLeaving, boolean uiSleeping, ActivityRecord resuming,
+            String reason) {
         if (!hasDirectChildActivities()) {
             return false;
         }
+
+        ProtoLog.d(WM_DEBUG_STATES, "startPausing: taskFrag =%s " + "mResumedActivity=%s", this,
+                mResumedActivity);
 
         if (mPausingActivity != null) {
             Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
@@ -1431,6 +1437,29 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return callback.apply(this);
         }
         return false;
+    }
+
+    void addChild(ActivityRecord r) {
+        addChild(r, POSITION_TOP);
+    }
+
+    @Override
+    void addChild(WindowContainer child, int index) {
+        boolean isAddingActivity = child.asActivityRecord() != null;
+        final Task task = isAddingActivity ? getTask() : null;
+
+        // If this task had any child before we added this one.
+        boolean taskHadChild = task != null && task.hasChild();
+        // getActivityType() looks at the top child, so we need to read the type before adding
+        // a new child in case the new child is on top and UNDEFINED.
+        final int activityType = task != null ? task.getActivityType() : ACTIVITY_TYPE_UNDEFINED;
+
+        super.addChild(child, index);
+
+        if (isAddingActivity && task != null) {
+            child.asActivityRecord().inHistory = true;
+            task.onDescendantActivityAdded(taskHadChild, activityType, child.asActivityRecord());
+        }
     }
 
     void executeAppTransition(ActivityOptions options) {

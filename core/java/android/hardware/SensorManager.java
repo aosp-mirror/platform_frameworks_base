@@ -46,6 +46,13 @@ import java.util.List;
  * at {@link TriggerEventListener}. {@link Sensor#TYPE_SIGNIFICANT_MOTION}
  * is an example of a trigger sensor.
  * </p>
+ * <p>
+ * In order to access sensor data at high sampling rates (i.e. greater than 200 Hz
+ * for {@link SensorEventListener} and greater than {@link SensorDirectChannel#RATE_NORMAL}
+ * for {@link SensorDirectChannel}), apps must declare
+ * the {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS} permission
+ * in their AndroidManifest.xml file.
+ * </p>
  * <pre class="prettyprint">
  * public class SensorActivity extends Activity implements SensorEventListener {
  *     private final SensorManager mSensorManager;

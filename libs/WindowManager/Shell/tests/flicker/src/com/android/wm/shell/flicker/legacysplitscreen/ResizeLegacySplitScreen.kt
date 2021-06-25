@@ -34,14 +34,14 @@ import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.resizeSplitScreen
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.flicker.traces.layers.getVisibleBounds
 import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER
 import com.android.wm.shell.flicker.helpers.SimpleAppHelper
@@ -101,10 +101,10 @@ class ResizeLegacySplitScreen(
         }
 
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
 
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
     @FlakyTest(bugId = 156223549)
     @Test
@@ -123,10 +123,10 @@ class ResizeLegacySplitScreen(
     }
 
     @Test
-    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+    fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
 
     @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+    fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
     @Test
     fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.endRotation)

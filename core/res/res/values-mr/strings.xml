@@ -349,7 +349,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"स्टेटस बार विस्तृत करण्यासाठी किंवा संक्षिप्त करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"लॉक केलेल्या डिव्हाइसवर फुल स्क्रीन अ‍ॅक्टिव्हिटी म्हणून सूचना प्रदर्शित करणे"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"लॉक केलेल्या डिव्हाइसवर फुल स्क्रीन अ‍ॅक्टिव्हिटी म्हणून सूचना प्रदर्शित करण्यासाठी ॲपला अनुमती द्या"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"शॉर्टकट स्‍थापित करा"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"शॉर्टकट इंस्टॉल करा"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"अनुप्रयोगाला वापरकर्ता हस्‍तक्षेपाशिवाय मुख्‍यस्‍क्रीन शॉर्टकट जोडण्‍याची अनुमती देते."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"शॉर्टकट विस्‍थापित करा"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"अनुप्रयोगाला वापरकर्ता हस्‍तक्षेपाशिवाय मुख्‍यस्‍क्रीन शॉर्टकट काढण्‍याची अनुमती देते."</string>
@@ -585,6 +585,8 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"दुसरी फिंगरप्रिंट वापरून पाहा"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"खूप प्रखर"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"अ‍ॅडजस्ट करण्याचा प्रयत्न करा"</string>
+    <!-- no translation found for fingerprint_acquired_immobile (1621891895241888048) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिंट ऑथेंटिकेट केली आहे"</string>

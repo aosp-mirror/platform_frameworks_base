@@ -16438,20 +16438,6 @@ public final class Settings {
             public static final String ALTERNATE_LAUNCHER_ENABLED = "alternate_launcher_enabled";
 
             /**
-             * Wear card preview mode.
-             * @hide
-             */
-            public static final String CARD_PREVIEW_MODE = "card_preview_mode";
-
-            // Possible CARD_PREVIEW_MODE values.
-            /** @hide */
-            public static final int CARD_PREVIEW_MODE_LOW = 0;
-            /** @hide */
-            public static final int CARD_PREVIEW_MODE_NORMAL = 1;
-            /** @hide */
-            public static final int CARD_PREVIEW_MODE_HIGH = 2;
-
-            /**
              * How round the corners of square screens are.
              * @hide
              */
@@ -16492,6 +16478,12 @@ public final class Settings {
              * @hide
              */
             public static final String WEAR_PLATFORM_MR_NUMBER = "wear_platform_mr_number";
+
+            /**
+             * The bluetooth settings storing duplicate address of companion device.
+             * @hide
+             */
+            public static final String COMPANION_BT_ADDRESS_DUAL = "companion_bt_address_dual";
 
             /**
              * The offset of the visible screen from the display bottom (overscan bottom).

@@ -2482,7 +2482,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         int intrinsicBefore = getIntrinsicHeight();
         super.onLayout(changed, left, top, right, bottom);
-        if (intrinsicBefore != getIntrinsicHeight() && intrinsicBefore != 0) {
+        if (intrinsicBefore != getIntrinsicHeight()
+                && (intrinsicBefore != 0 || getActualHeight() > 0)) {
             notifyHeightChanged(true  /* needsAnimation */);
         }
         if (mMenuRow != null && mMenuRow.getMenuView() != null) {

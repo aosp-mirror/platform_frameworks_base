@@ -29,16 +29,16 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.wm.shell.flicker.helpers.PipAppHelper
 import com.android.wm.shell.flicker.testapp.Components
 import org.junit.Test
@@ -162,19 +162,19 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    open fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    open fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
 
     @Presubmit
     @Test
-    open fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    open fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
     @FlakyTest
     @Test
-    open fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+    open fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
 
     @FlakyTest
     @Test
-    open fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+    open fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
     @Presubmit
     @Test

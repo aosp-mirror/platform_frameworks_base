@@ -35,11 +35,14 @@ import android.hardware.CameraStreamStats;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceProxy;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
 import android.nfc.INfcAdapter;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
@@ -57,8 +60,8 @@ import android.view.IDisplayWindowListener;
 import android.view.Surface;
 import android.view.WindowManagerGlobal;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.framework.protobuf.nano.MessageNano;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -447,6 +450,8 @@ public class CameraServiceProxy extends SystemService
         }
     };
 
+    private final FoldStateListener mFoldStateListener;
+
     public CameraServiceProxy(Context context) {
         super(context);
         mContext = context;
@@ -459,6 +464,14 @@ public class CameraServiceProxy extends SystemService
         // Don't keep any extra logging threads if not needed
         mLogWriterService.setKeepAliveTime(1, TimeUnit.SECONDS);
         mLogWriterService.allowCoreThreadTimeOut(true);
+
+        mFoldStateListener = new FoldStateListener(mContext, folded -> {
+            if (folded) {
+                setDeviceStateFlags(ICameraService.DEVICE_STATE_FOLDED);
+            } else {
+                clearDeviceStateFlags(ICameraService.DEVICE_STATE_FOLDED);
+            }
+        });
     }
 
     /**
@@ -471,7 +484,7 @@ public class CameraServiceProxy extends SystemService
      *
      * @see #clearDeviceStateFlags(int)
      */
-    public void setDeviceStateFlags(@DeviceStateFlags int deviceStateFlags) {
+    private void setDeviceStateFlags(@DeviceStateFlags int deviceStateFlags) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_NOTIFY_DEVICE_STATE);
             mDeviceState |= deviceStateFlags;
@@ -491,7 +504,7 @@ public class CameraServiceProxy extends SystemService
      *
      * @see #setDeviceStateFlags(int)
      */
-    public void clearDeviceStateFlags(@DeviceStateFlags int deviceStateFlags) {
+    private void clearDeviceStateFlags(@DeviceStateFlags int deviceStateFlags) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_NOTIFY_DEVICE_STATE);
             mDeviceState &= ~deviceStateFlags;
@@ -555,6 +568,9 @@ public class CameraServiceProxy extends SystemService
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to register display window listener!");
             }
+
+            mContext.getSystemService(DeviceStateManager.class)
+                    .registerCallback(new HandlerExecutor(mHandler), mFoldStateListener);
         }
     }
 

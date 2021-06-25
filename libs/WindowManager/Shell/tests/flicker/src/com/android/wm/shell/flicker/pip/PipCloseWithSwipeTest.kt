@@ -56,19 +56,19 @@ class PipCloseWithSwipeTest(testSpec: FlickerTestParameter) : PipCloseTransition
 
     @Presubmit
     @Test
-    override fun navBarLayerIsAlwaysVisible() = super.navBarLayerIsAlwaysVisible()
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
     @Presubmit
     @Test
-    override fun statusBarLayerIsAlwaysVisible() = super.statusBarLayerIsAlwaysVisible()
+    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
     @Presubmit
     @Test
-    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
     @Presubmit
     @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
 
     @FlakyTest
     @Test

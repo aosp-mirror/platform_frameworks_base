@@ -133,14 +133,14 @@ class SeamlessAppRotationTest(
 
     @FlakyTest
     @Test
-    override fun navBarWindowIsAlwaysVisible() {
-        super.navBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsVisible() {
+        super.navBarWindowIsVisible()
     }
 
     @FlakyTest
     @Test
-    override fun navBarLayerIsAlwaysVisible() {
-        super.navBarLayerIsAlwaysVisible()
+    override fun navBarLayerIsVisible() {
+        super.navBarLayerIsVisible()
     }
 
     @FlakyTest

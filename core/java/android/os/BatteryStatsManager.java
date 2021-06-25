@@ -322,7 +322,9 @@ public final class BatteryStatsManager {
      *
      * @return Instance of {@link CellularBatteryStats}.
      */
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.BATTERY_STATS,
+            android.Manifest.permission.UPDATE_DEVICE_STATS})
     public @NonNull CellularBatteryStats getCellularBatteryStats() {
         try {
             return mBatteryStats.getCellularBatteryStats();
@@ -337,7 +339,9 @@ public final class BatteryStatsManager {
      *
      * @return Instance of {@link WifiBatteryStats}.
      */
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.BATTERY_STATS,
+            android.Manifest.permission.UPDATE_DEVICE_STATS})
     public @NonNull WifiBatteryStats getWifiBatteryStats() {
         try {
             return mBatteryStats.getWifiBatteryStats();

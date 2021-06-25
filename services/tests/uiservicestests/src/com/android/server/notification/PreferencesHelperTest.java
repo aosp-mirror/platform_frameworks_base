@@ -3333,6 +3333,17 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testDeleted_twice() throws Exception {
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager, mStatsEventBuilderFactory);
+
+        mHelper.createNotificationChannel(
+                PKG_P, UID_P, createNotificationChannel("id", "id", 2), true, false);
+        assertTrue(mHelper.deleteNotificationChannel(PKG_P, UID_P, "id"));
+        assertFalse(mHelper.deleteNotificationChannel(PKG_P, UID_P, "id"));
+    }
+
+    @Test
     public void testDeleted_recentTime() throws Exception {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
                 mAppOpsManager, mStatsEventBuilderFactory);

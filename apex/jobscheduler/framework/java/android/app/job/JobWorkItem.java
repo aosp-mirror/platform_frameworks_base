@@ -68,6 +68,10 @@ final public class JobWorkItem implements Parcelable {
      *            uploaded by this job work item, in bytes.
      */
     public JobWorkItem(Intent intent, @BytesLong long downloadBytes, @BytesLong long uploadBytes) {
+        if ((downloadBytes != NETWORK_BYTES_UNKNOWN && downloadBytes < 0)
+                || (uploadBytes != NETWORK_BYTES_UNKNOWN && uploadBytes < 0)) {
+            throw new IllegalArgumentException("Can't provide negative estimated network usage");
+        }
         mIntent = intent;
         mNetworkDownloadBytes = downloadBytes;
         mNetworkUploadBytes = uploadBytes;
