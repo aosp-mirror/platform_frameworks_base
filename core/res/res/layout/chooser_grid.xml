@@ -51,6 +51,7 @@
                   android:paddingBottom="@dimen/chooser_view_spacing"
                   android:paddingLeft="24dp"
                   android:paddingRight="24dp"
+                  android:visibility="gone"
                   android:layout_below="@id/drag"
                   android:layout_centerHorizontal="true"/>
     </RelativeLayout>
