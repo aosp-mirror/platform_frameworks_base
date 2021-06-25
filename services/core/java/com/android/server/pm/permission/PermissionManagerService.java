@@ -1381,11 +1381,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
         final int callingUid = Binder.getCallingUid();
-        final int packageUid = UserHandle.getUid(userId, pkg.getUid());
+        if (mPackageManagerInt.filterAppAccess(packageName, callingUid, userId)) {
+            return false;
+        }
 
         if (!checkAutoRevokeAccess(pkg, callingUid)) {
             return false;
         }
+
+        final int packageUid = UserHandle.getUid(userId, pkg.getUid());
 
         final long identity = Binder.clearCallingIdentity();
         try {
