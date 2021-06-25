@@ -347,10 +347,11 @@ public class MediaControlPanel {
         artistText.setText(data.getArtist());
 
         // Transfer chip
-        mPlayerViewHolder.getSeamless().setVisibility(View.VISIBLE);
+        ViewGroup seamlessView = mPlayerViewHolder.getSeamless();
+        seamlessView.setVisibility(View.VISIBLE);
         setVisibleAndAlpha(collapsedSet, R.id.media_seamless, true /*visible */);
         setVisibleAndAlpha(expandedSet, R.id.media_seamless, true /*visible */);
-        mPlayerViewHolder.getSeamless().setOnClickListener(v -> {
+        seamlessView.setOnClickListener(v -> {
             mMediaOutputDialogFactory.create(data.getPackageName(), true);
         });
 
@@ -374,9 +375,9 @@ public class MediaControlPanel {
         collapsedSet.setAlpha(seamlessId, seamlessAlpha);
         // Disable clicking on output switcher for resumption controls.
         mPlayerViewHolder.getSeamless().setEnabled(!data.getResumption());
+        String deviceString = null;
         if (showFallback) {
             iconView.setImageDrawable(null);
-            deviceName.setText(null);
         } else if (device != null) {
             Drawable icon = device.getIcon();
             iconView.setVisibility(View.VISIBLE);
@@ -387,13 +388,16 @@ public class MediaControlPanel {
             } else {
                 iconView.setImageDrawable(icon);
             }
-            deviceName.setText(device.getName());
+            deviceString = device.getName();
         } else {
             // Reset to default
             Log.w(TAG, "device is null. Not binding output chip.");
             iconView.setVisibility(View.GONE);
-            deviceName.setText(com.android.internal.R.string.ext_media_seamless_action);
+            deviceString = mContext.getString(
+                    com.android.internal.R.string.ext_media_seamless_action);
         }
+        deviceName.setText(deviceString);
+        seamlessView.setContentDescription(deviceString);
 
         List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
         // Media controls
