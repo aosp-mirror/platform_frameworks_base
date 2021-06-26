@@ -108,7 +108,7 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Улантуу"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Жок"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Бөлүшүү"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Ооба"</string>
+    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Өчүрүү"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Экранды жаздыруу жокко чыгарылды"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Экранды жаздыруу сакталды, көрүү үчүн таптап коюңуз"</string>
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"Экранды жаздыруу өчүрүлдү"</string>
