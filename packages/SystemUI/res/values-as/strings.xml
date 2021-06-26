@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"ব্যৱহাৰকাৰী যোগ কৰক"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"নতুন ব্যৱহাৰকাৰী"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"অতিথি আঁতৰাবনে?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"অতিথিৰ ছেশ্বন ৰিছেট কৰিবনে?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই ছেশ্বনৰ সকলো এপ্ আৰু ডেটা মচা হ\'ব।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"আঁতৰাওক"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"ৰিছেট কৰক"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"অতিথি, আপোনাক পুনৰ স্বাগতম!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপুনি আপোনাৰ ছেশ্বন অব্যাহত ৰাখিব বিচাৰেনে?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"আকৌ আৰম্ভ কৰক"</string>
@@ -1146,6 +1144,8 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"শেহতীয়া বাৰ্তা, মিছড্‌ কল আৰু স্থিতিৰ আপডে’ট চাওক"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"বাৰ্তালাপ"</string>
+    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
+    <skip />
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g>এ এটা বাৰ্তা পঠিয়াইছে"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>এ এখন প্ৰতিচ্ছবি পঠিয়াইছে"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"আপোনাৰ বেটাৰী মিটাৰ পঢ়োঁতে সমস্যা হৈছে"</string>
