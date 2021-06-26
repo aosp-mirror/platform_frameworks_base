@@ -220,7 +220,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
     public CallSession callStarted(Binder binder, int code, int workSourceUid) {
         noteNativeThreadId();
 
-        if (!canCollect()) {
+        // We always want to collect data for latency if it's enabled, regardless of device state.
+        if (!mCollectLatencyData && !canCollect()) {
             return null;
         }
 
@@ -265,6 +266,11 @@ public class BinderCallsStats implements BinderInternal.Observer {
             int parcelRequestSize, int parcelReplySize, int workSourceUid) {
         if (mCollectLatencyData) {
             mLatencyObserver.callEnded(s);
+        }
+
+        // Latency collection has already been processed so check if the rest should be processed.
+        if (!canCollect()) {
+            return;
         }
 
         UidEntry uidEntry = null;
@@ -1190,15 +1196,12 @@ public class BinderCallsStats implements BinderInternal.Observer {
         private final Context mContext;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
         private final BinderCallsStats mBinderCallsStats;
-        private final int mProcessSource;
 
-        public SettingsObserver(Context context, BinderCallsStats binderCallsStats,
-                    int processSource) {
+        public SettingsObserver(Context context, BinderCallsStats binderCallsStats) {
             super(BackgroundThread.getHandler());
             mContext = context;
             context.getContentResolver().registerContentObserver(mUri, false, this);
             mBinderCallsStats = binderCallsStats;
-            mProcessSource = processSource;
             // Always kick once to ensure that we match current state
             onChange();
         }
