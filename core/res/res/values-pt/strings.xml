@@ -295,7 +295,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Perfil de trabalho"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatos"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acesse seus contatos"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Local"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Localização"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"acesse o local do dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acesse sua agenda"</string>
@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Permite que o app seja a barra de status."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"expandir/recolher barra de status"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permite que o app expanda ou recolha a barra de status."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalar atalhos"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instalar atalhos"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permite que um app adicione atalhos da tela inicial sem a intervenção do usuário."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstalar atalhos"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite que o app remova atalhos da tela inicial sem a intervenção do usuário."</string>
@@ -422,9 +422,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"acessar comandos extras do provedor de localização"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permite que o app acesse comandos do provedor não relacionados à localização. Isso pode permitir que o app interfira no funcionamento do GPS ou de outras fontes de localização."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"acessar localização precisa apenas em primeiro plano"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Esse app poderá acessar seu local exato por meio dos Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local. Isso pode aumentar o uso da bateria."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Esse app poderá acessar sua localização exata com os Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local. Isso pode aumentar o uso da bateria."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"acessar local aproximado apenas em primeiro plano"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Esse app poderá acessar seu local aproximado por meio dos Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Esse app poderá acessar sua localização aproximada com os Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"acessar a localização em segundo plano"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Esse app poderá acessar o local a qualquer momento, mesmo quando não estiver sendo usado."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"alterar as suas configurações de áudio"</string>

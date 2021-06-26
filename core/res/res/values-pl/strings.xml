@@ -341,7 +341,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Pozwala aplikacji na występowanie na pasku stanu."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"rozwijanie/zwijanie paska stanu"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Pozwala aplikacji na rozwijanie lub zwijanie paska stanu."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalowanie skrótów"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instalowanie skrótów"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Pozwala aplikacji dodawać skróty na ekranie głównym bez interwencji użytkownika."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"odinstalowywanie skrótów"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Pozwala aplikacji usuwać skróty z ekranu głównego bez interwencji użytkownika."</string>
