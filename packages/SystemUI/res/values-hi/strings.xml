@@ -708,7 +708,7 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"सूचना देना जारी रखें"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"सूचनाएं बंद करें"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"इस ऐप्लिकेशन से जुड़ी सूचनाएं दिखाना जारी रखें?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"आवाज़ के बिना सूचनाएं दिखाएं"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"बिना आवाज़ के सूचनाएं दिखाएं"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"डिफ़ॉल्ट"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"बबल"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"किसी तरह की आवाज़ या वाइब्रेशन न हो"</string>
