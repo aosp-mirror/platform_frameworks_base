@@ -20,6 +20,7 @@ import android.view.CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED
 
 import android.app.ActivityManager
 import android.content.res.Resources
+import android.os.SystemProperties
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import android.view.CrossWindowBlurListeners
@@ -100,7 +101,8 @@ open class BlurUtils @Inject constructor(
      */
     open fun supportsBlursOnWindows(): Boolean {
         return CROSS_WINDOW_BLUR_SUPPORTED && ActivityManager.isHighEndGfx() &&
-                crossWindowBlurListeners.isCrossWindowBlurEnabled()
+                crossWindowBlurListeners.isCrossWindowBlurEnabled() &&
+                !SystemProperties.getBoolean("persist.sysui.disableBlur", false)
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
