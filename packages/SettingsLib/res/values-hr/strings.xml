@@ -508,7 +508,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi i podsjetnici"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Dopusti postavljanje alarma i podsjetnika"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmi i podsjetnici"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Aplikaciji omogućuje da postavlja alarme i zakazuje vremenski osjetljive radnje. To aplikaciji omogućuje da se izvodi u pozadini, pa je moguće dodatno trošenje baterije.\n\nAko je to dopuštenje isključeno, postojeći alarmi i događaji temeljeni na vremenu koji su zakazani putem ove aplikacije neće funkcionirati."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Omogućite toj aplikaciji da postavlja alarme i zakazuje radnje u točno određeno vrijeme. To aplikaciji omogućuje da se izvodi u pozadini, pa je moguća dodatna potrošnja baterije.\n\nAko je to dopuštenje isključeno, postojeći alarmi i događaji zakazani putem te aplikacije neće funkcionirati."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"raspored, alarm, podsjetnik, sat"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Uključi"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Uključite opciju Ne uznemiravaj."</string>
