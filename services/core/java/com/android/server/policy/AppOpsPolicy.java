@@ -48,6 +48,7 @@ import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintConsumer;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
@@ -240,6 +241,14 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
                 attributionSource, startIfModeDefault, shouldCollectAsyncNotedOp, message,
                 shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
                 proxiedAttributionFlags, attributionChainId);
+    }
+
+    @Override
+    public void finishOperation(IBinder clientId, int code, int uid, String packageName,
+            String attributionTag,
+            @NonNull QuintConsumer<IBinder, Integer, Integer, String, String> superImpl) {
+        superImpl.accept(clientId, resolveDatasourceOp(code, uid, packageName, attributionTag),
+                resolveUid(code, uid), packageName, attributionTag);
     }
 
     @Override

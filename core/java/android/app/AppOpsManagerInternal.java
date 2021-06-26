@@ -16,9 +16,9 @@
 
 package android.app;
 
-import android.app.AppOpsManager.AttributionFlags;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager.AttributionFlags;
 import android.content.AttributionSource;
 import android.os.IBinder;
 import android.util.SparseArray;
@@ -29,6 +29,7 @@ import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintConsumer;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
@@ -153,6 +154,21 @@ public abstract class AppOpsManagerInternal {
                 int attributionChainId, @NonNull DecFunction<Integer, AttributionSource, Boolean,
                         Boolean, String, Boolean, Boolean, Integer, Integer, Integer,
                         SyncNotedAppOp> superImpl);
+
+        /**
+         * Allows overriding finish op.
+         *
+         * @param clientId The client state.
+         * @param code The op code to finish.
+         * @param uid The UID for which the op was noted.
+         * @param packageName The package for which it was noted. {@code null} for system package.
+         * @param attributionTag the attribution tag.
+         */
+        default void finishOperation(IBinder clientId, int code, int uid, String packageName,
+                String attributionTag,
+                @NonNull QuintConsumer<IBinder, Integer, Integer, String, String> superImpl) {
+            superImpl.accept(clientId, code, uid, packageName, attributionTag);
+        }
 
         /**
          * Allows overriding finish proxy op.
