@@ -223,14 +223,6 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
-    void setPortalToDisplayId(int displayId) {
-        if (mHandle.portalToDisplayId == displayId) {
-            return;
-        }
-        mHandle.portalToDisplayId = displayId;
-        mChanged = true;
-    }
-
     void setFrame(int left, int top, int right, int bottom) {
         if (mHandle.frameLeft == left && mHandle.frameTop == top && mHandle.frameRight == right
                 && mHandle.frameBottom == bottom) {

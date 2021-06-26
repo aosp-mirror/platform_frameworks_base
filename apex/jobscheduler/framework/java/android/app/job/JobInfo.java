@@ -1250,11 +1250,6 @@ public class JobInfo implements Parcelable {
          */
         public Builder setEstimatedNetworkBytes(@BytesLong long downloadBytes,
                 @BytesLong long uploadBytes) {
-            if ((downloadBytes != NETWORK_BYTES_UNKNOWN && downloadBytes < 0)
-                    || (uploadBytes != NETWORK_BYTES_UNKNOWN && uploadBytes < 0)) {
-                throw new IllegalArgumentException(
-                        "Can't provide negative estimated network usage");
-            }
             mNetworkDownloadBytes = downloadBytes;
             mNetworkUploadBytes = uploadBytes;
             return this;
@@ -1652,15 +1647,11 @@ public class JobInfo implements Parcelable {
     /**
      * @hide
      */
-    public final void enforceValidity() {
+    public void enforceValidity() {
         // Check that network estimates require network type
         if ((networkDownloadBytes > 0 || networkUploadBytes > 0) && networkRequest == null) {
             throw new IllegalArgumentException(
                     "Can't provide estimated network usage without requiring a network");
-        }
-        if ((networkDownloadBytes != NETWORK_BYTES_UNKNOWN && networkDownloadBytes < 0)
-                || (networkUploadBytes != NETWORK_BYTES_UNKNOWN && networkUploadBytes < 0)) {
-            throw new IllegalArgumentException("Can't provide negative estimated network usage");
         }
 
         // Check that a deadline was not set on a periodic job.
