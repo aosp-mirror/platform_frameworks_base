@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"प्रयोगकर्ता थप्नुहोस्"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नयाँ प्रयोगकर्ता"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथि हटाउने हो?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"अतिथि सत्र रिसेट गर्ने हो?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"यो सत्रमा भएका सबै एपहरू र डेटा मेटाइने छ।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"हटाउनुहोस्"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"रिसेट गर्नुहोस्"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"तपाईंलाई फेरि स्वागत छ, अतिथि"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"तपाईं आफ्नो सत्र जारी गर्न चाहनुहुन्छ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"सुरु गर्नुहोस्"</string>
@@ -1146,6 +1144,8 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"हालसालैका म्यासेज, मिस कल र स्ट्याटस अपडेट हेर्नुहोस्"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"वार्तालाप"</string>
+    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
+    <skip />
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ले एउटा म्यासेज पठाउनुभयो"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ले एउटा फोटो पठाउनुभयो"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"डिभाइसको ब्याट्रीको मिटर रिडिङ क्रममा समस्या भयो"</string>

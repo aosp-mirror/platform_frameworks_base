@@ -484,10 +484,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Dodajanje uporabnika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nov uporabnik"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Želite odstraniti gosta?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Želite ponastaviti gosta?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Vse aplikacije in podatki v tej seji bodo izbrisani."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Odstrani"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Ponastavi"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Znova pozdravljeni, gost!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Želite nadaljevati sejo?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Začni znova"</string>
@@ -1158,6 +1156,8 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Več kot <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Ogled nedavnih sporočil, neodgovorjenih klicev in posodobitev stanj"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Pogovor"</string>
+    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
+    <skip />
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je poslala sporočilo."</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je poslala sliko."</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Težava z branjem indikatorja stanja napolnjenosti baterije"</string>
