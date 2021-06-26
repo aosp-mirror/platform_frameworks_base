@@ -457,7 +457,7 @@
     <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Karikimi përkohësisht i kufizuar"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"I panjohur"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Po karikohet"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Po ngarkon me shpejtësi"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Karikim i shpejtë"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Po karikohet ngadalë"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Po karikohet pa tel"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nuk po karikohet"</string>
