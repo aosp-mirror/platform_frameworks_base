@@ -1638,8 +1638,8 @@
     <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor.</string>
     <!-- Generic error message shown when fingerprint is not available due to a security vulnerability. [CHAR LIMIT=50] -->
     <string name="fingerprint_error_security_update_required">Sensor temporarily disabled.</string>
-    <!-- Generic error message shown when fingerprint needs calibration [CHAR LIMIT=50] -->
-    <string name="fingerprint_error_bad_calibration">Sensor needs calibration</string>
+    <!-- Generic error message shown when fingerprint needs calibration [CHAR LIMIT=150] -->
+    <string name="fingerprint_error_bad_calibration">Can\u2019t use fingerprint sensor. Visit a repair provider</string>
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
@@ -1674,6 +1674,13 @@
     <string name="fingerprint_setup_notification_title">Set up more ways to unlock</string>
     <!-- Contents of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
     <string name="fingerprint_setup_notification_content">Tap to add a fingerprint</string>
+
+    <!-- Notification name shown when the system requires the user to re-calibrate their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_recalibrate_notification_name">Fingerprint Unlock</string>
+    <!-- Notification title shown when the system requires the user to re-calibrate their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_recalibrate_notification_title">Can\u2019t use fingerprint sensor</string>
+    <!-- Notification content shown when the system requires the user to re-calibrate their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_recalibrate_notification_content">Visit a repair provider.</string>
 
     <!-- Message shown during face acquisition when the face cannot be recognized [CHAR LIMIT=50] -->
     <string name="face_acquired_insufficient">Couldn\u2019t capture accurate face data. Try again.</string>
