@@ -192,25 +192,27 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
     }
 
-    protected @NonNull VibrationEffect getSuccessVibrationEffect() {
+    protected @Nullable VibrationEffect getSuccessVibrationEffect() {
         return mSuccessVibrationEffect;
     }
 
-    protected @NonNull VibrationEffect getErrorVibrationEffect() {
+    protected @Nullable VibrationEffect getErrorVibrationEffect() {
         return mErrorVibrationEffect;
     }
 
     protected final void vibrateSuccess() {
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
-        if (vibrator != null) {
-            vibrator.vibrate(getSuccessVibrationEffect(), VIBRATION_SONFICATION_ATTRIBUTES);
+        VibrationEffect effect = getSuccessVibrationEffect();
+        if (vibrator != null && effect != null) {
+            vibrator.vibrate(effect, VIBRATION_SONFICATION_ATTRIBUTES);
         }
     }
 
     protected final void vibrateError() {
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
-        if (vibrator != null) {
-            vibrator.vibrate(getErrorVibrationEffect(), VIBRATION_SONFICATION_ATTRIBUTES);
+        VibrationEffect effect = getErrorVibrationEffect();
+        if (vibrator != null && effect != null) {
+            vibrator.vibrate(effect, VIBRATION_SONFICATION_ATTRIBUTES);
         }
     }
 

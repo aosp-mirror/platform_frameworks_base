@@ -1677,8 +1677,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
      * Disable notification shade background blurs until the keyguard is dismissed.
      * (Used during app launch animations)
      */
-    public void disableBlursUntilHidden() {
-        mNotificationShadeDepthController.get().setIgnoreShadeBlurUntilHidden(true);
+    public void setBlursDisabledForAppLaunch(boolean disabled) {
+        mNotificationShadeDepthController.get().setBlursDisabledForAppLaunch(disabled);
     }
 
     public boolean isSecure() {
