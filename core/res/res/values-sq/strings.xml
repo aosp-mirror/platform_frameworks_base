@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Lejon aplikacionin të bëhet shiriti i statusit."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"zgjero ose shpalos shiritin e statusit"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Lejon aplikacionin të zgjerojë ose shpalosë shiritin e statusit."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalo shkurtore"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalimi i shkurtoreve"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Lejon një aplikacion për të shtuar shkurtore në ekranin bazë pa ndërhyrjen e përdoruesit."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"çinstalo shkurtore"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Lejon aplikacionin të heqë shkurtore në ekranin bazë, pa ndërhyrjen e përdoruesit."</string>
