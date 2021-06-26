@@ -349,7 +349,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"ઍપ્લિકેશનને સ્ટેટસ બાર વિસ્તૃત કરવાની અને સંકુચિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"લૉક કરેલા ડિવાઇસ પર પૂર્ણ સ્ક્રીન પરની પ્રવૃતિઓની જેમ નોટિફિકેશન બતાવો"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"ઍપને લૉક કરેલા ડિવાઇસ પર પૂર્ણ સ્ક્રીન પરની પ્રવૃતિઓની જેમ નોટિફિકેશન બતાવવાની મંજૂરી આપે છે"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"શોર્ટકટ્સ ઇન્સ્ટોલ કરો"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"શૉર્ટકટ ઇન્સ્ટૉલ કરો"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"એપ્લિકેશનને વપરાશકર્તા હસ્તક્ષેપ વગર હોમસ્ક્રીન શોર્ટકટ્સ ઉમેરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"શોર્ટકટ્સ અનઇન્સ્ટોલ કરો"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"એપ્લિકેશનને વપરાશકર્તા હસ્તક્ષેપ વગર હોમસ્ક્રીન શોર્ટકટ્સ દૂર કરવાની મંજૂરી આપે છે."</string>
@@ -603,8 +603,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"કોઈ ફિંગરપ્રિન્ટની નોંધણી કરવામાં આવી નથી."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"આ ડિવાઇસમાં કોઈ ફિંગરપ્રિન્ટ સેન્સર નથી."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"સેન્સર હંગામી રૂપે બંધ કર્યું છે."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"સેન્સરને કેલિબ્રેટ કરવાની જરૂર છે"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"આંગળી <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ફિંગરપ્રિન્ટ અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
@@ -614,8 +613,10 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ફિંગરપ્રિન્ટ આયકન"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ફેસ અનલૉક"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"તમારા ચહેરાની ફરી નોંધણી કરાવો"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ઓળખવાની પ્રક્રિયાને બહેતર બનાવવા માટે કૃપા કરીને તમારા ચહેરાની ફરી નોંધણી કરાવો"</string>
+    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
+    <skip />
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ફેસ અનલૉક સુવિધાનું સેટઅપ કરો"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"તમારા ફોનની તરફ જોઈને તેને અનલૉક કરો"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"અનલૉક કરવાની બીજી રીતોનું સેટઅપ કરો"</string>
