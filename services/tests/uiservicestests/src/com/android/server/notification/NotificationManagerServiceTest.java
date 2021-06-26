@@ -233,6 +233,7 @@ import java.util.function.Consumer;
 @RunWithLooper
 public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
+    private static final int UID_HEADLESS = 1000000;
 
     private final int mUid = Binder.getCallingUid();
     private TestableNotificationManagerService mService;
@@ -6758,7 +6759,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testGrantInlineReplyUriPermission_recordExists() throws Exception {
-        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, 0);
+        int userId = UserManager.isHeadlessSystemUserMode()
+                ? UserHandle.getUserId(UID_HEADLESS)
+                : USER_SYSTEM;
+
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, userId);
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
         waitForIdle();
@@ -6783,7 +6788,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testGrantInlineReplyUriPermission_noRecordExists() throws Exception {
-        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, 0);
+        int userId = UserManager.isHeadlessSystemUserMode()
+                ? UserHandle.getUserId(UID_HEADLESS)
+                : USER_SYSTEM;
+
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, userId);
         waitForIdle();
 
         // No notifications exist for the given record
@@ -6827,7 +6836,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Target user for the grant is USER_ALL instead of USER_SYSTEM
         verify(mUgm, times(1)).grantUriPermissionFromOwner(any(),
                 eq(nr.getSbn().getUid()), eq(nr.getSbn().getPackageName()), eq(uri), anyInt(),
-                anyInt(), eq(UserHandle.USER_SYSTEM));
+                anyInt(), UserManager.isHeadlessSystemUserMode()
+                        ? eq(UserHandle.getUserId(UID_HEADLESS))
+                        : eq(USER_SYSTEM));
     }
 
     @Test
@@ -6870,7 +6881,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testClearInlineReplyUriPermission_uriRecordExists() throws Exception {
-        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, 0);
+        int userId = UserManager.isHeadlessSystemUserMode()
+                ? UserHandle.getUserId(UID_HEADLESS)
+                : USER_SYSTEM;
+
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, userId);
         reset(mPackageManager);
 
         Uri uri1 = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
@@ -6932,7 +6947,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // permissionOwner destroyed for USER_SYSTEM, not USER_ALL
         verify(mUgmInternal, times(1)).revokeUriPermissionFromOwner(
-                eq(record.getPermissionOwner()), eq(null), eq(~0), eq(USER_SYSTEM));
+                eq(record.getPermissionOwner()), eq(null), eq(~0),
+                UserManager.isHeadlessSystemUserMode()
+                        ? eq(UserHandle.getUserId(UID_HEADLESS))
+                        : eq(USER_SYSTEM));
     }
 
     @Test
@@ -7425,6 +7443,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void createConversationNotificationChannel() throws Exception {
+        int userId = UserManager.isHeadlessSystemUserMode()
+                ? UserHandle.getUserId(UID_HEADLESS)
+                : USER_SYSTEM;
+
         NotificationChannel original = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         original.setAllowBubbles(!original.canBubble());
         original.setShowBadge(!original.canShowBadge());
@@ -7443,7 +7465,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 PKG, mUid, orig, "friend");
 
         NotificationChannel friendChannel = mBinderService.getConversationNotificationChannel(
-                PKG, 0, PKG, original.getId(), false, "friend");
+                PKG, userId, PKG, original.getId(), false, "friend");
 
         assertEquals(original.getName(), friendChannel.getName());
         assertEquals(original.getId(), friendChannel.getParentChannelId());

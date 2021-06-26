@@ -26,10 +26,54 @@
     <issue
         id="NewApi"
         message="`?android:attr/dialogCornerRadius` requires API level 28 (current min is 21)"
-        errorLine1="        android:radius=&quot;?android:attr/dialogCornerRadius&quot;"
+        errorLine1="        android:topLeftRadius=&quot;?android:attr/dialogCornerRadius&quot;"
         errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SettingsLib/ActionButtonsPreference/res/drawable/settingslib_rounded_background.xml"
+            file="frameworks/base/packages/SettingsLib/ActionButtonsPreference/res/drawable/half_rounded_left_bk.xml"
+            line="23"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`?android:attr/dialogCornerRadius` requires API level 28 (current min is 21)"
+        errorLine1="        android:bottomLeftRadius=&quot;?android:attr/dialogCornerRadius&quot;"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/ActionButtonsPreference/res/drawable/half_rounded_left_bk.xml"
+            line="25"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`?android:attr/dialogCornerRadius` requires API level 28 (current min is 21)"
+        errorLine1="        android:topRightRadius=&quot;?android:attr/dialogCornerRadius&quot;"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/ActionButtonsPreference/res/drawable/half_rounded_right_bk.xml"
+            line="24"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`?android:attr/dialogCornerRadius` requires API level 28 (current min is 21)"
+        errorLine1="        android:bottomRightRadius=&quot;?android:attr/dialogCornerRadius&quot;"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/ActionButtonsPreference/res/drawable/half_rounded_right_bk.xml"
+            line="26"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`?android:attr/dialogCornerRadius` requires API level 28 (current min is 21)"
+        errorLine1="        android:bottomRightRadius=&quot;?android:attr/dialogCornerRadius&quot;"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/ActionButtonsPreference/res/drawable/rounded_bk.xml"
             line="23"
             column="9"/>
     </issue>
