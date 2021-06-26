@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"അപ്ലിക്കേഷനെ നില ബാർ ആകാൻ അനുവദിക്കുന്നു."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"സ്റ്റാറ്റസ് വിപുലീകരിക്കുക/ചുരുക്കുക"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"നില ബാർ വിപുലീകരിക്കുന്നതിനോ ചുരുക്കുന്നതിനോ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"കുറുക്കുവഴികൾ ഇൻസ്റ്റാളുചെയ്യുക"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"കുറുക്കുവഴികൾ ഇൻസ്റ്റാൾ ചെയ്യുക"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"ഉപയോക്തൃ ഇടപെടലില്ലാതെ ഹോംസ്‌ക്രീൻ കുറുക്കുവഴികൾ ചേർക്കാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"കുറുക്കുവഴികൾ അൺഇൻസ്റ്റാളുചെയ്യുക"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"ഉപയോക്തൃ ഇടപെടലില്ലാതെ ഹോംസ്‌ക്രീൻ കുറുക്കുവഴികൾ നീക്കംചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>

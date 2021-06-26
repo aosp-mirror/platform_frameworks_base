@@ -335,7 +335,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Permet que l\'aplicació sigui la barra d\'estat."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"desplega/contrau la barra d\'estat"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permet que l\'aplicació desplegui o replegui la barra d\'estat."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instal·lar dreceres"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instal·lar dreceres"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permet que una aplicació afegeixi dreceres a la pantalla d\'inici sense la intervenció de l\'usuari."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstal·la dreceres"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permet que l\'aplicació suprimeixi les dreceres de la pantalla d\'inici sense la intervenció de l\'usuari."</string>
