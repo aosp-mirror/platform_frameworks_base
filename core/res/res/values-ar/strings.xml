@@ -146,7 +146,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"‏الاتصال عبر WiFi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"إيقاف"</string>
+    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"غير مفعّل"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"‏الاتصال عبر Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"الاتصال عبر شبكة الجوّال"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"‏Wi-Fi فقط"</string>
@@ -597,8 +597,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"يمكنك تجربة بصمة إصبع أخرى."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"الصورة ساطعة للغاية."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"حاوِل تعديل بصمة الإصبع."</string>
-    <!-- no translation found for fingerprint_acquired_immobile (1621891895241888048) -->
-    <skip />
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"غيِّر موضع إصبعك قليلاً في كل مرة."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"تم مصادقة بصمة الإصبع"</string>
@@ -625,8 +624,10 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"رمز بصمة الإصبع"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"فتح الجهاز بالتعرف على الوجه"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"إعادة تسجيل وجهك"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"لتحسين قدرة الجهاز على معرفة وجهك، يُرجى إعادة تسجيل الوجه."</string>
+    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
+    <skip />
     <string name="face_setup_notification_title" msgid="8843461561970741790">"إعداد ميزة \"فتح الجهاز بالتعرف على الوجه\""</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"يمكنك فتح قفل هاتفك بمجرّد النظر إلى الشاشة."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"إعداد المزيد من الطرق لفتح قفل الجهاز"</string>
