@@ -2112,8 +2112,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void disableKeyguardBlurs() {
-        mMainThreadHandler.post(mKeyguardViewMediator::disableBlursUntilHidden);
+    public void setBlursDisabledForAppLaunch(boolean disabled) {
+        mKeyguardViewMediator.setBlursDisabledForAppLaunch(disabled);
     }
 
     public boolean isDeviceInVrMode() {

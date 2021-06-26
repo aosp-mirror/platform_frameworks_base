@@ -24,8 +24,8 @@ package {
 
 java_defaults {
     name: "platform_app_defaults",
-    plugins: ["error_prone_android_framework"],
     errorprone: {
+        extra_check_modules: ["error_prone_android_framework"],
         javacflags: [
             // We're less worried about performance in app code
             "-Xep:AndroidFrameworkEfficientCollections:OFF",

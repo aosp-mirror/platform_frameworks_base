@@ -1529,7 +1529,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Updates the extra information of the intent.
         if (fromHomeKey) {
             homeIntent.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, true);
-            mWindowManager.cancelRecentsAnimation(REORDER_KEEP_IN_PLACE, "startHomeActivity");
+            if (mWindowManager.getRecentsAnimationController() != null) {
+                mWindowManager.getRecentsAnimationController().cancelAnimationForHomeStart();
+            }
         }
         homeIntent.putExtra(WindowManagerPolicy.EXTRA_START_REASON, reason);
 
