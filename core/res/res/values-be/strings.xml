@@ -341,7 +341,7 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Дазваляе прыкладанням быць радком стану."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"разгарнуць/згарнуць радок стану"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Дазваляе прыкладанню разгортваць ці згортваць радок стану."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"усталёўваць ярлыкі"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Стварэнне ярлыкоў"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Дазваляе праграме дадаваць ярлыкі на Галоўны экран без умяшання карыстальніка."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"выдаляць ярлыкі"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Дазваляе праграме выдаляць ярлыкі з Галоўнага экрана без умяшання карыстальніка."</string>
