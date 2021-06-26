@@ -363,7 +363,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Wima"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Mlalo"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Mbinu ya uingizaji"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"Kutambua Mahali"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"Mahali"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Kitambua eneo kimezimwa"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Kifaa cha faili"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
