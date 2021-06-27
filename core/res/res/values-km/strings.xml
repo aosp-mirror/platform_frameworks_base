@@ -585,8 +585,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"សាកល្បងប្រើ​ស្នាមម្រាមដៃផ្សេងទៀត"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ភ្លឺពេក"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"សាកល្បង​កែតម្រូវ"</string>
-    <!-- no translation found for fingerprint_acquired_immobile (1621891895241888048) -->
-    <skip />
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ប្ដូរទីតាំងម្រាមដៃ​របស់អ្នកតិចៗ​គ្រប់ពេល"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"បាន​ផ្ទៀង​ផ្ទាត់​ស្នាម​ម្រាមដៃ"</string>
@@ -613,8 +612,10 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"រូបស្នាមម្រាមដៃ"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ដោះ​សោ​តាម​​ទម្រង់​មុខ"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ដើម្បី​ធ្វើឱ្យ​ការសម្គាល់មុខ​ប្រសើរជាងមុន សូមស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
+    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
+    <skip />
     <string name="face_setup_notification_title" msgid="8843461561970741790">"រៀបចំ​ការដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ដោះសោទូរសព្ទ​របស់អ្នកដោយសម្លឹងមើលវា"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"រៀបចំ​វិធីច្រើនទៀត​ដើម្បី​ដោះសោ"</string>

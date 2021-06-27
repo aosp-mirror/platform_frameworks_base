@@ -585,8 +585,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"మరొక వేలిముద్రను ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"వెలుతురు అధికంగా ఉంది"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"సర్దుబాటు చేయడానికి ట్రై చేయండి"</string>
-    <!-- no translation found for fingerprint_acquired_immobile (1621891895241888048) -->
-    <skip />
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ప్రతిసారీ మీ వేళ్ల స్థానాన్ని కొద్దిగా మార్చండి"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"వేలిముద్ర ప్రమాణీకరించబడింది"</string>
@@ -603,8 +602,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"వేలిముద్రలు నమోదు చేయబడలేదు."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ఈ పరికరంలో వేలిముద్ర సెన్సార్ ఎంపిక లేదు."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"సెన్సార్‌కు కాలిబ్రేషన్ అవసరం"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"వేలు <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"వేలిముద్రను ఉపయోగించండి"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"వేలిముద్ర లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
@@ -614,8 +612,10 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"వేలిముద్ర చిహ్నం"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ఫేస్ అన్‌లాక్"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"మీ ముఖాన్ని తిరిగి నమోదు చేయండి"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"గుర్తింపును మెరుగుపరచడానికి, దయచేసి మీ ముఖంను తిరిగి నమోదు చేసుకోండి"</string>
+    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
+    <skip />
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ఫేస్ అన్‌లాక్‌ను సెటప్ చేయండి"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"మీ ఫోన్‌ను చూడటం ద్వారా దాన్ని అన్‌లాక్ చేయండి"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"అన్‌లాక్ చేయడానికి మరిన్ని మార్గాలను సెటప్ చేయండి"</string>
