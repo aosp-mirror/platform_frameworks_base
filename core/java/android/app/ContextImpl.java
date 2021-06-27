@@ -48,7 +48,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.content.res.CompatResources;
@@ -2462,7 +2461,7 @@ class ContextImpl extends Context {
     public Context createApplicationContext(ApplicationInfo application, int flags)
             throws NameNotFoundException {
         LoadedApk pi = mMainThread.getPackageInfo(application, mResources.getCompatibilityInfo(),
-                flags | CONTEXT_REGISTER_PACKAGE);
+                flags | CONTEXT_REGISTER_PACKAGE, false);
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, ContextParams.EMPTY,
                     mAttributionSource.getAttributionTag(),
@@ -2494,13 +2493,6 @@ class ContextImpl extends Context {
     @Override
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws NameNotFoundException {
-        return createPackageContextAsUser(packageName, flags, user, 0 /* packageFlags */);
-    }
-
-    @Override
-    public Context createPackageContextAsUser(
-            @NonNull String packageName, @CreatePackageOptions int flags, @NonNull UserHandle user,
-            @ApplicationInfoFlags int packageFlags) throws PackageManager.NameNotFoundException {
         if (packageName.equals("system") || packageName.equals("android")) {
             // The system resources are loaded in every application, so we can safely copy
             // the context without reloading Resources.
@@ -2511,7 +2503,7 @@ class ContextImpl extends Context {
         }
 
         LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
-                flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier(), packageFlags);
+                flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier());
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mParams,
                     mAttributionSource.getAttributionTag(),
