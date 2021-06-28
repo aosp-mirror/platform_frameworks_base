@@ -2178,12 +2178,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 mDrawnCallback = null;
             }
 
-            // only play "unlock" noises if not on a call (since the incall UI
-            // disables the keyguard)
-            if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)) {
-                playSounds(false);
-            }
-
             LatencyTracker.getInstance(mContext)
                     .onActionEnd(LatencyTracker.ACTION_LOCKSCREEN_UNLOCK);
 
@@ -2301,6 +2295,13 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     }
 
     private void onKeyguardExitFinished() {
+        // only play "unlock" noises if not on a call (since the incall UI
+        // disables the keyguard)
+        if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)) {
+            Log.i("TEST", "playSounds: false");
+            playSounds(false);
+        }
+
         setShowingLocked(false);
         mWakeAndUnlocking = false;
         mDismissCallbackRegistry.notifyDismissSucceeded();
