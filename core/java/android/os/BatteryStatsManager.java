@@ -262,7 +262,7 @@ public final class BatteryStatsManager {
     /**
      * Indicates that a new wifi scan has started.
      *
-     * @param ws Worksource (to be used for battery blaming).
+     * @param ws worksource (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public void reportWifiScanStartedFromSource(@NonNull WorkSource ws) {
@@ -276,7 +276,7 @@ public final class BatteryStatsManager {
     /**
      * Indicates that an ongoing wifi scan has stopped.
      *
-     * @param ws Worksource (to be used for battery blaming).
+     * @param ws worksource (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public void reportWifiScanStoppedFromSource(@NonNull WorkSource ws) {
@@ -290,7 +290,7 @@ public final class BatteryStatsManager {
     /**
      * Indicates that a new wifi batched scan has started.
      *
-     * @param ws Worksource (to be used for battery blaming).
+     * @param ws worksource (to be used for battery blaming).
      * @param csph Channels scanned per hour.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
@@ -306,7 +306,7 @@ public final class BatteryStatsManager {
     /**
      * Indicates that an ongoing wifi batched scan has stopped.
      *
-     * @param ws Worksource (to be used for battery blaming).
+     * @param ws worksource (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public void reportWifiBatchedScanStoppedFromSource(@NonNull WorkSource ws) {
@@ -354,7 +354,7 @@ public final class BatteryStatsManager {
     /**
      * Indicates an app acquiring full wifi lock.
      *
-     * @param ws Worksource (to be used for battery blaming).
+     * @param ws worksource (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public void reportFullWifiLockAcquiredFromSource(@NonNull WorkSource ws) {
@@ -368,7 +368,7 @@ public final class BatteryStatsManager {
     /**
      * Indicates an app releasing full wifi lock.
      *
-     * @param ws Worksource (to be used for battery blaming).
+     * @param ws worksource (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public void reportFullWifiLockReleasedFromSource(@NonNull WorkSource ws) {
@@ -478,6 +478,63 @@ public final class BatteryStatsManager {
             @NonNull int[] transportTypes) throws RuntimeException {
         try {
             mBatteryStats.noteNetworkInterfaceForTransports(iface, transportTypes);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Indicates that a new Bluetooth LE scan has started.
+     *
+     * @param ws worksource (to be used for battery blaming).
+     * @param isUnoptimized whether or not the scan has a filter.
+     */
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    public void reportBleScanStarted(@NonNull WorkSource ws, boolean isUnoptimized) {
+        try {
+            mBatteryStats.noteBleScanStarted(ws, isUnoptimized);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Indicates that an ongoing Bluetooth LE scan has stopped.
+     *
+     * @param ws worksource (to be used for battery blaming).
+     * @param isUnoptimized whether or not the scan has a filter.
+     */
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    public void reportBleScanStopped(@NonNull WorkSource ws, boolean isUnoptimized) {
+        try {
+            mBatteryStats.noteBleScanStopped(ws, isUnoptimized);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Indicates that Bluetooth LE has been reset.
+     */
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    public void reportBleScanReset() {
+        try {
+            mBatteryStats.noteBleScanReset();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Indicates that Bluetooth LE scan has received new results.
+     *
+     * @param ws worksource (to be used for battery blaming).
+     * @param numNewResults number of results received since last update.
+     */
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    public void reportBleScanResults(@NonNull WorkSource ws, int numNewResults) {
+        try {
+            mBatteryStats.noteBleScanResults(ws, numNewResults);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

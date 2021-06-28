@@ -1968,7 +1968,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     @Override
-    public void noteResetBleScan() {
+    public void noteBleScanReset() {
         enforceCallingPermission();
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
