@@ -33,6 +33,7 @@ import static java.util.Objects.requireNonNull;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ExitTransitionCoordinator;
 import android.app.ExitTransitionCoordinator.ExitTransitionCallbacks;
@@ -253,6 +254,7 @@ public class ScreenshotController {
     private final DisplayManager mDisplayManager;
     private final ScrollCaptureController mScrollCaptureController;
     private final LongScreenshotData mLongScreenshotHolder;
+    private final boolean mIsLowRamDevice;
 
     private ScreenshotView mScreenshotView;
     private Bitmap mScreenBitmap;
@@ -297,7 +299,8 @@ public class ScreenshotController {
             ImageExporter imageExporter,
             @Main Executor mainExecutor,
             ScrollCaptureController scrollCaptureController,
-            LongScreenshotData longScreenshotHolder) {
+            LongScreenshotData longScreenshotHolder,
+            ActivityManager activityManager) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
         mScrollCaptureClient = scrollCaptureClient;
@@ -306,6 +309,7 @@ public class ScreenshotController {
         mMainExecutor = mainExecutor;
         mScrollCaptureController = scrollCaptureController;
         mLongScreenshotHolder = longScreenshotHolder;
+        mIsLowRamDevice = activityManager.isLowRamDevice();
         mBgExecutor = Executors.newSingleThreadExecutor();
 
         mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
@@ -621,6 +625,10 @@ public class ScreenshotController {
     }
 
     private void requestScrollCapture() {
+        if (!allowLongScreenshots()) {
+            Log.d(TAG, "Long screenshots not supported on this device");
+            return;
+        }
         mScrollCaptureClient.setHostWindowToken(mWindow.getDecorView().getWindowToken());
         if (mLastScrollCaptureRequest != null) {
             mLastScrollCaptureRequest.cancel(true);
@@ -980,6 +988,10 @@ public class ScreenshotController {
 
     private Display getDefaultDisplay() {
         return mDisplayManager.getDisplay(DEFAULT_DISPLAY);
+    }
+
+    private boolean allowLongScreenshots() {
+        return !mIsLowRamDevice;
     }
 
     /** Does the aspect ratio of the bitmap with insets removed match the bounds. */
