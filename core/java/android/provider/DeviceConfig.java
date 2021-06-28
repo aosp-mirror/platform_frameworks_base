@@ -860,31 +860,31 @@ public final class DeviceConfig {
     /**
      * Disables or re-enables bulk modifications ({@link #setProperties(Properties)}) to device
      * config values. This is intended for use during tests to prevent a sync operation clearing
-     * config values, which could influence the outcome of the tests, i.e. by changing behavior.
+     * config values which could influence the outcome of the tests, i.e. by changing behavior.
      *
      * @param syncDisabledMode the mode to use, see {@link Settings.Config#SYNC_DISABLED_MODE_NONE},
      *     {@link Settings.Config#SYNC_DISABLED_MODE_PERSISTENT} and {@link
      *     Settings.Config#SYNC_DISABLED_MODE_UNTIL_REBOOT}
      *
-     * @see #getSyncDisabled()
+     * @see #getSyncDisabledMode()
      * @hide
      */
     @RequiresPermission(WRITE_DEVICE_CONFIG)
-    public static void setSyncDisabled(@SyncDisabledMode int syncDisabledMode) {
+    public static void setSyncDisabledMode(@SyncDisabledMode int syncDisabledMode) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        Settings.Config.setSyncDisabled(contentResolver, syncDisabledMode);
+        Settings.Config.setSyncDisabledMode(contentResolver, syncDisabledMode);
     }
 
     /**
      * Returns the current mode of sync disabling.
      *
-     * @see #setSyncDisabled(int)
+     * @see #setSyncDisabledMode(int)
      * @hide
      */
     @RequiresPermission(WRITE_DEVICE_CONFIG)
-    public static @SyncDisabledMode int getSyncDisabled() {
+    public static @SyncDisabledMode int getSyncDisabledMode() {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        return Settings.Config.getSyncDisabled(contentResolver);
+        return Settings.Config.getSyncDisabledMode(contentResolver);
     }
 
     /**

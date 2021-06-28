@@ -471,16 +471,16 @@ public class SettingsProvider extends ContentProvider {
                 return result;
             }
 
-            case Settings.CALL_METHOD_SET_SYNC_DISABLED_CONFIG: {
+            case Settings.CALL_METHOD_SET_SYNC_DISABLED_MODE_CONFIG: {
                 final int mode = getSyncDisabledMode(args);
-                setSyncDisabledConfig(mode);
+                setSyncDisabledModeConfig(mode);
                 break;
             }
 
-            case Settings.CALL_METHOD_GET_SYNC_DISABLED_CONFIG: {
+            case Settings.CALL_METHOD_GET_SYNC_DISABLED_MODE_CONFIG: {
                 Bundle result = new Bundle();
-                result.putInt(Settings.KEY_CONFIG_GET_SYNC_DISABLED_RETURN,
-                        getSyncDisabledConfig());
+                result.putInt(Settings.KEY_CONFIG_GET_SYNC_DISABLED_MODE_RETURN,
+                        getSyncDisabledModeConfig());
                 return result;
             }
 
@@ -1147,7 +1147,7 @@ public class SettingsProvider extends ContentProvider {
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
 
         synchronized (mLock) {
-            if (getSyncDisabledConfigLocked() != SYNC_DISABLED_MODE_NONE) {
+            if (getSyncDisabledModeConfigLocked() != SYNC_DISABLED_MODE_NONE) {
                 return SET_ALL_RESULT_DISABLED;
             }
             final int key = makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
@@ -1157,32 +1157,32 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private void setSyncDisabledConfig(@SyncDisabledMode int syncDisabledMode) {
+    private void setSyncDisabledModeConfig(@SyncDisabledMode int syncDisabledMode) {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "setSyncDisabledConfig(" + syncDisabledMode + ")");
+            Slog.v(LOG_TAG, "setSyncDisabledModeConfig(" + syncDisabledMode + ")");
         }
 
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
 
         synchronized (mLock) {
-            setSyncDisabledConfigLocked(syncDisabledMode);
+            setSyncDisabledModeConfigLocked(syncDisabledMode);
         }
     }
 
-    private int getSyncDisabledConfig() {
+    private int getSyncDisabledModeConfig() {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "getSyncDisabledConfig");
+            Slog.v(LOG_TAG, "getSyncDisabledModeConfig");
         }
 
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
 
         synchronized (mLock) {
-            return getSyncDisabledConfigLocked();
+            return getSyncDisabledModeConfigLocked();
         }
     }
 
     @GuardedBy("mLock")
-    private void setSyncDisabledConfigLocked(@SyncDisabledMode int syncDisabledMode) {
+    private void setSyncDisabledModeConfigLocked(@SyncDisabledMode int syncDisabledMode) {
         boolean persistentValue;
         boolean inMemoryValue;
         if (syncDisabledMode == SYNC_DISABLED_MODE_NONE) {
@@ -1214,7 +1214,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     @GuardedBy("mLock")
-    private int getSyncDisabledConfigLocked() {
+    private int getSyncDisabledModeConfigLocked() {
         // Check the values used for both SYNC_DISABLED_MODE_PERSISTENT and
         // SYNC_DISABLED_MODE_UNTIL_REBOOT.
 
