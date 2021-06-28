@@ -118,7 +118,7 @@ public final class DeviceConfigService extends Binder {
             }
 
             // Parse args for those commands that have them.
-            int disableSyncMode = -1;
+            int syncDisabledModeArg = -1;
             int resetMode = -1;
             boolean makeDefault = false;
             String namespace = null;
@@ -155,10 +155,10 @@ public final class DeviceConfigService extends Binder {
                         }
                     }
                 } else if (verb == CommandVerb.SET_SYNC_DISABLED_FOR_TESTS) {
-                    if (disableSyncMode == -1) {
-                        // DISABLE_SYNC_FOR_TESTS 1st arg (required)
-                        disableSyncMode = parseDisableSyncMode(arg);
-                        if (disableSyncMode == -1) {
+                    if (syncDisabledModeArg == -1) {
+                        // SET_SYNC_DISABLED_FOR_TESTS 1st arg (required)
+                        syncDisabledModeArg = parseSyncDisabledMode(arg);
+                        if (syncDisabledModeArg == -1) {
                             // invalid
                             perr.println("Invalid sync disabled mode: " + arg);
                             return -1;
@@ -248,13 +248,13 @@ public final class DeviceConfigService extends Binder {
                     DeviceConfig.resetToDefaults(resetMode, namespace);
                     break;
                 case SET_SYNC_DISABLED_FOR_TESTS:
-                    DeviceConfig.setSyncDisabled(disableSyncMode);
+                    DeviceConfig.setSyncDisabledMode(syncDisabledModeArg);
                     break;
                 case GET_SYNC_DISABLED_FOR_TESTS:
-                    int syncDisabledMode = DeviceConfig.getSyncDisabled();
-                    String syncDisabledModeString = formatDisableSyncMode(syncDisabledMode);
+                    int syncDisabledModeInt = DeviceConfig.getSyncDisabledMode();
+                    String syncDisabledModeString = formatSyncDisabledMode(syncDisabledModeInt);
                     if (syncDisabledModeString == null) {
-                        perr.println("Unknown mode:" + syncDisabledMode);
+                        perr.println("Unknown mode: " + syncDisabledModeInt);
                         return -1;
                     }
                     pout.println(syncDisabledModeString);
@@ -362,22 +362,22 @@ public final class DeviceConfigService extends Binder {
         }
     }
 
-    private static @SyncDisabledMode int parseDisableSyncMode(String arg) {
-        int disableSyncMode;
+    private static @SyncDisabledMode int parseSyncDisabledMode(String arg) {
+        int syncDisabledMode;
         if ("none".equalsIgnoreCase(arg)) {
-            disableSyncMode = SYNC_DISABLED_MODE_NONE;
+            syncDisabledMode = SYNC_DISABLED_MODE_NONE;
         } else if ("persistent".equalsIgnoreCase(arg)) {
-            disableSyncMode = SYNC_DISABLED_MODE_PERSISTENT;
+            syncDisabledMode = SYNC_DISABLED_MODE_PERSISTENT;
         } else if ("until_reboot".equalsIgnoreCase(arg)) {
-            disableSyncMode = SYNC_DISABLED_MODE_UNTIL_REBOOT;
+            syncDisabledMode = SYNC_DISABLED_MODE_UNTIL_REBOOT;
         } else {
-            disableSyncMode = -1;
+            syncDisabledMode = -1;
         }
-        return disableSyncMode;
+        return syncDisabledMode;
     }
 
-    private static String formatDisableSyncMode(@SyncDisabledMode int disableSyncMode) {
-        switch (disableSyncMode) {
+    private static String formatSyncDisabledMode(@SyncDisabledMode int syncDisabledMode) {
+        switch (syncDisabledMode) {
             case SYNC_DISABLED_MODE_NONE:
                 return "none";
             case SYNC_DISABLED_MODE_PERSISTENT:
