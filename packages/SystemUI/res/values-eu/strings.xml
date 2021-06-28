@@ -472,7 +472,7 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Aldatu erabiltzailea. <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> da saioa hasita daukana."</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Erabiltzailea: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Erakutsi profila"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Gehitu erabiltzaile bat"</string>
+    <string name="user_add_user" msgid="4336657383006913022">"Gehitu erabiltzailea"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Erabiltzaile berria"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Gonbidatua kendu nahi duzu?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Saioko aplikazio eta datu guztiak ezabatuko dira."</string>
@@ -538,7 +538,7 @@
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Profila kontrolatzeko aukera"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Sareen kontrola"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Sarearen erregistroak"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Sare-erregistroak"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA ziurtagiriak"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Desgaitu VPN konexioa"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Deskonektatu VPN sarea"</string>
@@ -548,7 +548,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Erakundeak ziurtagiri-emaile bat instalatu du gailuan. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Erakundeak ziurtagiri-emaile bat instalatu dizu laneko profilean. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Ziurtagiri-emaile bat dago instalatuta gailuan. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratzaileak sare-erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"<xliff:g id="VPN_APP">%1$s</xliff:g> aplikaziora konektatuta zaude eta hark sareko jarduerak gainbegira ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> eta <xliff:g id="VPN_APP_1">%2$s</xliff:g> aplikazioetara konektatuta zaude, eta haiek sareko jarduerak gainbegira ditzakete, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"<xliff:g id="VPN_APP">%1$s</xliff:g> aplikaziora dago konektatuta laneko profila, eta aplikazio horrek sareko jarduerak gainbegira ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
@@ -563,7 +563,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Ireki VPN ezarpenak"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Ireki kredentzial fidagarriak"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administratzaileak sare-erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Aplikazio bati VPN konexio bat konfiguratzeko baimena eman diozu.\n\nAplikazio horrek gailuko eta sareko jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> erakundeak kudeatzen du zure laneko profila.\n\nAdministratzaileak sareko jarduerak kontrola diezazkizuke, besteak beste, posta elektronikoa, aplikazioak eta webguneak.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan.\n\nHorrez gain, VPN batera zaude konektatuta, eta hark ere kontrola ditzake zure sareko jarduerak."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN konexioa"</string>
@@ -593,7 +593,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikazioa ainguratuta dago"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Atzera\" eta \"Ikuspegi orokorra\" botoiak."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta Atzera eta Hasiera botoiak."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, pasatu hatza gora eta eduki ezazu sakatuta."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, pasatu hatza gora eduki ezazu sakatuta."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Ikuspegi orokorra\" botoia."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta Hasiera botoia."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Baliteke datu pertsonalak atzitu ahal izatea (adibidez, kontaktuak eta posta elektronikoko edukia)."</string>

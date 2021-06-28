@@ -45,8 +45,8 @@ import android.security.keystore2.AndroidKeyStoreProvider;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
-import android.system.StructUserCapData;
-import android.system.StructUserCapHeader;
+import android.system.StructCapUserData;
+import android.system.StructCapUserHeader;
 import android.text.Hyphenator;
 import android.util.EventLog;
 import android.util.Log;
@@ -126,6 +126,12 @@ public class ZygoteInit {
     private static final int ROOT_GID = 0;
 
     private static boolean sPreloadComplete;
+
+    /**
+     * Cached classloader to use for the system server. Will only be populated in the system
+     * server process.
+     */
+    private static ClassLoader sCachedSystemServerClassLoader = null;
 
     static void preload(TimingsTraceLog bootTimingsTraceLog) {
         Log.d(TAG, "begin preload");
@@ -543,10 +549,8 @@ public class ZygoteInit {
 
             throw new IllegalStateException("Unexpected return from WrapperInit.execApplication");
         } else {
-            ClassLoader cl = null;
-            if (systemServerClasspath != null) {
-                cl = createPathClassLoader(systemServerClasspath, parsedArgs.mTargetSdkVersion);
-
+            ClassLoader cl = getOrCreateSystemServerClassLoader();
+            if (cl != null) {
                 Thread.currentThread().setContextClassLoader(cl);
             }
 
@@ -559,6 +563,23 @@ public class ZygoteInit {
         }
 
         /* should never reach here */
+    }
+
+    /**
+     * Create the classloader for the system server and store it in
+     * {@link sCachedSystemServerClassLoader}. This function may be called through JNI in
+     * system server startup, when the runtime is in a critically low state. Do not do
+     * extended computation etc here.
+     */
+    private static ClassLoader getOrCreateSystemServerClassLoader() {
+        if (sCachedSystemServerClassLoader == null) {
+            final String systemServerClasspath = Os.getenv("SYSTEMSERVERCLASSPATH");
+            if (systemServerClasspath != null) {
+                sCachedSystemServerClassLoader = createPathClassLoader(systemServerClasspath,
+                        VMRuntime.SDK_VERSION_CUR_DEVELOPMENT);
+            }
+        }
+        return sCachedSystemServerClassLoader;
     }
 
     /**
@@ -750,9 +771,9 @@ public class ZygoteInit {
                 OsConstants.CAP_BLOCK_SUSPEND
         );
         /* Containers run without some capabilities, so drop any caps that are not available. */
-        StructUserCapHeader header = new StructUserCapHeader(
+        StructCapUserHeader header = new StructCapUserHeader(
                 OsConstants._LINUX_CAPABILITY_VERSION_3, 0);
-        StructUserCapData[] data;
+        StructCapUserData[] data;
         try {
             data = Os.capget(header);
         } catch (ErrnoException ex) {

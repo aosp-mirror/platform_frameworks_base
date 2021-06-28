@@ -1049,8 +1049,8 @@
       <item quantity="other">dans <xliff:g id="COUNT_1">%d</xliff:g> a</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="one">Il y a <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
-      <item quantity="other">Il y a <xliff:g id="COUNT_1">%d</xliff:g> minutes</item>
+      <item quantity="one">il y a <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
+      <item quantity="other">il y a <xliff:g id="COUNT_1">%d</xliff:g> minutes</item>
     </plurals>
     <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
       <item quantity="one">il y a <xliff:g id="COUNT_1">%d</xliff:g> heure</item>
@@ -1636,13 +1636,13 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ne pas activer"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVÉE"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DÉSACTIVÉE"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Accorder le contrôle total de votre appareil à <xliff:g id="SERVICE">%1$s</xliff:g> ?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Accorder le contrôle total de votre appareil au service <xliff:g id="SERVICE">%1$s</xliff:g> ?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si vous activez <xliff:g id="SERVICE">%1$s</xliff:g>, votre appareil n\'utilisera pas le verrouillage de l\'écran pour améliorer le chiffrement des données."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Le contrôle total convient aux applications qui répondent à vos besoins d\'accessibilité. Il ne convient pas à la plupart des autres applications."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Le contrôle total convient aux applications qui répondent à vos besoins d\'accessibilité. Il ne convient pas à la plupart des applications."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Afficher et contrôler l\'écran"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Le service peut lire l\'intégralité du contenu à l\'écran et afficher du contenu par-dessus d\'autres applications."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Cette fonctionnalité peut lire l\'intégralité du contenu à l\'écran et afficher du contenu par-dessus d\'autres applications."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Afficher et effectuer des actions"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Le service peut suivre vos interactions avec une application ou un capteur matériel, et interagir avec des applications de votre part."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Cette fonctionnalité peut effectuer le suivi de vos interactions avec une application ou un capteur matériel, et interagir avec les applications en votre nom."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Autoriser"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuser"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Appuyez sur une fonctionnalité pour commencer à l\'utiliser :"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Taille inconnue au format portrait"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Taille inconnue au format paysage"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Tâche annulée."</string>
@@ -1811,7 +1787,7 @@
     <string name="select_day" msgid="2060371240117403147">"Sélectionner un mois et un jour"</string>
     <string name="select_year" msgid="1868350712095595393">"Sélectionner une année"</string>
     <string name="deleted_key" msgid="9130083334943364001">"\"<xliff:g id="KEY">%1$s</xliff:g>\" supprimé"</string>
-    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (pro)"</string>
+    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2e <xliff:g id="LABEL">%1$s</xliff:g> professionnelle"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3e <xliff:g id="LABEL">%1$s</xliff:g> professionnelle"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Demander le code avant d\'annuler l\'épinglage"</string>
@@ -1823,7 +1799,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n\n • active le thème sombre ;\n • désactive ou restreint les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme \"Hey Google\".\n\n"<annotation id="url">"En savoir plus"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n\n• active le thème sombre ;\n • désactive ou restreint les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme \"Hey Google\"."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation des données, l\'Économiseur de données empêche certaines applis d\'envoyer ou de recevoir des données en arrière-plan. Les applis que vous utiliserez pourront toujours accéder aux données, mais le feront moins fréquemment. Par exemple, les images pourront ne pas s\'afficher tant que vous n\'aurez pas appuyé pas dessus."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation de données, l\'économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Ainsi, les applications que vous utilisez peuvent toujours accéder aux données, mais pas en permanence. Par exemple, il se peut que les images ne s\'affichent pas tant que vous n\'appuyez pas dessus."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'économiseur de données ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activer"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

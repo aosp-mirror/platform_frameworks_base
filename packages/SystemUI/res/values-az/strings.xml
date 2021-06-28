@@ -710,11 +710,11 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Defolt"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Qabarcıq"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Səs və ya vibrasiya yoxdur"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Söhbət siyahısının aşağısında səssiz və vibrasiyasız görünür"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Telefon ayarlarına əsasən zəng çala və ya titrəyə bilər"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Səs və ya vibrasiya yoxdur və söhbət bölməsinin aşağısında görünür"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Telefon ayarlarına əsasən zəng çala və ya vibrasiya edə bilər"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Telefon ayarlarına əsasən zəng çala və ya vibrasiya edə bilər. <xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqindən söhbətlərdə defolt olaraq qabarcıq çıxır."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Bu məzmuna üzən qısayol ilə diqqətinizi cəlb edir."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Söhbət siyahısının yuxarısında üzə çıxır, profil fotosu kilidlənmiş ekrandakı kimi görünür"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Söhbət bölməsinin yuxarısında göstərilir, üzən qabarcıq kimi görünür, kilid ekranında profil şəkli göstərir"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> söhbət funksiyalarını dəstəkləmir"</string>
@@ -764,9 +764,9 @@
       <item quantity="other">%d dəqiqə</item>
       <item quantity="one">%d dəqiqə</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"Enerji istifadəsi"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"Batareya istifadəsi"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Enerji Qənaəti doldurulma zamanı əlçatan deyil"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Enerjiyə qənaət"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Enerji Qənaəti"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Performansı azaldır və arxa fon datasını məhdudlaşdırır"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Düymə <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Əsas səhifə"</string>

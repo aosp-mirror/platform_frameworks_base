@@ -67,6 +67,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteFullException;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Binder;
 import android.os.Bundle;
@@ -3071,7 +3072,8 @@ public class AccountManagerService
                     .setContentTitle(title)
                     .setContentText(subtitle)
                     .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0, intent,
-                            PendingIntent.FLAG_CANCEL_CURRENT, null, user))
+                            PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                            null, user))
                     .build();
         installNotification(getCredentialPermissionNotificationId(
                 account, authTokenType, uid), n, packageName, user.getIdentifier());
@@ -5152,7 +5154,7 @@ public class AccountManagerService
                     logStatement.bindLong(6, userDebugDbInsertionPoint);
                     try {
                         logStatement.execute();
-                    } catch (IllegalStateException e) {
+                    } catch (IllegalStateException | SQLiteFullException e) {
                         // Guard against crash, DB can already be closed
                         // since this statement is executed on a handler thread
                         Slog.w(TAG, "Failed to insert a log record. accountId=" + accountId
@@ -5293,7 +5295,8 @@ public class AccountManagerService
                         .setContentTitle(String.format(notificationTitleFormat, account.name))
                         .setContentText(message)
                         .setContentIntent(PendingIntent.getActivityAsUser(
-                                mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT,
+                                mContext, 0, intent,
+                                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
                                 null, new UserHandle(userId)))
                         .build();
                 installNotification(id, n, packageName, userId);

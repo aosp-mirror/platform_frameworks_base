@@ -29,6 +29,7 @@ import androidx.annotation.VisibleForTesting;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -120,6 +121,7 @@ public class OverlayViewGlobalStateController {
         refreshWindowFocus();
         refreshNavigationBarVisibility();
         refreshStatusBarVisibility();
+        refreshRotaryFocusIfNeeded();
 
         Log.d(TAG, "Content shown: " + viewController.getClass().getName());
         debugLog();
@@ -193,6 +195,7 @@ public class OverlayViewGlobalStateController {
         refreshWindowFocus();
         refreshNavigationBarVisibility();
         refreshStatusBarVisibility();
+        refreshRotaryFocusIfNeeded();
 
         if (mZOrderVisibleSortedMap.isEmpty()) {
             setWindowVisible(false);
@@ -251,6 +254,17 @@ public class OverlayViewGlobalStateController {
             setFitInsetsTypes(statusBars());
         } else {
             setFitInsetsTypes(mHighestZOrder.getInsetTypesToFit());
+        }
+    }
+
+    private void refreshRotaryFocusIfNeeded() {
+        for (OverlayViewController controller : mZOrderVisibleSortedMap.values()) {
+            boolean isTop = Objects.equals(controller, mHighestZOrder);
+            controller.setAllowRotaryFocus(isTop);
+        }
+
+        if (!mZOrderVisibleSortedMap.isEmpty()) {
+            mHighestZOrder.refreshRotaryFocusIfNeeded();
         }
     }
 
