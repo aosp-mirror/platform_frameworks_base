@@ -210,6 +210,7 @@ class NotificationShadeDepthController @Inject constructor(
         }
         listeners.forEach {
             it.onWallpaperZoomOutChanged(zoomOut)
+            it.onBlurRadiusChanged(blur)
         }
         notificationShadeWindowController.setBackgroundBlurRadius(blur)
     }
@@ -513,5 +514,8 @@ class NotificationShadeDepthController @Inject constructor(
          * Current wallpaper zoom out, where 0 is the closest, and 1 the farthest
          */
         fun onWallpaperZoomOutChanged(zoomOut: Float)
+
+        @JvmDefault
+        fun onBlurRadiusChanged(blurRadius: Int) {}
     }
 }
