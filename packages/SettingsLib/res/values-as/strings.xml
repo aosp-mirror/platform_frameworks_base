@@ -79,7 +79,7 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"সংযোগ কৰা হ’ল (কোনো ফ\'ন বা মিডিয়া নাই), বেটাৰিৰ স্তৰ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"সক্ৰিয়, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> বেটাৰি"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"সক্ৰিয়, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> বেটাৰি, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> বেটাৰি"</string>
-    <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> বেটাৰি"</string>
+    <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> বেটাৰী"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> বেটাৰি, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> বেটাৰি"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"সক্ৰিয়"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"মিডিয়াৰ অডিঅ’"</string>
