@@ -24,6 +24,7 @@ import android.os.Parcel;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * An app compat override applied to a given package and change id pairing.
@@ -135,6 +136,22 @@ public final class PackageOverride {
     /** @hide */
     public static PackageOverride createFromParcel(Parcel in) {
         return new PackageOverride(in.readLong(), in.readLong(), in.readBoolean());
+    }
+
+    /** @hide */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PackageOverride that = (PackageOverride) o;
+        return mMinVersionCode == that.mMinVersionCode && mMaxVersionCode == that.mMaxVersionCode
+                && mEnabled == that.mEnabled;
+    }
+
+    /** @hide */
+    @Override
+    public int hashCode() {
+        return Objects.hash(mMinVersionCode, mMaxVersionCode, mEnabled);
     }
 
     /** @hide */
