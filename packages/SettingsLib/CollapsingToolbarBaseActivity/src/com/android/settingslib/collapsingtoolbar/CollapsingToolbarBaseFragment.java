@@ -59,7 +59,9 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment implements
                 false);
         mCollapsingToolbarLayout = view.findViewById(R.id.collapsing_toolbar);
         mAppBarLayout = view.findViewById(R.id.app_bar);
-        mAppBarLayout.addOnOffsetChangedListener(this);
+        if (mAppBarLayout != null) {
+            mAppBarLayout.addOnOffsetChangedListener(this);
+        }
         if (savedInstanceState != null) {
             mIsToolbarCollapsed = savedInstanceState.getBoolean(KEY_IS_TOOLBAR_COLLAPSED);
         }
