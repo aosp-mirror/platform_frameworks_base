@@ -3397,20 +3397,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             boolean shouldCollectMessage) {
         PackageVerificationResult pvr;
         try {
-            boolean isLocOrActivity = code == AppOpsManager.OP_FINE_LOCATION
-                    || code == AppOpsManager.OP_FINE_LOCATION_SOURCE
-                    || code == AppOpsManager.OP_ACTIVITY_RECOGNITION
-                    || code == AppOpsManager.OP_ACTIVITY_RECOGNITION_SOURCE;
-            pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName,
-                    isLocOrActivity);
+            pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
             boolean wasNull = attributionTag == null;
             if (!pvr.isAttributionTagValid) {
                 attributionTag = null;
-            }
-            if (attributionTag == null && isLocOrActivity
-                    && packageName.equals("com.google.android.gms")) {
-                Slog.i("AppOpsDebug", "null tag on location or activity op " + code
-                        + " for " + packageName + ", was overridden: " + !wasNull, new Exception());
             }
         } catch (SecurityException e) {
             Slog.e(TAG, "noteOperation", e);
@@ -3919,19 +3909,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             int attributionChainId, boolean dryRun) {
         PackageVerificationResult pvr;
         try {
-            boolean isLocOrActivity = code == AppOpsManager.OP_FINE_LOCATION
-                    || code == AppOpsManager.OP_FINE_LOCATION_SOURCE
-                    || code == AppOpsManager.OP_ACTIVITY_RECOGNITION
-                    || code == AppOpsManager.OP_ACTIVITY_RECOGNITION_SOURCE;
-            pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName,
-                    isLocOrActivity);
+            pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
             if (!pvr.isAttributionTagValid) {
                 attributionTag = null;
-            }
-            if (attributionTag == null && isLocOrActivity
-                    && packageName.equals("com.google.android.gms")) {
-                Slog.i("AppOpsDebug", "null tag on location or activity op "
-                        + code + " for " + packageName, new Exception());
             }
         } catch (SecurityException e) {
             Slog.e(TAG, "startOperation", e);
@@ -4490,11 +4470,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     /**
-     * @see #verifyAndGetBypass(int, String, String, String, boolean)
+     * @see #verifyAndGetBypass(int, String, String, String)
      */
     private @NonNull PackageVerificationResult verifyAndGetBypass(int uid, String packageName,
             @Nullable String attributionTag) {
-        return verifyAndGetBypass(uid, packageName, attributionTag, null, false);
+        return verifyAndGetBypass(uid, packageName, attributionTag, null);
     }
 
     /**
@@ -4511,7 +4491,7 @@ public class AppOpsService extends IAppOpsService.Stub {
      *         attribution tag is valid
      */
     private @NonNull PackageVerificationResult verifyAndGetBypass(int uid, String packageName,
-            @Nullable String attributionTag, @Nullable String proxyPackageName, boolean extraLog) {
+            @Nullable String attributionTag, @Nullable String proxyPackageName) {
         if (uid == Process.ROOT_UID) {
             // For backwards compatibility, don't check package name for root UID.
             return new PackageVerificationResult(null,
@@ -4558,20 +4538,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             AndroidPackage pkg = pmInt.getPackage(packageName);
             if (pkg != null) {
                 isAttributionTagValid = isAttributionInPackage(pkg, attributionTag);
-                if (packageName.equals("com.google.android.gms") && extraLog) {
-                    if (isAttributionTagValid && attributionTag != null) {
-                        Slog.i("AppOpsDebug", "tag " + attributionTag + " found in "
-                                + packageName);
-                    } else {
-                        ArrayList<String> tagList = new ArrayList<>();
-                        for (int i = 0; i < pkg.getAttributions().size(); i++) {
-                            tagList.add(pkg.getAttributions().get(i).tag);
-                        }
-                        Slog.i("AppOpsDebug", "tag " + attributionTag + " missing from "
-                                + packageName + ", tags: " + tagList);
-                    }
-                }
-
                 pkgUid = UserHandle.getUid(userId, UserHandle.getAppId(pkg.getUid()));
                 bypass = getBypassforPackage(pkg);
             }
