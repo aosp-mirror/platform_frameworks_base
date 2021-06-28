@@ -62,6 +62,8 @@
 
 namespace android {
 
+using gui::FocusRequest;
+
 static void doThrowNPE(JNIEnv* env) {
     jniThrowNullPointerException(env, NULL);
 }
