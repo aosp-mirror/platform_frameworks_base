@@ -65,5 +65,8 @@ java_sdk_library {
     },
     jarjar_rules: "jarjar-rules.txt",
     apex_available: ["com.android.appsearch"],
+    impl_library_visibility: [
+        "//frameworks/base/apex/appsearch/service",
+    ],
     unsafe_ignore_missing_latest_api: true, // TODO(b/146218515) should be removed
 }
