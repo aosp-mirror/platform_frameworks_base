@@ -568,12 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Премахване на госта"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Нулиране на сесията като гост"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Гост"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8047270010895437534) -->
-    <skip />
-    <!-- no translation found for guest_reset_guest_confirm_button (2989915693215617237) -->
-    <skip />
-    <!-- no translation found for guest_resetting (7822120170191509566) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Да се нулира ли сесията като гост?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Нулиране"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Сесията като гост се нулира…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Правене на снимка"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Избиране на изображение"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Избиране на снимката"</string>
