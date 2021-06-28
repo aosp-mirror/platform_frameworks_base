@@ -110,6 +110,7 @@ import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.IUriGrantsManager;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
@@ -422,6 +423,8 @@ public class NotificationManagerService extends SystemService {
     @GuardedBy("mNotificationLock")
     final ArrayMap<NotificationRecord, ArrayList<CancelNotificationRunnable>> mDelayedCancelations =
             new ArrayMap<>();
+
+    private KeyguardManager mKeyguardManager;
 
     // The last key in this list owns the hardware.
     ArrayList<String> mLights = new ArrayList<>();
@@ -1466,6 +1469,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    void setKeyguardManager(KeyguardManager keyguardManager) {
+        mKeyguardManager = keyguardManager;
+    }
+
+    @VisibleForTesting
     void setHints(int hints) {
         mListenerHints = hints;
     }
@@ -1920,6 +1928,7 @@ public class NotificationManagerService extends SystemService {
             mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
             mAudioManagerInternal = getLocalService(AudioManagerInternal.class);
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+            mKeyguardManager = getContext().getSystemService(KeyguardManager.class);
             mZenModeHelper.onSystemReady();
             mRoleObserver = new RoleObserver(getContext().getSystemService(RoleManager.class),
                     mPackageManager, getContext().getMainExecutor());
@@ -5790,7 +5799,6 @@ public class NotificationManagerService extends SystemService {
         boolean beep = false;
         boolean blink = false;
 
-        final Notification notification = record.sbn.getNotification();
         final String key = record.getKey();
 
         // Should this notification make noise, vibe, or use the LED?
@@ -5809,7 +5817,7 @@ public class NotificationManagerService extends SystemService {
         // If the notification will appear in the status bar, it should send an accessibility
         // event
         if (!record.isUpdate && record.getImportance() > IMPORTANCE_MIN) {
-            sendAccessibilityEvent(notification, record.sbn.getPackageName());
+            sendAccessibilityEvent(record);
             sentAccessibilityEvent = true;
         }
 
@@ -5833,7 +5841,7 @@ public class NotificationManagerService extends SystemService {
                 boolean hasAudibleAlert = hasValidSound || hasValidVibrate;
                 if (hasAudibleAlert && !shouldMuteNotificationLocked(record)) {
                     if (!sentAccessibilityEvent) {
-                        sendAccessibilityEvent(notification, record.sbn.getPackageName());
+                        sendAccessibilityEvent(record);
                         sentAccessibilityEvent = true;
                     }
                     if (DBG) Slog.v(TAG, "Interrupting!");
@@ -6500,17 +6508,30 @@ public class NotificationManagerService extends SystemService {
         return (x < low) ? low : ((x > high) ? high : x);
     }
 
-    void sendAccessibilityEvent(Notification notification, CharSequence packageName) {
+    void sendAccessibilityEvent(NotificationRecord record) {
         if (!mAccessibilityManager.isEnabled()) {
             return;
         }
 
-        AccessibilityEvent event =
+        final Notification notification = record.getNotification();
+        final CharSequence packageName = record.sbn.getPackageName();
+        final AccessibilityEvent event =
             AccessibilityEvent.obtain(AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
         event.setPackageName(packageName);
         event.setClassName(Notification.class.getName());
-        event.setParcelableData(notification);
-        CharSequence tickerText = notification.tickerText;
+        final int visibilityOverride = record.getPackageVisibilityOverride();
+        final int notifVisibility = visibilityOverride == NotificationManager.VISIBILITY_NO_OVERRIDE
+                ? notification.visibility : visibilityOverride;
+        final int userId = record.getUser().getIdentifier();
+        final boolean needPublic = userId >= 0 && mKeyguardManager.isDeviceLocked(userId);
+        if (needPublic && notifVisibility != Notification.VISIBILITY_PUBLIC) {
+            // Emit the public version if we're on the lockscreen and this notification isn't
+            // publicly visible.
+            event.setParcelableData(notification.publicVersion);
+        } else {
+            event.setParcelableData(notification);
+        }
+        final CharSequence tickerText = notification.tickerText;
         if (!TextUtils.isEmpty(tickerText)) {
             event.getText().add(tickerText);
         }
