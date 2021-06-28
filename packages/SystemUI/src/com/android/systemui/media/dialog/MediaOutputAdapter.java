@@ -142,6 +142,9 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 mDivider.setVisibility(View.GONE);
                 mAddIcon.setVisibility(View.GONE);
             }
+            if (mCurrentActivePosition == position) {
+                mCurrentActivePosition = -1;
+            }
             if (mController.isTransferring()) {
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING
                         && !mController.hasAdjustVolumeUserRestriction()) {
@@ -214,6 +217,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 return;
             }
 
+            mCurrentActivePosition = -1;
             playSwitchingAnim(mConnectedItem, view);
             mController.connectDevice(device);
             device.setState(MediaDeviceState.STATE_CONNECTING);
