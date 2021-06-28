@@ -125,7 +125,6 @@ import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
-import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
@@ -2368,12 +2367,6 @@ public final class ProcessList {
             if (app.isolated) {
                 pkgDataInfoMap = null;
                 allowlistedAppDataInfoMap = null;
-            }
-
-            AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
-            if (ast != null) {
-                app.mState.setForcedAppStandby(ast.isAppInForcedAppStandby(
-                        app.info.uid, app.info.packageName));
             }
 
             final Process.ProcessStartResult startResult;
@@ -5006,55 +4999,6 @@ public final class ProcessList {
             }
         }
         return true;
-    }
-
-    @GuardedBy("mService")
-    void updateForceAppStandbyForUidPackageLocked(int uid, String packageName, boolean standby) {
-        final UidRecord uidRec = getUidRecordLOSP(uid);
-        if (uidRec != null) {
-            uidRec.forEachProcess(app -> {
-                if (TextUtils.equals(app.info.packageName, packageName)) {
-                    app.mState.setForcedAppStandby(standby);
-                    killAppIfForceStandbyAndCachedIdleLocked(app);
-                }
-            });
-        }
-    }
-
-    @GuardedBy("mService")
-    void updateForcedAppStandbyForAllAppsLocked() {
-        if (!mService.mConstants.mKillForceAppStandByAndCachedIdle) {
-            return;
-        }
-        final AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
-        for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
-            final ProcessRecord app = mLruProcesses.get(i);
-            final boolean standby = ast.isAppInForcedAppStandby(
-                    app.info.uid, app.info.packageName);
-            app.mState.setForcedAppStandby(standby);
-            if (standby) {
-                killAppIfForceStandbyAndCachedIdleLocked(app);
-            }
-        }
-    }
-
-    @GuardedBy("mService")
-    void killAppIfForceStandbyAndCachedIdleLocked(ProcessRecord app) {
-        final UidRecord uidRec = app.getUidRecord();
-        if (mService.mConstants.mKillForceAppStandByAndCachedIdle
-                && uidRec != null && uidRec.isIdle()
-                && !app.mState.shouldNotKillOnForcedAppStandbyAndIdle()
-                && app.isCached() && app.mState.isForcedAppStandby()) {
-            app.killLocked("cached idle & forced-app-standby",
-                    ApplicationExitInfo.REASON_OTHER,
-                    ApplicationExitInfo.SUBREASON_CACHED_IDLE_FORCED_APP_STANDBY,
-                    true);
-        }
-    }
-
-    @GuardedBy("mService")
-    void killAppIfForceStandbyAndCachedIdleLocked(UidRecord uidRec) {
-        uidRec.forEachProcess(app -> killAppIfForceStandbyAndCachedIdleLocked(app));
     }
 
     /**

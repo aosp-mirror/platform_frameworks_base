@@ -302,12 +302,6 @@ final class ProcessStateRecord {
     private int mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
 
     /**
-     * Whether or not this process has been in forced-app-standby state.
-     */
-    @GuardedBy("mService")
-    private boolean mForcedAppStandby;
-
-    /**
      * Debugging: primary thing impacting oom_adj.
      */
     @GuardedBy("mService")
@@ -1126,16 +1120,6 @@ final class ProcessStateRecord {
     }
 
     @GuardedBy("mService")
-    void setForcedAppStandby(boolean standby) {
-        mForcedAppStandby = standby;
-    }
-
-    @GuardedBy("mService")
-    boolean isForcedAppStandby() {
-        return mForcedAppStandby;
-    }
-
-    @GuardedBy("mService")
     void updateLastInvisibleTime(boolean hasVisibleActivities) {
         if (hasVisibleActivities) {
             mLastInvisibleTime = Long.MAX_VALUE;
@@ -1203,8 +1187,7 @@ final class ProcessStateRecord {
             pw.print(" pendingUiClean="); pw.println(mApp.mProfile.hasPendingUiClean());
         }
         pw.print(prefix); pw.print("cached="); pw.print(mCached);
-        pw.print(" empty="); pw.print(mEmpty);
-        pw.print(" forcedAppStandby="); pw.println(mForcedAppStandby);
+        pw.print(" empty="); pw.println(mEmpty);
         if (mServiceB) {
             pw.print(prefix); pw.print("serviceb="); pw.print(mServiceB);
             pw.print(" serviceHighRam="); pw.println(mServiceHighRam);
