@@ -191,6 +191,11 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     public static final int WAKE_LOCK_WEIGHT = 50;
 
+    private static final int RESET_REASON_CORRUPT_FILE = 1;
+    private static final int RESET_REASON_ADB_COMMAND = 2;
+    private static final int RESET_REASON_FULL_CHARGE = 3;
+    private static final int RESET_REASON_MEASURED_ENERGY_BUCKETS_CHANGE = 4;
+
     protected Clocks mClocks;
 
     private final AtomicFile mStatsFile;
@@ -747,6 +752,7 @@ public class BatteryStatsImpl extends BatteryStats {
     // CPU update, even if we aren't currently running wake locks.
     boolean mDistributeWakelockCpu;
 
+    private boolean mSystemReady;
     boolean mShuttingDown;
 
     final HistoryEventTracker mActiveEvents = new HistoryEventTracker();
@@ -11212,7 +11218,7 @@ public class BatteryStatsImpl extends BatteryStats {
         long uptimeUs = mSecUptime * 1000;
         long mSecRealtime = mClocks.elapsedRealtime();
         long realtimeUs = mSecRealtime * 1000;
-        resetAllStatsLocked(mSecUptime, mSecRealtime);
+        resetAllStatsLocked(mSecUptime, mSecRealtime, RESET_REASON_ADB_COMMAND);
         mDischargeStartLevel = mHistoryCur.batteryLevel;
         pullPendingStateUpdatesLocked();
         addHistoryRecordLocked(mSecRealtime, mSecUptime);
@@ -11241,8 +11247,10 @@ public class BatteryStatsImpl extends BatteryStats {
         initActiveHistoryEventsLocked(mSecRealtime, mSecUptime);
     }
 
-    private void resetAllStatsLocked(long uptimeMillis, long elapsedRealtimeMillis) {
-        if (mBatteryResetListener != null) {
+    private void resetAllStatsLocked(long uptimeMillis, long elapsedRealtimeMillis,
+            int resetReason) {
+        if (mBatteryResetListener != null && mSystemReady
+                && resetReason != RESET_REASON_CORRUPT_FILE) {
             mBatteryResetListener.prepareForBatteryStatsReset();
         }
 
@@ -13479,6 +13487,13 @@ public class BatteryStatsImpl extends BatteryStats {
         return false;
     }
 
+    /**
+     * Notifies BatteryStatsImpl that the system server is ready.
+     */
+    public void onSystemReady() {
+        mSystemReady = true;
+    }
+
     @GuardedBy("this")
     protected void setOnBatteryLocked(final long mSecRealtime, final long mSecUptime,
             final boolean onBattery, final int oldStatus, final int level, final int chargeUah) {
@@ -13496,7 +13511,8 @@ public class BatteryStatsImpl extends BatteryStats {
             // we have gone through a significant charge (from a very low
             // level to a now very high level).
             boolean reset = false;
-            if (!mNoAutoReset && (oldStatus == BatteryManager.BATTERY_STATUS_FULL
+            if (!mNoAutoReset && mSystemReady
+                    && (oldStatus == BatteryManager.BATTERY_STATUS_FULL
                     || level >= 90
                     || (mDischargeCurrentLevel < 20 && level >= 80))) {
                 Slog.i(TAG, "Resetting battery stats: level=" + level + " status=" + oldStatus
@@ -13536,7 +13552,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     });
                 }
                 doWrite = true;
-                resetAllStatsLocked(mSecUptime, mSecRealtime);
+                resetAllStatsLocked(mSecUptime, mSecRealtime, RESET_REASON_FULL_CHARGE);
                 if (chargeUah > 0 && level > 0) {
                     // Only use the reported coulomb charge value if it is supported and reported.
                     mEstimatedBatteryCapacityMah = (int) ((chargeUah / 1000) / (level / 100.0));
@@ -14504,7 +14520,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     ? null : new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
             // Supported power buckets changed since last boot.
             // Existing data is no longer reliable.
-            resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime());
+            resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime(),
+                    RESET_REASON_MEASURED_ENERGY_BUCKETS_CHANGE);
         }
     }
 
@@ -14951,7 +14968,8 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         } catch (Exception e) {
             Slog.e(TAG, "Error reading battery statistics", e);
-            resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime());
+            resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime(),
+                    RESET_REASON_CORRUPT_FILE);
         } finally {
             stats.recycle();
         }
