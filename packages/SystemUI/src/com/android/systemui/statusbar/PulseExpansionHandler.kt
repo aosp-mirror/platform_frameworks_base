@@ -179,7 +179,10 @@ constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!canHandleMotionEvent()) {
+        val finishExpanding = (event.action == MotionEvent.ACTION_CANCEL ||
+            event.action == MotionEvent.ACTION_UP) && isExpanding
+        if (!canHandleMotionEvent() && !finishExpanding) {
+            // We allow cancellations/finishing to still go through here to clean up the state
             return false
         }
 
