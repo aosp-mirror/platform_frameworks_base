@@ -71,6 +71,7 @@ public class NotificationIconAreaController implements
     private final DozeParameters mDozeParameters;
     private final Optional<Bubbles> mBubblesOptional;
     private final StatusBarWindowController mStatusBarWindowController;
+    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private int mIconSize;
     private int mIconHPadding;
@@ -119,7 +120,8 @@ public class NotificationIconAreaController implements
             Optional<Bubbles> bubblesOptional,
             DemoModeController demoModeController,
             DarkIconDispatcher darkIconDispatcher,
-            StatusBarWindowController statusBarWindowController) {
+            StatusBarWindowController statusBarWindowController,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mStatusBarStateController = statusBarStateController;
@@ -133,6 +135,7 @@ public class NotificationIconAreaController implements
         mDemoModeController = demoModeController;
         mDemoModeController.addCallback(this);
         mStatusBarWindowController = statusBarWindowController;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         notificationListener.addNotificationSettingsListener(mSettingsListener);
 
         initializeNotificationAreaViews(context);
@@ -677,7 +680,12 @@ public class NotificationIconAreaController implements
         }
         boolean visible = mBypassController.getBypassEnabled()
                 || mWakeUpCoordinator.getNotificationsFullyHidden();
-        if (mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
+
+        // Hide the AOD icons if we're not in the KEYGUARD state unless the screen off animation is
+        // playing, in which case we want them to be visible since we're animating in the AOD UI and
+        // will be switching to KEYGUARD shortly.
+        if (mStatusBarStateController.getState() != StatusBarState.KEYGUARD
+                && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
             visible = false;
         }
         if (visible && mWakeUpCoordinator.isPulseExpanding()) {
