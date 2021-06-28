@@ -98,6 +98,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -146,6 +147,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
@@ -266,6 +268,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     @Mock private BrightnessSlider.Factory mBrightnessSliderFactory;
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
+    @Mock private UnfoldTransitionConfig mUnfoldTransitionConfig;
+    @Mock private Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimationLazy;
     @Mock private OngoingCallController mOngoingCallController;
     @Mock private SystemStatusAnimationScheduler mAnimationScheduler;
     @Mock private StatusBarLocationPublisher mLocationPublisher;
@@ -439,6 +443,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationIconAreaController,
                 mBrightnessSliderFactory,
                 mWiredChargingRippleController,
+                mUnfoldTransitionConfig,
+                mUnfoldLightRevealOverlayAnimationLazy,
                 mOngoingCallController,
                 mAnimationScheduler,
                 mLocationPublisher,
