@@ -32,6 +32,7 @@ import javax.inject.Provider
 
 private const val TAG = "MediaCarouselController"
 private val settingsIntent = Intent().setAction(ACTION_MEDIA_CONTROLS_SETTINGS)
+private const val DEBUG = false
 
 /**
  * Class that is responsible for keeping the view carousel up to date.
@@ -203,7 +204,7 @@ class MediaCarouselController @Inject constructor(
                 isSsReactivated: Boolean
             ) {
                 if (addOrUpdatePlayer(key, oldKey, data)) {
-                    MediaPlayerData.getMediaPlayer(key, null)?.let {
+                    MediaPlayerData.getMediaPlayer(key)?.let {
                         logSmartspaceCardReported(759, // SMARTSPACE_CARD_RECEIVED
                                 it.mInstanceId,
                                 /* isRecommendationCard */ false,
@@ -237,10 +238,10 @@ class MediaCarouselController @Inject constructor(
                 data: SmartspaceMediaData,
                 shouldPrioritize: Boolean
             ) {
-                Log.d(TAG, "My Smartspace media update is here")
+                if (DEBUG) Log.d(TAG, "Loading Smartspace media update")
                 if (data.isActive) {
                     addSmartspaceMediaRecommendations(key, data, shouldPrioritize)
-                    MediaPlayerData.getMediaPlayer(key, null)?.let {
+                    MediaPlayerData.getMediaPlayer(key)?.let {
                         logSmartspaceCardReported(759, // SMARTSPACE_CARD_RECEIVED
                                 it.mInstanceId,
                                 /* isRecommendationCard */ true,
@@ -266,7 +267,7 @@ class MediaCarouselController @Inject constructor(
             }
 
             override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
-                Log.d(TAG, "My Smartspace media removal request is received")
+                if (DEBUG) Log.d(TAG, "My Smartspace media removal request is received")
                 if (immediately || visualStabilityManager.isReorderingAllowed) {
                     onMediaDataRemoved(key)
                 } else {
@@ -343,7 +344,8 @@ class MediaCarouselController @Inject constructor(
     // Returns true if new player is added
     private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData): Boolean {
         val dataCopy = data.copy(backgroundColor = bgColor)
-        val existingPlayer = MediaPlayerData.getMediaPlayer(key, oldKey)
+        MediaPlayerData.moveIfExists(oldKey, key)
+        val existingPlayer = MediaPlayerData.getMediaPlayer(key)
         val curVisibleMediaKey = MediaPlayerData.playerKeys()
             .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
         if (existingPlayer == null) {
@@ -384,8 +386,8 @@ class MediaCarouselController @Inject constructor(
         data: SmartspaceMediaData,
         shouldPrioritize: Boolean
     ) {
-        Log.d(TAG, "Updating smartspace target in carousel")
-        if (MediaPlayerData.getMediaPlayer(key, null) != null) {
+        if (DEBUG) Log.d(TAG, "Updating smartspace target in carousel")
+        if (MediaPlayerData.getMediaPlayer(key) != null) {
             Log.w(TAG, "Skip adding smartspace target in carousel")
             return
         }
@@ -794,13 +796,18 @@ internal object MediaPlayerData {
         smartspaceMediaData = data
     }
 
-    fun getMediaPlayer(key: String, oldKey: String?): MediaControlPanel? {
-        // If the key was changed, update entry
-        oldKey?.let {
-            if (it != key) {
-                mediaData.remove(it)?.let { sortKey -> mediaData.put(key, sortKey) }
-            }
+    fun moveIfExists(oldKey: String?, newKey: String) {
+        if (oldKey == null || oldKey == newKey) {
+            return
         }
+
+        mediaData.remove(oldKey)?.let {
+            removeMediaPlayer(newKey)
+            mediaData.put(newKey, it)
+        }
+    }
+
+    fun getMediaPlayer(key: String): MediaControlPanel? {
         return mediaData.get(key)?.let { mediaPlayers.get(it) }
     }
 

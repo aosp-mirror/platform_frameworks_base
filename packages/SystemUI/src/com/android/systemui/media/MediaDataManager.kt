@@ -453,7 +453,8 @@ class MediaDataManager(
         if (smartspaceMediaData.targetId != key) {
             return
         }
-        Log.d(TAG, "Dismissing Smartspace media target")
+
+        if (DEBUG) Log.d(TAG, "Dismissing Smartspace media target")
         if (smartspaceMediaData.isActive) {
             smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
                 targetId = smartspaceMediaData.targetId)
@@ -709,17 +710,19 @@ class MediaDataManager(
 
     override fun onSmartspaceTargetsUpdated(targets: List<Parcelable>) {
         if (!allowMediaRecommendations) {
+            if (DEBUG) Log.d(TAG, "Smartspace recommendation is disabled in Settings.")
             return
         }
 
         val mediaTargets = targets.filterIsInstance<SmartspaceTarget>()
         when (mediaTargets.size) {
             0 -> {
-                Log.d(TAG, "Empty Smartspace media target")
                 if (!smartspaceMediaData.isActive) {
                     return
                 }
-                Log.d(TAG, "Set Smartspace media to be inactive for the data update")
+                if (DEBUG) {
+                    Log.d(TAG, "Set Smartspace media to be inactive for the data update")
+                }
                 smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
                     targetId = smartspaceMediaData.targetId)
                 notifySmartspaceMediaDataRemoved(smartspaceMediaData.targetId, immediately = false)
@@ -728,13 +731,12 @@ class MediaDataManager(
                 val newMediaTarget = mediaTargets.get(0)
                 if (smartspaceMediaData.targetId == newMediaTarget.smartspaceTargetId) {
                     // The same Smartspace updates can be received. Skip the duplicate updates.
-                    Log.d(TAG, "Same Smartspace media update exists. Skip loading data.")
-                } else {
-                    Log.d(TAG, "Forwarding Smartspace media update.")
-                    smartspaceMediaData = toSmartspaceMediaData(newMediaTarget, isActive = true)
-                    notifySmartspaceMediaDataLoaded(
-                        smartspaceMediaData.targetId, smartspaceMediaData)
+                    return
                 }
+                if (DEBUG) Log.d(TAG, "Forwarding Smartspace media update.")
+                smartspaceMediaData = toSmartspaceMediaData(newMediaTarget, isActive = true)
+                notifySmartspaceMediaDataLoaded(
+                    smartspaceMediaData.targetId, smartspaceMediaData)
             }
             else -> {
                 // There should NOT be more than 1 Smartspace media update. When it happens, it
@@ -883,7 +885,7 @@ class MediaDataManager(
     private fun packageName(target: SmartspaceTarget): String? {
         val recommendationList = target.iconGrid
         if (recommendationList == null || recommendationList.isEmpty()) {
-            Log.d(TAG, "Empty or media recommendation list.")
+            Log.w(TAG, "Empty or null media recommendation list.")
             return null
         }
         for (recommendation in recommendationList) {
@@ -893,7 +895,7 @@ class MediaDataManager(
                     packageName -> return packageName }
             }
         }
-        Log.d(TAG, "No valid package name is provided.")
+        Log.w(TAG, "No valid package name is provided.")
         return null
     }
 

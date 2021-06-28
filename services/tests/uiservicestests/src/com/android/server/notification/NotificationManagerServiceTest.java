@@ -94,6 +94,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -232,6 +233,7 @@ import java.util.function.Consumer;
 @RunWithLooper
 public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
+    private static final int UID_HEADLESS = 1000000;
 
     private final int mUid = Binder.getCallingUid();
     private TestableNotificationManagerService mService;
@@ -2425,11 +2427,29 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
                 .thenReturn(mTestNotificationChannel);
+        when(mPreferencesHelper.deleteNotificationChannel(eq(PKG), anyInt(),
+                eq(mTestNotificationChannel.getId()))).thenReturn(true);
         reset(mListeners);
         mBinderService.deleteNotificationChannel(PKG, mTestNotificationChannel.getId());
         verify(mListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED));
+    }
+
+    @Test
+    public void testDeleteChannelOnlyDoExtraWorkIfExisted() throws Exception {
+        List<String> associations = new ArrayList<>();
+        associations.add("a");
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(associations);
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(null);
+        reset(mListeners);
+        mBinderService.deleteNotificationChannel(PKG, mTestNotificationChannel.getId());
+        verifyNoMoreInteractions(mListeners);
+        verifyNoMoreInteractions(mHistoryManager);
     }
 
     @Test
@@ -6739,7 +6759,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testGrantInlineReplyUriPermission_recordExists() throws Exception {
-        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, 0);
+        int userId = UserManager.isHeadlessSystemUserMode()
+                ? UserHandle.getUserId(UID_HEADLESS)
+                : USER_SYSTEM;
+
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, userId);
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
         waitForIdle();
@@ -6764,7 +6788,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testGrantInlineReplyUriPermission_noRecordExists() throws Exception {
-        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, 0);
+        int userId = UserManager.isHeadlessSystemUserMode()
+                ? UserHandle.getUserId(UID_HEADLESS)
+                : USER_SYSTEM;
+
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, userId);
         waitForIdle();
 
         // No notifications exist for the given record
@@ -6808,7 +6836,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Target user for the grant is USER_ALL instead of USER_SYSTEM
         verify(mUgm, times(1)).grantUriPermissionFromOwner(any(),
                 eq(nr.getSbn().getUid()), eq(nr.getSbn().getPackageName()), eq(uri), anyInt(),
-                anyInt(), eq(UserHandle.USER_SYSTEM));
+                anyInt(), UserManager.isHeadlessSystemUserMode()
+                        ? eq(UserHandle.getUserId(UID_HEADLESS))
+                        : eq(USER_SYSTEM));
     }
 
     @Test
@@ -6851,7 +6881,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testClearInlineReplyUriPermission_uriRecordExists() throws Exception {
-        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, 0);
+        int userId = UserManager.isHeadlessSystemUserMode()
+                ? UserHandle.getUserId(UID_HEADLESS)
+                : USER_SYSTEM;
+
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, userId);
         reset(mPackageManager);
 
         Uri uri1 = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
@@ -6913,7 +6947,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // permissionOwner destroyed for USER_SYSTEM, not USER_ALL
         verify(mUgmInternal, times(1)).revokeUriPermissionFromOwner(
-                eq(record.getPermissionOwner()), eq(null), eq(~0), eq(USER_SYSTEM));
+                eq(record.getPermissionOwner()), eq(null), eq(~0),
+                UserManager.isHeadlessSystemUserMode()
+                        ? eq(UserHandle.getUserId(UID_HEADLESS))
+                        : eq(USER_SYSTEM));
     }
 
     @Test
@@ -7406,6 +7443,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void createConversationNotificationChannel() throws Exception {
+        int userId = UserManager.isHeadlessSystemUserMode()
+                ? UserHandle.getUserId(UID_HEADLESS)
+                : USER_SYSTEM;
+
         NotificationChannel original = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         original.setAllowBubbles(!original.canBubble());
         original.setShowBadge(!original.canShowBadge());
@@ -7424,7 +7465,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 PKG, mUid, orig, "friend");
 
         NotificationChannel friendChannel = mBinderService.getConversationNotificationChannel(
-                PKG, 0, PKG, original.getId(), false, "friend");
+                PKG, userId, PKG, original.getId(), false, "friend");
 
         assertEquals(original.getName(), friendChannel.getName());
         assertEquals(original.getId(), friendChannel.getParentChannelId());

@@ -912,7 +912,7 @@ public class HardwareRenderer {
          * @param aSurfaceControlNativeObj ASurfaceControl native object handle
          * @param frame The id of the frame being drawn.
          */
-        void onMergeTransaction(long aSurfaceTranactionNativeObj,
+        boolean onMergeTransaction(long aSurfaceTranactionNativeObj,
                                 long aSurfaceControlNativeObj, long frame);
     }
 

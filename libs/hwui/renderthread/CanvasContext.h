@@ -206,7 +206,7 @@ public:
             ASurfaceControlStats* stats);
 
     void setASurfaceTransactionCallback(
-            const std::function<void(int64_t, int64_t, int64_t)>& callback) {
+            const std::function<bool(int64_t, int64_t, int64_t)>& callback) {
         mASurfaceTransactionCallback = callback;
     }
 
@@ -317,7 +317,7 @@ private:
     // If set to true, we expect that callbacks into onSurfaceStatsAvailable
     bool mExpectSurfaceStats = false;
 
-    std::function<void(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
+    std::function<bool(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
     std::function<void()> mPrepareSurfaceControlForWebviewCallback;
 
     void cleanupResources();

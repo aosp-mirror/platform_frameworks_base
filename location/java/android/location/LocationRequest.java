@@ -194,6 +194,7 @@ public final class LocationRequest implements Parcelable {
     private float mMinUpdateDistanceMeters;
     private final long mMaxUpdateDelayMillis;
     private boolean mHideFromAppOps;
+    private final boolean mAdasGnssBypass;
     private boolean mLocationSettingsIgnored;
     private boolean mLowPower;
     private @Nullable WorkSource mWorkSource;
@@ -236,7 +237,7 @@ public final class LocationRequest implements Parcelable {
         if (LocationManager.PASSIVE_PROVIDER.equals(provider)) {
             quality = POWER_NONE;
         } else if (LocationManager.GPS_PROVIDER.equals(provider)) {
-            quality = ACCURACY_FINE;
+            quality = QUALITY_HIGH_ACCURACY;
         } else {
             quality = POWER_LOW;
         }
@@ -289,6 +290,7 @@ public final class LocationRequest implements Parcelable {
             float minUpdateDistanceMeters,
             long maxUpdateDelayMillis,
             boolean hiddenFromAppOps,
+            boolean adasGnssBypass,
             boolean locationSettingsIgnored,
             boolean lowPower,
             WorkSource workSource) {
@@ -302,8 +304,9 @@ public final class LocationRequest implements Parcelable {
         mMinUpdateDistanceMeters = minUpdateDistanceMeters;
         mMaxUpdateDelayMillis = maxUpdateDelayMillis;
         mHideFromAppOps = hiddenFromAppOps;
-        mLowPower = lowPower;
+        mAdasGnssBypass = adasGnssBypass;
         mLocationSettingsIgnored = locationSettingsIgnored;
+        mLowPower = lowPower;
         mWorkSource = Objects.requireNonNull(workSource);
     }
 
@@ -339,15 +342,15 @@ public final class LocationRequest implements Parcelable {
         switch (quality) {
             case POWER_HIGH:
                 // fall through
-            case ACCURACY_FINE:
+            case QUALITY_HIGH_ACCURACY:
                 mQuality = QUALITY_HIGH_ACCURACY;
                 break;
-            case ACCURACY_BLOCK:
+            case QUALITY_BALANCED_POWER_ACCURACY:
                 mQuality = QUALITY_BALANCED_POWER_ACCURACY;
                 break;
             case POWER_LOW:
                 // fall through
-            case ACCURACY_CITY:
+            case QUALITY_LOW_POWER:
                 mQuality = QUALITY_LOW_POWER;
                 break;
             case POWER_NONE:
@@ -648,6 +651,21 @@ public final class LocationRequest implements Parcelable {
     }
 
     /**
+     * Returns true if this request may access GNSS even if location settings would normally deny
+     * this, in order to enable automotive safety features. This field is only respected on
+     * automotive devices, and only if the client is recognized as a legitimate ADAS (Advanced
+     * Driving Assistance Systems) application.
+     *
+     * @return true if all limiting factors will be ignored to satisfy GNSS request
+     *
+     * @hide
+     */
+    // TODO: @SystemApi
+    public boolean isAdasGnssBypass() {
+        return mAdasGnssBypass;
+    }
+
+    /**
      * @hide
      * @deprecated LocationRequests should be treated as immutable.
      */
@@ -670,6 +688,15 @@ public final class LocationRequest implements Parcelable {
     @SystemApi
     public boolean isLocationSettingsIgnored() {
         return mLocationSettingsIgnored;
+    }
+
+    /**
+     * Returns true if any bypass flag is set on this request. For internal use only.
+     *
+     * @hide
+     */
+    public boolean isBypass() {
+        return mAdasGnssBypass || mLocationSettingsIgnored;
     }
 
     /**
@@ -749,6 +776,7 @@ public final class LocationRequest implements Parcelable {
                             /* minUpdateDistanceMeters= */ in.readFloat(),
                             /* maxUpdateDelayMillis= */ in.readLong(),
                             /* hiddenFromAppOps= */ in.readBoolean(),
+                            /* adasGnssBypass= */ in.readBoolean(),
                             /* locationSettingsIgnored= */ in.readBoolean(),
                             /* lowPower= */ in.readBoolean(),
                             /* workSource= */ in.readTypedObject(WorkSource.CREATOR));
@@ -777,6 +805,7 @@ public final class LocationRequest implements Parcelable {
         parcel.writeFloat(mMinUpdateDistanceMeters);
         parcel.writeLong(mMaxUpdateDelayMillis);
         parcel.writeBoolean(mHideFromAppOps);
+        parcel.writeBoolean(mAdasGnssBypass);
         parcel.writeBoolean(mLocationSettingsIgnored);
         parcel.writeBoolean(mLowPower);
         parcel.writeTypedObject(mWorkSource, 0);
@@ -801,6 +830,7 @@ public final class LocationRequest implements Parcelable {
                 && Float.compare(that.mMinUpdateDistanceMeters, mMinUpdateDistanceMeters) == 0
                 && mMaxUpdateDelayMillis == that.mMaxUpdateDelayMillis
                 && mHideFromAppOps == that.mHideFromAppOps
+                && mAdasGnssBypass == that.mAdasGnssBypass
                 && mLocationSettingsIgnored == that.mLocationSettingsIgnored
                 && mLowPower == that.mLowPower
                 && Objects.equals(mProvider, that.mProvider)
@@ -866,8 +896,11 @@ public final class LocationRequest implements Parcelable {
         if (mHideFromAppOps) {
             s.append(", hiddenFromAppOps");
         }
+        if (mAdasGnssBypass) {
+            s.append(", adasGnssBypass");
+        }
         if (mLocationSettingsIgnored) {
-            s.append(", locationSettingsIgnored");
+            s.append(", settingsBypass");
         }
         if (mWorkSource != null && !mWorkSource.isEmpty()) {
             s.append(", ").append(mWorkSource);
@@ -889,6 +922,7 @@ public final class LocationRequest implements Parcelable {
         private float mMinUpdateDistanceMeters;
         private long mMaxUpdateDelayMillis;
         private boolean mHiddenFromAppOps;
+        private boolean mAdasGnssBypass;
         private boolean mLocationSettingsIgnored;
         private boolean mLowPower;
         @Nullable private WorkSource mWorkSource;
@@ -908,6 +942,7 @@ public final class LocationRequest implements Parcelable {
             mMinUpdateDistanceMeters = 0;
             mMaxUpdateDelayMillis = 0;
             mHiddenFromAppOps = false;
+            mAdasGnssBypass = false;
             mLocationSettingsIgnored = false;
             mLowPower = false;
             mWorkSource = null;
@@ -925,6 +960,7 @@ public final class LocationRequest implements Parcelable {
             mMinUpdateDistanceMeters = locationRequest.mMinUpdateDistanceMeters;
             mMaxUpdateDelayMillis = locationRequest.mMaxUpdateDelayMillis;
             mHiddenFromAppOps = locationRequest.mHideFromAppOps;
+            mAdasGnssBypass = locationRequest.mAdasGnssBypass;
             mLocationSettingsIgnored = locationRequest.mLocationSettingsIgnored;
             mLowPower = locationRequest.mLowPower;
             mWorkSource = locationRequest.mWorkSource;
@@ -977,10 +1013,10 @@ public final class LocationRequest implements Parcelable {
         public @NonNull Builder setQuality(@NonNull Criteria criteria) {
             switch (criteria.getAccuracy()) {
                 case Criteria.ACCURACY_COARSE:
-                    mQuality = ACCURACY_BLOCK;
+                    mQuality = QUALITY_BALANCED_POWER_ACCURACY;
                     break;
                 case Criteria.ACCURACY_FINE:
-                    mQuality = ACCURACY_FINE;
+                    mQuality = QUALITY_HIGH_ACCURACY;
                     break;
                 default: {
                     if (criteria.getPowerRequirement() == Criteria.POWER_HIGH) {
@@ -1092,6 +1128,25 @@ public final class LocationRequest implements Parcelable {
         }
 
         /**
+         * If set to true, indicates that the client is an ADAS (Advanced Driving Assistance
+         * Systems) client, which requires access to GNSS even if location settings would normally
+         * deny this, in order to enable auto safety features. This field is only respected on
+         * automotive devices, and only if the client is recognized as a legitimate ADAS
+         * application. Defaults to false.
+         *
+         * <p>Permissions enforcement occurs when resulting location request is actually used, not
+         * when this method is invoked.
+         *
+         * @hide
+         */
+        // TODO: @SystemApi
+        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        public @NonNull Builder setAdasGnssBypass(boolean adasGnssBypass) {
+            mAdasGnssBypass = adasGnssBypass;
+            return this;
+        }
+
+        /**
          * If set to true, indicates that location settings, throttling, background location limits,
          * and any other possible limiting factors should be ignored in order to satisfy this
          * request. This is only intended for use in user initiated emergency situations, and
@@ -1171,6 +1226,7 @@ public final class LocationRequest implements Parcelable {
                     mMinUpdateDistanceMeters,
                     mMaxUpdateDelayMillis,
                     mHiddenFromAppOps,
+                    mAdasGnssBypass,
                     mLocationSettingsIgnored,
                     mLowPower,
                     new WorkSource(mWorkSource));

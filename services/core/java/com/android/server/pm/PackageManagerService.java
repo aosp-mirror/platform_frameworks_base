@@ -245,7 +245,6 @@ import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingPackageUtils.ParseFlags;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
-import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
@@ -17102,9 +17101,15 @@ public class PackageManagerService extends IPackageManager.Stub
             return new ParceledListSlice<IntentFilter>(result) {
                 @Override
                 protected void writeElement(IntentFilter parcelable, Parcel dest, int callFlags) {
-                    // WatchedIntentFilter has final Parcelable methods, so redirect to the subclass
-                    ((ParsedIntentInfo) parcelable).writeIntentInfoToParcel(dest,
-                            callFlags);
+                    parcelable.writeToParcel(dest, callFlags);
+                }
+
+                @Override
+                protected void writeParcelableCreator(IntentFilter parcelable, Parcel dest) {
+                    // All Parcel#writeParcelableCreator does is serialize the class name to
+                    // access via reflection to grab its CREATOR. This does that manually, pointing
+                    // to the parent IntentFilter so that all of the subclass fields are ignored.
+                    dest.writeString(IntentFilter.class.getName());
                 }
             };
         }
@@ -21480,6 +21485,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // for the uninstall-updates case and restricted profiles, remember the per-
         // user handle installed state
         int[] allUsers;
+        final int freezeUser;
+        final SparseArray<Pair<Integer, String>> enabledStateAndCallerPerUser;
         /** enabled state of the uninstalled application */
         synchronized (mLock) {
             uninstalledPs = mSettings.getPackageLPr(packageName);
@@ -21524,16 +21531,23 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             info.origUsers = uninstalledPs.queryInstalledUsers(allUsers, true);
-        }
 
-        final int freezeUser;
-        if (isUpdatedSystemApp(uninstalledPs)
-                && ((deleteFlags & PackageManager.DELETE_SYSTEM_APP) == 0)) {
-            // We're downgrading a system app, which will apply to all users, so
-            // freeze them all during the downgrade
-            freezeUser = UserHandle.USER_ALL;
-        } else {
-            freezeUser = removeUser;
+            if (isUpdatedSystemApp(uninstalledPs)
+                    && ((deleteFlags & PackageManager.DELETE_SYSTEM_APP) == 0)) {
+                // We're downgrading a system app, which will apply to all users, so
+                // freeze them all during the downgrade
+                freezeUser = UserHandle.USER_ALL;
+                enabledStateAndCallerPerUser = new SparseArray<>();
+                for (int i = 0; i < allUsers.length; i++) {
+                    PackageUserState userState = uninstalledPs.readUserState(allUsers[i]);
+                    Pair<Integer, String> enabledStateAndCaller =
+                            new Pair<>(userState.enabled, userState.lastDisableAppCaller);
+                    enabledStateAndCallerPerUser.put(allUsers[i], enabledStateAndCaller);
+                }
+            } else {
+                freezeUser = removeUser;
+                enabledStateAndCallerPerUser = null;
+            }
         }
 
         synchronized (mInstallLock) {
@@ -21600,6 +21614,19 @@ public class PackageManagerService extends IPackageManager.Stub
                         Slog.i(TAG, "System stub disabled for all users, leaving uncompressed "
                                 + "after removal; pkg: " + stubPkg.getPackageName());
                     }
+                }
+            }
+            if (enabledStateAndCallerPerUser != null) {
+                synchronized (mLock) {
+                    for (int i = 0; i < allUsers.length; i++) {
+                        Pair<Integer, String> enabledStateAndCaller =
+                                enabledStateAndCallerPerUser.get(allUsers[i]);
+                        getPackageSetting(packageName)
+                                .setEnabled(enabledStateAndCaller.first,
+                                        allUsers[i],
+                                        enabledStateAndCaller.second);
+                    }
+                    mSettings.writeAllUsersPackageRestrictionsLPr();
                 }
             }
         }
@@ -28126,8 +28153,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void deleteOatArtifactsOfPackage(String packageName) {
-            PackageManagerService.this.deleteOatArtifactsOfPackage(packageName);
+        public long deleteOatArtifactsOfPackage(String packageName) {
+            return PackageManagerService.this.deleteOatArtifactsOfPackage(packageName);
         }
 
         @Override

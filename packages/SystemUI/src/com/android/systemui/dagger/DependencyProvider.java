@@ -231,7 +231,8 @@ public class DependencyProvider {
             @Main Handler mainHandler,
             UiEventLogger uiEventLogger,
             NavigationBarOverlayController navBarOverlayController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            UserTracker userTracker) {
         return new NavigationBarController(context,
                 windowManager,
                 assistManagerLazy,
@@ -256,7 +257,8 @@ public class DependencyProvider {
                 mainHandler,
                 uiEventLogger,
                 navBarOverlayController,
-                configurationController);
+                configurationController,
+                userTracker);
     }
 
     /** */

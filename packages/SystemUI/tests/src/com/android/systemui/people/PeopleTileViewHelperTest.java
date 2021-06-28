@@ -26,8 +26,6 @@ import static android.app.people.PeopleSpaceTile.BLOCK_CONVERSATIONS;
 import static android.app.people.PeopleSpaceTile.SHOW_CONTACTS;
 import static android.app.people.PeopleSpaceTile.SHOW_IMPORTANT_CONVERSATIONS;
 import static android.app.people.PeopleSpaceTile.SHOW_STARRED_CONTACTS;
-import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT;
-import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH;
 
 import static com.android.systemui.people.PeopleSpaceUtils.STARRED_CONTACT;
 import static com.android.systemui.people.PeopleSpaceUtils.VALID_CONTACT;
@@ -35,7 +33,6 @@ import static com.android.systemui.people.PeopleSpaceUtils.VALID_CONTACT;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -49,7 +46,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
@@ -137,14 +133,13 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
     @Mock
     private PackageManager mPackageManager;
 
-    private Bundle mOptions;
+    private int mWidth;
+    private int mHeight;
     private PeopleTileViewHelper mPeopleTileViewHelper;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        mOptions = new Bundle();
 
         when(mMockContext.getString(R.string.birthday_status)).thenReturn(
                 mContext.getString(R.string.birthday_status));
@@ -160,25 +155,24 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         TextView textView = mock(TextView.class);
         when(textView.getLineHeight()).thenReturn(16);
         when(mPackageManager.getApplicationIcon(anyString())).thenReturn(null);
-        mPeopleTileViewHelper = getPeopleTileViewHelper(
-                PERSON_TILE, mOptions);
+
+        mWidth = getSizeInDp(R.dimen.default_width);
+        mHeight = getSizeInDp(R.dimen.default_height);
+        mPeopleTileViewHelper = getPeopleTileViewHelper(PERSON_TILE);
     }
 
     @Test
     public void testCreateRemoteViewsWithLastInteractionTimeUnderOneDayHidden() {
-        RemoteViews views = getPeopleTileViewHelper(
-                PERSON_TILE_WITHOUT_NOTIFICATION, mOptions).getViews();
+        RemoteViews views = getPeopleTileViewHelper(PERSON_TILE_WITHOUT_NOTIFICATION).getViews();
         View result = views.apply(mContext, null);
 
         // Not showing last interaction.
         assertEquals(View.GONE, result.findViewById(R.id.last_interaction).getVisibility());
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_large));
-        mOptions.putInt(OPTION_APPWIDGET_MAX_HEIGHT,
-                getSizeInDp(R.dimen.required_height_for_large));
+        mWidth = getSizeInDp(R.dimen.required_width_for_large);
+        mHeight = getSizeInDp(R.dimen.required_height_for_large);
         RemoteViews largeView = getPeopleTileViewHelper(
-                PERSON_TILE_WITHOUT_NOTIFICATION, mOptions).getViews();
+                PERSON_TILE_WITHOUT_NOTIFICATION).getViews();
         View largeResult = largeView.apply(mContext, null);
 
         // Not showing last interaction.
@@ -214,8 +208,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         PeopleSpaceTile tileWithLastInteraction =
                 PERSON_TILE_WITHOUT_NOTIFICATION.toBuilder().setLastInteractionTimestamp(
                         123445L).build();
-        RemoteViews views = getPeopleTileViewHelper(
-                tileWithLastInteraction, mOptions).getViews();
+        RemoteViews views = getPeopleTileViewHelper(tileWithLastInteraction).getViews();
         View result = views.apply(mContext, null);
 
         TextView name = (TextView) result.findViewById(R.id.name);
@@ -231,10 +224,8 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // No status.
         assertThat((View) result.findViewById(R.id.text_content)).isNull();
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_medium) - 1);
-        RemoteViews smallView = getPeopleTileViewHelper(
-                tileWithLastInteraction, mOptions).getViews();
+        mWidth = getSizeInDp(R.dimen.required_width_for_medium) - 1;
+        RemoteViews smallView = getPeopleTileViewHelper(tileWithLastInteraction).getViews();
         View smallResult = smallView.apply(mContext, null);
 
         // Show name over predefined icon.
@@ -246,12 +237,10 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_large));
-        mOptions.putInt(OPTION_APPWIDGET_MAX_HEIGHT,
-                getSizeInDp(R.dimen.required_height_for_large));
+        mWidth = getSizeInDp(R.dimen.required_width_for_large);
+        mHeight = getSizeInDp(R.dimen.required_height_for_large);
         RemoteViews largeView = getPeopleTileViewHelper(
-                tileWithLastInteraction, mOptions).getViews();
+                tileWithLastInteraction).getViews();
         View largeResult = largeView.apply(mContext, null);
 
         name = (TextView) largeResult.findViewById(R.id.name);
@@ -276,8 +265,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                                 new ConversationStatus.Builder(
                                         PERSON_TILE_WITHOUT_NOTIFICATION.getId(),
                                         ACTIVITY_GAME).build())).build();
-        RemoteViews views = getPeopleTileViewHelper(
-                tileWithAvailabilityAndNewStory, mOptions).getViews();
+        RemoteViews views = getPeopleTileViewHelper(tileWithAvailabilityAndNewStory).getViews();
         View result = views.apply(mContext, null);
 
         TextView name = (TextView) result.findViewById(R.id.name);
@@ -291,10 +279,8 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // No status.
         assertThat((View) result.findViewById(R.id.text_content)).isNull();
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_medium) - 1);
-        RemoteViews smallView = getPeopleTileViewHelper(
-                tileWithAvailabilityAndNewStory, mOptions).getViews();
+        mWidth = getSizeInDp(R.dimen.required_width_for_medium) - 1;
+        RemoteViews smallView = getPeopleTileViewHelper(tileWithAvailabilityAndNewStory).getViews();
         View smallResult = smallView.apply(mContext, null);
 
         // Show name rather than game type.
@@ -306,12 +292,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // No messages count.
         assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_large));
-        mOptions.putInt(OPTION_APPWIDGET_MAX_HEIGHT,
-                getSizeInDp(R.dimen.required_height_for_large));
-        RemoteViews largeView = getPeopleTileViewHelper(
-                tileWithAvailabilityAndNewStory, mOptions).getViews();
+        mWidth = getSizeInDp(R.dimen.required_width_for_large);
+        mHeight = getSizeInDp(R.dimen.required_height_for_large);
+        RemoteViews largeView = getPeopleTileViewHelper(tileWithAvailabilityAndNewStory).getViews();
         View largeResult = largeView.apply(mContext, null);
 
         name = (TextView) largeResult.findViewById(R.id.name);
@@ -334,8 +317,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                                 NEW_STORY_WITH_AVAILABILITY, new ConversationStatus.Builder(
                                         PERSON_TILE_WITHOUT_NOTIFICATION.getId(),
                                         ACTIVITY_BIRTHDAY).build())).build();
-        RemoteViews views = getPeopleTileViewHelper(
-                tileWithStatusTemplate, mOptions).getViews();
+        RemoteViews views = getPeopleTileViewHelper(tileWithStatusTemplate).getViews();
         View result = views.apply(mContext, null);
 
         TextView name = (TextView) result.findViewById(R.id.name);
@@ -352,10 +334,8 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(statusContent.getText(), mContext.getString(R.string.birthday_status));
         assertThat(statusContent.getMaxLines()).isEqualTo(2);
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_medium) - 1);
-        RemoteViews smallView = getPeopleTileViewHelper(
-                tileWithStatusTemplate, mOptions).getViews();
+        mWidth = getSizeInDp(R.dimen.required_width_for_medium) - 1;
+        RemoteViews smallView = getPeopleTileViewHelper(tileWithStatusTemplate).getViews();
         View smallResult = smallView.apply(mContext, null);
 
         // Show icon instead of name.
@@ -368,12 +348,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // No messages count.
         assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_large));
-        mOptions.putInt(OPTION_APPWIDGET_MAX_HEIGHT,
-                getSizeInDp(R.dimen.required_height_for_large));
-        RemoteViews largeView = getPeopleTileViewHelper(
-                tileWithStatusTemplate, mOptions).getViews();
+        mWidth = getSizeInDp(R.dimen.required_width_for_large);
+        mHeight = getSizeInDp(R.dimen.required_height_for_large);
+        RemoteViews largeView = getPeopleTileViewHelper(tileWithStatusTemplate).getViews();
         View largeResult = largeView.apply(mContext, null);
 
         name = (TextView) largeResult.findViewById(R.id.name);
@@ -398,8 +375,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 PERSON_TILE_WITHOUT_NOTIFICATION.toBuilder().setStatuses(
                         Arrays.asList(GAME_STATUS,
                                 NEW_STORY_WITH_AVAILABILITY)).build();
-        RemoteViews views = getPeopleTileViewHelper(
-                tileWithStatusTemplate, mOptions).getViews();
+        RemoteViews views = getPeopleTileViewHelper(tileWithStatusTemplate).getViews();
         View result = views.apply(mContext, null);
 
         TextView name = (TextView) result.findViewById(R.id.name);
@@ -417,10 +393,8 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(statusContent.getText(), GAME_DESCRIPTION);
         assertThat(statusContent.getMaxLines()).isEqualTo(2);
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_medium) - 1);
-        RemoteViews smallView = getPeopleTileViewHelper(
-                tileWithStatusTemplate, mOptions).getViews();
+        mWidth = getSizeInDp(R.dimen.required_width_for_medium) - 1;
+        RemoteViews smallView = getPeopleTileViewHelper(tileWithStatusTemplate).getViews();
         View smallResult = smallView.apply(mContext, null);
 
         // Show icon instead of name.
@@ -433,12 +407,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // No messages count.
         assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_large));
-        mOptions.putInt(OPTION_APPWIDGET_MAX_HEIGHT,
-                getSizeInDp(R.dimen.required_height_for_large));
-        RemoteViews largeView = getPeopleTileViewHelper(
-                tileWithStatusTemplate, mOptions).getViews();
+        mWidth = getSizeInDp(R.dimen.required_width_for_large);
+        mHeight = getSizeInDp(R.dimen.required_height_for_large);
+        RemoteViews largeView = getPeopleTileViewHelper(tileWithStatusTemplate).getViews();
         View largeResult = largeView.apply(mContext, null);
 
         name = (TextView) largeResult.findViewById(R.id.name);
@@ -467,7 +438,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                                 ACTIVITY_ANNIVERSARY).setDescription("Anniversary").setAvailability(
                                 AVAILABILITY_AVAILABLE).setIcon(mIcon).build())).build();
         RemoteViews views = getPeopleTileViewHelper(
-                tileWithIconInStatusTemplate, mOptions).getViews();
+                tileWithIconInStatusTemplate).getViews();
         View result = views.apply(mContext, null);
 
         assertEquals(View.GONE, result.findViewById(R.id.subtext).getVisibility());
@@ -483,12 +454,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(statusContent.getText(), "Anniversary");
         assertThat(statusContent.getMaxLines()).isEqualTo(1);
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_large));
-        mOptions.putInt(OPTION_APPWIDGET_MAX_HEIGHT,
-                getSizeInDp(R.dimen.required_height_for_large));
-        RemoteViews largeView = getPeopleTileViewHelper(
-                tileWithIconInStatusTemplate, mOptions).getViews();
+        mWidth = getSizeInDp(R.dimen.required_width_for_large);
+        mHeight = getSizeInDp(R.dimen.required_height_for_large);
+        RemoteViews largeView = getPeopleTileViewHelper(tileWithIconInStatusTemplate).getViews();
         View largeResult = largeView.apply(mContext, null);
 
         assertEquals(View.GONE, largeResult.findViewById(R.id.subtext).getVisibility());
@@ -513,8 +481,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         PeopleSpaceTile tile = PERSON_TILE.toBuilder()
                 .setIsPackageSuspended(true)
                 .build();
-        RemoteViews views = getPeopleTileViewHelper(
-                tile, mOptions).getViews();
+        RemoteViews views = getPeopleTileViewHelper(tile).getViews();
         View result = views.apply(mContext, null);
 
         assertEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
@@ -525,8 +492,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         PeopleSpaceTile tile = PERSON_TILE.toBuilder()
                 .setIsUserQuieted(true)
                 .build();
-        RemoteViews views = getPeopleTileViewHelper(
-                tile, mOptions).getViews();
+        RemoteViews views = getPeopleTileViewHelper(tile).getViews();
         View result = views.apply(mContext, null);
 
         assertEquals(result.getSourceLayoutResId(), R.layout.people_tile_work_profile_quiet_layout);
@@ -537,89 +503,100 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         PeopleSpaceTile tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(BLOCK_CONVERSATIONS)
                 .build();
-        RemoteViews views = getPeopleTileViewHelper(
-                tileWithDndBlocking, mOptions).getViews();
+        RemoteViews views = getPeopleTileViewHelper(tileWithDndBlocking).getViews();
         View result = views.apply(mContext, null);
 
-        assertEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(BLOCK_CONVERSATIONS)
                 .setCanBypassDnd(true)
                 .build();
-        views = getPeopleTileViewHelper(
-                tileWithDndBlocking, mOptions).getViews();
+        views = getPeopleTileViewHelper(tileWithDndBlocking).getViews();
         result = views.apply(mContext, null);
 
-        assertNotEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesNotEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_IMPORTANT_CONVERSATIONS)
                 .build();
-        views = getPeopleTileViewHelper(
-                tileWithDndBlocking, mOptions).getViews();
+        views = getPeopleTileViewHelper(tileWithDndBlocking).getViews();
         result = views.apply(mContext, null);
 
-        assertEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_IMPORTANT_CONVERSATIONS)
                 .setIsImportantConversation(true)
                 .build();
-        views = getPeopleTileViewHelper(
-                tileWithDndBlocking, mOptions).getViews();
+        views = getPeopleTileViewHelper(tileWithDndBlocking).getViews();
         result = views.apply(mContext, null);
 
-        assertNotEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesNotEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_STARRED_CONTACTS)
                 .setContactAffinity(VALID_CONTACT)
                 .build();
-        views = getPeopleTileViewHelper(
-                tileWithDndBlocking, mOptions).getViews();
+        views = getPeopleTileViewHelper(tileWithDndBlocking).getViews();
         result = views.apply(mContext, null);
 
-        assertEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_STARRED_CONTACTS)
                 .setContactAffinity(STARRED_CONTACT)
                 .build();
-        views = getPeopleTileViewHelper(
-                tileWithDndBlocking, mOptions).getViews();
+        views = getPeopleTileViewHelper(tileWithDndBlocking).getViews();
         result = views.apply(mContext, null);
 
-        assertNotEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesNotEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_CONTACTS)
                 .setContactAffinity(STARRED_CONTACT)
                 .build();
-        views = getPeopleTileViewHelper(
-                tileWithDndBlocking, mOptions).getViews();
+        views = getPeopleTileViewHelper(tileWithDndBlocking).getViews();
         result = views.apply(mContext, null);
 
-        assertNotEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesNotEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_CONTACTS)
                 .setContactAffinity(VALID_CONTACT)
                 .build();
-        views = getPeopleTileViewHelper(
-                tileWithDndBlocking, mOptions).getViews();
+        views = getPeopleTileViewHelper(tileWithDndBlocking).getViews();
         result = views.apply(mContext, null);
 
-        assertNotEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesNotEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
 
         tileWithDndBlocking = PERSON_TILE.toBuilder()
                 .setNotificationPolicyState(SHOW_CONTACTS)
                 .build();
-        views = getPeopleTileViewHelper(
-                tileWithDndBlocking, mOptions).getViews();
+        views = getPeopleTileViewHelper(tileWithDndBlocking).getViews();
         result = views.apply(mContext, null);
 
-        assertEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+        assertResourcesEqual(
+                result.getSourceLayoutResId(),
+                R.layout.people_tile_with_suppression_detail_content_horizontal);
+        assertThat(result.<TextView>findViewById(R.id.text_content).getText().toString())
+                .isEqualTo(mContext.getString(R.string.paused_by_dnd));
     }
 
     @Test
@@ -629,8 +606,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 .setNotificationCategory(CATEGORY_MISSED_CALL)
                 .setNotificationContent(MISSED_CALL)
                 .build();
-        RemoteViews views = getPeopleTileViewHelper(
-                tileWithMissedCallNotification, mOptions).getViews();
+        RemoteViews views = getPeopleTileViewHelper(tileWithMissedCallNotification).getViews();
         View result = views.apply(mContext, null);
 
         TextView name = (TextView) result.findViewById(R.id.name);
@@ -647,10 +623,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(statusContent.getText(), MISSED_CALL);
         assertThat(statusContent.getMaxLines()).isEqualTo(2);
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_medium) - 1);
+        mWidth = getSizeInDp(R.dimen.required_width_for_medium) - 1;
         RemoteViews smallView = getPeopleTileViewHelper(
-                tileWithMissedCallNotification, mOptions).getViews();
+                tileWithMissedCallNotification).getViews();
         View smallResult = smallView.apply(mContext, null);
 
         // Show icon instead of name.
@@ -662,12 +637,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // No messages count.
         assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_large));
-        mOptions.putInt(OPTION_APPWIDGET_MAX_HEIGHT,
-                getSizeInDp(R.dimen.required_height_for_large));
-        RemoteViews largeView = getPeopleTileViewHelper(
-                tileWithMissedCallNotification, mOptions).getViews();
+        mWidth = getSizeInDp(R.dimen.required_width_for_large);
+        mHeight = getSizeInDp(R.dimen.required_height_for_large);
+        RemoteViews largeView = getPeopleTileViewHelper(tileWithMissedCallNotification).getViews();
         View largeResult = largeView.apply(mContext, null);
 
         name = (TextView) largeResult.findViewById(R.id.name);
@@ -693,7 +665,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 .setStatuses(Arrays.asList(GAME_STATUS,
                         NEW_STORY_WITH_AVAILABILITY)).build();
         RemoteViews views = getPeopleTileViewHelper(
-                tileWithStatusAndNotification, mOptions).getViews();
+                tileWithStatusAndNotification).getViews();
         View result = views.apply(mContext, null);
 
         TextView name = (TextView) result.findViewById(R.id.name);
@@ -714,10 +686,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // Has a single message, no count shown.
         assertEquals(View.GONE, result.findViewById(R.id.messages_count).getVisibility());
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_medium) - 1);
+        mWidth = getSizeInDp(R.dimen.required_width_for_medium) - 1;
         RemoteViews smallView = getPeopleTileViewHelper(
-                tileWithStatusAndNotification, mOptions).getViews();
+                tileWithStatusAndNotification).getViews();
         View smallResult = smallView.apply(mContext, null);
 
         // Show icon instead of name.
@@ -731,12 +702,10 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // Has a single message, no count shown.
         assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_large));
-        mOptions.putInt(OPTION_APPWIDGET_MAX_HEIGHT,
-                getSizeInDp(R.dimen.required_height_for_large));
+        mWidth = getSizeInDp(R.dimen.required_width_for_large);
+        mHeight = getSizeInDp(R.dimen.required_height_for_large);
         RemoteViews largeView = getPeopleTileViewHelper(
-                tileWithStatusAndNotification, mOptions).getViews();
+                tileWithStatusAndNotification).getViews();
         View largeResult = largeView.apply(mContext, null);
 
         name = (TextView) largeResult.findViewById(R.id.name);
@@ -767,7 +736,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 .setStatuses(Arrays.asList(GAME_STATUS,
                         NEW_STORY_WITH_AVAILABILITY)).build();
         RemoteViews views = getPeopleTileViewHelper(
-                tileWithStatusAndNotification, mOptions).getViews();
+                tileWithStatusAndNotification).getViews();
         View result = views.apply(mContext, null);
 
         TextView name = (TextView) result.findViewById(R.id.name);
@@ -791,10 +760,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // Has a single message, no count shown.
         assertEquals(View.GONE, result.findViewById(R.id.messages_count).getVisibility());
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_medium) - 1);
+        mWidth = getSizeInDp(R.dimen.required_width_for_medium) - 1;
         RemoteViews smallView = getPeopleTileViewHelper(
-                tileWithStatusAndNotification, mOptions).getViews();
+                tileWithStatusAndNotification).getViews();
         View smallResult = smallView.apply(mContext, null);
 
         // Show icon instead of name.
@@ -808,12 +776,10 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // Has a single message, no count shown.
         assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_large));
-        mOptions.putInt(OPTION_APPWIDGET_MAX_HEIGHT,
-                getSizeInDp(R.dimen.required_height_for_large));
+        mWidth = getSizeInDp(R.dimen.required_width_for_large);
+        mHeight = getSizeInDp(R.dimen.required_height_for_large);
         RemoteViews largeView = getPeopleTileViewHelper(
-                tileWithStatusAndNotification, mOptions).getViews();
+                tileWithStatusAndNotification).getViews();
         View largeResult = largeView.apply(mContext, null);
 
         name = (TextView) largeResult.findViewById(R.id.name);
@@ -848,7 +814,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                         NEW_STORY_WITH_AVAILABILITY))
                 .setMessagesCount(2).build();
         RemoteViews views = getPeopleTileViewHelper(
-                tileWithStatusAndNotification, mOptions).getViews();
+                tileWithStatusAndNotification).getViews();
         View result = views.apply(mContext, null);
 
         TextView name = (TextView) result.findViewById(R.id.name);
@@ -868,10 +834,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // Has two messages, show count.
         assertEquals(View.VISIBLE, result.findViewById(R.id.messages_count).getVisibility());
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_medium) - 1);
+        mWidth = getSizeInDp(R.dimen.required_width_for_medium) - 1;
         RemoteViews smallView = getPeopleTileViewHelper(
-                tileWithStatusAndNotification, mOptions).getViews();
+                tileWithStatusAndNotification).getViews();
         View smallResult = smallView.apply(mContext, null);
 
         // Show icon instead of name.
@@ -885,12 +850,10 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // Has two messages, show count.
         assertEquals(View.VISIBLE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.required_width_for_large));
-        mOptions.putInt(OPTION_APPWIDGET_MAX_HEIGHT,
-                getSizeInDp(R.dimen.required_height_for_large));
+        mWidth = getSizeInDp(R.dimen.required_width_for_large);
+        mHeight = getSizeInDp(R.dimen.required_height_for_large);
         RemoteViews largeView = getPeopleTileViewHelper(
-                tileWithStatusAndNotification, mOptions).getViews();
+                tileWithStatusAndNotification).getViews();
         View largeResult = largeView.apply(mContext, null);
 
         name = (TextView) largeResult.findViewById(R.id.name);
@@ -1064,8 +1027,26 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 / mContext.getResources().getDisplayMetrics().density);
     }
 
-    private PeopleTileViewHelper getPeopleTileViewHelper(PeopleSpaceTile tile, Bundle options) {
-        return new PeopleTileViewHelper(mContext, tile, 0, options,
+    private PeopleTileViewHelper getPeopleTileViewHelper(
+            PeopleSpaceTile tile) {
+        return new PeopleTileViewHelper(mContext, tile, 0, mWidth, mHeight,
                 new PeopleTileKey(tile.getId(), 0, tile.getPackageName()));
+    }
+
+    private void assertResourcesEqual(int expected, int actual) {
+        assertThat(getResourceName(actual)).isEqualTo(getResourceName(expected));
+    }
+
+    private void assertResourcesNotEqual(int expected, int actual) {
+        assertThat(getResourceName(actual)).isNotEqualTo(getResourceName(expected));
+    }
+
+    private String getResourceName(int resId) {
+        Resources resources = mContext.getResources();
+        try {
+            return resources.getResourceEntryName(resId);
+        } catch (Resources.NotFoundException e) {
+            return String.valueOf(resId);
+        }
     }
 }

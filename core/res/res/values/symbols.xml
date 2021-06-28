@@ -395,6 +395,7 @@
   <java-symbol type="bool" name="config_supportsMultiDisplay" />
   <java-symbol type="integer" name="config_supportsNonResizableMultiWindow" />
   <java-symbol type="integer" name="config_respectsActivityMinWidthHeightMultiWindow" />
+  <java-symbol type="dimen" name="config_minPercentageMultiWindowSupportHeight" />
   <java-symbol type="dimen" name="config_minPercentageMultiWindowSupportWidth" />
   <java-symbol type="integer" name="config_largeScreenSmallestScreenWidthDp" />
   <java-symbol type="bool" name="config_useLegacySplit" />
@@ -1918,6 +1919,7 @@
   <java-symbol type="bool" name="config_tintNotificationActionButtons" />
   <java-symbol type="bool" name="config_dozeAfterScreenOffByDefault" />
   <java-symbol type="bool" name="config_enableActivityRecognitionHardwareOverlay" />
+  <java-symbol type="bool" name="config_defaultAdasGnssLocationEnabled" />
   <java-symbol type="bool" name="config_enableFusedLocationOverlay" />
   <java-symbol type="bool" name="config_enableGeocoderOverlay" />
   <java-symbol type="bool" name="config_enableGeofenceOverlay" />
@@ -2013,6 +2015,7 @@
   <java-symbol type="integer" name="config_notificationServiceArchiveSize" />
   <java-symbol type="integer" name="config_previousVibrationsDumpLimit" />
   <java-symbol type="integer" name="config_defaultVibrationAmplitude" />
+  <java-symbol type="dimen" name="config_hapticChannelMaxVibrationAmplitude" />
   <java-symbol type="integer" name="config_vibrationWaveformRampStepDuration" />
   <java-symbol type="integer" name="config_vibrationWaveformRampDownDuration" />
   <java-symbol type="integer" name="config_radioScanningTimeout" />
@@ -2538,6 +2541,10 @@
   <java-symbol type="string" name="fingerprint_error_hw_not_present" />
   <java-symbol type="string" name="fingerprint_error_security_update_required" />
   <java-symbol type="string" name="fingerprint_error_bad_calibration" />
+  <java-symbol type="string" name="fingerprint_acquired_immobile" />
+  <java-symbol type="string" name="fingerprint_recalibrate_notification_name" />
+  <java-symbol type="string" name="fingerprint_recalibrate_notification_title" />
+  <java-symbol type="string" name="fingerprint_recalibrate_notification_content" />
 
   <!-- Fingerprint config -->
   <java-symbol type="integer" name="config_fingerprintMaxTemplatesPerUser"/>
@@ -4016,6 +4023,11 @@
   <java-symbol type="bool" name="config_bugReportHandlerEnabled" />
   <java-symbol type="string" name="config_defaultBugReportHandlerApp" />
 
+  <!-- For profcollect report uploader -->
+  <java-symbol type="bool" name="config_profcollectReportUploaderEnabled" />
+  <java-symbol type="string" name="config_defaultProfcollectReportUploaderApp" />
+  <java-symbol type="string" name="config_defaultProfcollectReportUploaderAction" />
+
   <java-symbol type="string" name="usb_device_resolve_prompt_warn" />
 
   <!-- For Accessibility system actions -->
@@ -4402,5 +4414,9 @@
   <java-symbol type="bool" name="config_assistLongPressHomeEnabledDefault" />
   <java-symbol type="bool" name="config_assistTouchGestureEnabledDefault" />
 
+  <java-symbol type="integer" name="config_hotwordDetectedResultMaxBundleSize" />
+
   <java-symbol type="dimen" name="config_wallpaperDimAmount" />
+
+  <java-symbol type="bool" name="config_volumeShowRemoteSessions" />
 </resources>

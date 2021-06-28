@@ -1148,17 +1148,11 @@
     <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_title">Remove guest?</string>
 
-    <!-- Title of the confirmation dialog when resetting guest session [CHAR LIMIT=NONE] -->
-    <string name="guest_reset_guest_dialog_title">Reset guest?</string>
-
     <!-- Message of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_message">All apps and data in this session will be deleted.</string>
 
     <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
     <string name="guest_exit_guest_dialog_remove">Remove</string>
-
-    <!-- Label for button in confirmation dialog when resetting guest session [CHAR LIMIT=35] -->
-    <string name="guest_reset_guest_dialog_remove">Reset</string>
 
     <!-- Title of the notification when resuming an existing guest session [CHAR LIMIT=NONE] -->
     <string name="guest_wipe_session_title">Welcome back, guest!</string>
@@ -2895,7 +2889,7 @@
     <!--Text explaining to tap a conversation to select it show in their Conversation widget [CHAR LIMIT=180] -->
     <string name="select_conversation_text">Tap a conversation to add it to your Home screen</string>
     <!--Text explaining there are no existing conversations to show in their Conversation widget [CHAR LIMIT=100] -->
-    <string name="no_conversations_text">Check back here once you get some messages</string>
+    <string name="no_conversations_text">Your recent conversations will show up here</string>
     <!--Text header for priority conversation tiles available to be added to the home screen [CHAR LIMIT=100] -->
     <string name="priority_conversations">Priority conversations</string>
     <!--Text header for recent conversation tiles available to be added to the home screen [CHAR LIMIT=100] -->
@@ -2938,7 +2932,7 @@
     <string name="audio_status">Listening</string>
     <!-- Status text on the Conversation widget for playing a game [CHAR LIMIT=20] -->
     <string name="game_status">Playing</string>
-    <!-- Empty user name before user has selected a friend for their Conversation widget [CHAR LIMIT=20] -->
+    <!-- Empty user name before user has selected a friend for their Conversation widget [CHAR LIMIT=10] -->
     <string name="empty_user_name">Friends</string>
     <!-- Empty status shown before user has selected a friend for their Conversation widget [CHAR LIMIT=20] -->
     <string name="empty_status">Let’s chat tonight!</string>
@@ -2952,6 +2946,8 @@
     <string name="people_tile_description">See recent messages, missed calls, and status updates</string>
     <!-- Title text displayed for the Conversation widget [CHAR LIMIT=50] -->
     <string name="people_tile_title">Conversation</string>
+    <!-- Text when the Conversation widget when Do Not Disturb is suppressing the notification. [CHAR LIMIT=50] -->
+    <string name="paused_by_dnd">Paused by Do Not Disturb</string>
     <!-- Content description text on the Conversation widget when a person has sent a new text message [CHAR LIMIT=150] -->
     <string name="new_notification_text_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent a message</string>
     <!-- Content description text on the Conversation widget when a person has sent a new image message [CHAR LIMIT=150] -->
