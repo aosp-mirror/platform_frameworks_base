@@ -133,8 +133,12 @@ static bool sendRequest(int fd, RequestType requestType, FileIdx fileIdx = -1,
 
 static int waitForDataOrSignal(int fd, int event_fd) {
     struct pollfd pfds[2] = {{fd, POLLIN, 0}, {event_fd, POLLIN, 0}};
-    // Wait indefinitely until either data is ready or stop signal is received
+    // Wait until either data is ready or stop signal is received
     int res = poll(pfds, 2, PollTimeoutMs);
+    if (res == -1 && errno == EINTR) {
+        // Treat it the same as timeout and allow the caller to retry.
+        return 0;
+    }
     if (res <= 0) {
         return res;
     }
