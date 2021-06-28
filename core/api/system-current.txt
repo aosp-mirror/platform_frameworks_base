@@ -8072,6 +8072,10 @@ package android.os {
   public final class BatteryStatsManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.os.connectivity.CellularBatteryStats getCellularBatteryStats();
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.os.connectivity.WifiBatteryStats getWifiBatteryStats();
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanReset();
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanResults(@NonNull android.os.WorkSource, int);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanStarted(@NonNull android.os.WorkSource, boolean);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanStopped(@NonNull android.os.WorkSource, boolean);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockAcquiredFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockReleasedFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportMobileRadioPowerState(boolean, int);
