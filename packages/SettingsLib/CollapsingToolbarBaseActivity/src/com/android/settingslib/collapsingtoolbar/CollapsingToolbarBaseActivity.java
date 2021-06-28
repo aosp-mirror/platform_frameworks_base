@@ -41,6 +41,7 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity implements
 
     private static final int TOOLBAR_MAX_LINE_NUMBER = 2;
     private static final int FULLY_EXPANDED_OFFSET = 0;
+    private static final float TOOLBAR_LINE_SPACING_MULTIPLIER = 1.1f;
     private static final String KEY_IS_TOOLBAR_COLLAPSED = "is_toolbar_collapsed";
 
     @Nullable
@@ -194,6 +195,8 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity implements
                             getResources().getDimensionPixelSize(
                                     R.dimen.scrim_visible_height_trigger_three_lines));
                     mCollapsingToolbarLayout.setLayoutParams(lp);
+                    mCollapsingToolbarLayout
+                            .setLineSpacingMultiplier(TOOLBAR_LINE_SPACING_MULTIPLIER);
                 } else if (count == TOOLBAR_MAX_LINE_NUMBER) {
                     final ViewGroup.LayoutParams lp = mCollapsingToolbarLayout.getLayoutParams();
                     lp.height = getResources()
@@ -202,6 +205,8 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity implements
                             getResources().getDimensionPixelSize(
                                     R.dimen.scrim_visible_height_trigger_two_lines));
                     mCollapsingToolbarLayout.setLayoutParams(lp);
+                    mCollapsingToolbarLayout
+                            .setLineSpacingMultiplier(TOOLBAR_LINE_SPACING_MULTIPLIER);
                 }
             }
         });
