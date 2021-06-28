@@ -690,12 +690,8 @@ public class ScreenshotController {
                         intent.setFlags(
                                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                        Pair<ActivityOptions, ExitTransitionCoordinator> transition =
-                                ActivityOptions.startSharedElementAnimation(mWindow,
-                                        new ScreenshotExitTransitionCallbacksSupplier(false).get(),
-                                        null);
-                        transition.second.startExit();
-                        mContext.startActivity(intent, transition.first.toBundle());
+                        mContext.startActivity(intent,
+                                ActivityOptions.makeCustomAnimation(mContext, 0, 0).toBundle());
                         RemoteAnimationAdapter runner = new RemoteAnimationAdapter(
                                 SCREENSHOT_REMOTE_RUNNER, 0, 0);
                         try {
