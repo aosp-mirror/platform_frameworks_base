@@ -1127,7 +1127,12 @@ public class VolumeDialogImpl implements VolumeDialog,
                     .alpha(0.f)
                     .setStartDelay(0)
                     .setDuration(mDialogHideAnimationDurationMs)
-                    .withEndAction(() -> mODICaptionsTooltipView.setVisibility(INVISIBLE))
+                    .withEndAction(() -> {
+                        // It might have been nulled out by tryToRemoveCaptionsTooltip.
+                        if (mODICaptionsTooltipView != null) {
+                            mODICaptionsTooltipView.setVisibility(INVISIBLE);
+                        }
+                    })
                     .start();
         }
     }
