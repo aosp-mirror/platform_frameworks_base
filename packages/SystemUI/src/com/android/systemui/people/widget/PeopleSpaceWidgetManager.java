@@ -297,8 +297,8 @@ public class PeopleSpaceWidgetManager {
             Log.e(TAG, "Cannot update invalid widget");
             return;
         }
-        RemoteViews views = new PeopleTileViewHelper(mContext, tile, appWidgetId,
-                options, key).getViews();
+        RemoteViews views = PeopleTileViewHelper.createRemoteViews(mContext, tile, appWidgetId,
+                options, key);
 
         // Tell the AppWidgetManager to perform an update on the current app widget.
         mAppWidgetManager.updateAppWidget(appWidgetId, views);
@@ -1031,8 +1031,8 @@ public class PeopleSpaceWidgetManager {
                 Optional.empty());
 
         if (DEBUG) Log.i(TAG, "Returning tile preview for shortcutId: " + shortcutId);
-        return new PeopleTileViewHelper(mContext, augmentedTile, 0, options,
-                new PeopleTileKey(augmentedTile)).getViews();
+        return PeopleTileViewHelper.createRemoteViews(mContext, augmentedTile, 0, options,
+                new PeopleTileKey(augmentedTile));
     }
 
     protected final BroadcastReceiver mBaseBroadcastReceiver = new BroadcastReceiver() {
