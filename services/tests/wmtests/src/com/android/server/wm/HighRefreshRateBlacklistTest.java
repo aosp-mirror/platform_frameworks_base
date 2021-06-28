@@ -31,7 +31,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
-import com.android.server.wm.utils.FakeDeviceConfigInterface;
+import com.android.server.testutils.FakeDeviceConfigInterface;
 
 import org.junit.After;
 import org.junit.Test;

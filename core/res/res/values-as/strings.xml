@@ -1512,7 +1512,7 @@
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"অধিক বিকল্প"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s: %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="8490227947584914460">"শ্বেয়াৰ কৰা আভ্যন্তৰীণ ষ্ট\'ৰেজ"</string>
+    <string name="storage_internal" msgid="8490227947584914460">"শ্বেয়াৰ কৰা আভ্যন্তৰীণ সঞ্চয়াগাৰ"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"এছডি কাৰ্ড"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> এছডি কাৰ্ড"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"ইউএছবি ড্ৰাইভ"</string>
@@ -1718,28 +1718,6 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"ম\'নাৰ্ক"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"কুৱাট্ৰো"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"ফুলস্কেপ"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1776,8 +1754,6 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"অজ্ঞাত প\'ৰ্ট্ৰেইট"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"অজ্ঞাত লেণ্ডস্কেইপ"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"বাতিল কৰা হ’ল"</string>
@@ -1823,7 +1799,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ঠিক আছে"</string>
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"বেটাৰীৰ জীৱনকাল বৃদ্ধি কৰিবলৈ, বেটাৰী সঞ্চয়কাৰীয়ে:\n\n•গাঢ় ৰঙৰ থীম অন কৰে\n•নেপথ্যৰ কাৰ্যকলাপ, কিছুমান ভিজুৱেল ইফেক্ট আৰু “Hey Google”ৰ দৰে অন্য সুবিধাসমূহ অফ কৰে অথবা সেইবোৰ সীমাবদ্ধ কৰে\n\n"<annotation id="url">"অধিক জানক"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"বেটাৰীৰ জীৱনকাল বৃদ্ধি কৰিবলৈ বেটাৰী সঞ্চয়কাৰীয়ে:\n\n• গাঢ় ৰঙৰ থীম অন কৰে\n• নেপথ্যৰ কাৰ্যকলাপ, কিছুমান ভিজুৱেল ইফেক্ট আৰু “Hey Google”ৰ দৰে অন্য সুবিধাসমূহ অফ কৰে অথবা সীমাবদ্ধ কৰে"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ডেটা ব্য়ৱহাৰৰ হ্ৰাস কৰিবলৈ ডেটা সঞ্চয়কাৰীয়ে কিছুমান এপক নেপথ্য়ত ডেটা প্ৰেৰণ বা সংগ্ৰহ কৰাত বাধা প্ৰদান কৰে। আপুনি বৰ্তমান ব্য়ৱহাৰ কৰি থকা এটা এপে ডেটা এক্সেছ কৰিব পাৰে, কিন্তু সঘনাই এক্সেছ কৰিব নোৱাৰিব পাৰে। ইয়াৰ অৰ্থ উদাহৰণস্বৰূপে এয়া হ\'ব পাৰে যে, আপুনি নিটিপা পর্যন্ত প্ৰতিচ্ছবিসমূহ দেখুওৱা নহ’ব।"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ডেটা ব্য়ৱহাৰ মাত্ৰা কম কৰিবৰ বাবে ডেটা সঞ্চয়কাৰীয়ে কিছুমান এপক নেপথ্য়ত ডেটা প্ৰেৰণ বা সংগ্ৰহ কৰাত বাধা প্ৰদান কৰে। আপুনি বৰ্তমান ব্য়ৱহাৰ কৰি থকা এটা এপে ডেটা ব্য়ৱহাৰ কৰিব পাৰে, কিন্তু সঘনাই এই কার্য কৰিব নোৱাৰিব পাৰে। ইয়াৰ অৰ্থ এইয়ে হ\'ব পাৰে যে, উদাহৰণস্বৰূপে, আপুনি নিটিপা পর্যন্ত প্ৰতিচ্ছবিসমূহ দেখুওৱা নহ’ব।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ডেটা সঞ্চয়কাৰী অন কৰিবনে?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"অন কৰক"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

@@ -648,7 +648,7 @@ public class Annotation {
             TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA,
             TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO,
             TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA,
-            TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE})
+            TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED})
     public @interface OverrideNetworkType {}
 
     /**

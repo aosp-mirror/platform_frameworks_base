@@ -103,7 +103,7 @@ public class NotificationHistoryDatabase {
 
         IntentFilter deletionFilter = new IntentFilter(ACTION_HISTORY_DELETION);
         deletionFilter.addDataScheme(SCHEME_DELETION);
-        mContext.registerReceiver(mFileCleaupReceiver, deletionFilter);
+        mContext.registerReceiver(mFileCleanupReceiver, deletionFilter);
     }
 
     public void init() {
@@ -329,6 +329,12 @@ public class NotificationHistoryDatabase {
         }
     }
 
+    public void unregisterFileCleanupReceiver() {
+        if(mContext != null) {
+            mContext.unregisterReceiver(mFileCleanupReceiver);
+        }
+    }
+
     private static long safeParseLong(String fileName) {
         // AtomicFile will create copies of the numeric files with ".new" and ".bak"
         // over the course of its processing. If these files still exist on boot we need to clean
@@ -340,7 +346,7 @@ public class NotificationHistoryDatabase {
         }
     }
 
-    private final BroadcastReceiver mFileCleaupReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mFileCleanupReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();

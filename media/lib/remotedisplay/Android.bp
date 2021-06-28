@@ -27,4 +27,5 @@ java_sdk_library {
     name: "com.android.media.remotedisplay",
     srcs: ["java/**/*.java"],
     api_packages: ["com.android.media.remotedisplay"],
+    dist_group: "android",
 }

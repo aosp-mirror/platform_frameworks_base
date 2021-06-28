@@ -16,12 +16,24 @@
 
 package com.android.server.vcn;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+
 import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.net.NetworkProvider;
 import android.net.NetworkRequest;
+import android.net.NetworkScore;
+import android.net.vcn.VcnGatewayConnectionConfig;
+import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -30,7 +42,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.IndentingPrintWriter;
 
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * VCN Network Provider routes NetworkRequests to listeners to bring up tunnels as needed.
@@ -45,6 +59,10 @@ public class VcnNetworkProvider extends NetworkProvider {
 
     private final Set<NetworkRequestListener> mListeners = new ArraySet<>();
 
+    private final Context mContext;
+    private final Handler mHandler;
+    private final Dependencies mDeps;
+
     /**
      * Cache of NetworkRequest(s).
      *
@@ -52,8 +70,59 @@ public class VcnNetworkProvider extends NetworkProvider {
      */
     private final Set<NetworkRequest> mRequests = new ArraySet<>();
 
-    public VcnNetworkProvider(Context context, Looper looper) {
-        super(context, looper, VcnNetworkProvider.class.getSimpleName());
+    public VcnNetworkProvider(@NonNull Context context, @NonNull Looper looper) {
+        this(context, looper, new Dependencies());
+    }
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public VcnNetworkProvider(
+            @NonNull Context context, @NonNull Looper looper, @NonNull Dependencies dependencies) {
+        super(
+                Objects.requireNonNull(context, "Missing context"),
+                Objects.requireNonNull(looper, "Missing looper"),
+                TAG);
+
+        mContext = context;
+        mHandler = new Handler(looper);
+        mDeps = Objects.requireNonNull(dependencies, "Missing dependencies");
+    }
+
+    /** Registers this VcnNetworkProvider and a generic network offer with ConnectivityService. */
+    public void register() {
+        mContext.getSystemService(ConnectivityManager.class).registerNetworkProvider(this);
+        mDeps.registerNetworkOffer(
+                this,
+                Vcn.getNetworkScore(), // score filter
+                buildCapabilityFilter(),
+                new HandlerExecutor(mHandler),
+                new NetworkOfferCallback() {
+                    @Override
+                    public void onNetworkNeeded(@NonNull NetworkRequest request) {
+                        handleNetworkRequested(request);
+                    }
+
+                    @Override
+                    public void onNetworkUnneeded(@NonNull NetworkRequest request) {
+                        handleNetworkRequestWithdrawn(request);
+                    }
+                });
+    }
+
+    /** Builds the filter for NetworkRequests that can be served by the VcnNetworkProvider. */
+    private NetworkCapabilities buildCapabilityFilter() {
+        final NetworkCapabilities.Builder builder =
+                new NetworkCapabilities.Builder()
+                        .addTransportType(TRANSPORT_CELLULAR)
+                        .addCapability(NET_CAPABILITY_TRUSTED)
+                        .addCapability(NET_CAPABILITY_NOT_RESTRICTED)
+                        .addCapability(NET_CAPABILITY_NOT_VPN)
+                        .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
+
+        for (int cap : VcnGatewayConnectionConfig.ALLOWED_CAPABILITIES) {
+            builder.addCapability(cap);
+        }
+
+        return builder.build();
     }
 
     /**
@@ -88,8 +157,7 @@ public class VcnNetworkProvider extends NetworkProvider {
         listener.onNetworkRequested(request);
     }
 
-    @Override
-    public void onNetworkRequested(@NonNull NetworkRequest request, int score, int providerId) {
+    private void handleNetworkRequested(@NonNull NetworkRequest request) {
         if (VDBG) {
             Slog.v(TAG, "Network requested: Request = " + request);
         }
@@ -103,8 +171,7 @@ public class VcnNetworkProvider extends NetworkProvider {
         }
     }
 
-    @Override
-    public void onNetworkRequestWithdrawn(@NonNull NetworkRequest request) {
+    private void handleNetworkRequestWithdrawn(@NonNull NetworkRequest request) {
         if (VDBG) {
             Slog.v(TAG, "Network request withdrawn: Request = " + request);
         }
@@ -143,5 +210,19 @@ public class VcnNetworkProvider extends NetworkProvider {
         pw.println();
 
         pw.decreaseIndent();
+    }
+
+    /** Proxy class for dependencies used for testing. */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static class Dependencies {
+        /** Registers a given network offer for the given provider. */
+        public void registerNetworkOffer(
+                @NonNull VcnNetworkProvider provider,
+                @NonNull NetworkScore score,
+                @NonNull NetworkCapabilities capabilitiesFilter,
+                @NonNull Executor executor,
+                @NonNull NetworkOfferCallback callback) {
+            provider.registerNetworkOffer(score, capabilitiesFilter, executor, callback);
+        }
     }
 }

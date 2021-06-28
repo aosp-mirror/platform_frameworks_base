@@ -3388,6 +3388,31 @@ public class CarrierConfigManager {
             "nr_timers_reset_if_non_endc_and_rrc_idle_bool";
 
     /**
+     * A list of additional NR advanced band would map to
+     * {@link TelephonyDisplayInfo#OVERRIDE_NETWORK_TYPE_NR_ADVANCED} when the device is on that
+     * band.
+     *
+     * @hide
+     */
+    public static final String KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY =
+            "additional_nr_advanced_bands_int_array";
+
+    /**
+     * This configuration allows the framework to control the NR advanced capable by protocol
+     * configuration options(PCO).
+     *
+     * If this config is 0, then the nr advanced capable is enabled.
+     * If this config is not 0 and PCO container with this config's address is 1, then the nr
+     * advanced capable is enabled.
+     * If this config is not 0 and PCO container with this config's address is 0, then the nr
+     * advanced capable is disabled.
+     *
+     * @hide
+     */
+    public static final String KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT =
+            "nr_advanced_capable_pco_id_int";
+
+    /**
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
      * @hide
      */
@@ -3579,6 +3604,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY =
             "emergency_number_prefix_string_array";
+
+    /**
+     * Indicates whether carrier treats "*67" or "*82" as a temporary mode CLIR.
+     * @hide
+     */
+    public static final String KEY_CARRIER_SUPPORTS_CALLER_ID_VERTICAL_SERVICE_CODES_BOOL =
+            "carrier_supports_caller_id_vertical_service_codes_bool";
 
     /**
      * Smart forwarding config. Smart forwarding is a feature to configure call forwarding to a
@@ -4151,7 +4183,7 @@ public class CarrierConfigManager {
                     "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.deferred\"",
                     "+g.gsma.rcs.cpm.pager-large",
                     "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.session\"",
-                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.session\"",
+                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.filetransfer\"",
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.fthttp\"",
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.ftsms\"",
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.gsma.callcomposer\"",
@@ -4871,6 +4903,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL, false);
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
+        sDefaults.putIntArray(KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY, new int[0]);
+        sDefaults.putInt(KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT, 0);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
@@ -4910,6 +4944,7 @@ public class CarrierConfigManager {
                         1 /* Roaming Indicator Off */
                 });
         sDefaults.putStringArray(KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY, new String[0]);
+        sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_CALLER_ID_VERTICAL_SERVICE_CODES_BOOL, false);
         sDefaults.putBoolean(KEY_USE_USIM_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_WFC_LOCATION_PRIVACY_POLICY_BOOL, false);
         sDefaults.putBoolean(KEY_AUTO_CANCEL_CS_REJECT_NOTIFICATION, true);
@@ -4951,7 +4986,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
         sDefaults.putStringArray(KEY_APN_PRIORITY_STRING_ARRAY, new String[] {
-                "default:0", "enterprise:1", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
+                "enterprise:0", "default:1", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
                 "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
         });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
@@ -4961,7 +4996,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING, "");
         sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
         sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
-        sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, false);
+        sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, true);
         sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
         sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
                 new String[]{"ia", "default", "mms", "dun"});

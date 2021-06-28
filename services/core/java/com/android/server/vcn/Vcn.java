@@ -453,6 +453,10 @@ public class Vcn extends Handler {
         for (VcnGatewayConnection gatewayConnection : mVcnGatewayConnections.values()) {
             gatewayConnection.updateSubscriptionSnapshot(mLastSnapshot);
         }
+
+        // Update the mobile data state after updating the subscription snapshot as a change in
+        // subIds for a subGroup may affect the mobile data state.
+        handleMobileDataToggled();
     }
 
     private void handleMobileDataToggled() {
@@ -514,7 +518,11 @@ public class Vcn extends Handler {
     }
 
     private String getLogPrefix() {
-        return "[" + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup) + "] ";
+        return "["
+                + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup)
+                + "-"
+                + System.identityHashCode(this)
+                + "] ";
     }
 
     private void logVdbg(String msg) {

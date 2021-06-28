@@ -31,6 +31,9 @@ import static com.android.server.pm.Installer.DEXOPT_PUBLIC;
 import static com.android.server.pm.Installer.DEXOPT_SECONDARY_DEX;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_CE;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
+import static com.android.server.pm.Installer.PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES;
+import static com.android.server.pm.Installer.PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
+import static com.android.server.pm.Installer.PROFILE_ANALYSIS_OPTIMIZE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -248,8 +251,12 @@ public class PackageDexOptimizer {
                     || packageUseInfo.isUsedByOtherApps(path);
             final String compilerFilter = getRealCompilerFilter(pkg,
                 options.getCompilerFilter(), isUsedByOtherApps);
-            final boolean profileUpdated = options.isCheckForProfileUpdates() &&
-                isProfileUpdated(pkg, sharedGid, profileName, compilerFilter);
+            // If we don't have to check for profiles updates assume
+            // PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA which will be a no-op with respect to
+            // profiles.
+            final int profileAnalysisResult = options.isCheckForProfileUpdates()
+                    ? analyseProfiles(pkg, sharedGid, profileName, compilerFilter)
+                    : PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
 
             // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct
             // flags.
@@ -257,7 +264,7 @@ public class PackageDexOptimizer {
 
             for (String dexCodeIsa : dexCodeInstructionSets) {
                 int newResult = dexOptPath(pkg, pkgSetting, path, dexCodeIsa, compilerFilter,
-                        profileUpdated, classLoaderContexts[i], dexoptFlags, sharedGid,
+                        profileAnalysisResult, classLoaderContexts[i], dexoptFlags, sharedGid,
                         packageStats, options.isDowngrade(), profileName, dexMetadataPath,
                         options.getCompilationReason());
 
@@ -305,11 +312,11 @@ public class PackageDexOptimizer {
      */
     @GuardedBy("mInstallLock")
     private int dexOptPath(AndroidPackage pkg, @NonNull PackageSetting pkgSetting, String path,
-            String isa, String compilerFilter, boolean profileUpdated, String classLoaderContext,
+            String isa, String compilerFilter, int profileAnalysisResult, String classLoaderContext,
             int dexoptFlags, int uid, CompilerStats.PackageStats packageStats, boolean downgrade,
             String profileName, String dexMetadataPath, int compilationReason) {
         int dexoptNeeded = getDexoptNeeded(path, isa, compilerFilter, classLoaderContext,
-                profileUpdated, downgrade);
+                profileAnalysisResult, downgrade);
         if (Math.abs(dexoptNeeded) == DexFile.NO_DEXOPT_NEEDED) {
             return DEX_OPT_SKIPPED;
         }
@@ -363,7 +370,7 @@ public class PackageDexOptimizer {
                     isa,
                     options.getCompilerFilter(),
                     dexUseInfo.getClassLoaderContext(),
-                    /* newProfile= */false,
+                    PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES,
                     /* downgrade= */ false);
 
             if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
@@ -749,11 +756,25 @@ public class PackageDexOptimizer {
      * configuration (isa, compiler filter, profile).
      */
     private int getDexoptNeeded(String path, String isa, String compilerFilter,
-            String classLoaderContext, boolean newProfile, boolean downgrade) {
+            String classLoaderContext, int profileAnalysisResult, boolean downgrade) {
         int dexoptNeeded;
         try {
-            dexoptNeeded = DexFile.getDexOptNeeded(path, isa, compilerFilter, classLoaderContext,
-                    newProfile, downgrade);
+            // A profile guided optimizations with an empty profile is essentially 'verify' and
+            // dex2oat already makes this transformation. However DexFile.getDexOptNeeded() cannot
+            // check the profiles because system server does not have access to them.
+            // As such, we rely on the previous profile analysis (done with dexoptanalyzer) and
+            // manually adjust the actual filter before checking.
+            //
+            // TODO: ideally. we'd move this check in dexoptanalyzer, but that's a large change,
+            // and in the interim we can still improve things here.
+            String actualCompilerFilter = compilerFilter;
+            if (compilerFilterDependsOnProfiles(compilerFilter)
+                    && profileAnalysisResult == PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES) {
+                actualCompilerFilter = "verify";
+            }
+            boolean newProfile = profileAnalysisResult == PROFILE_ANALYSIS_OPTIMIZE;
+            dexoptNeeded = DexFile.getDexOptNeeded(path, isa, actualCompilerFilter,
+                    classLoaderContext, newProfile, downgrade);
         } catch (IOException ioe) {
             Slog.w(TAG, "IOException reading apk: " + path, ioe);
             return DEX_OPT_FAILED;
@@ -764,27 +785,34 @@ public class PackageDexOptimizer {
         return adjustDexoptNeeded(dexoptNeeded);
     }
 
+    /** Returns true if the compiler filter depends on profiles (e.g speed-profile). */
+    private boolean compilerFilterDependsOnProfiles(String compilerFilter) {
+        return compilerFilter.endsWith("-profile");
+    }
+
     /**
      * Checks if there is an update on the profile information of the {@code pkg}.
-     * If the compiler filter is not profile guided the method returns false.
+     * If the compiler filter is not profile guided the method returns a safe default:
+     * PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA.
      *
      * Note that this is a "destructive" operation with side effects. Under the hood the
      * current profile and the reference profile will be merged and subsequent calls
      * may return a different result.
      */
-    private boolean isProfileUpdated(AndroidPackage pkg, int uid, String profileName,
+    private int analyseProfiles(AndroidPackage pkg, int uid, String profileName,
             String compilerFilter) {
         // Check if we are allowed to merge and if the compiler filter is profile guided.
         if (!isProfileGuidedCompilerFilter(compilerFilter)) {
-            return false;
+            return PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
         }
         // Merge profiles. It returns whether or not there was an updated in the profile info.
         try {
             return mInstaller.mergeProfiles(uid, pkg.getPackageName(), profileName);
         } catch (InstallerException e) {
             Slog.w(TAG, "Failed to merge profiles", e);
+            // We don't need to optimize if we failed to merge.
+            return PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
         }
-        return false;
     }
 
     /**

@@ -156,7 +156,10 @@ public class WindowlessWindowManager implements IWindowSession {
             mStateForWindow.put(window.asBinder(), state);
         }
 
-        return WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
+        final int res = WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
+
+        // Include whether the window is in touch mode.
+        return isInTouchMode() ? res | WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE : res;
     }
 
     /**
@@ -205,6 +208,15 @@ public class WindowlessWindowManager implements IWindowSession {
             return false;
         }
         return !PixelFormat.formatHasAlpha(attrs.format);
+    }
+
+    private boolean isInTouchMode() {
+        try {
+            return WindowManagerGlobal.getWindowSession().getInTouchMode();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to check if the window is in touch mode", e);
+        }
+        return false;
     }
 
     /** @hide */
@@ -268,7 +280,8 @@ public class WindowlessWindowManager implements IWindowSession {
             }
         }
 
-        return 0;
+        // Include whether the window is in touch mode.
+        return isInTouchMode() ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0;
     }
 
     @Override

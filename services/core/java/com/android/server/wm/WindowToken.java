@@ -622,11 +622,6 @@ class WindowToken extends WindowContainer<WindowState> {
         state.mIsTransforming = false;
         if (applyDisplayRotation != null) {
             applyDisplayRotation.run();
-        } else {
-            // The display will not rotate to the rotation of this container, let's cancel them.
-            for (int i = state.mAssociatedTokens.size() - 1; i >= 0; i--) {
-                state.mAssociatedTokens.get(i).cancelFixedRotationTransform();
-            }
         }
         // The state is cleared at the end, because it is used to indicate that other windows can
         // use seamless rotation when applying rotation to display.
@@ -634,11 +629,15 @@ class WindowToken extends WindowContainer<WindowState> {
             final WindowToken token = state.mAssociatedTokens.get(i);
             token.mFixedRotationTransformState = null;
             token.notifyFixedRotationTransform(false /* enabled */);
+            if (applyDisplayRotation == null) {
+                // Notify cancellation because the display does not change rotation.
+                token.cancelFixedRotationTransform();
+            }
         }
     }
 
     /** Notifies application side to enable or disable the rotation adjustment of display info. */
-    private void notifyFixedRotationTransform(boolean enabled) {
+    void notifyFixedRotationTransform(boolean enabled) {
         FixedRotationAdjustments adjustments = null;
         // A token may contain windows of the same processes or different processes. The list is
         // used to avoid sending the same adjustments to a process multiple times.
@@ -682,7 +681,6 @@ class WindowToken extends WindowContainer<WindowState> {
             // The window may be detached or detaching.
             return;
         }
-        notifyFixedRotationTransform(false /* enabled */);
         final int originalRotation = getWindowConfiguration().getRotation();
         onConfigurationChanged(parent.getConfiguration());
         onCancelFixedRotationTransform(originalRotation);

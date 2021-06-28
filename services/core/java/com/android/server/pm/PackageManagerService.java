@@ -20,12 +20,15 @@ import static android.Manifest.permission.DELETE_PACKAGES;
 import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
+import static android.Manifest.permission.QUERY_ALL_PACKAGES;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.Intent.ACTION_MAIN;
+import static android.content.Intent.CATEGORY_BROWSABLE;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.EXTRA_LONG_VERSION_CODE;
@@ -348,6 +351,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
+import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
@@ -2612,39 +2616,43 @@ public class PackageManagerService extends IPackageManager.Stub
         PackageManagerService m = new PackageManagerService(injector, onlyCore, factoryTest);
         t.traceEnd(); // "create package manager"
 
-        injector.getCompatibility().registerListener(SELinuxMMAC.SELINUX_LATEST_CHANGES,
-                packageName -> {
-                    synchronized (m.mInstallLock) {
-                        final AndroidPackage pkg;
-                        final PackageSetting ps;
-                        final SharedUserSetting sharedUser;
-                        final String oldSeInfo;
-                        synchronized (m.mLock) {
-                            ps = m.mSettings.getPackageLPr(packageName);
-                            if (ps == null) {
-                                Slog.e(TAG, "Failed to find package setting " + packageName);
-                                return;
-                            }
-                            pkg = ps.pkg;
-                            sharedUser = ps.getSharedUser();
-                            oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
-                        }
-
-                        if (pkg == null) {
-                            Slog.e(TAG, "Failed to find package " + packageName);
-                            return;
-                        }
-                        final String newSeInfo = SELinuxMMAC.getSeInfo(pkg, sharedUser,
-                                m.mInjector.getCompatibility());
-
-                        if (!newSeInfo.equals(oldSeInfo)) {
-                            Slog.i(TAG, "Updating seInfo for package " + packageName + " from: "
-                                    + oldSeInfo + " to: " + newSeInfo);
-                            ps.getPkgState().setOverrideSeInfo(newSeInfo);
-                            m.prepareAppDataAfterInstallLIF(pkg);
-                        }
+        final CompatChange.ChangeListener selinuxChangeListener = packageName -> {
+            synchronized (m.mInstallLock) {
+                final AndroidPackage pkg;
+                final PackageSetting ps;
+                final SharedUserSetting sharedUser;
+                final String oldSeInfo;
+                synchronized (m.mLock) {
+                    ps = m.mSettings.getPackageLPr(packageName);
+                    if (ps == null) {
+                        Slog.e(TAG, "Failed to find package setting " + packageName);
+                        return;
                     }
-                });
+                    pkg = ps.pkg;
+                    sharedUser = ps.getSharedUser();
+                    oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
+                }
+
+                if (pkg == null) {
+                    Slog.e(TAG, "Failed to find package " + packageName);
+                    return;
+                }
+                final String newSeInfo = SELinuxMMAC.getSeInfo(pkg, sharedUser,
+                        m.mInjector.getCompatibility());
+
+                if (!newSeInfo.equals(oldSeInfo)) {
+                    Slog.i(TAG, "Updating seInfo for package " + packageName + " from: "
+                            + oldSeInfo + " to: " + newSeInfo);
+                    ps.getPkgState().setOverrideSeInfo(newSeInfo);
+                    m.prepareAppDataAfterInstallLIF(pkg);
+                }
+            }
+        };
+
+        injector.getCompatibility().registerListener(SELinuxMMAC.SELINUX_LATEST_CHANGES,
+                selinuxChangeListener);
+        injector.getCompatibility().registerListener(SELinuxMMAC.SELINUX_R_CHANGES,
+                selinuxChangeListener);
 
         m.installWhitelistedSystemPackages();
         ServiceManager.addService("package", m);
@@ -3667,8 +3675,6 @@ public class PackageManagerService extends IPackageManager.Stub
         PackageParser.readConfigUseRoundIcon(mContext.getResources());
 
         mServiceStartWithDelay = SystemClock.uptimeMillis() + (60 * 1000L);
-
-        Slog.i(TAG, "Fix for b/169414761 is applied");
     }
 
     /**
@@ -6204,6 +6210,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public List<String> getAllPackages() {
+        // Allow iorapd to call this method.
+        if (Binder.getCallingUid() != Process.IORAPD_UID) {
+            enforceSystemOrRootOrShell("getAllPackages is limited to privileged callers");
+        }
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         synchronized (mLock) {
@@ -6482,14 +6492,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     true /*allowDynamicSplits*/);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
-            final boolean queryMayBeFiltered =
-                    UserHandle.getAppId(filterCallingUid) >= Process.FIRST_APPLICATION_UID
-                            && !resolveForStart;
-
             final ResolveInfo bestChoice =
                     chooseBestActivity(
                             intent, resolvedType, flags, privateResolveFlags, query, userId,
-                            queryMayBeFiltered);
+                            queryMayBeFiltered(filterCallingUid, resolveForStart));
             final boolean nonBrowserOnly =
                     (privateResolveFlags & PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY) != 0;
             if (nonBrowserOnly && bestChoice != null && bestChoice.handleAllWebDataURI) {
@@ -6499,6 +6505,25 @@ public class PackageManagerService extends IPackageManager.Stub
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
+    }
+
+    /**
+     * Returns whether the query may be filtered to packages which are visible to the caller.
+     * Filtering occurs except in the following cases:
+     * <ul>
+     *     <li>system processes
+     *     <li>applications granted {@link android.Manifest.permission#QUERY_ALL_PACKAGES}
+     *     <li>when querying to start an app
+     * </ul>
+     *
+     * @param filterCallingUid the UID of the calling application
+     * @param queryForStart whether query is to start an app
+     * @return whether filtering may occur
+     */
+    private boolean queryMayBeFiltered(int filterCallingUid, boolean queryForStart) {
+        return UserHandle.getAppId(filterCallingUid) >= Process.FIRST_APPLICATION_UID
+                && checkUidPermission(QUERY_ALL_PACKAGES, filterCallingUid) != PERMISSION_GRANTED
+                && !queryForStart;
     }
 
     @Override
@@ -6866,7 +6891,7 @@ public class PackageManagerService extends IPackageManager.Stub
             boolean removeMatches, boolean debug, int userId) {
         return findPreferredActivityNotLocked(
                 intent, resolvedType, flags, query, priority, always, removeMatches, debug, userId,
-                UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID);
+                queryMayBeFiltered(Binder.getCallingUid(), /* queryForStart= */ false));
     }
 
     // TODO: handle preferred activities missing while user has amnesia
@@ -25550,14 +25575,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void deleteOatArtifactsOfPackage(String packageName) {
+    long deleteOatArtifactsOfPackage(String packageName) {
         final AndroidPackage pkg;
         final PackageSetting pkgSetting;
         synchronized (mLock) {
             pkg = mPackages.get(packageName);
             pkgSetting = mSettings.getPackageLPr(packageName);
         }
-        mDexManager.deleteOptimizedFiles(ArtUtils.createArtPackageInfo(pkg, pkgSetting));
+        return mDexManager.deleteOptimizedFiles(ArtUtils.createArtPackageInfo(pkg, pkgSetting));
     }
 
     Set<String> getUnusedPackages(long downgradeTimeThresholdMillis) {
