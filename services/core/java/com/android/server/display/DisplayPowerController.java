@@ -393,7 +393,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // The last brightness that was set by the user and not temporary. Set to
     // PowerManager.BRIGHTNESS_INVALID_FLOAT when a brightness has yet to be recorded.
-    private float mLastUserSetScreenBrightness;
+    private float mLastUserSetScreenBrightness = Float.NaN;
 
     // The screen brightness setting has changed but not taken effect yet. If this is different
     // from the current screen brightness setting then this is coming from something other than us
@@ -423,6 +423,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // adjustment slider but hasn't settled on a choice yet. Set to
     // PowerManager.BRIGHTNESS_INVALID_FLOAT when there's no temporary adjustment set.
     private float mTemporaryAutoBrightnessAdjustment;
+
+    // Whether a reduce bright colors (rbc) change has been initiated by the user. We want to
+    // retain the current backlight level when rbc is toggled, since rbc additionally makes the
+    // screen appear dimmer using screen colors rather than backlight levels, and therefore we
+    // don't actually want to compensate for this by then in/decreasing the backlight when
+    // toggling this feature.
+    // This should be false during system start up.
+    private boolean mPendingUserRbcChange;
 
     // Animators.
     private ObjectAnimator mColorFadeOnAnimator;
@@ -555,24 +563,25 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mCdsi = LocalServices.getService(ColorDisplayServiceInternal.class);
             boolean active = mCdsi.setReduceBrightColorsListener(new ReduceBrightColorsListener() {
                 @Override
-                public void onReduceBrightColorsActivationChanged(boolean activated) {
-                    applyReduceBrightColorsSplineAdjustment();
+                public void onReduceBrightColorsActivationChanged(boolean activated,
+                        boolean userInitiated) {
+                    applyReduceBrightColorsSplineAdjustment(userInitiated);
                 }
 
                 @Override
                 public void onReduceBrightColorsStrengthChanged(int strength) {
-                    applyReduceBrightColorsSplineAdjustment();
+                    applyReduceBrightColorsSplineAdjustment(/*userInitiated*/ false);
                 }
             });
             if (active) {
-                applyReduceBrightColorsSplineAdjustment();
+                applyReduceBrightColorsSplineAdjustment(/*userInitiated*/ false);
             }
         } else {
             mCdsi = null;
         }
     }
 
-    private void applyReduceBrightColorsSplineAdjustment() {
+    private void applyReduceBrightColorsSplineAdjustment(boolean userInitiated) {
         if (mBrightnessMapper == null) {
             Log.w(TAG, "No brightness mapping available to recalculate splines");
             return;
@@ -583,6 +592,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             adjustedNits[i] = mCdsi.getReduceBrightColorsAdjustedBrightnessNits(mNitsRange[i]);
         }
         mBrightnessMapper.recalculateSplines(mCdsi.isReduceBrightColorsActivated(), adjustedNits);
+        mPendingUserRbcChange = userInitiated;
+        sendUpdatePowerState();
     }
 
     /**
@@ -914,7 +925,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private void reloadReduceBrightColours() {
         if (mCdsi != null && mCdsi.isReduceBrightColorsActivated()) {
-            applyReduceBrightColorsSplineAdjustment();
+            applyReduceBrightColorsSplineAdjustment(/*userInitiated*/ false);
         }
     }
 
@@ -2040,15 +2051,21 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private boolean updateUserSetScreenBrightness() {
+        final boolean brightnessSplineChanged = mPendingUserRbcChange;
+        if (mPendingUserRbcChange && !Float.isNaN(mCurrentScreenBrightnessSetting)) {
+            mLastUserSetScreenBrightness = mCurrentScreenBrightnessSetting;
+        }
+        mPendingUserRbcChange = false;
+
         if ((Float.isNaN(mPendingScreenBrightnessSetting)
                 || mPendingScreenBrightnessSetting < 0.0f)) {
-            return false;
+            return brightnessSplineChanged;
         }
         if (BrightnessSynchronizer.floatEquals(
                 mCurrentScreenBrightnessSetting, mPendingScreenBrightnessSetting)) {
             mPendingScreenBrightnessSetting = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             mTemporaryScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            return false;
+            return brightnessSplineChanged;
         }
         setCurrentScreenBrightness(mPendingScreenBrightnessSetting);
         mLastUserSetScreenBrightness = mPendingScreenBrightnessSetting;
