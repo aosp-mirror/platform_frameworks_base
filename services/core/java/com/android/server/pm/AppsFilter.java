@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.UserHandle.USER_ALL;
-import static android.os.UserHandle.USER_NULL;
 import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
@@ -839,14 +838,8 @@ public class AppsFilter implements Watchable, Snappable {
 
     private void updateEntireShouldFilterCache(int subjectUserId) {
         mStateProvider.runWithState((settings, users) -> {
-            int userId = USER_NULL;
-            for (int u = 0; u < users.length; u++) {
-                if (subjectUserId == users[u].id) {
-                    userId = subjectUserId;
-                    break;
-                }
-            }
-            if (userId == USER_NULL) {
+            int userId = subjectUserId;
+            if (!ArrayUtils.contains(users, subjectUserId)) {
                 Slog.e(TAG, "We encountered a new user that isn't a member of known users, "
                         + "updating the whole cache");
                 userId = USER_ALL;
@@ -868,7 +861,7 @@ public class AppsFilter implements Watchable, Snappable {
                             if (UserHandle.getUserId(uid2) == userId) {
                                 continue;
                             }
-                            cache.put(uid1, uid2, mShouldFilterCache.get(uid1, uid2));
+                            cache.setValueAt(uid1, uid2, mShouldFilterCache.valueAt(uid1, uid2));
                         }
                     }
                 }
