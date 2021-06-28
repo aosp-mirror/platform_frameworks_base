@@ -453,7 +453,6 @@ public class PeopleTileViewHelper {
                 views.setViewVisibility(R.id.availability, View.GONE);
             }
 
-            views.setBoolean(R.id.image, "setClipToOutline", true);
             views.setImageViewBitmap(R.id.person_icon,
                     getPersonIconBitmap(mContext, mTile, maxAvatarSize));
             return views;
@@ -481,7 +480,7 @@ public class PeopleTileViewHelper {
                         PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY,
                         mTile.getNotificationKey());
             }
-            views.setOnClickPendingIntent(R.id.item, PendingIntent.getActivity(
+            views.setOnClickPendingIntent(android.R.id.background, PendingIntent.getActivity(
                     mContext,
                     mAppWidgetId,
                     activityIntent,
@@ -504,7 +503,7 @@ public class PeopleTileViewHelper {
         int outerPadding = mLayoutSize == LAYOUT_LARGE ? 16 : 8;
         int outerPaddingPx = dpToPx(outerPadding);
         views.setViewPadding(
-                R.id.item,
+                android.R.id.background,
                 outerPaddingPx,
                 outerPaddingPx,
                 outerPaddingPx,
