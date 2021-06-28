@@ -763,9 +763,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES,
                 GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_SELECTION_VALUES);
         dumpSetting(s, p,
-                Settings.Global.ANGLE_ALLOWLIST,
-                GlobalSettingsProto.Gpu.ANGLE_ALLOWLIST);
-        dumpSetting(s, p,
                 Settings.Global.ANGLE_EGL_FEATURES,
                 GlobalSettingsProto.Gpu.ANGLE_EGL_FEATURES);
         dumpSetting(s, p,

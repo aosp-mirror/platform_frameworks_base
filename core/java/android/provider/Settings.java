@@ -13683,13 +13683,6 @@ public final class Settings {
                 "angle_gl_driver_selection_values";
 
         /**
-         * List of package names that should check ANGLE rules
-         * @hide
-         */
-        @Readable
-        public static final String ANGLE_ALLOWLIST = "angle_allowlist";
-
-        /**
          * Lists of ANGLE EGL features for debugging.
          * Each list of features is separated by a comma, each feature in each list is separated by
          * a colon.
