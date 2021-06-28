@@ -28,6 +28,7 @@ import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.permission.PermissionManager;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
 import android.speech.IRecognitionServiceManagerCallback;
@@ -136,6 +137,10 @@ final class SpeechRecognitionManagerServiceImpl extends
                                 @NonNull AttributionSource attributionSource)
                                         throws RemoteException {
                             attributionSource.enforceCallingUid();
+                            if (!attributionSource.isTrusted(mMaster.getContext())) {
+                                mMaster.getContext().getSystemService(PermissionManager.class)
+                                        .registerAttributionSource(attributionSource);
+                            }
                             service.startListening(recognizerIntent, listener, attributionSource);
                         }
 
