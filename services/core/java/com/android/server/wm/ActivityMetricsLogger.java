@@ -609,13 +609,27 @@ class ActivityMetricsLogger {
             return;
         }
 
+        // If the launched activity is started from an existing active transition, it will be put
+        // into the transition info.
         if (info != null && info.canCoalesce(launchedActivity)) {
-            // If we are already in an existing transition on the same display, only update the
-            // activity name, but not the other attributes.
+            if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunched consecutive launch");
 
-            if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunched update launched activity");
+            final boolean crossPackage =
+                    !info.mLastLaunchedActivity.packageName.equals(launchedActivity.packageName);
+            // The trace name uses package name so different packages should be separated.
+            if (crossPackage) {
+                stopLaunchTrace(info);
+            }
+
+            mLastTransitionInfo.remove(info.mLastLaunchedActivity);
             // Coalesce multiple (trampoline) activities from a single sequence together.
             info.setLatestLaunchedActivity(launchedActivity);
+            // Update the latest one so it can be found when reporting fully-drawn.
+            mLastTransitionInfo.put(launchedActivity, info);
+
+            if (crossPackage) {
+                startLaunchTrace(info);
+            }
             return;
         }
 
