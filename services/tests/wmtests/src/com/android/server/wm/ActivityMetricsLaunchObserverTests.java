@@ -270,9 +270,16 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     @Test
     public void testOnReportFullyDrawn() {
+        // Create an invisible event that should be cancelled after the next event starts.
+        onActivityLaunched(mTrampolineActivity);
+        mTrampolineActivity.mVisibleRequested = false;
+
         mActivityOptions = ActivityOptions.makeBasic();
         mActivityOptions.setSourceInfo(SourceInfo.TYPE_LAUNCHER, SystemClock.uptimeMillis() - 10);
-        onActivityLaunched(mTopActivity);
+        onIntentStarted(mTopActivity.intent);
+        notifyActivityLaunched(START_SUCCESS, mTopActivity);
+        verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(mTopActivity), anyInt());
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mTrampolineActivity));
 
         // The activity reports fully drawn before windows drawn, then the fully drawn event will
         // be pending (see {@link WindowingModeTransitionInfo#pendingFullyDrawn}).
@@ -287,6 +294,10 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mTopActivity), anyLong());
         verifyOnActivityLaunchFinished(mTopActivity);
         verifyNoMoreInteractions(mLaunchObserver);
+
+        final ActivityMetricsLogger.TransitionInfoSnapshot fullyDrawnInfo = mActivityMetricsLogger
+                .logAppTransitionReportedDrawn(mTopActivity, false /* restoredFromBundle */);
+        assertWithMessage("Invisible event must be dropped").that(fullyDrawnInfo).isNull();
     }
 
     private void onActivityLaunchedTrampoline() {
@@ -480,6 +491,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     @Test
     public void testConsecutiveLaunchWithDifferentWindowingMode() {
         mTopActivity.setWindowingMode(WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+        mTrampolineActivity.mVisibleRequested = true;
         onActivityLaunched(mTrampolineActivity);
         mActivityMetricsLogger.notifyActivityLaunching(mTopActivity.intent,
                 mTrampolineActivity /* caller */, mTrampolineActivity.getUid());
