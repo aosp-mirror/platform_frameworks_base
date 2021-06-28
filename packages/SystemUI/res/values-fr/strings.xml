@@ -733,8 +733,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatique"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Aucun son ni vibration"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Aucun son ni vibration, s\'affiche plus bas dans la section des conversations"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Peut sonner ou vibrer en fonction des paramètres du téléphone"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Peut sonner ou vibrer en fonction des paramètres du téléphone. Les conversations provenant de <xliff:g id="APP_NAME">%1$s</xliff:g> s\'affichent sous forme de bulles par défaut."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Son ou vibreur, selon les paramètres du téléphone"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Son ou vibreur, selon les paramètres du téléphone. Les conversations provenant de <xliff:g id="APP_NAME">%1$s</xliff:g> s\'affichent sous forme de bulles par défaut."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Attire votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Laisser le système déterminer si cette notification doit être accompagnée d\'un son ou d\'une vibration"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;État :&lt;/b&gt; Élevée à la catégorie \"Par défaut\""</string>
@@ -1115,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Conversation ouverte"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversation"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Appuyez sur une conversation pour l\'ajouter à votre écran d\'accueil"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Revenez quand vous aurez reçu des messages"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Conversations prioritaires"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversations récentes"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1144,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"+ de <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Voir les messages récents, les appels manqués et les notifications d\'état"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversation"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Mise en pause par Ne pas déranger"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> a envoyé un message"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> a envoyé une image"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Un problème est survenu au niveau de la lecture de votre outil de mesure de batterie"</string>

@@ -1139,7 +1139,8 @@
     <string name="basic_status" msgid="2315371112182658176">"محادثة مفتوحة"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"أدوات المحادثة"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"انقر على محادثة لإضافتها إلى \"الشاشة الرئيسية\"."</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"يمكنك الرجوع إلى هذه الأداة عندما تتلقّى بعض الرسائل."</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"المحادثات ذات الأولوية"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"المحادثات الحديثة"</string>
     <string name="okay" msgid="6490552955618608554">"حسنًا"</string>
@@ -1168,8 +1169,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"+<xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"عرض أحدث الرسائل والمكالمات الفائتة والتغييرات في الحالة"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"محادثة"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"تم إيقاف الإشعار مؤقتًا من خلال ميزة \"عدم الإزعاج\""</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"تم إرسال رسالة من <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"تم إرسال صورة من <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"حدثت مشكلة أثناء قراءة مقياس مستوى شحن البطارية."</string>

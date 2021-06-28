@@ -1115,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Åpen samtale"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Samtalemoduler"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Trykk på en samtale for å legge den til på startskjermen"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Sjekk her igjen når du mottar noen meldinger"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Prioriterte samtaler"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Nylige samtaler"</string>
     <string name="okay" msgid="6490552955618608554">"Ok"</string>
@@ -1144,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Se nylige meldinger, tapte anrop og statusoppdateringer"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Samtale"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Satt på pause av «Ikke forstyrr»"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> har sendt en melding"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> har sendt et bilde"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Kunne ikke lese batterimåleren"</string>
