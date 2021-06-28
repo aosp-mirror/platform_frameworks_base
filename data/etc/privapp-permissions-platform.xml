@@ -430,6 +430,8 @@ applications that come with the platform
         <!-- Permissions required for CTS test - TVInputManagerTest -->
         <permission name="android.permission.ACCESS_TUNED_INFO" />
         <permission name="android.permission.TV_INPUT_HARDWARE" />
+        <permission name="com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS" />
+        <permission name="com.android.providers.tv.permission.WRITE_EPG_DATA"/>
         <!-- Permission required for CTS test - PrivilegedLocationPermissionTest -->
         <permission name="android.permission.LOCATION_HARDWARE" />
         <!-- Permissions required for GTS test - GtsDialerAudioTestCases -->
