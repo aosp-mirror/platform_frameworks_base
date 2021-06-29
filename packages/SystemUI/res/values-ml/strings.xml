@@ -1115,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"സംഭാഷണം തുറക്കുക"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"സംഭാഷണ വിജറ്റുകൾ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"നിങ്ങളുടെ ഹോം സ്‌ക്രീനിൽ ചേർക്കാൻ സംഭാഷണത്തിൽ ടാപ്പ് ചെയ്യുക"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"കുറച്ച് സന്ദേശങ്ങൾ ലഭിച്ച ശേഷം ഇവിടെ വീണ്ടും പരിശോധിക്കൂ"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"മുൻഗണനാ സംഭാഷണങ്ങൾ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"അടുത്തിടെയുള്ള സംഭാഷണങ്ങൾ"</string>
     <string name="okay" msgid="6490552955618608554">"ശരി"</string>
@@ -1144,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"അടുത്തിടെയുള്ള സന്ദേശങ്ങൾ, മിസ്‌ഡ് കോൾ, സ്റ്റാറ്റസ് അപ്‌ഡേറ്റുകൾ എന്നിവ കാണൂ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"സംഭാഷണം"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"\'ശല്യപ്പെടുത്തരുത്\' ഓണായതിനാൽ തൽക്കാലം നിർത്തി"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g>, ഒരു സന്ദേശം അയച്ചു"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>, ഒരു ചിത്രം അയച്ചു"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"നിങ്ങളുടെ ബാറ്ററി മീറ്റർ വായിക്കുന്നതിൽ പ്രശ്‌നമുണ്ട്"</string>

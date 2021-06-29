@@ -452,9 +452,9 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Huenda kompyuta kibao ikazima hivi karibuni (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Huenda kifaa kikazima hivi karibuni (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Zimesalia <xliff:g id="TIME">%1$s</xliff:g> hadi ijae chaji"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> zimesalia hadi ijae chaji"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Hali ya kuchaji kwa muda imedhibitiwa"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Zimesalia <xliff:g id="TIME">%1$s</xliff:g> ijae chaji"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> zimesalia ijae chaji"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Kuchaji kumedhibitiwa kwa muda"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Haijulikani"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Inachaji"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Inachaji kwa kasi"</string>

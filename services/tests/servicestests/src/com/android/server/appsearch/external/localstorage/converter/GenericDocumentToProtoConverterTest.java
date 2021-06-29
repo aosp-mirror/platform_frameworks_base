@@ -20,10 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.app.appsearch.GenericDocument;
 
-import com.android.server.appsearch.proto.DocumentProto;
-import com.android.server.appsearch.proto.PropertyConfigProto;
-import com.android.server.appsearch.proto.PropertyProto;
-import com.android.server.appsearch.proto.SchemaTypeConfigProto;
+import com.android.server.appsearch.icing.proto.DocumentProto;
+import com.android.server.appsearch.icing.proto.PropertyConfigProto;
+import com.android.server.appsearch.icing.proto.PropertyProto;
+import com.android.server.appsearch.icing.proto.SchemaTypeConfigProto;
 import com.android.server.appsearch.protobuf.ByteString;
 
 import com.google.common.collect.ImmutableMap;

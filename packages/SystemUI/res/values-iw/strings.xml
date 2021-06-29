@@ -750,7 +750,7 @@
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"מוצגת בחלק העליון של קטע ההתראות וכתמונת פרופיל במסך הנעילה"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מפריעה במצב \'נא לא להפריע\'"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה הצפה ומפריעה במצב \'נא לא להפריע\'"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה צפה ומפריעה במצב \'נא לא להפריע\'"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"הגדרות"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"בעדיפות גבוהה"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא תומכת בתכונות השיחה"</string>
@@ -1127,7 +1127,8 @@
     <string name="basic_status" msgid="2315371112182658176">"פתיחת שיחה"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ווידג\'טים של שיחות"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"יש להקיש על שיחה כדי להוסיף אותה למסך הבית"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"אפשר לחזור לכאן ולהתעדכן לאחר קבלת מספר הודעות"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"שיחות בעדיפות גבוהה"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"שיחות אחרונות"</string>
     <string name="okay" msgid="6490552955618608554">"בסדר"</string>
@@ -1156,8 +1157,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ההודעות האחרונות, שיחות שלא נענו ועדכוני סטטוס"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"שיחה"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"ההתראה הושהתה על ידי \'נא לא להפריע\'"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> שלח/ה הודעה"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> שלח/ה תמונה"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"בעיה בקריאת מדדי הסוללה"</string>
