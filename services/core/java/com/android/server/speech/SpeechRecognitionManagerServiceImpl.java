@@ -24,6 +24,7 @@ import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.IBinder;
@@ -31,6 +32,7 @@ import android.os.RemoteException;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
 import android.speech.IRecognitionServiceManagerCallback;
+import android.speech.RecognitionService;
 import android.speech.SpeechRecognizer;
 import android.util.Slog;
 
@@ -39,6 +41,7 @@ import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -225,6 +228,10 @@ final class SpeechRecognitionManagerServiceImpl extends
                 }
             }
 
+            if (serviceComponent != null && !componentMapsToRecognitionService(serviceComponent)) {
+                return null;
+            }
+
             RemoteSpeechRecognitionService service =
                     new RemoteSpeechRecognitionService(
                             getContext(), serviceComponent, getUserId(), callingUid);
@@ -239,6 +246,25 @@ final class SpeechRecognitionManagerServiceImpl extends
 
             return service;
         }
+    }
+
+    private boolean componentMapsToRecognitionService(@NonNull ComponentName serviceComponent) {
+        List<ResolveInfo> resolveInfos =
+                getContext().getPackageManager().queryIntentServices(
+                        new Intent(RecognitionService.SERVICE_INTERFACE), 0);
+        if (resolveInfos == null) {
+            return false;
+        }
+
+        for (ResolveInfo ri : resolveInfos) {
+            if (ri.serviceInfo != null
+                    && serviceComponent.equals(ri.serviceInfo.getComponentName())) {
+                return true;
+            }
+        }
+
+        Slog.w(TAG, "serviceComponent is not RecognitionService: " + serviceComponent);
+        return false;
     }
 
     private void removeService(int callingUid, RemoteSpeechRecognitionService service) {
