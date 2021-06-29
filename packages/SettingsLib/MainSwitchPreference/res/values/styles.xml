@@ -23,9 +23,6 @@
         <item name="android:textColor">@android:color/black</item>
     </style>
 
-    <style name="MainSwitch.Settingslib" parent="@android:style/Widget.Material.CompoundButton.Switch">
-        <item name="android:switchMinWidth">@dimen/settingslib_min_switch_width</item>
-    </style>
 
     <style name="SwitchBar.Switch.Settingslib" parent="@android:style/Widget.Material.CompoundButton.Switch">
         <item name="android:trackTint">@color/settingslib_switchbar_switch_track_tint</item>

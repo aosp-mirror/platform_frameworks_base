@@ -144,6 +144,15 @@ public class CacheOomRankerTest {
 
         mExecutor.init();
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                CacheOomRanker.KEY_OOM_RE_RANKING_PRESERVE_TOP_N_APPS,
+                Integer.toString(CacheOomRanker.DEFAULT_PRESERVE_TOP_N_APPS + 1),
+                false);
+        mExecutor.waitForLatch();
+        assertThat(mCacheOomRanker.mPreserveTopNApps)
+                .isEqualTo(CacheOomRanker.DEFAULT_PRESERVE_TOP_N_APPS + 1);
+
+        mExecutor.init();
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CacheOomRanker.KEY_OOM_RE_RANKING_LRU_WEIGHT,
                 Float.toString(CacheOomRanker.DEFAULT_OOM_RE_RANKING_LRU_WEIGHT + 0.1f),
                 false);
@@ -173,6 +182,7 @@ public class CacheOomRankerTest {
     @Test
     public void reRankLruCachedApps_lruImpactsOrdering() throws InterruptedException {
         setConfig(/* numberToReRank= */ 5,
+                /* preserveTopNApps= */ 0,
                 /* usesWeight= */ 0.0f,
                 /* pssWeight= */ 0.0f,
                 /* lruWeight= */1.0f);
@@ -211,6 +221,7 @@ public class CacheOomRankerTest {
     @Test
     public void reRankLruCachedApps_rssImpactsOrdering() throws InterruptedException {
         setConfig(/* numberToReRank= */ 6,
+                /* preserveTopNApps= */ 0,
                 /* usesWeight= */ 0.0f,
                 /* pssWeight= */ 1.0f,
                 /* lruWeight= */ 0.0f);
@@ -251,6 +262,7 @@ public class CacheOomRankerTest {
     @Test
     public void reRankLruCachedApps_usesImpactsOrdering() throws InterruptedException {
         setConfig(/* numberToReRank= */ 4,
+                /* preserveTopNApps= */ 0,
                 /* usesWeight= */ 1.0f,
                 /* pssWeight= */ 0.0f,
                 /* lruWeight= */ 0.0f);
@@ -286,23 +298,24 @@ public class CacheOomRankerTest {
     }
 
     @Test
-    public void reRankLruCachedApps_notEnoughProcesses() throws InterruptedException {
+    public void reRankLruCachedApps_fewProcesses() throws InterruptedException {
         setConfig(/* numberToReRank= */ 4,
+                /* preserveTopNApps= */ 0,
                 /* usesWeight= */ 1.0f,
                 /* pssWeight= */ 0.0f,
                 /* lruWeight= */ 0.0f);
 
         ProcessList list = new ProcessList();
         ArrayList<ProcessRecord> processList = list.getLruProcessesLSP();
-        ProcessRecord unknownAdj1 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+        ProcessRecord used1000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
                 NOW.minus(40, ChronoUnit.MINUTES).toEpochMilli(), 10 * 1024L, 1000);
-        processList.add(unknownAdj1);
-        ProcessRecord unknownAdj2 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+        processList.add(used1000);
+        ProcessRecord used2000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
                 NOW.minus(42, ChronoUnit.MINUTES).toEpochMilli(), 20 * 1024L, 2000);
-        processList.add(unknownAdj2);
-        ProcessRecord unknownAdj3 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+        processList.add(used2000);
+        ProcessRecord used10 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
                 NOW.minus(15, ChronoUnit.MINUTES).toEpochMilli(), 100 * 1024L, 10);
-        processList.add(unknownAdj3);
+        processList.add(used10);
         ProcessRecord foregroundAdj = nextProcessRecord(ProcessList.FOREGROUND_APP_ADJ,
                 NOW.minus(17, ChronoUnit.MINUTES).toEpochMilli(), 2 * 1024L, 20);
         processList.add(foregroundAdj);
@@ -314,17 +327,156 @@ public class CacheOomRankerTest {
         processList.add(systemAdj);
         list.setLruProcessServiceStartLSP(processList.size());
 
-        // 6 Processes but only 3 in eligible for cache so no re-ranking.
         mCacheOomRanker.reRankLruCachedAppsLSP(processList, list.getLruProcessServiceStartLOSP());
 
-        // All positions unchanged.
-        assertThat(processList).containsExactly(unknownAdj1, unknownAdj2, unknownAdj3,
+        // 6 processes, only 3 in eligible for cache, so only those are re-ranked.
+        assertThat(processList).containsExactly(used10, used1000, used2000,
                 foregroundAdj, serviceAdj, systemAdj).inOrder();
     }
 
     @Test
-    public void reRankLruCachedApps_notEnoughNonServiceProcesses() throws InterruptedException {
+    public void reRankLruCachedApps_fewNonServiceProcesses() throws InterruptedException {
         setConfig(/* numberToReRank= */ 4,
+                /* preserveTopNApps= */ 0,
+                /* usesWeight= */ 1.0f,
+                /* pssWeight= */ 0.0f,
+                /* lruWeight= */ 0.0f);
+
+        ProcessList list = new ProcessList();
+        ArrayList<ProcessRecord> processList = list.getLruProcessesLSP();
+        ProcessRecord used1000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(40, ChronoUnit.MINUTES).toEpochMilli(), 10 * 1024L, 1000);
+        processList.add(used1000);
+        ProcessRecord used2000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(42, ChronoUnit.MINUTES).toEpochMilli(), 20 * 1024L, 2000);
+        processList.add(used2000);
+        ProcessRecord used10 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(15, ChronoUnit.MINUTES).toEpochMilli(), 100 * 1024L, 10);
+        processList.add(used10);
+        ProcessRecord service1 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(17, ChronoUnit.MINUTES).toEpochMilli(), 2 * 1024L, 20);
+        processList.add(service1);
+        ProcessRecord service2 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(30, ChronoUnit.MINUTES).toEpochMilli(), 15 * 1024L, 500);
+        processList.add(service2);
+        ProcessRecord service3 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(30, ChronoUnit.MINUTES).toEpochMilli(), 16 * 1024L, 200);
+        processList.add(service3);
+        list.setLruProcessServiceStartLSP(3);
+
+        mCacheOomRanker.reRankLruCachedAppsLSP(processList, list.getLruProcessServiceStartLOSP());
+
+        // Services unchanged, rest re-ranked.
+        assertThat(processList).containsExactly(used10, used1000, used2000, service1, service2,
+                service3).inOrder();
+    }
+
+    @Test
+    public void reRankLruCachedApps_manyProcessesThenFew() throws InterruptedException {
+        setConfig(/* numberToReRank= */ 6,
+                /* preserveTopNApps= */ 0,
+                /* usesWeight= */ 1.0f,
+                /* pssWeight= */ 0.0f,
+                /* lruWeight= */ 0.0f);
+
+        ProcessList set1List = new ProcessList();
+        ArrayList<ProcessRecord> set1ProcessList = set1List.getLruProcessesLSP();
+        ProcessRecord set1Used1000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(40, ChronoUnit.MINUTES).toEpochMilli(), 10 * 1024L, 1000);
+        set1ProcessList.add(set1Used1000);
+        ProcessRecord set1Used2000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(42, ChronoUnit.MINUTES).toEpochMilli(), 20 * 1024L, 2000);
+        set1ProcessList.add(set1Used2000);
+        ProcessRecord set1Used10 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(15, ChronoUnit.MINUTES).toEpochMilli(), 100 * 1024L, 10);
+        set1ProcessList.add(set1Used10);
+        ProcessRecord set1Uses20 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(17, ChronoUnit.MINUTES).toEpochMilli(), 2 * 1024L, 20);
+        set1ProcessList.add(set1Uses20);
+        ProcessRecord set1Uses500 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(30, ChronoUnit.MINUTES).toEpochMilli(), 15 * 1024L, 500);
+        set1ProcessList.add(set1Uses500);
+        ProcessRecord set1Uses200 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(30, ChronoUnit.MINUTES).toEpochMilli(), 16 * 1024L, 200);
+        set1ProcessList.add(set1Uses200);
+        set1List.setLruProcessServiceStartLSP(set1ProcessList.size());
+
+        mCacheOomRanker.reRankLruCachedAppsLSP(set1ProcessList,
+                set1List.getLruProcessServiceStartLOSP());
+        assertThat(set1ProcessList).containsExactly(set1Used10, set1Uses20, set1Uses200,
+                set1Uses500, set1Used1000, set1Used2000).inOrder();
+
+        ProcessList set2List = new ProcessList();
+        ArrayList<ProcessRecord> set2ProcessList = set2List.getLruProcessesLSP();
+        ProcessRecord set2Used1000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(40, ChronoUnit.MINUTES).toEpochMilli(), 10 * 1024L, 1000);
+        set2ProcessList.add(set2Used1000);
+        ProcessRecord set2Used2000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(42, ChronoUnit.MINUTES).toEpochMilli(), 20 * 1024L, 2000);
+        set2ProcessList.add(set2Used2000);
+        ProcessRecord set2Used10 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(15, ChronoUnit.MINUTES).toEpochMilli(), 100 * 1024L, 10);
+        set2ProcessList.add(set2Used10);
+        ProcessRecord set2ForegroundAdj = nextProcessRecord(ProcessList.FOREGROUND_APP_ADJ,
+                NOW.minus(17, ChronoUnit.MINUTES).toEpochMilli(), 2 * 1024L, 20);
+        set2ProcessList.add(set2ForegroundAdj);
+        ProcessRecord set2ServiceAdj = nextProcessRecord(ProcessList.SERVICE_ADJ,
+                NOW.minus(30, ChronoUnit.MINUTES).toEpochMilli(), 15 * 1024L, 500);
+        set2ProcessList.add(set2ServiceAdj);
+        ProcessRecord set2SystemAdj = nextProcessRecord(ProcessList.SYSTEM_ADJ,
+                NOW.minus(30, ChronoUnit.MINUTES).toEpochMilli(), 16 * 1024L, 200);
+        set2ProcessList.add(set2SystemAdj);
+        set2List.setLruProcessServiceStartLSP(set2ProcessList.size());
+
+        mCacheOomRanker.reRankLruCachedAppsLSP(set2ProcessList,
+                set2List.getLruProcessServiceStartLOSP());
+        assertThat(set2ProcessList).containsExactly(set2Used10, set2Used1000, set2Used2000,
+                set2ForegroundAdj, set2ServiceAdj, set2SystemAdj).inOrder();
+    }
+
+    @Test
+    public void reRankLruCachedApps_preservesTopNApps() throws InterruptedException {
+        setConfig(/* numberToReRank= */ 6,
+                /* preserveTopNApps= */ 3,
+                /* usesWeight= */ 1.0f,
+                /* pssWeight= */ 0.0f,
+                /* lruWeight= */ 0.0f);
+
+        ProcessList list = new ProcessList();
+        ArrayList<ProcessRecord> processList = list.getLruProcessesLSP();
+        ProcessRecord used1000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(40, ChronoUnit.MINUTES).toEpochMilli(), 10 * 1024L, 1000);
+        processList.add(used1000);
+        ProcessRecord used2000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(42, ChronoUnit.MINUTES).toEpochMilli(), 20 * 1024L, 2000);
+        processList.add(used2000);
+        ProcessRecord used10 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(15, ChronoUnit.MINUTES).toEpochMilli(), 100 * 1024L, 10);
+        processList.add(used10);
+        // Preserving the top 3 processes, so these should not be re-ranked.
+        ProcessRecord used20 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(17, ChronoUnit.MINUTES).toEpochMilli(), 2 * 1024L, 20);
+        processList.add(used20);
+        ProcessRecord used500 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(30, ChronoUnit.MINUTES).toEpochMilli(), 15 * 1024L, 500);
+        processList.add(used500);
+        ProcessRecord used200 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(30, ChronoUnit.MINUTES).toEpochMilli(), 16 * 1024L, 200);
+        processList.add(used200);
+        list.setLruProcessServiceStartLSP(processList.size());
+
+        mCacheOomRanker.reRankLruCachedAppsLSP(processList, list.getLruProcessServiceStartLOSP());
+
+        // First 3 ordered by uses, then last processes position unchanged.
+        assertThat(processList).containsExactly(used10, used1000, used2000, used20, used500,
+                used200).inOrder();
+    }
+
+    @Test
+    public void reRankLruCachedApps_preservesTopNApps_allAppsUnchanged()
+            throws InterruptedException {
+        setConfig(/* numberToReRank= */ 6,
+                /* preserveTopNApps= */ 100,
                 /* usesWeight= */ 1.0f,
                 /* pssWeight= */ 0.0f,
                 /* lruWeight= */ 0.0f);
@@ -349,21 +501,65 @@ public class CacheOomRankerTest {
         ProcessRecord used200 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
                 NOW.minus(30, ChronoUnit.MINUTES).toEpochMilli(), 16 * 1024L, 200);
         processList.add(used200);
-        list.setLruProcessServiceStartLSP(3);
+        list.setLruProcessServiceStartLSP(processList.size());
 
         mCacheOomRanker.reRankLruCachedAppsLSP(processList, list.getLruProcessServiceStartLOSP());
 
-        // All positions unchanged.
+        // Nothing reordered, as we preserve the top 100 apps.
         assertThat(processList).containsExactly(used1000, used2000, used10, used20, used500,
                 used200).inOrder();
     }
 
-    private void setConfig(int numberToReRank, float usesWeight, float pssWeight, float lruWeight)
+    @Test
+    public void reRankLruCachedApps_preservesTopNApps_negativeReplacedWithDefault()
+            throws InterruptedException {
+        setConfig(/* numberToReRank= */ 6,
+                /* preserveTopNApps= */ -100,
+                /* usesWeight= */ 1.0f,
+                /* pssWeight= */ 0.0f,
+                /* lruWeight= */ 0.0f);
+
+        ProcessList list = new ProcessList();
+        ArrayList<ProcessRecord> processList = list.getLruProcessesLSP();
+        ProcessRecord used1000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(40, ChronoUnit.MINUTES).toEpochMilli(), 10 * 1024L, 1000);
+        processList.add(used1000);
+        ProcessRecord used2000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(42, ChronoUnit.MINUTES).toEpochMilli(), 20 * 1024L, 2000);
+        processList.add(used2000);
+        ProcessRecord used10 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(15, ChronoUnit.MINUTES).toEpochMilli(), 100 * 1024L, 10);
+        processList.add(used10);
+        // Negative preserveTopNApps interpreted as the default (3), so the last three are unranked.
+        ProcessRecord used20 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(17, ChronoUnit.MINUTES).toEpochMilli(), 2 * 1024L, 20);
+        processList.add(used20);
+        ProcessRecord used500 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(30, ChronoUnit.MINUTES).toEpochMilli(), 15 * 1024L, 500);
+        processList.add(used500);
+        ProcessRecord used200 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
+                NOW.minus(30, ChronoUnit.MINUTES).toEpochMilli(), 16 * 1024L, 200);
+        processList.add(used200);
+        list.setLruProcessServiceStartLSP(processList.size());
+
+        mCacheOomRanker.reRankLruCachedAppsLSP(processList, list.getLruProcessServiceStartLOSP());
+
+        // First 3 apps re-ranked, as preserveTopNApps is interpreted as 3.
+        assertThat(processList).containsExactly(used10, used1000, used2000, used20, used500,
+                used200).inOrder();
+    }
+
+    private void setConfig(int numberToReRank, int preserveTopNApps, float usesWeight,
+            float pssWeight, float lruWeight)
             throws InterruptedException {
         mExecutor.init(4);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CacheOomRanker.KEY_OOM_RE_RANKING_NUMBER_TO_RE_RANK,
                 Integer.toString(numberToReRank),
+                false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                CacheOomRanker.KEY_OOM_RE_RANKING_PRESERVE_TOP_N_APPS,
+                Integer.toString(preserveTopNApps),
                 false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CacheOomRanker.KEY_OOM_RE_RANKING_LRU_WEIGHT,

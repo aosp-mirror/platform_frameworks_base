@@ -398,13 +398,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         registerStatsCallbacks();
     }
 
-    /**
-     * Notifies BatteryStatsService that the system server is ready.
-     */
-    public void onSystemReady() {
-        mStats.onSystemReady();
-    }
-
     private final class LocalService extends BatteryStatsInternal {
         @Override
         public String[] getWifiIfaces() {

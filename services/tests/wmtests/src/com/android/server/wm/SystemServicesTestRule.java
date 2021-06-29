@@ -484,7 +484,8 @@ public class SystemServicesTestRule implements TestRule {
             mSupportsFreeformWindowManagement = true;
             mSupportsPictureInPicture = true;
             mDevEnableNonResizableMultiWindow = false;
-            mMinPercentageMultiWindowSupportWidth = 0.3f;
+            mMinPercentageMultiWindowSupportHeight = 0.3f;
+            mMinPercentageMultiWindowSupportWidth = 0.5f;
             mLargeScreenSmallestScreenWidthDp = 600;
             mSupportsNonResizableMultiWindow = 0;
             mRespectsActivityMinWidthHeightMultiWindow = 0;

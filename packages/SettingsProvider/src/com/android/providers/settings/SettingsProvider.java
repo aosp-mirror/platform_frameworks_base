@@ -471,16 +471,16 @@ public class SettingsProvider extends ContentProvider {
                 return result;
             }
 
-            case Settings.CALL_METHOD_SET_SYNC_DISABLED_CONFIG: {
+            case Settings.CALL_METHOD_SET_SYNC_DISABLED_MODE_CONFIG: {
                 final int mode = getSyncDisabledMode(args);
-                setSyncDisabledConfig(mode);
+                setSyncDisabledModeConfig(mode);
                 break;
             }
 
-            case Settings.CALL_METHOD_IS_SYNC_DISABLED_CONFIG: {
+            case Settings.CALL_METHOD_GET_SYNC_DISABLED_MODE_CONFIG: {
                 Bundle result = new Bundle();
-                result.putBoolean(Settings.KEY_CONFIG_IS_SYNC_DISABLED_RETURN,
-                        isSyncDisabledConfig());
+                result.putInt(Settings.KEY_CONFIG_GET_SYNC_DISABLED_MODE_RETURN,
+                        getSyncDisabledModeConfig());
                 return result;
             }
 
@@ -1147,7 +1147,7 @@ public class SettingsProvider extends ContentProvider {
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
 
         synchronized (mLock) {
-            if (isSyncDisabledConfigLocked()) {
+            if (getSyncDisabledModeConfigLocked() != SYNC_DISABLED_MODE_NONE) {
                 return SET_ALL_RESULT_DISABLED;
             }
             final int key = makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
@@ -1157,32 +1157,32 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private void setSyncDisabledConfig(@SyncDisabledMode int syncDisabledMode) {
+    private void setSyncDisabledModeConfig(@SyncDisabledMode int syncDisabledMode) {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "setSyncDisabledConfig(" + syncDisabledMode + ")");
+            Slog.v(LOG_TAG, "setSyncDisabledModeConfig(" + syncDisabledMode + ")");
         }
 
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
 
         synchronized (mLock) {
-            setSyncDisabledConfigLocked(syncDisabledMode);
+            setSyncDisabledModeConfigLocked(syncDisabledMode);
         }
     }
 
-    private boolean isSyncDisabledConfig() {
+    private int getSyncDisabledModeConfig() {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "isSyncDisabledConfig");
+            Slog.v(LOG_TAG, "getSyncDisabledModeConfig");
         }
 
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
 
         synchronized (mLock) {
-            return isSyncDisabledConfigLocked();
+            return getSyncDisabledModeConfigLocked();
         }
     }
 
     @GuardedBy("mLock")
-    private void setSyncDisabledConfigLocked(@SyncDisabledMode int syncDisabledMode) {
+    private void setSyncDisabledModeConfigLocked(@SyncDisabledMode int syncDisabledMode) {
         boolean persistentValue;
         boolean inMemoryValue;
         if (syncDisabledMode == SYNC_DISABLED_MODE_NONE) {
@@ -1214,13 +1214,13 @@ public class SettingsProvider extends ContentProvider {
     }
 
     @GuardedBy("mLock")
-    private boolean isSyncDisabledConfigLocked() {
+    private int getSyncDisabledModeConfigLocked() {
         // Check the values used for both SYNC_DISABLED_MODE_PERSISTENT and
         // SYNC_DISABLED_MODE_UNTIL_REBOOT.
 
         // The SYNC_DISABLED_MODE_UNTIL_REBOOT value is cheap to check first.
         if (mSyncConfigDisabledUntilReboot) {
-            return true;
+            return SYNC_DISABLED_MODE_UNTIL_REBOOT;
         }
 
         // Now check the global setting used to implement SYNC_DISABLED_MODE_PERSISTENT.
@@ -1230,10 +1230,12 @@ public class SettingsProvider extends ContentProvider {
                     SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM,
                     Global.DEVICE_CONFIG_SYNC_DISABLED);
             if (settingLocked == null) {
-                return false;
+                return SYNC_DISABLED_MODE_NONE;
             }
             String settingValue = settingLocked.getValue();
-            return settingValue != null && !"0".equals(settingValue);
+            boolean isSyncDisabledPersistent = settingValue != null && !"0".equals(settingValue);
+            return isSyncDisabledPersistent
+                    ? SYNC_DISABLED_MODE_PERSISTENT : SYNC_DISABLED_MODE_NONE;
         } finally {
             restoreCallingIdentity(callingIdentity);
         }

@@ -81,6 +81,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowControllerImpl;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -198,6 +199,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     private ShellTaskOrganizer mShellTaskOrganizer;
     @Mock
     private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private TestableBubblePositioner mPositioner;
 
@@ -219,7 +222,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
-                mColorExtractor, mDumpManager, mKeyguardStateController);
+                mColorExtractor, mDumpManager, mKeyguardStateController,
+                mUnlockedScreenOffAnimationController);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowController.attach();
 

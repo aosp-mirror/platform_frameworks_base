@@ -200,7 +200,6 @@ public class LongScreenshotActivity extends Activity {
                         / (float) mLongScreenshot.getHeight());
 
         mEnterTransitionView.setImageDrawable(drawable);
-
         mEnterTransitionView.getViewTreeObserver().addOnPreDrawListener(
                 new ViewTreeObserver.OnPreDrawListener() {
                     @Override
@@ -220,7 +219,6 @@ public class LongScreenshotActivity extends Activity {
                                         mCropView.animateEntrance();
                                         mCropView.setVisibility(View.VISIBLE);
                                         setButtonsEnabled(true);
-                                        mEnterTransitionView.setVisibility(View.GONE);
                                     });
                         });
                         return true;

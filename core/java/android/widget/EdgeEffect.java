@@ -98,10 +98,26 @@ public class EdgeEffect {
     private static final double VELOCITY_THRESHOLD = 0.01;
 
     /**
+     * The speed at which we should start linearly interpolating to the destination.
+     * When using a spring, as it gets closer to the destination, the speed drops off exponentially.
+     * Instead of landing very slowly, a better experience is achieved if the final
+     * destination is arrived at quicker.
+     */
+    private static final float LINEAR_VELOCITY_TAKE_OVER = 200f;
+
+    /**
      * The value threshold before the spring animation is considered close enough to
      * the destination to be settled. This should be around 0.01 pixel.
      */
     private static final double VALUE_THRESHOLD = 0.001;
+
+    /**
+     * The maximum distance at which we should start linearly interpolating to the destination.
+     * When using a spring, as it gets closer to the destination, the speed drops off exponentially.
+     * Instead of landing very slowly, a better experience is achieved if the final
+     * destination is arrived at quicker.
+     */
+    private static final double LINEAR_DISTANCE_TAKE_OVER = 8.0;
 
     /**
      * The natural frequency of the stretch spring.
@@ -587,55 +603,57 @@ public class EdgeEffect {
             if (mState == STATE_RECEDE) {
                 updateSpring();
             }
-            RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
-            if (mTmpMatrix == null) {
-                mTmpMatrix = new Matrix();
-                mTmpPoints = new float[12];
-            }
-            //noinspection deprecation
-            recordingCanvas.getMatrix(mTmpMatrix);
+            if (mDistance != 0f) {
+                RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
+                if (mTmpMatrix == null) {
+                    mTmpMatrix = new Matrix();
+                    mTmpPoints = new float[12];
+                }
+                //noinspection deprecation
+                recordingCanvas.getMatrix(mTmpMatrix);
 
-            mTmpPoints[0] = 0;
-            mTmpPoints[1] = 0; // top-left
-            mTmpPoints[2] = mWidth;
-            mTmpPoints[3] = 0; // top-right
-            mTmpPoints[4] = mWidth;
-            mTmpPoints[5] = mHeight; // bottom-right
-            mTmpPoints[6] = 0;
-            mTmpPoints[7] = mHeight; // bottom-left
-            mTmpPoints[8] = mWidth * mDisplacement;
-            mTmpPoints[9] = 0; // drag start point
-            mTmpPoints[10] = mWidth * mDisplacement;
-            mTmpPoints[11] = mHeight * mDistance; // drag point
-            mTmpMatrix.mapPoints(mTmpPoints);
+                mTmpPoints[0] = 0;
+                mTmpPoints[1] = 0; // top-left
+                mTmpPoints[2] = mWidth;
+                mTmpPoints[3] = 0; // top-right
+                mTmpPoints[4] = mWidth;
+                mTmpPoints[5] = mHeight; // bottom-right
+                mTmpPoints[6] = 0;
+                mTmpPoints[7] = mHeight; // bottom-left
+                mTmpPoints[8] = mWidth * mDisplacement;
+                mTmpPoints[9] = 0; // drag start point
+                mTmpPoints[10] = mWidth * mDisplacement;
+                mTmpPoints[11] = mHeight * mDistance; // drag point
+                mTmpMatrix.mapPoints(mTmpPoints);
 
-            RenderNode renderNode = recordingCanvas.mNode;
+                RenderNode renderNode = recordingCanvas.mNode;
 
-            float left = renderNode.getLeft()
+                float left = renderNode.getLeft()
                     + min(mTmpPoints[0], mTmpPoints[2], mTmpPoints[4], mTmpPoints[6]);
-            float top = renderNode.getTop()
+                float top = renderNode.getTop()
                     + min(mTmpPoints[1], mTmpPoints[3], mTmpPoints[5], mTmpPoints[7]);
-            float right = renderNode.getLeft()
+                float right = renderNode.getLeft()
                     + max(mTmpPoints[0], mTmpPoints[2], mTmpPoints[4], mTmpPoints[6]);
-            float bottom = renderNode.getTop()
+                float bottom = renderNode.getTop()
                     + max(mTmpPoints[1], mTmpPoints[3], mTmpPoints[5], mTmpPoints[7]);
-            // assume rotations of increments of 90 degrees
-            float x = mTmpPoints[10] - mTmpPoints[8];
-            float width = right - left;
-            float vecX = dampStretchVector(Math.max(-1f, Math.min(1f, x / width)));
+                // assume rotations of increments of 90 degrees
+                float x = mTmpPoints[10] - mTmpPoints[8];
+                float width = right - left;
+                float vecX = dampStretchVector(Math.max(-1f, Math.min(1f, x / width)));
 
-            float y = mTmpPoints[11] - mTmpPoints[9];
-            float height = bottom - top;
-            float vecY = dampStretchVector(Math.max(-1f, Math.min(1f, y / height)));
+                float y = mTmpPoints[11] - mTmpPoints[9];
+                float height = bottom - top;
+                float vecY = dampStretchVector(Math.max(-1f, Math.min(1f, y / height)));
 
-            boolean hasValidVectors = Float.isFinite(vecX) && Float.isFinite(vecY);
-            if (right > left && bottom > top && mWidth > 0 && mHeight > 0 && hasValidVectors) {
-                renderNode.stretch(
+                boolean hasValidVectors = Float.isFinite(vecX) && Float.isFinite(vecY);
+                if (right > left && bottom > top && mWidth > 0 && mHeight > 0 && hasValidVectors) {
+                    renderNode.stretch(
                         vecX, // horizontal stretch intensity
                         vecY, // vertical stretch intensity
                         mWidth, // max horizontal stretch in pixels
                         mHeight // max vertical stretch in pixels
-                );
+                    );
+                }
             }
         } else {
             // Animations have been disabled or this is TYPE_STRETCH and drawing into a Canvas
@@ -730,6 +748,26 @@ public class EdgeEffect {
         if (deltaT < 0.001f) {
             return; // Must have at least 1 ms difference
         }
+        mStartTime = time;
+
+        if (Math.abs(mVelocity) <= LINEAR_VELOCITY_TAKE_OVER
+                && Math.abs(mDistance * mHeight) < LINEAR_DISTANCE_TAKE_OVER
+                && Math.signum(mVelocity) == -Math.signum(mDistance)
+        ) {
+            // This is close. The spring will slowly reach the destination. Instead, we
+            // will interpolate linearly so that it arrives at its destination quicker.
+            mVelocity = Math.signum(mVelocity) * LINEAR_VELOCITY_TAKE_OVER;
+
+            float targetDistance = mDistance + (mVelocity * deltaT / mHeight);
+            if (Math.signum(targetDistance) != Math.signum(mDistance)) {
+                // We have arrived
+                mDistance = 0;
+                mVelocity = 0;
+            } else {
+                mDistance = targetDistance;
+            }
+            return;
+        }
         final double mDampedFreq = NATURAL_FREQUENCY * Math.sqrt(1 - DAMPING_RATIO * DAMPING_RATIO);
 
         // We're always underdamped, so we can use only those equations:
@@ -745,9 +783,7 @@ public class EdgeEffect {
                 + mDampedFreq * sinCoeff * Math.cos(mDampedFreq * deltaT));
         mDistance = (float) distance / mHeight;
         mVelocity = (float) velocity;
-        mStartTime = time;
         if (isAtEquilibrium()) {
-            mState = STATE_IDLE;
             mDistance = 0;
             mVelocity = 0;
         }
