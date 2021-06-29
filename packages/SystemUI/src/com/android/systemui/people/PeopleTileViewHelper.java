@@ -29,6 +29,7 @@ import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH;
+import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_SIZES;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.COMPLEX_UNIT_PX;
 
@@ -43,7 +44,6 @@ import android.app.people.ConversationStatus;
 import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -59,6 +59,7 @@ import android.text.TextUtils;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SizeF;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -85,8 +86,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -173,28 +176,64 @@ public class PeopleTileViewHelper {
     private Locale mLocale;
     private NumberFormat mIntegerFormat;
 
-    public PeopleTileViewHelper(Context context, @Nullable PeopleSpaceTile tile,
-            int appWidgetId, Bundle options, PeopleTileKey key) {
+    PeopleTileViewHelper(Context context, @Nullable PeopleSpaceTile tile,
+            int appWidgetId, int width, int height, PeopleTileKey key) {
         mContext = context;
         mTile = tile;
         mKey = key;
         mAppWidgetId = appWidgetId;
         mDensity = mContext.getResources().getDisplayMetrics().density;
-        int display = mContext.getResources().getConfiguration().orientation;
-        mWidth = display == Configuration.ORIENTATION_PORTRAIT
-                ? options.getInt(OPTION_APPWIDGET_MIN_WIDTH,
-                getSizeInDp(R.dimen.default_width)) : options.getInt(
-                OPTION_APPWIDGET_MAX_WIDTH,
-                getSizeInDp(R.dimen.default_width));
-        mHeight = display == Configuration.ORIENTATION_PORTRAIT ? options.getInt(
-                OPTION_APPWIDGET_MAX_HEIGHT,
-                getSizeInDp(R.dimen.default_height))
-                : options.getInt(OPTION_APPWIDGET_MIN_HEIGHT,
-                        getSizeInDp(R.dimen.default_height));
+        mWidth = width;
+        mHeight = height;
         mLayoutSize = getLayoutSize();
     }
 
-    public RemoteViews getViews() {
+    /**
+     * Creates a {@link RemoteViews} for the specified arguments. The RemoteViews will support all
+     * the sizes present in {@code options.}.
+     */
+    public static RemoteViews createRemoteViews(Context context, @Nullable PeopleSpaceTile tile,
+            int appWidgetId, Bundle options, PeopleTileKey key) {
+        List<SizeF> widgetSizes = getWidgetSizes(context, options);
+        Map<SizeF, RemoteViews> sizeToRemoteView =
+                widgetSizes
+                        .stream()
+                        .distinct()
+                        .collect(Collectors.toMap(
+                                Function.identity(),
+                                size -> new PeopleTileViewHelper(
+                                        context, tile, appWidgetId,
+                                        (int) size.getWidth(),
+                                        (int) size.getHeight(),
+                                        key)
+                                        .getViews()));
+        return new RemoteViews(sizeToRemoteView);
+    }
+
+    private static List<SizeF> getWidgetSizes(Context context, Bundle options) {
+        float density = context.getResources().getDisplayMetrics().density;
+        List<SizeF> widgetSizes = options.getParcelableArrayList(OPTION_APPWIDGET_SIZES);
+        // If the full list of sizes was provided in the options bundle, use that.
+        if (widgetSizes != null && !widgetSizes.isEmpty()) return widgetSizes;
+
+        // Otherwise, create a list using the portrait/landscape sizes.
+        int defaultWidth = getSizeInDp(context, R.dimen.default_width, density);
+        int defaultHeight =  getSizeInDp(context, R.dimen.default_height, density);
+        widgetSizes = new ArrayList<>(2);
+
+        int portraitWidth = options.getInt(OPTION_APPWIDGET_MIN_WIDTH, defaultWidth);
+        int portraitHeight = options.getInt(OPTION_APPWIDGET_MAX_HEIGHT, defaultHeight);
+        widgetSizes.add(new SizeF(portraitWidth, portraitHeight));
+
+        int landscapeWidth = options.getInt(OPTION_APPWIDGET_MAX_WIDTH, defaultWidth);
+        int landscapeHeight = options.getInt(OPTION_APPWIDGET_MIN_HEIGHT, defaultHeight);
+        widgetSizes.add(new SizeF(landscapeWidth, landscapeHeight));
+
+        return widgetSizes;
+    }
+
+    @VisibleForTesting
+    RemoteViews getViews() {
         RemoteViews viewsForTile = getViewForTile();
         int maxAvatarSize = getMaxAvatarSize(viewsForTile);
         RemoteViews views = setCommonRemoteViewsFields(viewsForTile, maxAvatarSize);
@@ -453,7 +492,6 @@ public class PeopleTileViewHelper {
                 views.setViewVisibility(R.id.availability, View.GONE);
             }
 
-            views.setBoolean(R.id.image, "setClipToOutline", true);
             views.setImageViewBitmap(R.id.person_icon,
                     getPersonIconBitmap(mContext, mTile, maxAvatarSize));
             return views;
@@ -481,7 +519,7 @@ public class PeopleTileViewHelper {
                         PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY,
                         mTile.getNotificationKey());
             }
-            views.setOnClickPendingIntent(R.id.item, PendingIntent.getActivity(
+            views.setOnClickPendingIntent(android.R.id.background, PendingIntent.getActivity(
                     mContext,
                     mAppWidgetId,
                     activityIntent,
@@ -504,7 +542,7 @@ public class PeopleTileViewHelper {
         int outerPadding = mLayoutSize == LAYOUT_LARGE ? 16 : 8;
         int outerPaddingPx = dpToPx(outerPadding);
         views.setViewPadding(
-                R.id.item,
+                android.R.id.background,
                 outerPaddingPx,
                 outerPaddingPx,
                 outerPaddingPx,

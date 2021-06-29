@@ -31,6 +31,7 @@ import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -43,6 +44,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
+import android.content.res.Configuration;
 import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
@@ -1718,10 +1720,18 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             return true;
         }
         // Check if the request min width/height is supported in multi window.
-        final int maxSupportMinDimensions = (int) (mAtmService.mMinPercentageMultiWindowSupportWidth
-                * getConfiguration().smallestScreenWidthDp
-                * mDisplayContent.getDisplayMetrics().density);
-        return minWidth <= maxSupportMinDimensions && minHeight <= maxSupportMinDimensions;
+        final Configuration config = getConfiguration();
+        final int orientation = config.orientation;
+        if (orientation == ORIENTATION_LANDSCAPE) {
+            final int maxSupportMinWidth = (int) (mAtmService.mMinPercentageMultiWindowSupportWidth
+                    * config.screenWidthDp * mDisplayContent.getDisplayMetrics().density);
+            return minWidth <= maxSupportMinWidth;
+        } else {
+            final int maxSupportMinHeight =
+                    (int) (mAtmService.mMinPercentageMultiWindowSupportHeight
+                            * config.screenHeightDp * mDisplayContent.getDisplayMetrics().density);
+            return minHeight <= maxSupportMinHeight;
+        }
     }
 
     /**

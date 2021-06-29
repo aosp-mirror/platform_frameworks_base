@@ -26,6 +26,7 @@ import android.widget.Toolbar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -35,7 +36,7 @@ import com.google.android.material.resources.TextAppearanceConfig;
  * A base Activity that has a collapsing toolbar layout is used for the activities intending to
  * enable the collapsing toolbar function.
  */
-public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity implements
+public class CollapsingToolbarBaseActivity extends FragmentActivity implements
         AppBarLayout.OnOffsetChangedListener {
 
     private static final int TOOLBAR_MAX_LINE_NUMBER = 2;

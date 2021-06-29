@@ -2889,7 +2889,7 @@
     <!--Text explaining to tap a conversation to select it show in their Conversation widget [CHAR LIMIT=180] -->
     <string name="select_conversation_text">Tap a conversation to add it to your Home screen</string>
     <!--Text explaining there are no existing conversations to show in their Conversation widget [CHAR LIMIT=100] -->
-    <string name="no_conversations_text">Check back here once you get some messages</string>
+    <string name="no_conversations_text">Your recent conversations will show up here</string>
     <!--Text header for priority conversation tiles available to be added to the home screen [CHAR LIMIT=100] -->
     <string name="priority_conversations">Priority conversations</string>
     <!--Text header for recent conversation tiles available to be added to the home screen [CHAR LIMIT=100] -->

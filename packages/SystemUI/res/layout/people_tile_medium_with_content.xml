@@ -18,8 +18,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:theme="@android:style/Theme.DeviceDefault.DayNight"
-    android:id="@+id/item"
+    android:id="@android:id/background"
     android:background="@drawable/people_space_tile_view_card"
+    android:clipToOutline="true"
     android:layout_gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -83,6 +84,7 @@
                         android:id="@+id/image"
                         android:gravity="center"
                         android:background="@drawable/people_space_content_background"
+                        android:clipToOutline="true"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop" />

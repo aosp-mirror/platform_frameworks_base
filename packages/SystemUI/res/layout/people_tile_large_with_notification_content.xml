@@ -15,7 +15,7 @@
   -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@drawable/people_space_tile_view_card"
-    android:id="@+id/item"
+    android:id="@android:id/background"
     android:clipToOutline="true"
     android:theme="@android:style/Theme.DeviceDefault.DayNight"
     android:layout_gravity="center"

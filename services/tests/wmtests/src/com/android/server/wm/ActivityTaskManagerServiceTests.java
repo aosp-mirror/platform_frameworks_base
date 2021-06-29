@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -411,16 +413,16 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSupportsMultiWindow_activityMinWidthHeight_smallerThanSupport() {
+    public void testSupportsMultiWindow_landscape_checkActivityMinWidth() {
         // This is smaller than the min dimensions device support in multi window,
         // the activity will be supported in multi window
         final float density = mContext.getResources().getDisplayMetrics().density;
-        final int supportedDimensions = (int) ((mAtm.mLargeScreenSmallestScreenWidthDp - 1)
+        final int supportedWidth = (int) (mAtm.mLargeScreenSmallestScreenWidthDp
                 * mAtm.mMinPercentageMultiWindowSupportWidth * density);
         final ActivityInfo.WindowLayout windowLayout =
                 new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
-                        /* minWidth= */supportedDimensions,
-                        /* minHeight= */supportedDimensions);
+                        /* minWidth= */ supportedWidth,
+                        /* minHeight= */ 0);
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
                 .setWindowLayout(windowLayout)
@@ -429,15 +431,48 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         final Task task = activity.getTask();
         final TaskDisplayArea tda = task.getDisplayArea();
         tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().screenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().orientation = ORIENTATION_LANDSCAPE;
 
-        // Always check the activity min width/height.
-        mAtm.mSupportsNonResizableMultiWindow = 1;
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
+
+        tda.getConfiguration().screenWidthDp = (int) Math.ceil(
+                mAtm.mLargeScreenSmallestScreenWidthDp
+                        / mAtm.mMinPercentageMultiWindowSupportWidth);
 
         assertTrue(activity.supportsMultiWindow());
         assertTrue(task.supportsMultiWindow());
+    }
 
-        // The default config is relying on the screen size. Check for small screen
-        mAtm.mSupportsNonResizableMultiWindow = 0;
+    @Test
+    public void testSupportsMultiWindow_portrait_checkActivityMinHeight() {
+        // This is smaller than the min dimensions device support in multi window,
+        // the activity will be supported in multi window
+        final float density = mContext.getResources().getDisplayMetrics().density;
+        final int supportedHeight = (int) (mAtm.mLargeScreenSmallestScreenWidthDp
+                * mAtm.mMinPercentageMultiWindowSupportHeight * density);
+        final ActivityInfo.WindowLayout windowLayout =
+                new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
+                        /* minWidth= */ 0,
+                        /* minHeight= */ supportedHeight);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setWindowLayout(windowLayout)
+                .setResizeMode(RESIZE_MODE_RESIZEABLE)
+                .build();
+        final Task task = activity.getTask();
+        final TaskDisplayArea tda = task.getDisplayArea();
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().screenHeightDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().orientation = ORIENTATION_PORTRAIT;
+
+        assertFalse(activity.supportsMultiWindow());
+        assertFalse(task.supportsMultiWindow());
+
+        tda.getConfiguration().screenHeightDp = (int) Math.ceil(
+                mAtm.mLargeScreenSmallestScreenWidthDp
+                        / mAtm.mMinPercentageMultiWindowSupportHeight);
 
         assertTrue(activity.supportsMultiWindow());
         assertTrue(task.supportsMultiWindow());
