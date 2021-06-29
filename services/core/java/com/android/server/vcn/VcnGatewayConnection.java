@@ -75,6 +75,7 @@ import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.os.Process;
 import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -97,6 +98,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -925,6 +927,14 @@ public class VcnGatewayConnection extends StateMachine {
 
     private WakeupMessage createScheduledAlarm(
             @NonNull String cmdName, Message delayedMessage, long delay) {
+        final Handler handler = getHandler();
+        if (handler == null) {
+            logWarn(
+                    "Attempted to schedule alarm after StateMachine has quit",
+                    new IllegalStateException());
+            return null; // StateMachine has already quit.
+        }
+
         // WakeupMessage uses Handler#dispatchMessage() to immediately handle the specified Runnable
         // at the scheduled time. dispatchMessage() immediately executes and there may be queued
         // events that resolve the scheduled alarm pending in the queue. So, use the Runnable to
@@ -933,7 +943,7 @@ public class VcnGatewayConnection extends StateMachine {
         final WakeupMessage alarm =
                 mDeps.newWakeupMessage(
                         mVcnContext,
-                        getHandler(),
+                        handler,
                         cmdName,
                         () -> sendMessageAndAcquireWakeLock(delayedMessage));
         alarm.schedule(mDeps.getElapsedRealTime() + delay);
@@ -1560,6 +1570,9 @@ public class VcnGatewayConnection extends StateMachine {
 
             agent.sendNetworkCapabilities(caps);
             agent.sendLinkProperties(lp);
+
+            agent.setUnderlyingNetworks(
+                    mUnderlying == null ? null : Collections.singletonList(mUnderlying.network));
         }
 
         protected VcnNetworkAgent buildNetworkAgent(
@@ -1601,6 +1614,10 @@ public class VcnGatewayConnection extends StateMachine {
                                 teardownAsynchronously();
                             } /* networkUnwantedCallback */,
                             (status) -> {
+                                if (mIsQuitting) {
+                                    return; // Ignore; VcnGatewayConnection quitting or already quit
+                                }
+
                                 switch (status) {
                                     case NetworkAgent.VALIDATION_STATUS_VALID:
                                         clearFailedAttemptCounterAndSafeModeAlarm();
@@ -1620,6 +1637,8 @@ public class VcnGatewayConnection extends StateMachine {
                             } /* validationStatusCallback */);
 
             agent.register();
+            agent.setUnderlyingNetworks(
+                    mUnderlying == null ? null : Collections.singletonList(mUnderlying.network));
             agent.markConnected();
 
             return agent;
@@ -1958,7 +1977,7 @@ public class VcnGatewayConnection extends StateMachine {
             final int[] underlyingAdminUids = underlyingCaps.getAdministratorUids();
             Arrays.sort(underlyingAdminUids); // Sort to allow contains check below.
 
-            final int[] adminUids;
+            int[] adminUids;
             if (underlyingCaps.getOwnerUid() > 0 // No owner UID specified
                     && 0 > Arrays.binarySearch(// Owner UID not found in admin UID list.
                             underlyingAdminUids, underlyingCaps.getOwnerUid())) {
@@ -1968,6 +1987,11 @@ public class VcnGatewayConnection extends StateMachine {
             } else {
                 adminUids = underlyingAdminUids;
             }
+
+            // Set owner & administrator UID
+            builder.setOwnerUid(Process.myUid());
+            adminUids = Arrays.copyOf(adminUids, adminUids.length + 1);
+            adminUids[adminUids.length - 1] = Process.myUid();
             builder.setAdministratorUids(adminUids);
 
             builder.setLinkUpstreamBandwidthKbps(underlyingCaps.getLinkUpstreamBandwidthKbps());
@@ -2152,6 +2176,16 @@ public class VcnGatewayConnection extends StateMachine {
     private void logDbg(String msg, Throwable tr) {
         Slog.d(TAG, getLogPrefix() + msg, tr);
         LOCAL_LOG.log(getLogPrefix() + "DBG: " + msg + tr);
+    }
+
+    private void logWarn(String msg) {
+        Slog.w(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "WARN: " + msg);
+    }
+
+    private void logWarn(String msg, Throwable tr) {
+        Slog.w(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "WARN: " + msg + tr);
     }
 
     private void logErr(String msg) {
@@ -2529,6 +2563,11 @@ public class VcnGatewayConnection extends StateMachine {
         /** Sends new LinkProperties for the underlying NetworkAgent */
         public void sendLinkProperties(@NonNull LinkProperties lp) {
             mImpl.sendLinkProperties(lp);
+        }
+
+        /** Sends new NetworkCapabilities for the underlying NetworkAgent */
+        public void setUnderlyingNetworks(@Nullable List<Network> underlyingNetworks) {
+            mImpl.setUnderlyingNetworks(underlyingNetworks);
         }
 
         /** Retrieves the Network for the underlying NetworkAgent */
