@@ -420,8 +420,9 @@ public class StackScrollAlgorithm {
                 // When pulsing (incoming notification on AOD), innerHeight is 0; clamp all
                 // to shelf start, thereby hiding all notifications (except the first one, which we
                 // later unhide in updatePulsingState)
-                final int shelfStart = ambientState.getInnerHeight()
-                        - ambientState.getShelf().getIntrinsicHeight();
+                final int stackBottom = !ambientState.isShadeExpanded() || ambientState.isDozing()
+                        ? ambientState.getInnerHeight() : (int) ambientState.getStackHeight();
+                final int shelfStart = stackBottom - ambientState.getShelf().getIntrinsicHeight();
                 viewState.yTranslation = Math.min(viewState.yTranslation, shelfStart);
                 if (viewState.yTranslation >= shelfStart) {
                     viewState.hidden = !view.isExpandAnimationRunning()
