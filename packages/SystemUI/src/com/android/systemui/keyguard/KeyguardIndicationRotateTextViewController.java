@@ -167,12 +167,14 @@ public class KeyguardIndicationRotateTextViewController extends
      * - can be presented with an "error" color if isError is true
      */
     public void showTransient(CharSequence newIndication, boolean isError) {
+        final long inAnimationDuration = 600L; // see KeyguardIndicationTextView.getYInDuration
         updateIndication(INDICATION_TYPE_TRANSIENT,
                 new KeyguardIndication.Builder()
                         .setMessage(newIndication)
                         .setTextColor(isError
                                 ? Utils.getColorError(getContext())
                                 : mInitialTextColorState)
+                        .setMinVisibilityMillis(2000L + inAnimationDuration)
                         .build(),
                 /* showImmediately */true);
     }
