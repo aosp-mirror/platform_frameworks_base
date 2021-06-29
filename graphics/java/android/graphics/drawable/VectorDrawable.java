@@ -264,15 +264,19 @@ public class VectorDrawable extends Drawable {
     private final Rect mTmpBounds = new Rect();
 
     public VectorDrawable() {
-        this(new VectorDrawableState(null), null);
+        this(null, null);
     }
 
     /**
      * The one constructor to rule them all. This is called by all public
      * constructors to set the state and initialize local properties.
      */
-    private VectorDrawable(@NonNull VectorDrawableState state, @Nullable Resources res) {
-        mVectorState = state;
+    private VectorDrawable(@Nullable VectorDrawableState state, @Nullable Resources res) {
+        // As the mutable, not-thread-safe native instance is stored in VectorDrawableState, we
+        // need to always do a defensive copy even if mutate() isn't called. Otherwise
+        // draw() being called on 2 different VectorDrawable instances could still hit the same
+        // underlying native object.
+        mVectorState = new VectorDrawableState(state);
         updateLocalState(res);
     }
 
