@@ -201,6 +201,7 @@ void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
         funcs.releaseFunc(mSurfaceControl);
     }
     mSurfaceControl = surfaceControl;
+    mSurfaceControlGenerationId++;
     mExpectSurfaceStats = surfaceControl != nullptr;
     if (mSurfaceControl != nullptr) {
         funcs.acquireFunc(mSurfaceControl);
