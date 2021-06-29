@@ -287,7 +287,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"電池を消費しているアプリ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」が電池を使用しています"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリが電池を使用しています"</string>
-    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"タップして電池やデータの使用量を確認"</string>
+    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"タップしてバッテリーやデータの使用量を確認"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>、<xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"セーフモード"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Android システム"</string>
@@ -422,7 +422,7 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"フォアグラウンドでのみ正確な位置情報にアクセス"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"このアプリは、使用中に、位置情報サービスからデバイスの正確な位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。この場合、電池使用量が増えることがあります。"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"このアプリは、使用中に、位置情報サービスからデバイスの正確な位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。この場合、バッテリー使用量が増えることがあります。"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"フォアグラウンドでのみおおよその位置情報にアクセス"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"このアプリは、使用中に、位置情報サービスからデバイスのおおよその位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"バックグラウンドでの位置情報へのアクセス"</string>
@@ -497,9 +497,9 @@
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"Wi-Fiからの接続と切断"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fiアクセスポイントへの接続/切断、Wi-Fiネットワークのデバイス設定の変更をアプリに許可します。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"Wi-Fiマルチキャストの受信を許可する"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"マルチキャストアドレスを使用して、このタブレットだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"マルチキャスト アドレスを使用して、この Android TV デバイスだけでなく Wi-Fi ネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"マルチキャストアドレスを使用して、このモバイル デバイスだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"マルチキャスト アドレスを使用して、このタブレットだけでなく Wi-Fi ネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりもバッテリーの消費量が大きくなります。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"マルチキャスト アドレスを使用して、この Android TV デバイスだけでなく Wi-Fi ネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりもバッテリーの消費量が大きくなります。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"マルチキャスト アドレスを使用して、このモバイル デバイスだけでなく Wi-Fi ネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりもバッテリーの消費量が大きくなります。"</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"Bluetoothの設定へのアクセス"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"ローカルのBluetoothタブレットを設定することと、リモートデバイスを検出してペアに設定することをアプリに許可します。"</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Android TV デバイスで Bluetooth を設定することと、リモート デバイスを検出してペアに設定することをアプリに許可します。"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n•ダークテーマをオンにする\n•バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n•ダークテーマをオンにする\n•バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n•ダークモードをオンにする\n•バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n•ダークモードをオンにする\n•バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータを送受信することはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>
