@@ -345,7 +345,7 @@ public class PluginInstanceManager<T extends Plugin> {
                 // Create our own ClassLoader so we can use our own code as the parent.
                 ClassLoader classLoader = mManager.getClassLoader(info);
                 Context pluginContext = new PluginContextWrapper(
-                        mContext.createApplicationContext(info, 0), classLoader);
+                        mContext.createPackageContext(pkg, 0), classLoader);
                 Class<?> pluginClass = Class.forName(cls, true, classLoader);
                 // TODO: Only create the plugin before version check if we need it for
                 // legacy version check.
