@@ -749,8 +749,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stanje:&lt;/b&gt; Uvrščeno nižje"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Prikaz na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu."</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Prikaz na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Prikaz na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti."</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavitve"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prednostno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira pogovornih funkcij."</string>
@@ -1127,7 +1127,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Odprt pogovor"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Pripomočki za pogovore"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Dotaknite se pogovora, da ga dodate na začetni zaslon."</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Znova preverite tukaj, ko boste prejeli kakšno sporočilo."</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Prednostni pogovori"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Nedavni pogovori"</string>
     <string name="okay" msgid="6490552955618608554">"V redu"</string>
@@ -1156,8 +1157,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Več kot <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Ogled nedavnih sporočil, neodgovorjenih klicev in posodobitev stanj"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Pogovor"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"To je začasno zaustavil način »ne moti«."</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je poslala sporočilo."</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je poslala sliko."</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Težava z branjem indikatorja stanja napolnjenosti baterije"</string>
