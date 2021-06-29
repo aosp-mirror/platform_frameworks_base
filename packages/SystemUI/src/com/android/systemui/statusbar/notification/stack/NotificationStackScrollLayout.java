@@ -2073,6 +2073,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         int scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight);
         int imeInset = getImeInset();
         scrollRange += Math.min(imeInset, Math.max(0, contentHeight - (getHeight() - imeInset)));
+        if (scrollRange > 0) {
+            scrollRange = Math.max(getScrollAmountToScrollBoundary(), scrollRange);
+        }
         return scrollRange;
     }
 
