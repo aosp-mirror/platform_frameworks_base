@@ -10134,7 +10134,22 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(getCallingUid()) != null) {
             return EmptyArray.STRING;
         }
-        return mPermissionManager.getAppOpPermissionPackages(permissionName);
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+
+        final ArraySet<String> packageNames = new ArraySet(
+                mPermissionManager.getAppOpPermissionPackages(permissionName));
+        synchronized (mLock) {
+            for (int i = packageNames.size() - 1; i >= 0; i--) {
+                final String packageName = packageNames.valueAt(i);
+                if (!shouldFilterApplicationLocked(mSettings.getPackageLPr(packageName),
+                        callingUid, callingUserId)) {
+                    continue;
+                }
+                packageNames.removeAt(i);
+            }
+        }
+        return packageNames.toArray(new String[packageNames.size()]);
     }
 
     @Override
