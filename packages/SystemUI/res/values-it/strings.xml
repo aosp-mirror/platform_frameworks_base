@@ -714,7 +714,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Nessun suono o vibrazione"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Nessun suono o vibrazione e appare più in basso nella sezione delle conversazioni"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Può suonare o vibrare in base alle impostazioni del telefono"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Può suonare o vibrare in base alle impostazioni del telefono. Conversazioni dalla bolla <xliff:g id="APP_NAME">%1$s</xliff:g> per impostazione predefinita."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Può suonare o vibrare in base alle impostazioni del telefono. Le conversazioni di <xliff:g id="APP_NAME">%1$s</xliff:g> appaiono come bolla per impostazione predefinita."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantiene la tua attenzione con una scorciatoia mobile a questi contenuti."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Appare in cima alla sezione delle conversazioni e sotto forma di bolla mobile, mostra l\'immagine del profilo nella schermata di blocco"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Impostazioni"</string>
