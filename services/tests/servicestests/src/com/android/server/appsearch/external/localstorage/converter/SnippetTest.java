@@ -22,12 +22,12 @@ import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResultPage;
 
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
-import com.android.server.appsearch.proto.DocumentProto;
-import com.android.server.appsearch.proto.PropertyProto;
-import com.android.server.appsearch.proto.SchemaTypeConfigProto;
-import com.android.server.appsearch.proto.SearchResultProto;
-import com.android.server.appsearch.proto.SnippetMatchProto;
-import com.android.server.appsearch.proto.SnippetProto;
+import com.android.server.appsearch.icing.proto.DocumentProto;
+import com.android.server.appsearch.icing.proto.PropertyProto;
+import com.android.server.appsearch.icing.proto.SchemaTypeConfigProto;
+import com.android.server.appsearch.icing.proto.SearchResultProto;
+import com.android.server.appsearch.icing.proto.SnippetMatchProto;
+import com.android.server.appsearch.icing.proto.SnippetProto;
 
 import org.junit.Test;
 
