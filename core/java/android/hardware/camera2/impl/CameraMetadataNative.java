@@ -1884,6 +1884,8 @@ public class CameraMetadataNative implements Parcelable {
     private static native int nativeGetEntryCount(long ptr);
     @FastNative
     private static native long nativeGetBufferSize(long ptr);
+    @FastNative
+    private static native void nativeSetVendorId(long ptr, long vendorId);
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @FastNative
@@ -1926,6 +1928,15 @@ public class CameraMetadataNative implements Parcelable {
         mMultiResolutionStreamConfigurationMap = other.mMultiResolutionStreamConfigurationMap;
         updateNativeAllocation();
         other.updateNativeAllocation();
+    }
+
+    /**
+     * Set the native metadata vendor id.
+     *
+     * @hide
+     */
+    public void setVendorId(long vendorId) {
+        nativeSetVendorId(mMetadataPtr, vendorId);
     }
 
     /**
