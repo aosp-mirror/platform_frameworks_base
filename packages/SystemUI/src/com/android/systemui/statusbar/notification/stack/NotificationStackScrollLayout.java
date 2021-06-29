@@ -77,7 +77,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.CommandQueue;
@@ -201,6 +200,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mPaddingBetweenElements;
     private int mMaxTopPadding;
     private int mTopPadding;
+    private boolean mAnimateNextTopPaddingChange;
     private int mBottomMargin;
     private int mBottomInset = 0;
     private float mQsExpansionFraction;
@@ -1212,16 +1212,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void setTopPadding(int topPadding, boolean animate) {
         if (mTopPadding != topPadding) {
+            boolean shouldAnimate = animate || mAnimateNextTopPaddingChange;
             mTopPadding = topPadding;
             updateAlgorithmHeightAndPadding();
             updateContentHeight();
-            if (animate && mAnimationsEnabled && mIsExpanded) {
+            if (shouldAnimate && mAnimationsEnabled && mIsExpanded) {
                 mTopPaddingNeedsAnimation = true;
                 mNeedsAnimation = true;
             }
             updateStackPosition();
             requestChildrenUpdate();
-            notifyHeightChangeListener(null, animate);
+            notifyHeightChangeListener(null, shouldAnimate);
+            mAnimateNextTopPaddingChange = false;
         }
     }
 
@@ -5549,6 +5551,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     public int getTopClippingStartLocation() {
         return mIsExpanded ? mQsScrollBoundaryPosition : 0;
+    }
+
+    /**
+     * Request an animation whenever the toppadding changes next
+     */
+    public void animateNextTopPaddingChange() {
+        mAnimateNextTopPaddingChange = true;
     }
 
     /**
