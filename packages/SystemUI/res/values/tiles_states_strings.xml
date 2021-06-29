@@ -40,9 +40,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_internet">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for wifi tile: unavailable, off, on.
@@ -50,9 +50,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_wifi">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for cell (data) tile: unavailable, off, on.
@@ -60,9 +60,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear.[CHAR LIMIT=32] -->
     <string-array name="tile_states_cell">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for battery (saver) tile: unavailable, off, on.
@@ -70,9 +70,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_battery">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for dnd (Do not disturb) tile: unavailable, off, on.
@@ -80,9 +80,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_dnd">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for flashlight tile: unavailable, off, on.
@@ -90,9 +90,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_flashlight">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for rotation (lock) tile: unavailable, off, on.
@@ -100,9 +100,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_rotation">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for bt (bluetooth) tile: unavailable, off, on.
@@ -110,16 +110,16 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_bt">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for airplane tile: unavailable, off, on [CHAR LIMIT=32] -->
     <string-array name="tile_states_airplane">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for location tile: unavailable, off, on.
@@ -127,9 +127,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_location">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for hotspot tile: unavailable, off, on.
@@ -137,9 +137,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_hotspot">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for (color) inversion tile: unavailable, off, on.
@@ -147,9 +147,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_inversion">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for (data) saver tile: unavailable, off, on.
@@ -157,9 +157,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_saver">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for dark (mode) tile: unavailable, off, on.
@@ -167,9 +167,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_dark">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for work (mode) tile: unavailable, off, on.
@@ -177,9 +177,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_work">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for cast tile: unavailable, off, on.
@@ -187,9 +187,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_cast">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for night (light) tile: unavailable, off, on.
@@ -197,9 +197,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_night">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for screenrecord tile: unavailable, off, on.
@@ -207,9 +207,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_screenrecord">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for reverse (charging) tile: unavailable, off, on.
@@ -217,9 +217,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_reverse">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for reduce_brightness tile: unavailable, off, on.
@@ -227,9 +227,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_reduce_brightness">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for cameratoggle tile: unavailable, off, on.
@@ -237,9 +237,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear.[CHAR LIMIT=32] -->
     <string-array name="tile_states_cameratoggle">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for mictoggle tile: unavailable, off, on.
@@ -247,9 +247,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_mictoggle">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for (home) controls tile: unavailable, off, on.
@@ -257,9 +257,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_controls">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for (quick access) wallet tile: unavailable, off, on.
@@ -267,9 +267,9 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_wallet">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 
     <!-- State names for alarm tile: unavailable, off, on.
@@ -277,8 +277,8 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_alarm">
-        <item>@string/tile_unavailable</item>
-        <item>@string/switch_bar_off</item>
-        <item>@string/switch_bar_on</item>
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
     </string-array>
 </resources>
