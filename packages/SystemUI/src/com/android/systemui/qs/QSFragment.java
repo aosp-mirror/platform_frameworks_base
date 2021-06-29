@@ -53,6 +53,8 @@ import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.LifecycleFragment;
 import com.android.systemui.util.Utils;
 
+import java.util.function.Consumer;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -279,6 +281,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Override
     public boolean isFullyCollapsed() {
         return mLastQSExpansion == 0.0f || mLastQSExpansion == -1;
+    }
+
+    @Override
+    public void setCollapsedMediaVisibilityChangedListener(Consumer<Boolean> listener) {
+        mQuickQSPanelController.setMediaVisibilityChangedListener(listener);
     }
 
     private void setEditLocation(View view) {
