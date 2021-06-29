@@ -874,8 +874,10 @@ public class BubbleStackView extends FrameLayout
                         mExpandedAnimationController.expandFromStack(() -> {
                             afterExpandedViewAnimation();
                         } /* after */);
+                        final float translationY = mPositioner.getExpandedViewY(mExpandedBubble,
+                                getBubbleIndex(mExpandedBubble));
                         mExpandedViewContainer.setTranslationX(0f);
-                        mExpandedViewContainer.setTranslationY(mPositioner.getExpandedViewY());
+                        mExpandedViewContainer.setTranslationY(translationY);
                         mExpandedViewContainer.setAlpha(1f);
                     }
                     removeOnLayoutChangeListener(mOrientationChangedListener);
@@ -1524,6 +1526,7 @@ public class BubbleStackView extends FrameLayout
                     bubble.cleanupViews();
                 }
                 updatePointerPosition();
+                updateExpandedView();
                 logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
                 return;
             }
@@ -1815,9 +1818,10 @@ public class BubbleStackView extends FrameLayout
             mTaskbarScrim.setVisibility(VISIBLE);
             mTaskbarScrim.animate().alpha(1f).start();
         }
-
+        final float translationY = mPositioner.getExpandedViewY(mExpandedBubble,
+                getBubbleIndex(mExpandedBubble));
         mExpandedViewContainer.setTranslationX(0f);
-        mExpandedViewContainer.setTranslationY(mPositioner.getExpandedViewY());
+        mExpandedViewContainer.setTranslationY(translationY);
         mExpandedViewContainer.setAlpha(1f);
 
         int index;
@@ -1866,7 +1870,7 @@ public class BubbleStackView extends FrameLayout
                     1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
                     1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
                     bubbleWillBeAt + mBubbleSize / 2f,
-                    mPositioner.getExpandedViewY());
+                    translationY);
         }
         mExpandedViewContainer.setAnimationMatrix(mExpandedViewContainerMatrix);
 
@@ -1970,7 +1974,7 @@ public class BubbleStackView extends FrameLayout
             mExpandedViewContainerMatrix.setScale(
                     1f, 1f,
                     expandingFromBubbleAt + mBubbleSize / 2f,
-                    mPositioner.getExpandedViewY());
+                    mPositioner.getExpandedViewY(mExpandedBubble, index));
         }
 
         mExpandedViewAlphaAnimator.reverse();
@@ -2077,7 +2081,7 @@ public class BubbleStackView extends FrameLayout
                     1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
                     1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
                     expandingFromBubbleDestination + mBubbleSize / 2f,
-                    mPositioner.getExpandedViewY());
+                    mPositioner.getExpandedViewY(mExpandedBubble, expandingFromBubbleDestination));
         }
 
         mExpandedViewContainer.setAnimationMatrix(mExpandedViewContainerMatrix);
@@ -2698,7 +2702,9 @@ public class BubbleStackView extends FrameLayout
             mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         }
         if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
-            mExpandedViewContainer.setTranslationY(mPositioner.getExpandedViewY());
+            mExpandedViewContainer.setTranslationY(mPositioner.getExpandedViewY(mExpandedBubble,
+                    mExpandedAnimationController.getBubbleXOrYForOrientation(
+                            getBubbleIndex(mExpandedBubble))));
             mExpandedViewContainer.setTranslationX(0f);
             mExpandedBubble.getExpandedView().updateView(
                     mExpandedViewContainer.getLocationOnScreen());

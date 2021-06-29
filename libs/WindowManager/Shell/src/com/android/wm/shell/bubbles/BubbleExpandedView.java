@@ -25,6 +25,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPANDED_VIEW;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.wm.shell.bubbles.BubblePositioner.MAX_HEIGHT;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -60,7 +61,6 @@ import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
-import com.android.launcher3.icons.IconNormalizer;
 import com.android.wm.shell.R;
 import com.android.wm.shell.TaskView;
 import com.android.wm.shell.common.AlphaOptimizedButton;
@@ -77,7 +77,6 @@ public class BubbleExpandedView extends LinearLayout {
 
     // The triangle pointing to the expanded view
     private View mPointerView;
-    private int mPointerMargin;
     @Nullable private int[] mExpandedViewContainerLocation;
 
     private AlphaOptimizedButton mManageButton;
@@ -102,9 +101,6 @@ public class BubbleExpandedView extends LinearLayout {
      */
     private boolean mIsAlphaAnimating = false;
 
-    private int mMinHeight;
-    private int mOverflowHeight;
-    private int mManageButtonHeight;
     private int mPointerWidth;
     private int mPointerHeight;
     private float mPointerRadius;
@@ -348,12 +344,8 @@ public class BubbleExpandedView extends LinearLayout {
 
     void updateDimensions() {
         Resources res = getResources();
-        mMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
-        mOverflowHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height);
-
         updateFontSize();
 
-        mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
         mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
         mPointerRadius = getResources().getDimensionPixelSize(R.dimen.bubble_pointer_radius);
@@ -369,7 +361,6 @@ public class BubbleExpandedView extends LinearLayout {
             updatePointerView();
         }
 
-        mManageButtonHeight = res.getDimensionPixelSize(R.dimen.bubble_manage_button_height);
         if (mManageButton != null) {
             int visibility = mManageButton.getVisibility();
             removeView(mManageButton);
@@ -633,12 +624,11 @@ public class BubbleExpandedView extends LinearLayout {
         }
 
         if ((mBubble != null && mTaskView != null) || mIsOverflow) {
-            float desiredHeight = mIsOverflow
-                    ? mPositioner.isLargeScreen() ? getMaxExpandedHeight() : mOverflowHeight
-                    : mBubble.getDesiredHeight(mContext);
-            desiredHeight = Math.max(desiredHeight, mMinHeight);
-            float height = Math.min(desiredHeight, getMaxExpandedHeight());
-            height = Math.max(height, mMinHeight);
+            float desiredHeight = mPositioner.getExpandedViewHeight(mBubble);
+            int maxHeight = mPositioner.getMaxExpandedViewHeight(mIsOverflow);
+            float height = desiredHeight == MAX_HEIGHT
+                    ? maxHeight
+                    : Math.min(desiredHeight, maxHeight);
             FrameLayout.LayoutParams lp = mIsOverflow
                     ? (FrameLayout.LayoutParams) mOverflowView.getLayoutParams()
                     : (FrameLayout.LayoutParams) mTaskView.getLayoutParams();
@@ -660,23 +650,6 @@ public class BubbleExpandedView extends LinearLayout {
                         + " mNeedsNewHeight=" + mNeedsNewHeight);
             }
         }
-    }
-
-    private int getMaxExpandedHeight() {
-        int expandedContainerY = mExpandedViewContainerLocation != null
-                // Remove top insets back here because availableRect.height would account for that
-                ? mExpandedViewContainerLocation[1] - mPositioner.getInsets().top
-                : 0;
-        int settingsHeight = mIsOverflow ? 0 : mManageButtonHeight;
-        int pointerHeight = mPositioner.showBubblesVertically()
-                ? mPointerWidth
-                : (int) (mPointerHeight - mPointerOverlap + mPointerMargin);
-        return mPositioner.getAvailableRect().height()
-                - expandedContainerY
-                - getPaddingTop()
-                - getPaddingBottom()
-                - settingsHeight
-                - pointerHeight;
     }
 
     /**
@@ -728,14 +701,11 @@ public class BubbleExpandedView extends LinearLayout {
                 : mPointerHeight - mPointerOverlap;
         setPadding((int) paddingLeft, (int) paddingTop, (int) paddingRight, 0);
 
-        final float expandedViewY = mPositioner.getExpandedViewY();
-        // TODO: I don't understand why it works but it does - why normalized in portrait
-        //  & not in landscape? Am I missing ~2dp in the portrait expandedViewY calculation?
-        final float normalizedSize = IconNormalizer.getNormalizedCircleSize(
-                mPositioner.getBubbleSize());
-        final float bubbleCenter = showVertically
-                ? bubblePosition + (mPositioner.getBubbleSize() / 2f) - expandedViewY
-                : bubblePosition + (normalizedSize / 2f) - mPointerWidth;
+        // Subtract the expandedViewY here because the pointer is placed within the expandedView.
+        float pointerPosition = mPositioner.getPointerPosition(bubblePosition);
+        final float bubbleCenter = mPositioner.showBubblesVertically()
+                ? pointerPosition - mPositioner.getExpandedViewY(mBubble, bubblePosition)
+                : pointerPosition;
         // Post because we need the width of the view
         post(() -> {
             float pointerY;
