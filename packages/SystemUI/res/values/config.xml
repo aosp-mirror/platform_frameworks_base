@@ -659,13 +659,6 @@
         <!--sensorRadius -->
     </integer-array>
 
-    <!-- The properties of the lock icon in pixels. -->
-    <integer-array name="config_lock_icon_props">
-        <!-- X -->
-        <!-- Y -->
-        <!-- radius -->
-    </integer-array>
-
     <!-- Overrides the behavior of the face unlock keyguard bypass setting:
          0 - Don't override the setting (default)
          1 - Override the setting to always bypass keyguard
