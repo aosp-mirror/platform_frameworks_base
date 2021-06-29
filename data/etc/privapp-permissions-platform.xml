@@ -498,6 +498,8 @@ applications that come with the platform
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
         <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
         <permission name="android.permission.UPDATE_DEVICE_STATS" />
+        <!-- Permission required for GTS test - PendingSystemUpdateTest -->
+        <permission name="android.permission.NOTIFY_PENDING_SYSTEM_UPDATE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
