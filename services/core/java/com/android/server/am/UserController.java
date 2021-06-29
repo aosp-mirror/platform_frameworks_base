@@ -590,7 +590,11 @@ class UserController implements Handler.Callback {
                 Slogf.w(TAG, "User key got locked unexpectedly, leaving user locked.");
                 return;
             }
+
+            final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+            t.traceBegin("UM.onBeforeUnlockUser-" + userId);
             mInjector.getUserManager().onBeforeUnlockUser(userId);
+            t.traceEnd();
             synchronized (mLock) {
                 // Do not proceed if unexpected state
                 if (!uss.setState(STATE_RUNNING_LOCKED, STATE_RUNNING_UNLOCKING)) {
@@ -1683,7 +1687,11 @@ class UserController implements Handler.Callback {
             return false;
         }
 
-        if (!finishUserUnlocking(uss)) {
+        final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("finishUserUnlocking-" + userId);
+        final boolean finishUserUnlockingResult = finishUserUnlocking(uss);
+        t.traceEnd();
+        if (!finishUserUnlockingResult) {
             notifyFinished(userId, listener);
             return false;
         }
@@ -1849,6 +1857,9 @@ class UserController implements Handler.Callback {
     }
 
     void dispatchUserSwitch(final UserState uss, final int oldUserId, final int newUserId) {
+        final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("dispatchUserSwitch-" + oldUserId + "-to-" + newUserId);
+
         EventLog.writeEvent(EventLogTags.UC_DISPATCH_USER_SWITCH, oldUserId, newUserId);
 
         final int observerCount = mUserSwitchObservers.beginBroadcast();
@@ -1901,6 +1912,7 @@ class UserController implements Handler.Callback {
             }
         }
         mUserSwitchObservers.finishBroadcast();
+        t.traceEnd(); // end dispatchUserSwitch-
     }
 
     @GuardedBy("mLock")
@@ -1912,16 +1924,23 @@ class UserController implements Handler.Callback {
     }
 
     void continueUserSwitch(UserState uss, int oldUserId, int newUserId) {
+        final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("continueUserSwitch-" + oldUserId + "-to-" + newUserId);
+
         EventLog.writeEvent(EventLogTags.UC_CONTINUE_USER_SWITCH, oldUserId, newUserId);
 
         if (isUserSwitchUiEnabled()) {
+            t.traceBegin("stopFreezingScreen");
             mInjector.getWindowManager().stopFreezingScreen();
+            t.traceEnd();
         }
         uss.switching = false;
         mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
         mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG, newUserId, 0));
         stopGuestOrEphemeralUserIfBackground(oldUserId);
         stopBackgroundUsersOnSwitchIfEnforced(oldUserId);
+
+        t.traceEnd(); // end continueUserSwitch
     }
 
     private void moveUserToForeground(UserState uss, int oldUserId, int newUserId) {
@@ -2670,7 +2689,11 @@ class UserController implements Handler.Callback {
                         USER_LIFECYCLE_EVENT_STATE_FINISH);
                 logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_UNLOCKED_USER,
                         USER_LIFECYCLE_EVENT_STATE_BEGIN);
+
+                final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+                t.traceBegin("finishUserUnlocked-" + userId);
                 finishUserUnlocked((UserState) msg.obj);
+                t.traceEnd();
                 break;
             case USER_UNLOCKED_MSG:
                 mInjector.getSystemServiceManager().onUserUnlocked(msg.arg1);
