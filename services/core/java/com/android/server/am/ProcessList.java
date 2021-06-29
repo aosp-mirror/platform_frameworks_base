@@ -4691,10 +4691,10 @@ public final class ProcessList {
                         final ApplicationInfo ai = AppGlobals.getPackageManager()
                                 .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);
                         if (ai != null) {
+                            app.getThread().scheduleApplicationInfoChanged(ai);
                             if (ai.packageName.equals(app.info.packageName)) {
                                 app.info = ai;
                             }
-                            app.getThread().scheduleApplicationInfoChanged(ai);
                             targetProcesses.add(app.getWindowProcessController());
                         }
                     } catch (RemoteException e) {
@@ -4705,7 +4705,8 @@ public final class ProcessList {
             });
         }
 
-        mService.mActivityTaskManager.updateAssetConfiguration(targetProcesses, updateFrameworkRes);
+        mService.mActivityTaskManager.updateAssetConfiguration(
+                updateFrameworkRes ? null : targetProcesses);
     }
 
     @GuardedBy("mService")
