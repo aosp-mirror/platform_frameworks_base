@@ -61,6 +61,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -115,6 +116,7 @@ public class NavigationBarController implements Callbacks,
     private final DisplayManager mDisplayManager;
     private final NavigationBarOverlayController mNavBarOverlayController;
     private final TaskbarDelegate mTaskbarDelegate;
+    private final NotificationShadeDepthController mNotificationShadeDepthController;
     private int mNavMode;
     private boolean mIsTablet;
     private final UserTracker mUserTracker;
@@ -149,6 +151,7 @@ public class NavigationBarController implements Callbacks,
             Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
+            NotificationShadeDepthController notificationShadeDepthController,
             SystemActions systemActions,
             @Main Handler mainHandler,
             UiEventLogger uiEventLogger,
@@ -175,6 +178,7 @@ public class NavigationBarController implements Callbacks,
         mStatusBarLazy = statusBarLazy;
         mShadeController = shadeController;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
+        mNotificationShadeDepthController = notificationShadeDepthController;
         mSystemActions = systemActions;
         mUiEventLogger = uiEventLogger;
         mHandler = mainHandler;
@@ -362,6 +366,7 @@ public class NavigationBarController implements Callbacks,
                 mStatusBarLazy,
                 mShadeController,
                 mNotificationRemoteInputManager,
+                mNotificationShadeDepthController,
                 mSystemActions,
                 mHandler,
                 mNavBarOverlayController,
