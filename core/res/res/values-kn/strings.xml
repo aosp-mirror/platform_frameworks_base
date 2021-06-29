@@ -613,10 +613,8 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ಫೇಸ್ ಅನ್‌ಲಾಕ್"</string>
-    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
-    <skip />
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಕುರಿತು ಸಮಸ್ಯೆ ಇದೆ"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ನಿಮ್ಮ ಫೇಸ್ ಮಾಡೆಲ್ ಅನ್ನು ಅಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ, ನಂತರ ನಿಮ್ಮ ಫೇಸ್ ಮಾಡೆಲ್ ಅನ್ನು ಪುನಃ ಸೇರಿಸಿ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ಫೋನ್ ಅನ್ನು ನೋಡುವ ಮೂಲಕ ಅನ್‌ಲಾಕ್‌ ಮಾಡಿ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಹೆಚ್ಚಿನ ಮಾರ್ಗಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
