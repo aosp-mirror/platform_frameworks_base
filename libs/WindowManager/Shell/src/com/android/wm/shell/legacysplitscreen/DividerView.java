@@ -408,7 +408,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     boolean isHidden() {
-        return mSurfaceHidden;
+        return getVisibility() != View.VISIBLE || mSurfaceHidden;
     }
 
     /** Starts dragging the divider bar. */
