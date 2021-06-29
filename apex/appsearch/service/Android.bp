@@ -53,9 +53,6 @@ java_library {
         "framework-appsearch.impl",
         "unsupportedappusage", // TODO(b/181887768) should be removed
     ],
-    required: [
-        "libicing",
-    ],
     defaults: ["framework-system-server-module-defaults"],
     permitted_packages: [
         "com.android.server.appsearch",
