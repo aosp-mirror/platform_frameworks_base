@@ -608,7 +608,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Відбитки пальців не зареєстровано."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На цьому пристрої немає сканера відбитків пальців."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчик тимчасово вимкнено."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"Потрібно відкалібрувати датчик"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Не вдається скористатися сканером відбитків пальців. Зверніться до постачальника послуг із ремонту."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Відбиток пальця <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Доступ за відбитком пальця"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Використовувати відбиток пальця або дані для розблокування екрана"</string>
@@ -624,6 +624,9 @@
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ви зможете розблоковувати телефон, подивившись на нього"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Налаштуйте більше способів розблокування"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Натисніть, щоб додати відбиток пальця"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Розблокування відбитком пальця"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не вдається скористатися сканером відбитків пальців"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Зверніться до постачальника послуг із ремонту."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Не вдалося чітко зняти обличчя. Повторіть спробу."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Занадто яскраво. Потрібно менше світла."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Занадто темно. Потрібно більше світла."</string>

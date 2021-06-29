@@ -602,7 +602,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ບໍ່ມີການລົງທະບຽນລາຍນິ້ວມື."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ອຸປະກອນນີ້ບໍ່ມີເຊັນເຊີລາຍນິ້ວມື."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ປິດການເຮັດວຽກຂອງເຊັນເຊີໄວ້ຊົ່ວຄາວແລ້ວ."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"ຕ້ອງປັບທຽບມາດຕະຖານເຊັນເຊີ"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ບໍ່ສາມາດໃຊ້ເຊັນ​ເຊີລາຍນິ້ວ​ມືໄດ້. ກະລຸນາໄປຫາຜູ້ໃຫ້ບໍລິການສ້ອມແປງ"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ນີ້ວ​ມື <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ໃຊ້ລາຍນິ້ວມື"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ໃຊ້ລາຍນິ້ວມື ຫຼື ການລັອກໜ້າຈໍ"</string>
@@ -612,14 +612,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ໄອຄອນລາຍນິ້ວມື"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ປົດລັອກດ້ວຍໜ້າ"</string>
-    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
-    <skip />
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ເກີດບັນຫາກັບການປົດລັອກດ້ວຍໜ້າ"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ແຕະເພື່ອລຶບຮູບແບບໃບໜ້າຂອງທ່ານ, ຈາກນັ້ນເພີ່ມໃບໜ້າຂອງທ່ານໃສ່ໃໝ່"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ປົດລັອກໂທລະສັບຂອງທ່ານໂດຍການເບິ່ງມັນ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ຕັ້ງຄ່າວິທີເພີ່ມເຕີມເພື່ອປົດລັອກ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ແຕະເພື່ອເພີ່ມລາຍນິ້ວມື"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ປົດລັອກດ້ວຍລາຍນິ້ວມື"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ບໍ່ສາມາດໃຊ້ເຊັນ​ເຊີລາຍນິ້ວ​ມືໄດ້"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ກະລຸນາໄປຫາຜູ້ໃຫ້ບໍລິການສ້ອມແປງ."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ບໍ່ສາມາດບັນທຶກຂໍ້ມູນໃບໜ້າທີ່ຖືກຕ້ອງໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ແຈ້ງເກີນໄປ. ລອງຄ່ອຍແສງໄຟລົງ."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ມືດເກີນ. ກະລຸນາລອງໃຊ້ສະພາບແສງທີ່ແຈ້ງຂຶ້ນ."</string>
