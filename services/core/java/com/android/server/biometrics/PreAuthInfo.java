@@ -408,22 +408,22 @@ class PreAuthInfo {
     public String toString() {
         StringBuilder string = new StringBuilder(
                 "BiometricRequested: " + mBiometricRequested
-                        + "\nStrengthRequested: " + mBiometricStrengthRequested
-                        + "\nCredentialRequested: " + credentialRequested);
-        string.append("\nEligible:{");
+                        + ", StrengthRequested: " + mBiometricStrengthRequested
+                        + ", CredentialRequested: " + credentialRequested);
+        string.append(", Eligible:{");
         for (BiometricSensor sensor: eligibleSensors) {
             string.append(sensor.id).append(" ");
         }
         string.append("}");
 
-        string.append("\nIneligible:{");
+        string.append(", Ineligible:{");
         for (Pair<BiometricSensor, Integer> ineligible : ineligibleSensors) {
             string.append(ineligible.first).append(":").append(ineligible.second).append(" ");
         }
         string.append("}");
 
-        string.append("\nCredentialAvailable: ").append(credentialAvailable);
-        string.append("\n");
+        string.append(", CredentialAvailable: ").append(credentialAvailable);
+        string.append(", ");
         return string.toString();
     }
 }

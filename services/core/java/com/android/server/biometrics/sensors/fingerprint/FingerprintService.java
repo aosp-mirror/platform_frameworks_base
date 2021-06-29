@@ -498,6 +498,8 @@ public class FingerprintService extends SystemService {
 
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
 
+            Slog.d(TAG, "cancelAuthenticationFromService, sensorId: " + sensorId);
+
             final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for cancelAuthenticationFromService");
