@@ -1331,6 +1331,9 @@
     <family lang="und-Zsye">
         <font weight="400" style="normal">NotoColorEmoji.ttf</font>
     </family>
+    <family lang="und-Zsye">
+        <font weight="400" style="normal">NotoColorEmojiFlags.ttf</font>
+    </family>
     <family lang="und-Zsym">
         <font weight="400" style="normal">NotoSansSymbols-Regular-Subsetted2.ttf</font>
     </family>
