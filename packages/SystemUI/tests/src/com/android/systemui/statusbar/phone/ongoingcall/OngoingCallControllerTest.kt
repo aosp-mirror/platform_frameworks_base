@@ -43,6 +43,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -115,6 +116,11 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
         `when`(mockIActivityManager.getUidProcessState(eq(CALL_UID), nullable(String::class.java)))
                 .thenReturn(PROC_STATE_INVISIBLE)
+    }
+
+    @After
+    fun tearDown() {
+        controller.tearDownChipView()
     }
 
     @Test
