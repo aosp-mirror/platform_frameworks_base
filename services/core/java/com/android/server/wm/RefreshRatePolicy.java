@@ -151,6 +151,10 @@ class RefreshRatePolicy {
             }
         }
 
+        if (w.mAttrs.preferredRefreshRate != 0) {
+            return w.mAttrs.preferredRefreshRate;
+        }
+
         return 0;
     }
 
