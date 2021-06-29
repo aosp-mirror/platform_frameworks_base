@@ -34,6 +34,7 @@ import android.view.WindowMetrics;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.launcher3.icons.IconNormalizer;
 import com.android.wm.shell.R;
 
 import java.lang.annotation.Retention;
@@ -58,6 +59,8 @@ public class BubblePositioner {
 
     /** When the bubbles are collapsed in a stack only some of them are shown, this is how many. **/
     public static final int NUM_VISIBLE_WHEN_RESTING = 2;
+    /** Indicates a bubble's height should be the maximum available space. **/
+    public static final int MAX_HEIGHT = -1;
 
     private Context mContext;
     private WindowManager mWindowManager;
@@ -68,13 +71,16 @@ public class BubblePositioner {
     private int mMaxBubbles;
 
     private int mBubbleSize;
-    private int mBubbleBadgeSize;
     private int mSpacingBetweenBubbles;
     private int mExpandedViewLargeScreenWidth;
     private int mExpandedViewPadding;
     private int mPointerMargin;
-    private float mPointerWidth;
-    private float mPointerHeight;
+    private int mPointerWidth;
+    private int mPointerHeight;
+    private int mPointerOverlap;
+    private int mManageButtonHeight;
+    private int mExpandedViewMinHeight;
+    private int mOverflowHeight;
 
     private PointF mPinLocation;
     private PointF mRestingStackPosition;
@@ -151,7 +157,6 @@ public class BubblePositioner {
 
         Resources res = mContext.getResources();
         mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
-        mBubbleBadgeSize = res.getDimensionPixelSize(R.dimen.bubble_badge_size);
         mSpacingBetweenBubbles = res.getDimensionPixelSize(R.dimen.bubble_spacing);
         mDefaultMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
 
@@ -161,6 +166,10 @@ public class BubblePositioner {
         mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
+        mPointerOverlap = res.getDimensionPixelSize(R.dimen.bubble_pointer_overlap);
+        mManageButtonHeight = res.getDimensionPixelSize(R.dimen.bubble_manage_button_height);
+        mExpandedViewMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
+        mOverflowHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height);
 
         mMaxBubbles = calculateMaxBubbles();
 
@@ -296,14 +305,124 @@ public class BubblePositioner {
         return mPaddings;
     }
 
-    /** Calculates the y position of the expanded view when it is expanded. */
-    public float getExpandedViewY() {
+    /** Gets the y position of the expanded view if it was top-aligned. */
+    private float getExpandedViewYTopAligned() {
         final int top = getAvailableRect().top;
         if (showBubblesVertically()) {
             return top - mPointerWidth;
         } else {
             return top + mBubbleSize + mPointerMargin;
         }
+    }
+
+    /** The maximum height the expanded view can be. */
+    public int getMaxExpandedViewHeight(boolean isOverflow) {
+        int paddingTop = showBubblesVertically()
+                ? 0
+                : mPointerHeight;
+        int settingsHeight = isOverflow ? 0 : mManageButtonHeight;
+        // Subtract pointer size because it's laid out in LinearLayout with the expanded view.
+        int pointerSize = showBubblesVertically()
+                ? mPointerWidth
+                : (mPointerHeight + mPointerMargin);
+        // Subtract top insets because availableRect.height would account for that
+        int expandedContainerY = (int) getExpandedViewYTopAligned() - getInsets().top;
+        return getAvailableRect().height()
+                - expandedContainerY
+                - paddingTop
+                - settingsHeight
+                - pointerSize;
+    }
+
+    /**
+     * Determines the height for the bubble, ensuring a minimum height. If the height should be as
+     * big as available, returns {@link #MAX_HEIGHT}.
+     */
+    public float getExpandedViewHeight(BubbleViewProvider bubble) {
+        boolean isOverflow = bubble == null || BubbleOverflow.KEY.equals(bubble.getKey());
+        float desiredHeight = isOverflow
+                ? mOverflowHeight
+                : ((Bubble) bubble).getDesiredHeight(mContext);
+        int manageButtonHeight = isOverflow ? 0 : mManageButtonHeight;
+        desiredHeight = Math.max(manageButtonHeight + desiredHeight, mExpandedViewMinHeight);
+        if (desiredHeight > getMaxExpandedViewHeight(isOverflow)) {
+            return MAX_HEIGHT;
+        }
+        return desiredHeight;
+    }
+
+    /**
+     * Gets the y position for the expanded view. This is the position on screen of the top
+     * horizontal line of the expanded view.
+     *
+     * @param bubble the bubble being positioned.
+     * @param bubblePosition the x position of the bubble if showing on top, the y position of the
+     *                       bubble if showing vertically.
+     * @return the y position for the expanded view.
+     */
+    public float getExpandedViewY(BubbleViewProvider bubble, float bubblePosition) {
+        boolean isOverflow = bubble == null || BubbleOverflow.KEY.equals(bubble.getKey());
+        float expandedViewHeight = getExpandedViewHeight(bubble);
+        float topAlignment = getExpandedViewYTopAligned();
+        if (!showBubblesVertically() || expandedViewHeight == MAX_HEIGHT) {
+            // Top-align when bubbles are shown at the top or are max size.
+            return topAlignment;
+        }
+        // If we're here, we're showing vertically & developer has made height less than maximum.
+        int manageButtonHeight = isOverflow ? 0 : mManageButtonHeight;
+        float pointerPosition = getPointerPosition(bubblePosition);
+        float bottomIfCentered = pointerPosition + (expandedViewHeight / 2) + manageButtonHeight;
+        float topIfCentered = pointerPosition - (expandedViewHeight / 2);
+        if (topIfCentered > mPositionRect.top && mPositionRect.bottom > bottomIfCentered) {
+            // Center it
+            return pointerPosition - mPointerWidth - (expandedViewHeight / 2f);
+        } else if (topIfCentered <= mPositionRect.top) {
+            // Top align
+            return topAlignment;
+        } else {
+            // Bottom align
+            return mPositionRect.bottom - manageButtonHeight - expandedViewHeight - mPointerWidth;
+        }
+    }
+
+    /**
+     * The position the pointer points to, the center of the bubble.
+     *
+     * @param bubblePosition the x position of the bubble if showing on top, the y position of the
+     *                       bubble if showing vertically.
+     * @return the position the tip of the pointer points to. The x position if showing on top, the
+     * y position if showing vertically.
+     */
+    public float getPointerPosition(float bubblePosition) {
+        // TODO: I don't understand why it works but it does - why normalized in portrait
+        //  & not in landscape? Am I missing ~2dp in the portrait expandedViewY calculation?
+        final float normalizedSize = IconNormalizer.getNormalizedCircleSize(
+                getBubbleSize());
+        return showBubblesVertically()
+                ? bubblePosition + (getBubbleSize() / 2f)
+                : bubblePosition + (normalizedSize / 2f) - mPointerWidth;
+    }
+
+    /**
+     * When bubbles are expanded in portrait, they display at the top of the screen in a horizontal
+     * row. When in landscape or on a large screen, they show at the left or right side in a
+     * vertical row. This method accounts for screen orientation and will return an x or y value
+     * for the position of the bubble in the row.
+     *
+     * @param index bubble index in the row.
+     * @param numberOfBubbles the number of bubbles (including the overflow) in the row.
+     * @return the y position of the bubble if showing vertically and the x position if showing
+     * horizontally.
+     */
+    public float getBubbleXOrYForOrientation(int index, int numberOfBubbles) {
+        final float positionInBar = index * (mBubbleSize + mSpacingBetweenBubbles);
+        final float expandedStackSize = (numberOfBubbles * mBubbleSize)
+                + ((numberOfBubbles - 1) * mSpacingBetweenBubbles);
+        final float centerPosition = showBubblesVertically()
+                ? mPositionRect.centerY()
+                : mPositionRect.centerX();
+        final float rowStart = centerPosition - (expandedStackSize / 2f);
+        return rowStart + positionInBar;
     }
 
     /**
