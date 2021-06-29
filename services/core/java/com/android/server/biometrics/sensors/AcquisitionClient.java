@@ -17,7 +17,6 @@
 package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.media.AudioAttributes;
@@ -27,7 +26,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.text.TextUtils;
 import android.util.Slog;
 
 /**
@@ -39,24 +37,18 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
 
     private static final String TAG = "Biometrics/AcquisitionClient";
 
-    private static final AudioAttributes VIBRATION_SONFICATION_ATTRIBUTES =
+    private static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
             new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                     .build();
 
-    private final VibrationEffect mEffectTick = VibrationEffect.get(VibrationEffect.EFFECT_TICK);
-    private final VibrationEffect mEffectTextureTick =
-            VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK);
-    private final VibrationEffect mEffectClick = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
-    private final VibrationEffect mEffectHeavy =
-            VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
-    private final VibrationEffect mDoubleClick =
+    private static final VibrationEffect SUCCESS_VIBRATION_EFFECT =
+            VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+    private static final VibrationEffect ERROR_VIBRATION_EFFECT =
             VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
 
     private final PowerManager mPowerManager;
-    private final VibrationEffect mSuccessVibrationEffect;
-    private final VibrationEffect mErrorVibrationEffect;
     private boolean mShouldSendErrorToClient = true;
     private boolean mAlreadyCancelled;
 
@@ -72,8 +64,6 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         super(context, lazyDaemon, token, listener, userId, owner, cookie, sensorId, statsModality,
                 statsAction, statsClient);
         mPowerManager = context.getSystemService(PowerManager.class);
-        mSuccessVibrationEffect = mEffectClick;
-        mErrorVibrationEffect = mDoubleClick;
     }
 
     @Override
@@ -192,49 +182,31 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
     }
 
-    protected @Nullable VibrationEffect getSuccessVibrationEffect() {
-        return mSuccessVibrationEffect;
+    protected boolean successHapticsEnabled() {
+        return true;
     }
 
-    protected @Nullable VibrationEffect getErrorVibrationEffect() {
-        return mErrorVibrationEffect;
+    protected boolean errorHapticsEnabled() {
+        return true;
     }
 
     protected final void vibrateSuccess() {
+        if (!successHapticsEnabled()) {
+            return;
+        }
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
-        VibrationEffect effect = getSuccessVibrationEffect();
-        if (vibrator != null && effect != null) {
-            vibrator.vibrate(effect, VIBRATION_SONFICATION_ATTRIBUTES);
+        if (vibrator != null) {
+            vibrator.vibrate(SUCCESS_VIBRATION_EFFECT, VIBRATION_SONIFICATION_ATTRIBUTES);
         }
     }
 
     protected final void vibrateError() {
+        if (!errorHapticsEnabled()) {
+            return;
+        }
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
-        VibrationEffect effect = getErrorVibrationEffect();
-        if (vibrator != null && effect != null) {
-            vibrator.vibrate(effect, VIBRATION_SONFICATION_ATTRIBUTES);
-        }
-    }
-
-    protected final @NonNull VibrationEffect getVibration(@Nullable String effect,
-            @NonNull VibrationEffect defaultEffect) {
-        if (TextUtils.isEmpty(effect)) {
-            return defaultEffect;
-        }
-
-        switch (effect.toLowerCase()) {
-            case "click":
-                return mEffectClick;
-            case "heavy":
-                return mEffectHeavy;
-            case "texture_tick":
-                return mEffectTextureTick;
-            case "tick":
-                return mEffectTick;
-            case "double_click":
-                return mDoubleClick;
-            default:
-                return defaultEffect;
+        if (vibrator != null) {
+            vibrator.vibrate(ERROR_VIBRATION_EFFECT, VIBRATION_SONIFICATION_ATTRIBUTES);
         }
     }
 }
