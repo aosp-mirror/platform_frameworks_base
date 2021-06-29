@@ -2806,6 +2806,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 throw new NullPointerException("work is null");
             }
 
+            work.enforceValidity();
             validateJobFlags(job, uid);
 
             final long ident = Binder.clearCallingIdentity();

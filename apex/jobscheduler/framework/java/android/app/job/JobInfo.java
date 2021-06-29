@@ -324,6 +324,7 @@ public class JobInfo implements Parcelable {
     private final NetworkRequest networkRequest;
     private final long networkDownloadBytes;
     private final long networkUploadBytes;
+    private final long minimumNetworkChunkBytes;
     private final long minLatencyMillis;
     private final long maxExecutionDelayMillis;
     private final boolean isPeriodic;
@@ -515,6 +516,17 @@ public class JobInfo implements Parcelable {
     }
 
     /**
+     * Return the smallest piece of data that cannot be easily paused and resumed, in bytes.
+     *
+     * @return Smallest piece of data that cannot be easily paused and resumed, or
+     *         {@link #NETWORK_BYTES_UNKNOWN} when unknown.
+     * @see Builder#setMinimumNetworkChunkBytes(long)
+     */
+    public @BytesLong long getMinimumNetworkChunkBytes() {
+        return minimumNetworkChunkBytes;
+    }
+
+    /**
      * Set for a job that does not recur periodically, to specify a delay after which the job
      * will be eligible for execution. This value is not set if the job recurs periodically.
      * @see JobInfo.Builder#setMinimumLatency(long)
@@ -679,6 +691,9 @@ public class JobInfo implements Parcelable {
         if (networkUploadBytes != j.networkUploadBytes) {
             return false;
         }
+        if (minimumNetworkChunkBytes != j.minimumNetworkChunkBytes) {
+            return false;
+        }
         if (minLatencyMillis != j.minLatencyMillis) {
             return false;
         }
@@ -741,6 +756,7 @@ public class JobInfo implements Parcelable {
         }
         hashCode = 31 * hashCode + Long.hashCode(networkDownloadBytes);
         hashCode = 31 * hashCode + Long.hashCode(networkUploadBytes);
+        hashCode = 31 * hashCode + Long.hashCode(minimumNetworkChunkBytes);
         hashCode = 31 * hashCode + Long.hashCode(minLatencyMillis);
         hashCode = 31 * hashCode + Long.hashCode(maxExecutionDelayMillis);
         hashCode = 31 * hashCode + Boolean.hashCode(isPeriodic);
@@ -777,6 +793,7 @@ public class JobInfo implements Parcelable {
         }
         networkDownloadBytes = in.readLong();
         networkUploadBytes = in.readLong();
+        minimumNetworkChunkBytes = in.readLong();
         minLatencyMillis = in.readLong();
         maxExecutionDelayMillis = in.readLong();
         isPeriodic = in.readInt() == 1;
@@ -807,6 +824,7 @@ public class JobInfo implements Parcelable {
         networkRequest = b.mNetworkRequest;
         networkDownloadBytes = b.mNetworkDownloadBytes;
         networkUploadBytes = b.mNetworkUploadBytes;
+        minimumNetworkChunkBytes = b.mMinimumNetworkChunkBytes;
         minLatencyMillis = b.mMinLatencyMillis;
         maxExecutionDelayMillis = b.mMaxExecutionDelayMillis;
         isPeriodic = b.mIsPeriodic;
@@ -851,6 +869,7 @@ public class JobInfo implements Parcelable {
         }
         out.writeLong(networkDownloadBytes);
         out.writeLong(networkUploadBytes);
+        out.writeLong(minimumNetworkChunkBytes);
         out.writeLong(minLatencyMillis);
         out.writeLong(maxExecutionDelayMillis);
         out.writeInt(isPeriodic ? 1 : 0);
@@ -986,6 +1005,7 @@ public class JobInfo implements Parcelable {
         private NetworkRequest mNetworkRequest;
         private long mNetworkDownloadBytes = NETWORK_BYTES_UNKNOWN;
         private long mNetworkUploadBytes = NETWORK_BYTES_UNKNOWN;
+        private long mMinimumNetworkChunkBytes = NETWORK_BYTES_UNKNOWN;
         private ArrayList<TriggerContentUri> mTriggerContentUris;
         private long mTriggerContentUpdateDelay = -1;
         private long mTriggerContentMaxDelay = -1;
@@ -1038,6 +1058,7 @@ public class JobInfo implements Parcelable {
             mNetworkRequest = job.getRequiredNetwork();
             mNetworkDownloadBytes = job.getEstimatedNetworkDownloadBytes();
             mNetworkUploadBytes = job.getEstimatedNetworkUploadBytes();
+            mMinimumNetworkChunkBytes = job.getMinimumNetworkChunkBytes();
             mTriggerContentUris = job.getTriggerContentUris() != null
                     ? new ArrayList<>(Arrays.asList(job.getTriggerContentUris())) : null;
             mTriggerContentUpdateDelay = job.getTriggerContentUpdateDelay();
@@ -1252,6 +1273,39 @@ public class JobInfo implements Parcelable {
                 @BytesLong long uploadBytes) {
             mNetworkDownloadBytes = downloadBytes;
             mNetworkUploadBytes = uploadBytes;
+            return this;
+        }
+
+        /**
+         * Set the minimum size of non-resumable network traffic this job requires, in bytes. When
+         * the upload or download can be easily paused and resumed, use this to set the smallest
+         * size that must be transmitted between start and stop events to be considered successful.
+         * If the transfer cannot be paused and resumed, then this should be the sum of the values
+         * provided to {@link JobInfo.Builder#setEstimatedNetworkBytes(long, long)}.
+         *
+         * <p>
+         * Apps are encouraged to provide values that are as accurate as possible since JobScheduler
+         * will try to run the job at a time when at least the minimum chunk can be transmitted to
+         * reduce the amount of repetitive data that's transferred. Jobs that cannot provide
+         * reasonable estimates should use the sentinel value {@link JobInfo#NETWORK_BYTES_UNKNOWN}.
+         *
+         * <p>
+         * The values provided here only reflect the minimum non-resumable traffic that will be
+         * performed by the base job; if you're using {@link JobWorkItem} then
+         * you also need to define the network traffic used by each work item
+         * when constructing them.
+         *
+         * @param chunkSizeBytes The smallest piece of data that cannot be easily paused and
+         *                       resumed, in bytes.
+         * @see JobInfo#getMinimumNetworkChunkBytes()
+         * @see JobWorkItem#JobWorkItem(android.content.Intent, long, long, long)
+         */
+        @NonNull
+        public Builder setMinimumNetworkChunkBytes(@BytesLong long chunkSizeBytes) {
+            if (chunkSizeBytes != NETWORK_BYTES_UNKNOWN && chunkSizeBytes <= 0) {
+                throw new IllegalArgumentException("Minimum chunk size must be positive");
+            }
+            mMinimumNetworkChunkBytes = chunkSizeBytes;
             return this;
         }
 
@@ -1647,11 +1701,28 @@ public class JobInfo implements Parcelable {
     /**
      * @hide
      */
-    public void enforceValidity() {
-        // Check that network estimates require network type
-        if ((networkDownloadBytes > 0 || networkUploadBytes > 0) && networkRequest == null) {
+    public final void enforceValidity() {
+        // Check that network estimates require network type and are reasonable values.
+        if ((networkDownloadBytes > 0 || networkUploadBytes > 0 || minimumNetworkChunkBytes > 0)
+                && networkRequest == null) {
             throw new IllegalArgumentException(
                     "Can't provide estimated network usage without requiring a network");
+        }
+        final long estimatedTransfer;
+        if (networkUploadBytes == NETWORK_BYTES_UNKNOWN) {
+            estimatedTransfer = networkDownloadBytes;
+        } else {
+            estimatedTransfer = networkUploadBytes
+                    + (networkDownloadBytes == NETWORK_BYTES_UNKNOWN ? 0 : networkDownloadBytes);
+        }
+        if (minimumNetworkChunkBytes != NETWORK_BYTES_UNKNOWN
+                && estimatedTransfer != NETWORK_BYTES_UNKNOWN
+                && minimumNetworkChunkBytes > estimatedTransfer) {
+            throw new IllegalArgumentException(
+                    "Minimum chunk size can't be greater than estimated network usage");
+        }
+        if (minimumNetworkChunkBytes != NETWORK_BYTES_UNKNOWN && minimumNetworkChunkBytes <= 0) {
+            throw new IllegalArgumentException("Minimum chunk size must be positive");
         }
 
         // Check that a deadline was not set on a periodic job.

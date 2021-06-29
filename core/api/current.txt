@@ -7937,6 +7937,7 @@ package android.app.job {
     method public static final long getMinFlexMillis();
     method public long getMinLatencyMillis();
     method public static final long getMinPeriodMillis();
+    method public long getMinimumNetworkChunkBytes();
     method @Deprecated public int getNetworkType();
     method @Nullable public android.net.NetworkRequest getRequiredNetwork();
     method @NonNull public android.content.ComponentName getService();
@@ -7979,6 +7980,7 @@ package android.app.job {
     method public android.app.job.JobInfo.Builder setExtras(@NonNull android.os.PersistableBundle);
     method @Deprecated public android.app.job.JobInfo.Builder setImportantWhileForeground(boolean);
     method public android.app.job.JobInfo.Builder setMinimumLatency(long);
+    method @NonNull public android.app.job.JobInfo.Builder setMinimumNetworkChunkBytes(long);
     method public android.app.job.JobInfo.Builder setOverrideDeadline(long);
     method public android.app.job.JobInfo.Builder setPeriodic(long);
     method public android.app.job.JobInfo.Builder setPeriodic(long, long);
@@ -8071,11 +8073,13 @@ package android.app.job {
   public final class JobWorkItem implements android.os.Parcelable {
     ctor public JobWorkItem(android.content.Intent);
     ctor public JobWorkItem(android.content.Intent, long, long);
+    ctor public JobWorkItem(@Nullable android.content.Intent, long, long, long);
     method public int describeContents();
     method public int getDeliveryCount();
     method public long getEstimatedNetworkDownloadBytes();
     method public long getEstimatedNetworkUploadBytes();
     method public android.content.Intent getIntent();
+    method public long getMinimumNetworkChunkBytes();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.job.JobWorkItem> CREATOR;
   }
