@@ -366,10 +366,9 @@ public final class AuthSession implements IBinder.DeathRecipient {
         // sending the final error callback to the application.
         for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
             try {
-                if (filter.apply(sensor)) {
-                    if (DEBUG) {
-                        Slog.v(TAG, "Canceling sensor: " + sensor.id);
-                    }
+                final boolean shouldCancel = filter.apply(sensor);
+                Slog.d(TAG, "sensorId: " + sensor.id + ", shouldCancel: " + shouldCancel);
+                if (shouldCancel) {
                     sensor.goToStateCancelling(mToken, mOpPackageName);
                 }
             } catch (RemoteException e) {
