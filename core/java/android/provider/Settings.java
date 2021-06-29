@@ -4700,7 +4700,7 @@ public final class Settings {
          *
          * @hide
          */
-        @Readable
+        @Readable(maxTargetSdk = Build.VERSION_CODES.R)
         public static final String MEDIA_BUTTON_RECEIVER = "media_button_receiver";
 
         /**
