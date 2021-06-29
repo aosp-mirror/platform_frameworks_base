@@ -338,7 +338,14 @@ public class AppOpsService extends IAppOpsService.Stub {
     /*
      * These are app op restrictions imposed per user from various parties.
      */
-    private final ArrayMap<IBinder, ClientRestrictionState> mOpUserRestrictions = new ArrayMap<>();
+    private final ArrayMap<IBinder, ClientUserRestrictionState> mOpUserRestrictions =
+            new ArrayMap<>();
+
+    /*
+     * These are app op restrictions imposed globally from various parties within the system.
+     */
+    private final ArrayMap<IBinder, ClientGlobalRestrictionState> mOpGlobalRestrictions =
+            new ArrayMap<>();
 
     SparseIntArray mProfileOwners;
 
@@ -4722,13 +4729,22 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private boolean isOpRestrictedLocked(int uid, int code, String packageName,
             String attributionTag, @Nullable RestrictionBypass appBypass) {
+        int restrictionSetCount = mOpGlobalRestrictions.size();
+
+        for (int i = 0; i < restrictionSetCount; i++) {
+            ClientGlobalRestrictionState restrictionState = mOpGlobalRestrictions.valueAt(i);
+            if (restrictionState.hasRestriction(code)) {
+                return true;
+            }
+        }
+
         int userHandle = UserHandle.getUserId(uid);
-        final int restrictionSetCount = mOpUserRestrictions.size();
+        restrictionSetCount = mOpUserRestrictions.size();
 
         for (int i = 0; i < restrictionSetCount; i++) {
             // For each client, check that the given op is not restricted, or that the given
             // package is exempt from the restriction.
-            ClientRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
+            ClientUserRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
             if (restrictionState.hasRestriction(code, packageName, attributionTag, userHandle)) {
                 RestrictionBypass opBypass = opAllowSystemBypassRestriction(code);
                 if (opBypass != null) {
@@ -6295,10 +6311,31 @@ public class AppOpsService extends IAppOpsService.Stub {
                 pw.println();
             }
 
+            final int globalRestrictionCount = mOpGlobalRestrictions.size();
+            for (int i = 0; i < globalRestrictionCount; i++) {
+                IBinder token = mOpGlobalRestrictions.keyAt(i);
+                ClientGlobalRestrictionState restrictionState = mOpGlobalRestrictions.valueAt(i);
+                ArraySet<Integer> restrictedOps = restrictionState.mRestrictedOps;
+
+                pw.println("  Global restrictions for token " + token + ":");
+                StringBuilder restrictedOpsValue = new StringBuilder();
+                restrictedOpsValue.append("[");
+                final int restrictedOpCount = restrictedOps.size();
+                for (int j = 0; j < restrictedOpCount; j++) {
+                    if (restrictedOpsValue.length() > 1) {
+                        restrictedOpsValue.append(", ");
+                    }
+                    restrictedOpsValue.append(AppOpsManager.opToName(restrictedOps.valueAt(j)));
+                }
+                restrictedOpsValue.append("]");
+                pw.println("      Restricted ops: " + restrictedOpsValue);
+
+            }
+
             final int userRestrictionCount = mOpUserRestrictions.size();
             for (int i = 0; i < userRestrictionCount; i++) {
                 IBinder token = mOpUserRestrictions.keyAt(i);
-                ClientRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
+                ClientUserRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
                 boolean printedTokenHeader = false;
 
                 if (dumpMode >= 0 || dumpWatchers || dumpHistory) {
@@ -6444,11 +6481,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     private void setUserRestrictionNoCheck(int code, boolean restricted, IBinder token,
             int userHandle, PackageTagsList excludedPackageTags) {
         synchronized (AppOpsService.this) {
-            ClientRestrictionState restrictionState = mOpUserRestrictions.get(token);
+            ClientUserRestrictionState restrictionState = mOpUserRestrictions.get(token);
 
             if (restrictionState == null) {
                 try {
-                    restrictionState = new ClientRestrictionState(token);
+                    restrictionState = new ClientUserRestrictionState(token);
                 } catch (RemoteException e) {
                     return;
                 }
@@ -6528,7 +6565,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         synchronized (AppOpsService.this) {
             final int tokenCount = mOpUserRestrictions.size();
             for (int i = tokenCount - 1; i >= 0; i--) {
-                ClientRestrictionState opRestrictions = mOpUserRestrictions.valueAt(i);
+                ClientUserRestrictionState opRestrictions = mOpUserRestrictions.valueAt(i);
                 opRestrictions.removeUser(userHandle);
             }
             removeUidsForUserLocked(userHandle);
@@ -6986,12 +7023,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         return packageNames;
     }
 
-    private final class ClientRestrictionState implements DeathRecipient {
+    private final class ClientUserRestrictionState implements DeathRecipient {
         private final IBinder token;
         SparseArray<boolean[]> perUserRestrictions;
         SparseArray<PackageTagsList> perUserExcludedPackageTags;
 
-        public ClientRestrictionState(IBinder token)
+        ClientUserRestrictionState(IBinder token)
                 throws RemoteException {
             token.linkToDeath(this, 0);
             this.token = token;
@@ -7082,6 +7119,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (perUserExclusions == null) {
                 return true;
             }
+
             return !perUserExclusions.contains(packageName, attributionTag);
         }
 
@@ -7143,6 +7181,42 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    private final class ClientGlobalRestrictionState implements DeathRecipient {
+        final IBinder mToken;
+        final ArraySet<Integer> mRestrictedOps = new ArraySet<>();
+
+        ClientGlobalRestrictionState(IBinder token)
+                throws RemoteException {
+            token.linkToDeath(this, 0);
+            this.mToken = token;
+        }
+
+        boolean setRestriction(int code, boolean restricted) {
+            if (restricted) {
+                return mRestrictedOps.add(code);
+            } else {
+                return mRestrictedOps.remove(code);
+            }
+        }
+
+        boolean hasRestriction(int code) {
+            return mRestrictedOps.contains(code);
+        }
+
+        boolean isDefault() {
+            return mRestrictedOps.isEmpty();
+        }
+
+        @Override
+        public void binderDied() {
+            destroy();
+        }
+
+        void destroy() {
+            mToken.unlinkToDeath(this, 0);
+        }
+    }
+
     private final class AppOpsManagerInternalImpl extends AppOpsManagerInternal {
         @Override public void setDeviceAndProfileOwners(SparseIntArray owners) {
             synchronized (AppOpsService.this) {
@@ -7166,6 +7240,42 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void setModeFromPermissionPolicy(int code, int uid, @NonNull String packageName,
                 int mode, @Nullable IAppOpsCallback callback) {
             setMode(code, uid, packageName, mode, callback);
+        }
+
+
+        @Override
+        public void setGlobalRestriction(int code, boolean restricted, IBinder token) {
+            if (Binder.getCallingPid() != Process.myPid()) {
+                // TODO instead of this enforcement put in AppOpsManagerInternal
+                throw new SecurityException("Only the system can set global restrictions");
+            }
+
+            synchronized (AppOpsService.this) {
+                ClientGlobalRestrictionState restrictionState = mOpGlobalRestrictions.get(token);
+
+                if (restrictionState == null) {
+                    try {
+                        restrictionState = new ClientGlobalRestrictionState(token);
+                    } catch (RemoteException  e) {
+                        return;
+                    }
+                    mOpGlobalRestrictions.put(token, restrictionState);
+                }
+
+                if (restrictionState.setRestriction(code, restricted)) {
+                    mHandler.sendMessage(PooledLambda.obtainMessage(
+                            AppOpsService::notifyWatchersOfChange, AppOpsService.this, code,
+                            UID_ANY));
+                    mHandler.sendMessage(PooledLambda.obtainMessage(
+                            AppOpsService::updateStartedOpModeForUser, AppOpsService.this,
+                            code, restricted, UserHandle.USER_ALL));
+                }
+
+                if (restrictionState.isDefault()) {
+                    mOpGlobalRestrictions.remove(token);
+                    restrictionState.destroy();
+                }
+            }
         }
     }
 
