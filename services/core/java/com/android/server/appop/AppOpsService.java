@@ -2341,8 +2341,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             boolean isCallerSystem = Binder.getCallingPid() == Process.myPid();
             boolean isCallerPermissionController;
             try {
-                isCallerPermissionController = pm.getPackageUid(
-                        mContext.getPackageManager().getPermissionControllerPackageName(), 0)
+                isCallerPermissionController = pm.getPackageUidAsUser(
+                        mContext.getPackageManager().getPermissionControllerPackageName(), 0,
+                        UserHandle.getUserId(Binder.getCallingUid()))
                         == Binder.getCallingUid();
             } catch (PackageManager.NameNotFoundException doesNotHappen) {
                 return;
