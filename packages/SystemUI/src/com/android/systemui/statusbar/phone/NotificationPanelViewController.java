@@ -2056,7 +2056,7 @@ public class NotificationPanelViewController extends PanelViewController {
         // When expanding QS, let's authenticate the user if possible,
         // this will speed up notification actions.
         if (height == 0) {
-            mStatusBar.requestFaceAuth();
+            mStatusBar.requestFaceAuth(false);
         }
     }
 
@@ -3197,7 +3197,7 @@ public class NotificationPanelViewController extends PanelViewController {
             case KEYGUARD:
                 if (!mDozingOnDown) {
                     if (mKeyguardBypassController.getBypassEnabled()) {
-                        mUpdateMonitor.requestFaceAuth();
+                        mUpdateMonitor.requestFaceAuth(true);
                     } else {
                         mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
                                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
