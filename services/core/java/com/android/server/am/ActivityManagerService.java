@@ -16333,6 +16333,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return mConstants.mPushMessagingOverQuotaBehavior;
             }
         }
+
+        @Override
+        public int getUidCapability(int uid) {
+            synchronized (ActivityManagerService.this) {
+                UidRecord uidRecord = mProcessList.getUidRecordLOSP(uid);
+                if (uidRecord == null) {
+                    throw new IllegalArgumentException("uid record for " + uid + " not found");
+                }
+                return uidRecord.getCurCapability();
+            }
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
