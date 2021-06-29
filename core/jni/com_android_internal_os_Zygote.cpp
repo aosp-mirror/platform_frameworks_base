@@ -122,6 +122,10 @@ static jclass gZygoteClass;
 static jmethodID gCallPostForkSystemServerHooks;
 static jmethodID gCallPostForkChildHooks;
 
+static constexpr const char* kZygoteInitClassName = "com/android/internal/os/ZygoteInit";
+static jclass gZygoteInitClass;
+static jmethodID gGetOrCreateSystemServerClassLoader;
+
 static bool gIsSecurityEnforced = true;
 
 /**
@@ -1625,6 +1629,17 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
                                            instruction_set.value().c_str());
     }
 
+    if (is_system_server) {
+        // Prefetch the classloader for the system server. This is done early to
+        // allow a tie-down of the proper system server selinux domain.
+        env->CallStaticObjectMethod(gZygoteInitClass, gGetOrCreateSystemServerClassLoader);
+        if (env->ExceptionCheck()) {
+            // Be robust here. The Java code will attempt to create the classloader
+            // at a later point (but may not have rights to use AoT artifacts).
+            env->ExceptionClear();
+        }
+    }
+
     if (setresgid(gid, gid, gid) == -1) {
         fail_fn(CREATE_ERROR("setresgid(%d) failed: %s", gid, strerror(errno)));
     }
@@ -2688,6 +2703,13 @@ int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
                                                    "(IZZLjava/lang/String;)V");
 
-  return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
+  gZygoteInitClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteInitClassName));
+  gGetOrCreateSystemServerClassLoader =
+          GetStaticMethodIDOrDie(env, gZygoteInitClass, "getOrCreateSystemServerClassLoader",
+                                 "()Ljava/lang/ClassLoader;");
+
+  RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
+
+  return JNI_OK;
 }
 }  // namespace android
