@@ -1620,7 +1620,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     if (is_system_server) {
         // Prefetch the classloader for the system server. This is done early to
         // allow a tie-down of the proper system server selinux domain.
-        env->CallStaticVoidMethod(gZygoteInitClass, gGetOrCreateSystemServerClassLoader);
+        env->CallStaticObjectMethod(gZygoteInitClass, gGetOrCreateSystemServerClassLoader);
         if (env->ExceptionCheck()) {
             // Be robust here. The Java code will attempt to create the classloader
             // at a later point (but may not have rights to use AoT artifacts).
