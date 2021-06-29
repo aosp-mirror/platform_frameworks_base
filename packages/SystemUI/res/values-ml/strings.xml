@@ -713,7 +713,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ശബ്ദമോ വൈബ്രേഷനോ ഇല്ല"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ശബ്‌ദമോ വൈബ്രേഷനോ ഇല്ല, സംഭാഷണ വിഭാഗത്തിന് താഴെയായി ദൃശ്യമാകും"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ഫോൺ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ്/വൈബ്രേറ്റ് ചെയ്യും"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ഫോൺ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ് ചെയ്‌തേക്കാം അല്ലെങ്കിൽ വൈബ്രേറ്റ് ചെയ്‌തേക്കാം. <xliff:g id="APP_NAME">%1$s</xliff:g>-ൽ നിന്നുള്ള സംഭാഷണങ്ങൾ ഡിഫോൾട്ടായി ബബിൾ ആവുന്നു."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ഫോൺ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ്/വൈബ്രേറ്റ് ചെയ്‌തേക്കാം. <xliff:g id="APP_NAME">%1$s</xliff:g>-ൽ നിന്നുള്ള സംഭാഷണങ്ങൾ ഡിഫോൾട്ടായി ബബിൾ ചെയ്യുന്നു."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ഈ ഉള്ളടക്കത്തിലേക്ക് ഒരു ഫ്ലോട്ടിംഗ് കുറുക്കുവഴി ഉപയോഗിച്ച് നിങ്ങളുടെ ശ്രദ്ധ നിലനിർത്തുന്നു."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"സംഭാഷണ വിഭാഗത്തിന് മുകളിലായി കാണിക്കുന്നു, ഫ്ലോട്ടിംഗ് ബബിളായി ദൃശ്യമാകുന്നു, ലോക്ക് സ്ക്രീനിൽ പ്രൊഫൈൽ ചിത്രം പ്രദർശിപ്പിക്കുന്നു"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ക്രമീകരണം"</string>

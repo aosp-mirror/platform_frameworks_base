@@ -721,7 +721,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Vyzvání nebo vibruje podle nastavení telefonu"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Vyzvání nebo vibruje podle nastavení telefonu. Konverzace z aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> mají ve výchozím nastavení podobu bublin."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Přitahuje pozornost pomocí plovoucí zkratky k tomuto obsahu."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Najdete ji v horní části sekce konverzací jako plovoucí bublinu a na obrazovce uzamčení zobrazuje profilovou fotku"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzací jako plovoucí bublina a na obrazovce uzamčení zobrazuje profilovou fotku"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>

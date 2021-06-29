@@ -437,7 +437,7 @@
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"สลับภาพรวม"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ชาร์จแล้ว"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"กำลังชาร์จ"</string>
-    <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"อีก <xliff:g id="CHARGING_TIME">%s</xliff:g> จึงจะเต็ม"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"อีก <xliff:g id="CHARGING_TIME">%s</xliff:g> จะเต็ม"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ไม่ได้ชาร์จ"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"เครือข่ายอาจ\nถูกตรวจสอบ"</string>
     <string name="description_target_search" msgid="3875069993128855865">"ค้นหา"</string>
