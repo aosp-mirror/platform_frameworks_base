@@ -23,6 +23,8 @@ import com.android.systemui.plugins.annotations.DependsOn;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 import com.android.systemui.plugins.qs.QS.HeightListener;
 
+import java.util.function.Consumer;
+
 /**
  * Fragment that contains QS in the notification shade.  Most of the interface is for
  * handling the expand/collapsing of the view interaction.
@@ -33,7 +35,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 9;
+    int VERSION = 10;
 
     String TAG = "QS";
 
@@ -100,6 +102,11 @@ public interface QS extends FragmentBase {
     default boolean isFullyCollapsed() {
         return true;
     }
+
+    /**
+     * Add a listener for when the collapsed media visibility changes.
+     */
+    void setCollapsedMediaVisibilityChangedListener(Consumer<Boolean> listener);
 
     @ProvidesInterface(version = HeightListener.VERSION)
     interface HeightListener {
