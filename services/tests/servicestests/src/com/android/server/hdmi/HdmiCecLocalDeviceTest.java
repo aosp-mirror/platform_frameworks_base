@@ -32,9 +32,15 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.media.AudioManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
@@ -45,6 +51,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -123,8 +131,12 @@ public class HdmiCecLocalDeviceTest {
     private boolean isControlEnabled;
     private int mPowerStatus;
 
+    @Mock
+    private AudioManager mAudioManager;
+
     @Before
     public void SetUp() {
+        MockitoAnnotations.initMocks(this);
 
         Context context = InstrumentationRegistry.getTargetContext();
 
@@ -160,6 +172,11 @@ public class HdmiCecLocalDeviceTest {
                     @Override
                     void wakeUp() {
                         mWakeupMessageReceived = true;
+                    }
+
+                    @Override
+                    AudioManager getAudioManager() {
+                        return mAudioManager;
                     }
                 };
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
@@ -416,6 +433,28 @@ public class HdmiCecLocalDeviceTest {
         assertEquals(Constants.HANDLED, result);
         assertThat(mWakeupMessageReceived).isFalse();
         assertThat(mStandbyMessageReceived).isTrue();
+    }
+
+    @Test
+    public void handleUserControlPressed_muteFunction() {
+        @Constants.HandleMessageResult int result = mHdmiLocalDevice.handleUserControlPressed(
+                HdmiCecMessageBuilder.buildUserControlPressed(ADDR_TV, ADDR_PLAYBACK_1,
+                        HdmiCecKeycode.CEC_KEYCODE_MUTE_FUNCTION));
+
+        assertEquals(result, Constants.HANDLED);
+        verify(mAudioManager, times(1))
+                .adjustStreamVolume(anyInt(), eq(AudioManager.ADJUST_MUTE), anyInt());
+    }
+
+    @Test
+    public void handleUserControlPressed_restoreVolumeFunction() {
+        @Constants.HandleMessageResult int result = mHdmiLocalDevice.handleUserControlPressed(
+                HdmiCecMessageBuilder.buildUserControlPressed(ADDR_TV, ADDR_PLAYBACK_1,
+                        HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION));
+
+        assertEquals(result, Constants.HANDLED);
+        verify(mAudioManager, times(1))
+                .adjustStreamVolume(anyInt(), eq(AudioManager.ADJUST_UNMUTE), anyInt());
     }
 
     @Test
