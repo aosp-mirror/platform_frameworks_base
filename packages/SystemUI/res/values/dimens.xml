@@ -1398,9 +1398,11 @@
     <dimen name="controls_dialog_padding">32dp</dimen>
     <dimen name="controls_dialog_control_width">200dp</dimen>
 
-    <!-- Screen Record -->
-    <dimen name="screenrecord_dialog_padding">18dp</dimen>
-    <dimen name="screenrecord_logo_size">24dp</dimen>
+    <!-- Screen record dialog -->
+    <dimen name="screenrecord_option_padding">18dp</dimen>
+    <dimen name="screenrecord_logo_size">26dp</dimen>
+    <dimen name="screenrecord_option_icon_size">24dp</dimen>
+    <!-- Screen record status bar icon -->
     <dimen name="screenrecord_status_text_size">14sp</dimen>
     <dimen name="screenrecord_status_icon_radius">7dp</dimen>
     <dimen name="screenrecord_status_icon_width">21dp</dimen>
