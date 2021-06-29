@@ -885,6 +885,11 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                     .isUnlockingWithBiometricAllowed(true /* isStrongBiometric */)) {
                 return;
             }
+
+            if (biometricSourceType == BiometricSourceType.FACE && shouldSuppressFaceMsg()) {
+                return;
+            }
+
             boolean showSwipeToUnlock =
                     msgId == KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
@@ -912,7 +917,8 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                 // The face timeout message is not very actionable, let's ask the user to
                 // manually retry.
                 if (!mStatusBarKeyguardViewManager.isBouncerShowing()
-                        && mKeyguardUpdateMonitor.isUdfpsEnrolled()) {
+                        && mKeyguardUpdateMonitor.isUdfpsEnrolled()
+                        && mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
                     // suggest trying fingerprint
                     showTransientIndication(R.string.keyguard_try_fingerprint);
                 } else {
@@ -952,7 +958,18 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED);
         }
 
+        private boolean shouldSuppressFaceMsg() {
+            // For dual biometric, don't show face auth messages unless face auth was explicitly
+            // requested by the user.
+            return mKeyguardUpdateMonitor.isUdfpsEnrolled()
+                && mKeyguardUpdateMonitor.isFingerprintDetectionRunning()
+                && !mKeyguardUpdateMonitor.isFaceAuthUserRequested();
+        }
+
         private boolean shouldSuppressFaceError(int msgId, KeyguardUpdateMonitor updateMonitor) {
+            if (shouldSuppressFaceMsg()) {
+                return true;
+            }
             // Only checking if unlocking with Biometric is allowed (no matter strong or non-strong
             // as long as primary auth, i.e. PIN/pattern/password, is not required), so it's ok to
             // pass true for isStrongBiometric to isUnlockingWithBiometricAllowed() to bypass the
