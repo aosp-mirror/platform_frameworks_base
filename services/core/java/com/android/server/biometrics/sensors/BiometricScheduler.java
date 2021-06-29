@@ -569,6 +569,9 @@ public class BiometricScheduler {
         final boolean isCorrectClient = isAuthenticationOrDetectionOperation(mCurrentOperation);
         final boolean tokenMatches = mCurrentOperation.mClientMonitor.getToken() == token;
 
+        Slog.d(getTag(), "cancelAuthenticationOrDetection, isCorrectClient: " + isCorrectClient
+                + ", tokenMatches: " + tokenMatches);
+
         if (isCorrectClient && tokenMatches) {
             Slog.d(getTag(), "Cancelling: " + mCurrentOperation);
             cancelInternal(mCurrentOperation);
