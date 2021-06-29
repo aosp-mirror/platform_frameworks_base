@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"વપરાશકર્તા ઉમેરો"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"નવો વપરાશકર્તા"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"અતિથિ દૂર કરીએ?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"અતિથિ સત્રને રીસેટ કરીએ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"આ સત્રમાંની તમામ ઍપ અને ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"દૂર કરો"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"રીસેટ કરો"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ફરી સ્વાગત છે, અતિથિ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"શું તમે તમારું સત્ર ચાલુ રાખવા માંગો છો?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"શરૂ કરો"</string>
@@ -1117,7 +1115,7 @@
     <string name="basic_status" msgid="2315371112182658176">"વાતચીત ખોલો"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"વાતચીતના વિજેટ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"તમારી હોમ સ્ક્રીનમાં વાતચીત ઉમેરવા માટે તેના પર ટૅપ કરો"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"એકવાર તમને અમુક સંદેશા મળે પછી ફરીથી અહીં ચેક કરો"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"તમારી તાજેતરની વાતચીતો અહીં બતાવવામાં આવશે"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"પ્રાધાન્યતા ધરાવતી વાતચીતો"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"તાજેતરની વાતચીતો"</string>
     <string name="okay" msgid="6490552955618608554">"ઓકે"</string>

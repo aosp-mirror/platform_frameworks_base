@@ -438,7 +438,7 @@
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"สลับภาพรวม"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ชาร์จแล้ว"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"กำลังชาร์จ"</string>
-    <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"อีก <xliff:g id="CHARGING_TIME">%s</xliff:g> จึงจะเต็ม"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"อีก <xliff:g id="CHARGING_TIME">%s</xliff:g> จะเต็ม"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ไม่ได้ชาร์จ"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"เครือข่ายอาจ\nถูกตรวจสอบ"</string>
     <string name="description_target_search" msgid="3875069993128855865">"ค้นหา"</string>
@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"เพิ่มผู้ใช้"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ผู้ใช้ใหม่"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ต้องการนำผู้ใช้ชั่วคราวออกไหม"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"รีเซ็ตผู้เข้าร่วมไหม"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"นำออก"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"รีเซ็ต"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้เข้าร่วมกลับมาอีกครั้ง"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"เริ่มต้นใหม่"</string>
@@ -1117,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"เปิดการสนทนา"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"วิดเจ็ตการสนทนา"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"แตะการสนทนาเพื่อเพิ่มไปยังหน้าจอหลัก"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"กลับมาดูที่นี่อีกครั้งเมื่อได้รับข้อความ"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"การสนทนาสำคัญ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"การสนทนาล่าสุด"</string>
     <string name="okay" msgid="6490552955618608554">"ตกลง"</string>
@@ -1146,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ดูข้อความล่าสุด สายที่ไม่ได้รับ และการอัปเดตสถานะ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"การสนทนา"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"หยุดชั่วคราวโดยฟีเจอร์ห้ามรบกวน"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ส่งข้อความ"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ส่งรูปภาพ"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"พบปัญหาในการอ่านเครื่องวัดแบตเตอรี่"</string>
