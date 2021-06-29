@@ -3854,8 +3854,13 @@ public class NotificationPanelViewController extends PanelViewController {
                     expand(true /* animate */);
                 }
                 initDownStates(event);
-                if (!mIsExpanding && !shouldQuickSettingsIntercept(mDownX, mDownY, 0)
-                        && mPulseExpansionHandler.onTouchEvent(event)) {
+
+                // If pulse is expanding already, let's give it the touch. There are situations
+                // where the panel starts expanding even though we're also pulsing
+                boolean pulseShouldGetTouch = (!mIsExpanding
+                        && !shouldQuickSettingsIntercept(mDownX, mDownY, 0))
+                        || mPulseExpansionHandler.isExpanding();
+                if (pulseShouldGetTouch && mPulseExpansionHandler.onTouchEvent(event)) {
                     // We're expanding all the other ones shouldn't get this anymore
                     return true;
                 }
