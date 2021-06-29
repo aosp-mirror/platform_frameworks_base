@@ -237,6 +237,55 @@ public final class HotwordDetectedResult implements Parcelable {
         return size;
     }
 
+    /**
+     * Returns how many bits have been written into the HotwordDetectedResult.
+     *
+     * @hide
+     */
+    public static int getUsageSize(@NonNull HotwordDetectedResult hotwordDetectedResult) {
+        int totalBits = 0;
+
+        if (hotwordDetectedResult.getConfidenceLevel() != defaultConfidenceLevel()) {
+            totalBits += bitCount(CONFIDENCE_LEVEL_VERY_HIGH);
+        }
+        if (hotwordDetectedResult.getHotwordOffsetMillis() != HOTWORD_OFFSET_UNSET) {
+            totalBits += Integer.SIZE;
+        }
+        if (hotwordDetectedResult.getHotwordDurationMillis() != 0) {
+            totalBits += bitCount(AudioRecord.getMaxSharedAudioHistoryMillis());
+        }
+        if (hotwordDetectedResult.getAudioChannel() != AUDIO_CHANNEL_UNSET) {
+            totalBits += Integer.SIZE;
+        }
+
+        // Add one bit for HotwordDetectionPersonalized
+        totalBits += 1;
+
+        if (hotwordDetectedResult.getScore() != defaultScore()) {
+            totalBits += bitCount(HotwordDetectedResult.getMaxScore());
+        }
+        if (hotwordDetectedResult.getPersonalizedScore() != defaultPersonalizedScore()) {
+            totalBits += bitCount(HotwordDetectedResult.getMaxScore());
+        }
+        if (hotwordDetectedResult.getHotwordPhraseId() != defaultHotwordPhraseId()) {
+            totalBits += bitCount(HotwordDetectedResult.getMaxHotwordPhraseId());
+        }
+        PersistableBundle persistableBundle = hotwordDetectedResult.getExtras();
+        if (!persistableBundle.isEmpty()) {
+            totalBits += getParcelableSize(persistableBundle) * Byte.SIZE;
+        }
+        return totalBits;
+    }
+
+    private static int bitCount(long value) {
+        int bits = 0;
+        while (value > 0) {
+            bits++;
+            value = value >> 1;
+        }
+        return bits;
+    }
+
     private void onConstructed() {
         Preconditions.checkArgumentInRange(mScore, 0, getMaxScore(), "score");
         Preconditions.checkArgumentInRange(mPersonalizedScore, 0, getMaxScore(),
@@ -784,10 +833,10 @@ public final class HotwordDetectedResult implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1624361647985L,
+            time = 1625198973370L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordDetectedResult.java",
-            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_LOW_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_HIGH\npublic static final  int CONFIDENCE_LEVEL_HIGH\npublic static final  int CONFIDENCE_LEVEL_VERY_HIGH\npublic static final  int HOTWORD_OFFSET_UNSET\npublic static final  int AUDIO_CHANNEL_UNSET\nprivate final @android.service.voice.HotwordDetectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate @android.annotation.Nullable android.media.MediaSyncEvent mMediaSyncEvent\nprivate  int mHotwordOffsetMillis\nprivate  int mHotwordDurationMillis\nprivate  int mAudioChannel\nprivate  boolean mHotwordDetectionPersonalized\nprivate final  int mScore\nprivate final  int mPersonalizedScore\nprivate final  int mHotwordPhraseId\nprivate final @android.annotation.NonNull android.os.PersistableBundle mExtras\nprivate static  int sMaxBundleSize\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultScore()\nprivate static  int defaultPersonalizedScore()\npublic static  int getMaxScore()\nprivate static  int defaultHotwordPhraseId()\npublic static  int getMaxHotwordPhraseId()\nprivate static  android.os.PersistableBundle defaultExtras()\npublic static  int getMaxBundleSize()\npublic @android.annotation.Nullable android.media.MediaSyncEvent getMediaSyncEvent()\npublic static  int getParcelableSize(android.os.Parcelable)\nprivate  void onConstructed()\nclass HotwordDetectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_LOW_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_HIGH\npublic static final  int CONFIDENCE_LEVEL_HIGH\npublic static final  int CONFIDENCE_LEVEL_VERY_HIGH\npublic static final  int HOTWORD_OFFSET_UNSET\npublic static final  int AUDIO_CHANNEL_UNSET\nprivate final @android.service.voice.HotwordDetectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate @android.annotation.Nullable android.media.MediaSyncEvent mMediaSyncEvent\nprivate  int mHotwordOffsetMillis\nprivate  int mHotwordDurationMillis\nprivate  int mAudioChannel\nprivate  boolean mHotwordDetectionPersonalized\nprivate final  int mScore\nprivate final  int mPersonalizedScore\nprivate final  int mHotwordPhraseId\nprivate final @android.annotation.NonNull android.os.PersistableBundle mExtras\nprivate static  int sMaxBundleSize\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultScore()\nprivate static  int defaultPersonalizedScore()\npublic static  int getMaxScore()\nprivate static  int defaultHotwordPhraseId()\npublic static  int getMaxHotwordPhraseId()\nprivate static  android.os.PersistableBundle defaultExtras()\npublic static  int getMaxBundleSize()\npublic @android.annotation.Nullable android.media.MediaSyncEvent getMediaSyncEvent()\npublic static  int getParcelableSize(android.os.Parcelable)\npublic static  int getUsageSize(android.service.voice.HotwordDetectedResult)\nprivate static  int bitCount(long)\nprivate  void onConstructed()\nclass HotwordDetectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 
