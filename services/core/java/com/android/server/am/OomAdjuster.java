@@ -2835,8 +2835,6 @@ public class OomAdjuster {
                             + " target=" + state.getAdjTarget() + " capability=" + item.capability);
         }
 
-        mProcessList.killAppIfForceStandbyAndCachedIdleLocked(app);
-
         return success;
     }
 
