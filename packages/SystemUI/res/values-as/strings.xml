@@ -32,14 +32,14 @@
     <string name="invalid_charger" msgid="4370074072117767416">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি। আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
-    <string name="battery_low_why" msgid="2056750982959359863">"ছেটিংসমূহ"</string>
+    <string name="battery_low_why" msgid="2056750982959359863">"ছেটিং"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"বেটাৰি সঞ্চয়কাৰী অন কৰেনে?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"বেটাৰী সঞ্চয়কাৰীৰ বিষয়ে"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"অন কৰক"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"বেটাৰি সঞ্চয়কাৰী অন কৰক"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ছেটিংসমূহ"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"ৱাই-ফাই"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীণ"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীন"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"মিউট"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"স্বয়ং"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"জাননীসমূহ"</string>
@@ -343,7 +343,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"অন কৰি থকা হৈছে…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"উজ্জ্বলতা"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"স্বয়ং-ঘূৰ্ণন"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীণ"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীন"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> ম\'ড"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"ঘূৰ্ণন লক কৰা হ’ল"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"প\'ৰ্ট্ৰেইট"</string>
@@ -1115,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"বাৰ্তালাপ খোলক"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"বাৰ্তালাপ ৱিজেট"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"আপোনাৰ গৃহ স্ক্ৰীনত কোনো বাৰ্তালাপ যোগ দিবলৈ সেইটোত টিপক"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"আপুনি কিবা বাৰ্তা পোৱাৰ পাছত ইয়াত পুনৰ চাওক"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"অগ্ৰাধিকাৰপ্ৰাপ্ত বাৰ্তালাপ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"শেহতীয়া বাৰ্তালাপ"</string>
     <string name="okay" msgid="6490552955618608554">"ঠিক আছে"</string>
