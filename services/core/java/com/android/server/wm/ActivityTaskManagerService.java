@@ -4146,21 +4146,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /**
      * Update the asset configuration and increase the assets sequence number.
-     * @param processes the processes that needs to update the asset configuration
+     * @param processes the processes that needs to update the asset configuration, if none
+     *                  updates the global configuration for all processes.
      */
-    public void updateAssetConfiguration(List<WindowProcessController> processes,
-            boolean updateFrameworkRes) {
+    public void updateAssetConfiguration(List<WindowProcessController> processes) {
         synchronized (mGlobalLock) {
             final int assetSeq = increaseAssetConfigurationSeq();
 
-            if (updateFrameworkRes) {
+            // Update the global configuration if the no target processes
+            if (processes == null) {
                 Configuration newConfig = new Configuration();
                 newConfig.assetsSeq = assetSeq;
                 updateConfiguration(newConfig);
+                return;
             }
 
-            // Always update the override of every process so the asset sequence of the process is
-            // always greater than or equal to the global configuration.
             for (int i = processes.size() - 1; i >= 0; i--) {
                 final WindowProcessController wpc = processes.get(i);
                 wpc.updateAssetConfiguration(assetSeq);
