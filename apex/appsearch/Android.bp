@@ -50,6 +50,20 @@ bootclasspath_fragment {
     name: "com.android.appsearch-bootclasspath-fragment",
     contents: ["framework-appsearch"],
     apex_available: ["com.android.appsearch"],
+
+    // The bootclasspath_fragments that provide APIs on which this depends.
+    fragments: [
+        {
+            apex: "com.android.art",
+            module: "art-bootclasspath-fragment",
+        },
+    ],
+
+    // Additional stubs libraries that this fragment's contents use which are
+    // not provided by another bootclasspath_fragment.
+    additional_stubs: [
+        "android-non-updatable",
+    ],
 }
 
 // Encapsulate the contributions made by the com.android.appsearch to the systemserverclasspath.
