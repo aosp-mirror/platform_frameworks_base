@@ -714,7 +714,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"အသံ သို့မဟုတ် တုန်ခါမှုမရှိပါ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"အသံ သို့မဟုတ် တုန်ခါမှုမရှိပါ၊ စကားဝိုင်းကဏ္ဍ၏ အောက်ပိုင်းတွင် မြင်ရသည်"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ဖုန်းဆက်တင်များပေါ် အခြေခံပြီး အသံမြည်နိုင်သည် သို့မဟုတ် တုန်ခါနိုင်သည်"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ဖုန်းဆက်တင်များပေါ် အခြေခံပြီး အသံမြည်နိုင်သည် သို့မဟုတ် တုန်ခါနိုင်သည်။ မူရင်းသတ်မှတ်ချက်အဖြစ် <xliff:g id="APP_NAME">%1$s</xliff:g> မှ စကားဝိုင်းများကို ပူဖောင်းကွက်ဖြင့် ပြသည်။"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ဖုန်းဆက်တင်ပေါ် အခြေခံပြီး အသံမြည် (သို့) တုန်ခါနိုင်သည်။ <xliff:g id="APP_NAME">%1$s</xliff:g> မှ စကားဝိုင်းများကို ပူဖောင်းကွက်ဖြင့် အလိုအလျောက်ပြသည်။"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"အကြောင်းအရာကို floating shortcut ကိုသုံး၍ အာရုံစိုက်လာအောင်လုပ်ပါ။"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"စကားဝိုင်းကဏ္ဍ၏ ထိပ်ပိုင်းတွင် ပြပြီး ပူဖောင်းကွက်အဖြစ် မြင်ရသည်၊ လော့ခ်ချထားချိန် မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံကို ပြသည်"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ဆက်တင်များ"</string>
