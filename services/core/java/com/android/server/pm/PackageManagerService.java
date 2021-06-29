@@ -20111,7 +20111,28 @@ public class PackageManagerService extends IPackageManager.Stub
 
             notifyPackageChangeObserversOnUpdate(reconciledPkg);
         }
-        NativeLibraryHelper.waitForNativeBinariesExtraction(incrementalStorages);
+        waitForNativeBinariesExtraction(incrementalStorages);
+    }
+
+    static void waitForNativeBinariesExtraction(
+            ArraySet<IncrementalStorage> incrementalStorages) {
+        if (incrementalStorages.isEmpty()) {
+            return;
+        }
+        try {
+            // Native library extraction may take very long time: each page could potentially
+            // wait for either 10s or 100ms (adb vs non-adb data loader), and that easily adds
+            // up to a full watchdog timeout of 1 min, killing the system after that. It doesn't
+            // make much sense as blocking here doesn't lock up the framework, but only blocks
+            // the installation session and the following ones.
+            Watchdog.getInstance().pauseWatchingCurrentThread("native_lib_extract");
+            for (int i = 0; i < incrementalStorages.size(); ++i) {
+                IncrementalStorage storage = incrementalStorages.valueAtUnchecked(i);
+                storage.waitForNativeBinariesExtraction();
+            }
+        } finally {
+            Watchdog.getInstance().resumeWatchingCurrentThread("native_lib_extract");
+        }
     }
 
     private int[] getInstalledUsers(PackageSetting ps, int userId) {
