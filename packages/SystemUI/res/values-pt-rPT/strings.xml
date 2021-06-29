@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Adicionar utilizador"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novo utilizador"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remover o convidado?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Pretende repor a sessão de convidado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todas as apps e dados desta sessão serão eliminados."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Remover"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Repor"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bem-vindo de volta, convidado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Pretende continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Recomeçar"</string>
@@ -1117,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Abrir conversa"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversa"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Toque numa conversa para a adicionar ao ecrã principal"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Volte aqui quando tiver mensagens"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Conversas com prioridade"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversas recentes"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1146,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Veja mensagens recentes, chamadas não atendidas e atualizações de estado"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversa"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Colocado em pausa pelo modo Não incomodar"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> enviou uma mensagem"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> enviou uma imagem"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Ocorreu um problema ao ler o medidor da bateria"</string>

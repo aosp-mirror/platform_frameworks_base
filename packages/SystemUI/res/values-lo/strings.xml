@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"ເພີ່ມຜູ້ໃຊ້"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ຜູ່ໃຊ້ໃໝ່"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ລຶບ​ແຂກ​ບໍ?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"ຣີເຊັດແຂກບໍ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ແອັບຯ​ແລະ​ຂໍ້​ມູນ​ທັງ​ໝົດ​ໃນ​ເຊດ​ຊັນ​ນີ້​ຈະ​ຖືກ​ລຶບ​ອອກ."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ລຶບ​"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"ຣີເຊັດ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ຍິນ​ດີ​ຕ້ອນ​ຮັບ​ກັບ​ມາ, ຜູ້ຢ້ຽມຢາມ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ທ່ານ​ຕ້ອງ​ການ​ສືບ​ຕໍ່​ເຊດ​ຊັນ​ຂອງ​ທ່ານບໍ່?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ເລີ່ມຕົ້ນໃຫມ່"</string>
@@ -1117,7 +1115,7 @@
     <string name="basic_status" msgid="2315371112182658176">"ເປີດການສົນທະນາ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ວິດເຈັດການສົນທະນາ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ແຕະໃສ່ການສົນທະນາໃດໜຶ່ງເພື່ອເພີ່ມມັນໃສ່ໂຮມສະກຣີນຂອງທ່ານ"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"ກັບມາກວດເບິ່ງຢູ່ບ່ອນນີ້ຄືນໃໝ່ຫຼັງຈາກທີ່ທ່ານໄດ້ຮັບຂໍ້ຄວາມ"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"ການສົນທະນາຫຼ້າສຸດຂອງທ່ານຈະສະແດງຢູ່ບ່ອນນີ້"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ການສົນທະນາສຳຄັນ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ການສົນທະນາຫຼ້າສຸດ"</string>
     <string name="okay" msgid="6490552955618608554">"ຕົກລົງ"</string>

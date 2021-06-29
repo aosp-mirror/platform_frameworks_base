@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"新增使用者"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新使用者"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"移除訪客？"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"要重設訪客工作階段嗎？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會遭到刪除。"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"移除"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"重設"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"訪客你好，歡迎回來！"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"你要繼續這個工作階段嗎？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新開始"</string>
@@ -1117,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"開放式對話"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"對話小工具"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"輕觸對話即可新增至主畫面"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"等你收到一些訊息後再回來這裡看看"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"優先對話"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"最近的對話"</string>
     <string name="okay" msgid="6490552955618608554">"確定"</string>
@@ -1146,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"查看最近的訊息、未接來電和狀態更新"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"對話"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"零打擾模式已將通知暫停"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g>傳送了一則訊息"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>傳送了一張圖片"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"讀取電池計量器時發生問題"</string>
