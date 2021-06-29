@@ -1528,8 +1528,14 @@ public final class DisplayManagerService extends SystemService {
             if (requestedModeId == 0 && requestedRefreshRate != 0) {
                 // Scan supported modes returned by display.getInfo() to find a mode with the same
                 // size as the default display mode but with the specified refresh rate instead.
-                requestedModeId = display.getDisplayInfoLocked().findDefaultModeByRefreshRate(
-                        requestedRefreshRate).getModeId();
+                Display.Mode mode = display.getDisplayInfoLocked().findDefaultModeByRefreshRate(
+                        requestedRefreshRate);
+                if (mode != null) {
+                    requestedModeId = mode.getModeId();
+                } else {
+                    Slog.e(TAG, "Couldn't find a mode for the requestedRefreshRate: "
+                            + requestedRefreshRate + " on Display: " + displayId);
+                }
             }
             mDisplayModeDirector.getAppRequestObserver().setAppRequest(
                     displayId, requestedModeId, requestedMaxRefreshRate);
