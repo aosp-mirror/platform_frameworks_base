@@ -430,21 +430,7 @@ public class UdfpsController implements DozeReceiver {
                             mTouchLogTime = SystemClock.elapsedRealtime();
                             mPowerManager.userActivity(SystemClock.uptimeMillis(),
                                     PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
-
-                            // TODO: this should eventually be removed after ux testing
-                            if (mVibrator != null) {
-                                final ContentResolver contentResolver =
-                                        mContext.getContentResolver();
-                                int startEnabled = Settings.Global.getInt(contentResolver,
-                                        "udfps_start", 1);
-                                if (startEnabled > 0) {
-                                    String startEffectSetting = Settings.Global.getString(
-                                            contentResolver, "udfps_start_type");
-                                    mVibrator.vibrate(getVibration(startEffectSetting,
-                                            EFFECT_CLICK), VIBRATION_SONIFICATION_ATTRIBUTES);
-                                }
-                            }
-
+                            playStartHaptic();
                             handled = true;
                         } else if (sinceLastLog >= MIN_TOUCH_LOG_INTERVAL) {
                             Log.v(TAG, "onTouch | finger move: " + touchInfo);
@@ -498,6 +484,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull LockscreenShadeTransitionController lockscreenShadeTransitionController,
             @NonNull ScreenLifecycle screenLifecycle,
             @Nullable Vibrator vibrator,
+            @NonNull UdfpsHapticsSimulator udfpsHapticsSimulator,
             @NonNull Optional<UdfpsHbmProvider> hbmProvider) {
         mContext = context;
         mExecution = execution;
@@ -544,6 +531,29 @@ public class UdfpsController implements DozeReceiver {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mBroadcastReceiver, filter);
+
+        udfpsHapticsSimulator.setUdfpsController(this);
+    }
+
+    /**
+     * Play haptic to signal udfps scanning started.
+     */
+    @VisibleForTesting
+    public void playStartHaptic() {
+        if (mVibrator != null) {
+            final ContentResolver contentResolver =
+                    mContext.getContentResolver();
+            // TODO: these settings checks should eventually be removed after ux testing
+            //  (b/185124905)
+            int startEnabled = Settings.Global.getInt(contentResolver,
+                    "udfps_start", 1);
+            if (startEnabled > 0) {
+                String startEffectSetting = Settings.Global.getString(
+                        contentResolver, "udfps_start_type");
+                mVibrator.vibrate(getVibration(startEffectSetting,
+                        EFFECT_CLICK), VIBRATION_SONIFICATION_ATTRIBUTES);
+            }
+        }
     }
 
     private int getCoreLayoutParamFlags() {
@@ -835,7 +845,6 @@ public class UdfpsController implements DozeReceiver {
             mView.stopIllumination();
         }
     }
-
 
     /**
      * get vibration to play given string
