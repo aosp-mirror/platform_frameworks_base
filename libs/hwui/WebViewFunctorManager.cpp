@@ -126,7 +126,14 @@ void WebViewFunctor::drawGl(const DrawGlInfo& drawInfo) {
                 renderthread::CanvasContext::getActiveContext();
         if (activeContext != nullptr) {
             ASurfaceControl* rootSurfaceControl = activeContext->getSurfaceControl();
-            if (rootSurfaceControl) overlayParams.overlaysMode = OverlaysMode::Enabled;
+            if (rootSurfaceControl) {
+                overlayParams.overlaysMode = OverlaysMode::Enabled;
+                int32_t rgid = activeContext->getSurfaceControlGenerationId();
+                if (mParentSurfaceControlGenerationId != rgid) {
+                    reparentSurfaceControl(rootSurfaceControl);
+                    mParentSurfaceControlGenerationId = rgid;
+                }
+            }
         }
     }
 
@@ -195,6 +202,7 @@ ASurfaceControl* WebViewFunctor::getSurfaceControl() {
     LOG_ALWAYS_FATAL_IF(rootSurfaceControl == nullptr, "Null root surface control!");
 
     auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
+    mParentSurfaceControlGenerationId = activeContext->getSurfaceControlGenerationId();
     mSurfaceControl = funcs.createFunc(rootSurfaceControl, "Webview Overlay SurfaceControl");
     ASurfaceTransaction* transaction = funcs.transactionCreateFunc();
     activeContext->prepareSurfaceControlForWebview();
@@ -216,6 +224,17 @@ void WebViewFunctor::mergeTransaction(ASurfaceTransaction* transaction) {
         auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
         funcs.transactionApplyFunc(transaction);
     }
+}
+
+void WebViewFunctor::reparentSurfaceControl(ASurfaceControl* parent) {
+    ATRACE_NAME("WebViewFunctor::reparentSurfaceControl");
+    if (mSurfaceControl == nullptr) return;
+
+    auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
+    ASurfaceTransaction* transaction = funcs.transactionCreateFunc();
+    funcs.transactionReparentFunc(transaction, mSurfaceControl, parent);
+    mergeTransaction(transaction);
+    funcs.transactionDeleteFunc(transaction);
 }
 
 WebViewFunctorManager& WebViewFunctorManager::instance() {
