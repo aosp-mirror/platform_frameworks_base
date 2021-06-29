@@ -25,23 +25,15 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityThread;
-import android.app.PendingIntent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInstaller;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.inputmethodservice.InputMethodService;
 import android.media.ImageReader;
-import android.os.FileUtils;
 import android.os.UserHandle;
 import android.view.Display;
 
@@ -50,20 +42,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.compatibility.common.util.ShellIdentityUtils;
-import com.android.frameworks.coretests.R;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
 /**
- * Build/Install/Run:
- * atest FrameworksCoreTests:ContextTest
+ *  Build/Install/Run:
+ *   atest FrameworksCoreTests:ContextTest
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -230,132 +214,6 @@ public class ContextTest {
         final Context context = uiContext.createDisplayContext(secondaryDisplay);
 
         assertFalse(context.isUiContext());
-    }
-
-    private static class TestReceiver extends BroadcastReceiver implements AutoCloseable {
-        private static final String INTENT_ACTION = "com.android.server.pm.test.test_app.action";
-        private final ArrayBlockingQueue<Intent> mResults = new ArrayBlockingQueue<>(1);
-
-        public IntentSender makeIntentSender() {
-            return PendingIntent.getBroadcast(getContext(), 0, new Intent(INTENT_ACTION),
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED)
-                    .getIntentSender();
-        }
-
-        public void waitForIntent() throws InterruptedException {
-            assertNotNull(mResults.poll(30, TimeUnit.SECONDS));
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mResults.add(intent);
-        }
-
-        public void register() {
-            getContext().registerReceiver(this, new IntentFilter(INTENT_ACTION));
-        }
-
-        @Override
-        public void close() throws Exception {
-            getContext().unregisterReceiver(this);
-        }
-
-        private Context getContext() {
-            return InstrumentationRegistry.getInstrumentation().getContext();
-        }
-    }
-
-    @Test
-    public void applicationContextBeforeAndAfterUpgrade() throws Exception {
-        final Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        final String testPackageName = "com.android.frameworks.coretests.res_version";
-        try {
-            final PackageManager pm = context.getPackageManager();
-            final int versionRes = 0x7f010000;
-
-            final Context appContext = ApplicationProvider.getApplicationContext();
-            installApk(appContext, R.raw.res_version_before);
-
-            ApplicationInfo info = pm.getApplicationInfo(testPackageName, 0);
-            final Context beforeContext = appContext.createApplicationContext(info, 0);
-            assertEquals("before", beforeContext.getResources().getString(versionRes));
-
-            installApk(appContext, R.raw.res_version_after);
-
-            info = pm.getApplicationInfo(testPackageName, 0);
-            final Context afterContext = appContext.createApplicationContext(info, 0);
-            assertEquals("before", beforeContext.createConfigurationContext(Configuration.EMPTY)
-                    .getResources().getString(versionRes));
-            assertEquals("after", afterContext.createConfigurationContext(Configuration.EMPTY)
-                    .getResources().getString(versionRes));
-            assertNotEquals(beforeContext.getPackageResourcePath(),
-                    afterContext.getPackageResourcePath());
-        } finally {
-            uninstallPackage(context, testPackageName);
-        }
-    }
-
-    @Test
-    public void packageContextBeforeAndAfterUpgrade() throws Exception {
-        final Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        final String testPackageName = "com.android.frameworks.coretests.res_version";
-        try {
-            final int versionRes = 0x7f010000;
-            final Context appContext = ApplicationProvider.getApplicationContext();
-            installApk(appContext, R.raw.res_version_before);
-
-            final Context beforeContext = appContext.createPackageContext(testPackageName, 0);
-            assertEquals("before", beforeContext.getResources().getString(versionRes));
-
-            installApk(appContext, R.raw.res_version_after);
-
-            final Context afterContext = appContext.createPackageContext(testPackageName, 0);
-            assertEquals("before", beforeContext.createConfigurationContext(Configuration.EMPTY)
-                    .getResources().getString(versionRes));
-            assertEquals("after", afterContext.createConfigurationContext(Configuration.EMPTY)
-                    .getResources().getString(versionRes));
-            assertNotEquals(beforeContext.getPackageResourcePath(),
-                    afterContext.getPackageResourcePath());
-        } finally {
-            uninstallPackage(context, testPackageName);
-        }
-    }
-
-    private void installApk(Context context, int rawApkResId) throws Exception {
-        final PackageManager pm = context.getPackageManager();
-        final PackageInstaller pi = pm.getPackageInstaller();
-        final PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
-                PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-        final int sessionId = pi.createSession(params);
-
-        try (PackageInstaller.Session session = pi.openSession(sessionId)) {
-            // Copy the apk to the install session.
-            final Resources resources = context.getResources();
-            try (InputStream is = resources.openRawResource(rawApkResId);
-                 OutputStream sessionOs = session.openWrite("base", 0, -1)) {
-                FileUtils.copy(is, sessionOs);
-            }
-
-            // Wait for the installation to finish
-            try (TestReceiver receiver = new TestReceiver()) {
-                receiver.register();
-                ShellIdentityUtils.invokeMethodWithShellPermissions(session,
-                        (s) -> {
-                            s.commit(receiver.makeIntentSender());
-                            return true;
-                        });
-                receiver.waitForIntent();
-            }
-        }
-    }
-
-    private void uninstallPackage(Context context, String packageName) throws Exception {
-        try (TestReceiver receiver = new TestReceiver()) {
-            receiver.register();
-            final PackageInstaller pi = context.getPackageManager().getPackageInstaller();
-            pi.uninstall(packageName, receiver.makeIntentSender());
-            receiver.waitForIntent();
-        }
     }
 
     private Context createUiContext() {

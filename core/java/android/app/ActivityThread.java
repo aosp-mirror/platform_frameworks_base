@@ -218,8 +218,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.ref.Reference;
-import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -230,7 +228,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -419,16 +416,6 @@ public final class ActivityThread extends ClientTransactionHandler
     @GuardedBy("mResourcesManager")
     @UnsupportedAppUsage
     final ArrayMap<String, WeakReference<LoadedApk>> mResourcePackages = new ArrayMap<>();
-
-    @GuardedBy("mResourcesManager")
-    private final ArrayMap<List<String>, WeakReference<LoadedApk>> mPackageNonAMS =
-            new ArrayMap<>();
-    @GuardedBy("mResourcesManager")
-    private final ArrayMap<List<String>, WeakReference<LoadedApk>> mResourcePackagesNonAMS =
-            new ArrayMap<>();
-    @GuardedBy("mResourcesManager")
-    private final ReferenceQueue<LoadedApk> mPackageRefQueue = new ReferenceQueue<>();
-
     @GuardedBy("mResourcesManager")
     final ArrayList<ActivityClientRecord> mRelaunchingActivities = new ArrayList<>();
     @GuardedBy("mResourcesManager")
@@ -2384,229 +2371,6 @@ public final class ActivityThread extends ClientTransactionHandler
         return mH;
     }
 
-    /**
-     * If {@code retainReferences} is false, prunes all {@link LoadedApk} representing any of the
-     * specified packages from the package caches.
-     *
-     * @return whether the cache contains a loaded apk representing any of the specified packages
-     */
-    private boolean clearCachedApks() {
-        synchronized (mResourcesManager) {
-            Reference<? extends LoadedApk> enqueuedRef = mPackageRefQueue.poll();
-            if (enqueuedRef == null) {
-                return false;
-            }
-
-            final HashSet<Reference<? extends LoadedApk>> deadReferences = new HashSet<>();
-            for (; enqueuedRef != null; enqueuedRef = mPackageRefQueue.poll()) {
-                deadReferences.add(enqueuedRef);
-            }
-
-            return cleanWeakMapValues(mPackages, deadReferences)
-                    || cleanWeakMapValues(mResourcePackages, deadReferences)
-                    || cleanWeakMapValues(mPackageNonAMS, deadReferences)
-                    || cleanWeakMapValues(mResourcePackages, deadReferences);
-        }
-    }
-
-    private static <K> boolean cleanWeakMapValues(ArrayMap<K, WeakReference<LoadedApk>> map,
-            HashSet<Reference<? extends LoadedApk>> deadReferences) {
-        boolean hasPkgInfo = false;
-        for (int i = map.size() - 1; i >= 0; i--) {
-            if (deadReferences.contains(map.valueAt(i))) {
-                map.removeAt(i);
-                hasPkgInfo = true;
-            }
-        }
-        return hasPkgInfo;
-    }
-
-    /**
-     * Retrieves the previously cached {@link LoadedApk} that was created/updated with the most
-     * recent {@link ApplicationInfo} sent from the activity manager service.
-     */
-    @Nullable
-    private LoadedApk peekLatestCachedApkFromAMS(@NonNull String packageName, boolean includeCode) {
-        synchronized (mResourcesManager) {
-            WeakReference<LoadedApk> ref;
-            if (includeCode) {
-                return ((ref = mPackages.get(packageName)) != null) ? ref.get() : null;
-            } else {
-                return ((ref = mResourcePackages.get(packageName)) != null) ? ref.get() : null;
-            }
-        }
-    }
-
-    /**
-     * Updates the previously cached {@link LoadedApk} that was created/updated using an
-     * {@link ApplicationInfo} sent from activity manager service.
-     *
-     * If {@code appInfo} is null, the most up-to-date {@link ApplicationInfo} will be fetched and
-     * used to update the cached package; otherwise, the specified app info will be used.
-     */
-    private boolean updateLatestCachedApkFromAMS(@NonNull String packageName,
-            @Nullable ApplicationInfo appInfo, boolean updateActivityRecords) {
-        final LoadedApk[] loadedPackages = new LoadedApk[]{
-                peekLatestCachedApkFromAMS(packageName, true),
-                peekLatestCachedApkFromAMS(packageName, false)
-        };
-
-        try {
-            if (appInfo == null) {
-                appInfo = sPackageManager.getApplicationInfo(
-                        packageName, PackageManager.GET_SHARED_LIBRARY_FILES,
-                        UserHandle.myUserId());
-            }
-        } catch (RemoteException e) {
-            Slog.v(TAG, "Failed to get most recent app info for '" + packageName + "'", e);
-            return false;
-        }
-
-        boolean hasPackage = false;
-        final String[] oldResDirs = new String[loadedPackages.length];
-        for (int i = loadedPackages.length - 1; i >= 0; i--) {
-            final LoadedApk loadedPackage = loadedPackages[i];
-            if (loadedPackage == null) {
-                continue;
-            }
-
-            // If the package is being updated, yet it still has a valid LoadedApk object, the
-            // package was updated with PACKAGE_REMOVED_DONT_KILL. Adjust it's internal references
-            // to the application info and resources.
-            hasPackage = true;
-            if (updateActivityRecords && mActivities.size() > 0) {
-                for (ActivityClientRecord ar : mActivities.values()) {
-                    if (ar.activityInfo.applicationInfo.packageName.equals(packageName)) {
-                        ar.activityInfo.applicationInfo = appInfo;
-                        ar.packageInfo = loadedPackage;
-                    }
-                }
-            }
-
-            updateLoadedApk(loadedPackage, appInfo);
-            oldResDirs[i] = loadedPackage.getResDir();
-        }
-        if (hasPackage) {
-            synchronized (mResourcesManager) {
-                mResourcesManager.applyNewResourceDirs(appInfo, oldResDirs);
-            }
-        }
-        return hasPackage;
-    }
-
-    private static List<String> makeNonAMSKey(@NonNull ApplicationInfo appInfo) {
-        final List<String> paths = new ArrayList<>();
-        paths.add(appInfo.sourceDir);
-        if (appInfo.resourceDirs != null) {
-            for (String path : appInfo.resourceDirs) {
-                paths.add(path);
-            }
-        }
-        return paths;
-    }
-
-    /**
-     * Retrieves the previously cached {@link LoadedApk}.
-     *
-     * If {@code isAppInfoFromAMS} is true, then {@code appInfo} will be used to update the paths
-     * of the previously cached {@link LoadedApk} that was created/updated using an
-     * {@link ApplicationInfo} sent from activity manager service.
-     */
-    @Nullable
-    private LoadedApk retrieveCachedApk(@NonNull ApplicationInfo appInfo, boolean includeCode,
-            boolean isAppInfoFromAMS) {
-        if (UserHandle.myUserId() != UserHandle.getUserId(appInfo.uid)) {
-            // Caching not supported across users.
-            return null;
-        }
-
-        if (isAppInfoFromAMS) {
-            LoadedApk loadedPackage = peekLatestCachedApkFromAMS(appInfo.packageName, includeCode);
-            if (loadedPackage != null) {
-                updateLoadedApk(loadedPackage, appInfo);
-            }
-            return loadedPackage;
-        }
-
-        synchronized (mResourcesManager) {
-            WeakReference<LoadedApk> ref;
-            if (includeCode) {
-                return ((ref = mPackageNonAMS.get(makeNonAMSKey(appInfo))) != null)
-                        ? ref.get() : null;
-            } else {
-                return ((ref = mResourcePackagesNonAMS.get(makeNonAMSKey(appInfo))) != null)
-                        ? ref.get() : null;
-            }
-        }
-    }
-
-    private static boolean isLoadedApkResourceDirsUpToDate(LoadedApk loadedApk,
-            ApplicationInfo appInfo) {
-        boolean baseDirsUpToDate = loadedApk.getResDir().equals(appInfo.sourceDir);
-        boolean resourceDirsUpToDate = Arrays.equals(
-                ArrayUtils.defeatNullable(appInfo.resourceDirs),
-                ArrayUtils.defeatNullable(loadedApk.getOverlayDirs()));
-        boolean overlayPathsUpToDate = Arrays.equals(
-                ArrayUtils.defeatNullable(appInfo.overlayPaths),
-                ArrayUtils.defeatNullable(loadedApk.getOverlayPaths()));
-
-        return (loadedApk.mResources == null || loadedApk.mResources.getAssets().isUpToDate())
-                && baseDirsUpToDate && resourceDirsUpToDate && overlayPathsUpToDate;
-    }
-
-    private void updateLoadedApk(@NonNull LoadedApk loadedPackage,
-            @NonNull ApplicationInfo appInfo) {
-        if (isLoadedApkResourceDirsUpToDate(loadedPackage, appInfo)) {
-            return;
-        }
-
-        final List<String> oldPaths = new ArrayList<>();
-        LoadedApk.makePaths(this, appInfo, oldPaths);
-        loadedPackage.updateApplicationInfo(appInfo, oldPaths);
-    }
-
-    @Nullable
-    private LoadedApk createLoadedPackage(@NonNull ApplicationInfo appInfo,
-            @Nullable CompatibilityInfo compatInfo, @Nullable ClassLoader baseLoader,
-            boolean securityViolation, boolean includeCode, boolean registerPackage,
-            boolean isAppInfoFromAMS) {
-        final LoadedApk packageInfo =
-                new LoadedApk(this, appInfo, compatInfo, baseLoader,
-                        securityViolation, includeCode
-                        && (appInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0, registerPackage);
-
-        if (mSystemThread && "android".equals(appInfo.packageName)) {
-            packageInfo.installSystemApplicationInfo(appInfo,
-                    getSystemContext().mPackageInfo.getClassLoader());
-        }
-
-        if (UserHandle.myUserId() != UserHandle.getUserId(appInfo.uid)) {
-            // Caching not supported across users
-            return packageInfo;
-        }
-
-        synchronized (mResourcesManager) {
-            if (includeCode) {
-                if (isAppInfoFromAMS) {
-                    mPackages.put(appInfo.packageName,
-                            new WeakReference<>(packageInfo, mPackageRefQueue));
-                } else {
-                    mPackageNonAMS.put(makeNonAMSKey(appInfo),
-                            new WeakReference<>(packageInfo, mPackageRefQueue));
-                }
-            } else {
-                if (isAppInfoFromAMS) {
-                    mResourcePackages.put(appInfo.packageName,
-                            new WeakReference<>(packageInfo, mPackageRefQueue));
-                } else {
-                    mResourcePackagesNonAMS.put(makeNonAMSKey(appInfo),
-                            new WeakReference<>(packageInfo, mPackageRefQueue));
-                }
-            }
-            return packageInfo;
-        }
-    }
-
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
             int flags) {
@@ -2615,50 +2379,58 @@ public final class ActivityThread extends ClientTransactionHandler
 
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
             int flags, int userId) {
-        final ApplicationInfo ai = PackageManager.getApplicationInfoAsUserCached(
+        final boolean differentUser = (UserHandle.myUserId() != userId);
+        ApplicationInfo ai = PackageManager.getApplicationInfoAsUserCached(
                 packageName,
                 PackageManager.GET_SHARED_LIBRARY_FILES
                 | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                 (userId < 0) ? UserHandle.myUserId() : userId);
-        LoadedApk packageInfo = null;
-        if (ai != null) {
-            packageInfo = retrieveCachedApk(ai,
-                    (flags & Context.CONTEXT_INCLUDE_CODE) != 0,
-                    false);
-        }
-
-        if (packageInfo != null) {
-            if (packageInfo.isSecurityViolation()
-                    && (flags & Context.CONTEXT_IGNORE_SECURITY) == 0) {
-                throw new SecurityException(
-                        "Requesting code from " + packageName
-                                + " to be run in process "
-                                + mBoundApplication.processName
-                                + "/" + mBoundApplication.appInfo.uid);
+        synchronized (mResourcesManager) {
+            WeakReference<LoadedApk> ref;
+            if (differentUser) {
+                // Caching not supported across users
+                ref = null;
+            } else if ((flags & Context.CONTEXT_INCLUDE_CODE) != 0) {
+                ref = mPackages.get(packageName);
+            } else {
+                ref = mResourcePackages.get(packageName);
             }
-            return packageInfo;
+
+            LoadedApk packageInfo = ref != null ? ref.get() : null;
+            if (ai != null && packageInfo != null) {
+                if (!isLoadedApkResourceDirsUpToDate(packageInfo, ai)) {
+                    List<String> oldPaths = new ArrayList<>();
+                    LoadedApk.makePaths(this, ai, oldPaths);
+                    packageInfo.updateApplicationInfo(ai, oldPaths);
+                }
+
+                if (packageInfo.isSecurityViolation()
+                        && (flags&Context.CONTEXT_IGNORE_SECURITY) == 0) {
+                    throw new SecurityException(
+                            "Requesting code from " + packageName
+                            + " to be run in process "
+                            + mBoundApplication.processName
+                            + "/" + mBoundApplication.appInfo.uid);
+                }
+                return packageInfo;
+            }
         }
 
-        return ai == null ? null : getPackageInfo(ai, compatInfo, flags, false);
+        if (ai != null) {
+            return getPackageInfo(ai, compatInfo, flags);
+        }
+
+        return null;
     }
 
-    /**
-     * @deprecated Use {@link #getPackageInfo(ApplicationInfo, CompatibilityInfo, int, boolean)}
-     * instead.
-     */
-    @Deprecated
     @UnsupportedAppUsage(trackingBug = 171933273)
     public final LoadedApk getPackageInfo(ApplicationInfo ai, CompatibilityInfo compatInfo,
             int flags) {
-        return getPackageInfo(ai, compatInfo, flags, true);
-    }
-
-    public final LoadedApk getPackageInfo(ApplicationInfo ai, CompatibilityInfo compatInfo,
-            @Context.CreatePackageOptions int flags, boolean isAppInfoFromAMS) {
         boolean includeCode = (flags&Context.CONTEXT_INCLUDE_CODE) != 0;
         boolean securityViolation = includeCode && ai.uid != 0
-                && ai.uid != Process.SYSTEM_UID && (mBoundApplication == null
-                || !UserHandle.isSameApp(ai.uid, mBoundApplication.appInfo.uid));
+                && ai.uid != Process.SYSTEM_UID && (mBoundApplication != null
+                        ? !UserHandle.isSameApp(ai.uid, mBoundApplication.appInfo.uid)
+                        : true);
         boolean registerPackage = includeCode && (flags&Context.CONTEXT_REGISTER_PACKAGE) != 0;
         if ((flags&(Context.CONTEXT_INCLUDE_CODE
                 |Context.CONTEXT_IGNORE_SECURITY))
@@ -2668,47 +2440,107 @@ public final class ActivityThread extends ClientTransactionHandler
                         + " (with uid " + ai.uid + ")";
                 if (mBoundApplication != null) {
                     msg = msg + " to be run in process "
-                            + mBoundApplication.processName + " (with uid "
-                            + mBoundApplication.appInfo.uid + ")";
+                        + mBoundApplication.processName + " (with uid "
+                        + mBoundApplication.appInfo.uid + ")";
                 }
                 throw new SecurityException(msg);
             }
         }
         return getPackageInfo(ai, compatInfo, null, securityViolation, includeCode,
-                registerPackage, isAppInfoFromAMS);
+                registerPackage);
     }
 
     @Override
     @UnsupportedAppUsage
     public final LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,
             CompatibilityInfo compatInfo) {
-        return getPackageInfo(ai, compatInfo, null, false, true, false, true);
+        return getPackageInfo(ai, compatInfo, null, false, true, false);
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final LoadedApk peekPackageInfo(String packageName, boolean includeCode) {
         synchronized (mResourcesManager) {
-            return peekLatestCachedApkFromAMS(packageName, includeCode);
+            WeakReference<LoadedApk> ref;
+            if (includeCode) {
+                ref = mPackages.get(packageName);
+            } else {
+                ref = mResourcePackages.get(packageName);
+            }
+            return ref != null ? ref.get() : null;
         }
     }
 
     private LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,
             ClassLoader baseLoader, boolean securityViolation, boolean includeCode,
-            boolean registerPackage, boolean isAppInfoFromAMS) {
-        LoadedApk packageInfo = retrieveCachedApk(aInfo, includeCode,
-                isAppInfoFromAMS);
-        if (packageInfo != null) {
+            boolean registerPackage) {
+        final boolean differentUser = (UserHandle.myUserId() != UserHandle.getUserId(aInfo.uid));
+        synchronized (mResourcesManager) {
+            WeakReference<LoadedApk> ref;
+            if (differentUser) {
+                // Caching not supported across users
+                ref = null;
+            } else if (includeCode) {
+                ref = mPackages.get(aInfo.packageName);
+            } else {
+                ref = mResourcePackages.get(aInfo.packageName);
+            }
+
+            LoadedApk packageInfo = ref != null ? ref.get() : null;
+
+            if (packageInfo != null) {
+                if (!isLoadedApkResourceDirsUpToDate(packageInfo, aInfo)) {
+                    List<String> oldPaths = new ArrayList<>();
+                    LoadedApk.makePaths(this, aInfo, oldPaths);
+                    packageInfo.updateApplicationInfo(aInfo, oldPaths);
+                }
+
+                return packageInfo;
+            }
+
+            if (localLOGV) {
+                Slog.v(TAG, (includeCode ? "Loading code package "
+                        : "Loading resource-only package ") + aInfo.packageName
+                        + " (in " + (mBoundApplication != null
+                        ? mBoundApplication.processName : null)
+                        + ")");
+            }
+
+            packageInfo =
+                    new LoadedApk(this, aInfo, compatInfo, baseLoader,
+                            securityViolation, includeCode
+                            && (aInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0, registerPackage);
+
+            if (mSystemThread && "android".equals(aInfo.packageName)) {
+                packageInfo.installSystemApplicationInfo(aInfo,
+                        getSystemContext().mPackageInfo.getClassLoader());
+            }
+
+            if (differentUser) {
+                // Caching not supported across users
+            } else if (includeCode) {
+                mPackages.put(aInfo.packageName,
+                        new WeakReference<LoadedApk>(packageInfo));
+            } else {
+                mResourcePackages.put(aInfo.packageName,
+                        new WeakReference<LoadedApk>(packageInfo));
+            }
+
             return packageInfo;
         }
-        if (localLOGV) {
-            Slog.v(TAG, (includeCode ? "Loading code package "
-                    : "Loading resource-only package ") + aInfo.packageName
-                    + " (in " + (mBoundApplication != null
-                    ? mBoundApplication.processName : null)
-                    + ")");
-        }
-        return createLoadedPackage(aInfo, compatInfo, baseLoader,
-                securityViolation, includeCode, registerPackage, isAppInfoFromAMS);
+    }
+
+    private static boolean isLoadedApkResourceDirsUpToDate(LoadedApk loadedApk,
+            ApplicationInfo appInfo) {
+        Resources packageResources = loadedApk.mResources;
+        boolean resourceDirsUpToDate = Arrays.equals(
+                ArrayUtils.defeatNullable(appInfo.resourceDirs),
+                ArrayUtils.defeatNullable(loadedApk.getOverlayDirs()));
+        boolean overlayPathsUpToDate = Arrays.equals(
+                ArrayUtils.defeatNullable(appInfo.overlayPaths),
+                ArrayUtils.defeatNullable(loadedApk.getOverlayPaths()));
+
+        return (packageResources == null || packageResources.getAssets().isUpToDate())
+                && resourceDirsUpToDate && overlayPathsUpToDate;
     }
 
     @UnsupportedAppUsage
@@ -3670,7 +3502,7 @@ public final class ActivityThread extends ClientTransactionHandler
         ActivityInfo aInfo = r.activityInfo;
         if (r.packageInfo == null) {
             r.packageInfo = getPackageInfo(aInfo.applicationInfo, r.compatInfo,
-                    Context.CONTEXT_INCLUDE_CODE, true);
+                    Context.CONTEXT_INCLUDE_CODE);
         }
 
         ComponentName component = r.intent.getComponent();
@@ -6153,10 +5985,40 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @VisibleForTesting(visibility = PACKAGE)
     public void handleApplicationInfoChanged(@NonNull final ApplicationInfo ai) {
-        // Updates triggered by package installation go through a package update receiver. Here we
-        // try to capture ApplicationInfo changes that are caused by other sources, such as
-        // overlays. That means we want to be as conservative about code changes as possible.
-        updateLatestCachedApkFromAMS(ai.packageName, ai, false);
+        // Updates triggered by package installation go through a package update
+        // receiver. Here we try to capture ApplicationInfo changes that are
+        // caused by other sources, such as overlays. That means we want to be as conservative
+        // about code changes as possible. Take the diff of the old ApplicationInfo and the new
+        // to see if anything needs to change.
+        LoadedApk apk;
+        LoadedApk resApk;
+        // Update all affected loaded packages with new package information
+        synchronized (mResourcesManager) {
+            WeakReference<LoadedApk> ref = mPackages.get(ai.packageName);
+            apk = ref != null ? ref.get() : null;
+            ref = mResourcePackages.get(ai.packageName);
+            resApk = ref != null ? ref.get() : null;
+        }
+
+        final String[] oldResDirs = new String[2];
+
+        if (apk != null) {
+            oldResDirs[0] = apk.getResDir();
+            final ArrayList<String> oldPaths = new ArrayList<>();
+            LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths);
+            apk.updateApplicationInfo(ai, oldPaths);
+        }
+        if (resApk != null) {
+            oldResDirs[1] = resApk.getResDir();
+            final ArrayList<String> oldPaths = new ArrayList<>();
+            LoadedApk.makePaths(this, resApk.getApplicationInfo(), oldPaths);
+            resApk.updateApplicationInfo(ai, oldPaths);
+        }
+
+        synchronized (mResourcesManager) {
+            // Update all affected Resources objects to use new ResourcesImpl
+            mResourcesManager.applyNewResourceDirs(ai, oldResDirs);
+        }
     }
 
     /**
@@ -6333,7 +6195,29 @@ public final class ActivityThread extends ClientTransactionHandler
             case ApplicationThreadConstants.PACKAGE_REMOVED:
             case ApplicationThreadConstants.PACKAGE_REMOVED_DONT_KILL:
             {
-                hasPkgInfo = clearCachedApks();
+                final boolean killApp = cmd == ApplicationThreadConstants.PACKAGE_REMOVED;
+                if (packages == null) {
+                    break;
+                }
+                synchronized (mResourcesManager) {
+                    for (int i = packages.length - 1; i >= 0; i--) {
+                        if (!hasPkgInfo) {
+                            WeakReference<LoadedApk> ref = mPackages.get(packages[i]);
+                            if (ref != null && ref.get() != null) {
+                                hasPkgInfo = true;
+                            } else {
+                                ref = mResourcePackages.get(packages[i]);
+                                if (ref != null && ref.get() != null) {
+                                    hasPkgInfo = true;
+                                }
+                            }
+                        }
+                        if (killApp) {
+                            mPackages.remove(packages[i]);
+                            mResourcePackages.remove(packages[i]);
+                        }
+                    }
+                }
                 break;
             }
             case ApplicationThreadConstants.PACKAGE_REPLACED:
@@ -6341,19 +6225,68 @@ public final class ActivityThread extends ClientTransactionHandler
                 if (packages == null) {
                     break;
                 }
-                final List<String> packagesHandled = new ArrayList<>();
-                for (int i = packages.length - 1; i >= 0; i--) {
-                    final String packageName = packages[i];
-                    if (updateLatestCachedApkFromAMS(packageName, null, true)) {
-                        hasPkgInfo = true;
-                        packagesHandled.add(packageName);
+
+                List<String> packagesHandled = new ArrayList<>();
+
+                synchronized (mResourcesManager) {
+                    for (int i = packages.length - 1; i >= 0; i--) {
+                        String packageName = packages[i];
+                        WeakReference<LoadedApk> ref = mPackages.get(packageName);
+                        LoadedApk pkgInfo = ref != null ? ref.get() : null;
+                        if (pkgInfo != null) {
+                            hasPkgInfo = true;
+                        } else {
+                            ref = mResourcePackages.get(packageName);
+                            pkgInfo = ref != null ? ref.get() : null;
+                            if (pkgInfo != null) {
+                                hasPkgInfo = true;
+                            }
+                        }
+                        // If the package is being replaced, yet it still has a valid
+                        // LoadedApk object, the package was updated with _DONT_KILL.
+                        // Adjust it's internal references to the application info and
+                        // resources.
+                        if (pkgInfo != null) {
+                            packagesHandled.add(packageName);
+                            try {
+                                final ApplicationInfo aInfo =
+                                        sPackageManager.getApplicationInfo(
+                                                packageName,
+                                                PackageManager.GET_SHARED_LIBRARY_FILES,
+                                                UserHandle.myUserId());
+
+                                if (mActivities.size() > 0) {
+                                    for (ActivityClientRecord ar : mActivities.values()) {
+                                        if (ar.activityInfo.applicationInfo.packageName
+                                                .equals(packageName)) {
+                                            ar.activityInfo.applicationInfo = aInfo;
+                                            ar.packageInfo = pkgInfo;
+                                        }
+                                    }
+                                }
+
+                                final String[] oldResDirs = { pkgInfo.getResDir() };
+
+                                final ArrayList<String> oldPaths = new ArrayList<>();
+                                LoadedApk.makePaths(this, pkgInfo.getApplicationInfo(), oldPaths);
+                                pkgInfo.updateApplicationInfo(aInfo, oldPaths);
+
+                                synchronized (mResourcesManager) {
+                                    // Update affected Resources objects to use new ResourcesImpl
+                                    mResourcesManager.applyNewResourceDirs(aInfo, oldResDirs);
+                                }
+                            } catch (RemoteException e) {
+                            }
+                        }
                     }
                 }
+
                 try {
                     getPackageManager().notifyPackagesReplacedReceived(
                             packagesHandled.toArray(new String[0]));
                 } catch (RemoteException ignored) {
                 }
+
                 break;
             }
         }
@@ -6912,7 +6845,7 @@ public final class ActivityThread extends ClientTransactionHandler
         ii.copyTo(instrApp);
         instrApp.initForUser(UserHandle.myUserId());
         final LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
-                appContext.getClassLoader(), false, true, false, true);
+                appContext.getClassLoader(), false, true, false);
 
         // The test context's op package name == the target app's op package name, because
         // the app ops manager checks the op package name against the real calling UID,
