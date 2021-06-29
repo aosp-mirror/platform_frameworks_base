@@ -567,6 +567,9 @@
     <!-- Permission required for CTS test - GlobalSearchSessionPlatformCtsTests -->
     <uses-permission android:name="android.permission.READ_GLOBAL_APP_SEARCH_DATA" />
 
+    <!-- Permission required for GTS test - PendingSystemUpdateTest -->
+    <uses-permission android:name="android.permission.NOTIFY_PENDING_SYSTEM_UPDATE" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
