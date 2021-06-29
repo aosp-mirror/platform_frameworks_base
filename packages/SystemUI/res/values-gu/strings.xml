@@ -1115,8 +1115,7 @@
     <string name="basic_status" msgid="2315371112182658176">"વાતચીત ખોલો"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"વાતચીતના વિજેટ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"તમારી હોમ સ્ક્રીનમાં વાતચીત ઉમેરવા માટે તેના પર ટૅપ કરો"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"તમારી તાજેતરની વાતચીતો અહીં બતાવવામાં આવશે"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"પ્રાધાન્યતા ધરાવતી વાતચીતો"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"તાજેતરની વાતચીતો"</string>
     <string name="okay" msgid="6490552955618608554">"ઓકે"</string>

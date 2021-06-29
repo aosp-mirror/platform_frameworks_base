@@ -1115,8 +1115,7 @@
     <string name="basic_status" msgid="2315371112182658176">"ເປີດການສົນທະນາ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ວິດເຈັດການສົນທະນາ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ແຕະໃສ່ການສົນທະນາໃດໜຶ່ງເພື່ອເພີ່ມມັນໃສ່ໂຮມສະກຣີນຂອງທ່ານ"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"ການສົນທະນາຫຼ້າສຸດຂອງທ່ານຈະສະແດງຢູ່ບ່ອນນີ້"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ການສົນທະນາສຳຄັນ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ການສົນທະນາຫຼ້າສຸດ"</string>
     <string name="okay" msgid="6490552955618608554">"ຕົກລົງ"</string>

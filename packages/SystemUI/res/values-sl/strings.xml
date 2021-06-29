@@ -749,8 +749,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stanje:&lt;/b&gt; Uvrščeno nižje"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Prikaz na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu."</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Prikaz na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Prikaz na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti."</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavitve"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prednostno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira pogovornih funkcij."</string>

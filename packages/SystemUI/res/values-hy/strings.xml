@@ -1115,8 +1115,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Բաց զրույց"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Զրույցի վիջեթներ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Հպեք զրույցին՝ այն հիմնական էկրանին ավելացնելու համար"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Ձեր վերջին զրույցները կցուցադրվեն այստեղ"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Կարևոր զրույցներ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Վերջին հաղորդագրությունները"</string>
     <string name="okay" msgid="6490552955618608554">"Եղավ"</string>
