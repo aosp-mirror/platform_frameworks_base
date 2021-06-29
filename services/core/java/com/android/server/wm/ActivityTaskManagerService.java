@@ -580,19 +580,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      *     windowing modes.
      *  0: If it is a small screen (smallest width < {@link #mLargeScreenSmallestScreenWidthDp}),
      *     the device compares the activity min width/height with the min multi windowing modes
-     *     dimensions {@link #mMinPercentageMultiWindowSupportWidth} the device supports to
+     *     dimensions {@link #mMinPercentageMultiWindowSupportHeight} the device supports to
      *     determine whether the activity can be shown in multi windowing modes
      *  1: The device always compare the activity min width/height with the min multi windowing
-     *     modes dimensions {@link #mMinPercentageMultiWindowSupportWidth} the device supports to
+     *     modes dimensions {@link #mMinPercentageMultiWindowSupportHeight} the device supports to
      *     determine whether it can be shown in multi windowing modes.
      */
     int mRespectsActivityMinWidthHeightMultiWindow;
 
     /**
-     * This value is only used when the device checks activity min width/height to determine if it
+     * This value is only used when the device checks activity min height to determine if it
      * can be shown in multi windowing modes.
-     * If the activity min width/height is greater than this percentage of the display smallest
-     * width, it will not be allowed to be shown in multi windowing modes.
+     * If the activity min height is greater than this percentage of the display height in portrait,
+     * it will not be allowed to be shown in multi windowing modes.
+     * The value should be between [0 - 1].
+     */
+    float mMinPercentageMultiWindowSupportHeight;
+
+    /**
+     * This value is only used when the device checks activity min width to determine if it
+     * can be shown in multi windowing modes.
+     * If the activity min width is greater than this percentage of the display width in landscape,
+     * it will not be allowed to be shown in multi windowing modes.
      * The value should be between [0 - 1].
      */
     float mMinPercentageMultiWindowSupportWidth;
@@ -840,6 +849,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 com.android.internal.R.integer.config_supportsNonResizableMultiWindow);
         final int respectsActivityMinWidthHeightMultiWindow = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_respectsActivityMinWidthHeightMultiWindow);
+        final float minPercentageMultiWindowSupportHeight = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_minPercentageMultiWindowSupportHeight);
         final float minPercentageMultiWindowSupportWidth = mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_minPercentageMultiWindowSupportWidth);
         final int largeScreenSmallestScreenWidthDp = mContext.getResources().getInteger(
@@ -860,6 +871,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mDevEnableNonResizableMultiWindow = devEnableNonResizableMultiWindow;
             mSupportsNonResizableMultiWindow = supportsNonResizableMultiWindow;
             mRespectsActivityMinWidthHeightMultiWindow = respectsActivityMinWidthHeightMultiWindow;
+            mMinPercentageMultiWindowSupportHeight = minPercentageMultiWindowSupportHeight;
             mMinPercentageMultiWindowSupportWidth = minPercentageMultiWindowSupportWidth;
             mLargeScreenSmallestScreenWidthDp = largeScreenSmallestScreenWidthDp;
             final boolean multiWindowFormEnabled = freeformWindowManagement

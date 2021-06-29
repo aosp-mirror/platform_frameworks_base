@@ -42,6 +42,8 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment implements
     private static final String KEY_IS_TOOLBAR_COLLAPSED = "is_toolbar_collapsed";
 
     @Nullable
+    private CoordinatorLayout mCoordinatorLayout;
+    @Nullable
     private CollapsingToolbarLayout mCollapsingToolbarLayout;
     @Nullable
     private AppBarLayout mAppBarLayout;
@@ -57,9 +59,12 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment implements
             @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.collapsing_toolbar_base_layout, container,
                 false);
+        mCoordinatorLayout = view.findViewById(R.id.content_parent);
         mCollapsingToolbarLayout = view.findViewById(R.id.collapsing_toolbar);
         mAppBarLayout = view.findViewById(R.id.app_bar);
-        mAppBarLayout.addOnOffsetChangedListener(this);
+        if (mAppBarLayout != null) {
+            mAppBarLayout.addOnOffsetChangedListener(this);
+        }
         if (savedInstanceState != null) {
             mIsToolbarCollapsed = savedInstanceState.getBoolean(KEY_IS_TOOLBAR_COLLAPSED);
         }
@@ -92,6 +97,14 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment implements
         } else {
             mIsToolbarCollapsed = true;
         }
+    }
+
+    /**
+     * Return an instance of CoordinatorLayout.
+     */
+    @Nullable
+    public CoordinatorLayout getCoordinatorLayout() {
+        return mCoordinatorLayout;
     }
 
     /**

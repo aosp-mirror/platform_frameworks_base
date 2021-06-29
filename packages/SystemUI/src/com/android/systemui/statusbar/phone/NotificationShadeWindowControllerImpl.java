@@ -99,6 +99,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             mCallbacks = Lists.newArrayList();
 
     private final SysuiColorExtractor mColorExtractor;
+    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private float mFaceAuthDisplayBrightness = LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
 
     @Inject
@@ -110,7 +111,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             KeyguardBypassController keyguardBypassController,
             SysuiColorExtractor colorExtractor,
             DumpManager dumpManager,
-            KeyguardStateController keyguardStateController) {
+            KeyguardStateController keyguardStateController,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
@@ -121,6 +123,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardBypassController = keyguardBypassController;
         mColorExtractor = colorExtractor;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         dumpManager.registerDumpable(getClass().getName(), this);
 
         mLockScreenDisplayTimeout = context.getResources()
@@ -300,7 +303,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private void applyFocusableFlag(State state) {
         boolean panelFocusable = state.mNotificationShadeFocusable && state.mPanelExpanded;
         if (state.mBouncerShowing && (state.mKeyguardOccluded || state.mKeyguardNeedsInput)
-                || ENABLE_REMOTE_INPUT && state.mRemoteInputActive) {
+                || ENABLE_REMOTE_INPUT && state.mRemoteInputActive
+                // Make the panel focusable if we're doing the screen off animation, since the light
+                // reveal scrim is drawing in the panel and should consume touch events so that they
+                // don't go to the app behind.
+                || mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
             mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {

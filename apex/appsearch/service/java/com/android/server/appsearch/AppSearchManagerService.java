@@ -82,7 +82,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/** TODO(b/142567528): add comments when implement this class */
+/**
+ * The main service implementation which contains AppSearch's platform functionality.
+ * @hide
+ */
 public class AppSearchManagerService extends SystemService {
     private static final String TAG = "AppSearchManagerService";
     private final Context mContext;

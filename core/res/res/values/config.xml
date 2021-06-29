@@ -3587,13 +3587,21 @@
     -->
     <integer name="config_respectsActivityMinWidthHeightMultiWindow">0</integer>
 
-    <!-- This value is only used when the device checks activity min width/height to determine if it
+    <!-- This value is only used when the device checks activity min height to determine if it
          can be shown in multi windowing modes.
-         If the activity min width/height is greater than this percentage of the display smallest
-         width, it will not be allowed to be shown in multi windowing modes.
+         If the activity min height is greater than this percentage of the display height in
+         portrait, it will not be allowed to be shown in multi windowing modes.
          The value should be between [0 - 1].
     -->
-    <item name="config_minPercentageMultiWindowSupportWidth" format="float" type="dimen">0.3</item>
+    <item name="config_minPercentageMultiWindowSupportHeight" format="float" type="dimen">0.3</item>
+
+    <!-- This value is only used when the device checks activity min width to determine if it
+         can be shown in multi windowing modes.
+         If the activity min width is greater than this percentage of the display width in
+         landscape, it will not be allowed to be shown in multi windowing modes.
+         The value should be between [0 - 1].
+    -->
+    <item name="config_minPercentageMultiWindowSupportWidth" format="float" type="dimen">0.5</item>
 
     <!-- If the display smallest screen width is greater or equal to this value, we will treat it
          as a large screen device, which will have some multi window features enabled by default.

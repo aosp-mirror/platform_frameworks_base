@@ -38,16 +38,25 @@ public class CacheOomRanker {
     private static final boolean DEFAULT_USE_OOM_RE_RANKING = false;
     @VisibleForTesting
     static final String KEY_OOM_RE_RANKING_NUMBER_TO_RE_RANK = "oom_re_ranking_number_to_re_rank";
-    @VisibleForTesting static final int DEFAULT_OOM_RE_RANKING_NUMBER_TO_RE_RANK = 8;
+    @VisibleForTesting
+    static final int DEFAULT_OOM_RE_RANKING_NUMBER_TO_RE_RANK = 8;
+    @VisibleForTesting
+    static final String KEY_OOM_RE_RANKING_PRESERVE_TOP_N_APPS =
+            "oom_re_ranking_preserve_top_n_apps";
+    @VisibleForTesting
+    static final int DEFAULT_PRESERVE_TOP_N_APPS = 3;
     @VisibleForTesting
     static final String KEY_OOM_RE_RANKING_LRU_WEIGHT = "oom_re_ranking_lru_weight";
-    @VisibleForTesting static final float DEFAULT_OOM_RE_RANKING_LRU_WEIGHT = 0.35f;
+    @VisibleForTesting
+    static final float DEFAULT_OOM_RE_RANKING_LRU_WEIGHT = 0.35f;
     @VisibleForTesting
     static final String KEY_OOM_RE_RANKING_USES_WEIGHT = "oom_re_ranking_uses_weight";
-    @VisibleForTesting static final float DEFAULT_OOM_RE_RANKING_USES_WEIGHT = 0.5f;
+    @VisibleForTesting
+    static final float DEFAULT_OOM_RE_RANKING_USES_WEIGHT = 0.5f;
     @VisibleForTesting
     static final String KEY_OOM_RE_RANKING_RSS_WEIGHT = "oom_re_ranking_rss_weight";
-    @VisibleForTesting static final float DEFAULT_OOM_RE_RANKING_RSS_WEIGHT = 0.15f;
+    @VisibleForTesting
+    static final float DEFAULT_OOM_RE_RANKING_RSS_WEIGHT = 0.15f;
 
     private static final Comparator<RankedProcessRecord> SCORED_PROCESS_RECORD_COMPARATOR =
             new ScoreComparator();
@@ -66,15 +75,21 @@ public class CacheOomRanker {
 
     @GuardedBy("mPhenotypeFlagLock")
     private boolean mUseOomReRanking = DEFAULT_USE_OOM_RE_RANKING;
+    @GuardedBy("mPhenotypeFlagLock")
+    @VisibleForTesting
+    int mPreserveTopNApps = DEFAULT_PRESERVE_TOP_N_APPS;
     // Weight to apply to the LRU ordering.
     @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting float mLruWeight = DEFAULT_OOM_RE_RANKING_LRU_WEIGHT;
+    @VisibleForTesting
+    float mLruWeight = DEFAULT_OOM_RE_RANKING_LRU_WEIGHT;
     // Weight to apply to the ordering by number of times the process has been added to the cache.
     @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting float mUsesWeight = DEFAULT_OOM_RE_RANKING_USES_WEIGHT;
+    @VisibleForTesting
+    float mUsesWeight = DEFAULT_OOM_RE_RANKING_USES_WEIGHT;
     // Weight to apply to the ordering by RSS used by the processes.
     @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting float mRssWeight = DEFAULT_OOM_RE_RANKING_RSS_WEIGHT;
+    @VisibleForTesting
+    float mRssWeight = DEFAULT_OOM_RE_RANKING_RSS_WEIGHT;
 
     // Positions to replace in the lru list.
     @GuardedBy("mPhenotypeFlagLock")
@@ -93,6 +108,8 @@ public class CacheOomRanker {
                                 updateUseOomReranking();
                             } else if (KEY_OOM_RE_RANKING_NUMBER_TO_RE_RANK.equals(name)) {
                                 updateNumberToReRank();
+                            } else if (KEY_OOM_RE_RANKING_PRESERVE_TOP_N_APPS.equals(name)) {
+                                updatePreserveTopNApps();
                             } else if (KEY_OOM_RE_RANKING_LRU_WEIGHT.equals(name)) {
                                 updateLruWeight();
                             } else if (KEY_OOM_RE_RANKING_USES_WEIGHT.equals(name)) {
@@ -160,6 +177,19 @@ public class CacheOomRanker {
     }
 
     @GuardedBy("mPhenotypeFlagLock")
+    private void updatePreserveTopNApps() {
+        int preserveTopNApps = DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_OOM_RE_RANKING_PRESERVE_TOP_N_APPS, DEFAULT_PRESERVE_TOP_N_APPS);
+        if (preserveTopNApps < 0) {
+            Slog.w(OomAdjuster.TAG,
+                    "Found negative value for preserveTopNApps, setting to default: "
+                            + preserveTopNApps);
+            preserveTopNApps = DEFAULT_PRESERVE_TOP_N_APPS;
+        }
+        mPreserveTopNApps = preserveTopNApps;
+    }
+
+    @GuardedBy("mPhenotypeFlagLock")
     private void updateLruWeight() {
         mLruWeight = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_OOM_RE_RANKING_LRU_WEIGHT, DEFAULT_OOM_RE_RANKING_LRU_WEIGHT);
@@ -183,6 +213,33 @@ public class CacheOomRanker {
      */
     @GuardedBy({"mService", "mProcLock"})
     void reRankLruCachedAppsLSP(ArrayList<ProcessRecord> lruList, int lruProcessServiceStart) {
+        // The lruList is a list of processes ordered by how recently they were used. The
+        // least-recently-used apps are at the beginning of the list. We keep track of two
+        // indices in the lruList:
+        //
+        // getNumberToReRank=5, preserveTopNApps=3, lruProcessServiceStart=7,
+        // lruList=
+        //   0: app A       ^
+        //   1: app B       | These apps are re-ranked, as they are the first five apps (see
+        //   2: app C       | getNumberToReRank), excluding...
+        //   3: app D       v
+        //   4: app E       ^
+        //   5: app F       | The three most-recently-used apps in the cache (see preserveTopNApps).
+        //   6: app G       v
+        //   7: service A   ^
+        //   8: service B   | Everything beyond lruProcessServiceStart is ignored, as these aren't
+        //   9: service C   | apps.
+        //  10: activity A  |
+        //      ...         |
+        //
+        // `numProcessesEvaluated` moves across the apps (indices 0-6) or until we've found enough
+        // apps to re-rank, and made sure none of them are in the top `preserveTopNApps` apps.
+        // Re-ranked apps are copied into `scoredProcessRecords`, where the re-ranking calculation
+        // happens.
+        //
+        // Note that some apps in the `lruList` can be skipped, if they don't pass
+        //`appCanBeReRanked`.
+
         float lruWeight;
         float usesWeight;
         float rssWeight;
@@ -202,52 +259,67 @@ public class CacheOomRanker {
             return;
         }
 
+        int numProcessesEvaluated = 0;
         // Collect the least recently used processes to re-rank, only rank cached
         // processes further down the list than mLruProcessServiceStart.
-        int cachedProcessPos = 0;
-        for (int i = 0; i < lruProcessServiceStart
-                && cachedProcessPos < scoredProcessRecords.length; ++i) {
-            ProcessRecord app = lruList.get(i);
+        int numProcessesReRanked = 0;
+        while (numProcessesEvaluated < lruProcessServiceStart
+                && numProcessesReRanked < scoredProcessRecords.length) {
+            ProcessRecord process = lruList.get(numProcessesEvaluated);
             // Processes that will be assigned a cached oom adj score.
-            if (!app.isKilledByAm() && app.getThread() != null && app.mState.getCurAdj()
-                    >= ProcessList.UNKNOWN_ADJ) {
-                scoredProcessRecords[cachedProcessPos].proc = app;
-                scoredProcessRecords[cachedProcessPos].score = 0.0f;
-                lruPositions[cachedProcessPos] = i;
-                ++cachedProcessPos;
+            if (appCanBeReRanked(process)) {
+                scoredProcessRecords[numProcessesReRanked].proc = process;
+                scoredProcessRecords[numProcessesReRanked].score = 0.0f;
+                lruPositions[numProcessesReRanked] = numProcessesEvaluated;
+                ++numProcessesReRanked;
             }
+            ++numProcessesEvaluated;
         }
 
-        // TODO maybe ensure a certain number above this in the cache before re-ranking.
-        if (cachedProcessPos < scoredProcessRecords.length)  {
-            // Ignore we don't have enough processes to worry about re-ranking.
-            return;
+        // Count how many apps we're not re-ranking (up to mPreserveTopNApps).
+        int numProcessesNotReRanked = 0;
+        while (numProcessesEvaluated < lruProcessServiceStart
+                && numProcessesNotReRanked < mPreserveTopNApps) {
+            ProcessRecord process = lruList.get(numProcessesEvaluated);
+            if (appCanBeReRanked(process)) {
+                numProcessesNotReRanked++;
+            }
+            numProcessesEvaluated++;
+        }
+        // Exclude the top `mPreserveTopNApps` apps from re-ranking.
+        if (numProcessesNotReRanked < mPreserveTopNApps) {
+            numProcessesReRanked -= mPreserveTopNApps - numProcessesNotReRanked;
+            if (numProcessesReRanked < 0) {
+                numProcessesReRanked = 0;
+            }
         }
 
         // Add scores for each of the weighted features we want to rank based on.
         if (lruWeight > 0.0f) {
             // This doesn't use the LRU list ordering as after the first re-ranking
             // that will no longer be lru.
-            Arrays.sort(scoredProcessRecords, LAST_ACTIVITY_TIME_COMPARATOR);
+            Arrays.sort(scoredProcessRecords, 0, numProcessesReRanked,
+                    LAST_ACTIVITY_TIME_COMPARATOR);
             addToScore(scoredProcessRecords, lruWeight);
         }
         if (rssWeight > 0.0f) {
             synchronized (mService.mAppProfiler.mProfilerLock) {
-                Arrays.sort(scoredProcessRecords, LAST_RSS_COMPARATOR);
+                Arrays.sort(scoredProcessRecords, 0, numProcessesReRanked, LAST_RSS_COMPARATOR);
             }
             addToScore(scoredProcessRecords, rssWeight);
         }
         if (usesWeight > 0.0f) {
-            Arrays.sort(scoredProcessRecords, CACHE_USE_COMPARATOR);
+            Arrays.sort(scoredProcessRecords, 0, numProcessesReRanked, CACHE_USE_COMPARATOR);
             addToScore(scoredProcessRecords, usesWeight);
         }
 
         // Re-rank by the new combined score.
-        Arrays.sort(scoredProcessRecords, SCORED_PROCESS_RECORD_COMPARATOR);
+        Arrays.sort(scoredProcessRecords, 0, numProcessesReRanked,
+                SCORED_PROCESS_RECORD_COMPARATOR);
 
         if (ActivityManagerDebugConfig.DEBUG_OOM_ADJ) {
             boolean printedHeader = false;
-            for (int i = 0; i < scoredProcessRecords.length; ++i) {
+            for (int i = 0; i < numProcessesReRanked; ++i) {
                 if (scoredProcessRecords[i].proc.getPid()
                         != lruList.get(lruPositions[i]).getPid()) {
                     if (!printedHeader) {
@@ -260,10 +332,16 @@ public class CacheOomRanker {
             }
         }
 
-        for (int i = 0; i < scoredProcessRecords.length; ++i) {
+        for (int i = 0; i < numProcessesReRanked; ++i) {
             lruList.set(lruPositions[i], scoredProcessRecords[i].proc);
             scoredProcessRecords[i].proc = null;
         }
+    }
+
+    private static boolean appCanBeReRanked(ProcessRecord process) {
+        return !process.isKilledByAm()
+                && process.getThread() != null
+                && process.mState.getCurAdj() >= ProcessList.UNKNOWN_ADJ;
     }
 
     private static void addToScore(RankedProcessRecord[] scores, float weight) {

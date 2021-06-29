@@ -299,8 +299,8 @@ public final class Settings {
     public static final String KEY_CONFIG_SET_ALL_RETURN = "config_set_all_return";
 
     /** @hide */
-    public static final String KEY_CONFIG_IS_SYNC_DISABLED_RETURN =
-            "config_is_sync_disabled_return";
+    public static final String KEY_CONFIG_GET_SYNC_DISABLED_MODE_RETURN =
+            "config_get_sync_disabled_mode_return";
 
     /**
      * An int extra specifying a subscription ID.
@@ -2439,13 +2439,15 @@ public final class Settings {
     public static final String CALL_METHOD_LIST_CONFIG = "LIST_config";
 
     /** @hide - Private call() method to disable / re-enable syncs to the 'configuration' table */
-    public static final String CALL_METHOD_SET_SYNC_DISABLED_CONFIG = "SET_SYNC_DISABLED_config";
+    public static final String CALL_METHOD_SET_SYNC_DISABLED_MODE_CONFIG =
+            "SET_SYNC_DISABLED_MODE_config";
 
     /**
-     * @hide - Private call() method to return whether syncs are disabled for the 'configuration'
-     * table
+     * @hide - Private call() method to return the current mode of sync disabling for the
+     * 'configuration' table
      */
-    public static final String CALL_METHOD_IS_SYNC_DISABLED_CONFIG = "IS_SYNC_DISABLED_config";
+    public static final String CALL_METHOD_GET_SYNC_DISABLED_MODE_CONFIG =
+            "GET_SYNC_DISABLED_MODE_config";
 
     /** @hide - Private call() method to register monitor callback for 'configuration' table */
     public static final String CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG =
@@ -14335,8 +14337,11 @@ public final class Settings {
                 "are_user_disabled_hdr_formats_allowed";
 
         /**
-         * Whether or not syncs (bulk set operations) for {@link DeviceConfig} are disabled
-         * currently. The value is boolean (1 or 0). The value '1' means that {@link
+         * Whether or not syncs (bulk set operations) for {@link DeviceConfig} are currently
+         * persistently disabled. This is only used for the {@link
+         * Config#SYNC_DISABLED_MODE_PERSISTENT persistent} mode, {@link
+         * Config#SYNC_DISABLED_MODE_UNTIL_REBOOT until_reboot} mode is not stored in settings.
+         * The value is boolean (1 or 0). The value '1' means that {@link
          * DeviceConfig#setProperties(DeviceConfig.Properties)} will return {@code false}.
          *
          * @hide
@@ -16707,47 +16712,47 @@ public final class Settings {
         }
 
         /**
-         * Bridge method between {@link DeviceConfig#setSyncDisabled(int)} and the
+         * Bridge method between {@link DeviceConfig#setSyncDisabledMode(int)} and the
          * {@link com.android.providers.settings.SettingsProvider} implementation.
          *
          * @hide
          */
         @SuppressLint("AndroidFrameworkRequiresPermission")
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static void setSyncDisabled(
+        static void setSyncDisabledMode(
                 @NonNull ContentResolver resolver, @SyncDisabledMode int disableSyncMode) {
             try {
                 Bundle args = new Bundle();
                 args.putInt(CALL_METHOD_SYNC_DISABLED_MODE_KEY, disableSyncMode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getAttributionSource(),
-                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_SET_SYNC_DISABLED_CONFIG,
-                        null, args);
+                cp.call(resolver.getAttributionSource(), sProviderHolder.mUri.getAuthority(),
+                        CALL_METHOD_SET_SYNC_DISABLED_MODE_CONFIG, null, args);
             } catch (RemoteException e) {
-                Log.w(TAG, "Can't set sync disabled " + DeviceConfig.CONTENT_URI, e);
+                Log.w(TAG, "Can't set sync disabled mode " + DeviceConfig.CONTENT_URI, e);
             }
         }
 
         /**
-         * Bridge method between {@link DeviceConfig#isSyncDisabled()} and the
+         * Bridge method between {@link DeviceConfig#getSyncDisabledMode()} and the
          * {@link com.android.providers.settings.SettingsProvider} implementation.
          *
          * @hide
          */
         @SuppressLint("AndroidFrameworkRequiresPermission")
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static boolean isSyncDisabled(@NonNull ContentResolver resolver) {
+        static int getSyncDisabledMode(@NonNull ContentResolver resolver) {
             try {
                 Bundle args = Bundle.EMPTY;
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
                 Bundle bundle = cp.call(resolver.getAttributionSource(),
-                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_IS_SYNC_DISABLED_CONFIG,
+                        sProviderHolder.mUri.getAuthority(),
+                        CALL_METHOD_GET_SYNC_DISABLED_MODE_CONFIG,
                         null, args);
-                return bundle.getBoolean(KEY_CONFIG_IS_SYNC_DISABLED_RETURN);
+                return bundle.getInt(KEY_CONFIG_GET_SYNC_DISABLED_MODE_RETURN);
             } catch (RemoteException e) {
-                Log.w(TAG, "Can't query sync disabled " + DeviceConfig.CONTENT_URI, e);
+                Log.w(TAG, "Can't query sync disabled mode " + DeviceConfig.CONTENT_URI, e);
             }
-            return false;
+            return -1;
         }
 
         /**

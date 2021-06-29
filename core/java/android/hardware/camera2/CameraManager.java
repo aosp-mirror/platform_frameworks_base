@@ -162,6 +162,9 @@ public final class CameraManager {
      * <p>The set of combinations may include camera devices that may be in use by other camera API
      * clients.</p>
      *
+     * <p>Concurrent camera extension sessions {@link CameraExtensionSession} are not currently
+     * supported.</p>
+     *
      * <p>The set of combinations doesn't contain physical cameras that can only be used as
      * part of a logical multi-camera device.</p>
      *

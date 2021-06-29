@@ -31,6 +31,7 @@ import com.android.keyguard.KeyguardViewController
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController
+import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -89,7 +90,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
     private val keyguardStateController: KeyguardStateController,
     private val keyguardViewMediator: Lazy<KeyguardViewMediator>,
     private val keyguardViewController: KeyguardViewController,
-    private val smartspaceTransitionController: SmartspaceTransitionController
+    private val smartspaceTransitionController: SmartspaceTransitionController,
+    private val featureFlags: FeatureFlags
 ) : KeyguardStateController.Callback {
 
     /**
@@ -346,6 +348,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * keyguard visible.
      */
     private fun updateKeyguardViewMediatorIfThresholdsReached() {
+        if (!featureFlags.isNewKeyguardSwipeAnimationEnabled) {
+            return
+        }
+
         val dismissAmount = keyguardStateController.dismissAmount
 
         // Hide the keyguard if we're fully dismissed, or if we're swiping to dismiss and have
@@ -382,6 +388,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * know if it needs to do something as a result.
      */
     private fun updateSmartSpaceTransition() {
+        if (!featureFlags.isSmartSpaceSharedElementTransitionEnabled) {
+            return
+        }
+
         val dismissAmount = keyguardStateController.dismissAmount
 
         // If we've begun a swipe, and are capable of doing the SmartSpace transition, start it!
