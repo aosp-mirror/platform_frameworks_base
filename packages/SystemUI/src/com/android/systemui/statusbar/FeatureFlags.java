@@ -84,4 +84,12 @@ public class FeatureFlags {
     public boolean isSmartspaceDedupingEnabled() {
         return isSmartspaceEnabled() && mFlagReader.isEnabled(R.bool.flag_smartspace_deduping);
     }
+
+    public boolean isNewKeyguardSwipeAnimationEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_new_unlock_swipe_animation);
+    }
+
+    public boolean isSmartSpaceSharedElementTransitionEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_smartspace_shared_element_transition);
+    }
 }

@@ -1115,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"திறந்தநிலை உரையாடல்"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"உரையாடல் விட்ஜெட்டுகள்"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ஓர் உரையாடலை உங்கள் முகப்புத் திரையில் சேர்க்க அந்த உரையாடலைத் தட்டுங்கள்"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"செய்திகளைப் பெற்றதும் இங்கே மீண்டும் வரவும்"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"முன்னுரிமை அளிக்கப்பட்ட உரையாடல்கள்"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"சமீபத்திய உரையாடல்கள்"</string>
     <string name="okay" msgid="6490552955618608554">"சரி"</string>
@@ -1144,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"சமீபத்திய மெசேஜ்களையும் தவறிய அழைப்புகளையும் ஸ்டேட்டஸ் அப்டேட்களையும் பார்க்கலாம்"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"உரையாடல்"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"தொந்தரவு செய்ய வேண்டாம் அம்சத்தால் இடைநிறுத்தப்பட்டது"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ஒரு மெசேஜ் அனுப்பியுள்ளார்"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ஒரு படம் அனுப்பியுள்ளார்"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"பேட்டரி அளவை அறிவதில் சிக்கல்"</string>

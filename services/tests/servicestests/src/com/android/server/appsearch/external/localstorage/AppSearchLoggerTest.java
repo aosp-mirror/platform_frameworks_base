@@ -32,15 +32,15 @@ import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
-import com.android.server.appsearch.proto.DeleteStatsProto;
-import com.android.server.appsearch.proto.DocumentProto;
-import com.android.server.appsearch.proto.InitializeStatsProto;
-import com.android.server.appsearch.proto.PutDocumentStatsProto;
-import com.android.server.appsearch.proto.PutResultProto;
-import com.android.server.appsearch.proto.QueryStatsProto;
-import com.android.server.appsearch.proto.ScoringSpecProto;
-import com.android.server.appsearch.proto.StatusProto;
-import com.android.server.appsearch.proto.TermMatchType;
+import com.android.server.appsearch.icing.proto.DeleteStatsProto;
+import com.android.server.appsearch.icing.proto.DocumentProto;
+import com.android.server.appsearch.icing.proto.InitializeStatsProto;
+import com.android.server.appsearch.icing.proto.PutDocumentStatsProto;
+import com.android.server.appsearch.icing.proto.PutResultProto;
+import com.android.server.appsearch.icing.proto.QueryStatsProto;
+import com.android.server.appsearch.icing.proto.ScoringSpecProto;
+import com.android.server.appsearch.icing.proto.StatusProto;
+import com.android.server.appsearch.icing.proto.TermMatchType;
 
 import com.google.common.collect.ImmutableList;
 

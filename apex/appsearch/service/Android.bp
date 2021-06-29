@@ -28,31 +28,41 @@ genrule {
 }
 
 java_library {
-    name: "service-appsearch",
-    srcs: [
-        "java/**/*.java",
-        ":statslog-appsearch-java-gen",
+    name: "statslog-appsearch-lib",
+    srcs: [":statslog-appsearch-java-gen"],
+    libs: [
+        "framework-statsd.stubs.module_lib",
     ],
+    sdk_version: "system_server_current",
+    apex_available: ["com.android.appsearch"],
+}
+
+java_library {
+    name: "service-appsearch",
+    srcs: ["java/**/*.java"],
+    sdk_version: "system_server_current",
     static_libs: [
         "icing-java-proto-lite",
         "libicing-java",
-        // This list must be kept in sync with jarjar.txt
+        "statslog-appsearch-lib",
+        // Entries below this line are outside of the appsearch package tree and must be kept in
+        // sync with jarjar.txt
         "modules-utils-preconditions",
     ],
     libs: [
-        "framework",
-        "framework-appsearch",
-        "framework-statsd.stubs.module_lib",
-        "services.core",
-        "services.usage",
+        "framework-appsearch.impl",
         "unsupportedappusage", // TODO(b/181887768) should be removed
     ],
     required: [
         "libicing",
     ],
+    defaults: ["framework-system-server-module-defaults"],
+    permitted_packages: [
+        "com.android.server.appsearch",
+        "com.google.android.icing",
+    ],
     jarjar_rules: "jarjar-rules.txt",
     visibility: [
-        "//frameworks/base/apex/appsearch:__subpackages__",
         // These are required until appsearch is properly unbundled.
         "//frameworks/base/services/tests/mockingservicestests",
         "//frameworks/base/services/tests/servicestests",

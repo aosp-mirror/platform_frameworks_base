@@ -452,8 +452,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ಟ್ಯಾಬ್ಲೆಟ್‌‌ ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ಸಾಧನವು ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"ಭರ್ತಿಯಾಗುವವರೆಗೂ <xliff:g id="TIME">%1$s</xliff:g> - ಉಳಿದಿದೆ"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"ಭರ್ತಿಯಾಗುವವರೆಗೂ <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ಉಳಿದಿದೆ"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> - ಸಮಯದಲ್ಲಿ ಪೂರ್ತಿ ಚಾರ್ಜ್ ಆಗುತ್ತದೆ"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ಸಮಯದಲ್ಲಿ ಪೂರ್ತಿ ಚಾರ್ಜ್ ಆಗುತ್ತದೆ"</string>
     <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - ಚಾರ್ಜಿಂಗ್ ತಾತ್ಕಾಲಿಕವಾಗಿ ಸೀಮಿತವಾಗಿದೆ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ಅಪರಿಚಿತ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>

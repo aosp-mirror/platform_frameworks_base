@@ -40,9 +40,7 @@ public:
 
     StretchEffect() {}
 
-    bool isEmpty() const {
-        return MathUtils::isZero(mStretchDirection.x()) && MathUtils::isZero(mStretchDirection.y());
-    }
+    bool isEmpty() const { return isZero(mStretchDirection.x()) && isZero(mStretchDirection.y()); }
 
     void setEmpty() {
         *this = StretchEffect{};
@@ -118,6 +116,18 @@ public:
     }
 
 private:
+    // The epsilon for StretchEffect is less than in MathUtils because
+    // the range is 0-1 for an entire screen and should be significantly
+    // less than 1 pixel for a smooth stretch animation.
+    inline static bool isZero(float value) {
+        // Using fabsf is more performant as ARM computes
+        // fabsf in a single instruction.
+        return fabsf(value) <= NON_ZERO_EPSILON;
+    }
+    // This should be good for 1/25,000 of a screen and should be good for
+    // screens with less than ~8000 pixels in one dimension with only 1/4 pixel
+    // cut-off.
+    static constexpr float NON_ZERO_EPSILON = 0.00004f;
     static sk_sp<SkRuntimeEffect> getStretchEffect();
     mutable SkVector mStretchDirection{0, 0};
     mutable std::unique_ptr<SkRuntimeShaderBuilder> mBuilder;
