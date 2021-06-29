@@ -23,6 +23,7 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.input.InputManager;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -685,8 +686,26 @@ abstract class HdmiCecLocalDevice {
                     Message.obtain(mHandler, MSG_USER_CONTROL_RELEASE_TIMEOUT),
                     FOLLOWER_SAFETY_TIMEOUT);
             return Constants.HANDLED;
+        } else if (params.length > 0) {
+            // Handle CEC UI commands that are not mapped to an Android keycode
+            return handleUnmappedCecKeycode(params[0]);
         }
 
+        return Constants.ABORT_INVALID_OPERAND;
+    }
+
+    @ServiceThreadOnly
+    @Constants.HandleMessageResult
+    protected int handleUnmappedCecKeycode(int cecKeycode) {
+        if (cecKeycode == HdmiCecKeycode.CEC_KEYCODE_MUTE_FUNCTION) {
+            mService.getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                    AudioManager.ADJUST_MUTE, AudioManager.FLAG_SHOW_UI);
+            return Constants.HANDLED;
+        } else if (cecKeycode == HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION) {
+            mService.getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                    AudioManager.ADJUST_UNMUTE, AudioManager.FLAG_SHOW_UI);
+            return Constants.HANDLED;
+        }
         return Constants.ABORT_INVALID_OPERAND;
     }
 
