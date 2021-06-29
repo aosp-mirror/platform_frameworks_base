@@ -268,9 +268,9 @@ public abstract class BaseClientMonitor extends LoggableMonitor
     public String toString() {
         return "{[" + mSequentialId + "] "
                 + this.getClass().getSimpleName()
-                + ", " + getProtoEnum()
-                + ", " + getOwnerString()
-                + ", " + getCookie()
-                + ", " + getTargetUserId() + "}";
+                + ", proto=" + getProtoEnum()
+                + ", owner=" + getOwnerString()
+                + ", cookie=" + getCookie()
+                + ", userId=" + getTargetUserId() + "}";
     }
 }
