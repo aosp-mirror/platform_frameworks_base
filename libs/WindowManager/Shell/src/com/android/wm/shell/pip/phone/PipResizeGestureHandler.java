@@ -246,10 +246,20 @@ public class PipResizeGestureHandler {
         }
 
         if (ev instanceof MotionEvent) {
+            MotionEvent mv = (MotionEvent) ev;
+            int action = mv.getActionMasked();
+            final Rect pipBounds = mPipBoundsState.getBounds();
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (!pipBounds.contains((int) mv.getRawX(), (int) mv.getRawY())
+                        && mPhonePipMenuController.isMenuVisible()) {
+                    mPhonePipMenuController.hideMenu();
+                }
+            }
+
             if (mEnablePinchResize && mOngoingPinchToResize) {
-                onPinchResize((MotionEvent) ev);
+                onPinchResize(mv);
             } else if (mEnableDragCornerResize) {
-                onDragCornerResize((MotionEvent) ev);
+                onDragCornerResize(mv);
             }
         }
     }
@@ -450,7 +460,6 @@ public class PipResizeGestureHandler {
         float x = ev.getX();
         float y = ev.getY() - mOhmOffset;
         if (action == MotionEvent.ACTION_DOWN) {
-            final Rect currentPipBounds = mPipBoundsState.getBounds();
             mLastResizeBounds.setEmpty();
             mAllowGesture = isInValidSysUiState() && isWithinDragResizeRegion((int) x, (int) y);
             if (mAllowGesture) {
@@ -458,11 +467,6 @@ public class PipResizeGestureHandler {
                 mDownPoint.set(x, y);
                 mDownBounds.set(mPipBoundsState.getBounds());
             }
-            if (!currentPipBounds.contains((int) x, (int) y)
-                    && mPhonePipMenuController.isMenuVisible()) {
-                mPhonePipMenuController.hideMenu();
-            }
-
         } else if (mAllowGesture) {
             switch (action) {
                 case MotionEvent.ACTION_POINTER_DOWN:
