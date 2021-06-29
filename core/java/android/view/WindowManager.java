@@ -3781,6 +3781,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(screenOrientation);
             out.writeFloat(preferredRefreshRate);
             out.writeInt(preferredDisplayModeId);
+            out.writeFloat(preferredMaxDisplayRefreshRate);
             out.writeInt(systemUiVisibility);
             out.writeInt(subtreeSystemUiVisibility);
             out.writeBoolean(hasSystemUiListeners);
@@ -3851,6 +3852,7 @@ public interface WindowManager extends ViewManager {
             screenOrientation = in.readInt();
             preferredRefreshRate = in.readFloat();
             preferredDisplayModeId = in.readInt();
+            preferredMaxDisplayRefreshRate = in.readFloat();
             systemUiVisibility = in.readInt();
             subtreeSystemUiVisibility = in.readInt();
             hasSystemUiListeners = in.readBoolean();
@@ -3928,6 +3930,8 @@ public interface WindowManager extends ViewManager {
         public static final int MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED = 1 << 28;
         /** {@hide} */
         public static final int BLUR_BEHIND_RADIUS_CHANGED = 1 << 29;
+        /** {@hide} */
+        public static final int PREFERRED_MAX_DISPLAY_REFRESH_RATE = 1 << 30;
 
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
@@ -4057,6 +4061,11 @@ public interface WindowManager extends ViewManager {
             if (preferredDisplayModeId != o.preferredDisplayModeId) {
                 preferredDisplayModeId = o.preferredDisplayModeId;
                 changes |= PREFERRED_DISPLAY_MODE_ID;
+            }
+
+            if (preferredMaxDisplayRefreshRate != o.preferredMaxDisplayRefreshRate) {
+                preferredMaxDisplayRefreshRate = o.preferredMaxDisplayRefreshRate;
+                changes |= PREFERRED_MAX_DISPLAY_REFRESH_RATE;
             }
 
             if (systemUiVisibility != o.systemUiVisibility
@@ -4262,6 +4271,10 @@ public interface WindowManager extends ViewManager {
             if (preferredDisplayModeId != 0) {
                 sb.append(" preferredDisplayMode=");
                 sb.append(preferredDisplayModeId);
+            }
+            if (preferredMaxDisplayRefreshRate != 0) {
+                sb.append(" preferredMaxDisplayRefreshRate=");
+                sb.append(preferredMaxDisplayRefreshRate);
             }
             if (hasSystemUiListeners) {
                 sb.append(" sysuil=");
