@@ -438,7 +438,7 @@
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"สลับภาพรวม"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ชาร์จแล้ว"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"กำลังชาร์จ"</string>
-    <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"อีก <xliff:g id="CHARGING_TIME">%s</xliff:g> จึงจะเต็ม"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"อีก <xliff:g id="CHARGING_TIME">%s</xliff:g> จะเต็ม"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ไม่ได้ชาร์จ"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"เครือข่ายอาจ\nถูกตรวจสอบ"</string>
     <string name="description_target_search" msgid="3875069993128855865">"ค้นหา"</string>
@@ -1115,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"เปิดการสนทนา"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"วิดเจ็ตการสนทนา"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"แตะการสนทนาเพื่อเพิ่มไปยังหน้าจอหลัก"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"กลับมาดูที่นี่อีกครั้งเมื่อได้รับข้อความ"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"การสนทนาสำคัญ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"การสนทนาล่าสุด"</string>
     <string name="okay" msgid="6490552955618608554">"ตกลง"</string>

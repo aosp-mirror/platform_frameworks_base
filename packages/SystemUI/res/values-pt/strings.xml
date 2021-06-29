@@ -1115,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Conversa aberta"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversa"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Toque em uma conversa para adicioná-la à tela inicial"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Volte aqui quando receber mensagens"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Conversas prioritárias"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversas recentes"</string>
     <string name="okay" msgid="6490552955618608554">"Ok"</string>

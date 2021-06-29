@@ -1115,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"대화 열기"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"대화 위젯"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"대화를 탭하여 홈 화면에 추가하세요."</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"메시지를 받으면 여기서 다시 확인해 주세요."</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"우선순위 대화"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"최근 대화"</string>
     <string name="okay" msgid="6490552955618608554">"확인"</string>
@@ -1144,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"최근 메시지, 부재중 전화, 상태 업데이트 보기"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"대화"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"방해 금지 모드로 인해 일시중지됨"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g>님이 메시지를 보냈습니다."</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>님이 이미지를 보냈습니다."</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"배터리 수준을 읽는 중에 문제가 발생함"</string>

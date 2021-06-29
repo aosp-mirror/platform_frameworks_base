@@ -39,7 +39,6 @@ import android.os.UserHandle;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -68,10 +67,6 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private static final String ACTIVITY_RECOGNITION_TAGS =
             "android:activity_recognition_allow_listed_tags";
     private static final String ACTIVITY_RECOGNITION_TAGS_SEPARATOR = ";";
-
-    private static final ArraySet<String> sExpectedTags = new ArraySet<>(new String[] {
-            "awareness_provider", "activity_recognition_provider", "network_location_provider",
-            "network_location_calibration", "fused_location_provider", "geofencer_provider"});
 
     @NonNull
     private final Object mLock = new Object();
@@ -269,32 +264,14 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         if (resolvedCode != code) {
             if (isDatasourceAttributionTag(uid, packageName, attributionTag,
                     mLocationTags)) {
-                if (packageName.equals("com.google.android.gms")
-                        && !sExpectedTags.contains(attributionTag)) {
-                    Log.i("AppOpsDebugRemapping", "remapping " + packageName + " location "
-                            + "for tag " + attributionTag);
-                }
                 return resolvedCode;
-            } else if (packageName.equals("com.google.android.gms")
-                    && sExpectedTags.contains(attributionTag)) {
-                Log.i("AppOpsDebugRemapping", "NOT remapping " + packageName + " code "
-                        + code + " for tag " + attributionTag);
             }
         } else {
             resolvedCode = resolveArOp(code);
             if (resolvedCode != code) {
                 if (isDatasourceAttributionTag(uid, packageName, attributionTag,
                         mActivityRecognitionTags)) {
-                    if (packageName.equals("com.google.android.gms")
-                            && !sExpectedTags.contains(attributionTag)) {
-                        Log.i("AppOpsDebugRemapping", "remapping " + packageName + " "
-                                + "activity recognition for tag " + attributionTag);
-                    }
                     return resolvedCode;
-                } else if (packageName.equals("com.google.android.gms")
-                        && sExpectedTags.contains(attributionTag)) {
-                    Log.i("AppOpsDebugRemapping", "NOT remapping " + packageName
-                            + " code " + code + " for tag " + attributionTag);
                 }
             }
         }

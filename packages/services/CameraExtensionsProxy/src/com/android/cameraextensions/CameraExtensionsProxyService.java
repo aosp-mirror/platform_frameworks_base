@@ -18,6 +18,7 @@ package com.android.cameraextensions;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraAccessException;
@@ -42,6 +43,7 @@ import android.hardware.camera2.extension.IRequestProcessorImpl;
 import android.hardware.camera2.extension.IRequestUpdateProcessorImpl;
 import android.hardware.camera2.extension.IImageCaptureExtenderImpl;
 import android.hardware.camera2.extension.IImageProcessorImpl;
+import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.ISessionProcessorImpl;
 import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.OutputConfigId;
@@ -57,6 +59,7 @@ import android.hardware.HardwareBuffer;
 import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Binder;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -176,6 +179,7 @@ public class CameraExtensionsProxyService extends Service {
 
         private long mCurrentClientCount = 0;
         private ArraySet<Long> mActiveClients = new ArraySet<>();
+        private IInitializeSessionCallback mInitializeCb = null;
 
         // Singleton instance
         private static final CameraExtensionManagerGlobal GLOBAL_CAMERA_MANAGER =
@@ -328,6 +332,40 @@ public class CameraExtensionsProxyService extends Service {
                 }
             }
         }
+
+        private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
+            @Override
+            public void binderDied() {
+                synchronized (mLock) {
+                    mInitializeCb = null;
+                }
+            }
+        };
+
+        public boolean initializeSession(IInitializeSessionCallback cb) {
+            synchronized (mLock) {
+                if (mInitializeCb == null) {
+                    mInitializeCb = cb;
+                    try {
+                        mInitializeCb.asBinder().linkToDeath(mDeathRecipient, 0);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public void releaseSession() {
+            synchronized (mLock) {
+                if (mInitializeCb != null) {
+                    mInitializeCb.asBinder().unlinkToDeath(mDeathRecipient, 0);
+                    mInitializeCb = null;
+                }
+            }
+        }
     }
 
     /**
@@ -348,6 +386,26 @@ public class CameraExtensionsProxyService extends Service {
             return;
         }
         CameraExtensionManagerGlobal.get().unregisterClient(clientId);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean initializeSession(IInitializeSessionCallback cb) {
+        if (!EXTENSIONS_PRESENT) {
+            return false;
+        }
+        return CameraExtensionManagerGlobal.get().initializeSession(cb);
+    }
+
+    /**
+     * @hide
+     */
+    public static void releaseSession() {
+        if (!EXTENSIONS_PRESENT) {
+            return;
+        }
+        CameraExtensionManagerGlobal.get().releaseSession();
     }
 
     /**
@@ -536,6 +594,39 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public void unregisterClient(long clientId) {
             CameraExtensionsProxyService.unregisterClient(clientId);
+        }
+
+        private boolean checkCameraPermission() {
+            int allowed = CameraExtensionsProxyService.this.checkPermission(
+                    android.Manifest.permission.CAMERA, Binder.getCallingPid(),
+                    Binder.getCallingUid());
+            return (PackageManager.PERMISSION_GRANTED == allowed);
+        }
+
+        @Override
+        public void initializeSession(IInitializeSessionCallback cb) {
+            try {
+                if (!checkCameraPermission()) {
+                    Log.i(TAG, "Camera permission required for initializing capture session");
+                    cb.onFailure();
+                    return;
+                }
+
+                if (CameraExtensionsProxyService.initializeSession(cb)) {
+                    cb.onSuccess();
+                } else {
+                    cb.onFailure();
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Client doesn't respond!");
+            }
+        }
+
+        @Override
+        public void releaseSession() {
+            if (checkCameraPermission()) {
+                CameraExtensionsProxyService.releaseSession();
+            }
         }
 
         @Override

@@ -22,8 +22,8 @@ import static com.android.server.appsearch.external.localstorage.FrameworkOptimi
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.android.server.appsearch.proto.GetOptimizeInfoResultProto;
-import com.android.server.appsearch.proto.StatusProto;
+import com.android.server.appsearch.icing.proto.GetOptimizeInfoResultProto;
+import com.android.server.appsearch.icing.proto.StatusProto;
 
 import org.junit.Test;
 

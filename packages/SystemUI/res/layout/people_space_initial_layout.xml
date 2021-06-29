@@ -22,7 +22,8 @@
 
     <LinearLayout
         android:background="@drawable/people_space_tile_view_card"
-        android:id="@+id/item"
+        android:clipToOutline="true"
+        android:id="@android:id/background"
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_gravity="top"
