@@ -77,14 +77,16 @@ interface IAudioService {
     oneway void playerSessionId(in int piid, in int sessionId);
 
     // Java-only methods below.
-
-    oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
-            String callingPackage, String caller);
-
     void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);
+
+    void adjustStreamVolumeWithAttribution(int streamType, int direction, int flags,
+            in String callingPackage, in String attributionTag);
 
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setStreamVolume(int streamType, int index, int flags, String callingPackage);
+
+    void setStreamVolumeWithAttribution(int streamType, int index, int flags,
+            in String callingPackage, in String attributionTag);
 
     oneway void handleVolumeKey(in KeyEvent event, boolean isOnTv,
             String callingPackage, String caller);
@@ -95,7 +97,8 @@ interface IAudioService {
 
     boolean isMasterMute();
 
-    void setMasterMute(boolean mute, int flags, String callingPackage, int userId);
+    void setMasterMute(boolean mute, int flags, String callingPackage, int userId,
+            in String attributionTag);
 
     @UnsupportedAppUsage
     int getStreamVolume(int streamType);
@@ -107,7 +110,8 @@ interface IAudioService {
 
     List<AudioVolumeGroup> getAudioVolumeGroups();
 
-    void setVolumeIndexForAttributes(in AudioAttributes aa, int index, int flags, String callingPackage);
+    void setVolumeIndexForAttributes(in AudioAttributes aa, int index, int flags,
+            String callingPackage, in String attributionTag);
 
     int getVolumeIndexForAttributes(in AudioAttributes aa);
 
@@ -125,7 +129,7 @@ interface IAudioService {
 
     boolean isMicrophoneMuted();
 
-    void setMicrophoneMute(boolean on, String callingPackage, int userId);
+    void setMicrophoneMute(boolean on, String callingPackage, int userId, in String attributionTag);
 
     oneway void setMicrophoneMuteFromSwitch(boolean on);
 
@@ -182,8 +186,8 @@ interface IAudioService {
     boolean isBluetoothA2dpOn();
 
     int requestAudioFocus(in AudioAttributes aa, int durationHint, IBinder cb,
-            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
-            IAudioPolicyCallback pcb, int sdk);
+            IAudioFocusDispatcher fd, in String clientId, in String callingPackageName,
+            in String attributionTag, int flags, IAudioPolicyCallback pcb, int sdk);
 
     int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, in AudioAttributes aa,
             in String callingPackageName);
