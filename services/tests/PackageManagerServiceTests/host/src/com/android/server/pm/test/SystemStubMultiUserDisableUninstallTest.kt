@@ -281,7 +281,7 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
         assertState(
                 primaryInstalled = false, primaryEnabled = true,
                 secondaryInstalled = true, secondaryEnabled = true,
-                codePaths = listOf(CodePath.DIFFERENT, CodePath.SYSTEM)
+                codePaths = listOf(CodePath.SAME, CodePath.SYSTEM)
         )
 
         uninstall(User.SECONDARY)
@@ -289,7 +289,7 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
         assertState(
                 primaryInstalled = false, primaryEnabled = true,
                 secondaryInstalled = false, secondaryEnabled = true,
-                codePaths = listOf(CodePath.DIFFERENT, CodePath.SYSTEM)
+                codePaths = listOf(CodePath.SAME, CodePath.SYSTEM)
         )
 
         installExisting(User.PRIMARY)
@@ -311,20 +311,20 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
 
     @Test
     fun uninstallSecondaryFirstByUserAndInstallExistingSecondaryFirst() {
+        uninstall(User.SECONDARY)
+
+        assertState(
+                primaryInstalled = true, primaryEnabled = true,
+                secondaryInstalled = false, secondaryEnabled = true,
+                codePaths = listOf(CodePath.SAME, CodePath.SYSTEM)
+        )
+
         uninstall(User.PRIMARY)
 
         assertState(
                 primaryInstalled = false, primaryEnabled = true,
-                secondaryInstalled = true, secondaryEnabled = true,
-                codePaths = listOf(CodePath.DIFFERENT, CodePath.SYSTEM)
-        )
-
-        uninstall(User.SECONDARY)
-
-        assertState(
-                primaryInstalled = false, primaryEnabled = true,
                 secondaryInstalled = false, secondaryEnabled = true,
-                codePaths = listOf(CodePath.DIFFERENT, CodePath.SYSTEM)
+                codePaths = listOf(CodePath.SAME, CodePath.SYSTEM)
         )
 
         installExisting(User.SECONDARY)
@@ -348,15 +348,14 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
     fun uninstallUpdatesAndEnablePrimaryFirst() {
         device.executeShellCommand("pm uninstall-system-updates $TEST_PKG_NAME")
 
-        // Uninstall-system-updates always disables system user 0
-        // TODO: Is this intentional? There is no user argument for this command.
         assertState(
-                primaryInstalled = true, primaryEnabled = false,
+                primaryInstalled = true, primaryEnabled = true,
                 secondaryInstalled = true, secondaryEnabled = true,
                 // If any user is enabled when uninstalling updates, /data is re-uncompressed
                 codePaths = listOf(CodePath.DIFFERENT, CodePath.SYSTEM)
         )
 
+        toggleEnabled(false, User.PRIMARY)
         toggleEnabled(true, User.PRIMARY)
 
         assertState(
@@ -379,13 +378,14 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
     fun uninstallUpdatesAndEnableSecondaryFirst() {
         device.executeShellCommand("pm uninstall-system-updates $TEST_PKG_NAME")
 
-        // Uninstall-system-updates always disables system user 0
         assertState(
-                primaryInstalled = true, primaryEnabled = false,
+                primaryInstalled = true, primaryEnabled = true,
                 secondaryInstalled = true, secondaryEnabled = true,
                 // If any user is enabled when uninstalling updates, /data is re-uncompressed
                 codePaths = listOf(CodePath.DIFFERENT, CodePath.SYSTEM)
         )
+
+        toggleEnabled(false, User.PRIMARY)
 
         toggleEnabled(true, User.SECONDARY)
 
@@ -417,6 +417,7 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
                 codePaths = listOf(CodePath.SYSTEM)
         )
 
+        toggleEnabled(false, User.PRIMARY)
         toggleEnabled(true, User.PRIMARY)
 
         assertState(
@@ -447,6 +448,7 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
                 codePaths = listOf(CodePath.SYSTEM)
         )
 
+        toggleEnabled(false, User.PRIMARY)
         toggleEnabled(true, User.SECONDARY)
 
         assertState(
@@ -471,13 +473,13 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
 
         device.executeShellCommand("pm uninstall-system-updates $TEST_PKG_NAME")
 
-        // Uninstall-system-updates always disables system user 0
         assertState(
-                primaryInstalled = false, primaryEnabled = false,
+                primaryInstalled = false, primaryEnabled = true,
                 secondaryInstalled = false, secondaryEnabled = true,
                 codePaths = listOf(CodePath.SYSTEM)
         )
 
+        toggleEnabled(false, User.PRIMARY)
         toggleEnabled(true, User.PRIMARY)
 
         assertState(
@@ -502,9 +504,8 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
 
         device.executeShellCommand("pm uninstall-system-updates $TEST_PKG_NAME")
 
-        // Uninstall-system-updates always disables system user 0
         assertState(
-                primaryInstalled = false, primaryEnabled = false,
+                primaryInstalled = false, primaryEnabled = true,
                 secondaryInstalled = false, secondaryEnabled = true,
                 codePaths = listOf(CodePath.SYSTEM)
         )
@@ -512,7 +513,7 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
         toggleEnabled(true, User.SECONDARY)
 
         assertState(
-                primaryInstalled = false, primaryEnabled = false,
+                primaryInstalled = false, primaryEnabled = true,
                 secondaryInstalled = false, secondaryEnabled = true,
                 codePaths = listOf(CodePath.DIFFERENT, CodePath.SYSTEM)
         )
@@ -582,22 +583,24 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
         codePaths: List<CodePath>
     ) {
         HostUtils.getUserIdToPkgInstalledState(device, TEST_PKG_NAME)
-                .forEach { (userId, installed) ->
-                    if (userId == 0) {
-                        assertThat(installed).isEqualTo(primaryInstalled)
-                    } else {
-                        assertThat(installed).isEqualTo(secondaryInstalled)
-                    }
+            .also { assertThat(it.size).isAtLeast(USER_COUNT) }
+            .forEach { (userId, installed) ->
+                if (userId == 0) {
+                    assertThat(installed).isEqualTo(primaryInstalled)
+                } else {
+                    assertThat(installed).isEqualTo(secondaryInstalled)
                 }
+            }
 
         HostUtils.getUserIdToPkgEnabledState(device, TEST_PKG_NAME)
-                .forEach { (userId, enabled) ->
-                    if (userId == 0) {
-                        assertThat(enabled).isEqualTo(primaryEnabled)
-                    } else {
-                        assertThat(enabled).isEqualTo(secondaryEnabled)
-                    }
+            .also { assertThat(it.size).isAtLeast(USER_COUNT) }
+            .forEach { (userId, enabled) ->
+                if (userId == 0) {
+                    assertThat(enabled).isEqualTo(primaryEnabled)
+                } else {
+                    assertThat(enabled).isEqualTo(secondaryEnabled)
                 }
+            }
 
         assertCodePaths(codePaths.first(), codePaths.getOrNull(1))
     }
