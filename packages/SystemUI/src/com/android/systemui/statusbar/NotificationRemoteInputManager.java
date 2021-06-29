@@ -369,7 +369,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         });
         mSmartReplyController.setCallback((entry, reply) -> {
             StatusBarNotification newSbn =
-                    rebuildNotificationWithRemoteInput(entry, reply, true /* showSpinner */,
+                    rebuildNotificationWithRemoteInputInserted(entry, reply, true /* showSpinner */,
                             null /* mimeType */, null /* uri */);
             mEntryManager.updateNotification(newSbn, null /* ranking */);
         });
@@ -638,12 +638,12 @@ public class NotificationRemoteInputManager implements Dumpable {
     @VisibleForTesting
     StatusBarNotification rebuildNotificationForCanceledSmartReplies(
             NotificationEntry entry) {
-        return rebuildNotificationWithRemoteInput(entry, null /* remoteInputTest */,
+        return rebuildNotificationWithRemoteInputInserted(entry, null /* remoteInputTest */,
                 false /* showSpinner */, null /* mimeType */, null /* uri */);
     }
 
     @VisibleForTesting
-    StatusBarNotification rebuildNotificationWithRemoteInput(NotificationEntry entry,
+    StatusBarNotification rebuildNotificationWithRemoteInputInserted(NotificationEntry entry,
             CharSequence remoteInputText, boolean showSpinner, String mimeType, Uri uri) {
         StatusBarNotification sbn = entry.getSbn();
 
@@ -746,7 +746,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                 }
                 String remoteInputMimeType = entry.remoteInputMimeType;
                 Uri remoteInputUri = entry.remoteInputUri;
-                StatusBarNotification newSbn = rebuildNotificationWithRemoteInput(entry,
+                StatusBarNotification newSbn = rebuildNotificationWithRemoteInputInserted(entry,
                         remoteInputText, false /* showSpinner */, remoteInputMimeType,
                         remoteInputUri);
                 entry.onRemoteInputInserted();
