@@ -23,6 +23,7 @@ import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -36,6 +37,7 @@ import java.util.Map;
  * usage data attributed to subsystems and UIDs.
  */
 public class BatteryUsageStatsProvider {
+    private static final String TAG = "BatteryUsageStatsProv";
     private final Context mContext;
     private final BatteryStats mStats;
     private final BatteryUsageStatsStore mBatteryUsageStatsStore;
@@ -234,6 +236,11 @@ public class BatteryUsageStatsProvider {
 
         final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
                 mStats.getCustomEnergyConsumerNames(), includePowerModels);
+        if (mBatteryUsageStatsStore == null) {
+            Log.e(TAG, "BatteryUsageStatsStore is unavailable");
+            return builder.build();
+        }
+
         final long[] timestamps = mBatteryUsageStatsStore.listBatteryUsageStatsTimestamps();
         for (long timestamp : timestamps) {
             if (timestamp > query.getFromTimestamp() && timestamp <= query.getToTimestamp()) {
