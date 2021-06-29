@@ -72,6 +72,7 @@ message UsbHandlerProto {
     optional bool adb_enabled = 14;
     optional string kernel_state = 15;
     optional string kernel_function_list = 16;
+    optional string uevent = 17;
 }
 
 message UsbAccessoryProto {
@@ -315,6 +316,7 @@ message UsbProfileGroupSettingsManagerProto {
     optional int32 parent_user_id = 1;
     repeated UsbSettingsDevicePreferenceProto device_preferences = 2;
     repeated UsbSettingsAccessoryPreferenceProto accessory_preferences = 3;
+    optional string intent = 4;
 }
 
 message UsbSettingsDevicePreferenceProto {
