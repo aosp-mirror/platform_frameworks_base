@@ -26,7 +26,7 @@
     <string name="keyguard_password_enter_puk_prompt" msgid="3529260761374385243">"சிம் PUK குறியீடு"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"புதிய சிம் பின் குறியீடு"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"கடவுச்சொல்லை உள்ளிட, தொடவும்"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"திறக்க, கடவுச்சொல்லை உள்ளிடவும்"</string>
+    <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"அன்லாக் செய்ய கடவுச்சொல்லை உள்ளிடவும்"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"திறக்க, பின்னை உள்ளிடவும்"</string>
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"பின்னை உள்ளிடுக"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"பேட்டர்னை உள்ளிடுக"</string>
@@ -40,7 +40,7 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • மெதுவாகச் சார்ஜாகிறது"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • பேட்டரியின் ஆயுளை மேம்படுத்துகிறது"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"சார்ஜரை இணைக்கவும்."</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"திறக்க, மெனுவை அழுத்தவும்."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"அன்லாக் செய்ய மெனுவை அழுத்தவும்."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"நெட்வொர்க் பூட்டப்பட்டது"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"சிம் கார்டு இல்லை"</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"சிம் கார்டைச் செருகவும்."</string>
@@ -85,11 +85,11 @@
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"பேட்டர்னை அதிக முறை தவறாக வரைந்துவிட்டீர்கள்"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"உங்கள் பின்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக உள்ளிட்டுவிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"உங்கள் கடவுச்சொல்லை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக உள்ளிட்டுவிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"திறப்பதற்கான பேட்டர்னை, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துவிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"சிம்மின் பின் குறியீடு தவறானது. இனி சாதனத்தைத் திறக்க, உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்புகொள்ள வேண்டும்."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"அன்லாக் பேட்டர்னை, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துவிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"சிம்மின் பின் குறியீடு தவறானது. இனி சாதனத்தை அன்லாக் செய்ய, உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்புகொள்ள வேண்டும்."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">சிம்மின் பின் குறியீடு தவறானது, இன்னும் நீங்கள் <xliff:g id="NUMBER_1">%d</xliff:g> முறை முயலலாம்.</item>
-      <item quantity="one">சிம்மின் பின் குறியீடு தவறானது, மேலும் <xliff:g id="NUMBER_0">%d</xliff:g> முயற்சிகளுக்குப் பின்னர், உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்பு கொண்டு மட்டுமே சாதனத்தைத் திறக்க முடியும்.</item>
+      <item quantity="one">சிம்மின் பின் குறியீடு தவறானது, மேலும் <xliff:g id="NUMBER_0">%d</xliff:g> முயற்சிகளுக்குப் பின்னர், உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்பு கொண்டு மட்டுமே சாதனத்தை அன்லாக் செய்ய முடியும்.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"பயன்படுத்த முடியாத சிம். உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்புகொள்ளவும்."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
@@ -129,7 +129,7 @@
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"அடையாளங்காணபடவில்லை"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">சிம் பின்னை உள்ளிடவும். மேலும், <xliff:g id="NUMBER_1">%d</xliff:g> வாய்ப்புகள் மீதமுள்ளன.</item>
-      <item quantity="one">சிம் பின்னை உள்ளிடவும். மீதமுள்ள <xliff:g id="NUMBER_0">%d</xliff:g> வாய்ப்பில் தவறுதலான பின் உள்ளிடப்பட்டால், உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்பு கொண்டு மட்டுமே சாதனத்தைத் திறக்க முடியும்.</item>
+      <item quantity="one">சிம் பின்னை உள்ளிடவும். மீதமுள்ள <xliff:g id="NUMBER_0">%d</xliff:g> வாய்ப்பில் தவறுதலான பின் உள்ளிடப்பட்டால், உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்பு கொண்டு மட்டுமே சாதனத்தை அன்லாக் செய்ய முடியும்.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
       <item quantity="other">சிம் தற்போது முடக்கப்பட்டுள்ளது. தொடர்வதற்கு, PUK குறியீட்டை உள்ளிடவும். நீங்கள் <xliff:g id="_NUMBER_1">%d</xliff:g> முறை மட்டுமே முயற்சிக்க முடியும். அதன்பிறகு சிம் நிரந்தரமாக முடக்கப்படும். விவரங்களுக்கு, மொபைல் நிறுவனத்தைத் தொடர்புகொள்ளவும்.</item>
