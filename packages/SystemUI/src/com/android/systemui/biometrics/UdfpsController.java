@@ -596,8 +596,10 @@ public class UdfpsController implements DozeReceiver {
     }
 
     private void updateOverlay() {
+        mExecution.assertIsMainThread();
+
         if (mServerRequest != null) {
-            showUdfpsOverlay(mServerRequest.mRequestReason);
+            showUdfpsOverlay(mServerRequest);
         } else {
             hideUdfpsOverlay();
         }
@@ -658,36 +660,37 @@ public class UdfpsController implements DozeReceiver {
         updateOverlay();
     }
 
-    private void showUdfpsOverlay(int reason) {
-        mFgExecutor.execute(() -> {
-            if (mView == null) {
-                try {
-                    Log.v(TAG, "showUdfpsOverlay | adding window reason=" + reason);
-                    mView = (UdfpsView) mInflater.inflate(R.layout.udfps_view, null, false);
-                    mView.setSensorProperties(mSensorProps);
-                    mView.setHbmProvider(mHbmProvider);
-                    UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
-                    animation.init();
-                    mView.setAnimationViewController(animation);
+    private void showUdfpsOverlay(@NonNull ServerRequest request) {
+        mExecution.assertIsMainThread();
 
-                    // This view overlaps the sensor area, so prevent it from being selectable
-                    // during a11y.
-                    if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
-                            || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
-                        mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-                    }
+        final int reason = request.mRequestReason;
+        if (mView == null) {
+            try {
+                Log.v(TAG, "showUdfpsOverlay | adding window reason=" + reason);
+                mView = (UdfpsView) mInflater.inflate(R.layout.udfps_view, null, false);
+                mView.setSensorProperties(mSensorProps);
+                mView.setHbmProvider(mHbmProvider);
+                UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
+                animation.init();
+                mView.setAnimationViewController(animation);
 
-                    mWindowManager.addView(mView, computeLayoutParams(animation));
-                    mAccessibilityManager.addTouchExplorationStateChangeListener(
-                            mTouchExplorationStateChangeListener);
-                    updateTouchListener();
-                } catch (RuntimeException e) {
-                    Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
+                // This view overlaps the sensor area, so prevent it from being selectable
+                // during a11y.
+                if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
+                        || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
+                    mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
                 }
-            } else {
-                Log.v(TAG, "showUdfpsOverlay | the overlay is already showing");
+
+                mWindowManager.addView(mView, computeLayoutParams(animation));
+                mAccessibilityManager.addTouchExplorationStateChangeListener(
+                        mTouchExplorationStateChangeListener);
+                updateTouchListener();
+            } catch (RuntimeException e) {
+                Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
             }
-        });
+        } else {
+            Log.v(TAG, "showUdfpsOverlay | the overlay is already showing");
+        }
     }
 
     private UdfpsAnimationViewController inflateUdfpsAnimation(int reason) {
