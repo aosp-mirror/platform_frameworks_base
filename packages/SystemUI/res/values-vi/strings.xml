@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hiện tất cả"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Mở khóa để thanh toán"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Chưa thiết lập"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Mở khóa để sử dụng"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Đã xảy ra sự cố khi tải thẻ của bạn. Vui lòng thử lại sau"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Cài đặt màn hình khóa"</string>
@@ -734,7 +736,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Không phát âm thanh hoặc rung"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Không phát âm thanh hoặc rung và xuất hiện phía dưới trong phần cuộc trò chuyện"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Theo mặc định, các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> sẽ hiện ở dạng bong bóng theo mặc định."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Luôn chú ý vào nội dung này bằng phím tắt nổi."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Cho phép hệ thống quyết định xem thông báo này phát âm thanh hay rung"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Trạng thái:&lt;/b&gt; Đã thay đổi thành Mặc định"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Mở cuộc trò chuyện"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Tiện ích trò chuyện"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Nhấn vào một cuộc trò chuyện để thêm cuộc trò chuyện đó vào Màn hình chính"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Các cuộc trò chuyện gần đây của bạn sẽ xuất hiện ở đây"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Cuộc trò chuyện ưu tiên"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Cuộc trò chuyện gần đây"</string>
     <string name="okay" msgid="6490552955618608554">"Ok"</string>
