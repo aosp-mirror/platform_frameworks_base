@@ -37,7 +37,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -719,10 +718,9 @@ public class AppWidgetHostView extends FrameLayout {
     protected Context getRemoteContext() {
         try {
             // Return if cloned successfully, otherwise default
-            final ApplicationInfo info = mInfo.providerInfo.applicationInfo;
-            Context newContext = mContext.createPackageContextAsUser(info.packageName,
-                    Context.CONTEXT_RESTRICTED,
-                    UserHandle.getUserHandleForUid(info.uid));
+            Context newContext = mContext.createApplicationContext(
+                    mInfo.providerInfo.applicationInfo,
+                    Context.CONTEXT_RESTRICTED);
             if (mColorResources != null) {
                 mColorResources.apply(newContext);
             }

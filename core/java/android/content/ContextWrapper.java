@@ -1009,14 +1009,6 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    public Context createPackageContextAsUser(String packageName, int flags, UserHandle user,
-            int packageFlags)
-            throws PackageManager.NameNotFoundException {
-        return mBase.createPackageContextAsUser(packageName, flags, user, packageFlags);
-    }
-
-    /** @hide */
-    @Override
     public Context createContextAsUser(UserHandle user, @CreatePackageOptions int flags) {
         return mBase.createContextAsUser(user, flags);
     }
