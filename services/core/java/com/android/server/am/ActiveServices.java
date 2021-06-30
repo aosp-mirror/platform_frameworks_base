@@ -328,23 +328,11 @@ public final class ActiveServices {
      * Watch for apps being put into forced app standby, so we can step their fg
      * services down.
      */
-    class ForcedStandbyListener implements AppStateTracker.ForcedAppStandbyListener {
+    class ForcedStandbyListener implements AppStateTracker.ServiceStateListener {
         @Override
-        public void updateForceAppStandbyForUidPackage(int uid, String packageName,
-                boolean standby) {
+        public void stopForegroundServicesForUidPackage(final int uid, final String packageName) {
             synchronized (mAm) {
-                if (standby) {
-                    stopAllForegroundServicesLocked(uid, packageName);
-                }
-                mAm.mProcessList.updateForceAppStandbyForUidPackageLocked(
-                        uid, packageName, standby);
-            }
-        }
-
-        @Override
-        public void updateForcedAppStandbyForAllApps() {
-            synchronized (mAm) {
-                mAm.mProcessList.updateForcedAppStandbyForAllAppsLocked();
+                stopAllForegroundServicesLocked(uid, packageName);
             }
         }
     }
@@ -530,7 +518,7 @@ public final class ActiveServices {
 
     void systemServicesReady() {
         AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
-        ast.addForcedAppStandbyListener(new ForcedStandbyListener());
+        ast.addServiceStateListener(new ForcedStandbyListener());
         mAppWidgetManagerInternal = LocalServices.getService(AppWidgetManagerInternal.class);
         setAllowListWhileInUsePermissionInFgs();
     }

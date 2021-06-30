@@ -146,10 +146,8 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
                             new LegacySplitDisplayLayout(mContext, displayLayout, mSplits);
                     sdl.rotateTo(toRotation);
                     mRotateSplitLayout = sdl;
-                    final int position = isDividerVisible()
-                            ? (mMinimized ? mView.mSnapTargetBeforeMinimized.position
-                            : mView.getCurrentPosition())
-                            // snap resets to middle target when not in split-mode
+                    // snap resets to middle target when not minimized and rotation changed.
+                    final int position = mMinimized ? mView.mSnapTargetBeforeMinimized.position
                             : sdl.getSnapAlgorithm().getMiddleTarget().position;
                     DividerSnapAlgorithm snap = sdl.getSnapAlgorithm();
                     final DividerSnapAlgorithm.SnapTarget target =

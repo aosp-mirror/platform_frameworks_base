@@ -557,6 +557,11 @@ public class NotificationPanelViewController extends PanelViewController {
     private long mNotificationBoundsAnimationDelay;
 
     /**
+     * The duration of the notification bounds animation
+     */
+    private long mNotificationBoundsAnimationDuration;
+
+    /**
      * Is this a collapse that started on the panel where we should allow the panel to intercept
      */
     private boolean mIsPanelCollapseOnQQS;
@@ -2038,7 +2043,7 @@ public class NotificationPanelViewController extends PanelViewController {
         // When expanding QS, let's authenticate the user if possible,
         // this will speed up notification actions.
         if (height == 0) {
-            mStatusBar.requestFaceAuth();
+            mStatusBar.requestFaceAuth(false);
         }
     }
 
@@ -2214,7 +2219,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private void onStackYChanged(boolean shouldAnimate) {
         if (mQs != null) {
             if (shouldAnimate) {
-                mAnimateNextNotificationBounds = true;
+                animateNextNotificationBounds(StackStateAnimator.ANIMATION_DURATION_STANDARD,
+                        0 /* delay */);
                 mNotificationBoundsAnimationDelay = 0;
             }
             setQSClippingBounds();
@@ -2293,8 +2299,7 @@ public class NotificationPanelViewController extends PanelViewController {
             final int startBottom = mKeyguardStatusAreaClipBounds.bottom;
             mQsClippingAnimation = ValueAnimator.ofFloat(0.0f, 1.0f);
             mQsClippingAnimation.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
-            mQsClippingAnimation.setDuration(
-                    StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE);
+            mQsClippingAnimation.setDuration(mNotificationBoundsAnimationDuration);
             mQsClippingAnimation.setStartDelay(mNotificationBoundsAnimationDelay);
             mQsClippingAnimation.addUpdateListener(animation -> {
                 float fraction = animation.getAnimatedFraction();
@@ -2470,8 +2475,10 @@ public class NotificationPanelViewController extends PanelViewController {
      * shade. 0.0f means we're not transitioning yet.
      */
     public void setTransitionToFullShadeAmount(float pxAmount, boolean animate, long delay) {
-        mAnimateNextNotificationBounds = animate && !mShouldUseSplitNotificationShade;
-        mNotificationBoundsAnimationDelay = delay;
+        if (animate && !mShouldUseSplitNotificationShade) {
+            animateNextNotificationBounds(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE,
+                    delay);
+        }
 
         float endPosition = 0;
         if (pxAmount > 0.0f) {
@@ -3176,7 +3183,7 @@ public class NotificationPanelViewController extends PanelViewController {
             case KEYGUARD:
                 if (!mDozingOnDown) {
                     if (mKeyguardBypassController.getBypassEnabled()) {
-                        mUpdateMonitor.requestFaceAuth();
+                        mUpdateMonitor.requestFaceAuth(true);
                     } else {
                         mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
                                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
@@ -3470,7 +3477,6 @@ public class NotificationPanelViewController extends PanelViewController {
             mQs.setPanelView(mHeightListener);
             mQs.setExpandClickListener(mOnClickListener);
             mQs.setHeaderClickable(mQsExpansionEnabled);
-            mQs.setTranslateWhileExpanding(mShouldUseSplitNotificationShade);
             updateQSPulseExpansion();
             mQs.setOverscrolling(mStackScrollerOverscrolling);
             mQs.setTranslateWhileExpanding(mShouldUseSplitNotificationShade);
@@ -3484,6 +3490,13 @@ public class NotificationPanelViewController extends PanelViewController {
                             mHeightListener.onQsHeightChanged();
                         }
                     });
+            mQs.setCollapsedMediaVisibilityChangedListener((visible) -> {
+                if (mQs.getHeader().isShown()) {
+                    animateNextNotificationBounds(StackStateAnimator.ANIMATION_DURATION_STANDARD,
+                            0 /* delay */);
+                    mNotificationStackScrollLayoutController.animateNextTopPaddingChange();
+                }
+            });
             mLockscreenShadeTransitionController.setQS(mQs);
             mNotificationStackScrollLayoutController.setQsContainer((ViewGroup) mQs.getView());
             updateQsExpansion();
@@ -3499,6 +3512,12 @@ public class NotificationPanelViewController extends PanelViewController {
             }
         }
     };
+
+    private void animateNextNotificationBounds(long duration, long delay) {
+        mAnimateNextNotificationBounds = true;
+        mNotificationBoundsAnimationDuration = duration;
+        mNotificationBoundsAnimationDelay = delay;
+    }
 
     @Override
     public void setTouchAndAnimationDisabled(boolean disabled) {
@@ -3821,8 +3840,13 @@ public class NotificationPanelViewController extends PanelViewController {
                     expand(true /* animate */);
                 }
                 initDownStates(event);
-                if (!mIsExpanding && !shouldQuickSettingsIntercept(mDownX, mDownY, 0)
-                        && mPulseExpansionHandler.onTouchEvent(event)) {
+
+                // If pulse is expanding already, let's give it the touch. There are situations
+                // where the panel starts expanding even though we're also pulsing
+                boolean pulseShouldGetTouch = (!mIsExpanding
+                        && !shouldQuickSettingsIntercept(mDownX, mDownY, 0))
+                        || mPulseExpansionHandler.isExpanding();
+                if (pulseShouldGetTouch && mPulseExpansionHandler.onTouchEvent(event)) {
                     // We're expanding all the other ones shouldn't get this anymore
                     return true;
                 }
