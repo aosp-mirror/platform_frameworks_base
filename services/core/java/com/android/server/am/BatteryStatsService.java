@@ -126,7 +126,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         Watchdog.Monitor {
     static final String TAG = "BatteryStatsService";
     static final boolean DBG = false;
-    private static final boolean BATTERY_USAGE_STORE_ENABLED = false;
+    private static final boolean BATTERY_USAGE_STORE_ENABLED = true;
 
     private static IBatteryStats sService;
 
@@ -396,6 +396,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         dataConnectionStats.startMonitoring();
 
         registerStatsCallbacks();
+    }
+
+    /**
+     * Notifies BatteryStatsService that the system server is ready.
+     */
+    public void onSystemReady() {
+        mStats.onSystemReady();
+        if (BATTERY_USAGE_STORE_ENABLED) {
+            mBatteryUsageStatsStore.onSystemReady();
+        }
     }
 
     private final class LocalService extends BatteryStatsInternal {
