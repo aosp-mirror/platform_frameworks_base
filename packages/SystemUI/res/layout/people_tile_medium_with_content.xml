@@ -29,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <include layout="@layout/people_tile_punctuation_background_medium" />
-        <include layout="@layout/people_tile_punctuation_background_medium" />
+        <include layout="@layout/people_tile_emoji_background_medium" />
         <include layout="@layout/people_status_scrim_layout" />
         <LinearLayout
             android:id="@+id/content"

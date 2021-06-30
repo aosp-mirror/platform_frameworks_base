@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Ongeza mtumiaji"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Mtumiaji mpya"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ungependa kumwondoa mgeni?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Ungependa kubadilisha kipindi cha mgeni?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Data na programu zote katika kipindi hiki zitafutwa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ondoa"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Badilisha"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Karibu tena mgeni!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Je, unataka kuendelea na kipindi chako?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Anza upya"</string>
@@ -1117,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Fungua mazungumzo"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Wijeti za mazungumzo"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Gusa mazungumzo ili uyaweke kwenye Skrini yako ya kwanza"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Angalia hapa tena utakapopokea ujumbe"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Mazungumzo yenye kipaumbele"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Mazungumzo ya hivi majuzi"</string>
     <string name="okay" msgid="6490552955618608554">"Sawa"</string>
@@ -1146,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Angalia ujumbe wa hivi majuzi, simu ambazo hukujibu na taarifa za hali"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Mazungumzo"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Imesimamishwa na kipengele cha Usinisumbue"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ametuma ujumbe"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ametuma picha"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Tatizo la kusoma mita ya betri yako"</string>

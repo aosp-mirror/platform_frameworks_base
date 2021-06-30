@@ -19,6 +19,8 @@ package com.android.systemui.qs;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.metrics.LogMaker;
@@ -42,6 +44,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Named;
@@ -68,6 +71,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     private boolean mShouldUseSplitNotificationShade;
 
+    @Nullable
+    private Consumer<Boolean> mMediaVisibilityChangedListener;
     private int mLastOrientation;
     private String mCachedSpecs = "";
     private QSTileRevealController mQsTileRevealController;
@@ -89,7 +94,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             };
 
     private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
-        mView.onMediaVisibilityChanged(visible);
+        if (mMediaVisibilityChangedListener != null) {
+            mMediaVisibilityChangedListener.accept(visible);
+        }
         switchTileLayout(false);
         return null;
     };
@@ -136,7 +143,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         }
 
         mMediaHost.addVisibilityChangeListener(mMediaHostVisibilityListener);
-        mView.onMediaVisibilityChanged(mMediaHost.getVisible());
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mHost.addCallback(mQSHostCallback);
         setTiles();
@@ -379,6 +385,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     public QSPanel.QSTileLayout getTileLayout() {
         return mView.getTileLayout();
+    }
+
+    /**
+     * Add a listener for when the media visibility changes.
+     */
+    public void setMediaVisibilityChangedListener(@NonNull Consumer<Boolean> listener) {
+        mMediaVisibilityChangedListener = listener;
     }
 
     /** */

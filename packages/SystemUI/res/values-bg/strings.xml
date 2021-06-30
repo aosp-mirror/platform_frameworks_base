@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Добавяне на потребител"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Нов потребител"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Да се премахне ли гостът?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Да се нулира ли сесията като гост?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Всички приложения и данни в тази сесия ще бъдат изтрити."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Премахване"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Нулиране"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добре дошли отново в сесията като гост!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Искате ли да продължите сесията си?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Започване отначало"</string>
@@ -1117,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Отворен разговор"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Приспособления за разговор"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Докоснете разговор, за да го добавите към началния си екран"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Проверете отново тук, когато получите съобщения"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Разговори с приоритет"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Скорошни разговори"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>

@@ -72,6 +72,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock ColorExtractor.GradientColors mGradientColors;
     @Mock private DumpManager mDumpManager;
     @Mock private KeyguardStateController mKeyguardStateController;
+    @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
 
     private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
@@ -85,7 +86,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
-                mColorExtractor, mDumpManager, mKeyguardStateController);
+                mColorExtractor, mDumpManager, mKeyguardStateController,
+                mUnlockedScreenOffAnimationController);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
 
         mNotificationShadeWindowController.attach();

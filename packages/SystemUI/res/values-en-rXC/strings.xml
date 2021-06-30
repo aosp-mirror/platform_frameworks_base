@@ -480,12 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‎‎‏‎‏‏‏‎‏‏‏‎‎‏‏‎‏‏‏‎‏‎‎‏‏‏‎‎‏‎‏‎‏‎‏‏‎‎‏‏‏‏‎‎‎‎‎‏‏‏‏‏‏‏‏‎‎Add user‎‏‎‎‏‎"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‎‎‎‎‎‏‎‏‏‎‎‎‎‏‎‏‎‎‎‎‏‎‎‏‎‎‏‏‏‏‏‏‎‎‎‎‎‏‏‏‏‎‎‏‎‎‎‎‏‏‎‎‏‏‎‏‎New user‎‏‎‎‏‎"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‎‏‏‎‏‏‎‏‎‏‎‏‏‎‎‏‎‏‏‎‏‏‏‎‏‎‎‎‏‎‏‏‎‎‏‏‏‎‏‎‎‏‏‏‎‎‏‎‎‎‏‏‏‎‎Remove guest?‎‏‎‎‏‎"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‎‎‎‏‎‏‏‏‎‏‎‏‎‏‎‏‎‎‎‎‎‏‎‎‏‎‏‏‎‎‏‏‎‏‎‎‏‏‏‎‏‏‏‏‎‏‎‏‏‏‎‏‎All apps and data in this session will be deleted.‎‏‎‎‏‎"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‏‎‏‎‏‎‎‎‎‎‎‏‎‏‎‏‎‏‎‏‎‎‏‏‏‎‏‎‏‎‏‏‏‎‎‏‏‎‎‏‎‎‎‎‏‏‏‎‎‎‏‏‎‏‎Remove‎‏‎‎‏‎"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‏‎‎‏‎‏‎‏‎‏‏‎‏‎‎‎‎‏‎‎‏‎‏‏‏‎‎‏‎‏‏‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‎‎‎‎‎Welcome back, guest!‎‏‎‎‏‎"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‏‎‎‎‏‏‎‎‏‎‏‎‎‏‎‎‎‏‎‎‏‎‏‏‏‏‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‏‏‎‎‎‏‎‏‏‏‏‏‎‎‎‏‎Do you want to continue your session?‎‏‎‎‏‎"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‏‏‏‏‏‎‏‎‎‎‏‎‎‎‏‎‏‏‏‏‏‏‎‎‎‏‎‏‎‎‏‏‏‏‏‎‎‏‏‏‎‎‏‎‎‎‎‏‏‏‎‏‎Start over‎‏‎‎‏‎"</string>
@@ -1119,7 +1115,7 @@
     <string name="basic_status" msgid="2315371112182658176">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‎‎‏‎‎‎‎‏‏‏‎‏‏‎‎‏‏‏‎‎‎‎‏‎‎‏‎‏‏‎‎‎‏‏‎‏‏‎‎‏‎‎‏‏‎‏‎‎‏‎‎‎‎‎‎‎‎Open conversation‎‏‎‎‏‎"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‎‏‎‏‎‏‎‏‎‎‎‏‏‎‎‏‎‏‎‎‏‎‏‎‎‎‎‏‎‎‏‏‏‏‎‎‏‏‎‎‏‏‏‏‎‏‏‎‏‏‏‏‎Conversation widgets‎‏‎‎‏‎"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‏‎‏‏‎‏‎‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‎‏‏‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‏‏‎‏‎Tap a conversation to add it to your Home screen‎‏‎‎‏‎"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‏‎‏‏‎‎‎‏‏‎‏‎‎‎‎‏‎‏‎‏‏‎‏‏‎‎‎‎‎‎‎‏‏‏‏‏‏‎‎‎‏‏‎‏‎‎‏‏‏‏‎‎‎‏‎Check back here once you get some messages‎‏‎‎‏‎"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‏‎‎‏‏‎‏‏‎‏‎‎‎‏‏‏‎‏‏‎‏‏‏‏‎‏‎‏‏‎‎‏‎‎‎‏‎‎‏‎‎‎‏‎‎‏‏‏‎‎‎‎‏‏‏‎Your recent conversations will show up here‎‏‎‎‏‎"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‎‎‎‎‎‏‏‏‏‏‎‎‎‎‎‎‏‎‎‏‎‏‎‏‏‎‏‎‏‏‎‏‏‎‏‏‏‎‏‏‏‏‎Priority conversations‎‏‎‎‏‎"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‎‏‏‏‎‏‎‎‏‏‏‎‏‏‎‏‎‎‏‎‎‏‏‎‏‏‏‎‏‎‎‏‏‏‎‎‏‏‏‏‏‏‎‎‎‎‎‏‏‏‏‎‎Recent conversations‎‏‎‎‏‎"</string>
     <string name="okay" msgid="6490552955618608554">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‎‎‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‎‎‎‏‏‎‎‏‎‏‎‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‎‏‎‏‎‏‎‎Okay‎‏‎‎‏‎"</string>

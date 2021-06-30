@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Agregar usuario"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Usuario nuevo"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"¿Quitar invitado?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"¿Quieres restablecer el usuario?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Quitar"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Restablecer"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Hola de nuevo, invitado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres retomar la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>
@@ -1117,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Conversación abierta"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversación"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Presiona una conversación para agregarla a tu pantalla principal"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Vuelve a consultar cuando recibas algunos mensajes"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Conversaciones prioritarias"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversaciones recientes"</string>
     <string name="okay" msgid="6490552955618608554">"Aceptar"</string>

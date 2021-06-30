@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Lägg till användare"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Ny användare"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vill du ta bort gästen?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Vill du återställa gästsessionen?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alla appar och data i denna session kommer att raderas."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ta bort"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Återställ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Välkommen tillbaka som gäst!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vill du fortsätta sessionen?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Börja om"</string>
@@ -1117,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Öppen konversation"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Konversationswidgetar"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tryck på en konversation för att lägga till den på startskärmen"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Besök den här sidan igen när du har fått meddelanden"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Prioriterade konversationer"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Senaste konversationerna"</string>
     <string name="okay" msgid="6490552955618608554">"Okej"</string>
@@ -1146,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"över <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Se de senaste meddelandena, missade samtal och statusuppdateringar"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Konversation"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Pausad av Stör ej"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> skickade ett meddelande"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> skickade en bild"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Batteriindikatorn visas inte"</string>

@@ -126,6 +126,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ScreenLifecycle mScreenLifecycle;
     @Mock
     private Vibrator mVibrator;
+    @Mock
+    private UdfpsHapticsSimulator mUdfpsHapticsSimulator;
 
     private FakeExecutor mFgExecutor;
 
@@ -188,6 +190,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mLockscreenShadeTransitionController,
                 mScreenLifecycle,
                 mVibrator,
+                mUdfpsHapticsSimulator,
                 Optional.of(mHbmProvider));
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
