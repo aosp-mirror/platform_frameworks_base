@@ -17,14 +17,14 @@
 #ifndef _ANDROID_VIEW_INPUT_WINDOW_HANDLE_H
 #define _ANDROID_VIEW_INPUT_WINDOW_HANDLE_H
 
-#include <input/InputWindow.h>
+#include <gui/WindowInfo.h>
 
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"
 
 namespace android {
 
-class NativeInputWindowHandle : public InputWindowHandle {
+class NativeInputWindowHandle : public gui::WindowInfoHandle {
 public:
     NativeInputWindowHandle(jweak objWeak);
     virtual ~NativeInputWindowHandle();
@@ -36,7 +36,6 @@ public:
 private:
     jweak mObjWeak;
 };
-
 
 extern sp<NativeInputWindowHandle> android_view_InputWindowHandle_getHandle(
         JNIEnv* env, jobject inputWindowHandleObj);
