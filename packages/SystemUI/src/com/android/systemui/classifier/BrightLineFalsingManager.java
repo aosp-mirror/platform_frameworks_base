@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 
@@ -70,6 +71,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final DoubleTapClassifier mDoubleTapClassifier;
     private final HistoryTracker mHistoryTracker;
     private final KeyguardStateController mKeyguardStateController;
+    private AccessibilityManager mAccessibilityManager;
     private final boolean mTestHarness;
     private final MetricsLogger mMetricsLogger;
     private int mIsFalseTouchCalls;
@@ -175,6 +177,7 @@ public class BrightLineFalsingManager implements FalsingManager {
             @Named(BRIGHT_LINE_GESTURE_CLASSIFERS) Set<FalsingClassifier> classifiers,
             SingleTapClassifier singleTapClassifier, DoubleTapClassifier doubleTapClassifier,
             HistoryTracker historyTracker, KeyguardStateController keyguardStateController,
+            AccessibilityManager accessibilityManager,
             @TestHarness boolean testHarness) {
         mDataProvider = falsingDataProvider;
         mDockManager = dockManager;
@@ -184,6 +187,7 @@ public class BrightLineFalsingManager implements FalsingManager {
         mDoubleTapClassifier = doubleTapClassifier;
         mHistoryTracker = historyTracker;
         mKeyguardStateController = keyguardStateController;
+        mAccessibilityManager = accessibilityManager;
         mTestHarness = testHarness;
 
         mDataProvider.addSessionListener(mSessionListener);
@@ -328,7 +332,8 @@ public class BrightLineFalsingManager implements FalsingManager {
                 || !mKeyguardStateController.isShowing()
                 || mTestHarness
                 || mDataProvider.isJustUnlockedWithFace()
-                || mDockManager.isDocked();
+                || mDockManager.isDocked()
+                || mAccessibilityManager.isEnabled();
     }
 
     @Override
