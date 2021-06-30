@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"အားလုံးပြရန်"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ငွေပေးချေရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"စနစ် ထည့်သွင်းမထားပါ"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"သုံးရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"သင်၏ကတ်များ ရယူရာတွင် ပြဿနာရှိနေသည်၊ နောက်မှ ထပ်စမ်းကြည့်ပါ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"လော့ခ်မျက်နှာပြင် ဆက်တင်များ"</string>

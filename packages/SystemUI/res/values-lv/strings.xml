@@ -673,6 +673,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Rādīt visu"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Lai maksātu, atbloķējiet ekrānu"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nav iestatīts"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lai izmantotu, atbloķējiet ekrānu"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ienesot jūsu kartes, radās problēma. Lūdzu, vēlāk mēģiniet vēlreiz."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Bloķēšanas ekrāna iestatījumi"</string>
@@ -1121,8 +1123,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Atvērt sarunu"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Sarunu logrīki"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Pieskarieties kādai sarunai, lai pievienotu to savam sākuma ekrānam."</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Jūsu pēdējās sarunas būs redzamas šeit"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritārās sarunas"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Jaunākās sarunas"</string>
     <string name="okay" msgid="6490552955618608554">"Labi"</string>
