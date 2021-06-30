@@ -29,7 +29,7 @@ import android.util.Log;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.concurrent.Executor;
@@ -66,7 +66,7 @@ public class QuickAccessWalletController {
     @Inject
     public QuickAccessWalletController(
             Context context,
-            @Background Executor executor,
+            @Main Executor executor,
             SecureSettings secureSettings,
             QuickAccessWalletClient quickAccessWalletClient) {
         mContext = context;
