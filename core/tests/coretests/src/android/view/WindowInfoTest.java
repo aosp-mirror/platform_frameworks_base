@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
+import android.app.ActivityTaskManager;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
@@ -83,6 +84,7 @@ public class WindowInfoTest {
         assertEquals(0, w.layer);
         assertEquals(AccessibilityNodeInfo.UNDEFINED_NODE_ID, w.accessibilityIdOfAnchor);
         assertEquals(Display.INVALID_DISPLAY, w.displayId);
+        assertEquals(ActivityTaskManager.INVALID_TASK_ID, w.taskId);
         assertNull(w.title);
         assertNull(w.token);
         assertNull(w.childTokens);
@@ -123,6 +125,7 @@ public class WindowInfoTest {
         windowInfo.displayId = 2;
         windowInfo.layer = 3;
         windowInfo.accessibilityIdOfAnchor = 4L;
+        windowInfo.taskId = 5;
         windowInfo.title = "title";
         windowInfo.token = mock(IBinder.class);
         windowInfo.childTokens = new ArrayList<>();
