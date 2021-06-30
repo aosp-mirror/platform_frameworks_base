@@ -644,7 +644,7 @@ class TaskSnapshotController {
 
     /** Called when the device is going to sleep (e.g. screen off, AOD without screen off). */
     void snapshotForSleeping(int displayId) {
-        if (shouldDisableSnapshots()) {
+        if (shouldDisableSnapshots() || !mService.mDisplayEnabled) {
             return;
         }
         final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
