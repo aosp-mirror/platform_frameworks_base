@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Додај корисник"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Нов корисник"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Да се отстрани гостинот?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Да се ресетира гостинот?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Сите апликации и податоци во сесијата ќе се избришат."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Отстрани"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Ресетирај"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добре дојде пак, гостине!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Дали сакате да продолжите со сесијата?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Почни одново"</string>
@@ -1117,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Започни разговор"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виџети за разговор"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Допрете на разговор за да го додадете на вашиот почетен екран"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Вратете се тука кога ќе добиете пораки"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Приоритетни разговори"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Неодамнешни разговори"</string>
     <string name="okay" msgid="6490552955618608554">"Во ред"</string>
@@ -1146,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Видете ги неодамнешните пораки, пропуштени повици и промени на статусот"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Разговор"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Паузирано од „Не вознемирувај“"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> испрати порака"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> испрати слика"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Проблем при читањето на мерачот на батеријата"</string>

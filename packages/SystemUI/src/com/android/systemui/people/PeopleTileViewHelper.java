@@ -121,6 +121,8 @@ public class PeopleTileViewHelper {
 
     private static final int MESSAGES_COUNT_OVERFLOW = 6;
 
+    private static final CharSequence EMOJI_CAKE = "\ud83c\udf82";
+
     private static final Pattern DOUBLE_EXCLAMATION_PATTERN = Pattern.compile("[!][!]+");
     private static final Pattern DOUBLE_QUESTION_PATTERN = Pattern.compile("[?][?]+");
     private static final Pattern ANY_DOUBLE_MARK_PATTERN = Pattern.compile("[!?][!?]+");
@@ -703,6 +705,10 @@ public class PeopleTileViewHelper {
         }
         views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
         views.setTextViewText(R.id.text_content, statusText);
+
+        if (status.getActivity() == ACTIVITY_BIRTHDAY) {
+            setEmojiBackground(views, EMOJI_CAKE);
+        }
 
         Icon statusIcon = status.getIcon();
         if (statusIcon != null) {

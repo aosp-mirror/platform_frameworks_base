@@ -137,10 +137,10 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ஃபோன்"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"குரல் உதவி"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"வாலட்"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"திற"</string>
+    <string name="accessibility_unlock_button" msgid="122785427241471085">"அன்லாக் செய்"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"சாதனம் பூட்டப்பட்டுள்ளது"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"கைரேகைக்காகக் காத்திருக்கிறது"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"உங்கள் கைரேகையைப் பயன்படுத்தாமல் திறக்கவும்"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"உங்கள் கைரேகையைப் பயன்படுத்தாமல் அன்லாக் செய்யுங்கள்"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"முகத்தை ஸ்கேன் செய்கிறது"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"அனுப்பு"</string>
     <string name="accessibility_manage_notification" msgid="582215815790143983">"அறிவிப்புகளை நிர்வகிக்கும் பட்டன்"</string>
@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"பயனரைச் சேர்"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"புதியவர்"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"கெஸ்ட்டை அகற்றவா?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"விருந்தினர் அமர்வை மீட்டமைக்கவா?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா ஆப்ஸும் தரவும் நீக்கப்படும்."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"அகற்று"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"மீட்டமை"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"நல்வரவு!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"மீண்டும் தொடங்கு"</string>
@@ -588,10 +586,10 @@
     <string name="monitoring_description_app_work" msgid="3713084153786663662">"உங்கள் பணிக் கணக்கை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. மின்னஞ்சல்கள், ஆப்ஸ், இணையதளங்கள் உட்பட உங்கள் பணி நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION">%2$s</xliff:g> உடன் அது இணைக்கப்பட்டுள்ளது.\n\nமேலும் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"உங்கள் பணிக் கணக்கை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. மின்னஞ்சல்கள், ஆப்ஸ், இணையதளங்கள் உட்பட உங்கள் பணி நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> உடன் அது இணைக்கப்பட்டுள்ளது.\n\nஉங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> உடனும் இணைக்கப்பட்டுள்ளீர்கள்."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent இதைத் திறந்தே வைத்துள்ளது"</string>
-    <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"நீங்கள் கைமுறையாகத் திறக்கும் வரை, சாதனம் பூட்டப்பட்டிருக்கும்"</string>
+    <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"நீங்கள் கைமுறையாக அன்லாக் செய்யும் வரை, சாதனம் பூட்டப்பட்டிருக்கும்"</string>
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"விரைவாக அறிவிப்புகளைப் பெறுதல்"</string>
-    <string name="hidden_notifications_text" msgid="5899627470450792578">"திறக்கும் முன் அவற்றைப் பார்க்கவும்"</string>
+    <string name="hidden_notifications_text" msgid="5899627470450792578">"அன்லாக் செய்யும் முன் அவற்றைப் பார்க்கவும்"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"வேண்டாம்"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"அமை"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -1117,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"திறந்தநிலை உரையாடல்"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"உரையாடல் விட்ஜெட்டுகள்"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ஓர் உரையாடலை உங்கள் முகப்புத் திரையில் சேர்க்க அந்த உரையாடலைத் தட்டுங்கள்"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"செய்திகளைப் பெற்றதும் இங்கே மீண்டும் வரவும்"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"முன்னுரிமை அளிக்கப்பட்ட உரையாடல்கள்"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"சமீபத்திய உரையாடல்கள்"</string>
     <string name="okay" msgid="6490552955618608554">"சரி"</string>
@@ -1146,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"சமீபத்திய மெசேஜ்களையும் தவறிய அழைப்புகளையும் ஸ்டேட்டஸ் அப்டேட்களையும் பார்க்கலாம்"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"உரையாடல்"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"தொந்தரவு செய்ய வேண்டாம் அம்சத்தால் இடைநிறுத்தப்பட்டது"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ஒரு மெசேஜ் அனுப்பியுள்ளார்"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ஒரு படம் அனுப்பியுள்ளார்"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"பேட்டரி அளவை அறிவதில் சிக்கல்"</string>

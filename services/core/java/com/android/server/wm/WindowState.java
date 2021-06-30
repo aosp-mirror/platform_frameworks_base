@@ -3893,7 +3893,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean forceRelayout = syncRedraw || reportOrientation || isDragResizeChanged();
         final DisplayContent displayContent = getDisplayContent();
         final boolean alwaysConsumeSystemBars =
-                displayContent.getDisplayPolicy().areSystemBarsForcedShownLw(this);
+                displayContent.getDisplayPolicy().areSystemBarsForcedShownLw();
         final int displayId = displayContent.getDisplayId();
 
         markRedrawForSyncReported();
@@ -5512,8 +5512,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             getPendingTransaction().setMatrix(getSurfaceControl(),
                 newHScale, 0, 0, newVScale);
             mLastGlobalScale = mGlobalScale;
-            mLastHScale = mHScale;
-            mLastVScale = mVScale;
+            mLastHScale = newHScale;
+            mLastVScale = newVScale;
         }
     }
 

@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ਨਵਾਂ ਵਰਤੋਂਕਾਰ"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ਕੀ ਮਹਿਮਾਨ ਹਟਾਉਣਾ ਹੈ?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"ਕੀ ਗੈਸਟ ਨੂੰ ਰੀਸੈੱਟ ਕਰਨਾ ਹੈ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿੱਚ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ਹਟਾਓ"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"ਰੀਸੈੱਟ ਕਰੋ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ਮਹਿਮਾਨ, ਫਿਰ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ਕੀ ਤੁਸੀਂ ਆਪਣਾ ਸੈਸ਼ਨ ਜਾਰੀ ਰੱਖਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
@@ -1117,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"ਗੱਲਬਾਤ ਖੋਲ੍ਹੋ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ਗੱਲਬਾਤ ਵਿਜੇਟ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ਆਪਣੀ ਹੋਮ ਸਕ੍ਰੀਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਕੋਈ ਗੱਲਬਾਤ ਚੁਣੋ"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"ਤੁਹਾਨੂੰ ਕੁਝ ਸੁਨੇਹੇ ਮਿਲਣ \'ਤੇ, ਉਹਨਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਵਾਪਸ ਇੱਥੇ ਆਓ"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"ਤਰਜੀਹੀ ਗੱਲਾਂਬਾਤਾਂ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ਹਾਲੀਆ ਗੱਲਾਂਬਾਤਾਂ"</string>
     <string name="okay" msgid="6490552955618608554">"ਠੀਕ ਹੈ"</string>

@@ -17,6 +17,8 @@
 package com.android.server;
 
 import static android.Manifest.permission.MANAGE_SENSOR_PRIVACY;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.ActivityManager.RunningServiceInfo;
 import static android.app.ActivityManager.RunningTaskInfo;
 import static android.app.ActivityManager.getCurrentUser;
@@ -41,6 +43,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
@@ -83,6 +86,7 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -156,6 +160,7 @@ public final class SensorPrivacyService extends SystemService {
     private final SensorPrivacyServiceImpl mSensorPrivacyServiceImpl;
     private final UserManagerInternal mUserManagerInternal;
     private final ActivityManager mActivityManager;
+    private final ActivityManagerInternal mActivityManagerInternal;
     private final ActivityTaskManager mActivityTaskManager;
     private final AppOpsManager mAppOpsManager;
     private final TelephonyManager mTelephonyManager;
@@ -173,6 +178,7 @@ public final class SensorPrivacyService extends SystemService {
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
         mUserManagerInternal = getLocalService(UserManagerInternal.class);
         mActivityManager = context.getSystemService(ActivityManager.class);
+        mActivityManagerInternal = getLocalService(ActivityManagerInternal.class);
         mActivityTaskManager = context.getSystemService(ActivityTaskManager.class);
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
 
@@ -421,11 +427,33 @@ public final class SensorPrivacyService extends SystemService {
                 }
             }
 
-            VoiceInteractionManagerInternal voiceInteractionManagerInternal =
-                    LocalServices.getService(VoiceInteractionManagerInternal.class);
+            String inputMethodComponent = Settings.Secure.getString(mContext.getContentResolver(),
+                    Settings.Secure.DEFAULT_INPUT_METHOD);
+            String inputMethodPackageName = null;
+            if (inputMethodComponent != null) {
+                inputMethodPackageName = ComponentName.unflattenFromString(
+                        inputMethodComponent).getPackageName();
+            }
+            int capability = mActivityManagerInternal.getUidCapability(uid);
 
-            if (sensor == MICROPHONE && voiceInteractionManagerInternal != null
-                    && voiceInteractionManagerInternal.hasActiveSession(packageName)) {
+            if (sensor == MICROPHONE) {
+                VoiceInteractionManagerInternal voiceInteractionManagerInternal =
+                        LocalServices.getService(VoiceInteractionManagerInternal.class);
+                if (voiceInteractionManagerInternal != null
+                        && voiceInteractionManagerInternal.hasActiveSession(packageName)) {
+                    enqueueSensorUseReminderDialogAsync(-1, user, packageName, sensor);
+                    return;
+                }
+
+                if (TextUtils.equals(packageName, inputMethodPackageName)
+                        && (capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
+                    enqueueSensorUseReminderDialogAsync(-1, user, packageName, sensor);
+                    return;
+                }
+            }
+
+            if (sensor == CAMERA && TextUtils.equals(packageName, inputMethodPackageName)
+                    && (capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
                 enqueueSensorUseReminderDialogAsync(-1, user, packageName, sensor);
                 return;
             }

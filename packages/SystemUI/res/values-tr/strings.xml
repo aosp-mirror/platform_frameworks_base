@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Kullanıcı ekle"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Yeni kullanıcı"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Misafir oturumu kaldırılsın mı?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Misafir oturumu sıfırlansın mı?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Bu oturumdaki tüm uygulamalar ve veriler silinecek."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Kaldır"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Sıfırla"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Misafir kullanıcı, tekrar hoşgeldiniz"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Oturumunuza devam etmek istiyor musunuz?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Baştan başla"</string>
@@ -1117,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Görüşmeyi aç"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Görüşme widget\'ları"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Ana ekranınıza eklemek için bir ileti dizisine dokunun"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Birkaç mesaj aldıktan sonra burayı tekrar kontrol edin"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Öncelikli görüşmeler"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Son görüşmeler"</string>
     <string name="okay" msgid="6490552955618608554">"Tamam"</string>
@@ -1146,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Yeni mesajları, cevapsız aramaları ve durum güncellemelerini görün"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Görüşme"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Rahatsız Etmeyin özelliği tarafından duraklatıldı"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> bir mesaj gönderdi"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> bir resim gönderdi"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Pil ölçeriniz okunurken sorun oluştu"</string>

@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -80,7 +81,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    public void testControlsForDispatch_dockedStackVisible() {
+    public void testControlsForDispatch_dockedTaskVisible() {
         addWindow(TYPE_STATUS_BAR, "statusBar");
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
@@ -93,25 +94,26 @@ public class InsetsPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    public void testControlsForDispatch_freeformStackVisible() {
+    public void testControlsForDispatch_multiWindowTaskVisible() {
+        addWindow(TYPE_STATUS_BAR, "statusBar");
+        addWindow(TYPE_NAVIGATION_BAR, "navBar");
+
+        final WindowState win = createWindow(null, WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD, TYPE_APPLICATION, mDisplayContent, "app");
+        final InsetsSourceControl[] controls = addWindowAndGetControlsForDispatch(win);
+
+        // The app must not control any system bars.
+        assertNull(controls);
+    }
+
+    @Test
+    public void testControlsForDispatch_freeformTaskVisible() {
         addWindow(TYPE_STATUS_BAR, "statusBar");
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
         final WindowState win = createWindow(null, WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, TYPE_APPLICATION, mDisplayContent, "app");
         final InsetsSourceControl[] controls = addWindowAndGetControlsForDispatch(win);
-
-        // The app must not control any bars.
-        assertNull(controls);
-    }
-
-    @Test
-    public void testControlsForDispatch_dockedDividerControllerResizing() {
-        addWindow(TYPE_STATUS_BAR, "statusBar");
-        addWindow(TYPE_NAVIGATION_BAR, "navBar");
-        mDisplayContent.getDockedDividerController().setResizing(true);
-
-        final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
 
         // The app must not control any system bars.
         assertNull(controls);

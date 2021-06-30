@@ -79,6 +79,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
@@ -274,6 +275,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 () -> mock(StatusBar.class),
                 mock(ShadeController.class),
                 mock(NotificationRemoteInputManager.class),
+                mock(NotificationShadeDepthController.class),
                 mock(SystemActions.class),
                 mHandler,
                 mock(NavigationBarOverlayController.class),
