@@ -118,6 +118,11 @@ class TaskSnapshotController {
      */
     private final boolean mIsRunningOnWear;
 
+    /**
+     * Flag indicating if device configuration has disabled app snapshots.
+     */
+    private final boolean mConfigDisableTaskSnapshots;
+
     TaskSnapshotController(WindowManagerService service) {
         mService = service;
         mPersister = new TaskSnapshotPersister(mService, Environment::getDataSystemCeDirectory);
@@ -131,6 +136,8 @@ class TaskSnapshotController {
             PackageManager.FEATURE_WATCH);
         mHighResTaskSnapshotScale = mService.mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_highResTaskSnapshotScale);
+        mConfigDisableTaskSnapshots = mService.mContext.getResources().getBoolean(
+                            com.android.internal.R.bool.config_disableTaskSnapshots);
     }
 
     void systemReady() {
@@ -488,7 +495,8 @@ class TaskSnapshotController {
     }
 
     boolean shouldDisableSnapshots() {
-        return mIsRunningOnWear || mIsRunningOnTv || mIsRunningOnIoT;
+        return mIsRunningOnWear || mIsRunningOnTv || mIsRunningOnIoT
+            || mConfigDisableTaskSnapshots;
     }
 
     /**

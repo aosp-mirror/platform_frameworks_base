@@ -4403,7 +4403,7 @@
   <java-symbol type="string" name="view_and_control_notification_title" />
   <java-symbol type="string" name="view_and_control_notification_content" />
   <java-symbol type="array" name="config_accessibility_allowed_install_source" />
-  
+
   <!-- Translation -->
   <java-symbol type="string" name="ui_translation_accessibility_translated_text" />
   <java-symbol type="string" name="ui_translation_accessibility_translation_finished" />
@@ -4426,4 +4426,7 @@
   <java-symbol type="bool" name="config_volumeShowRemoteSessions" />
 
   <java-symbol type="integer" name="config_customizedMaxCachedProcesses" />
+
+  <java-symbol type="bool" name="config_disableTaskSnapshots" />
+
 </resources>
