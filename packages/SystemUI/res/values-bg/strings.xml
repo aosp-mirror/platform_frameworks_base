@@ -713,7 +713,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звук или вибриране"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибриране и се показва по-долу в секцията с разговори"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може да звъни или да вибрира въз основа на настройките за телефона"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да звъни или да вибрира въз основа на настройките за телефона. Разговорите от <xliff:g id="APP_NAME">%1$s</xliff:g> се показват като балончета по подразбиране."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да звъни или да вибрира според настройките за телефона. Разговорите от <xliff:g id="APP_NAME">%1$s</xliff:g> се показват като балончета по подразбиране."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Задържа вниманието ви посредством плаващ пряк път към това съдържание."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Показва се като плаващо балонче в горната част на секцията с разговори, показва снимката на потр. профил на заключения екран"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
