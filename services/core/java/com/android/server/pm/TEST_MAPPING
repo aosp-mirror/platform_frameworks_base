@@ -238,9 +238,6 @@
           "include-filter": "com.android.server.pm.parsing.SystemPartitionParseTest"
         }
       ]
-    },
-    {
-      "name": "CtsPackageManagerBootTestCases"
     }
   ],
   "imports": [
