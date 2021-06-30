@@ -382,7 +382,7 @@ public class PeopleSpaceWidgetManager {
             ConversationChannel channel = mIPeopleManager.getConversation(
                     key.getPackageName(), key.getUserId(), key.getShortcutId());
             if (channel == null) {
-                Log.d(TAG, "Could not retrieve conversation from storage");
+                if (DEBUG) Log.d(TAG, "Could not retrieve conversation from storage");
                 return null;
             }
 
@@ -568,7 +568,7 @@ public class PeopleSpaceWidgetManager {
     @Nullable
     public Optional<PeopleSpaceTile> getAugmentedTileForExistingWidget(int widgetId,
             Map<PeopleTileKey, Set<NotificationEntry>> notifications) {
-        Log.d(TAG, "Augmenting tile for existing widget: " + widgetId);
+        if (DEBUG) Log.d(TAG, "Augmenting tile for existing widget: " + widgetId);
         PeopleSpaceTile tile = getTileForExistingWidget(widgetId);
         if (tile == null) {
             if (DEBUG) {

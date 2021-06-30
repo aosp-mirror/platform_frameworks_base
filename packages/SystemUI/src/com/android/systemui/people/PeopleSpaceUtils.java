@@ -74,7 +74,8 @@ import java.util.stream.Stream;
 /** Utils class for People Space. */
 public class PeopleSpaceUtils {
     /** Turns on debugging information about People Space. */
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
+
     public static final String PACKAGE_NAME = "package_name";
     public static final String USER_ID = "user_id";
     public static final String SHORTCUT_ID = "shortcut_id";
