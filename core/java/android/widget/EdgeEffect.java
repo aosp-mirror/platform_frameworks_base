@@ -365,6 +365,10 @@ public class EdgeEffect {
         mDuration = PULL_TIME;
 
         mPullDistance += deltaDistance;
+        if (edgeEffectBehavior == TYPE_STRETCH) {
+            // Don't allow stretch beyond 1
+            mPullDistance = Math.min(1f, mPullDistance);
+        }
         mDistance = Math.max(0f, mPullDistance);
         mVelocity = 0;
 
@@ -783,6 +787,10 @@ public class EdgeEffect {
                 + mDampedFreq * sinCoeff * Math.cos(mDampedFreq * deltaT));
         mDistance = (float) distance / mHeight;
         mVelocity = (float) velocity;
+        if (mDistance > 1f) {
+            mDistance = 1f;
+            mVelocity = 0f;
+        }
         if (isAtEquilibrium()) {
             mDistance = 0;
             mVelocity = 0;
