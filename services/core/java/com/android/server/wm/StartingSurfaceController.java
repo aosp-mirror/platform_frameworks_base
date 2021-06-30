@@ -26,6 +26,9 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_EMPTY_SPLASH_
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.SystemProperties;
@@ -33,6 +36,8 @@ import android.util.Slog;
 import android.window.TaskSnapshot;
 
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
+
+import java.util.function.Supplier;
 
 /**
  * Managing to create and release a starting window surface.
@@ -44,9 +49,11 @@ public class StartingSurfaceController {
     static final boolean DEBUG_ENABLE_SHELL_DRAWER =
             SystemProperties.getBoolean("persist.debug.shell_starting_surface", true);
     private final WindowManagerService mService;
+    private final SplashScreenExceptionList mSplashScreenExceptionsList;
 
     public StartingSurfaceController(WindowManagerService wm) {
         mService = wm;
+        mSplashScreenExceptionsList = new SplashScreenExceptionList(wm.mContext.getMainExecutor());
     }
 
     StartingSurface createSplashScreenStartingSurface(ActivityRecord activity, String packageName,
@@ -66,6 +73,14 @@ public class StartingSurfaceController {
             }
         }
         return null;
+    }
+
+    /**
+     * @see SplashScreenExceptionList#isException(String, int, Supplier)
+     */
+    boolean isExceptionApp(@NonNull String packageName, int targetSdk,
+            @Nullable Supplier<ApplicationInfo> infoProvider) {
+        return mSplashScreenExceptionsList.isException(packageName, targetSdk, infoProvider);
     }
 
     int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
