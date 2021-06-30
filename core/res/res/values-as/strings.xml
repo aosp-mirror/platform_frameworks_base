@@ -602,8 +602,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনো ফিংগাৰপ্ৰিণ্ট যোগ কৰা নহ\'ল।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইচটোত ফিংগাৰপ্ৰিণ্ট ছেন্সৰ নাই।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ছেন্সৰটো সাময়িকভাৱে অক্ষম হৈ আছে।"</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (4385512597740168120) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰ ব্যৱহাৰ কৰিব নোৱাৰি। মেৰামতি সেৱা প্ৰদানকাৰী কোনো প্ৰতিষ্ঠানলৈ যাওক"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> আঙুলি"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰক"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ফিংগাৰপ্ৰিণ্ট অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
@@ -613,20 +612,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ফিংগাৰপ্ৰিণ্ট আইকন"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"মুখাৱয়বৰ দ্বাৰা আনলক কৰাৰ সুবিধা"</string>
-    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
-    <skip />
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"মুখাৱয়বৰ দ্বাৰা আনলক কৰাৰ সুবিধাটোৰ ব্যৱহাৰ কৰোঁতে সমস্যা হৈছে"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"আপোনাৰ মুখাৱয়বৰ মডেলটো মচিবলৈ টিপক, তাৰ পাছত পুনৰ আপোনাৰ মুখাৱয়ব যোগ দিয়ক"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"মুখাৱয়বৰে আনলক কৰাৰ সুবিধাটো ছেট আপ কৰক"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"আপোনাৰ ফ’নটোলৈ চাই সেইটো আনলক কৰক"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক কৰাৰ অধিক উপায় ছেট আপ কৰক"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"এটা ফিংগাৰপ্ৰিণ্ট যোগ দিবলৈ টিপক"</string>
-    <!-- no translation found for fingerprint_recalibrate_notification_name (1414578431898579354) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_title (2406561052064558497) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_content (8519935717822194943) -->
-    <skip />
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ফিংগাৰপ্ৰিণ্টৰ দ্বাৰা আনলক কৰা সুবিধা"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰ ব্যৱহাৰ কৰিব নোৱাৰি"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"মেৰামতি সেৱা প্ৰদানকাৰী কোনো প্ৰতিষ্ঠানলৈ যাওক।"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"সঠিক মুখমণ্ডলৰ ডেটা কেপচাৰ নহ’ল। আকৌ চেষ্টা কৰক।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"অতি উজ্জ্বল। ইয়াতকৈ কম পোহৰৰ উৎস ব্যৱহাৰ কৰক।"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"অতি আন্ধাৰ। উজ্জ্বল লাইট ব্যৱহাৰ কৰক।"</string>
