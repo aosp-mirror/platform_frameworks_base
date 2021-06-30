@@ -26504,7 +26504,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             scheduleWritePackageRestrictionsLocked(userId);
             scheduleWritePackageListLocked(userId);
-            mAppsFilter.onUserCreated(userId);
+            mAppsFilter.onUsersChanged();
         }
     }
 
