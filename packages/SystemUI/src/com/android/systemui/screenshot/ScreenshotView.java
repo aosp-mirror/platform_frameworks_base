@@ -851,6 +851,23 @@ public class ScreenshotView extends FrameLayout implements
         anim.start();
     }
 
+    void restoreNonScrollingUi() {
+        mScrollChip.setVisibility(View.GONE);
+        mScrollablePreview.setVisibility(View.GONE);
+        mScrollingScrim.setVisibility(View.GONE);
+
+        if (mAccessibilityManager.isEnabled()) {
+            mDismissButton.setVisibility(View.VISIBLE);
+        }
+        mActionsContainer.setVisibility(View.VISIBLE);
+        mBackgroundProtection.setVisibility(View.VISIBLE);
+        mActionsContainerBackground.setVisibility(View.VISIBLE);
+        mScreenshotPreviewBorder.setVisibility(View.VISIBLE);
+        mScreenshotPreview.setVisibility(View.VISIBLE);
+        // reset the timeout
+        mCallbacks.onUserInteraction();
+    }
+
     boolean isDismissing() {
         return (mDismissAnimation != null && mDismissAnimation.isRunning());
     }

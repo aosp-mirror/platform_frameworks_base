@@ -662,12 +662,19 @@ public class ScreenshotController {
                             mScrollCaptureController.run(response);
                     future.addListener(() -> {
                         ScrollCaptureController.LongScreenshot longScreenshot;
+
                         try {
                             longScreenshot = future.get();
                         } catch (CancellationException
                                 | InterruptedException
                                 | ExecutionException e) {
                             Log.e(TAG, "Exception", e);
+                            mScreenshotView.restoreNonScrollingUi();
+                            return;
+                        }
+
+                        if (longScreenshot.getHeight() == 0) {
+                            mScreenshotView.restoreNonScrollingUi();
                             return;
                         }
 
