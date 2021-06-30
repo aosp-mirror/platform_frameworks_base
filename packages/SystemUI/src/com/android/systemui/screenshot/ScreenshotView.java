@@ -162,6 +162,7 @@ public class ScreenshotView extends FrameLayout implements
     private GestureDetector mSwipeDetector;
     private SwipeDismissHandler mSwipeDismissHandler;
     private InputMonitorCompat mInputMonitor;
+    private boolean mShowScrollablePreview;
 
     private final ArrayList<ScreenshotActionChip> mSmartChips = new ArrayList<>();
     private PendingInteraction mPendingInteraction;
@@ -772,70 +773,99 @@ public class ScreenshotView extends FrameLayout implements
 
     void startLongScreenshotTransition(Rect destination, Runnable onTransitionEnd,
             ScrollCaptureController.LongScreenshot longScreenshot) {
-        mScrollablePreview.setImageBitmap(longScreenshot.toBitmap());
-        ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-        float startX = mScrollablePreview.getX();
-        float startY = mScrollablePreview.getY();
-        int[] locInScreen = mScrollablePreview.getLocationOnScreen();
-        destination.offset((int) startX - locInScreen[0], (int) startY - locInScreen[1]);
-        mScrollablePreview.setPivotX(0);
-        mScrollablePreview.setPivotY(0);
-        mScrollablePreview.setAlpha(1f);
-        float currentScale = mScrollablePreview.getWidth() / (float) longScreenshot.getWidth();
-        Matrix matrix = new Matrix();
-        matrix.setScale(currentScale, currentScale);
-        matrix.postTranslate(
-                longScreenshot.getLeft() * currentScale, longScreenshot.getTop() * currentScale);
-        mScrollablePreview.setImageMatrix(matrix);
-        float destinationScale = destination.width() / (float) mScrollablePreview.getWidth();
-        anim.addUpdateListener(animation -> {
-            float t = animation.getAnimatedFraction();
-            mScrollingScrim.setAlpha(1 - t);
-            float currScale = MathUtils.lerp(1, destinationScale, t);
-            mScrollablePreview.setScaleX(currScale);
-            mScrollablePreview.setScaleY(currScale);
-            mScrollablePreview.setX(MathUtils.lerp(startX, destination.left, t));
-            mScrollablePreview.setY(MathUtils.lerp(startY, destination.top, t));
-        });
-        anim.addListener(new AnimatorListenerAdapter() {
+        AnimatorSet animSet = new AnimatorSet();
+
+        ValueAnimator scrimAnim = ValueAnimator.ofFloat(0, 1);
+        scrimAnim.addUpdateListener(animation ->
+                mScrollingScrim.setAlpha(1 - animation.getAnimatedFraction()));
+
+        if (mShowScrollablePreview) {
+            mScrollablePreview.setImageBitmap(longScreenshot.toBitmap());
+            float startX = mScrollablePreview.getX();
+            float startY = mScrollablePreview.getY();
+            int[] locInScreen = mScrollablePreview.getLocationOnScreen();
+            destination.offset((int) startX - locInScreen[0], (int) startY - locInScreen[1]);
+            mScrollablePreview.setPivotX(0);
+            mScrollablePreview.setPivotY(0);
+            mScrollablePreview.setAlpha(1f);
+            float currentScale = mScrollablePreview.getWidth() / (float) longScreenshot.getWidth();
+            Matrix matrix = new Matrix();
+            matrix.setScale(currentScale, currentScale);
+            matrix.postTranslate(
+                    longScreenshot.getLeft() * currentScale,
+                    longScreenshot.getTop() * currentScale);
+            mScrollablePreview.setImageMatrix(matrix);
+            float destinationScale = destination.width() / (float) mScrollablePreview.getWidth();
+
+            ValueAnimator previewAnim = ValueAnimator.ofFloat(0, 1);
+            previewAnim.addUpdateListener(animation -> {
+                float t = animation.getAnimatedFraction();
+                float currScale = MathUtils.lerp(1, destinationScale, t);
+                mScrollablePreview.setScaleX(currScale);
+                mScrollablePreview.setScaleY(currScale);
+                mScrollablePreview.setX(MathUtils.lerp(startX, destination.left, t));
+                mScrollablePreview.setY(MathUtils.lerp(startY, destination.top, t));
+            });
+            ValueAnimator previewFadeAnim = ValueAnimator.ofFloat(1, 0);
+            previewFadeAnim.addUpdateListener(animation ->
+                    mScrollablePreview.setAlpha(1 - animation.getAnimatedFraction()));
+            animSet.play(previewAnim).with(scrimAnim).before(previewFadeAnim);
+            previewAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    onTransitionEnd.run();
+                }
+            });
+        } else {
+            // if we switched orientations between the original screenshot and the long screenshot
+            // capture, just fade out the scrim instead of running the preview animation
+            animSet.play(scrimAnim);
+            animSet.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    onTransitionEnd.run();
+                }
+            });
+        }
+        animSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                onTransitionEnd.run();
-                mScrollablePreview.animate().alpha(0).setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
                         mCallbacks.onDismiss();
                     }
-                });
-            }
         });
-        anim.start();
+        animSet.start();
     }
 
     void prepareScrollingTransition(ScrollCaptureResponse response, Bitmap screenBitmap,
-            Bitmap newBitmap) {
+            Bitmap newBitmap, boolean screenshotTakenInPortrait) {
+        mShowScrollablePreview = (screenshotTakenInPortrait == mOrientationPortrait);
+
         mScrollingScrim.setImageBitmap(newBitmap);
         mScrollingScrim.setVisibility(View.VISIBLE);
-        Rect scrollableArea = scrollableAreaOnScreen(response);
-        float scale = mCornerSizeX
-                / (mOrientationPortrait ? screenBitmap.getWidth() : screenBitmap.getHeight());
-        ConstraintLayout.LayoutParams params =
-                (ConstraintLayout.LayoutParams) mScrollablePreview.getLayoutParams();
 
-        params.width = (int) (scale * scrollableArea.width());
-        params.height = (int) (scale * scrollableArea.height());
-        Matrix matrix = new Matrix();
-        matrix.setScale(scale, scale);
-        matrix.postTranslate(-scrollableArea.left * scale, -scrollableArea.top * scale);
+        if (mShowScrollablePreview) {
+            Rect scrollableArea = scrollableAreaOnScreen(response);
 
-        mScrollablePreview.setTranslationX(scale * scrollableArea.left);
-        mScrollablePreview.setTranslationY(scale * scrollableArea.top);
-        mScrollablePreview.setImageMatrix(matrix);
+            float scale = mCornerSizeX
+                    / (mOrientationPortrait ? screenBitmap.getWidth() : screenBitmap.getHeight());
+            ConstraintLayout.LayoutParams params =
+                    (ConstraintLayout.LayoutParams) mScrollablePreview.getLayoutParams();
 
-        mScrollablePreview.setImageBitmap(screenBitmap);
-        mScrollablePreview.setVisibility(View.VISIBLE);
+            params.width = (int) (scale * scrollableArea.width());
+            params.height = (int) (scale * scrollableArea.height());
+            Matrix matrix = new Matrix();
+            matrix.setScale(scale, scale);
+            matrix.postTranslate(-scrollableArea.left * scale, -scrollableArea.top * scale);
+
+            mScrollablePreview.setTranslationX(scale * scrollableArea.left);
+            mScrollablePreview.setTranslationY(scale * scrollableArea.top);
+            mScrollablePreview.setImageMatrix(matrix);
+            mScrollablePreview.setImageBitmap(screenBitmap);
+            mScrollablePreview.setVisibility(View.VISIBLE);
+        }
         mDismissButton.setVisibility(View.GONE);
         mActionsContainer.setVisibility(View.GONE);
         mBackgroundProtection.setVisibility(View.GONE);
@@ -919,6 +949,8 @@ public class ScreenshotView extends FrameLayout implements
         mActionsContainer.setVisibility(View.GONE);
         mBackgroundProtection.setAlpha(0f);
         mDismissButton.setVisibility(View.GONE);
+        mScrollingScrim.setVisibility(View.GONE);
+        mScrollablePreview.setVisibility(View.GONE);
         mScreenshotStatic.setTranslationX(0);
         mScreenshotPreview.setTranslationY(0);
         mScreenshotPreview.setContentDescription(
