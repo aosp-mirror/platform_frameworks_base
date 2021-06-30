@@ -20,8 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.hardware.vibrator.IVibrator;
+import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
+import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
@@ -62,7 +64,9 @@ public class DeviceVibrationEffectAdapterTest {
 
     @Before
     public void setUp() throws Exception {
-        mAdapter = new DeviceVibrationEffectAdapter(InstrumentationRegistry.getContext());
+        VibrationSettings vibrationSettings = new VibrationSettings(
+                InstrumentationRegistry.getContext(), new Handler(new TestLooper().getLooper()));
+        mAdapter = new DeviceVibrationEffectAdapter(vibrationSettings);
     }
 
     @Test
