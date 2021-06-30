@@ -602,8 +602,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"မည်သည့် လက်ဗွေကိုမျှ ထည့်သွင်းမထားပါ။"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ဤစက်တွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ။"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"အာရုံခံကိရိယာကို ယာယီပိတ်ထားသည်။"</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (4385512597740168120) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"လက်ဗွေ အာရုံခံကိရိယာကို အသုံးပြု၍ မရပါ။ ပြုပြင်ရေး ဝန်ဆောင်မှုပေးသူထံသို့ သွားပါ"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"လက်ချောင်း <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"လက်ဗွေ သုံးခြင်း"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"လက်ဗွေ (သို့) ဖန်သားပြင်လော့ခ်ချခြင်းကို သုံးခြင်း"</string>
@@ -619,12 +618,9 @@
     <string name="face_setup_notification_content" msgid="5463999831057751676">"သင့်ဖုန်းကိုကြည့်၍ သော့ဖွင့်ပါ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"သော့ဖွင့်ရန် နောက်ထပ်နည်းလမ်းများကို စနစ်ထည့်သွင်းပါ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"လက်ဗွေထည့်ရန် တို့ပါ"</string>
-    <!-- no translation found for fingerprint_recalibrate_notification_name (1414578431898579354) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_title (2406561052064558497) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_content (8519935717822194943) -->
-    <skip />
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"လက်ဗွေသုံး လော့ခ်ဖွင့်ခြင်း"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"လက်ဗွေ အာရုံခံကိရိယာကို အသုံးပြု၍ မရပါ"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ပြုပြင်ရေး ဝန်ဆောင်မှုပေးသူထံသို့ သွားပါ။"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"မျက်နှာဒေတာ အမှန် မရိုက်ယူနိုင်ပါ၊ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"အလွန် လင်းသည်။ အလင်းလျှော့ကြည့်ပါ။"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"အလွန်မှောင်သည်။ ပိုလင်းအောင် လုပ်ကြည့်ပါ။"</string>
