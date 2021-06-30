@@ -602,8 +602,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nuk ka asnjë gjurmë gishti të regjistruar."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Kjo pajisje nuk ka sensor të gjurmës së gishtit."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensori është çaktivizuar përkohësisht."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (4385512597740168120) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Sensori i gjurmës së gishtit nuk mund të përdoret. Vizito një ofrues të shërbimit të riparimit"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Gishti <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Përdor gjurmën e gishtit"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Përdor gjurmën e gishtit ose kyçjen e ekranit"</string>
@@ -613,18 +612,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona e gjurmës së gishtit"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Shkyçja me fytyrë"</string>
-    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Lëshoje me \"Shkyçjen me fytyrë\""</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem me \"Shkyçjen me fytyrë\""</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Trokit për të fshirë modelin tënd të fytyrës, pastaj shtoje përsëri fytyrën tënde"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguro \"Shkyçjen me fytyrë\""</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Shkyçe telefonin duke parë tek ai"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguri më shumë mënyra për të shkyçur"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Trokit për të shtuar një gjurmë gishti"</string>
-    <!-- no translation found for fingerprint_recalibrate_notification_name (1414578431898579354) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_title (2406561052064558497) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_content (8519935717822194943) -->
-    <skip />
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Shkyçja me gjurmën e gishtit"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Sensori i gjurmës së gishtit nuk mund të përdoret"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Vizito një ofrues të shërbimit të riparimit."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"S\'mund të regjistroheshin të dhëna të sakta të fytyrës. Provo përsëri."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Me shumë ndriçim. Provo një ndriçim më të butë."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Shumë i errët. Provo një ndriçim më të fortë."</string>

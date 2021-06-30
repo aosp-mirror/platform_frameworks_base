@@ -602,7 +602,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ez da erregistratu hatz-markarik."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Gailu honek ez du hatz-marken sentsorerik."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sentsorea aldi baterako desgaitu da."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Ezin da erabili hatz-marken sentsorea. Jo konponketak egiten dituen hornitzaile batenera."</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Ezin da erabili hatz-marken sentsorea. Jarri harremanetan konponketak egiten dituen hornitzaile batekin."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. hatza"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Erabili hatz-marka"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Erabili hatz-marka edo pantailaren blokeoa"</string>
@@ -620,7 +620,7 @@
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Sakatu hau hatz-marka bat gehitzeko"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Hatz-marka bidez desblokeatzea"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Ezin da erabili hatz-marken sentsorea"</string>
-    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Jo konponketak egiten dituen hornitzaile batenera."</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Jarri harremanetan konponketak egiten dituen hornitzaile batekin."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Ezin izan dira bildu argazkiaren datu zehatzak. Saiatu berriro."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Argi gehiegi dago. Joan toki ilunago batera."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Ilunegi dago. Erabili argi gehiago."</string>
@@ -2062,7 +2062,7 @@
     <string name="mmcc_illegal_ms" msgid="7509650265233909445">"SIM txartela ezin da erabili ahotsa erabiltzeko"</string>
     <string name="mmcc_illegal_me" msgid="6505557881889904915">"Telefonoa ezin da erabili ahotsa erabiltzeko"</string>
     <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"Ez dago <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartelik"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"Ez dago <xliff:g id="SIMNUMBER">%d</xliff:g> SIMik"</string>
     <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
     <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
     <string name="popup_window_default_title" msgid="6907717596694826919">"Leiho gainerakorra"</string>
