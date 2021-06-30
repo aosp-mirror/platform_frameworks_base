@@ -2632,10 +2632,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 final ActivityInfo ainfo = AppGlobals.getPackageManager().getActivityInfo(comp,
                         STOCK_PM_FLAGS, UserHandle.getUserId(callingUid));
-                if (ainfo.applicationInfo.uid != callingUid) {
-                    throw new SecurityException(
-                            "Can't add task for another application: target uid="
-                                    + ainfo.applicationInfo.uid + ", calling uid=" + callingUid);
+                if (ainfo == null || ainfo.applicationInfo.uid != callingUid) {
+                    Slog.e(TAG, "Can't add task for another application: target uid="
+                            + (ainfo == null ? Process.INVALID_UID : ainfo.applicationInfo.uid)
+                            + ", calling uid=" + callingUid);
+                    return INVALID_TASK_ID;
                 }
 
                 final Task rootTask = r.getRootTask();
