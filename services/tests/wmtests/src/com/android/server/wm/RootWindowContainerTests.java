@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.KeyguardManager.ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -25,6 +26,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
@@ -37,11 +39,15 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -194,6 +200,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 .setUid(UserHandle.PER_USER_RANGE + 1)
                 .setTask(task)
                 .build();
+        doReturn(true).when(topActivity).okToShowLocked();
+        topActivity.intent.setAction(Intent.ACTION_MAIN);
 
         // Make sure the listeners will be notified for putting the task to locked state
         TaskChangeNotificationController controller =
@@ -201,6 +209,23 @@ public class RootWindowContainerTests extends WindowTestsBase {
         spyOn(controller);
         mWm.mRoot.lockAllProfileTasks(0);
         verify(controller).notifyTaskProfileLocked(eq(task.mTaskId), eq(0));
+
+        // Create the work lock activity on top of the task
+        final ActivityRecord workLockActivity =
+                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                        .setStack(stack)
+                        .setUid(UserHandle.PER_USER_RANGE + 1)
+                        .setTask(task)
+                        .build();
+        doReturn(true).when(workLockActivity).okToShowLocked();
+        workLockActivity.intent.setAction(ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER);
+        doReturn(workLockActivity.mActivityComponent).when(
+                mWm.mAtmService).getSysUiServiceComponentLocked();
+
+        // Make sure the listener won't be notified again.
+        clearInvocations(controller);
+        mWm.mRoot.lockAllProfileTasks(0);
+        verify(controller, never()).notifyTaskProfileLocked(eq(task.mTaskId), anyInt());
     }
 }
 
