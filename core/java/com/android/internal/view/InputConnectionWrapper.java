@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.util.imetracing.ImeTracing;
 import android.util.imetracing.InputConnectionHelper;
 import android.util.proto.ProtoOutputStream;
@@ -40,7 +39,7 @@ import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.Completable;
-import com.android.internal.inputmethod.ResultCallbacks;
+import com.android.internal.inputmethod.IInputContextInvoker;
 
 import java.lang.ref.WeakReference;
 
@@ -48,7 +47,10 @@ public class InputConnectionWrapper implements InputConnection {
     private static final String TAG = "InputConnectionWrapper";
 
     private static final int MAX_WAIT_TIME_MILLIS = 2000;
-    private final IInputContext mIInputContext;
+
+    @NonNull
+    private final IInputContextInvoker mInvoker;
+
     @NonNull
     private final WeakReference<AbstractInputMethodService> mInputMethodService;
 
@@ -69,7 +71,7 @@ public class InputConnectionWrapper implements InputConnection {
             IInputContext inputContext, @MissingMethodFlags int missingMethods,
             @NonNull CancellationGroup cancellationGroup) {
         mInputMethodService = inputMethodService;
-        mIInputContext = inputContext;
+        mInvoker = IInputContextInvoker.create(inputContext);
         mMissingMethods = missingMethods;
         mCancellationGroup = cancellationGroup;
     }
@@ -84,14 +86,8 @@ public class InputConnectionWrapper implements InputConnection {
             return null;
         }
 
-        final Completable.CharSequence value = Completable.createCharSequence();
-        boolean hadRemoteException = false;
-        try {
-            mIInputContext.getTextAfterCursor(length, flags, ResultCallbacks.of(value));
-        } catch (RemoteException e) {
-            hadRemoteException = true;
-        }
-        final CharSequence result = hadRemoteException ? null : Completable.getResultOrNull(
+        final Completable.CharSequence value = mInvoker.getTextAfterCursor(length, flags);
+        final CharSequence result = Completable.getResultOrNull(
                 value, TAG, "getTextAfterCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
@@ -115,14 +111,8 @@ public class InputConnectionWrapper implements InputConnection {
             return null;
         }
 
-        final Completable.CharSequence value = Completable.createCharSequence();
-        boolean hadRemoteException = false;
-        try {
-            mIInputContext.getTextBeforeCursor(length, flags, ResultCallbacks.of(value));
-        } catch (RemoteException e) {
-            hadRemoteException = true;
-        }
-        final CharSequence result = hadRemoteException ? null : Completable.getResultOrNull(
+        final Completable.CharSequence value = mInvoker.getTextBeforeCursor(length, flags);
+        final CharSequence result = Completable.getResultOrNull(
                 value, TAG, "getTextBeforeCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
@@ -146,14 +136,8 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return null;
         }
-        final Completable.CharSequence value = Completable.createCharSequence();
-        boolean hadRemoteException = false;
-        try {
-            mIInputContext.getSelectedText(flags, ResultCallbacks.of(value));
-        } catch (RemoteException e) {
-            hadRemoteException = true;
-        }
-        final CharSequence result = hadRemoteException ? null : Completable.getResultOrNull(
+        final Completable.CharSequence value = mInvoker.getSelectedText(flags);
+        final CharSequence result = Completable.getResultOrNull(
                 value, TAG, "getSelectedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
@@ -190,15 +174,9 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return null;
         }
-        final Completable.SurroundingText value = Completable.createSurroundingText();
-        boolean hadRemoteException = false;
-        try {
-            mIInputContext.getSurroundingText(beforeLength, afterLength, flags,
-                    ResultCallbacks.of(value));
-        } catch (RemoteException e) {
-            hadRemoteException = true;
-        }
-        final SurroundingText result = hadRemoteException ? null : Completable.getResultOrNull(
+        final Completable.SurroundingText value = mInvoker.getSurroundingText(beforeLength,
+                afterLength, flags);
+        final SurroundingText result = Completable.getResultOrNull(
                 value, TAG, "getSurroundingText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
@@ -218,14 +196,8 @@ public class InputConnectionWrapper implements InputConnection {
             return 0;
         }
 
-        final Completable.Int value = Completable.createInt();
-        boolean hadRemoteException = false;
-        try {
-            mIInputContext.getCursorCapsMode(reqModes, ResultCallbacks.of(value));
-        } catch (RemoteException e) {
-            hadRemoteException = true;
-        }
-        final int result = hadRemoteException ? 0 : Completable.getResultOrZero(
+        final Completable.Int value = mInvoker.getCursorCapsMode(reqModes);
+        final int result = Completable.getResultOrZero(
                 value, TAG, "getCursorCapsMode()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
@@ -245,14 +217,8 @@ public class InputConnectionWrapper implements InputConnection {
             return null;
         }
 
-        final Completable.ExtractedText value = Completable.createExtractedText();
-        boolean hadRemoteException = false;
-        try {
-            mIInputContext.getExtractedText(request, flags, ResultCallbacks.of(value));
-        } catch (RemoteException e) {
-            hadRemoteException = true;
-        }
-        final ExtractedText result = hadRemoteException ? null : Completable.getResultOrNull(
+        final Completable.ExtractedText value = mInvoker.getExtractedText(request, flags);
+        final ExtractedText result = Completable.getResultOrNull(
                 value, TAG, "getExtractedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
@@ -268,13 +234,11 @@ public class InputConnectionWrapper implements InputConnection {
 
     @AnyThread
     public boolean commitText(CharSequence text, int newCursorPosition) {
-        try {
-            mIInputContext.commitText(text, newCursorPosition);
+        final boolean handled = mInvoker.commitText(text, newCursorPosition);
+        if (handled) {
             notifyUserActionIfNecessary();
-            return true;
-        } catch (RemoteException e) {
-            return false;
         }
+        return handled;
     }
 
     @AnyThread
@@ -293,52 +257,27 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return false;
         }
-        try {
-            mIInputContext.commitCompletion(text);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.commitCompletion(text);
     }
 
     @AnyThread
     public boolean commitCorrection(CorrectionInfo correctionInfo) {
-        try {
-            mIInputContext.commitCorrection(correctionInfo);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.commitCorrection(correctionInfo);
     }
 
     @AnyThread
     public boolean setSelection(int start, int end) {
-        try {
-            mIInputContext.setSelection(start, end);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.setSelection(start, end);
     }
 
     @AnyThread
     public boolean performEditorAction(int actionCode) {
-        try {
-            mIInputContext.performEditorAction(actionCode);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.performEditorAction(actionCode);
     }
 
     @AnyThread
     public boolean performContextMenuAction(int id) {
-        try {
-            mIInputContext.performContextMenuAction(id);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.performContextMenuAction(id);
     }
 
     @AnyThread
@@ -347,84 +286,50 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return false;
         }
-        try {
-            mIInputContext.setComposingRegion(start, end);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.setComposingRegion(start, end);
     }
 
     @AnyThread
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
-        try {
-            mIInputContext.setComposingText(text, newCursorPosition);
+        final boolean handled = mInvoker.setComposingText(text, newCursorPosition);
+        if (handled) {
             notifyUserActionIfNecessary();
-            return true;
-        } catch (RemoteException e) {
-            return false;
         }
+        return handled;
     }
 
     @AnyThread
     public boolean finishComposingText() {
-        try {
-            mIInputContext.finishComposingText();
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.finishComposingText();
     }
 
     @AnyThread
     public boolean beginBatchEdit() {
-        try {
-            mIInputContext.beginBatchEdit();
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.beginBatchEdit();
     }
 
     @AnyThread
     public boolean endBatchEdit() {
-        try {
-            mIInputContext.endBatchEdit();
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.endBatchEdit();
     }
 
     @AnyThread
     public boolean sendKeyEvent(KeyEvent event) {
-        try {
-            mIInputContext.sendKeyEvent(event);
+        final boolean handled = mInvoker.sendKeyEvent(event);
+        if (handled) {
             notifyUserActionIfNecessary();
-            return true;
-        } catch (RemoteException e) {
-            return false;
         }
+        return handled;
     }
 
     @AnyThread
     public boolean clearMetaKeyStates(int states) {
-        try {
-            mIInputContext.clearMetaKeyStates(states);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.clearMetaKeyStates(states);
     }
 
     @AnyThread
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
-        try {
-            mIInputContext.deleteSurroundingText(beforeLength, afterLength);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.deleteSurroundingText(beforeLength, afterLength);
     }
 
     @AnyThread
@@ -433,12 +338,7 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return false;
         }
-        try {
-            mIInputContext.deleteSurroundingTextInCodePoints(beforeLength, afterLength);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.deleteSurroundingTextInCodePoints(beforeLength, afterLength);
     }
 
     @AnyThread
@@ -448,24 +348,13 @@ public class InputConnectionWrapper implements InputConnection {
     }
 
     @AnyThread
-    @Override
     public boolean performSpellCheck() {
-        try {
-            mIInputContext.performSpellCheck();
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.performSpellCheck();
     }
 
     @AnyThread
     public boolean performPrivateCommand(String action, Bundle data) {
-        try {
-            mIInputContext.performPrivateCommand(action, data);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.performPrivateCommand(action, data);
     }
 
     @AnyThread
@@ -478,13 +367,7 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return false;
         }
-        final Completable.Int value = Completable.createInt();
-        try {
-            mIInputContext.requestUpdateCursorAnchorInfo(cursorUpdateMode,
-                    ResultCallbacks.of(value));
-        } catch (RemoteException e) {
-            return false;
-        }
+        final Completable.Int value = mInvoker.requestUpdateCursorAnchorInfo(cursorUpdateMode);
         return Completable.getResultOrZero(value, TAG, "requestUpdateCursorAnchorInfo()",
                 mCancellationGroup, MAX_WAIT_TIME_MILLIS) != 0;
     }
@@ -520,12 +403,7 @@ public class InputConnectionWrapper implements InputConnection {
             inputMethodService.exposeContent(inputContentInfo, this);
         }
 
-        final Completable.Int value = Completable.createInt();
-        try {
-            mIInputContext.commitContent(inputContentInfo, flags, opts, ResultCallbacks.of(value));
-        } catch (RemoteException e) {
-            return false;
-        }
+        final Completable.Int value = mInvoker.commitContent(inputContentInfo, flags, opts);
         return Completable.getResultOrZero(
                 value, TAG, "commitContent()", mCancellationGroup, MAX_WAIT_TIME_MILLIS) != 0;
     }
@@ -535,12 +413,7 @@ public class InputConnectionWrapper implements InputConnection {
      */
     @AnyThread
     public boolean setImeConsumesInput(boolean imeConsumesInput) {
-        try {
-            mIInputContext.setImeConsumesInput(imeConsumesInput);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mInvoker.setImeConsumesInput(imeConsumesInput);
     }
 
     @AnyThread
