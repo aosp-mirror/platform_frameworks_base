@@ -1786,7 +1786,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2வது பணி <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3வது பணி <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"அகற்றும் முன் PINஐக் கேள்"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"அகற்றும் முன் திறத்தல் வடிவத்தைக் கேள்"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"அகற்றும் முன் அன்லாக் பேட்டர்னைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"உங்கள் நிர்வாகி நிறுவியுள்ளார்"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
