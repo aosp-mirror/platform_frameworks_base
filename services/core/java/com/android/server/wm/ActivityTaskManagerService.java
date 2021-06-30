@@ -302,6 +302,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     // started or finished.
     static final long ACTIVITY_BG_START_GRACE_PERIOD_MS = 10 * 1000;
 
+    /**
+     * The duration to keep a process in animating state (top scheduling group) when the
+     * wakefulness is changing from awake to doze or sleep.
+     */
+    private static final long DOZE_ANIMATING_STATE_RETAIN_TIME_MS = 2000;
+
     /** Used to indicate that an app transition should be animated. */
     static final boolean ANIMATE = true;
 
@@ -2757,12 +2763,35 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         });
     }
 
+    // The caller MUST NOT hold the global lock.
     public void onScreenAwakeChanged(boolean isAwake) {
         mH.post(() -> {
             for (int i = mScreenObservers.size() - 1; i >= 0; i--) {
                 mScreenObservers.get(i).onAwakeStateChanged(isAwake);
             }
         });
+
+        if (isAwake) {
+            return;
+        }
+        // If the device is going to sleep, keep a higher priority temporarily for potential
+        // animation of system UI. Even if AOD is not enabled, it should be no harm.
+        final WindowProcessController proc;
+        synchronized (mGlobalLockWithoutBoost) {
+            final WindowState notificationShade = mRootWindowContainer.getDefaultDisplay()
+                    .getDisplayPolicy().getNotificationShade();
+            proc = notificationShade != null
+                    ? mProcessMap.getProcess(notificationShade.mSession.mPid) : null;
+        }
+        if (proc == null) {
+            return;
+        }
+        // Set to activity manager directly to make sure the state can be seen by the subsequent
+        // update of scheduling group.
+        proc.setRunningAnimationUnsafe();
+        mH.removeMessages(H.UPDATE_PROCESS_ANIMATING_STATE, proc);
+        mH.sendMessageDelayed(mH.obtainMessage(H.UPDATE_PROCESS_ANIMATING_STATE, proc),
+                DOZE_ANIMATING_STATE_RETAIN_TIME_MS);
     }
 
     @Override
@@ -5027,7 +5056,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
-
+        static final int UPDATE_PROCESS_ANIMATING_STATE = 2;
 
         static final int FIRST_ACTIVITY_TASK_MSG = 100;
         static final int FIRST_SUPERVISOR_TASK_MSG = 200;
@@ -5042,6 +5071,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 case REPORT_TIME_TRACKER_MSG: {
                     AppTimeTracker tracker = (AppTimeTracker) msg.obj;
                     tracker.deliverResult(mContext);
+                }
+                break;
+                case UPDATE_PROCESS_ANIMATING_STATE: {
+                    final WindowProcessController proc = (WindowProcessController) msg.obj;
+                    synchronized (mGlobalLock) {
+                        proc.updateRunningRemoteOrRecentsAnimation();
+                    }
                 }
                 break;
             }

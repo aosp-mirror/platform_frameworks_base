@@ -1594,12 +1594,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         updateRunningRemoteOrRecentsAnimation();
     }
 
-    private void updateRunningRemoteOrRecentsAnimation() {
-
+    void updateRunningRemoteOrRecentsAnimation() {
         // Posting on handler so WM lock isn't held when we call into AM.
         mAtm.mH.sendMessage(PooledLambda.obtainMessage(
                 WindowProcessListener::setRunningRemoteAnimation, mListener,
                 mRunningRecentsAnimation || mRunningRemoteAnimation));
+    }
+
+    /** Adjusts scheduling group for animation. This method MUST NOT be called inside WM lock. */
+    void setRunningAnimationUnsafe() {
+        mListener.setRunningRemoteAnimation(true);
     }
 
     @Override

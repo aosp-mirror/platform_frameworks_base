@@ -1572,8 +1572,9 @@ public class OomAdjuster {
                 state.setSystemNoUi(false);
             }
             if (!state.isSystemNoUi()) {
-                if (mService.mWakefulness.get() == PowerManagerInternal.WAKEFULNESS_AWAKE) {
-                    // screen on, promote UI
+                if (mService.mWakefulness.get() == PowerManagerInternal.WAKEFULNESS_AWAKE
+                        || state.isRunningRemoteAnimation()) {
+                    // screen on or animating, promote UI
                     state.setCurProcState(ActivityManager.PROCESS_STATE_PERSISTENT_UI);
                     state.setCurrentSchedulingGroup(ProcessList.SCHED_GROUP_TOP_APP);
                 } else {
