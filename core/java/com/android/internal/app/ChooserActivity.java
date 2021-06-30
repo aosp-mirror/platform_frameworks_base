@@ -1186,7 +1186,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         final DisplayResolveInfo dri = new DisplayResolveInfo(
                 originalIntent, ri, getString(R.string.screenshot_edit), "", resolveIntent, null);
-        dri.setDisplayIcon(getDrawable(R.drawable.ic_menu_edit));
+        dri.setDisplayIcon(getDrawable(R.drawable.ic_screenshot_edit));
         return dri;
     }
 
