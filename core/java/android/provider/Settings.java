@@ -4700,7 +4700,7 @@ public final class Settings {
          *
          * @hide
          */
-        @Readable
+        @Readable(maxTargetSdk = Build.VERSION_CODES.R)
         public static final String MEDIA_BUTTON_RECEIVER = "media_button_receiver";
 
         /**
@@ -13681,13 +13681,6 @@ public final class Settings {
         @Readable
         public static final String ANGLE_GL_DRIVER_SELECTION_VALUES =
                 "angle_gl_driver_selection_values";
-
-        /**
-         * List of package names that should check ANGLE rules
-         * @hide
-         */
-        @Readable
-        public static final String ANGLE_ALLOWLIST = "angle_allowlist";
 
         /**
          * Lists of ANGLE EGL features for debugging.

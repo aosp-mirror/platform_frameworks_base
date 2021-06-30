@@ -51,6 +51,7 @@ import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
+import android.view.ContentInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -128,6 +129,7 @@ public final class NotificationEntry extends ListEntry {
     public CharSequence remoteInputText;
     public String remoteInputMimeType;
     public Uri remoteInputUri;
+    public ContentInfo remoteInputAttachment;
     private Notification.BubbleMetadata mBubbleMetadata;
     private ShortcutInfo mShortcutInfo;
 

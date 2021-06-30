@@ -734,7 +734,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"အသံ သို့မဟုတ် တုန်ခါမှုမရှိပါ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"အသံ သို့မဟုတ် တုန်ခါမှုမရှိပါ၊ စကားဝိုင်းကဏ္ဍ၏ အောက်ပိုင်းတွင် မြင်ရသည်"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ဖုန်းဆက်တင်များပေါ် အခြေခံပြီး အသံမြည်နိုင်သည် သို့မဟုတ် တုန်ခါနိုင်သည်"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ဖုန်းဆက်တင်များပေါ် အခြေခံပြီး အသံမြည်နိုင်သည် သို့မဟုတ် တုန်ခါနိုင်သည်။ မူရင်းသတ်မှတ်ချက်အဖြစ် <xliff:g id="APP_NAME">%1$s</xliff:g> မှ စကားဝိုင်းများကို ပူဖောင်းကွက်ဖြင့် ပြသည်။"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ဖုန်းဆက်တင်ပေါ် အခြေခံပြီး အသံမြည် (သို့) တုန်ခါနိုင်သည်။ <xliff:g id="APP_NAME">%1$s</xliff:g> မှ စကားဝိုင်းများကို ပူဖောင်းကွက်ဖြင့် အလိုအလျောက်ပြသည်။"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"အကြောင်းအရာကို floating shortcut ကိုသုံး၍ အာရုံစိုက်လာအောင်လုပ်ပါ။"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ဤအကြောင်းကြားချက်က အသံ သို့မဟုတ် တုန်ခါမှု ပေးရန် သင့်/မသင့်ကို စနစ်က ဆုံးဖြတ်ပါစေ"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;အခြေအနေ-&lt;/b&gt; မူရင်းသို့ ချိန်ညှိထားသည်"</string>
@@ -1115,7 +1115,7 @@
     <string name="basic_status" msgid="2315371112182658176">"စကားဝိုင်းကို ဖွင့်ရန်"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"စကားဝိုင်း ဝိဂျက်များ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"စကားဝိုင်းကို သင်၏ ‘ပင်မစာမျက်နှာ’ သို့ထည့်ရန် တို့ပါ"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"မက်ဆေ့ဂျ်အချို့ရလျှင် ဤနေရာသို့ ပြန်လာကြည့်ပါ"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"သင်၏မကြာသေးမီက စကားဝိုင်းများကို ဤနေရာတွင် ပြပါမည်"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ဦးစားပေး စကားဝိုင်းများ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"မကြာသေးမီက စကားဝိုင်းများ"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1144,8 +1144,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"မကြာသေးမီက မက်ဆေ့ဂျ်၊ လွတ်သွားသောခေါ်ဆိုမှုနှင့် အခြေအနေအပ်ဒိတ်များကို ကြည့်နိုင်သည်"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"စကားဝိုင်း"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"‘မနှောင့်ယှက်ရ’ ဖြင့် ခဏရပ်ထားသည်"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> က မက်ဆေ့ဂျ်ပို့လိုက်သည်"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> က ပုံပို့လိုက်သည်"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"သင်၏ ဘက်ထရီမီတာကို ဖတ်ရာတွင် ပြဿနာရှိနေသည်"</string>

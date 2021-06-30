@@ -585,8 +585,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ଅନ୍ୟ ଏକ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ବହୁତ ଉଜ୍ଜ୍ୱଳ"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ଆଡଜଷ୍ଟ କରି ଦେଖନ୍ତୁ"</string>
-    <!-- no translation found for fingerprint_acquired_immobile (1621891895241888048) -->
-    <skip />
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ପ୍ରତି ଥର ଆପଣଙ୍କ ଆଙ୍ଗୁଠିର ସ୍ଥାନ ସାମାନ୍ୟ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ଟିପଚିହ୍ନ ପ୍ରମାଣିତ ହେଲା"</string>
@@ -603,7 +602,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"କୌଣସି ଆଙ୍ଗୁଠି ଚିହ୍ନ ପଞ୍ଜୀକୃତ ହୋଇନାହିଁ।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ଏହି ଡିଭାଇସ୍‌ରେ ଟିପଚିହ୍ନ ସେନ୍‍ସର୍ ନାହିଁ।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
-    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"ସେନ୍ସରକୁ କାଲିବ୍ରେଟ୍ କରିବା ଆବଶ୍ୟକ"</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (4385512597740168120) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ଆଙ୍ଗୁଠି <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ଟିପଚିହ୍ନ ବା ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
@@ -613,14 +613,18 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ଟିପଚିହ୍ନ ଆଇକନ୍"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ଫେସ୍ ଅନଲକ୍"</string>
-    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
-    <skip />
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ଫେସ୍ ଅନଲକ୍ ସହ ସମସ୍ୟା"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ଆପଣଙ୍କ ଫେସ୍ ମଡେଲକୁ ଡିଲିଟ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ, ତା\'ପରେ ପୁଣି ଆପଣଙ୍କ ଫେସ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ଫେସ୍ ଅନଲକ୍ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ଫୋନକୁ ଦେଖି ଏହାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ଅନଲକ୍ କରିବା ପାଇଁ ଆହୁରି ଅଧିକ ଉପାୟ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ଏକ ଟିପଚିହ୍ନ ଯୋଗ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
+    <!-- no translation found for fingerprint_recalibrate_notification_name (1414578431898579354) -->
+    <skip />
+    <!-- no translation found for fingerprint_recalibrate_notification_title (2406561052064558497) -->
+    <skip />
+    <!-- no translation found for fingerprint_recalibrate_notification_content (8519935717822194943) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ମୁହଁର ଡାଟା କ୍ୟାପଚର୍ ହେଲାନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ଅତ୍ୟଧିକ ଉଜ୍ଵଳ। କମ୍ ଉଜ୍ବଳକରଣରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ଅତ୍ୟଧିକ ଅନ୍ଧକାର। ଉଜ୍ବଳ ଲାଇଟ୍ ବ୍ୟବହାର କରନ୍ତୁ।"</string>

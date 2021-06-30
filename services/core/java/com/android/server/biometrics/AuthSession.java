@@ -366,10 +366,9 @@ public final class AuthSession implements IBinder.DeathRecipient {
         // sending the final error callback to the application.
         for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
             try {
-                if (filter.apply(sensor)) {
-                    if (DEBUG) {
-                        Slog.v(TAG, "Canceling sensor: " + sensor.id);
-                    }
+                final boolean shouldCancel = filter.apply(sensor);
+                Slog.d(TAG, "sensorId: " + sensor.id + ", shouldCancel: " + shouldCancel);
+                if (shouldCancel) {
                     sensor.goToStateCancelling(mToken, mOpPackageName);
                 }
             } catch (RemoteException e) {
@@ -542,9 +541,9 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
         if (mState != STATE_AUTH_STARTED
                 && mState != STATE_AUTH_STARTED_UI_SHOWING
-                && mState != STATE_AUTH_PAUSED) {
-            Slog.e(TAG, "onStartFingerprint, unexpected state: " + mState);
-            return;
+                && mState != STATE_AUTH_PAUSED
+                && mState != STATE_ERROR_PENDING_SYSUI) {
+            Slog.w(TAG, "onStartFingerprint, started from unexpected state: " + mState);
         }
 
         mMultiSensorState = MULTI_SENSOR_STATE_FP_SCANNING;

@@ -750,7 +750,7 @@
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, показується у вигляді спливаючої підказки"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, показується навіть у режимі \"Не турбувати\""</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, відображається у вигляді спливаючої підказки, показується навіть у режимі \"Не турбувати\""</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, відображається як спливаючий чат, перериває режим \"Не турбувати\""</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Налаштування"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Пріоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не підтримує функції розмов"</string>
@@ -1127,7 +1127,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Відкрита розмова"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Віджети розмов"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Натисніть розмову, щоб додати її на головний екран"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Поверніться сюди, коли отримаєте повідомлення"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Важливі розмови"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Нещодавні розмови"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>

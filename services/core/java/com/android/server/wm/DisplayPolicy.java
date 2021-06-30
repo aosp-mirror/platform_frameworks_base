@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
@@ -1416,7 +1417,7 @@ public class DisplayPolicy {
     /**
      * @return true if the system bars are forced to stay visible
      */
-    public boolean areSystemBarsForcedShownLw(WindowState windowState) {
+    public boolean areSystemBarsForcedShownLw() {
         return mForceShowSystemBars;
     }
 
@@ -2631,8 +2632,6 @@ public class DisplayPolicy {
         final WindowState win = winCandidate;
         mSystemUiControllingWindow = win;
 
-        mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
-
         final boolean inSplitScreen =
                 mService.mRoot.getDefaultTaskDisplayArea().isSplitScreenModeActivated();
         if (inSplitScreen) {
@@ -2779,19 +2778,22 @@ public class DisplayPolicy {
     }
 
     private int updateSystemBarsLw(WindowState win, int disableFlags) {
-        final boolean dockedRootTaskVisible = mDisplayContent.getDefaultTaskDisplayArea()
-                .isRootTaskVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        final boolean resizing = mDisplayContent.getDockedDividerController().isResizing();
+        final TaskDisplayArea defaultTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
+        final boolean multiWindowTaskVisible =
+                defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
+                        || defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_MULTI_WINDOW);
+        final boolean freeformRootTaskVisible =
+                defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_FREEFORM);
 
-        // We need to force system bars when the docked root task is visible, when the freeform
-        // root task is focused but also when we are resizing for the transitions when docked
-        // root task visibility changes.
-        mForceShowSystemBars = dockedRootTaskVisible || win.inFreeformWindowingMode() || resizing;
+        // We need to force showing system bars when the multi-window or freeform root task is
+        // visible.
+        mForceShowSystemBars = multiWindowTaskVisible || freeformRootTaskVisible;
+        mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
 
         int appearance = APPEARANCE_OPAQUE_NAVIGATION_BARS | APPEARANCE_OPAQUE_STATUS_BARS;
-
         appearance = configureStatusBarOpacity(appearance);
-        appearance = configureNavBarOpacity(appearance, dockedRootTaskVisible, resizing);
+        appearance = configureNavBarOpacity(appearance, multiWindowTaskVisible,
+                freeformRootTaskVisible);
 
         final boolean requestHideNavBar = !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
         final long now = SystemClock.uptimeMillis();
@@ -2910,10 +2912,8 @@ public class DisplayPolicy {
      * @return the current visibility flags with the nav-bar opacity related flags toggled based
      *         on the nav bar opacity rules chosen by {@link #mNavBarOpacityMode}.
      */
-    private int configureNavBarOpacity(int appearance, boolean dockedRootTaskVisible,
-            boolean isDockedDividerResizing) {
-        final boolean freeformRootTaskVisible = mDisplayContent.getDefaultTaskDisplayArea()
-                .isRootTaskVisible(WINDOWING_MODE_FREEFORM);
+    private int configureNavBarOpacity(int appearance, boolean multiWindowTaskVisible,
+            boolean freeformRootTaskVisible) {
         final boolean fullscreenDrawsBackground =
                 drawsBarBackground(mTopFullscreenOpaqueWindowState);
         final boolean dockedDrawsBackground =
@@ -2922,26 +2922,18 @@ public class DisplayPolicy {
         if (mNavBarOpacityMode == NAV_BAR_FORCE_TRANSPARENT) {
             if (fullscreenDrawsBackground && dockedDrawsBackground) {
                 appearance = clearNavBarOpaqueFlag(appearance);
-            } else if (dockedRootTaskVisible) {
-                appearance = setNavBarOpaqueFlag(appearance);
             }
         } else if (mNavBarOpacityMode == NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED) {
-            if (dockedRootTaskVisible || freeformRootTaskVisible || isDockedDividerResizing) {
+            if (multiWindowTaskVisible || freeformRootTaskVisible) {
                 if (mIsFreeformWindowOverlappingWithNavBar) {
                     appearance = clearNavBarOpaqueFlag(appearance);
-                } else {
-                    appearance = setNavBarOpaqueFlag(appearance);
                 }
             } else if (fullscreenDrawsBackground) {
                 appearance = clearNavBarOpaqueFlag(appearance);
             }
         } else if (mNavBarOpacityMode == NAV_BAR_TRANSLUCENT_WHEN_FREEFORM_OPAQUE_OTHERWISE) {
-            if (isDockedDividerResizing) {
-                appearance = setNavBarOpaqueFlag(appearance);
-            } else if (freeformRootTaskVisible) {
+            if (freeformRootTaskVisible) {
                 appearance = clearNavBarOpaqueFlag(appearance);
-            } else {
-                appearance = setNavBarOpaqueFlag(appearance);
             }
         }
 
@@ -2951,10 +2943,6 @@ public class DisplayPolicy {
         }
 
         return appearance;
-    }
-
-    private int setNavBarOpaqueFlag(int appearance) {
-        return appearance | APPEARANCE_OPAQUE_NAVIGATION_BARS;
     }
 
     private int clearNavBarOpaqueFlag(int appearance) {

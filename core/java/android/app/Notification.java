@@ -6342,10 +6342,11 @@ public class Notification implements Parcelable
             ApplicationInfo applicationInfo = n.extras.getParcelable(
                     EXTRA_BUILDER_APPLICATION_INFO);
             Context builderContext;
-            if (applicationInfo != null) {
+            if (applicationInfo != null && applicationInfo.packageName != null) {
                 try {
-                    builderContext = context.createApplicationContext(applicationInfo,
-                            Context.CONTEXT_RESTRICTED);
+                    builderContext = context.createPackageContextAsUser(applicationInfo.packageName,
+                            Context.CONTEXT_RESTRICTED,
+                            UserHandle.getUserHandleForUid(applicationInfo.uid));
                 } catch (NameNotFoundException e) {
                     Log.e(TAG, "ApplicationInfo " + applicationInfo + " not found");
                     builderContext = context;  // try with our context

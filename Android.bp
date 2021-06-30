@@ -111,6 +111,7 @@ filegroup {
         ":framework_native_aidl",
         ":gatekeeper_aidl",
         ":gsiservice_aidl",
+        ":guiconstants_aidl",
         ":idmap2_aidl",
         ":idmap2_core_aidl",
         ":incidentcompanion_aidl",

@@ -18,8 +18,8 @@ package android.view;
 
 import android.annotation.Nullable;
 import android.graphics.Region;
+import android.gui.TouchOcclusionMode;
 import android.os.IBinder;
-import android.os.TouchOcclusionMode;
 
 import java.lang.ref.WeakReference;
 

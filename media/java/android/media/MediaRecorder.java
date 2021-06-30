@@ -844,7 +844,7 @@ public class MediaRecorder implements AudioRouting,
         setVideoSize(profile.getWidth(), profile.getHeight());
         setVideoEncodingBitRate(profile.getBitrate());
         setVideoEncoder(profile.getCodec());
-        if (profile.getProfile() > 0) {
+        if (profile.getProfile() >= 0) {
             setVideoEncodingProfileLevel(profile.getProfile(), 0 /* level */);
         }
     }
@@ -1125,10 +1125,10 @@ public class MediaRecorder implements AudioRouting,
      * @throws IllegalArgumentException when an invalid profile or level value is used.
      */
     public void setVideoEncodingProfileLevel(int profile, int level) {
-        if (profile <= 0)  {
+        if (profile < 0)  {
             throw new IllegalArgumentException("Video encoding profile is not positive");
         }
-        if (level <= 0)  {
+        if (level < 0)  {
             throw new IllegalArgumentException("Video encoding level is not positive");
         }
         setParameter("video-param-encoder-profile=" + profile);

@@ -990,7 +990,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 SessionInfo info =
                         session.generateInfoForCaller(false /*withIcon*/, Process.SYSTEM_UID);
                 if (Objects.equals(info.getInstallerPackageName(), installerPackageName)
-                        && session.userId == userId && !session.hasParentSessionId()) {
+                        && session.userId == userId && !session.hasParentSessionId()
+                        && isCallingUidOwner(session)) {
                     result.add(info);
                 }
             }

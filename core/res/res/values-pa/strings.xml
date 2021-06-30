@@ -602,7 +602,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ਕੋਈ ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਰਜ ਨਹੀਂ ਕੀਤੇ ਗਏ।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨਹੀਂ ਹੈ।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ਸੈਂਸਰ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
-    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"ਸੈਂਸਰ ਨੂੰ ਕੈਲੀਬਰੇਸ਼ਨ ਦੀ ਲੋੜ ਹੈ"</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (4385512597740168120) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ਉਂਗਲ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
@@ -620,6 +621,12 @@
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ਆਪਣੇ ਫ਼ੋਨ ਵੱਲ ਦੇਖ ਕੇ ਇਸਨੂੰ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ਅਣਲਾਕ ਕਰਨ ਦੇ ਹੋਰ ਤਰੀਕਿਆਂ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <!-- no translation found for fingerprint_recalibrate_notification_name (1414578431898579354) -->
+    <skip />
+    <!-- no translation found for fingerprint_recalibrate_notification_title (2406561052064558497) -->
+    <skip />
+    <!-- no translation found for fingerprint_recalibrate_notification_content (8519935717822194943) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ਸਟੀਕ ਚਿਹਰਾ ਡਾਟਾ ਕੈਪਚਰ ਨਹੀਂ ਹੋਇਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਚਮਕ। ਹਲਕੀ ਚਮਕ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ਬਹੁਤ ਗੂੜ੍ਹਾ। ਤੇਜ਼ ਰੋਸ਼ਨੀ ਕਰਕੇ ਦੇਖੋ।"</string>
