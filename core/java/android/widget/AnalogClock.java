@@ -111,7 +111,9 @@ public class AnalogClock extends View {
 
         mSecondsHandFps = AppGlobals.getIntCoreSetting(
                 WidgetFlags.KEY_ANALOG_CLOCK_SECONDS_HAND_FPS,
-                WidgetFlags.ANALOG_CLOCK_SECONDS_HAND_FPS_DEFAULT);
+                context.getResources()
+                        .getInteger(com.android.internal.R.integer
+                                .config_defaultAnalogClockSecondsHandFps));
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.AnalogClock, defStyleAttr, defStyleRes);
@@ -720,7 +722,7 @@ public class AnalogClock extends View {
         canvas.restore();
 
         final Drawable secondHand = mSecondHand;
-        if (secondHand != null) {
+        if (secondHand != null && mSecondsHandFps > 0) {
             canvas.save();
             canvas.rotate(mSeconds / 60.0f * 360.0f, x, y);
 
@@ -752,7 +754,10 @@ public class AnalogClock extends View {
         // n positions between two given numbers, where n is the number of ticks per second. This
         // ensures the second hand advances by a consistent distance despite our handler callbacks
         // occurring at inconsistent frequencies.
-        mSeconds = Math.round(rawSeconds * mSecondsHandFps) / (float) mSecondsHandFps;
+        mSeconds =
+                mSecondsHandFps <= 0
+                        ? rawSeconds
+                        : Math.round(rawSeconds * mSecondsHandFps) / (float) mSecondsHandFps;
         mMinutes = localTime.getMinute() + mSeconds / 60.0f;
         mHour = localTime.getHour() + mMinutes / 60.0f;
         mChanged = true;
@@ -789,7 +794,7 @@ public class AnalogClock extends View {
             LocalTime localTime = zonedDateTime.toLocalTime();
 
             long millisUntilNextTick;
-            if (mSecondHand == null) {
+            if (mSecondHand == null || mSecondsHandFps <= 0) {
                 // If there's no second hand, then tick at the start of the next minute.
                 //
                 // This must be done with ZonedDateTime as opposed to LocalDateTime to ensure proper
