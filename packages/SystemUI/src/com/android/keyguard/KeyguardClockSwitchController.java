@@ -191,10 +191,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                     .getDimensionPixelSize(R.dimen.below_clock_padding_end);
             mSmartspaceView.setPaddingRelative(startPadding, 0, endPadding, 0);
 
-            // ... but above the large clock
-            lp = new RelativeLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-            lp.addRule(RelativeLayout.BELOW, mSmartspaceView.getId());
-            mLargeClockFrame.setLayoutParams(lp);
+            updateClockLayout();
 
             View nic = mView.findViewById(
                     R.id.left_aligned_notification_icon_container);
@@ -237,6 +234,18 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      */
     public void onDensityOrFontScaleChanged() {
         mView.onDensityOrFontScaleChanged();
+
+        updateClockLayout();
+    }
+
+    private void updateClockLayout() {
+        if (mSmartspaceController.isEnabled()) {
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(MATCH_PARENT,
+                    MATCH_PARENT);
+            lp.topMargin = getContext().getResources().getDimensionPixelSize(
+                    R.dimen.keyguard_large_clock_top_margin);
+            mLargeClockFrame.setLayoutParams(lp);
+        }
     }
 
     /**
