@@ -61,6 +61,7 @@ import static org.mockito.Mockito.clearInvocations;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityOptions;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
@@ -69,7 +70,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -1255,21 +1255,24 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testStartTasksInTransaction() {
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        Bundle testOptions = new Bundle();
-        testOptions.putInt("test", 20);
+        ActivityOptions testOptions = ActivityOptions.makeBasic();
+        testOptions.setTransientLaunch();
         wct.startTask(1, null /* options */);
-        wct.startTask(2, testOptions);
-        spyOn(mWm.mAtmService);
-        doReturn(START_CANCELED).when(mWm.mAtmService).startActivityFromRecents(anyInt(), any());
+        wct.startTask(2, testOptions.toBundle());
+        spyOn(mWm.mAtmService.mTaskSupervisor);
+        doReturn(START_CANCELED).when(mWm.mAtmService.mTaskSupervisor).startActivityFromRecents(
+                anyInt(), anyInt(), anyInt(), any());
         clearInvocations(mWm.mAtmService);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
-        final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
-        verify(mWm.mAtmService, times(1)).startActivityFromRecents(eq(1), bundleCaptor.capture());
-        assertTrue(bundleCaptor.getValue().isEmpty());
+        verify(mWm.mAtmService.mTaskSupervisor, times(1)).startActivityFromRecents(
+                anyInt(), anyInt(), eq(1), any());
 
-        verify(mWm.mAtmService, times(1)).startActivityFromRecents(eq(2), bundleCaptor.capture());
-        assertEquals(20, bundleCaptor.getValue().getInt("test"));
+        final ArgumentCaptor<SafeActivityOptions> optionsCaptor =
+                ArgumentCaptor.forClass(SafeActivityOptions.class);
+        verify(mWm.mAtmService.mTaskSupervisor, times(1)).startActivityFromRecents(
+                anyInt(), anyInt(), eq(2), optionsCaptor.capture());
+        assertTrue(optionsCaptor.getValue().getOriginalOptions().getTransientLaunch());
     }
 
     /**

@@ -39,6 +39,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.view.RemoteAnimationAdapter;
 import android.window.IRemoteTransition;
 
 import androidx.annotation.BinderThread;
@@ -425,6 +426,16 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     (controller) -> {
                         controller.startTask(taskId, stage, position, options);
                     });
+        }
+
+        @Override
+        public void startTasksWithLegacyTransition(int mainTaskId, @Nullable Bundle mainOptions,
+                int sideTaskId, @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
+                RemoteAnimationAdapter adapter) {
+            executeRemoteCallWithTaskPermission(mController, "startTasks",
+                    (controller) -> controller.mStageCoordinator.startTasksWithLegacyTransition(
+                            mainTaskId, mainOptions, sideTaskId, sideOptions, sidePosition,
+                            adapter));
         }
 
         @Override
