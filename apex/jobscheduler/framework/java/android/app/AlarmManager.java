@@ -1294,22 +1294,31 @@ public class AlarmManager {
 
     /**
      * Called to check if the caller can schedule exact alarms.
+     * Your app schedules exact alarms when it calls any of the {@code setExact...} or
+     * {@link #setAlarmClock(AlarmClockInfo, PendingIntent) setAlarmClock} API methods.
      * <p>
-     * Apps targeting {@link Build.VERSION_CODES#S} or higher can schedule exact alarms if they
-     * have the {@link Manifest.permission#SCHEDULE_EXACT_ALARM} permission. These apps can also
+     * Apps targeting {@link Build.VERSION_CODES#S} or higher can schedule exact alarms only if they
+     * have the {@link Manifest.permission#SCHEDULE_EXACT_ALARM} permission or they are on the
+     * device's power-save exemption list.
+     * These apps can also
      * start {@link android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM} to
-     * request this from the user.
+     * request this permission from the user.
      * <p>
      * Apps targeting lower sdk versions, can always schedule exact alarms.
      *
-     * @return {@code true} if the caller can schedule exact alarms.
+     * @return {@code true} if the caller can schedule exact alarms, {@code false} otherwise.
      * @see android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM
      * @see #setExact(int, long, PendingIntent)
      * @see #setExactAndAllowWhileIdle(int, long, PendingIntent)
      * @see #setAlarmClock(AlarmClockInfo, PendingIntent)
+     * @see android.os.PowerManager#isIgnoringBatteryOptimizations(String)
      */
     public boolean canScheduleExactAlarms() {
-        return hasScheduleExactAlarm(mContext.getOpPackageName(), mContext.getUserId());
+        try {
+            return mService.canScheduleExactAlarms(mContext.getOpPackageName());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
