@@ -613,10 +613,8 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ફિંગરપ્રિન્ટ આયકન"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ફેસ અનલૉક"</string>
-    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
-    <skip />
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ફેસ અનલૉકની સુવિધામાં સમસ્યા"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"તમારા ચહેરાનું મૉડલ ડિલીટ કરવા માટે ટૅપ કરો, પછી તમારો ચહેરો ફરીથી ઉમેરો"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ફેસ અનલૉક સુવિધાનું સેટઅપ કરો"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"તમારા ફોનની તરફ જોઈને તેને અનલૉક કરો"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"અનલૉક કરવાની બીજી રીતોનું સેટઅપ કરો"</string>

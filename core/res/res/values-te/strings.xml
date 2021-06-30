@@ -787,7 +787,7 @@
     <item msgid="7640927178025203330">"అనుకూలం"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="6144047813304847762">"కార్యాలయం"</item>
+    <item msgid="6144047813304847762">"వర్క్"</item>
     <item msgid="7402720230065674193">"ఇతరం"</item>
     <item msgid="808230403067569648">"అనుకూలం"</item>
   </string-array>
@@ -849,7 +849,7 @@
     <string name="imProtocolIcq" msgid="2410325380427389521">"ICQ"</string>
     <string name="imProtocolJabber" msgid="7919269388889582015">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="8684458700669564172">"కార్యాలయం"</string>
+    <string name="orgTypeWork" msgid="8684458700669564172">"వర్క్"</string>
     <string name="orgTypeOther" msgid="5450675258408005553">"ఇతరం"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"అనుకూలం"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"అనుకూలం"</string>
