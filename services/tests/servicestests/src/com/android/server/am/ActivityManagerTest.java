@@ -94,6 +94,17 @@ public class ActivityManagerTest {
             "com.android.servicestests.apps.simpleservicetestapp.ACTION_FGS_STATS_TEST";
     private static final String EXTRA_MESSENGER = "extra_messenger";
 
+    private static final String EXTRA_CALLBACK = "callback";
+    private static final String EXTRA_COMMAND = "command";
+    private static final String EXTRA_FLAGS = "flags";
+    private static final String EXTRA_TARGET_PACKAGE = "target_package";
+
+    private static final int COMMAND_INVALID = 0;
+    private static final int COMMAND_EMPTY = 1;
+    private static final int COMMAND_BIND_SERVICE = 2;
+    private static final int COMMAND_UNBIND_SERVICE = 3;
+    private static final int COMMAND_STOP_SELF = 4;
+
     private IActivityManager mService;
     private IRemoteCallback mCallback;
     private Context mContext;
@@ -333,6 +344,12 @@ public class ActivityManagerTest {
         SettingsSession<String> amConstantsSettings = null;
         DeviceConfigSession<Long> freezerDebounceTimeout = null;
         MyServiceConnection autoConnection = null;
+        final ActivityManager am = mContext.getSystemService(ActivityManager.class);
+        final PackageManager pm = mContext.getPackageManager();
+        final int uid1 = pm.getPackageUid(TEST_APP1, 0);
+        final int uid2 = pm.getPackageUid(TEST_APP2, 0);
+        final MyUidImportanceListener uid1Listener = new MyUidImportanceListener(uid1);
+        final MyUidImportanceListener uid2Listener = new MyUidImportanceListener(uid2);
         try {
             if (!freezerWasEnabled) {
                 freezerEnabled = new SettingsSession<>(
@@ -346,7 +363,7 @@ public class ActivityManagerTest {
                 }
             }
             freezerDebounceTimeout = new DeviceConfigSession<>(
-                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                     CachedAppOptimizer.KEY_FREEZER_DEBOUNCE_TIMEOUT,
                     DeviceConfig::getLong, CachedAppOptimizer.DEFAULT_FREEZER_DEBOUNCE_TIMEOUT);
             freezerDebounceTimeout.set(waitFor);
@@ -359,13 +376,20 @@ public class ActivityManagerTest {
             amConstantsSettings.set(
                     ActivityManagerConstants.KEY_MAX_SERVICE_INACTIVITY + "=" + waitFor);
 
+            runShellCommand("cmd deviceidle whitelist +" + TEST_APP1);
+            runShellCommand("cmd deviceidle whitelist +" + TEST_APP2);
+
+            am.addOnUidImportanceListener(uid1Listener,
+                    RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE);
+            am.addOnUidImportanceListener(uid2Listener, RunningAppProcessInfo.IMPORTANCE_CACHED);
+
             final Intent intent = new Intent();
             intent.setClassName(TEST_APP1, TEST_CLASS);
 
-            final CountDownLatch latch = new CountDownLatch(1);
+            CountDownLatch latch = new CountDownLatch(1);
             autoConnection = new MyServiceConnection(latch);
             mContext.bindService(intent, autoConnection,
-                    Context.BIND_AUTO_CREATE | Context.BIND_ALLOW_OOM_MANAGEMENT);
+                    Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY);
             try {
                 assertTrue("Timeout to bind to service " + intent.getComponent(),
                         latch.await(AWAIT_TIMEOUT, TimeUnit.MILLISECONDS));
@@ -383,6 +407,37 @@ public class ActivityManagerTest {
 
             // It still shouldn't be frozen, although it's been in cached state.
             assertFalse(TEST_APP1 + " shouldn't be frozen now.", isAppFrozen(TEST_APP1));
+
+            final CountDownLatch[] latchHolder = new CountDownLatch[1];
+            final IRemoteCallback callback = new IRemoteCallback.Stub() {
+                @Override
+                public void sendResult(Bundle bundle) {
+                    if (bundle != null) {
+                        latchHolder[0].countDown();
+                    }
+                }
+            };
+
+            // Bind from app1 to app2 without BIND_WAIVE_PRIORITY.
+            final Bundle extras = new Bundle();
+            extras.putBinder(EXTRA_CALLBACK, callback.asBinder());
+            latchHolder[0] = new CountDownLatch(1);
+            sendCommand(COMMAND_BIND_SERVICE, TEST_APP1, TEST_APP2, extras);
+            assertTrue("Timed out to bind to " + TEST_APP2, latchHolder[0].await(
+                    waitFor, TimeUnit.MILLISECONDS));
+
+            // Stop service in app1
+            extras.clear();
+            sendCommand(COMMAND_STOP_SELF, TEST_APP1, TEST_APP1, extras);
+
+            assertTrue(TEST_APP2 + " should be in cached", uid2Listener.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_CACHED, waitFor));
+
+            // Wait for the freezer kick in if there is any.
+            Thread.sleep(waitFor * 4);
+
+            // It still shouldn't be frozen, although it's been in cached state.
+            assertFalse(TEST_APP2 + " shouldn't be frozen now.", isAppFrozen(TEST_APP2));
         } finally {
             toggleScreenOn(true);
             if (amConstantsSettings != null) {
@@ -397,7 +452,24 @@ public class ActivityManagerTest {
             if (autoConnection != null) {
                 mContext.unbindService(autoConnection);
             }
+            am.removeOnUidImportanceListener(uid1Listener);
+            am.removeOnUidImportanceListener(uid2Listener);
+            sendCommand(COMMAND_UNBIND_SERVICE, TEST_APP1, TEST_APP2, null);
+            sendCommand(COMMAND_UNBIND_SERVICE, TEST_APP2, TEST_APP1, null);
+            runShellCommand("cmd deviceidle whitelist -" + TEST_APP1);
+            runShellCommand("cmd deviceidle whitelist -" + TEST_APP2);
         }
+    }
+
+    private void sendCommand(int command, String sourcePkg, String targetPkg, Bundle extras) {
+        final Intent intent = new Intent();
+        intent.setClassName(sourcePkg, TEST_CLASS);
+        intent.putExtra(EXTRA_COMMAND, command);
+        intent.putExtra(EXTRA_TARGET_PACKAGE, targetPkg);
+        if (extras != null) {
+            intent.putExtras(extras);
+        }
+        mContext.startService(intent);
     }
 
     private boolean isFreezerEnabled() throws Exception {
