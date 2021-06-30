@@ -604,6 +604,7 @@ public final class SelectionActionModeHelper {
          */
         public void onSelectionDestroyed() {
             mAllowReset = false;
+            mTextView.notifyContentCaptureTextChanged();
             // Wait a few ms to see if the selection was destroyed because of a text change event.
             mDelayedLogAbandon.schedule(100 /* ms */);
         }
