@@ -20,7 +20,6 @@ import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -38,7 +37,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.Editable;
@@ -72,13 +70,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -111,8 +109,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     private final SendButtonTextWatcher mTextWatcher;
     private final TextView.OnEditorActionListener mEditorActionHandler;
-    private final NotificationRemoteInputManager mRemoteInputManager;
     private final UiEventLogger mUiEventLogger;
+    private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final List<OnFocusChangeListener> mEditTextFocusChangeListeners = new ArrayList<>();
     private final List<OnSendRemoteInputListener> mOnSendListeners = new ArrayList<>();
     private RemoteEditText mEditText;
@@ -123,9 +121,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private RemoteInput[] mRemoteInputs;
     private RemoteInput mRemoteInput;
     private RemoteInputController mController;
-    private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
-
-    private IStatusBarService mStatusBarManagerService;
 
     private NotificationEntry mEntry;
 
@@ -134,7 +129,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private int mRevealCx;
     private int mRevealCy;
     private int mRevealR;
-    private ContentInfo mAttachment;
 
     private boolean mColorized;
     private int mTint;
@@ -143,7 +137,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private NotificationViewWrapper mWrapper;
     private Consumer<Boolean> mOnVisibilityChangedListener;
     private NotificationRemoteInputManager.BouncerChecker mBouncerChecker;
-    private LinearLayout mContentView;
     private ImageView mDelete;
     private ImageView mDeleteBg;
 
@@ -174,10 +167,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mTextWatcher = new SendButtonTextWatcher();
         mEditorActionHandler = new EditorActionHandler();
         mRemoteInputQuickSettingsDisabler = Dependency.get(RemoteInputQuickSettingsDisabler.class);
-        mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
         mUiEventLogger = Dependency.get(UiEventLogger.class);
-        mStatusBarManagerService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         TypedArray ta = getContext().getTheme().obtainStyledAttributes(new int[]{
                 com.android.internal.R.attr.colorAccent,
                 com.android.internal.R.attr.colorSurface,
@@ -266,8 +256,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mDeleteBg.setImageTintBlendMode(BlendMode.SRC_IN);
         mDelete.setImageTintBlendMode(BlendMode.SRC_IN);
         mDelete.setOnClickListener(v -> setAttachment(null));
-        mContentView = findViewById(R.id.remote_input_content);
-        mContentView.setBackground(mContentBackground);
+        LinearLayout contentView = findViewById(R.id.remote_input_content);
+        contentView.setBackground(mContentBackground);
         mEditText = findViewById(R.id.remote_input_text);
         mEditText.setInnerFocusable(false);
         mEditText.setWindowInsetsAnimationCallback(
@@ -293,15 +283,19 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void setAttachment(ContentInfo item) {
-        if (mAttachment != null) {
+        if (mEntry.remoteInputAttachment != null && mEntry.remoteInputAttachment != item) {
             // We need to release permissions when sending the attachment to the target
             // app or if it is deleted by the user. When sending to the target app, we
             // can safely release permissions as soon as the call to
             // `mController.grantInlineReplyUriPermission` is made (ie, after the grant
             // to the target app has been created).
-            mAttachment.releasePermissions();
+            mEntry.remoteInputAttachment.releasePermissions();
         }
-        mAttachment = item;
+        mEntry.remoteInputAttachment = item;
+        if (item != null) {
+            mEntry.remoteInputUri = item.getClip().getItemAt(0).getUri();
+            mEntry.remoteInputMimeType = item.getClip().getDescription().getMimeType(0);
+        }
         View attachment = findViewById(R.id.remote_input_content_container);
         ImageView iconView = findViewById(R.id.remote_input_attachment_image);
         iconView.setImageDrawable(null);
@@ -323,10 +317,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
      * @return returns intent with granted URI permissions that should be used immediately
      */
     private Intent prepareRemoteInput() {
-        if (mAttachment == null) return prepareRemoteInputFromText();
-        return prepareRemoteInputFromData(
-                mAttachment.getClip().getDescription().getMimeType(0),
-                mAttachment.getClip().getItemAt(0).getUri());
+        return mEntry.remoteInputAttachment == null
+                ? prepareRemoteInputFromText()
+                : prepareRemoteInputFromData(mEntry.remoteInputMimeType, mEntry.remoteInputUri);
     }
 
     private Intent prepareRemoteInputFromText() {
@@ -337,7 +330,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 results);
 
         mEntry.remoteInputText = mEditText.getText().toString();
-        // TODO(b/188646667): store attachment to entry
+        setAttachment(null);
         mEntry.remoteInputUri = null;
         mEntry.remoteInputMimeType = null;
 
@@ -363,7 +356,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         RemoteInput.addResultsToIntent(mRemoteInputs, fillInIntent,
                 bundle);
 
-        CharSequence attachmentText = mAttachment.getClip().getDescription().getLabel();
+        CharSequence attachmentText =
+                mEntry.remoteInputAttachment.getClip().getDescription().getLabel();
 
         CharSequence attachmentLabel = TextUtils.isEmpty(attachmentText)
                 ? mContext.getString(R.string.remote_input_image_insertion_text)
@@ -374,14 +368,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 : "\"" + attachmentLabel + "\" " + mEditText.getText();
 
         mEntry.remoteInputText = fullText;
-        // TODO(b/188646667): store attachment to entry
-        mEntry.remoteInputMimeType = contentType;
-        mEntry.remoteInputUri = data;
 
         // mirror prepareRemoteInputFromText for text input
         if (mEntry.editedSuggestionInfo == null) {
             RemoteInput.setResultsSource(fillInIntent, RemoteInput.SOURCE_FREE_FORM_INPUT);
-        } else if (mAttachment == null) {
+        } else if (mEntry.remoteInputAttachment == null) {
             RemoteInput.setResultsSource(fillInIntent, RemoteInput.SOURCE_CHOICE);
         }
 
@@ -437,6 +428,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                     mEntry.getSbn().getUid(), mEntry.getSbn().getPackageName(),
                     mEntry.getSbn().getInstanceId());
         }
+
         setAttachment(null);
     }
 
@@ -477,7 +469,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private void onDefocus(boolean animate, boolean logClose) {
         mController.removeRemoteInput(mEntry, mToken);
         mEntry.remoteInputText = mEditText.getText();
-        // TODO(b/188646667): store attachment to entry
 
         // During removal, we get reattached and lose focus. Not hiding in that
         // case to prevent flicker.
@@ -565,7 +556,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEntry.editedSuggestionInfo = editedSuggestionInfo;
         if (editedSuggestionInfo != null) {
             mEntry.remoteInputText = editedSuggestionInfo.originalText;
-            // TODO(b/188646667): store attachment to entry
+            mEntry.remoteInputAttachment = null;
         }
     }
 
@@ -608,7 +599,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setSelection(mEditText.length());
         mEditText.requestFocus();
         mController.addRemoteInput(mEntry, mToken);
-        // TODO(b/188646667): restore attachment from entry
+        setAttachment(mEntry.remoteInputAttachment);
 
         mRemoteInputQuickSettingsDisabler.setRemoteInputActive(true);
 
@@ -631,7 +622,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private void reset() {
         mResetting = true;
         mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
-        // TODO(b/188646667): store attachment at time of reset to entry
 
         mEditText.getText().clear();
         mEditText.setEnabled(true);
@@ -640,7 +630,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mController.removeSpinning(mEntry.getKey(), mToken);
         updateSendButton();
         onDefocus(false /* animate */, false /* logClose */);
-        // TODO(b/188646667): clear attachment
+        setAttachment(null);
 
         mResetting = false;
     }
@@ -657,7 +647,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void updateSendButton() {
-        mSendButton.setEnabled(mEditText.length() != 0 || mAttachment != null);
+        mSendButton.setEnabled(mEditText.length() != 0 || mEntry.remoteInputAttachment != null);
     }
 
     public void close() {
@@ -857,7 +847,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                     && event.getAction() == KeyEvent.ACTION_DOWN;
 
             if (isSoftImeEvent || isKeyboardEnterKey) {
-                if (mEditText.length() > 0 || mAttachment != null) {
+                if (mEditText.length() > 0 || mEntry.remoteInputAttachment != null) {
                     sendRemoteInput(prepareRemoteInput());
                 }
                 // Consume action to prevent IME from closing.
@@ -928,7 +918,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                     // our focus, so we'll need to save our text here.
                     if (mRemoteInputView != null) {
                         mRemoteInputView.mEntry.remoteInputText = getText();
-                        // TODO(b/188646667): store attachment to entry
                     }
                 }
                 return;

@@ -602,7 +602,8 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ಯಾವುದೇ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ ಅನ್ನು ನೋಂದಣಿ ಮಾಡಿಲ್ಲ."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ಈ ಸಾಧನವು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಹೊಂದಿಲ್ಲ."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ಸೆನ್ಸಾರ್ ಅನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"ಸೆನ್ಸರ್‌ಗೆ ಕ್ಯಾಲಿಬ್ರೇಶನ್‌ನ ಅಗತ್ಯವಿದೆ"</string>
+    <!-- no translation found for fingerprint_error_bad_calibration (4385512597740168120) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ಫಿಂಗರ್ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ಬಳಸಿ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಅಥವಾ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಬಳಸಿ"</string>
@@ -612,14 +613,18 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ಫೇಸ್ ಅನ್‌ಲಾಕ್"</string>
-    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
-    <skip />
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಕುರಿತು ಸಮಸ್ಯೆ ಇದೆ"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ನಿಮ್ಮ ಫೇಸ್ ಮಾಡೆಲ್ ಅನ್ನು ಅಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ, ನಂತರ ನಿಮ್ಮ ಫೇಸ್ ಮಾಡೆಲ್ ಅನ್ನು ಪುನಃ ಸೇರಿಸಿ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ಫೋನ್ ಅನ್ನು ನೋಡುವ ಮೂಲಕ ಅನ್‌ಲಾಕ್‌ ಮಾಡಿ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಹೆಚ್ಚಿನ ಮಾರ್ಗಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಸೇರಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <!-- no translation found for fingerprint_recalibrate_notification_name (1414578431898579354) -->
+    <skip />
+    <!-- no translation found for fingerprint_recalibrate_notification_title (2406561052064558497) -->
+    <skip />
+    <!-- no translation found for fingerprint_recalibrate_notification_content (8519935717822194943) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ಸರಿಯಾಗಿ ಮುಖ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಲಾಗಲಿಲ್ಲ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ತುಂಬಾ ಪ್ರಕಾಶಮಾನವಾಗಿದೆ ಮಂದ ಪ್ರಕಾಶಮಾನವಿರುವ ಲೈಟ್ ಬಳಸಿ"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ತುಂಬಾ ಕಪ್ಪು ಛಾಯೆಯಿದೆ. ಪ್ರಕಾಶಮಾನವಾದ ಲೈಟಿಂಗ್ ಬಳಸಿ."</string>

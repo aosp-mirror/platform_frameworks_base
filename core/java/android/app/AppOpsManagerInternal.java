@@ -209,4 +209,10 @@ public abstract class AppOpsManagerInternal {
      */
     public abstract void setModeFromPermissionPolicy(int code, int uid, @NonNull String packageName,
             int mode, @Nullable IAppOpsCallback callback);
+
+
+    /**
+     * Sets a global restriction on an op code.
+     */
+    public abstract void setGlobalRestriction(int code, boolean restricted, IBinder token);
 }

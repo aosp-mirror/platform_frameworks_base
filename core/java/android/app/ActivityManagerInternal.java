@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager.ProcessCapability;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -634,4 +635,9 @@ public abstract class ActivityManagerInternal {
      * Return the temp allowlist type when server push messaging is over the quota.
      */
     public abstract @TempAllowListType int getPushMessagingOverQuotaBehavior();
+
+    /**
+     * Returns the capability of the given uid
+     */
+    public abstract @ProcessCapability int getUidCapability(int uid);
 }
