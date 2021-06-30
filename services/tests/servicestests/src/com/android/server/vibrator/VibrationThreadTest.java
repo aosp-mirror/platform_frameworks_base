@@ -36,6 +36,7 @@ import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.IVibratorManager;
 import android.os.CombinedVibration;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
@@ -108,7 +109,9 @@ public class VibrationThreadTest {
         mTestLooper = new TestLooper();
 
         Context context = InstrumentationRegistry.getContext();
-        mEffectAdapter = new DeviceVibrationEffectAdapter(context);
+        VibrationSettings vibrationSettings = new VibrationSettings(context,
+                new Handler(mTestLooper.getLooper()));
+        mEffectAdapter = new DeviceVibrationEffectAdapter(vibrationSettings);
         mWakeLock = context.getSystemService(
                 PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
 
