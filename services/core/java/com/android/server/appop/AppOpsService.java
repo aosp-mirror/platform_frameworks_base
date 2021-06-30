@@ -4523,10 +4523,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         int callingUid = Binder.getCallingUid();
 
         // Allow any attribution tag for resolvable uids
-        int pkgUid = resolveUid(packageName);
-        if (pkgUid != Process.INVALID_UID) {
+        int pkgUid;
+        if (Objects.equals(packageName, "com.android.shell")) {
             // Special case for the shell which is a package but should be able
             // to bypass app attribution tag restrictions.
+            pkgUid = Process.SHELL_UID;
+        } else {
+            pkgUid = resolveUid(packageName);
+        }
+        if (pkgUid != Process.INVALID_UID) {
             if (pkgUid != UserHandle.getAppId(uid)) {
                 String otherUidMessage = DEBUG ? " but it is really " + pkgUid : " but it is not";
                 throw new SecurityException("Specified package " + packageName + " under uid "
@@ -6993,7 +6998,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return Process.ROOT_UID;
             case "shell":
             case "dumpstate":
-            case "com.android.shell":
                 return Process.SHELL_UID;
             case "media":
                 return Process.MEDIA_UID;
