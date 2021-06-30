@@ -39,6 +39,7 @@ import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -718,6 +719,20 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      * @see #filterAppAccess(AndroidPackage, int, int)
      */
     public abstract boolean filterAppAccess(int uid, int callingUid);
+
+    /**
+     * Fetches all app Ids that a given application is currently visible to the provided user.
+     *
+     * <p>
+     * <strong>Note: </strong>This only includes UIDs >= {@link Process#FIRST_APPLICATION_UID}
+     * as all other UIDs can already see all applications.
+     * </p>
+     *
+     * If the app is visible to all UIDs, null is returned. If the app is not visible to any
+     * applications, the int array will be empty.
+     */
+    @Nullable
+    public abstract int[] getVisibilityAllowList(@NonNull String packageName, int userId);
 
     /** Returns whether the given package was signed by the platform */
     public abstract boolean isPlatformSigned(String pkg);
