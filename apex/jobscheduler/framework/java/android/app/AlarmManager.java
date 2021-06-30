@@ -494,6 +494,9 @@ public class AlarmManager {
      * exact alarms, rescheduling each time as described above. Legacy applications
      * whose {@code targetSdkVersion} is earlier than API 19 will continue to have all
      * of their alarms, including repeating alarms, treated as exact.
+     * <p>Apps targeting {@link Build.VERSION_CODES#S} will need to set the flag
+     * {@link PendingIntent#FLAG_MUTABLE} on the {@link PendingIntent} being used to set this alarm,
+     * if they want the alarm count to be supplied with the key {@link Intent#EXTRA_ALARM_COUNT}.
      *
      * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should first
@@ -516,6 +519,7 @@ public class AlarmManager {
      * @see #ELAPSED_REALTIME_WAKEUP
      * @see #RTC
      * @see #RTC_WAKEUP
+     * @see Intent#EXTRA_ALARM_COUNT
      */
     public void setRepeating(@AlarmType int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
@@ -1004,6 +1008,9 @@ public class AlarmManager {
      * been available since API 3, your application can safely call it and be
      * assured that it will get similar behavior on both current and older versions
      * of Android.
+     * <p>Apps targeting {@link Build.VERSION_CODES#S} will need to set the flag
+     * {@link PendingIntent#FLAG_MUTABLE} on the {@link PendingIntent} being used to set this alarm,
+     * if they want the alarm count to be supplied with the key {@link Intent#EXTRA_ALARM_COUNT}.
      *
      * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should first
@@ -1038,6 +1045,7 @@ public class AlarmManager {
      * @see #INTERVAL_HOUR
      * @see #INTERVAL_HALF_DAY
      * @see #INTERVAL_DAY
+     * @see Intent#EXTRA_ALARM_COUNT
      */
     public void setInexactRepeating(@AlarmType int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
