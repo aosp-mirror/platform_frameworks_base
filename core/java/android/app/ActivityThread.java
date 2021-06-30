@@ -1169,6 +1169,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public void scheduleApplicationInfoChanged(ApplicationInfo ai) {
+            mResourcesManager.updatePendingAppInfoUpdates(ai);
             mH.removeMessages(H.APPLICATION_INFO_CHANGED, ai);
             sendMessage(H.APPLICATION_INFO_CHANGED, ai);
         }
