@@ -602,7 +602,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Walang naka-enroll na fingerprint."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Walang sensor ng fingerprint ang device na ito."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Pansamantalang na-disable ang sensor."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"Kailangang i-calibrate ang sensor"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Hindi magamit ang sensor para sa fingerprint. Bumisita sa provider ng pag-aayos"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Daliri <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Gumamit ng fingerprint"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Gumamit ng fingerprint o lock ng screen"</string>
@@ -612,14 +612,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icon ng fingerprint"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Pag-unlock Gamit ang Mukha"</string>
-    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
-    <skip />
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Isyu sa Pag-unlock Gamit ang Mukha"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"I-tap para i-delete ang iyong face model, pagkatapos ay idagdag ulit ang mukha mo"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"I-set up ang Pag-unlock Gamit ang Mukha"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"I-unlock ang iyong telepono sa pamamagitan ng pagtingin dito"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Mag-set up ng higit pang paraan para mag-unlock"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"I-tap para magdagdag ng fingerprint"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Pag-unlock Gamit ang Fingerprint"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Hindi magamit ang sensor para sa fingerprint"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Bumisita sa provider ng pag-aayos."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Hindi makakuha ng tamang face data. Subukang muli."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Masyadong maliwanag. Subukang bawasan ang liwanag."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Masyadong madilim. Subukan sa mas maliwanag."</string>

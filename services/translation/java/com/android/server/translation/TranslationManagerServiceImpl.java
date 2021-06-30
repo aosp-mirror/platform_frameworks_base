@@ -182,15 +182,28 @@ final class TranslationManagerServiceImpl extends
                     + "translation state for token=" + token + " taskId=" + taskId);
             return;
         }
+        int translationActivityUid = -1;
         try {
+            IBinder activityToken = taskTopActivityTokens.getActivityToken();
             taskTopActivityTokens.getApplicationThread().updateUiTranslationState(
-                    taskTopActivityTokens.getActivityToken(), state, sourceSpec, targetSpec,
+                    activityToken, state, sourceSpec, targetSpec,
                     viewIds, uiTranslationSpec);
             mLastActivityTokens = new WeakReference<>(taskTopActivityTokens);
+            ComponentName componentName =
+                    mActivityTaskManagerInternal.getActivityName(activityToken);
+            try {
+                if (componentName != null) {
+                    translationActivityUid =
+                            getContext().getPackageManager().getApplicationInfoAsUser(
+                                    componentName.getPackageName(), 0, getUserId()).uid;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.d(TAG, "Cannot find package for" +  componentName);
+            }
         } catch (RemoteException e) {
             Slog.w(TAG, "Update UiTranslationState fail: " + e);
         }
-        invokeCallbacks(state, sourceSpec, targetSpec);
+        invokeCallbacks(state, sourceSpec, targetSpec, translationActivityUid);
     }
 
     @GuardedBy("mLock")
@@ -216,7 +229,8 @@ final class TranslationManagerServiceImpl extends
     }
 
     private void invokeCallbacks(
-            int state, TranslationSpec sourceSpec, TranslationSpec targetSpec) {
+            int state, TranslationSpec sourceSpec, TranslationSpec targetSpec,
+            int translationActivityUid) {
         Bundle res = new Bundle();
         res.putInt(EXTRA_STATE, state);
         // TODO(177500482): Store the locale pair so it can be sent for RESUME events.
@@ -229,6 +243,14 @@ final class TranslationManagerServiceImpl extends
                 LocalServices.getService(InputMethodManagerInternal.class)
                         .getEnabledInputMethodListAsUser(mUserId);
         mCallbacks.broadcast((callback, uid) -> {
+            // callback to the application that is translated if registered.
+            if ((int) uid == translationActivityUid) {
+                try {
+                    callback.sendResult(res);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to invoke UiTranslationStateCallback: " + e);
+                }
+            }
             // Code here is non-optimal since it's temporary..
             boolean isIme = false;
             for (InputMethodInfo inputMethod : enabledInputMethods) {

@@ -1115,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"ਗੱਲਬਾਤ ਖੋਲ੍ਹੋ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ਗੱਲਬਾਤ ਵਿਜੇਟ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ਆਪਣੀ ਹੋਮ ਸਕ੍ਰੀਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਕੋਈ ਗੱਲਬਾਤ ਚੁਣੋ"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"ਤੁਹਾਨੂੰ ਕੁਝ ਸੁਨੇਹੇ ਮਿਲਣ \'ਤੇ, ਉਹਨਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਵਾਪਸ ਇੱਥੇ ਆਓ"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"ਤਰਜੀਹੀ ਗੱਲਾਂਬਾਤਾਂ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ਹਾਲੀਆ ਗੱਲਾਂਬਾਤਾਂ"</string>
     <string name="okay" msgid="6490552955618608554">"ਠੀਕ ਹੈ"</string>

@@ -22,7 +22,9 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.input.InputManager;
+import android.hardware.tv.cec.V1_0.Result;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -284,7 +286,7 @@ abstract class HdmiCecLocalDevice {
             case Constants.MESSAGE_GIVE_OSD_NAME:
                 return handleGiveOsdName(message);
             case Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID:
-                return handleGiveDeviceVendorId(null);
+                return handleGiveDeviceVendorId(message);
             case Constants.MESSAGE_CEC_VERSION:
                 return handleCecVersion();
             case Constants.MESSAGE_GET_CEC_VERSION:
@@ -392,12 +394,16 @@ abstract class HdmiCecLocalDevice {
 
     @ServiceThreadOnly
     @Constants.HandleMessageResult
-    protected int handleGiveDeviceVendorId(@Nullable SendMessageCallback callback) {
+    protected int handleGiveDeviceVendorId(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int vendorId = mService.getVendorId();
-        HdmiCecMessage cecMessage =
-                HdmiCecMessageBuilder.buildDeviceVendorIdCommand(mAddress, vendorId);
-        mService.sendCecCommand(cecMessage, callback);
+        if (vendorId == Result.FAILURE_UNKNOWN) {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_UNABLE_TO_DETERMINE);
+        } else {
+            HdmiCecMessage cecMessage =
+                    HdmiCecMessageBuilder.buildDeviceVendorIdCommand(mAddress, vendorId);
+            mService.sendCecCommand(cecMessage);
+        }
         return Constants.HANDLED;
     }
 
@@ -685,8 +691,26 @@ abstract class HdmiCecLocalDevice {
                     Message.obtain(mHandler, MSG_USER_CONTROL_RELEASE_TIMEOUT),
                     FOLLOWER_SAFETY_TIMEOUT);
             return Constants.HANDLED;
+        } else if (params.length > 0) {
+            // Handle CEC UI commands that are not mapped to an Android keycode
+            return handleUnmappedCecKeycode(params[0]);
         }
 
+        return Constants.ABORT_INVALID_OPERAND;
+    }
+
+    @ServiceThreadOnly
+    @Constants.HandleMessageResult
+    protected int handleUnmappedCecKeycode(int cecKeycode) {
+        if (cecKeycode == HdmiCecKeycode.CEC_KEYCODE_MUTE_FUNCTION) {
+            mService.getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                    AudioManager.ADJUST_MUTE, AudioManager.FLAG_SHOW_UI);
+            return Constants.HANDLED;
+        } else if (cecKeycode == HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION) {
+            mService.getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                    AudioManager.ADJUST_UNMUTE, AudioManager.FLAG_SHOW_UI);
+            return Constants.HANDLED;
+        }
         return Constants.ABORT_INVALID_OPERAND;
     }
 

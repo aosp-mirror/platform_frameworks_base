@@ -734,7 +734,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Nessun suono o vibrazione"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Nessun suono o vibrazione e appare più in basso nella sezione delle conversazioni"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Può suonare o vibrare in base alle impostazioni del telefono"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Può suonare o vibrare in base alle impostazioni del telefono. Conversazioni dalla bolla <xliff:g id="APP_NAME">%1$s</xliff:g> per impostazione predefinita."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Può suonare o vibrare in base alle impostazioni del telefono. Le conversazioni di <xliff:g id="APP_NAME">%1$s</xliff:g> appaiono come bolla per impostazione predefinita."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantiene la tua attenzione con una scorciatoia mobile a questi contenuti."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Fai stabilire al sistema se questa notifica deve emettere suoni o vibrazioni"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stato:&lt;/b&gt; promossa a Predefinita"</string>
@@ -1115,7 +1115,8 @@
     <string name="basic_status" msgid="2315371112182658176">"Apri conversazione"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widget di conversazione"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tocca una conversazione per aggiungerla alla schermata Home"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Torna qui quando avrai ricevuto qualche messaggio"</string>
+    <!-- no translation found for no_conversations_text (5354115541282395015) -->
+    <skip />
     <string name="priority_conversations" msgid="3967482288896653039">"Conversazioni prioritarie"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversazioni recenti"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1144,8 +1145,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"+<xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Visualizza messaggi recenti, chiamate senza risposta e aggiornamenti dello stato"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversazione"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"In pausa in base alla modalità Non disturbare"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ha inviato un messaggio"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ha inviato un\'immagine"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema durante la lettura dell\'indicatore di livello della batteria"</string>

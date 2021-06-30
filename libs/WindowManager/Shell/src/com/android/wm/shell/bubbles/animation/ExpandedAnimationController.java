@@ -83,12 +83,6 @@ public class ExpandedAnimationController
     private float mBubblePaddingTop;
     /** Size of each bubble. */
     private float mBubbleSizePx;
-    /** Max number of bubbles shown in row above expanded view. */
-    private int mBubblesMaxRendered;
-    /** Max amount of space to have between bubbles when expanded. */
-    private int mBubblesMaxSpace;
-    /** Amount of space between the bubbles when expanded. */
-    private float mSpaceBetweenBubbles;
     /** Whether the expand / collapse animation is running. */
     private boolean mAnimatingExpand = false;
 
@@ -211,8 +205,6 @@ public class ExpandedAnimationController
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubbleSizePx = mPositioner.getBubbleSize();
-        mBubblesMaxRendered = mPositioner.getMaxBubbles();
-        mSpaceBetweenBubbles = res.getDimensionPixelSize(R.dimen.bubble_spacing);
     }
 
     /**
@@ -628,14 +620,13 @@ public class ExpandedAnimationController
         }
     }
 
-    // TODO - could move to method on bubblePositioner if mSpaceBetweenBubbles gets moved
     /**
      * When bubbles are expanded in portrait, they display at the top of the screen in a horizontal
      * row. When in landscape or on a large screen, they show at the left or right side in a
      * vertical row. This method accounts for screen orientation and will return an x or y value
      * for the position of the bubble in the row.
      *
-     * @param index Bubble index in row.
+     * @param index bubble index in the row.
      * @return the y position of the bubble if showing vertically and the x position if showing
      * horizontally.
      */
@@ -643,15 +634,6 @@ public class ExpandedAnimationController
         if (mLayout == null) {
             return 0;
         }
-        final float positionInBar = index * (mBubbleSizePx + mSpaceBetweenBubbles);
-        Rect availableRect = mPositioner.getAvailableRect();
-        final boolean isLandscape = mPositioner.showBubblesVertically();
-        final float expandedStackSize = (mLayout.getChildCount() * mBubbleSizePx)
-                + ((mLayout.getChildCount() - 1) * mSpaceBetweenBubbles);
-        final float centerPosition = isLandscape
-                ? availableRect.centerY()
-                : availableRect.centerX();
-        final float rowStart = centerPosition - (expandedStackSize / 2f);
-        return rowStart + positionInBar;
+        return mPositioner.getBubbleXOrYForOrientation(index, mLayout.getChildCount());
     }
 }

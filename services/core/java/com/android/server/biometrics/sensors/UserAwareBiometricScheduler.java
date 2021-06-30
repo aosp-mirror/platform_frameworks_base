@@ -50,16 +50,26 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
 
     @NonNull private final CurrentUserRetriever mCurrentUserRetriever;
     @NonNull private final UserSwitchCallback mUserSwitchCallback;
-    @NonNull @VisibleForTesting final ClientFinishedCallback mClientFinishedCallback;
-
     @Nullable private StopUserClient<?> mStopUserClient;
 
-    @VisibleForTesting
-    class ClientFinishedCallback implements BaseClientMonitor.Callback {
+    private class ClientFinishedCallback implements BaseClientMonitor.Callback {
+        private final BaseClientMonitor mOwner;
+
+        ClientFinishedCallback(BaseClientMonitor owner) {
+            mOwner = owner;
+        }
+
         @Override
         public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             mHandler.post(() -> {
-                Slog.d(getTag(), "[Client finished] " + clientMonitor + ", success: " + success);
+                if (mOwner == clientMonitor && mOwner == mCurrentOperation.mClientMonitor) {
+                    Slog.d(getTag(), "[Client finished] "
+                            + clientMonitor + ", success: " + success);
+                    mCurrentOperation = null;
+                } else {
+                    Slog.e(getTag(), "[Client finished, but not current operation], actual: "
+                            + mCurrentOperation + ", expected: " + mOwner);
+                }
 
                 startNextOperationIfIdle();
             });
@@ -76,7 +86,6 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
 
         mCurrentUserRetriever = currentUserRetriever;
         mUserSwitchCallback = userSwitchCallback;
-        mClientFinishedCallback = new ClientFinishedCallback();
     }
 
     public UserAwareBiometricScheduler(@NonNull String tag,
@@ -112,17 +121,27 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
         } else if (currentUserId == UserHandle.USER_NULL) {
             final BaseClientMonitor startClient =
                     mUserSwitchCallback.getStartUserClient(nextUserId);
+            final ClientFinishedCallback finishedCallback =
+                    new ClientFinishedCallback(startClient);
+
             Slog.d(getTag(), "[Starting User] " + startClient);
-            startClient.start(mClientFinishedCallback);
+            startClient.start(finishedCallback);
+            mCurrentOperation = new Operation(
+                    startClient, finishedCallback, Operation.STATE_STARTED);
         } else {
             if (mStopUserClient != null) {
                 Slog.d(getTag(), "[Waiting for StopUser] " + mStopUserClient);
             } else {
                 mStopUserClient = mUserSwitchCallback
                         .getStopUserClient(currentUserId);
+                final ClientFinishedCallback finishedCallback =
+                        new ClientFinishedCallback(mStopUserClient);
+
                 Slog.d(getTag(), "[Stopping User] current: " + currentUserId
                         + ", next: " + nextUserId + ". " + mStopUserClient);
-                mStopUserClient.start(mClientFinishedCallback);
+                mStopUserClient.start(finishedCallback);
+                mCurrentOperation = new Operation(
+                        mStopUserClient, finishedCallback, Operation.STATE_STARTED);
             }
         }
     }

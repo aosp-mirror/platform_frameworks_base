@@ -10134,7 +10134,22 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(getCallingUid()) != null) {
             return EmptyArray.STRING;
         }
-        return mPermissionManager.getAppOpPermissionPackages(permissionName);
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+
+        final ArraySet<String> packageNames = new ArraySet(
+                mPermissionManager.getAppOpPermissionPackages(permissionName));
+        synchronized (mLock) {
+            for (int i = packageNames.size() - 1; i >= 0; i--) {
+                final String packageName = packageNames.valueAt(i);
+                if (!shouldFilterApplicationLocked(mSettings.getPackageLPr(packageName),
+                        callingUid, callingUserId)) {
+                    continue;
+                }
+                packageNames.removeAt(i);
+            }
+        }
+        return packageNames.toArray(new String[packageNames.size()]);
     }
 
     @Override
@@ -21479,7 +21494,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // user handle installed state
         int[] allUsers;
         final int freezeUser;
-        final SparseArray<Pair<Integer, String>> enabledStateAndCallerPerUser;
+        final SparseArray<TempUserState> priorUserStates;
         /** enabled state of the uninstalled application */
         synchronized (mLock) {
             uninstalledPs = mSettings.getPackageLPr(packageName);
@@ -21530,16 +21545,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 // We're downgrading a system app, which will apply to all users, so
                 // freeze them all during the downgrade
                 freezeUser = UserHandle.USER_ALL;
-                enabledStateAndCallerPerUser = new SparseArray<>();
+                priorUserStates = new SparseArray<>();
                 for (int i = 0; i < allUsers.length; i++) {
                     PackageUserState userState = uninstalledPs.readUserState(allUsers[i]);
-                    Pair<Integer, String> enabledStateAndCaller =
-                            new Pair<>(userState.enabled, userState.lastDisableAppCaller);
-                    enabledStateAndCallerPerUser.put(allUsers[i], enabledStateAndCaller);
+                    priorUserStates.put(allUsers[i],
+                            new TempUserState(userState.enabled, userState.lastDisableAppCaller,
+                                    userState.installed));
                 }
             } else {
                 freezeUser = removeUser;
-                enabledStateAndCallerPerUser = null;
+                priorUserStates = null;
             }
         }
 
@@ -21576,6 +21591,30 @@ public class PackageManagerService extends IPackageManager.Stub
             if (info.args != null) {
                 info.args.doPostDeleteLI(true);
             }
+
+            boolean reEnableStub = false;
+
+            if (priorUserStates != null) {
+                synchronized (mLock) {
+                    for (int i = 0; i < allUsers.length; i++) {
+                        TempUserState priorUserState = priorUserStates.get(allUsers[i]);
+                        int enabledState = priorUserState.enabledState;
+                        PackageSetting pkgSetting = getPackageSetting(packageName);
+                        pkgSetting.setEnabled(enabledState, allUsers[i],
+                                priorUserState.lastDisableAppCaller);
+
+                        AndroidPackage aPkg = pkgSetting.getPkg();
+                        boolean pkgEnabled = aPkg != null && aPkg.isEnabled();
+                        if (!reEnableStub && priorUserState.installed
+                                && ((enabledState == COMPONENT_ENABLED_STATE_DEFAULT && pkgEnabled)
+                                        || enabledState == COMPONENT_ENABLED_STATE_ENABLED)) {
+                            reEnableStub = true;
+                        }
+                    }
+                    mSettings.writeAllUsersPackageRestrictionsLPr();
+                }
+            }
+
             final AndroidPackage stubPkg =
                     (disabledSystemPs == null) ? null : disabledSystemPs.pkg;
             if (stubPkg != null && stubPkg.isStub()) {
@@ -21585,19 +21624,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 if (stubPs != null) {
-                    boolean enable = false;
-                    for (int aUserId : allUsers) {
-                        if (stubPs.getInstalled(aUserId)) {
-                            int enabled = stubPs.getEnabled(aUserId);
-                            if (enabled == COMPONENT_ENABLED_STATE_DEFAULT
-                                    || enabled == COMPONENT_ENABLED_STATE_ENABLED) {
-                                enable = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (enable) {
+                    if (reEnableStub) {
                         if (DEBUG_COMPRESSION) {
                             Slog.i(TAG, "Enabling system stub after removal; pkg: "
                                     + stubPkg.getPackageName());
@@ -21607,19 +21634,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         Slog.i(TAG, "System stub disabled for all users, leaving uncompressed "
                                 + "after removal; pkg: " + stubPkg.getPackageName());
                     }
-                }
-            }
-            if (enabledStateAndCallerPerUser != null) {
-                synchronized (mLock) {
-                    for (int i = 0; i < allUsers.length; i++) {
-                        Pair<Integer, String> enabledStateAndCaller =
-                                enabledStateAndCallerPerUser.get(allUsers[i]);
-                        getPackageSetting(packageName)
-                                .setEnabled(enabledStateAndCaller.first,
-                                        allUsers[i],
-                                        enabledStateAndCaller.second);
-                    }
-                    mSettings.writeAllUsersPackageRestrictionsLPr();
                 }
             }
         }
@@ -26479,7 +26493,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             scheduleWritePackageRestrictionsLocked(userId);
             scheduleWritePackageListLocked(userId);
-            mAppsFilter.onUserCreated(userId);
+            mAppsFilter.onUsersChanged();
         }
     }
 
@@ -28993,6 +29007,20 @@ public class PackageManagerService extends IPackageManager.Stub
                 resolvedType != null ? new String[] { resolvedType } : null,
                 PendingIntent.FLAG_IMMUTABLE, null /* bOptions */, userId);
         return new IntentSender(target);
+    }
+
+    private static class TempUserState {
+        public final int enabledState;
+        @Nullable
+        public final String lastDisableAppCaller;
+        public final boolean installed;
+
+        private TempUserState(int enabledState, @Nullable String lastDisableAppCaller,
+                boolean installed) {
+            this.enabledState = enabledState;
+            this.lastDisableAppCaller = lastDisableAppCaller;
+            this.installed = installed;
+        }
     }
 }
 

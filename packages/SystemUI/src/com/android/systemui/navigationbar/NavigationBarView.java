@@ -413,6 +413,13 @@ public class NavigationBarView extends FrameLayout implements
         return super.onTouchEvent(event);
     }
 
+    /**
+     * If we're blurring the shade window.
+     */
+    public void setWindowHasBlurs(boolean hasBlurs) {
+        mRegionSamplingHelper.setWindowHasBlurs(hasBlurs);
+    }
+
     void onTransientStateChanged(boolean isTransient) {
         mEdgeBackGestureHandler.onNavBarTransientStateChanged(isTransient);
 

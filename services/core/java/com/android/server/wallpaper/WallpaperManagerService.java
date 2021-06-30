@@ -1816,26 +1816,26 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     @Override
     public void onUnlockUser(final int userId) {
-        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
-        t.traceBegin("on-unlock-user-" + userId);
-        try {
-            synchronized (mLock) {
-                if (mCurrentUserId == userId) {
-                    if (mWaitingForUnlock) {
-                        // the desired wallpaper is not direct-boot aware, load it now
-                        final WallpaperData systemWallpaper =
-                                getWallpaperSafeLocked(userId, FLAG_SYSTEM);
-                        switchWallpaper(systemWallpaper, null);
-                        notifyCallbacksLocked(systemWallpaper);
-                    }
+        synchronized (mLock) {
+            if (mCurrentUserId == userId) {
+                if (mWaitingForUnlock) {
+                    // the desired wallpaper is not direct-boot aware, load it now
+                    final WallpaperData systemWallpaper =
+                            getWallpaperSafeLocked(userId, FLAG_SYSTEM);
+                    switchWallpaper(systemWallpaper, null);
+                    notifyCallbacksLocked(systemWallpaper);
+                }
 
-                    // Make sure that the SELinux labeling of all the relevant files is correct.
-                    // This corrects for mislabeling bugs that might have arisen from move-to
-                    // operations involving the wallpaper files.  This isn't timing-critical,
-                    // so we do it in the background to avoid holding up the user unlock operation.
-                    if (!mUserRestorecon.get(userId)) {
-                        mUserRestorecon.put(userId, true);
-                        Runnable relabeler = () -> {
+                // Make sure that the SELinux labeling of all the relevant files is correct.
+                // This corrects for mislabeling bugs that might have arisen from move-to
+                // operations involving the wallpaper files.  This isn't timing-critical,
+                // so we do it in the background to avoid holding up the user unlock operation.
+                if (!mUserRestorecon.get(userId)) {
+                    mUserRestorecon.put(userId, true);
+                    Runnable relabeler = () -> {
+                        final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+                        t.traceBegin("Wallpaper_selinux_restorecon-" + userId);
+                        try {
                             final File wallpaperDir = getWallpaperDir(userId);
                             for (String filename : sPerUserFiles) {
                                 File f = new File(wallpaperDir, filename);
@@ -1843,13 +1843,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                     SELinux.restorecon(f);
                                 }
                             }
-                        };
-                        BackgroundThread.getHandler().post(relabeler);
-                    }
+                        } finally {
+                            t.traceEnd();
+                        }
+                    };
+                    BackgroundThread.getHandler().post(relabeler);
                 }
             }
-        } finally {
-            t.traceEnd();
         }
     }
 
@@ -1868,7 +1868,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     void switchUser(int userId, IRemoteCallback reply) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
-        t.traceBegin("switch-user-" + userId);
+        t.traceBegin("Wallpaper_switch-user-" + userId);
         try {
             final WallpaperData systemWallpaper;
             final WallpaperData lockWallpaper;

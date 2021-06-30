@@ -432,6 +432,16 @@ public final class DeviceConfig {
     public static final String NAMESPACE_STORAGE_NATIVE_BOOT = "storage_native_boot";
 
     /**
+     * Namespace for all SurfaceFlinger features that are used at the native level.
+     * These features are applied on boot or after reboot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_SURFACE_FLINGER_NATIVE_BOOT =
+            "surface_flinger_native_boot";
+
+    /**
      * Namespace for swcodec native related features.
      *
      * @hide

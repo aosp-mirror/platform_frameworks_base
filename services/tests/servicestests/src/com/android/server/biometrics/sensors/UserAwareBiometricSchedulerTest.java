@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,12 +58,16 @@ public class UserAwareBiometricSchedulerTest {
     private TestUserStartedCallback mUserStartedCallback;
     private TestUserStoppedCallback mUserStoppedCallback;
     private int mCurrentUserId = UserHandle.USER_NULL;
+    private boolean mStartOperationsFinish;
+    private int mStartUserClientCount;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         mToken = new Binder();
+        mStartOperationsFinish = true;
+        mStartUserClientCount = 0;
         mUserStartedCallback = new TestUserStartedCallback();
         mUserStoppedCallback = new TestUserStoppedCallback();
 
@@ -81,8 +86,9 @@ public class UserAwareBiometricSchedulerTest {
                     @NonNull
                     @Override
                     public StartUserClient<?, ?> getStartUserClient(int newUserId) {
+                        mStartUserClientCount++;
                         return new TestStartUserClient(mContext, Object::new, mToken, newUserId,
-                                TEST_SENSOR_ID, mUserStartedCallback);
+                                TEST_SENSOR_ID, mUserStartedCallback, mStartOperationsFinish);
                     }
                 });
     }
@@ -91,18 +97,39 @@ public class UserAwareBiometricSchedulerTest {
     public void testScheduleOperation_whenNoUser() {
         mCurrentUserId = UserHandle.USER_NULL;
 
-        final int nextUserId = 0;
-
-        BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
-        when(nextClient.getTargetUserId()).thenReturn(nextUserId);
+        final BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        when(nextClient.getTargetUserId()).thenReturn(0);
 
         mScheduler.scheduleClientMonitor(nextClient);
+        waitForIdle();
 
         assertEquals(0, mUserStoppedCallback.numInvocations);
         assertEquals(1, mUserStartedCallback.numInvocations);
-
-        waitForIdle();
         verify(nextClient).start(any());
+    }
+
+    @Test
+    public void testScheduleOperation_whenNoUser_notStarted() {
+        mCurrentUserId = UserHandle.USER_NULL;
+        mStartOperationsFinish = false;
+
+        final BaseClientMonitor[] nextClients = new BaseClientMonitor[] {
+                mock(BaseClientMonitor.class),
+                mock(BaseClientMonitor.class),
+                mock(BaseClientMonitor.class)
+        };
+        for (BaseClientMonitor client : nextClients) {
+            when(client.getTargetUserId()).thenReturn(5);
+            mScheduler.scheduleClientMonitor(client);
+            waitForIdle();
+        }
+
+        assertEquals(0, mUserStoppedCallback.numInvocations);
+        assertEquals(0, mUserStartedCallback.numInvocations);
+        assertEquals(1, mStartUserClientCount);
+        for (BaseClientMonitor client : nextClients) {
+            verify(client, never()).start(any());
+        }
     }
 
     @Test
@@ -192,10 +219,13 @@ public class UserAwareBiometricSchedulerTest {
     }
 
     private static class TestStartUserClient extends StartUserClient<Object, Object> {
+        private final boolean mShouldFinish;
+
         public TestStartUserClient(@NonNull Context context,
                 @NonNull LazyDaemon<Object> lazyDaemon, @Nullable IBinder token, int userId,
-                int sensorId, @NonNull UserStartedCallback<Object> callback) {
+                int sensorId, @NonNull UserStartedCallback<Object> callback, boolean shouldFinish) {
             super(context, lazyDaemon, token, userId, sensorId, callback);
+            mShouldFinish = shouldFinish;
         }
 
         @Override
@@ -206,8 +236,10 @@ public class UserAwareBiometricSchedulerTest {
         @Override
         public void start(@NonNull Callback callback) {
             super.start(callback);
-            mUserStartedCallback.onUserStarted(getTargetUserId(), new Object());
-            callback.onClientFinished(this, true /* success */);
+            if (mShouldFinish) {
+                mUserStartedCallback.onUserStarted(getTargetUserId(), new Object());
+                callback.onClientFinished(this, true /* success */);
+            }
         }
 
         @Override

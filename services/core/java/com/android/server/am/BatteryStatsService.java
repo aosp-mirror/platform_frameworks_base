@@ -126,7 +126,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         Watchdog.Monitor {
     static final String TAG = "BatteryStatsService";
     static final boolean DBG = false;
-    private static final boolean BATTERY_USAGE_STORE_ENABLED = true;
+    private static final boolean BATTERY_USAGE_STORE_ENABLED = false;
 
     private static IBatteryStats sService;
 
@@ -784,6 +784,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     bus = getBatteryUsageStats(List.of(powerProfileQuery)).get(0);
                     break;
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET:
+                    if (!BATTERY_USAGE_STORE_ENABLED) {
+                        return StatsManager.PULL_SKIP;
+                    }
+
                     final long sessionStart = mBatteryUsageStatsStore
                             .getLastBatteryUsageStatsBeforeResetAtomPullTimestamp();
                     final long sessionEnd = mStats.getStartClockTime();
