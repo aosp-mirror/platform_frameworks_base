@@ -196,20 +196,20 @@ public class AnimatableClockView extends TextView {
                 null /* onAnimationEnd */);
     }
 
-    void animateCharge(boolean isDozing) {
+    void animateCharge(DozeStateGetter dozeStateGetter) {
         if (mTextAnimator == null || mTextAnimator.isRunning()) {
             // Skip charge animation if dozing animation is already playing.
             return;
         }
         Runnable startAnimPhase2 = () -> setTextStyle(
-                isDozing ? mDozingWeight : mLockScreenWeight/* weight */,
+                dozeStateGetter.isDozing() ? mDozingWeight : mLockScreenWeight/* weight */,
                 -1,
                 null,
                 true /* animate */,
                 CHARGE_ANIM_DURATION_PHASE_1,
                 0 /* delay */,
                 null /* onAnimationEnd */);
-        setTextStyle(isDozing ? mLockScreenWeight : mDozingWeight/* weight */,
+        setTextStyle(dozeStateGetter.isDozing() ? mLockScreenWeight : mDozingWeight/* weight */,
                 -1,
                 null,
                 true /* animate */,
@@ -278,5 +278,9 @@ public class AnimatableClockView extends TextView {
         DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(
                 context.getResources().getConfiguration().locale);
         return dtpg.getBestPattern(skeleton);
+    }
+
+    interface DozeStateGetter {
+        boolean isDozing();
     }
 }
