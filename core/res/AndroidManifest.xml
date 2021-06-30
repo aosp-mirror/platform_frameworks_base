@@ -1665,11 +1665,6 @@
     <permission android:name="android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE"
         android:protectionLevel="signature|privileged" />
 
-    <!-- The system server uses this permission to install a default secondary location time zone
-         provider.
-    -->
-    <uses-permission android:name="android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE"/>
-
     <!-- @SystemApi @hide Allows an application to bind to a android.service.TimeZoneProviderService
          for the purpose of detecting the device's time zone. This prevents arbitrary clients
          connecting to the time zone provider service. The system server checks that the provider's
@@ -5811,10 +5806,6 @@
              android:label="@string/sensor_notification_service"/>
     <!-- Attribution for Twilight service. -->
     <attribution android:tag="TwilightService" android:label="@string/twilight_service"/>
-    <!-- Attribution for the Offline LocationTimeZoneProvider, used to detect time zone using
-         on-device data -->
-    <attribution android:tag="OfflineLocationTimeZoneProviderService"
-                 android:label="@string/offline_location_time_zone_detection_service_attribution"/>
     <!-- Attribution for Gnss Time Update service. -->
     <attribution android:tag="GnssTimeUpdateService"
                  android:label="@string/gnss_time_update_service"/>
@@ -6292,19 +6283,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.LOAD_DATA"/>
             </intent-filter>
-        </service>
-
-        <!-- AOSP configures a default secondary LocationTimeZoneProvider that uses an on-device
-             data set from the com.android.geotz APEX. -->
-        <service android:name="com.android.timezone.location.provider.OfflineLocationTimeZoneProviderService"
-                 android:enabled="@bool/config_enableSecondaryLocationTimeZoneProvider"
-                 android:permission="android.permission.BIND_TIME_ZONE_PROVIDER_SERVICE"
-                 android:exported="false">
-            <intent-filter>
-                <action android:name="android.service.timezone.SecondaryLocationTimeZoneProviderService" />
-            </intent-filter>
-            <meta-data android:name="serviceVersion" android:value="1" />
-            <meta-data android:name="serviceIsMultiuser" android:value="true" />
         </service>
 
         <provider
