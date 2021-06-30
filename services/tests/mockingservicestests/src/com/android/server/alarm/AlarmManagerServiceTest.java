@@ -1910,17 +1910,6 @@ public class AlarmManagerServiceTest {
         assertTrue(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
     }
 
-    @Test
-    public void hasScheduleExactAlarmBinderCallChangeDisabled() throws RemoteException {
-        mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, false);
-
-        mockExactAlarmPermissionGrant(false, true, MODE_DEFAULT);
-        assertTrue(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
-
-        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
-        assertTrue(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
-    }
-
     private void mockChangeEnabled(long changeId, boolean enabled) {
         doReturn(enabled).when(() -> CompatChanges.isChangeEnabled(eq(changeId), anyString(),
                 any(UserHandle.class)));
@@ -1938,6 +1927,53 @@ public class AlarmManagerServiceTest {
 
         mockExactAlarmPermissionGrant(false, true, MODE_ALLOWED);
         assertFalse(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
+    }
+
+    @Test
+    public void canScheduleExactAlarmsBinderCallChangeDisabled() throws RemoteException {
+        mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, false);
+
+        mockExactAlarmPermissionGrant(false, true, MODE_DEFAULT);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+    }
+
+    @Test
+    public void canScheduleExactAlarmsBinderCall() throws RemoteException {
+        mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, true);
+
+        // No permission, no exemption.
+        mockExactAlarmPermissionGrant(true, true, MODE_DEFAULT);
+        assertFalse(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // No permission, no exemption.
+        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
+        assertFalse(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // Permission, no exemption.
+        mockExactAlarmPermissionGrant(true, false, MODE_DEFAULT);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // Permission, no exemption.
+        mockExactAlarmPermissionGrant(true, true, MODE_ALLOWED);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // No permission, exemption.
+        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
+        when(mDeviceIdleInternal.isAppOnWhitelist(TEST_CALLING_UID)).thenReturn(true);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // No permission, exemption.
+        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
+        when(mDeviceIdleInternal.isAppOnWhitelist(TEST_CALLING_UID)).thenReturn(false);
+        doReturn(true).when(() -> UserHandle.isCore(TEST_CALLING_UID));
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // Both permission and exemption.
+        mockExactAlarmPermissionGrant(true, false, MODE_ALLOWED);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
     }
 
     @Test
@@ -2086,14 +2122,17 @@ public class AlarmManagerServiceTest {
 
         final PendingIntent alarmPi = getNewMockPendingIntent();
         final AlarmManager.AlarmClockInfo alarmClock = mock(AlarmManager.AlarmClockInfo.class);
-        try {
-            mBinder.set(TEST_CALLING_PACKAGE, RTC_WAKEUP, 1234, WINDOW_EXACT, 0, 0,
+        mBinder.set(TEST_CALLING_PACKAGE, RTC_WAKEUP, 1234, WINDOW_EXACT, 0, 0,
                     alarmPi, null, null, null, alarmClock);
-            fail("alarm clock binder call succeeded without permission");
-        } catch (SecurityException se) {
-            // Expected.
-        }
-        verify(mDeviceIdleInternal, never()).isAppOnWhitelist(anyInt());
+
+        // Correct permission checks are invoked.
+        verify(mService).hasScheduleExactAlarmInternal(TEST_CALLING_PACKAGE, TEST_CALLING_UID);
+        verify(mDeviceIdleInternal).isAppOnWhitelist(UserHandle.getAppId(TEST_CALLING_UID));
+
+        verify(mService).setImpl(eq(RTC_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
+                eq(alarmPi), isNull(), isNull(), eq(FLAG_STANDALONE | FLAG_WAKE_FROM_IDLE),
+                isNull(), eq(alarmClock), eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE),
+                isNull(), eq(EXACT_ALLOW_REASON_ALLOW_LIST));
     }
 
     @Test
