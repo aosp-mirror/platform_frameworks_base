@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
   ~ Copyright (C) 2021 The Android Open Source Project
   ~
@@ -15,8 +14,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<resources>
-    <string name="version">before</string>
-    <public type="string" name="version" id="0x7f010000"/>
-</resources>
+<shape
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle"
+    android:width="52dp"
+    android:height="28dp">
+    <solid android:color="@color/screenrecord_switch_track_color" />
+    <corners android:radius="35dp" />
+</shape>

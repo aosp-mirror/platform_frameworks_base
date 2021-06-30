@@ -136,6 +136,7 @@ import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -201,6 +202,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final NavigationBarOverlayController mNavbarOverlayController;
     private final UiEventLogger mUiEventLogger;
     private final UserTracker mUserTracker;
+    private final NotificationShadeDepthController mNotificationShadeDepthController;
 
     private Bundle mSavedState;
     private NavigationBarView mNavigationBarView;
@@ -438,6 +440,25 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 }
             };
 
+    private final NotificationShadeDepthController.DepthListener mDepthListener =
+            new NotificationShadeDepthController.DepthListener() {
+                boolean mHasBlurs;
+
+                @Override
+                public void onWallpaperZoomOutChanged(float zoomOut) {
+                }
+
+                @Override
+                public void onBlurRadiusChanged(int radius) {
+                    boolean hasBlurs = radius != 0;
+                    if (hasBlurs == mHasBlurs) {
+                        return;
+                    }
+                    mHasBlurs = hasBlurs;
+                    mNavigationBarView.setWindowHasBlurs(hasBlurs);
+                }
+            };
+
     public NavigationBar(Context context,
             WindowManager windowManager,
             Lazy<AssistManager> assistManagerLazy,
@@ -457,6 +478,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
+            NotificationShadeDepthController notificationShadeDepthController,
             SystemActions systemActions,
             @Main Handler mainHandler,
             NavigationBarOverlayController navbarOverlayController,
@@ -487,6 +509,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNavbarOverlayController = navbarOverlayController;
         mUiEventLogger = uiEventLogger;
         mUserTracker = userTracker;
+        mNotificationShadeDepthController = notificationShadeDepthController;
 
         mNavBarMode = mNavigationModeController.addListener(this);
         mAccessibilityButtonModeObserver.addListener(this);
@@ -570,6 +593,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         mIsCurrentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
         mDeviceProvisionedController.addCallback(mUserSetupListener);
+        mNotificationShadeDepthController.addListener(mDepthListener);
 
         setAccessibilityFloatingMenuModeIfNeeded();
 
@@ -586,6 +610,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mAccessibilityManagerWrapper.removeCallback(mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
         mDeviceProvisionedController.removeCallback(mUserSetupListener);
+        mNotificationShadeDepthController.removeListener(mDepthListener);
 
         DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
     }

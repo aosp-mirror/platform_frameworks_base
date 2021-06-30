@@ -30,7 +30,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.scrim.ScrimDrawable;
@@ -51,7 +50,6 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
     private final KeyguardStateController mKeyguardStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final BlurUtils mBlurUtils;
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final CommandQueue mCommandQueue;
     private GlobalActionsDialogLite mGlobalActionsDialog;
     private boolean mDisabled;
@@ -60,15 +58,13 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
     public GlobalActionsImpl(Context context, CommandQueue commandQueue,
             Lazy<GlobalActionsDialogLite> globalActionsDialogLazy, BlurUtils blurUtils,
             KeyguardStateController keyguardStateController,
-            DeviceProvisionedController deviceProvisionedController,
-            KeyguardUpdateMonitor keyguardUpdateMonitor) {
+            DeviceProvisionedController deviceProvisionedController) {
         mContext = context;
         mGlobalActionsDialogLazy = globalActionsDialogLazy;
         mKeyguardStateController = keyguardStateController;
         mDeviceProvisionedController = deviceProvisionedController;
         mCommandQueue = commandQueue;
         mBlurUtils = blurUtils;
-        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mCommandQueue.addCallback(this);
     }
 
@@ -87,7 +83,6 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         mGlobalActionsDialog = mGlobalActionsDialogLazy.get();
         mGlobalActionsDialog.showOrHideDialog(mKeyguardStateController.isShowing(),
                 mDeviceProvisionedController.isDeviceProvisioned());
-        mKeyguardUpdateMonitor.requestFaceAuth();
     }
 
     @Override

@@ -57,7 +57,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
     private val lightRevealAnimator = ValueAnimator.ofFloat(1f, 0f).apply {
         duration = LIGHT_REVEAL_ANIMATION_DURATION
-        interpolator = Interpolators.FAST_OUT_SLOW_IN_REVERSE
+        interpolator = Interpolators.LINEAR
         addUpdateListener { lightRevealScrim.revealAmount = it.animatedValue as Float }
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationCancel(animation: Animator?) {

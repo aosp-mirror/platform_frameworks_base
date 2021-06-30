@@ -602,7 +602,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Parmak izi kaydedilmedi."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Bu cihazda parmak izi sensörü yok."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensör geçici olarak devre dışı bırakıldı."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"Sensörün kalibre edilmesi gerekiyor"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Parmak izi sensörü kullanılamıyor. Bir onarım hizmeti sağlayıcıyı ziyaret edin"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. parmak"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Parmak izi kullan"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Parmak izi veya ekran kilidi kullan"</string>
@@ -612,14 +612,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Parmak izi simgesi"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Yüz Tanıma Kilidi"</string>
-    <!-- no translation found for face_recalibrate_notification_title (2524791952735579082) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (3064513770251355594) -->
-    <skip />
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Yüz Tanıma Kilidi sorunu"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Yüz modelinizi silmek için dokunup ardından yüzünüzü yeniden ekleyin"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurma"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonunuza bakarak kilidini açın"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Kilidi açmak için daha fazla yöntem ayarlayın"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Parmak izi eklemek için dokunun"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Parmak İzi Kilidi"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Parmak izi sensörü kullanılamıyor"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Bir onarım hizmeti sağlayıcıyı ziyaret edin."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Doğru yüz verileri yakalanamadı. Tekrar deneyin."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Çok parlak. Parlaklığı daha az bir ışıklandırma deneyin."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Çok karanlık. Daha parlak ışıkta deneyin."</string>
