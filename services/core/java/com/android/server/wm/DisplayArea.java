@@ -553,7 +553,13 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
             }
             final WindowManagerPolicy policy = mWmService.mPolicy;
             if (policy.isKeyguardHostWindow(w.mAttrs)) {
-                if (mWmService.mKeyguardGoingAway) {
+                // Ignore the orientation of keyguard if it is going away or is not showing while
+                // the device is fully awake. In other words, use the orientation of keyguard if
+                // its window is visible while the device is going to sleep or is sleeping.
+                if (!mWmService.mAtmService.isKeyguardLocked()
+                        && mDisplayContent.getDisplayPolicy().isAwake()
+                        // Device is not going to sleep.
+                        && policy.okToAnimate(true /* ignoreScreenOn */)) {
                     return false;
                 }
                 // Consider unoccluding only when all unknown visibilities have been
