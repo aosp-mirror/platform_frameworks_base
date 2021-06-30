@@ -1969,7 +1969,7 @@
     <string name="mmcc_illegal_ms" msgid="7509650265233909445">"SIM txartela ezin da erabili ahotsa erabiltzeko"</string>
     <string name="mmcc_illegal_me" msgid="6505557881889904915">"Telefonoa ezin da erabili ahotsa erabiltzeko"</string>
     <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"Ez dago <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartelik"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"Ez dago <xliff:g id="SIMNUMBER">%d</xliff:g> SIMik"</string>
     <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
     <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
     <string name="popup_window_default_title" msgid="6907717596694826919">"Leiho gainerakorra"</string>
