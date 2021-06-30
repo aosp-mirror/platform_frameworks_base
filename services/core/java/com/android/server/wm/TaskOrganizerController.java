@@ -922,6 +922,34 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
     }
 
+    @Override
+    public void restartTaskTopActivityProcessIfVisible(WindowContainerToken token) {
+        enforceTaskPermission("restartTopActivityProcessIfVisible()");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final WindowContainer wc = WindowContainer.fromBinder(token.asBinder());
+                if (wc == null) {
+                    Slog.w(TAG, "Could not resolve window from token");
+                    return;
+                }
+                final Task task = wc.asTask();
+                if (task == null) {
+                    Slog.w(TAG, "Could not resolve task from token");
+                    return;
+                }
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
+                        "Restart top activity process of Task taskId=%d", task.mTaskId);
+                final ActivityRecord activity = task.getTopNonFinishingActivity();
+                if (activity != null) {
+                    activity.restartProcessIfVisible();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     public boolean handleInterceptBackPressedOnTaskRoot(Task task) {
         if (task == null || !task.isOrganized()
                 || !mInterceptBackPressedOnRootTasks.contains(task.mTaskId)) {
