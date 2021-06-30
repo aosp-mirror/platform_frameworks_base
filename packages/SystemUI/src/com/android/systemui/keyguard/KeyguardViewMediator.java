@@ -2161,6 +2161,15 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             if (!mHiding
                     && !mSurfaceBehindRemoteAnimationRequested
                     && !mKeyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture()) {
+                if (finishedCallback != null) {
+                    // There will not execute animation, send a finish callback to ensure the remote
+                    // animation won't hanging there.
+                    try {
+                        finishedCallback.onAnimationFinished();
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to call onAnimationFinished", e);
+                    }
+                }
                 setShowingLocked(mShowing, true /* force */);
                 return;
             }
