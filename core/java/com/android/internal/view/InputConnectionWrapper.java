@@ -85,12 +85,13 @@ public class InputConnectionWrapper implements InputConnection {
         }
 
         final Completable.CharSequence value = Completable.createCharSequence();
+        boolean hadRemoteException = false;
         try {
             mIInputContext.getTextAfterCursor(length, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
-            return null;
+            hadRemoteException = true;
         }
-        CharSequence result = Completable.getResultOrNull(
+        final CharSequence result = hadRemoteException ? null : Completable.getResultOrNull(
                 value, TAG, "getTextAfterCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
@@ -115,12 +116,13 @@ public class InputConnectionWrapper implements InputConnection {
         }
 
         final Completable.CharSequence value = Completable.createCharSequence();
+        boolean hadRemoteException = false;
         try {
             mIInputContext.getTextBeforeCursor(length, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
-            return null;
+            hadRemoteException = true;
         }
-        CharSequence result = Completable.getResultOrNull(
+        final CharSequence result = hadRemoteException ? null : Completable.getResultOrNull(
                 value, TAG, "getTextBeforeCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
@@ -145,12 +147,13 @@ public class InputConnectionWrapper implements InputConnection {
             return null;
         }
         final Completable.CharSequence value = Completable.createCharSequence();
+        boolean hadRemoteException = false;
         try {
             mIInputContext.getSelectedText(flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
-            return null;
+            hadRemoteException = true;
         }
-        CharSequence result = Completable.getResultOrNull(
+        final CharSequence result = hadRemoteException ? null : Completable.getResultOrNull(
                 value, TAG, "getSelectedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
@@ -188,13 +191,14 @@ public class InputConnectionWrapper implements InputConnection {
             return null;
         }
         final Completable.SurroundingText value = Completable.createSurroundingText();
+        boolean hadRemoteException = false;
         try {
             mIInputContext.getSurroundingText(beforeLength, afterLength, flags,
                     ResultCallbacks.of(value));
         } catch (RemoteException e) {
-            return null;
+            hadRemoteException = true;
         }
-        SurroundingText result = Completable.getResultOrNull(
+        final SurroundingText result = hadRemoteException ? null : Completable.getResultOrNull(
                 value, TAG, "getSurroundingText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
@@ -215,12 +219,13 @@ public class InputConnectionWrapper implements InputConnection {
         }
 
         final Completable.Int value = Completable.createInt();
+        boolean hadRemoteException = false;
         try {
             mIInputContext.getCursorCapsMode(reqModes, ResultCallbacks.of(value));
         } catch (RemoteException e) {
-            return 0;
+            hadRemoteException = true;
         }
-        int result = Completable.getResultOrZero(
+        final int result = hadRemoteException ? 0 : Completable.getResultOrZero(
                 value, TAG, "getCursorCapsMode()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
@@ -241,12 +246,13 @@ public class InputConnectionWrapper implements InputConnection {
         }
 
         final Completable.ExtractedText value = Completable.createExtractedText();
+        boolean hadRemoteException = false;
         try {
             mIInputContext.getExtractedText(request, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
-            return null;
+            hadRemoteException = true;
         }
-        ExtractedText result = Completable.getResultOrNull(
+        final ExtractedText result = hadRemoteException ? null : Completable.getResultOrNull(
                 value, TAG, "getExtractedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
         final AbstractInputMethodService inputMethodService = mInputMethodService.get();
