@@ -773,7 +773,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     void notifyContextUpdated(int sessionId, @Nullable ContentCaptureContext context) {
         mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, TYPE_CONTEXT_UPDATED)
-                .setClientContext(context)));
+                .setClientContext(context), FORCE_FLUSH));
     }
 
     @Override
