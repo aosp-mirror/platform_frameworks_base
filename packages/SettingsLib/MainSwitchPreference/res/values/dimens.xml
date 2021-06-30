@@ -41,6 +41,9 @@
     <!-- Radius of switch bar -->
     <dimen name="settingslib_switch_bar_radius">28dp</dimen>
 
+    <!-- Size of title margin -->
+    <dimen name="settingslib_switch_title_margin">16dp</dimen>
+
     <!-- SwitchBar sub settings margin start / end -->
     <dimen name="settingslib_switchbar_subsettings_margin_start">72dp</dimen>
     <dimen name="settingslib_switchbar_subsettings_margin_end">16dp</dimen>
