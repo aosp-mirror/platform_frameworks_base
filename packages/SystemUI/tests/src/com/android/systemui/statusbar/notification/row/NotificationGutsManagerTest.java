@@ -91,15 +91,12 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.Optional;
-
-import javax.inject.Provider;
 
 /**
  * Tests for {@link NotificationGutsManager}.
@@ -157,11 +154,12 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
 
         mGutsManager = new NotificationGutsManager(mContext,
-                () -> mStatusBar, mHandler, mHandler, mAccessibilityManager, mHighPriorityProvider,
-                mINotificationManager, mNotificationEntryManager, mPeopleSpaceWidgetManager,
-                mLauncherApps, mShortcutManager, mChannelEditorDialogController, mContextTracker,
-                mAssistantFeedbackController, Optional.of(mBubblesManager),
-                new UiEventLoggerFake(), mOnUserInteractionCallback, mShadeController);
+                () -> Optional.of(mStatusBar), mHandler, mHandler, mAccessibilityManager,
+                mHighPriorityProvider, mINotificationManager, mNotificationEntryManager,
+                mPeopleSpaceWidgetManager, mLauncherApps, mShortcutManager,
+                mChannelEditorDialogController, mContextTracker, mAssistantFeedbackController,
+                Optional.of(mBubblesManager), new UiEventLoggerFake(), mOnUserInteractionCallback,
+                mShadeController);
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);

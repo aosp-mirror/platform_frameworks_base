@@ -28,6 +28,7 @@ import com.android.systemui.util.ViewController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Optional;
 
 /**
  * Handles:
@@ -42,7 +43,7 @@ import java.io.PrintWriter;
 abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
         extends ViewController<T> implements Dumpable {
     @NonNull final StatusBarStateController mStatusBarStateController;
-    @NonNull final StatusBar mStatusBar;
+    @NonNull final Optional<StatusBar> mStatusBarOptional;
     @NonNull final DumpManager mDumpManger;
 
     boolean mNotificationShadeExpanded;
@@ -50,11 +51,11 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
     protected UdfpsAnimationViewController(
             T view,
             @NonNull StatusBarStateController statusBarStateController,
-            @NonNull StatusBar statusBar,
+            @NonNull Optional<StatusBar> statusBarOptional,
             @NonNull DumpManager dumpManager) {
         super(view);
         mStatusBarStateController = statusBarStateController;
-        mStatusBar = statusBar;
+        mStatusBarOptional = statusBarOptional;
         mDumpManger = dumpManager;
     }
 
@@ -62,13 +63,17 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
 
     @Override
     protected void onViewAttached() {
-        mStatusBar.addExpansionChangedListener(mStatusBarExpansionChangedListener);
+        mStatusBarOptional.ifPresent(
+                statusBar -> statusBar.addExpansionChangedListener(
+                        mStatusBarExpansionChangedListener));
         mDumpManger.registerDumpable(getDumpTag(), this);
     }
 
     @Override
     protected void onViewDetached() {
-        mStatusBar.removeExpansionChangedListener(mStatusBarExpansionChangedListener);
+        mStatusBarOptional.ifPresent(
+                statusBar -> statusBar.removeExpansionChangedListener(
+                        mStatusBarExpansionChangedListener));
         mDumpManger.unregisterDumpable(getDumpTag());
     }
 
