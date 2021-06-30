@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostrar tudo"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Desbloquear para pagar"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Não configurado"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para utilizar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ocorreu um problema ao obter os seus cartões. Tente novamente mais tarde."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Definições do ecrã de bloqueio"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Abrir conversa"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversa"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Toque numa conversa para a adicionar ao ecrã principal"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"As suas conversas recentes aparecem aqui"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Conversas com prioridade"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversas recentes"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
