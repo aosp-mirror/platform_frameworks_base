@@ -15557,13 +15557,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public List<ProcessMemoryState> getMemoryStateForProcesses() {
             List<ProcessMemoryState> processMemoryStates = new ArrayList<>();
-            synchronized (mProcLock) {
-                synchronized (mPidsSelfLocked) {
-                    for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
-                        final ProcessRecord r = mPidsSelfLocked.valueAt(i);
-                        processMemoryStates.add(new ProcessMemoryState(
-                                r.uid, r.getPid(), r.processName, r.mState.getCurAdj()));
-                    }
+            synchronized (mPidsSelfLocked) {
+                for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
+                    final ProcessRecord r = mPidsSelfLocked.valueAt(i);
+                    processMemoryStates.add(new ProcessMemoryState(
+                            r.uid, r.getPid(), r.processName, r.mState.getCurAdj()));
                 }
             }
             return processMemoryStates;
