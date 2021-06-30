@@ -608,8 +608,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Адбіткі пальцаў не зарэгістраваны."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На гэтай прыладзе няма сканера адбіткаў пальцаў."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчык часова выключаны."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (4385512597740168120) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Не ўдалося скарыстаць сканер адбіткаў пальцаў. Звярніцеся ў сэрвісны цэнтр."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Палец <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Выкарыстоўваць адбітак пальца"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Выкарыстоўваць адбітак пальца ці блакіроўку экрана"</string>
@@ -625,12 +624,9 @@
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Разблакіруйце свой тэлефон, паглядзеўшы на яго"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Наладзьце дадатковыя спосабы разблакіроўкі"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Націсніце, каб дадаць адбітак пальца"</string>
-    <!-- no translation found for fingerprint_recalibrate_notification_name (1414578431898579354) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_title (2406561052064558497) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_content (8519935717822194943) -->
-    <skip />
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Разблакіраванне адбіткам пальца"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не ўдалося скарыстаць сканер адбіткаў пальцаў"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Звярніцеся ў сэрвісны цэнтр."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Не атрымалася распазнаць твар. Паўтарыце спробу."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Занадта светла. Прыглушыце асвятленне."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Занадта цёмна. Павялічце асвятленне."</string>

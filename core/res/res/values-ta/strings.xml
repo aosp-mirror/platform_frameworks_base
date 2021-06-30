@@ -602,8 +602,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"கைரேகைப் பதிவுகள் எதுவும் இல்லை."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"இந்தச் சாதனத்தில் கைரேகை சென்சார் இல்லை."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"சென்சார் தற்காலிகமாக முடக்கப்பட்டுள்ளது."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (4385512597740168120) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"கைரேகை சென்சாரைப் பயன்படுத்த முடியவில்லை. பழுதுபார்ப்புச் சேவை வழங்குநரைத் தொடர்புகொள்ளவும்"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"கைரேகை <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"கைரேகையைப் பயன்படுத்து"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"கைரேகையையோ திரைப் பூட்டையோ பயன்படுத்து"</string>
@@ -619,12 +618,9 @@
     <string name="face_setup_notification_content" msgid="5463999831057751676">"மொபைலைப் பார்ப்பதன் மூலம் அதைத் திறக்கலாம்"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"திறக்க, மேலும் பல வழிகளை அமையுங்கள்"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"கைரேகையைச் சேர்க்கத் தட்டுங்கள்"</string>
-    <!-- no translation found for fingerprint_recalibrate_notification_name (1414578431898579354) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_title (2406561052064558497) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_content (8519935717822194943) -->
-    <skip />
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"கைரேகை அன்லாக்"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"கைரேகை சென்சாரைப் பயன்படுத்த முடியவில்லை"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"பழுதுபார்ப்புச் சேவை வழங்குநரைத் தொடர்புகொள்ளவும்."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"முகம் தெளிவாகப் பதிவாகவில்லை. மீண்டும் முயலவும்."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"அதிக ஒளிர்வு. மிதமான ஒளியில் முயலவும்."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"இருட்டாக உள்ளது. பிரகாசமான ஒளியில் முயலவும்."</string>
@@ -1871,7 +1867,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2வது பணி <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3வது பணி <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"அகற்றும் முன் PINஐக் கேள்"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"அகற்றும் முன் திறத்தல் வடிவத்தைக் கேள்"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"அகற்றும் முன் அன்லாக் பேட்டர்னைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"உங்கள் நிர்வாகி நிறுவியுள்ளார்"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
