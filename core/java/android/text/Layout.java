@@ -2214,20 +2214,20 @@ public abstract class Layout {
         int ellipsisStart = getEllipsisStart(line);
         int linestart = getLineStart(line);
 
-        for (int i = ellipsisStart; i < ellipsisStart + ellipsisCount; i++) {
+        final int min = Math.max(0, start - ellipsisStart - linestart);
+        final int max = Math.min(ellipsisCount, end - ellipsisStart - linestart);
+
+        for (int i = min; i < max; i++) {
             char c;
 
-            if (i == ellipsisStart) {
+            if (i == 0) {
                 c = getEllipsisChar(method); // ellipsis
             } else {
                 c = '\uFEFF'; // 0-width space
             }
 
-            int a = i + linestart;
-
-            if (a >= start && a < end) {
-                dest[destoff + a - start] = c;
-            }
+            int a = i + ellipsisStart + linestart;
+            dest[destoff + a - start] = c;
         }
     }
 
