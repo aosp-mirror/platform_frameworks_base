@@ -38,6 +38,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pair;
@@ -52,6 +53,7 @@ import com.android.server.usage.AppStandbyInternal;
 import java.util.List;
 import java.util.Objects;
 import java.util.PriorityQueue;
+import java.util.function.Consumer;
 
 /**
  * Other half of the IRS. The agent handles the nitty gritty details, interacting directly with
@@ -76,6 +78,7 @@ class Agent {
     private static final long MAX_TRANSACTION_AGE_MS = 24 * HOUR_IN_MILLIS;
 
     private static final String ALARM_TAG_LEDGER_CLEANUP = "*tare.ledger_cleanup*";
+    private static final String ALARM_TAG_SOLVENCY_CHECK = "*tare.solvency_check*";
 
     private final Object mLock;
     private final CompleteEconomicPolicy mCompleteEconomicPolicy;
@@ -88,6 +91,10 @@ class Agent {
     private final SparseArrayMap<String, Ledger> mLedgers = new SparseArrayMap<>();
 
     @GuardedBy("mLock")
+    private final SparseArrayMap<String, SparseArrayMap<String, OngoingEvent>>
+            mCurrentOngoingEvents = new SparseArrayMap<>();
+
+    @GuardedBy("mLock")
     private long mCurrentNarcsInCirculation;
 
     /**
@@ -97,6 +104,14 @@ class Agent {
     private final LedgerCleanupAlarmListener mLedgerCleanupAlarmListener =
             new LedgerCleanupAlarmListener();
 
+    /**
+     * Listener to track and manage when apps will cross the solvency threshold (in both
+     * directions).
+     */
+    @GuardedBy("mLock")
+    private final SolvencyAlarmListener mSolvencyAlarmListener = new SolvencyAlarmListener();
+
+    private static final int MSG_CHECK_BALANCE = 0;
     private static final int MSG_CLEAN_LEDGER = 1;
     private static final int MSG_SET_ALARMS = 2;
 
@@ -121,12 +136,42 @@ class Agent {
         return ledger;
     }
 
+    private class TotalDeltaCalculator implements Consumer<OngoingEvent> {
+        private Ledger mLedger;
+        private long mNowElapsed;
+        private long mNow;
+        private long mTotal;
+
+        void reset(@NonNull Ledger ledger, long nowElapsed, long now) {
+            mLedger = ledger;
+            mNowElapsed = nowElapsed;
+            mNow = now;
+            mTotal = 0;
+        }
+
+        @Override
+        public void accept(OngoingEvent ongoingEvent) {
+            mTotal += getActualDeltaLocked(ongoingEvent, mLedger, mNowElapsed, mNow);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private final TotalDeltaCalculator mTotalDeltaCalculator = new TotalDeltaCalculator();
+
     /** Get an app's current balance, factoring in any currently ongoing events. */
     @GuardedBy("mLock")
     long getBalanceLocked(final int userId, @NonNull final String pkgName) {
         final Ledger ledger = getLedgerLocked(userId, pkgName);
         long balance = ledger.getCurrentBalance();
-        // TODO: add ongoing events
+        SparseArrayMap<String, OngoingEvent> ongoingEvents =
+                mCurrentOngoingEvents.get(userId, pkgName);
+        if (ongoingEvents != null) {
+            final long nowElapsed = SystemClock.elapsedRealtime();
+            final long now = System.currentTimeMillis();
+            mTotalDeltaCalculator.reset(ledger, nowElapsed, now);
+            ongoingEvents.forEach(mTotalDeltaCalculator);
+            balance += mTotalDeltaCalculator.mTotal;
+        }
         return balance;
     }
 
@@ -135,6 +180,7 @@ class Agent {
             final int eventId, @Nullable String tag) {
         final long now = System.currentTimeMillis();
         final Ledger ledger = getLedgerLocked(userId, pkgName);
+        final boolean wasSolvent = getBalanceLocked(userId, pkgName) > 0;
 
         final int eventType = getEventType(eventId);
         switch (eventType) {
@@ -160,6 +206,156 @@ class Agent {
             default:
                 Slog.w(TAG, "Unsupported event type: " + eventType);
         }
+        scheduleBalanceCheckLocked(userId, pkgName);
+
+        final boolean isSolvent = getBalanceLocked(userId, pkgName) > 0;
+        if (wasSolvent && !isSolvent) {
+            mIrs.postSolvencyChanged(userId, pkgName, false);
+        } else if (!wasSolvent && isSolvent) {
+            mIrs.postSolvencyChanged(userId, pkgName, true);
+        }
+    }
+
+    @GuardedBy("mLock")
+    void noteOngoingEventLocked(final int userId, @NonNull final String pkgName, final int eventId,
+            @Nullable String tag, final long startElapsed) {
+        noteOngoingEventLocked(userId, pkgName, eventId, tag, startElapsed, true);
+    }
+
+    @GuardedBy("mLock")
+    void noteOngoingEventLocked(final int userId, @NonNull final String pkgName, final int eventId,
+            @Nullable String tag, final long startElapsed, final boolean updateBalanceCheck) {
+        SparseArrayMap<String, OngoingEvent> ongoingEvents =
+                mCurrentOngoingEvents.get(userId, pkgName);
+        if (ongoingEvents == null) {
+            ongoingEvents = new SparseArrayMap<>();
+            mCurrentOngoingEvents.add(userId, pkgName, ongoingEvents);
+        }
+        OngoingEvent ongoingEvent = ongoingEvents.get(eventId, tag);
+
+        final int eventType = getEventType(eventId);
+        switch (eventType) {
+            case TYPE_ACTION:
+                final long actionCost =
+                        mCompleteEconomicPolicy.getCostOfAction(eventId, userId, pkgName);
+
+                if (ongoingEvent == null) {
+                    ongoingEvents.add(eventId, tag,
+                            new OngoingEvent(eventId, tag, null, startElapsed, -actionCost));
+                } else {
+                    ongoingEvent.refCount++;
+                }
+                break;
+
+            case TYPE_REWARD:
+                final EconomicPolicy.Reward reward = mCompleteEconomicPolicy.getReward(eventId);
+                if (reward != null) {
+                    if (ongoingEvent == null) {
+                        ongoingEvents.add(eventId, tag, new OngoingEvent(
+                                eventId, tag, reward, startElapsed, reward.ongoingRewardPerSecond));
+                    } else {
+                        ongoingEvent.refCount++;
+                    }
+                }
+                break;
+
+            default:
+                Slog.w(TAG, "Unsupported event type: " + eventType);
+        }
+
+        if (updateBalanceCheck) {
+            scheduleBalanceCheckLocked(userId, pkgName);
+        }
+    }
+
+    @GuardedBy("mLock")
+    void updateOngoingEventsLocked() {
+        final long now = System.currentTimeMillis();
+        final long nowElapsed = SystemClock.elapsedRealtime();
+
+        mCurrentOngoingEvents.forEach((userId, pkgName, ongoingEvents) -> {
+            ongoingEvents.forEach((ongoingEvent) -> {
+                stopOngoingActionLocked(userId, pkgName, ongoingEvent.eventId,
+                        ongoingEvent.tag, nowElapsed, now, false);
+                noteOngoingEventLocked(userId, pkgName, ongoingEvent.eventId, ongoingEvent.tag,
+                        nowElapsed, false);
+            });
+            scheduleBalanceCheckLocked(userId, pkgName);
+        });
+    }
+
+    @GuardedBy("mLock")
+    void updateOngoingEventsLocked(final int userId, @NonNull ArraySet<String> pkgNames) {
+        final long now = System.currentTimeMillis();
+        final long nowElapsed = SystemClock.elapsedRealtime();
+
+        for (int i = 0; i < pkgNames.size(); ++i) {
+            final String pkgName = pkgNames.valueAt(i);
+            SparseArrayMap<String, OngoingEvent> ongoingEvents =
+                    mCurrentOngoingEvents.get(userId, pkgName);
+            if (ongoingEvents != null) {
+                ongoingEvents.forEach((ongoingEvent) -> {
+                    stopOngoingActionLocked(userId, pkgName, ongoingEvent.eventId,
+                            ongoingEvent.tag, nowElapsed, now, false);
+                    noteOngoingEventLocked(userId, pkgName, ongoingEvent.eventId, ongoingEvent.tag,
+                            nowElapsed, false);
+                });
+                scheduleBalanceCheckLocked(userId, pkgName);
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    void stopOngoingActionLocked(final int userId, @NonNull final String pkgName, final int eventId,
+            @Nullable String tag, final long nowElapsed, final long now) {
+        stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now, true);
+    }
+
+    @GuardedBy("mLock")
+    void stopOngoingActionLocked(final int userId, @NonNull final String pkgName, final int eventId,
+            @Nullable String tag, final long nowElapsed, final long now,
+            final boolean updateBalanceCheck) {
+        final Ledger ledger = getLedgerLocked(userId, pkgName);
+
+        SparseArrayMap<String, OngoingEvent> ongoingEvents =
+                mCurrentOngoingEvents.get(userId, pkgName);
+        if (ongoingEvents == null) {
+            Slog.wtf(TAG, "No ongoing transactions :/");
+            return;
+        }
+        final OngoingEvent ongoingEvent = ongoingEvents.get(eventId, tag);
+        if (ongoingEvent == null) {
+            Slog.wtf(TAG, "Nonexistent ongoing transaction "
+                    + eventToString(eventId) + (tag == null ? "" : ":" + tag)
+                    + " for <" + userId + ">" + pkgName + " ended");
+            return;
+        }
+        ongoingEvent.refCount--;
+        if (ongoingEvent.refCount <= 0) {
+            final long startElapsed = ongoingEvent.startTimeElapsed;
+            final long startTime = now - (nowElapsed - startElapsed);
+            final long actualDelta = getActualDeltaLocked(ongoingEvent, ledger, nowElapsed, now);
+            recordTransactionLocked(userId, pkgName, ledger,
+                    new Ledger.Transaction(startTime, now, eventId, tag, actualDelta));
+            ongoingEvents.delete(eventId, tag);
+        }
+        if (updateBalanceCheck) {
+            scheduleBalanceCheckLocked(userId, pkgName);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private long getActualDeltaLocked(@NonNull OngoingEvent ongoingEvent, @NonNull Ledger ledger,
+            long nowElapsed, long now) {
+        final long startElapsed = ongoingEvent.startTimeElapsed;
+        final long durationSecs = (nowElapsed - startElapsed) / 1000;
+        final long computedDelta = durationSecs * ongoingEvent.deltaPerSec;
+        if (ongoingEvent.reward == null) {
+            return computedDelta;
+        }
+        final long rewardSum = ledger.get24HourSum(ongoingEvent.eventId, now);
+        return Math.max(0,
+                Math.min(ongoingEvent.reward.maxDailyReward - rewardSum, computedDelta));
     }
 
     @GuardedBy("mLock")
@@ -328,6 +524,7 @@ class Agent {
     void onPackageRemovedLocked(final int userId, @NonNull final String pkgName) {
         reclaimAssetsLocked(userId, pkgName);
         mLedgerCleanupAlarmListener.removeAlarmLocked(userId, pkgName);
+        mSolvencyAlarmListener.removeAlarmLocked(userId, pkgName);
     }
 
     /**
@@ -342,18 +539,94 @@ class Agent {
         }
         // TODO: delete ledger entry from disk
         mLedgers.delete(userId, pkgName);
+        mCurrentOngoingEvents.delete(userId, pkgName);
     }
 
     @GuardedBy("mLock")
     void onUserRemovedLocked(final int userId, @NonNull final List<String> pkgNames) {
         reclaimAssetsLocked(userId, pkgNames);
         mLedgerCleanupAlarmListener.removeAlarmsLocked(userId);
+        mSolvencyAlarmListener.removeAlarmsLocked(userId);
     }
 
     @GuardedBy("mLock")
     private void reclaimAssetsLocked(final int userId, @NonNull final List<String> pkgNames) {
         for (int i = 0; i < pkgNames.size(); ++i) {
             reclaimAssetsLocked(userId, pkgNames.get(i));
+        }
+    }
+
+    private static class TrendCalculator implements Consumer<OngoingEvent> {
+        private boolean mSolvent;
+        /**
+         * The maximum change in credits per second towards 0 (solvency/insolvency threshold).
+         * A value of 0 means the current ongoing events will never result in the app crossing the
+         * solvency threshold.
+         */
+        private long mMaxDeltaPerSecToThreshold;
+
+        void reset(boolean solvent) {
+            mSolvent = solvent;
+            mMaxDeltaPerSecToThreshold = 0;
+        }
+
+        @Override
+        public void accept(OngoingEvent ongoingEvent) {
+            if ((mSolvent && ongoingEvent.deltaPerSec < 0)
+                    || (!mSolvent && ongoingEvent.deltaPerSec > 0)) {
+                mMaxDeltaPerSecToThreshold += ongoingEvent.deltaPerSec;
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private final TrendCalculator mTrendCalculator = new TrendCalculator();
+
+    @GuardedBy("mLock")
+    private void scheduleBalanceCheckLocked(final int userId, @NonNull final String pkgName) {
+        SparseArrayMap<String, OngoingEvent> ongoingEvents =
+                mCurrentOngoingEvents.get(userId, pkgName);
+        if (ongoingEvents == null) {
+            // No ongoing transactions. No reason to schedule
+            mSolvencyAlarmListener.removeAlarmLocked(userId, pkgName);
+            return;
+        }
+        final long balance = getBalanceLocked(userId, pkgName);
+        mTrendCalculator.reset(balance > 0);
+        ongoingEvents.forEach(mTrendCalculator);
+        if (mTrendCalculator.mMaxDeltaPerSecToThreshold == 0) {
+            // Will never cross solvency threshold based on current events.
+            mSolvencyAlarmListener.removeAlarmLocked(userId, pkgName);
+            return;
+        }
+        // The minimum amount of time before this app will cross the solvency threshold.
+        // Including "-" in the calculation ensures that minSeconds is always non-negative:
+        //   * If balance is negative (or 0), solvent=false, so the maxDeltaPerSecToThreshold is
+        //     positive
+        //   * If balance is positive, solvent=true, so the maxDeltaPerSecToThreshold is negative
+        final long minSeconds = -balance / mTrendCalculator.mMaxDeltaPerSecToThreshold;
+        mSolvencyAlarmListener.addAlarmLocked(userId, pkgName,
+                SystemClock.elapsedRealtime() + minSeconds * 1000);
+    }
+
+    private static class OngoingEvent {
+        public final long startTimeElapsed;
+        public final int eventId;
+        @Nullable
+        public final String tag;
+        @Nullable
+        public final EconomicPolicy.Reward reward;
+        public final long deltaPerSec;
+        public int refCount;
+
+        OngoingEvent(int eventId, @Nullable String tag,
+                @Nullable EconomicPolicy.Reward reward, long startTimeElapsed, long deltaPerSec) {
+            this.startTimeElapsed = startTimeElapsed;
+            this.eventId = eventId;
+            this.tag = tag;
+            this.reward = reward;
+            this.deltaPerSec = deltaPerSec;
+            refCount = 1;
         }
     }
 
@@ -610,6 +883,19 @@ class Agent {
         }
     }
 
+    /** Track when apps will cross the solvency threshold (in both directions). */
+    private class SolvencyAlarmListener extends AlarmQueueListener {
+        private SolvencyAlarmListener() {
+            super(ALARM_TAG_SOLVENCY_CHECK, true, 15_000L);
+        }
+
+        @Override
+        @GuardedBy("mLock")
+        protected void processExpiredAlarmLocked(int userId, @NonNull String packageName) {
+            mHandler.obtainMessage(MSG_CHECK_BALANCE, userId, 0, packageName).sendToTarget();
+        }
+    }
+
     private final class AgentHandler extends Handler {
         AgentHandler(Looper looper) {
             super(looper);
@@ -618,6 +904,24 @@ class Agent {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_CHECK_BALANCE: {
+                    final int userId = msg.arg1;
+                    final String pkgName = (String) msg.obj;
+                    synchronized (mLock) {
+                        final Ledger ledger = getLedgerLocked(userId, pkgName);
+                        final long loggedBalance = ledger.getCurrentBalance();
+                        final long newBalance = getBalanceLocked(userId, pkgName);
+                        if (loggedBalance <= 0 && newBalance > 0) {
+                            mIrs.postSolvencyChanged(userId, pkgName, true);
+                        } else if (loggedBalance > 0 && newBalance <= 0) {
+                            mIrs.postSolvencyChanged(userId, pkgName, false);
+                        } else {
+                            scheduleBalanceCheckLocked(userId, pkgName);
+                        }
+                    }
+                }
+                break;
+
                 case MSG_CLEAN_LEDGER: {
                     final int userId = msg.arg1;
                     final String pkgName = (String) msg.obj;
@@ -631,6 +935,7 @@ class Agent {
                 case MSG_SET_ALARMS: {
                     synchronized (mLock) {
                         mLedgerCleanupAlarmListener.setNextAlarmLocked();
+                        mSolvencyAlarmListener.setNextAlarmLocked();
                     }
                 }
                 break;
@@ -642,6 +947,9 @@ class Agent {
     void dumpLocked(IndentingPrintWriter pw) {
         pw.print("Current GDP: ");
         pw.println(narcToString(mCurrentNarcsInCirculation));
+
+        pw.println();
+        mSolvencyAlarmListener.dumpLocked(pw);
 
         pw.println();
         mLedgerCleanupAlarmListener.dumpLocked(pw);
