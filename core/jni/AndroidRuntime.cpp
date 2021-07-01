@@ -752,6 +752,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
         //addOption("-verbose:jni");
     }
 
+    const bool odsignVerificationSuccess = GetBoolProperty("odsign.verification.success", false);
+    if (!odsignVerificationSuccess) {
+        addOption("-Xdeny-art-apex-data-files");
+    }
+
     property_get("dalvik.vm.execution-mode", propBuf, "");
     if (strcmp(propBuf, "int:portable") == 0) {
         executionMode = kEMIntPortable;
