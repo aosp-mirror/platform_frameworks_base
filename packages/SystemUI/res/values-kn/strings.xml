@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ಎಲ್ಲವನ್ನೂ ತೋರಿಸಿ"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ಪಾವತಿಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"ಇನ್ನೂ ಸೆಟಪ್‌ ಮಾಡಿಲ್ಲ"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ಬಳಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ನಿಮ್ಮ ಕಾರ್ಡ್‌ಗಳನ್ನು ಪಡೆಯುವಾಗ ಸಮಸ್ಯೆ ಉಂಟಾಗಿದೆ, ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ಲಾಕ್ ಸ್ಕ್ರ್ರೀನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"ಸಂಭಾಷಣೆಯನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ಸಂಭಾಷಣೆ ವಿಜೆಟ್‌ಗಳು"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ಸಂಭಾಷಣೆಯನ್ನು ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಸೇರಿಸಲು ಅದನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"ನಿಮ್ಮ ಇತ್ತೀಚಿನ ಸಂಭಾಷಣೆಗಳನ್ನು ಇಲ್ಲಿ ತೋರಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ಆದ್ಯತೆಯ ಸಂಭಾಷಣೆಗಳು"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ಇತ್ತೀಚಿನ ಸಂಭಾಷಣೆಗಳು"</string>
     <string name="okay" msgid="6490552955618608554">"ಸರಿ"</string>
