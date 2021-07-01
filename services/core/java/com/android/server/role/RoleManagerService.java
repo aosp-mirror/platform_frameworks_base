@@ -662,6 +662,12 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
         @Override
         public String getDefaultSmsPackage(int userId) {
+            userId = handleIncomingUser(userId, false, "getDefaultSmsPackage");
+            if (!mUserManagerInternal.exists(userId)) {
+                Slog.e(LOG_TAG, "user " + userId + " does not exist");
+                return null;
+            }
+
             long identity = Binder.clearCallingIdentity();
             try {
                 return CollectionUtils.firstOrNull(
