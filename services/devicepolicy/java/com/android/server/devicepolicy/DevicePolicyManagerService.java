@@ -14913,6 +14913,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void setNetworkLoggingActiveInternal(boolean active) {
+        final boolean[] shouldSendNotification = new boolean[] {false};
         synchronized (getLockObject()) {
             mInjector.binderWithCleanCallingIdentity(() -> {
                 if (active) {
@@ -14929,16 +14930,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                                 + " service not being available yet.");
                     }
                     maybePauseDeviceWideLoggingLocked();
-                    sendNetworkLoggingNotificationLocked();
+                    shouldSendNotification[0] = shouldSendNetworkLoggingNotificationLocked();
                 } else {
                     if (mNetworkLogger != null && !mNetworkLogger.stopNetworkLogging()) {
                         Slogf.wtf(LOG_TAG, "Network logging could not be stopped due to the logging"
                                 + " service not being available yet.");
                     }
                     mNetworkLogger = null;
-                    mInjector.getNotificationManager().cancel(SystemMessage.NOTE_NETWORK_LOGGING);
                 }
             });
+        }
+        if (active) {
+            if (shouldSendNotification[0]) {
+                sendNetworkLoggingNotification();
+            }
+        } else {
+            mInjector.getNotificationManager().cancel(SystemMessage.NOTE_NETWORK_LOGGING);
         }
     }
 
@@ -15097,20 +15104,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void sendNetworkLoggingNotificationLocked() {
+    /**
+     * Returns whether it's time to post another network logging notification. When returning true,
+     * this method has the side-effect of updating the recorded last network logging notification
+     * time to now.
+     */
+    private boolean shouldSendNetworkLoggingNotificationLocked() {
         ensureLocked();
         // Send a network logging notification if the admin is a device owner, not profile owner.
         final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
         if (deviceOwner == null || !deviceOwner.isNetworkLoggingEnabled) {
-            return;
+            return false;
         }
         if (deviceOwner.numNetworkLoggingNotifications
                 >= ActiveAdmin.DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN) {
-            return;
+            return false;
         }
         final long now = System.currentTimeMillis();
         if (now - deviceOwner.lastNetworkLoggingNotificationTimeMs < MS_PER_DAY) {
-            return;
+            return false;
         }
         deviceOwner.numNetworkLoggingNotifications++;
         if (deviceOwner.numNetworkLoggingNotifications
@@ -15119,6 +15131,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } else {
             deviceOwner.lastNetworkLoggingNotificationTimeMs = now;
         }
+        saveSettingsLocked(deviceOwner.getUserHandle().getIdentifier());
+        return true;
+    }
+
+    private void sendNetworkLoggingNotification() {
         final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
         final Intent intent = new Intent(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
         intent.setPackage(pm.getSystemUiServiceComponent().getPackageName());
@@ -15137,7 +15154,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .bigText(mContext.getString(R.string.network_logging_notification_text)))
                 .build();
         mInjector.getNotificationManager().notify(SystemMessage.NOTE_NETWORK_LOGGING, notification);
-        saveSettingsLocked(deviceOwner.getUserHandle().getIdentifier());
     }
 
     /**
