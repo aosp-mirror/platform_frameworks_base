@@ -69,6 +69,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private View mKeyguardStatusArea;
     /** Mutually exclusive with mKeyguardStatusArea */
     private View mSmartspaceView;
+    private int mSmartspaceTopOffset;
 
     /**
      * Maintain state so that a newly connected plugin can be initialized.
@@ -108,6 +109,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
         mClockSwitchYAmount = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_clock_switch_y_shift);
+
+        mSmartspaceTopOffset = mContext.getResources().getDimensionPixelSize(
+                R.dimen.keyguard_smartspace_top_offset);
     }
 
     /**
@@ -205,7 +209,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
             if (indexOfChild(in) == -1) addView(in);
             direction = -1;
             smartspaceYTranslation = mSmartspaceView == null ? 0
-                    : mClockFrame.getTop() - mSmartspaceView.getTop();
+                    : mClockFrame.getTop() - mSmartspaceView.getTop() + mSmartspaceTopOffset;
         } else {
             in = mClockFrame;
             out = mLargeClockFrame;
