@@ -179,6 +179,10 @@ public class ClipData implements Parcelable {
 
     final ArrayList<Item> mItems;
 
+    // This is false by default unless the ClipData is obtained via
+    // {@link #copyForTransferWithActivityInfo}.
+    private boolean mParcelItemActivityInfos;
+
     /**
      * Description of a single item in a ClipData.
      *
@@ -204,9 +208,11 @@ public class ClipData implements Parcelable {
         final Intent mIntent;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         Uri mUri;
-        // Additional activity info resolved by the system
-        ActivityInfo mActivityInfo;
         private TextLinks mTextLinks;
+        // Additional activity info resolved by the system. This is only parceled with the ClipData
+        // if the data is obtained from {@link #copyForTransferWithActivityInfo}
+        private ActivityInfo mActivityInfo;
+
 
         /** @hide */
         public Item(Item other) {
@@ -214,6 +220,8 @@ public class ClipData implements Parcelable {
             mHtmlText = other.mHtmlText;
             mIntent = other.mIntent;
             mUri = other.mUri;
+            mActivityInfo = other.mActivityInfo;
+            mTextLinks = other.mTextLinks;
         }
 
         /**
@@ -817,6 +825,24 @@ public class ClipData implements Parcelable {
     }
 
     /**
+     * Returns a copy of the ClipData which will parcel the Item's activity infos.
+     * @hide
+     */
+    public ClipData copyForTransferWithActivityInfo() {
+        ClipData copy = new ClipData(this);
+        copy.mParcelItemActivityInfos = true;
+        return copy;
+    }
+
+    /**
+     * Returns whether this clip data will parcel the Item's activity infos.
+     * @hide
+     */
+    public boolean willParcelWithActivityInfo() {
+        return mParcelItemActivityInfos;
+    }
+
+    /**
      * Create a new ClipData holding data of the type
      * {@link ClipDescription#MIMETYPE_TEXT_PLAIN}.
      *
@@ -1208,7 +1234,7 @@ public class ClipData implements Parcelable {
             dest.writeString8(item.mHtmlText);
             dest.writeTypedObject(item.mIntent, flags);
             dest.writeTypedObject(item.mUri, flags);
-            dest.writeTypedObject(item.mActivityInfo, flags);
+            dest.writeTypedObject(mParcelItemActivityInfos ? item.mActivityInfo : null, flags);
             dest.writeTypedObject(item.mTextLinks, flags);
         }
     }
