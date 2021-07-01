@@ -321,6 +321,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runMemoryFactor(pw);
                 case "service-restart-backoff":
                     return runServiceRestartBackoff(pw);
+                case "get-isolated-pids":
+                    return runGetIsolatedProcesses(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -3137,6 +3139,24 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
     }
 
+    private int runGetIsolatedProcesses(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(android.Manifest.permission.DUMP,
+                "getIsolatedProcesses()");
+        final List<Integer> result = mInternal.mInternal.getIsolatedProcesses(
+                Integer.parseInt(getNextArgRequired()));
+        pw.print("[");
+        if (result != null) {
+            for (int i = 0, size = result.size(); i < size; i++) {
+                if (i > 0) {
+                    pw.print(", ");
+                }
+                pw.print(result.get(i));
+            }
+        }
+        pw.println("]");
+        return 0;
+    }
+
     private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
         Configuration config = mInterface.getConfiguration();
@@ -3467,6 +3487,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("            Toggles the restart backoff policy on/off for <PACKAGE_NAME>.");
             pw.println("         show <PACKAGE_NAME>");
             pw.println("            Shows the restart backoff policy state for <PACKAGE_NAME>.");
+            pw.println("  get-isolated-pids <UID>");
+            pw.println("         Get the PIDs of isolated processes with packages in this <UID>");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }
