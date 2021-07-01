@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include <input/InputApplication.h>
+#include <gui/InputApplication.h>
 
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"

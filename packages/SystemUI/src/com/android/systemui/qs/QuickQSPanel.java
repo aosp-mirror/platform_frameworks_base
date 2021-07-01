@@ -61,21 +61,10 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    public TileLayout createRegularTileLayout() {
+    public TileLayout getOrCreateTileLayout() {
         return new QQSSideLabelTileLayout(mContext);
     }
 
-    @Override
-    protected QSTileLayout createHorizontalTileLayout() {
-        TileLayout t = createRegularTileLayout();
-        t.setMaxColumns(2);
-        return t;
-    }
-
-    @Override
-    protected boolean needsDynamicRowsAndColumns() {
-        return false; // QQS always have the same layout
-    }
 
     @Override
     protected boolean displayMediaMarginsOnMedia() {

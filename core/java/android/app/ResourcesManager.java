@@ -98,12 +98,6 @@ public class ResourcesManager {
     private int mResDisplayId = DEFAULT_DISPLAY;
 
     /**
-     * ApplicationInfo changes that need to be applied to Resources when the next configuration
-     * change occurs.
-     */
-    private ArrayList<ApplicationInfo> mPendingAppInfoUpdates;
-
-    /**
      * A mapping of ResourceImpls and their configurations. These are heavy weight objects
      * which should be reused as much as possible.
      */
@@ -994,7 +988,7 @@ public class ResourcesManager {
      * @param classLoader The classloader to use for the Resources object.
      *                    If null, {@link ClassLoader#getSystemClassLoader()} is used.
      * @return A Resources object that gets updated when
-     *         {@link #applyConfigurationToResources(Configuration, CompatibilityInfo)}
+     *         {@link #applyConfigurationToResourcesLocked(Configuration, CompatibilityInfo)}
      *         is called.
      */
     @Nullable
@@ -1121,8 +1115,8 @@ public class ResourcesManager {
     /**
      * Updates an Activity's Resources object with overrideConfig. The Resources object
      * that was previously returned by {@link #getResources(IBinder, String, String[], String[],
-     * String[], String[], Integer, Configuration, CompatibilityInfo, ClassLoader, List)} is still
-     * valid and will have the updated configuration.
+     * String[], Integer, Configuration, CompatibilityInfo, ClassLoader, List)} is still valid and
+     * will have the updated configuration.
      *
      * @param activityToken The Activity token.
      * @param overrideConfig The configuration override to update.
@@ -1273,22 +1267,6 @@ public class ResourcesManager {
         return newKey;
     }
 
-    public void updatePendingAppInfoUpdates(@NonNull ApplicationInfo appInfo) {
-        synchronized (mLock) {
-            if (mPendingAppInfoUpdates == null) {
-                mPendingAppInfoUpdates = new ArrayList<>();
-            }
-            // Clear previous app info changes for the package to prevent multiple ResourcesImpl
-            // recreations when only the last recreation will be used.
-            for (int i = mPendingAppInfoUpdates.size() - 1; i >= 0; i--) {
-                if (appInfo.sourceDir.equals(mPendingAppInfoUpdates.get(i).sourceDir)) {
-                    mPendingAppInfoUpdates.remove(i);
-                }
-            }
-            mPendingAppInfoUpdates.add(appInfo);
-        }
-    }
-
     public final boolean applyConfigurationToResources(@NonNull Configuration config,
             @Nullable CompatibilityInfo compat) {
         return applyConfigurationToResources(config, compat, null /* adjustments */);
@@ -1302,18 +1280,7 @@ public class ResourcesManager {
                 Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
                         "ResourcesManager#applyConfigurationToResources");
 
-                final boolean assetsUpdated = mPendingAppInfoUpdates != null
-                        && config.assetsSeq > mResConfiguration.assetsSeq;
-                if (assetsUpdated) {
-                    for (int i = 0, n = mPendingAppInfoUpdates.size(); i < n; i++) {
-                        final ApplicationInfo appInfo = mPendingAppInfoUpdates.get(i);
-                        applyNewResourceDirs(appInfo, new String[]{appInfo.sourceDir});
-                    }
-                    mPendingAppInfoUpdates = null;
-                }
-
-                if (!assetsUpdated && !mResConfiguration.isOtherSeqNewer(config)
-                        && compat == null) {
+                if (!mResConfiguration.isOtherSeqNewer(config) && compat == null) {
                     if (DEBUG || DEBUG_CONFIGURATION) {
                         Slog.v(TAG, "Skipping new config: curSeq="
                                 + mResConfiguration.seq + ", newSeq=" + config.seq);
@@ -1353,7 +1320,7 @@ public class ResourcesManager {
                     }
                 }
 
-                return assetsUpdated || changes != 0;
+                return changes != 0;
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
             }

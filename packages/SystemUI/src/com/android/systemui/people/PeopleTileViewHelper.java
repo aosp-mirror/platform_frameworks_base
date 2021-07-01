@@ -330,11 +330,8 @@ public class PeopleTileViewHelper {
                     R.layout.people_tile_suppressed_layout);
         }
         Drawable appIcon = mContext.getDrawable(R.drawable.ic_conversation_icon);
-        Bitmap appIconAsBitmap = convertDrawableToBitmap(appIcon);
-        FastBitmapDrawable drawable = new FastBitmapDrawable(appIconAsBitmap);
-        drawable.setIsDisabled(true);
-        Bitmap convertedBitmap = convertDrawableToBitmap(drawable);
-        views.setImageViewBitmap(R.id.icon, convertedBitmap);
+        Bitmap disabledBitmap = convertDrawableToDisabledBitmap(appIcon);
+        views.setImageViewBitmap(R.id.icon, disabledBitmap);
         return views;
     }
 
@@ -504,6 +501,11 @@ public class PeopleTileViewHelper {
     }
 
     private RemoteViews setLaunchIntents(RemoteViews views) {
+        if (!PeopleTileKey.isValid(mKey) || mTile == null) {
+            if (DEBUG) Log.d(TAG, "Skipping launch intent, Null tile or invalid key: " + mKey);
+            return views;
+        }
+
         try {
             Intent activityIntent = new Intent(mContext, LaunchConversationActivity.class);
             activityIntent.addFlags(
@@ -706,7 +708,8 @@ public class PeopleTileViewHelper {
         views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
         views.setTextViewText(R.id.text_content, statusText);
 
-        if (status.getActivity() == ACTIVITY_BIRTHDAY) {
+        if (status.getActivity() == ACTIVITY_BIRTHDAY
+            || status.getActivity() == ACTIVITY_UPCOMING_BIRTHDAY) {
             setEmojiBackground(views, EMOJI_CAKE);
         }
 
@@ -1067,7 +1070,8 @@ public class PeopleTileViewHelper {
 
         Icon icon = tile.getUserIcon();
         if (icon == null) {
-            return null;
+            Drawable placeholder = context.getDrawable(R.drawable.ic_avatar_with_badge);
+            return convertDrawableToDisabledBitmap(placeholder);
         }
         PeopleStoryIconFactory storyIcon = new PeopleStoryIconFactory(context,
                 context.getPackageManager(),
@@ -1178,5 +1182,12 @@ public class PeopleTileViewHelper {
             mRemoteViews = remoteViews;
             mAvatarSize = avatarSize;
         }
+    }
+
+    private static Bitmap convertDrawableToDisabledBitmap(Drawable icon) {
+        Bitmap appIconAsBitmap = convertDrawableToBitmap(icon);
+        FastBitmapDrawable drawable = new FastBitmapDrawable(appIconAsBitmap);
+        drawable.setIsDisabled(true);
+        return convertDrawableToBitmap(drawable);
     }
 }

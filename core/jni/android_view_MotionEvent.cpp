@@ -22,6 +22,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <attestation/HmacKeyManager.h>
+#include <gui/constants.h>
 #include <input/Input.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <utils/Log.h>
@@ -396,9 +397,9 @@ static jlong android_view_MotionEvent_nativeInitialize(
                       flags, edgeFlags, metaState, buttonState,
                       static_cast<MotionClassification>(classification), transform, xPrecision,
                       yPrecision, AMOTION_EVENT_INVALID_CURSOR_POSITION,
-                      AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_DISPLAY_SIZE,
-                      AMOTION_EVENT_INVALID_DISPLAY_SIZE, downTimeNanos, eventTimeNanos,
-                      pointerCount, pointerProperties, rawPointerCoords);
+                      AMOTION_EVENT_INVALID_CURSOR_POSITION, INVALID_DISPLAY_SIZE,
+                      INVALID_DISPLAY_SIZE, downTimeNanos, eventTimeNanos, pointerCount,
+                      pointerProperties, rawPointerCoords);
 
     return reinterpret_cast<jlong>(event.release());
 }

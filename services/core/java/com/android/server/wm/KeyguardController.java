@@ -72,7 +72,6 @@ class KeyguardController {
     private boolean mAodShowing;
     private boolean mKeyguardGoingAway;
     private boolean mDismissalRequested;
-    private int mBeforeUnoccludeTransit;
     private final SparseArray<KeyguardDisplayState> mDisplayStates = new SparseArray<>();
     private final ActivityTaskManagerService mService;
     private RootWindowContainer mRootWindowContainer;
@@ -191,14 +190,11 @@ class KeyguardController {
             // Irrelevant to AOD.
             dismissMultiWindowModeForTaskIfNeeded(null /* currentTaskControllsingOcclusion */,
                     false /* turningScreenOn */);
-            setKeyguardGoingAway(false);
+            mKeyguardGoingAway = false;
             if (keyguardShowing) {
                 mDismissalRequested = false;
             }
         }
-        // TODO(b/113840485): Check usage for non-default display
-        mWindowManager.setKeyguardOrAodShowingOnDefaultDisplay(
-                isKeyguardOrAodShowing(DEFAULT_DISPLAY));
 
         // Update the sleep token first such that ensureActivitiesVisible has correct sleep token
         // state when evaluating visibilities.
@@ -219,8 +215,8 @@ class KeyguardController {
         }
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "keyguardGoingAway");
         mService.deferWindowLayout();
+        mKeyguardGoingAway = true;
         try {
-            setKeyguardGoingAway(true);
             EventLogTags.writeWmSetKeyguardShown(
                     1 /* keyguardShowing */,
                     mAodShowing ? 1 : 0,
@@ -256,11 +252,6 @@ class KeyguardController {
         }
 
         mWindowManager.dismissKeyguard(callback, message);
-    }
-
-    private void setKeyguardGoingAway(boolean keyguardGoingAway) {
-        mKeyguardGoingAway = keyguardGoingAway;
-        mWindowManager.setKeyguardGoingAway(keyguardGoingAway);
     }
 
     private void failCallback(IKeyguardDismissCallback callback) {

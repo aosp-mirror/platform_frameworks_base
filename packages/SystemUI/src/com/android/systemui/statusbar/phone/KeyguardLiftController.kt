@@ -53,7 +53,7 @@ class KeyguardLiftController constructor(
             // Not listening anymore since trigger events unregister themselves
             isListening = false
             updateListeningState()
-            keyguardUpdateMonitor.requestFaceAuth()
+            keyguardUpdateMonitor.requestFaceAuth(true)
         }
     }
 
