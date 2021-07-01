@@ -86,11 +86,9 @@ public final class ServiceConfigAccessor {
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS
             }));
 
-    // TODO(b/179488561): Put this back to 5 minutes when primary provider is fully implemented
-    private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT = Duration.ofMinutes(1);
-    // TODO(b/179488561): Put this back to 1 minute when primary provider is fully implemented
+    private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ =
-            Duration.ofSeconds(20);
+            Duration.ofMinutes(1);
     private static final Duration DEFAULT_PROVIDER_UNCERTAINTY_DELAY = Duration.ofMinutes(5);
 
     private static final Object SLOCK = new Object();
