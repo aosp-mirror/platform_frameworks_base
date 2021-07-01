@@ -59,7 +59,6 @@ class TestNetworkStackService : Service() {
     private class NetworkMonitorDeps(private val privateDnsBypassNetwork: Network) :
             NetworkMonitor.Dependencies() {
         override fun getPrivateDnsBypassNetwork(network: Network?) = privateDnsBypassNetwork
-        override fun sendNetworkConditionsBroadcast(context: Context, broadcast: Intent) = Unit
     }
 
     private inner class TestNetworkStackConnector(context: Context) : NetworkStackConnector(
