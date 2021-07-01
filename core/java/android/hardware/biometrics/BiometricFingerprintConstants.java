@@ -209,7 +209,8 @@ public interface BiometricFingerprintConstants {
             FINGERPRINT_ACQUIRED_VENDOR,
             FINGERPRINT_ACQUIRED_START,
             FINGERPRINT_ACQUIRED_UNKNOWN,
-            FINGERPRINT_ACQUIRED_IMMOBILE})
+            FINGERPRINT_ACQUIRED_IMMOBILE,
+            FINGERPRINT_ACQUIRED_TOO_BRIGHT})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintAcquired {}
 
@@ -285,6 +286,13 @@ public interface BiometricFingerprintConstants {
      * @hide
      */
     int FINGERPRINT_ACQUIRED_IMMOBILE = 9;
+
+    /**
+     * For sensors that require illumination, such as optical under-display fingerprint sensors,
+     * the image was too bright to be used for matching.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_TOO_BRIGHT = 10;
 
     /**
      * @hide
