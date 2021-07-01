@@ -127,8 +127,11 @@ public final class Helper {
     @NonNull
     public static LogMaker newLogMaker(int category, @NonNull ComponentName componentName,
             @NonNull String servicePackageName, int sessionId, boolean compatMode) {
+        // Remove activity name from logging
+        final ComponentName sanitizedComponentName =
+                new ComponentName(componentName.getPackageName(), "");
         return newLogMaker(category, servicePackageName, sessionId, compatMode)
-                .setComponentName(componentName);
+                .setComponentName(sanitizedComponentName);
     }
 
     public static void printlnRedactedText(@NonNull PrintWriter pw, @Nullable CharSequence text) {
