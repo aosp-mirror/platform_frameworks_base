@@ -167,25 +167,25 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testStackCleanupOnClearingTask() {
+    public void testTaskFragmentCleanupOnClearingTask() {
         final ActivityRecord activity = createActivityWith2LevelTask();
         final Task task = activity.getTask();
-        final Task rootTask = activity.getRootTask();
+        final TaskFragment taskFragment = activity.getTaskFragment();
         activity.onParentChanged(null /*newParent*/, task);
-        verify(rootTask, times(1)).cleanUpActivityReferences(any());
+        verify(taskFragment).cleanUpActivityReferences(any());
     }
 
     @Test
-    public void testStackCleanupOnActivityRemoval() {
+    public void testTaskFragmentCleanupOnActivityRemoval() {
         final ActivityRecord activity = createActivityWith2LevelTask();
         final Task task = activity.getTask();
-        final Task rootTask = activity.getRootTask();
+        final TaskFragment taskFragment = activity.getTaskFragment();
         task.removeChild(activity);
-        verify(rootTask, times(1)).cleanUpActivityReferences(any());
+        verify(taskFragment).cleanUpActivityReferences(any());
     }
 
     @Test
-    public void testStackCleanupOnTaskRemoval() {
+    public void testRootTaskCleanupOnTaskRemoval() {
         final ActivityRecord activity = createActivityWith2LevelTask();
         final Task task = activity.getTask();
         final Task rootTask = activity.getRootTask();
@@ -1148,7 +1148,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     /**
      * Verify that finish request won't change the state of next top activity if the current
      * finishing activity doesn't need to be destroyed immediately. The case is usually like
-     * from {@link ActivityStack#completePauseLocked(boolean, ActivityRecord)} to
+     * from {@link Task#completePause(boolean, ActivityRecord)} to
      * {@link ActivityRecord#completeFinishing(String)}, so the complete-pause should take the
      * responsibility to resume the next activity with updating the state.
      */
@@ -1446,7 +1446,8 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testDestroyIfPossible() {
         final ActivityRecord activity = createActivityWithTask();
-        doReturn(false).when(mRootWindowContainer).resumeFocusedTasksTopActivities();
+        doReturn(false).when(mRootWindowContainer)
+                .resumeFocusedTasksTopActivities();
         activity.destroyIfPossible("test");
 
         assertEquals(DESTROYING, activity.getState());
@@ -1468,7 +1469,8 @@ public class ActivityRecordTests extends WindowTestsBase {
             homeStack.removeChild(t, "test");
         }, true /* traverseTopToBottom */);
         activity.finishing = true;
-        doReturn(false).when(mRootWindowContainer).resumeFocusedTasksTopActivities();
+        doReturn(false).when(mRootWindowContainer)
+                .resumeFocusedTasksTopActivities();
 
         // Try to destroy the last activity above the home stack.
         activity.destroyIfPossible("test");
@@ -2556,7 +2558,8 @@ public class ActivityRecordTests extends WindowTestsBase {
                 any(), any(), anyBoolean(), anyBoolean(), any(), any());
         // In normal case, resumeFocusedTasksTopActivities() should be called after
         // startActivityLocked(). So skip resumeFocusedTasksTopActivities() in ActivityBuilder.
-        doReturn(false).when(mRootWindowContainer).resumeFocusedTasksTopActivities();
+        doReturn(false).when(mRootWindowContainer)
+                .resumeFocusedTasksTopActivities();
         // Make mVisibleSetFromTransferredStartingWindow true.
         final ActivityRecord middle = new ActivityBuilder(mAtm).setTask(task).build();
         task.startActivityLocked(middle, null /* focusedTopActivity */,
