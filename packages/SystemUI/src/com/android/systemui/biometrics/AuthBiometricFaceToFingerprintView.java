@@ -19,16 +19,18 @@ package com.android.systemui.biometrics;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
@@ -87,11 +89,9 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
         }
     }
 
-    @Modality
-    private int mActiveSensorType = TYPE_FACE;
-
-    @Nullable
-    private UdfpsDialogMeasureAdapter mUdfpsMeasureAdapter;
+    @Modality private int mActiveSensorType = TYPE_FACE;
+    @Nullable private FingerprintSensorPropertiesInternal mFingerprintSensorProps;
+    @Nullable private UdfpsDialogMeasureAdapter mUdfpsMeasureAdapter;
 
     public AuthBiometricFaceToFingerprintView(Context context) {
         super(context);
@@ -106,14 +106,17 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
         super(context, attrs, injector);
     }
 
-    void setFingerprintSensorProps(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
-        if (!sensorProps.isAnyUdfpsType()) {
-            return;
-        }
+    @Modality
+    int getActiveSensorType() {
+        return mActiveSensorType;
+    }
 
-        if (mUdfpsMeasureAdapter == null || mUdfpsMeasureAdapter.getSensorProps() != sensorProps) {
-            mUdfpsMeasureAdapter = new UdfpsDialogMeasureAdapter(this, sensorProps);
-        }
+    boolean isFingerprintUdfps() {
+        return mFingerprintSensorProps.isAnyUdfpsType();
+    }
+
+    void setFingerprintSensorProps(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
+        mFingerprintSensorProps = sensorProps;
     }
 
     @Override
@@ -193,8 +196,34 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     @NonNull
     AuthDialog.LayoutParams onMeasureInternal(int width, int height) {
         final AuthDialog.LayoutParams layoutParams = super.onMeasureInternal(width, height);
-        return mUdfpsMeasureAdapter != null
-                ? mUdfpsMeasureAdapter.onMeasureInternal(width, height, layoutParams)
+        return isFingerprintUdfps()
+                ? getUdfpsMeasureAdapter().onMeasureInternal(width, height, layoutParams)
                 : layoutParams;
+    }
+
+    @NonNull
+    private UdfpsDialogMeasureAdapter getUdfpsMeasureAdapter() {
+        if (mUdfpsMeasureAdapter == null
+                || mUdfpsMeasureAdapter.getSensorProps() != mFingerprintSensorProps) {
+            mUdfpsMeasureAdapter = new UdfpsDialogMeasureAdapter(this, mFingerprintSensorProps);
+        }
+        return mUdfpsMeasureAdapter;
+    }
+
+    @Override
+    public void onSaveState(@NonNull Bundle outState) {
+        super.onSaveState(outState);
+        outState.putInt(AuthDialog.KEY_BIOMETRIC_SENSOR_TYPE, mActiveSensorType);
+        outState.putParcelable(AuthDialog.KEY_BIOMETRIC_SENSOR_PROPS, mFingerprintSensorProps);
+    }
+
+    @Override
+    public void restoreState(@Nullable Bundle savedState) {
+        super.restoreState(savedState);
+        if (savedState != null) {
+            mActiveSensorType = savedState.getInt(AuthDialog.KEY_BIOMETRIC_SENSOR_TYPE, TYPE_FACE);
+            mFingerprintSensorProps =
+                    savedState.getParcelable(AuthDialog.KEY_BIOMETRIC_SENSOR_PROPS);
+        }
     }
 }
