@@ -1530,9 +1530,11 @@ public class OomAdjuster {
         state.setAdjTarget(null);
         state.setEmpty(false);
         state.setCached(false);
-        state.setNoKillOnForcedAppStandbyAndIdle(false);
         state.resetAllowStartFgsState();
-        app.mOptRecord.setShouldNotFreeze(false);
+        if (!cycleReEval) {
+            // Don't reset this flag when doing cycles re-evaluation.
+            app.mOptRecord.setShouldNotFreeze(false);
+        }
 
         final int appUid = app.info.uid;
         final int logUid = mService.mCurOomAdjUid;
@@ -1983,6 +1985,11 @@ public class OomAdjuster {
 
                     final boolean clientIsSystem = clientProcState < PROCESS_STATE_TOP;
 
+                    if (client.mOptRecord.shouldNotFreeze()) {
+                        // Propagate the shouldNotFreeze flag down the bindings.
+                        app.mOptRecord.setShouldNotFreeze(true);
+                    }
+
                     if ((cr.flags & Context.BIND_WAIVE_PRIORITY) == 0) {
                         if (shouldSkipDueToCycle(app, cstate, procState, adj, cycleReEval)) {
                             continue;
@@ -2019,9 +2026,6 @@ public class OomAdjuster {
                             // Similar to BIND_WAIVE_PRIORITY, keep it unfrozen.
                             if (clientAdj < ProcessList.CACHED_APP_MIN_ADJ) {
                                 app.mOptRecord.setShouldNotFreeze(true);
-                                // Similarly, we shouldn't kill it when it's in forced-app-standby
-                                // mode and cached & idle state.
-                                app.mState.setNoKillOnForcedAppStandbyAndIdle(true);
                             }
                             // Not doing bind OOM management, so treat
                             // this guy more like a started service.
@@ -2226,9 +2230,6 @@ public class OomAdjuster {
                         // unfrozen.
                         if (clientAdj < ProcessList.CACHED_APP_MIN_ADJ) {
                             app.mOptRecord.setShouldNotFreeze(true);
-                            // Similarly, we shouldn't kill it when it's in forced-app-standby
-                            // mode and cached & idle state.
-                            app.mState.setNoKillOnForcedAppStandbyAndIdle(true);
                         }
                     }
                     if ((cr.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
@@ -2301,6 +2302,10 @@ public class OomAdjuster {
                     // If the other app is cached for any reason, for purposes here
                     // we are going to consider it empty.
                     clientProcState = PROCESS_STATE_CACHED_EMPTY;
+                }
+                if (client.mOptRecord.shouldNotFreeze()) {
+                    // Propagate the shouldNotFreeze flag down the bindings.
+                    app.mOptRecord.setShouldNotFreeze(true);
                 }
                 String adjType = null;
                 if (adj > clientAdj) {
