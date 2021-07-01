@@ -484,10 +484,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private final DisplayAreaPolicy.Provider mDisplayAreaPolicyProvider;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
-    // TODO: eventually unify all keyguard state in a common place instead of having it spread over
-    // AM's KeyguardController and the policy's KeyguardServiceDelegate.
-    boolean mKeyguardGoingAway;
-    boolean mKeyguardOrAodShowingOnDefaultDisplay;
+
     // VR Vr2d Display Id.
     int mVr2dDisplayId = INVALID_DISPLAY;
     boolean mVrModeEnabled = false;
@@ -3075,17 +3072,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mAtmInternal.notifyKeyguardFlagsChanged(callback, displayId);
     }
 
-    public void setKeyguardGoingAway(boolean keyguardGoingAway) {
-        synchronized (mGlobalLock) {
-            mKeyguardGoingAway = keyguardGoingAway;
-        }
-    }
-
-    public void setKeyguardOrAodShowingOnDefaultDisplay(boolean showing) {
-        synchronized (mGlobalLock) {
-            mKeyguardOrAodShowingOnDefaultDisplay = showing;
-        }
-    }
 
     // -------------------------------------------------------------
     // Misc IWindowSession methods

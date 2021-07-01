@@ -16,8 +16,12 @@
 
 package com.android.server.tare;
 
+import static android.text.format.DateUtils.HOUR_IN_MILLIS;
+import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +33,7 @@ import android.os.BatteryManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Log;
@@ -57,6 +62,10 @@ public class InternalResourceService extends SystemService {
     public static final String TAG = "TARE-IRS";
     public static final boolean DEBUG = Log.isLoggable("TARE", Log.DEBUG);
 
+    static final long UNUSED_RECLAMATION_PERIOD_MS = 24 * HOUR_IN_MILLIS;
+    /** How much of an app's unused wealth should be reclaimed periodically. */
+    private static final float DEFAULT_UNUSED_RECLAMATION_PERCENTAGE = .1f;
+
     /** Global local for all resource economy state. */
     private final Object mLock = new Object();
 
@@ -83,6 +92,9 @@ public class InternalResourceService extends SystemService {
     // In the range [0,100] to represent 0% to 100% battery.
     @GuardedBy("mLock")
     private int mCurrentBatteryLevel;
+    // TODO: load from disk
+    @GuardedBy("mLock")
+    private long mLastUnusedReclamationTime;
 
     @SuppressWarnings("FieldCanBeLocal")
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -133,7 +145,21 @@ public class InternalResourceService extends SystemService {
         }
     };
 
+    private final AlarmManager.OnAlarmListener mUnusedWealthReclamationListener =
+            new AlarmManager.OnAlarmListener() {
+                @Override
+                public void onAlarm() {
+                    synchronized (mLock) {
+                        mAgent.reclaimUnusedAssetsLocked(DEFAULT_UNUSED_RECLAMATION_PERCENTAGE);
+                        mLastUnusedReclamationTime = System.currentTimeMillis();
+                        scheduleUnusedWealthReclamationLocked();
+                    }
+                }
+            };
+
     private static final int MSG_NOTIFY_BALANCE_CHANGE_LISTENERS = 0;
+    private static final int MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT = 1;
+    private static final String ALARM_TAG_WEALTH_RECLAMATION = "*tare.reclamation*";
 
     /**
      * Initializes the system service.
@@ -186,6 +212,8 @@ public class InternalResourceService extends SystemService {
                 } else {
                     mIsSetup = true;
                 }
+                scheduleUnusedWealthReclamationLocked();
+                mCompleteEconomicPolicy.onSystemServicesReady();
             }
         }
     }
@@ -213,22 +241,6 @@ public class InternalResourceService extends SystemService {
                 / 100;
     }
 
-    @Nullable
-    @GuardedBy("mLock")
-    ArraySet<String> getPackagesForUidLocked(final int uid) {
-        ArraySet<String> packages = mUidToPackageCache.get(uid);
-        if (packages == null) {
-            final String[] pkgs = mPackageManager.getPackagesForUid(uid);
-            if (pkgs != null) {
-                for (String pkg : pkgs) {
-                    mUidToPackageCache.add(uid, pkg);
-                }
-                packages = mUidToPackageCache.get(uid);
-            }
-        }
-        return packages;
-    }
-
     void onBatteryLevelChanged() {
         synchronized (mLock) {
             final int newBatteryLevel = getCurrentBatteryLevel();
@@ -240,6 +252,9 @@ public class InternalResourceService extends SystemService {
     }
 
     void onDeviceStateChanged() {
+        synchronized (mLock) {
+            mAgent.updateOngoingEventsLocked();
+        }
     }
 
     void onPackageAdded(final int uid, @NonNull final String pkgName) {
@@ -282,6 +297,14 @@ public class InternalResourceService extends SystemService {
     }
 
     void onUidStateChanged(final int uid) {
+        synchronized (mLock) {
+            final ArraySet<String> pkgNames = getPackagesForUidLocked(uid);
+            if (pkgNames == null) {
+                Slog.e(TAG, "Don't have packages for uid " + uid);
+            } else {
+                mAgent.updateOngoingEventsLocked(UserHandle.getUserId(uid), pkgNames);
+            }
+        }
     }
 
     void onUserAdded(final int userId) {
@@ -314,8 +337,44 @@ public class InternalResourceService extends SystemService {
                 .sendToTarget();
     }
 
+    @GuardedBy("mLock")
+    private void scheduleUnusedWealthReclamationLocked() {
+        final long now = System.currentTimeMillis();
+        final long nextReclamationTime =
+                Math.max(mLastUnusedReclamationTime + UNUSED_RECLAMATION_PERIOD_MS, now + 30_000);
+        mHandler.post(() -> {
+            // Never call out to AlarmManager with the lock held. This sits below AM.
+            AlarmManager alarmManager = getContext().getSystemService(AlarmManager.class);
+            if (alarmManager != null) {
+                alarmManager.setWindow(AlarmManager.ELAPSED_REALTIME,
+                        SystemClock.elapsedRealtime() + (nextReclamationTime - now),
+                        30 * MINUTE_IN_MILLIS,
+                        ALARM_TAG_WEALTH_RECLAMATION, mUnusedWealthReclamationListener, mHandler);
+            } else {
+                mHandler.sendEmptyMessageDelayed(
+                        MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT, 30_000);
+            }
+        });
+    }
+
     private int getCurrentBatteryLevel() {
         return mBatteryManagerInternal.getBatteryLevel();
+    }
+
+    @Nullable
+    @GuardedBy("mLock")
+    private ArraySet<String> getPackagesForUidLocked(final int uid) {
+        ArraySet<String> packages = mUidToPackageCache.get(uid);
+        if (packages == null) {
+            final String[] pkgs = mPackageManager.getPackagesForUid(uid);
+            if (pkgs != null) {
+                for (String pkg : pkgs) {
+                    mUidToPackageCache.add(uid, pkg);
+                }
+                packages = mUidToPackageCache.get(uid);
+            }
+        }
+        return packages;
     }
 
     @GuardedBy("mLock")
@@ -351,6 +410,13 @@ public class InternalResourceService extends SystemService {
                         }
                     }
                     break;
+
+                case MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT:
+                    removeMessages(MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT);
+                    synchronized (mLock) {
+                        scheduleUnusedWealthReclamationLocked();
+                    }
+                    break;
             }
         }
     }
@@ -384,11 +450,20 @@ public class InternalResourceService extends SystemService {
         @Override
         public void noteOngoingEventStarted(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
+            synchronized (mLock) {
+                final long nowElapsed = SystemClock.elapsedRealtime();
+                mAgent.noteOngoingEventLocked(userId, pkgName, eventId, tag, nowElapsed);
+            }
         }
 
         @Override
         public void noteOngoingEventStopped(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
+            final long nowElapsed = SystemClock.elapsedRealtime();
+            final long now = System.currentTimeMillis();
+            synchronized (mLock) {
+                mAgent.stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now);
+            }
         }
     }
 }

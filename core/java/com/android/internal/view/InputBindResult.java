@@ -53,8 +53,7 @@ public final class InputBindResult implements Parcelable {
             ResultCode.ERROR_NOT_IME_TARGET_WINDOW,
             ResultCode.ERROR_NO_EDITOR,
             ResultCode.ERROR_DISPLAY_ID_MISMATCH,
-            ResultCode.ERROR_INVALID_DISPLAY_ID,
-            ResultCode.ERROR_INVALID_CLIENT,
+            ResultCode.ERROR_INVALID_DISPLAY_ID
     })
     public @interface ResultCode {
         /**
@@ -168,10 +167,6 @@ public final class InputBindResult implements Parcelable {
          * display.
          */
         int ERROR_INVALID_DISPLAY_ID = 15;
-        /**
-         * Indicates that the client is not recognized by the system.
-         */
-        int ERROR_INVALID_CLIENT = 16;
     }
 
     @ResultCode
@@ -310,8 +305,6 @@ public final class InputBindResult implements Parcelable {
                 return "ERROR_DISPLAY_ID_MISMATCH";
             case ResultCode.ERROR_INVALID_DISPLAY_ID:
                 return "ERROR_INVALID_DISPLAY_ID";
-            case ResultCode.ERROR_INVALID_CLIENT:
-                return "ERROR_INVALID_CLIENT";
             default:
                 return "Unknown(" + result + ")";
         }
@@ -368,11 +361,6 @@ public final class InputBindResult implements Parcelable {
      */
     public static final InputBindResult INVALID_DISPLAY_ID =
             error(ResultCode.ERROR_INVALID_DISPLAY_ID);
-
-    /**
-     * Predefined error object for {@link ResultCode#ERROR_INVALID_CLIENT}.
-     */
-    public static final InputBindResult INVALID_CLIENT = error(ResultCode.ERROR_INVALID_CLIENT);
 
     /**
      * Predefined <strong>success</strong> object for

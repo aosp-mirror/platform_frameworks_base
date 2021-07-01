@@ -5690,6 +5690,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
         }
+        try {
+            if (uid != 0) { // bypass the root
+                final String[] packageNames = getPackageManager().getPackagesForUid(uid);
+                if (ArrayUtils.isEmpty(packageNames)) {
+                    // The uid is not existed or not visible to the caller.
+                    return PackageManager.PERMISSION_DENIED;
+                }
+            }
+        } catch (RemoteException e) {
+        }
         return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
                 ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
     }
@@ -7625,6 +7635,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         t.traceEnd();
 
         t.traceBegin("ActivityManagerStartApps");
+        mBatteryStatsService.onSystemReady();
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                 Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,

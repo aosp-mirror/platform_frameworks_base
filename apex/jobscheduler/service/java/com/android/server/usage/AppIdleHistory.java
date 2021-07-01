@@ -462,6 +462,17 @@ public class AppIdleHistory {
         return getElapsedTime(elapsedRealtime) - appUsageHistory.lastJobRunTime;
     }
 
+    public long getTimeSinceLastUsedByUser(String packageName, int userId, long elapsedRealtime) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory appUsageHistory =
+                getPackageHistory(userHistory, packageName, elapsedRealtime, false);
+        if (appUsageHistory == null || appUsageHistory.lastUsedByUserElapsedTime == Long.MIN_VALUE
+                || appUsageHistory.lastUsedByUserElapsedTime == 0) {
+            return Long.MAX_VALUE;
+        }
+        return getElapsedTime(elapsedRealtime) - appUsageHistory.lastUsedByUserElapsedTime;
+    }
+
     public int getAppStandbyBucket(String packageName, int userId, long elapsedRealtime) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory =

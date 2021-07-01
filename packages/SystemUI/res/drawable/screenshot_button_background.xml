@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<!-- Long screenshot save button background -->
+<!-- Long screenshot save/cancel button background -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         android:color="?android:textColorPrimary">

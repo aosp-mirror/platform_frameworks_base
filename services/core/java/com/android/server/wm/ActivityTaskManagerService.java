@@ -253,7 +253,6 @@ import com.android.server.am.PendingIntentController;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
 import com.android.server.firewall.IntentFirewall;
-import com.android.server.inputmethod.InputMethodSystemProperty;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -2633,10 +2632,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 final ActivityInfo ainfo = AppGlobals.getPackageManager().getActivityInfo(comp,
                         STOCK_PM_FLAGS, UserHandle.getUserId(callingUid));
-                if (ainfo.applicationInfo.uid != callingUid) {
-                    throw new SecurityException(
-                            "Can't add task for another application: target uid="
-                                    + ainfo.applicationInfo.uid + ", calling uid=" + callingUid);
+                if (ainfo == null || ainfo.applicationInfo.uid != callingUid) {
+                    Slog.e(TAG, "Can't add task for another application: target uid="
+                            + (ainfo == null ? Process.INVALID_UID : ainfo.applicationInfo.uid)
+                            + ", calling uid=" + callingUid);
+                    return INVALID_TASK_ID;
                 }
 
                 final Task rootTask = r.getRootTask();
@@ -5020,11 +5020,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * @param imeContainer The DisplayArea that contains the IME window.
      */
     void onImeWindowSetOnDisplayArea(final int pid, @NonNull final DisplayArea imeContainer) {
-        // Don't update process-level configuration for Multi-Client IME process since other
-        // IMEs on other displays will also receive this configuration change due to IME
-        // services use the same application config/context.
-        if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
-
         if (pid == MY_PID || pid < 0) {
             ProtoLog.w(WM_DEBUG_CONFIGURATION,
                     "Trying to update display configuration for system/invalid process.");
