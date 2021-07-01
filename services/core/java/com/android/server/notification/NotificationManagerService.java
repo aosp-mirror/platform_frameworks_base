@@ -773,12 +773,13 @@ public class NotificationManagerService extends SystemService {
                     mAssistants.resetDefaultFromConfig();
                     continue;
                 }
+                // TODO(b/192450820): re-enable when "user set" isn't over triggering
                 //User selected different NAS, need onboarding
-                enqueueNotificationInternal(getContext().getPackageName(),
+                /*enqueueNotificationInternal(getContext().getPackageName(),
                         getContext().getOpPackageName(), Binder.getCallingUid(),
                         Binder.getCallingPid(), TAG,
                         SystemMessageProto.SystemMessage.NOTE_NAS_UPGRADE,
-                        createNASUpgradeNotification(userId), userId);
+                        createNASUpgradeNotification(userId), userId);*/
             }
         }
     }
