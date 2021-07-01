@@ -16329,6 +16329,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return uidRecord.getCurCapability();
             }
         }
+
+        /**
+         * @return The PID list of the isolated process with packages matching the given uid.
+         */
+        @Nullable
+        public List<Integer> getIsolatedProcesses(int uid) {
+            synchronized (ActivityManagerService.this) {
+                return mProcessList.getIsolatedProcessesLocked(uid);
+            }
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {

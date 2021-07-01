@@ -56,6 +56,7 @@ import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityThread;
@@ -2986,6 +2987,22 @@ public final class ProcessList {
             return mAppIsolatedUidRangeAllocator.getOrCreateIsolatedUidRangeLocked(
                     info.processName, hostingRecord.getDefiningUid());
         }
+    }
+
+    @Nullable
+    @GuardedBy("mService")
+    List<Integer> getIsolatedProcessesLocked(int uid) {
+        List<Integer> ret = null;
+        for (int i = 0, size = mIsolatedProcesses.size(); i < size; i++) {
+            final ProcessRecord app = mIsolatedProcesses.valueAt(i);
+            if (app.info.uid == uid) {
+                if (ret == null) {
+                    ret = new ArrayList<>();
+                }
+                ret.add(app.getPid());
+            }
+        }
+        return ret;
     }
 
     @GuardedBy("mService")
