@@ -25,6 +25,7 @@ import android.provider.Settings;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.QuickAccessWalletClientImpl;
+import android.util.Log;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
@@ -142,6 +143,10 @@ public class QuickAccessWalletController {
      */
     public void queryWalletCards(
             QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever) {
+        if (!mQuickAccessWalletClient.isWalletFeatureAvailable()) {
+            Log.d(TAG, "QuickAccessWallet feature is not available.");
+            return;
+        }
         int cardWidth =
                 mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_width);
         int cardHeight =

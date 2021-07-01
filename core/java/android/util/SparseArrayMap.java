@@ -157,4 +157,28 @@ public class SparseArrayMap<K, V> {
             }
         }
     }
+
+    /**
+     * @param <K> Any class
+     * @param <V> Any class
+     * @hide
+     */
+    public interface TriConsumer<K, V> {
+        /** Consume the int-K-V tuple. */
+        void accept(int key, K mapKey, V value);
+    }
+
+    /**
+     * Iterate through all int-K pairs and operate on all of the values.
+     * @hide
+     */
+    public void forEach(@NonNull TriConsumer<K, V> consumer) {
+        for (int iIdx = numMaps() - 1; iIdx >= 0; --iIdx) {
+            final int i = mData.keyAt(iIdx);
+            final ArrayMap<K, V> data = mData.valueAt(i);
+            for (int kIdx = data.size() - 1; kIdx >= 0; --kIdx) {
+                consumer.accept(i, data.keyAt(kIdx), data.valueAt(kIdx));
+            }
+        }
+    }
 }

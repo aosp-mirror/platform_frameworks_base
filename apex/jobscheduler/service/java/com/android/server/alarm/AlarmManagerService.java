@@ -1740,7 +1740,7 @@ public class AlarmManagerService extends SystemService {
                     if (!isExactAlarmChangeEnabled(a.packageName, UserHandle.getUserId(a.uid))) {
                         return false;
                     }
-                    return a.alarmClock != null || !isExemptFromExactAlarmPermission(a.uid);
+                    return !isExemptFromExactAlarmPermission(a.uid);
                 };
                 removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_EXACT_PERMISSION_REVOKED);
             }
@@ -2414,6 +2414,7 @@ public class AlarmManagerService extends SystemService {
     /**
      * Returns true if the given uid does not require SCHEDULE_EXACT_ALARM to set exact,
      * allow-while-idle alarms.
+     * Note: It is ok to call this method without the lock {@link #mLock} held.
      */
     boolean isExemptFromExactAlarmPermission(int uid) {
         return (UserHandle.isSameApp(mSystemUiUid, uid)
@@ -2515,7 +2516,7 @@ public class AlarmManagerService extends SystemService {
                     idleOptions = allowWhileIdle ? mOptsWithFgs.toBundle() : null;
                 }
                 if (needsPermission && !hasScheduleExactAlarmInternal(callingPackage, callingUid)) {
-                    if (alarmClock != null || !isExemptFromExactAlarmPermission(callingUid)) {
+                    if (!isExemptFromExactAlarmPermission(callingUid)) {
                         final String errorMessage = "Caller " + callingPackage + " needs to hold "
                                 + Manifest.permission.SCHEDULE_EXACT_ALARM + " to set "
                                 + "exact alarms.";
@@ -2527,10 +2528,16 @@ public class AlarmManagerService extends SystemService {
                     } else {
                         allowListed = true;
                     }
-                    // If the app is on the full system power allow-list (not except-idle), or we're
-                    // in a soft failure mode, we still allow the alarms.
-                    // We give temporary allowlist to allow-while-idle alarms but without FGS
-                    // capability. Note that apps that are in the power allow-list do not need it.
+                    // If the app is on the full system power allow-list (not except-idle), or the
+                    // user-elected allow-list, or we're in a soft failure mode, we still allow the
+                    // alarms.
+                    // In both cases, ALLOW_WHILE_IDLE alarms get a lower quota equivalent to what
+                    // pre-S apps got. Note that user-allow-listed apps don't use the flag
+                    // ALLOW_WHILE_IDLE.
+                    // We grant temporary allow-list to allow-while-idle alarms but without FGS
+                    // capability. AlarmClock alarms do not get the temporary allow-list. This is
+                    // consistent with pre-S behavior. Note that apps that are in either of the
+                    // power-save allow-lists do not need it.
                     idleOptions = allowWhileIdle ? mOptsWithoutFgs.toBundle() : null;
                     lowerQuota = allowWhileIdle;
                 }
@@ -2561,6 +2568,22 @@ public class AlarmManagerService extends SystemService {
         }
 
         @Override
+        public boolean canScheduleExactAlarms(String packageName) {
+            final int callingUid = mInjector.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final int packageUid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
+            if (callingUid != packageUid) {
+                throw new SecurityException("Uid " + callingUid
+                        + " cannot query canScheduleExactAlarms for package " + packageName);
+            }
+            if (!isExactAlarmChangeEnabled(packageName, userId)) {
+                return true;
+            }
+            return isExemptFromExactAlarmPermission(packageUid)
+                    || hasScheduleExactAlarmInternal(packageName, packageUid);
+        }
+
+        @Override
         public boolean hasScheduleExactAlarm(String packageName, int userId) {
             final int callingUid = mInjector.getCallingUid();
             if (UserHandle.getUserId(callingUid) != userId) {
@@ -2571,9 +2594,6 @@ public class AlarmManagerService extends SystemService {
             if (callingUid != uid && !UserHandle.isCore(callingUid)) {
                 throw new SecurityException("Uid " + callingUid
                         + " cannot query hasScheduleExactAlarm for uid " + uid);
-            }
-            if (!isExactAlarmChangeEnabled(packageName, userId)) {
-                return true;
             }
             return (uid > 0) ? hasScheduleExactAlarmInternal(packageName, uid) : false;
         }
@@ -3577,17 +3597,14 @@ public class AlarmManagerService extends SystemService {
      * This is not expected to get called frequently.
      */
     void removeExactAlarmsOnPermissionRevokedLocked(int uid, String packageName) {
-        Slog.w(TAG, "Package " + packageName + ", uid " + uid + " lost SCHEDULE_EXACT_ALARM!");
-        if (!isExactAlarmChangeEnabled(packageName, UserHandle.getUserId(uid))) {
+        if (isExemptFromExactAlarmPermission(uid)
+                || !isExactAlarmChangeEnabled(packageName, UserHandle.getUserId(uid))) {
             return;
         }
+        Slog.w(TAG, "Package " + packageName + ", uid " + uid + " lost SCHEDULE_EXACT_ALARM!");
 
-        final Predicate<Alarm> whichAlarms = a -> {
-            if (a.uid == uid && a.packageName.equals(packageName) && a.windowLength == 0) {
-                return a.alarmClock != null || !isExemptFromExactAlarmPermission(uid);
-            }
-            return false;
-        };
+        final Predicate<Alarm> whichAlarms = a -> (a.uid == uid && a.packageName.equals(packageName)
+                && a.windowLength == 0);
         removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_EXACT_PERMISSION_REVOKED);
 
         if (mConstants.KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED) {

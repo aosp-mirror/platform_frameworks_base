@@ -81,6 +81,12 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private final VoiceInteractionManagerInternal mVoiceInteractionManagerInternal;
 
     /**
+     * Whether this device allows only the HotwordDetectionService to use OP_RECORD_AUDIO_HOTWORD
+     * which doesn't incur the privacy indicator.
+     */
+    private final boolean mIsHotwordDetectionServiceRequired;
+
+    /**
      * The locking policy around the location tags is a bit special. Since we want to
      * avoid grabbing the lock on every op note we are taking the approach where the
      * read and write are being done via a thread-safe data structure such that the
@@ -114,6 +120,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         mRoleManager = mContext.getSystemService(RoleManager.class);
         mVoiceInteractionManagerInternal = LocalServices.getService(
                 VoiceInteractionManagerInternal.class);
+        mIsHotwordDetectionServiceRequired = isHotwordDetectionServiceRequired(
+                mContext.getPackageManager());
 
         final LocationManagerInternal locationManagerInternal = LocalServices.getService(
                 LocationManagerInternal.class);
@@ -172,6 +180,12 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         }, UserHandle.SYSTEM);
 
         initializeActivityRecognizersTags();
+    }
+
+    private static boolean isHotwordDetectionServiceRequired(PackageManager pm) {
+        // The HotwordDetectionService APIs aren't ready yet for Auto or TV.
+        return !(pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK));
     }
 
     @Override
@@ -257,6 +271,7 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
     private int resolveDatasourceOp(int code, int uid, @NonNull String packageName,
             @Nullable String attributionTag) {
+        code = resolveRecordAudioOp(code, uid);
         if (attributionTag == null) {
             return code;
         }
@@ -355,6 +370,24 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private static int resolveArOp(int code) {
         if (code == AppOpsManager.OP_ACTIVITY_RECOGNITION) {
             return AppOpsManager.OP_ACTIVITY_RECOGNITION_SOURCE;
+        }
+        return code;
+    }
+
+    private int resolveRecordAudioOp(int code, int uid) {
+        if (code == AppOpsManager.OP_RECORD_AUDIO_HOTWORD) {
+            if (!mIsHotwordDetectionServiceRequired) {
+                return code;
+            }
+            // Only the HotwordDetectionService can use the HOTWORD op which doesn't incur the
+            // privacy indicator. Downgrade to standard RECORD_AUDIO for other processes.
+            final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
+                    mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
+            if (hotwordDetectionServiceIdentity != null
+                    && uid == hotwordDetectionServiceIdentity.getIsolatedUid()) {
+                return code;
+            }
+            return AppOpsManager.OP_RECORD_AUDIO;
         }
         return code;
     }

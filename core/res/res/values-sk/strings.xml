@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
     <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
     <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
-    <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g>&amp;#160;<xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Bez mena&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(žiadne telefónne číslo)"</string>
     <string name="unknownName" msgid="7078697621109055330">"Bez názvu"</string>
