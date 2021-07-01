@@ -593,11 +593,13 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     public void onSaveState(@NonNull Bundle outState) {
+        outState.putInt(AuthDialog.KEY_BIOMETRIC_CONFIRM_VISIBILITY,
+                mConfirmButton.getVisibility());
         outState.putInt(AuthDialog.KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY,
                 mTryAgainButton.getVisibility());
         outState.putInt(AuthDialog.KEY_BIOMETRIC_STATE, mState);
         outState.putString(AuthDialog.KEY_BIOMETRIC_INDICATOR_STRING,
-                mIndicatorView.getText().toString());
+                mIndicatorView.getText() != null ? mIndicatorView.getText().toString() : "");
         outState.putBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING,
                 mHandler.hasCallbacks(mResetErrorRunnable));
         outState.putBoolean(AuthDialog.KEY_BIOMETRIC_INDICATOR_HELP_SHOWING,
@@ -754,9 +756,12 @@ public abstract class AuthBiometricView extends LinearLayout {
             // Restore as much state as possible first
             updateState(mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_STATE));
 
-            // Restore positive button state
+            // Restore positive button(s) state
+            mConfirmButton.setVisibility(
+                    mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_CONFIRM_VISIBILITY));
             mTryAgainButton.setVisibility(
                     mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY));
+
         }
     }
 

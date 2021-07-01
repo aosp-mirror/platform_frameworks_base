@@ -72,7 +72,7 @@ public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUdfpsBottomSpacerHeightForLandscape() {
+    public void testUdfpsBottomSpacerHeightForLandscape_whenMoreSpaceAboveIcon() {
         final int titleHeightPx = 320;
         final int subtitleHeightPx = 240;
         final int descriptionHeightPx = 200;
@@ -82,6 +82,22 @@ public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
         final int navbarBottomInsetPx = 75;
 
         assertEquals(885,
+                UdfpsDialogMeasureAdapter.calculateBottomSpacerHeightForLandscape(
+                        titleHeightPx, subtitleHeightPx, descriptionHeightPx, topSpacerHeightPx,
+                        textIndicatorHeightPx, buttonBarHeightPx, navbarBottomInsetPx));
+    }
+
+    @Test
+    public void testUdfpsBottomSpacerHeightForLandscape_whenMoreSpaceBelowIcon() {
+        final int titleHeightPx = 315;
+        final int subtitleHeightPx = 160;
+        final int descriptionHeightPx = 75;
+        final int topSpacerHeightPx = 220;
+        final int textIndicatorHeightPx = 290;
+        final int buttonBarHeightPx = 360;
+        final int navbarBottomInsetPx = 205;
+
+        assertEquals(-85,
                 UdfpsDialogMeasureAdapter.calculateBottomSpacerHeightForLandscape(
                         titleHeightPx, subtitleHeightPx, descriptionHeightPx, topSpacerHeightPx,
                         textIndicatorHeightPx, buttonBarHeightPx, navbarBottomInsetPx));
