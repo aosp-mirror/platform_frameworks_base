@@ -66,7 +66,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -130,7 +129,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
     private String mRestingIndication;
     private String mAlignmentIndication;
     private CharSequence mTransientIndication;
-    private boolean mTransientTextIsError;
     protected ColorStateList mInitialTextColorState;
     private boolean mVisible;
     private boolean mHideTransientMessageOnScreenOff;
@@ -382,8 +380,7 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
 
     private void updateTransient() {
         if (!TextUtils.isEmpty(mTransientIndication)) {
-            mRotateTextViewController.showTransient(mTransientIndication,
-                    mTransientTextIsError);
+            mRotateTextViewController.showTransient(mTransientIndication);
         } else {
             mRotateTextViewController.hideTransient();
         }
@@ -421,7 +418,8 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                     INDICATION_TYPE_ALIGNMENT,
                     new KeyguardIndication.Builder()
                             .setMessage(mAlignmentIndication)
-                            .setTextColor(Utils.getColorError(mContext))
+                            .setTextColor(ColorStateList.valueOf(
+                                    mContext.getColor(R.color.misalignment_text_color)))
                             .build(),
                     true);
         } else {
@@ -594,7 +592,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
             boolean isError, boolean hideOnScreenOff) {
         mTransientIndication = transientIndication;
         mHideTransientMessageOnScreenOff = hideOnScreenOff && transientIndication != null;
-        mTransientTextIsError = isError;
         mHandler.removeMessages(MSG_HIDE_TRANSIENT);
         mHandler.removeMessages(MSG_SWIPE_UP_TO_UNLOCK);
         if (mDozing && !TextUtils.isEmpty(mTransientIndication)) {
@@ -811,7 +808,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardIndicationController:");
-        pw.println("  mTransientTextIsError: " + mTransientTextIsError);
         pw.println("  mInitialTextColorState: " + mInitialTextColorState);
         pw.println("  mPowerPluggedInWired: " + mPowerPluggedInWired);
         pw.println("  mPowerPluggedIn: " + mPowerPluggedIn);
