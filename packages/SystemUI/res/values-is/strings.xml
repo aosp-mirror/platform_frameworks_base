@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Gæti hringt eða titrað eftir stillingum símans"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Gæti hringt eða titrað eftir stillingum símans. Samtöl á <xliff:g id="APP_NAME">%1$s</xliff:g> birtast sjálfkrafa í blöðru."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Fangar athygli þína með fljótandi flýtileið á þetta efni."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Birtist efst í samtalshluta, birtist sem fljótandi blaðra, birtir prófílmynd á lásskjánum"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Birtist efst í samtalshluta sem fljótandi blaðra, birtir prófílmynd á lásskjánum"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Áfram"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Forgangur"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> styður ekki samtalseiginleika"</string>

@@ -718,7 +718,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ดึงดูดความสนใจของคุณไว้เสมอด้วยทางลัดแบบลอยที่มายังเนื้อหานี้"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"แสดงที่ด้านบนของส่วนการสนทนา ปรากฏเป็นบับเบิลแบบลอย แสดงรูปโปรไฟล์บนหน้าจอล็อก"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"การตั้งค่า"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"ลำดับความสำคัญ"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"สำคัญ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่รองรับฟีเจอร์การสนทนา"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ไม่มีบับเบิลเมื่อเร็วๆ นี้"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"บับเบิลที่แสดงและที่ปิดไปเมื่อเร็วๆ นี้จะปรากฏที่นี่"</string>
