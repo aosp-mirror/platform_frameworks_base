@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="5" by="lint 4.1.0" client="cli" variant="all" version="4.1.0">
+<issues format="6" by="lint 7.1.0-dev" type="baseline" client="" name="" variant="all" version="7.1.0-dev">
+
 
     <issue
         id="NewApi"
-        message="Call requires API level R (current min is 26): `android.os.RemoteException#rethrowFromSystemServer`"
+        message="Call requires API level 30 (current min is 26): `android.os.RemoteException#rethrowFromSystemServer`"
         errorLine1="            throw e.rethrowFromSystemServer();"
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~">
         <location
@@ -91,7 +92,7 @@
 
     <issue
         id="NewApi"
-        message="Call requires API level R (current min is 26): `android.view.SurfaceControlViewHost#release`"
+        message="Call requires API level 30 (current min is 26): `android.view.SurfaceControlViewHost#release`"
         errorLine1="            mSurfaceControlViewHost.release();"
         errorLine2="                                    ~~~~~~~">
         <location
@@ -102,7 +103,7 @@
 
     <issue
         id="NewApi"
-        message="Call requires API level R (current min is 26): `android.view.SurfaceView#getHostToken`"
+        message="Call requires API level 30 (current min is 26): `android.view.SurfaceView#getHostToken`"
         errorLine1="        bundle.putBinder(KEY_HOST_TOKEN, surfaceView.getHostToken());"
         errorLine2="                                                     ~~~~~~~~~~~~">
         <location
@@ -278,7 +279,7 @@
 
     <issue
         id="NewApi"
-        message="Field requires API level 29 (current min is 26): `android.app.ActivityManager.RunningTaskInfo#taskId`"
+        message="Field requires API level 29 (current min is 26): `android.app.TaskInfo#taskId`"
         errorLine1="        onTaskMovedToFront(taskInfo.taskId);"
         errorLine2="                           ~~~~~~~~~~~~~~~">
         <location
