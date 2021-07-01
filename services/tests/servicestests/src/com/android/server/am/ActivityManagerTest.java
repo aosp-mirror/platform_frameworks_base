@@ -35,6 +35,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Handler;
@@ -43,7 +44,9 @@ import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcel;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
@@ -53,6 +56,7 @@ import android.support.test.uiautomator.UiDevice;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
@@ -62,11 +66,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Tests for {@link ActivityManager}.
@@ -104,6 +110,9 @@ public class ActivityManagerTest {
     private static final int COMMAND_BIND_SERVICE = 2;
     private static final int COMMAND_UNBIND_SERVICE = 3;
     private static final int COMMAND_STOP_SELF = 4;
+
+    private static final String TEST_ISOLATED_CLASS =
+            "com.android.servicestests.apps.simpleservicetestapp.SimpleIsolatedService";
 
     private IActivityManager mService;
     private IRemoteCallback mCallback;
@@ -566,6 +575,127 @@ public class ActivityManagerTest {
             }
         }
         return -1;
+    }
+
+    @Test
+    public void testGetIsolatedProcesses() throws Exception {
+        final ActivityManager am = mContext.getSystemService(ActivityManager.class);
+        final PackageManager pm = mContext.getPackageManager();
+        final int uid1 = pm.getPackageUid(TEST_APP1, 0);
+        final int uid2 = pm.getPackageUid(TEST_APP2, 0);
+        final int uid3 = pm.getPackageUid(TEST_APP3, 0);
+        final List<Pair<Integer, ServiceConnection>> uid1Processes = new ArrayList<>();
+        final List<Pair<Integer, ServiceConnection>> uid2Processes = new ArrayList<>();
+        try {
+            assertTrue("There shouldn't be any isolated process for " + TEST_APP1,
+                    getIsolatedProcesses(uid1).isEmpty());
+            assertTrue("There shouldn't be any isolated process for " + TEST_APP2,
+                    getIsolatedProcesses(uid2).isEmpty());
+            assertTrue("There shouldn't be any isolated process for " + TEST_APP3,
+                    getIsolatedProcesses(uid3).isEmpty());
+
+            // Verify uid1
+            uid1Processes.add(createIsolatedProcessAndVerify(TEST_APP1, uid1));
+            uid1Processes.add(createIsolatedProcessAndVerify(TEST_APP1, uid1));
+            uid1Processes.add(createIsolatedProcessAndVerify(TEST_APP1, uid1));
+            verifyIsolatedProcesses(uid1Processes, getIsolatedProcesses(uid1));
+
+            // Let one of the processes go
+            final Pair<Integer, ServiceConnection> uid1P2 = uid1Processes.remove(2);
+            mContext.unbindService(uid1P2.second);
+            Thread.sleep(5_000); // Wait for the process gone.
+            verifyIsolatedProcesses(uid1Processes, getIsolatedProcesses(uid1));
+
+            // Verify uid2
+            uid2Processes.add(createIsolatedProcessAndVerify(TEST_APP2, uid2));
+            verifyIsolatedProcesses(uid2Processes, getIsolatedProcesses(uid2));
+
+            // Verify uid1 again
+            verifyIsolatedProcesses(uid1Processes, getIsolatedProcesses(uid1));
+
+            // Verify uid3
+            assertTrue("There shouldn't be any isolated process for " + TEST_APP3,
+                    getIsolatedProcesses(uid3).isEmpty());
+        } finally {
+            for (Pair<Integer, ServiceConnection> p: uid1Processes) {
+                mContext.unbindService(p.second);
+            }
+            for (Pair<Integer, ServiceConnection> p: uid2Processes) {
+                mContext.unbindService(p.second);
+            }
+            am.forceStopPackage(TEST_APP1);
+            am.forceStopPackage(TEST_APP2);
+            am.forceStopPackage(TEST_APP3);
+        }
+    }
+
+    private static List<Integer> getIsolatedProcesses(int uid) throws Exception {
+        final String output = runShellCommand("am get-isolated-pids " + uid);
+        final Matcher matcher = Pattern.compile("(\\d+)").matcher(output);
+        final List<Integer> pids = new ArrayList<>();
+        while (matcher.find()) {
+            pids.add(Integer.parseInt(output.substring(matcher.start(), matcher.end())));
+        }
+        return pids;
+    }
+
+    private void verifyIsolatedProcesses(List<Pair<Integer, ServiceConnection>> processes,
+            List<Integer> pids) {
+        final List<Integer> l = processes.stream().map(p -> p.first).collect(Collectors.toList());
+        assertTrue("Isolated processes don't match", l.containsAll(pids));
+        assertTrue("Isolated processes don't match", pids.containsAll(l));
+    }
+
+    private Pair<Integer, ServiceConnection> createIsolatedProcessAndVerify(String pkgName, int uid)
+            throws Exception {
+        final Pair<Integer, ServiceConnection> p = createIsolatedProcess(pkgName);
+        final List<Integer> pids = getIsolatedProcesses(uid);
+        assertTrue("Can't find the isolated pid " + p.first + " for " + pkgName,
+                pids.contains(p.first));
+        return p;
+    }
+
+    private Pair<Integer, ServiceConnection> createIsolatedProcess(String pkgName)
+            throws Exception {
+        final int[] pid = new int[1];
+        final CountDownLatch[] latch = new CountDownLatch[1];
+        final ServiceConnection conn = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                final IRemoteCallback s = IRemoteCallback.Stub.asInterface(service);
+                final IBinder callback = new Binder() {
+                    @Override
+                    protected boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+                            throws RemoteException {
+                        if (code == Binder.FIRST_CALL_TRANSACTION) {
+                            pid[0] = data.readInt();
+                            latch[0].countDown();
+                            return true;
+                        }
+                        return super.onTransact(code, data, reply, flags);
+                    }
+                };
+                try {
+                    final Bundle extra = new Bundle();
+                    extra.putBinder(EXTRA_CALLBACK, callback);
+                    s.sendResult(extra);
+                } catch (RemoteException e) {
+                    fail("Unable to call into isolated process");
+                }
+            }
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+            }
+        };
+        final Intent intent = new Intent();
+        intent.setClassName(pkgName, TEST_ISOLATED_CLASS);
+        latch[0] = new CountDownLatch(1);
+        assertTrue("Unable to create isolated process in " + pkgName,
+                mContext.bindIsolatedService(intent, Context.BIND_AUTO_CREATE,
+                Long.toString(SystemClock.uptimeMillis()), mContext.getMainExecutor(), conn));
+        assertTrue("Timeout to bind to service " + intent.getComponent(),
+                latch[0].await(AWAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+        return Pair.create(pid[0], conn);
     }
 
     /**
