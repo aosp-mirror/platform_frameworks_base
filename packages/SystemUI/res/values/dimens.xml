@@ -1461,6 +1461,7 @@
     <dimen name="required_height_for_large">168dp</dimen>
     <dimen name="default_width">146dp</dimen>
     <dimen name="default_height">92dp</dimen>
+    <dimen name="avatar_size_for_medium_empty">64dp</dimen>
     <dimen name="avatar_size_for_medium">52dp</dimen>
     <dimen name="max_people_avatar_size_for_large_content">64dp</dimen>
     <dimen name="max_people_avatar_size">108dp</dimen>
@@ -1480,7 +1481,10 @@
     <dimen name="largest_predefined_icon">32dp</dimen>
     <dimen name="availability_dot_status_padding">8dp</dimen>
     <dimen name="availability_dot_notification_padding">12dp</dimen>
+    <dimen name="availability_dot_shown_padding">4dp</dimen>
+    <dimen name="availability_dot_missing_padding">12dp</dimen>
     <dimen name="medium_content_padding_above_name">4dp</dimen>
+    <dimen name="padding_above_predefined_icon_for_small">4dp</dimen>
     <dimen name="padding_between_suppressed_layout_items">8dp</dimen>
 
     <!-- Accessibility floating menu -->
