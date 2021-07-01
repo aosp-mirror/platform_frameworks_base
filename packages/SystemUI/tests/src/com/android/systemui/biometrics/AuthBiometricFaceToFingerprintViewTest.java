@@ -17,8 +17,10 @@
 package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -27,6 +29,11 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.hardware.biometrics.ComponentInfoInternal;
+import android.hardware.biometrics.SensorProperties;
+import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -34,6 +41,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -44,6 +53,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -168,6 +180,50 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
 
         verify(mCallback, never()).onAction(
                 eq(AuthBiometricView.Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR));
+    }
+
+    @Test
+    public void testOnSaveState() {
+        final FingerprintSensorPropertiesInternal sensorProps = createFingerprintSensorProps();
+        mFaceToFpView.setFingerprintSensorProps(sensorProps);
+
+        final Bundle savedState = new Bundle();
+        mFaceToFpView.onSaveState(savedState);
+
+        assertEquals(savedState.getInt(AuthDialog.KEY_BIOMETRIC_SENSOR_TYPE),
+                mFaceToFpView.getActiveSensorType());
+        assertEquals(savedState.getParcelable(AuthDialog.KEY_BIOMETRIC_SENSOR_PROPS), sensorProps);
+    }
+
+    @Test
+    public void testRestoreState() {
+        final Bundle savedState = new Bundle();
+        savedState.putInt(AuthDialog.KEY_BIOMETRIC_SENSOR_TYPE, TYPE_FINGERPRINT);
+        savedState.putParcelable(AuthDialog.KEY_BIOMETRIC_SENSOR_PROPS,
+                createFingerprintSensorProps());
+
+        mFaceToFpView.restoreState(savedState);
+
+        assertEquals(mFaceToFpView.getActiveSensorType(), TYPE_FINGERPRINT);
+        assertTrue(mFaceToFpView.isFingerprintUdfps());
+    }
+
+    @NonNull
+    private static FingerprintSensorPropertiesInternal createFingerprintSensorProps() {
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        componentInfo.add(new ComponentInfoInternal("componentId", "hardwareVersion",
+                "firmwareVersion", "serialNumber", "softwareVersion"));
+
+        return new FingerprintSensorPropertiesInternal(
+                0 /* sensorId */,
+                SensorProperties.STRENGTH_STRONG,
+                5 /* maxEnrollmentsPerUser */,
+                componentInfo,
+                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                true /* resetLockoutRequiresHardwareAuthToken */,
+                540 /* sensorLocationX */,
+                1600 /* sensorLocationY */,
+                100 /* sensorRadius */);
     }
 
     public class TestableView extends AuthBiometricFaceToFingerprintView {
