@@ -1506,8 +1506,9 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void setDisplayPropertiesInternal(int displayId, boolean hasContent,
-            float requestedRefreshRate, int requestedModeId, float requestedMaxRefreshRate,
-            boolean preferMinimalPostProcessing, boolean inTraversal) {
+            float requestedRefreshRate, int requestedModeId, float requestedMinRefreshRate,
+            float requestedMaxRefreshRate, boolean preferMinimalPostProcessing,
+            boolean inTraversal) {
         synchronized (mSyncRoot) {
             final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
             if (display == null) {
@@ -1538,7 +1539,7 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
             mDisplayModeDirector.getAppRequestObserver().setAppRequest(
-                    displayId, requestedModeId, requestedMaxRefreshRate);
+                    displayId, requestedModeId, requestedMinRefreshRate, requestedMaxRefreshRate);
 
             if (display.getDisplayInfoLocked().minimalPostProcessingSupported) {
                 boolean mppRequest = mMinimalPostProcessingAllowed && preferMinimalPostProcessing;
@@ -3208,11 +3209,12 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public void setDisplayProperties(int displayId, boolean hasContent,
-                float requestedRefreshRate, int requestedMode, float requestedMaxRefreshRate,
-                boolean requestedMinimalPostProcessing, boolean inTraversal) {
+                float requestedRefreshRate, int requestedMode, float requestedMinRefreshRate,
+                float requestedMaxRefreshRate, boolean requestedMinimalPostProcessing,
+                boolean inTraversal) {
             setDisplayPropertiesInternal(displayId, hasContent, requestedRefreshRate,
-                    requestedMode, requestedMaxRefreshRate, requestedMinimalPostProcessing,
-                    inTraversal);
+                    requestedMode, requestedMinRefreshRate, requestedMaxRefreshRate,
+                    requestedMinimalPostProcessing, inTraversal);
         }
 
         @Override
