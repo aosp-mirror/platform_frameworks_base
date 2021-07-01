@@ -97,7 +97,7 @@ import java.util.stream.Collectors;
 /** Functions that help creating the People tile layouts. */
 public class PeopleTileViewHelper {
     /** Turns on debugging information about People Space. */
-    public static final boolean DEBUG = true;
+    private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
     private static final String TAG = "PeopleTileView";
 
     private static final int DAYS_IN_A_WEEK = 7;
@@ -116,8 +116,10 @@ public class PeopleTileViewHelper {
     private static final int MIN_MEDIUM_VERTICAL_PADDING = 4;
     private static final int MAX_MEDIUM_PADDING = 16;
     private static final int FIXED_HEIGHT_DIMENS_FOR_MEDIUM_CONTENT_BEFORE_PADDING = 8 + 4;
-    private static final int FIXED_HEIGHT_DIMENS_FOR_SMALL = 6 + 4 + 8;
-    private static final int FIXED_WIDTH_DIMENS_FOR_SMALL = 4 + 4;
+    private static final int FIXED_HEIGHT_DIMENS_FOR_SMALL_VERTICAL = 6 + 4 + 8;
+    private static final int FIXED_WIDTH_DIMENS_FOR_SMALL_VERTICAL = 4 + 4;
+    private static final int FIXED_HEIGHT_DIMENS_FOR_SMALL_HORIZONTAL = 6 + 4;
+    private static final int FIXED_WIDTH_DIMENS_FOR_SMALL_HORIZONTAL = 8 + 8;
 
     private static final int MESSAGES_COUNT_OVERFLOW = 6;
 
@@ -220,7 +222,7 @@ public class PeopleTileViewHelper {
 
         // Otherwise, create a list using the portrait/landscape sizes.
         int defaultWidth = getSizeInDp(context, R.dimen.default_width, density);
-        int defaultHeight =  getSizeInDp(context, R.dimen.default_height, density);
+        int defaultHeight = getSizeInDp(context, R.dimen.default_height, density);
         widgetSizes = new ArrayList<>(2);
 
         int portraitWidth = options.getInt(OPTION_APPWIDGET_MIN_WIDTH, defaultWidth);
@@ -404,7 +406,8 @@ public class PeopleTileViewHelper {
             return LAYOUT_LARGE;
         }
         // Small layout used below a certain minimum mWidth with any mHeight.
-        if (mWidth >= getSizeInDp(R.dimen.required_width_for_medium)) {
+        if (mHeight >= getSizeInDp(R.dimen.required_height_for_medium)
+                && mWidth >= getSizeInDp(R.dimen.required_width_for_medium)) {
             int spaceAvailableForPadding =
                     mHeight - (getSizeInDp(R.dimen.avatar_size_for_medium)
                             + 4 + getLineHeightFromResource(
@@ -437,10 +440,15 @@ public class PeopleTileViewHelper {
 
         // Calculate adaptive avatar size for remaining layouts.
         if (layoutId == R.layout.people_tile_small) {
-            int avatarHeightSpace = mHeight - (FIXED_HEIGHT_DIMENS_FOR_SMALL + Math.max(18,
+            int avatarHeightSpace = mHeight - (FIXED_HEIGHT_DIMENS_FOR_SMALL_VERTICAL + Math.max(18,
                     getLineHeightFromResource(
                             R.dimen.name_text_size_for_small)));
-            int avatarWidthSpace = mWidth - FIXED_WIDTH_DIMENS_FOR_SMALL;
+            int avatarWidthSpace = mWidth - FIXED_WIDTH_DIMENS_FOR_SMALL_VERTICAL;
+            avatarSize = Math.min(avatarHeightSpace, avatarWidthSpace);
+        }
+        if (layoutId == R.layout.people_tile_small_horizontal) {
+            int avatarHeightSpace = mHeight - FIXED_HEIGHT_DIMENS_FOR_SMALL_HORIZONTAL;
+            int avatarWidthSpace = mWidth - FIXED_WIDTH_DIMENS_FOR_SMALL_HORIZONTAL;
             avatarSize = Math.min(avatarHeightSpace, avatarWidthSpace);
         }
 
@@ -1033,7 +1041,7 @@ public class PeopleTileViewHelper {
                 return R.layout.people_tile_large_empty;
             case LAYOUT_SMALL:
             default:
-                return R.layout.people_tile_small;
+                return getLayoutSmallByHeight();
         }
     }
 
@@ -1045,7 +1053,7 @@ public class PeopleTileViewHelper {
                 return R.layout.people_tile_large_with_notification_content;
             case LAYOUT_SMALL:
             default:
-                return R.layout.people_tile_small;
+                return getLayoutSmallByHeight();
         }
     }
 
@@ -1057,8 +1065,15 @@ public class PeopleTileViewHelper {
                 return R.layout.people_tile_large_with_status_content;
             case LAYOUT_SMALL:
             default:
-                return R.layout.people_tile_small;
+                return getLayoutSmallByHeight();
         }
+    }
+
+    private int getLayoutSmallByHeight() {
+        if (mHeight >= getSizeInDp(R.dimen.required_height_for_medium)) {
+            return R.layout.people_tile_small;
+        }
+        return R.layout.people_tile_small_horizontal;
     }
 
     /** Returns a bitmap with the user icon and package icon. */
