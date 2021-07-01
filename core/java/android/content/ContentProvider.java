@@ -1117,7 +1117,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *         calling identity by passing it to
      *         {@link #restoreCallingIdentity}.
      */
-    @SuppressWarnings("AndroidFrameworkBinderIdentity")
+    @SuppressWarnings("ResultOfClearIdentityCallNotStoredInVariable")
     public final @NonNull CallingIdentity clearCallingIdentity() {
         return new CallingIdentity(Binder.clearCallingIdentity(),
                 setCallingAttributionSource(null));
