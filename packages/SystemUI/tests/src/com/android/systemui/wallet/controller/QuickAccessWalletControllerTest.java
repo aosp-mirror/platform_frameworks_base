@@ -21,7 +21,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,12 +63,10 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     private ArgumentCaptor<GetWalletCardsRequest> mRequestCaptor;
 
     private QuickAccessWalletController mController;
-    private TestableLooper mTestableLooper;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTestableLooper = TestableLooper.get(this);
         when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailableWhenDeviceLocked()).thenReturn(true);
@@ -142,5 +142,14 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
         assertEquals(
                 mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_height),
                 request.getCardHeightPx());
+    }
+
+    @Test
+    public void queryWalletCards_walletFeatureNotAvailable_noQuery() {
+        when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(false);
+
+        mController.queryWalletCards(mCardsRetriever);
+
+        verify(mQuickAccessWalletClient, never()).getWalletCards(any(), any(), any());
     }
 }

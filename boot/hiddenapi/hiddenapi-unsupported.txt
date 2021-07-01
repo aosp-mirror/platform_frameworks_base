@@ -167,16 +167,6 @@ Landroid/media/IMediaScannerListener$Stub;-><init>()V
 Landroid/media/IMediaScannerService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/IMediaScannerService;
 Landroid/media/session/ISessionManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/session/ISessionManager;
 Landroid/media/tv/ITvRemoteProvider$Stub;-><init>()V
-Landroid/net/IConnectivityManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
-Landroid/net/IConnectivityManager$Stub$Proxy;->getActiveLinkProperties()Landroid/net/LinkProperties;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getActiveNetworkInfo()Landroid/net/NetworkInfo;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getAllNetworkInfo()[Landroid/net/NetworkInfo;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getAllNetworks()[Landroid/net/Network;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getTetherableIfaces()[Ljava/lang/String;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getTetherableUsbRegexs()[Ljava/lang/String;
-Landroid/net/IConnectivityManager$Stub$Proxy;->getTetheredIfaces()[Ljava/lang/String;
-Landroid/net/IConnectivityManager$Stub$Proxy;->mRemote:Landroid/os/IBinder;
-Landroid/net/IConnectivityManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/IConnectivityManager;
 Landroid/net/INetworkManagementEventObserver$Stub;-><init>()V
 Landroid/net/INetworkPolicyManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetworkPolicyManager;
 Landroid/net/INetworkScoreService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetworkScoreService;

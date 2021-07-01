@@ -517,7 +517,7 @@ public final class PinnerService extends SystemService {
         boolean shouldPinCamera = mConfiguredToPinCamera
                 && DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
                         "pin_camera",
-                        SystemProperties.getBoolean("pinner.pin_camera", false));
+                        SystemProperties.getBoolean("pinner.pin_camera", true));
         if (shouldPinCamera) {
             pinKeys.add(KEY_CAMERA);
         } else if (DEBUG) {
