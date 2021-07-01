@@ -393,6 +393,7 @@ import com.android.server.graphics.fonts.FontManagerInternal;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.os.NativeTombstoneManager;
 import com.android.server.pm.Installer;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.uri.GrantUri;
@@ -13308,6 +13309,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             switch (action) {
+                case Intent.ACTION_MEDIA_SCANNER_SCAN_FILE:
+                    UserManagerInternal umInternal = LocalServices.getService(
+                            UserManagerInternal.class);
+                    UserInfo userInfo = umInternal.getUserInfo(userId);
+                    if (userInfo != null && userInfo.isCloneProfile()) {
+                        userId = umInternal.getProfileParentId(userId);
+                    }
+                    break;
                 case Intent.ACTION_UID_REMOVED:
                 case Intent.ACTION_PACKAGE_REMOVED:
                 case Intent.ACTION_PACKAGE_CHANGED:
