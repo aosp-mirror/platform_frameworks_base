@@ -121,6 +121,7 @@ import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
@@ -314,6 +315,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final ScrimController mScrimController;
     private final PrivacyDotViewController mPrivacyDotViewController;
     private final QuickAccessWalletController mQuickAccessWalletController;
+    private final NotificationRemoteInputManager mRemoteInputManager;
 
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
     // If there are exactly 1 + mMaxKeyguardNotifications, then still shows all notifications
@@ -372,7 +374,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private float mLastOverscroll;
     private boolean mQsExpansionEnabledPolicy = true;
     private boolean mQsExpansionEnabledAmbient = true;
-    private boolean mQsExpansionEnabled = mQsExpansionEnabledPolicy && mQsExpansionEnabledAmbient;
     private ValueAnimator mQsExpansionAnimator;
     private FlingAnimationUtils mFlingAnimationUtils;
     private int mStatusBarMinHeight;
@@ -696,7 +697,8 @@ public class NotificationPanelViewController extends PanelViewController {
             QuickAccessWalletController quickAccessWalletController,
             @Main Executor uiExecutor,
             SecureSettings secureSettings,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            NotificationRemoteInputManager remoteInputManager) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 statusBarKeyguardViewManager, latencyTracker, flingAnimationUtilsBuilder.get(),
@@ -789,6 +791,8 @@ public class NotificationPanelViewController extends PanelViewController {
         mAuthController = authController;
         mLockIconViewController = lockIconViewController;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mRemoteInputManager = remoteInputManager;
+
         int currentMode = navigationModeController.addListener(
                 mode -> mIsGestureNavigation = QuickStepContract.isGesturalMode(mode));
         mIsGestureNavigation = QuickStepContract.isGesturalMode(currentMode);
@@ -1460,9 +1464,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void setQsExpansionEnabled() {
-        mQsExpansionEnabled = mQsExpansionEnabledPolicy && mQsExpansionEnabledAmbient;
         if (mQs == null) return;
-        mQs.setHeaderClickable(mQsExpansionEnabled);
+        mQs.setHeaderClickable(isQsExpansionEnabled());
     }
 
     public void setQsExpansionEnabledPolicy(boolean qsExpansionEnabledPolicy) {
@@ -1531,8 +1534,13 @@ public class NotificationPanelViewController extends PanelViewController {
         flingSettings(0 /* vel */, animateAway ? FLING_HIDE : FLING_COLLAPSE);
     }
 
+    private boolean isQsExpansionEnabled() {
+        return mQsExpansionEnabledPolicy && mQsExpansionEnabledAmbient
+                && !mRemoteInputManager.getController().isRemoteInputActive();
+    }
+
     public void expandWithQs() {
-        if (mQsExpansionEnabled) {
+        if (isQsExpansionEnabled()) {
             mQsExpandImmediate = true;
             mNotificationStackScrollLayoutController.setShouldShowShelfOnly(true);
         }
@@ -1797,7 +1805,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean handleQsTouch(MotionEvent event) {
         final int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN && getExpandedFraction() == 1f
-                && mBarState != KEYGUARD && !mQsExpanded && mQsExpansionEnabled) {
+                && mBarState != KEYGUARD && !mQsExpanded && isQsExpansionEnabled()) {
             // Down in the empty area while fully expanded - go to QS.
             mQsTracking = true;
             traceQsJank(true /* startTracing */, false /* wasCancelled */);
@@ -1819,7 +1827,7 @@ public class NotificationPanelViewController extends PanelViewController {
         if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
             mConflictingQsExpansionGesture = false;
         }
-        if (action == MotionEvent.ACTION_DOWN && isFullyCollapsed() && mQsExpansionEnabled) {
+        if (action == MotionEvent.ACTION_DOWN && isFullyCollapsed() && isQsExpansionEnabled()) {
             mTwoFingerQsExpandPossible = true;
         }
         if (mTwoFingerQsExpandPossible && isOpenQsEvent(event) && event.getY(event.getActionIndex())
@@ -2657,7 +2665,7 @@ public class NotificationPanelViewController extends PanelViewController {
      * @return Whether we should intercept a gesture to open Quick Settings.
      */
     private boolean shouldQuickSettingsIntercept(float x, float y, float yDiff) {
-        if (!mQsExpansionEnabled || mCollapsedOnDown || (mKeyguardShowing
+        if (!isQsExpansionEnabled() || mCollapsedOnDown || (mKeyguardShowing
                 && mKeyguardBypassController.getBypassEnabled())) {
             return false;
         }
@@ -3476,7 +3484,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mQs = (QS) fragment;
             mQs.setPanelView(mHeightListener);
             mQs.setExpandClickListener(mOnClickListener);
-            mQs.setHeaderClickable(mQsExpansionEnabled);
+            mQs.setHeaderClickable(isQsExpansionEnabled());
             updateQSPulseExpansion();
             mQs.setOverscrolling(mStackScrollerOverscrolling);
             mQs.setTranslateWhileExpanding(mShouldUseSplitNotificationShade);
@@ -3967,7 +3975,7 @@ public class NotificationPanelViewController extends PanelViewController {
             if (mQsExpanded) {
                 flingSettings(0 /* vel */, FLING_COLLAPSE, null /* onFinishRunnable */,
                         true /* isClick */);
-            } else if (mQsExpansionEnabled) {
+            } else if (isQsExpansionEnabled()) {
                 mLockscreenGestureLogger.write(MetricsEvent.ACTION_SHADE_QS_TAP, 0, 0);
                 flingSettings(0 /* vel */, FLING_EXPAND, null /* onFinishRunnable */,
                         true /* isClick */);
@@ -3984,7 +3992,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 return;
             }
             cancelQsAnimation();
-            if (!mQsExpansionEnabled) {
+            if (!isQsExpansionEnabled()) {
                 amount = 0f;
             }
             float rounded = amount >= 1f ? amount : 0f;
@@ -4012,8 +4020,9 @@ public class NotificationPanelViewController extends PanelViewController {
                 setOverScrolling(false);
             }
             setQsExpansion(mQsExpansionHeight);
-            flingSettings(!mQsExpansionEnabled && open ? 0f : velocity,
-                    open && mQsExpansionEnabled ? FLING_EXPAND : FLING_COLLAPSE, () -> {
+            boolean canExpand = isQsExpansionEnabled();
+            flingSettings(!canExpand && open ? 0f : velocity,
+                    open && canExpand ? FLING_EXPAND : FLING_COLLAPSE, () -> {
                         setOverScrolling(false);
                         updateQsState();
                     }, false /* isClick */);
