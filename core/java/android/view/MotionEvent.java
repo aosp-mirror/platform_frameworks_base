@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.os.IInputConstants.INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -492,6 +493,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @hide
      */
     public static final int FLAG_NO_FOCUS_CHANGE = 0x40;
+
+    /**
+     * This flag indicates that this event was modified by or generated from an accessibility
+     * service. Value = 0x800
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_IS_ACCESSIBILITY_EVENT = INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT;
 
     /**
      * Private flag that indicates when the system has detected that this motion event
