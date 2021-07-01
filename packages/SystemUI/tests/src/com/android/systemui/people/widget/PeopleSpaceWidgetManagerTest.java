@@ -144,6 +144,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
     private static final String TEST_PACKAGE_A = "com.android.systemui.tests";
     private static final String TEST_PACKAGE_B = "com.test.package_b";
+    private static final String TEST_PACKAGE_C = "com.test.package_c";
     private static final String TEST_CHANNEL_ID = "channel_id";
     private static final String TEST_CHANNEL_NAME = "channel_name";
     private static final String TEST_PARENT_CHANNEL_ID = "parent_channel_id";
@@ -161,6 +162,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private static final int WIDGET_ID_15 = 15;
     private static final String SHORTCUT_ID = "101";
     private static final String OTHER_SHORTCUT_ID = "102";
+    private static final String THIRD_SHORTCUT_ID = "103";
     private static final String NOTIFICATION_KEY = "0|com.android.systemui.tests|0|null|0";
     private static final String NOTIFICATION_CONTENT_1 = "message text 1";
     private static final Uri URI = Uri.parse("fake_uri");
@@ -209,6 +211,12 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             String.valueOf(WIDGET_ID_11), String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS),
             String.valueOf(WIDGET_ID_14), String.valueOf(WIDGET_ID_WITH_SAME_URI),
             String.valueOf(WIDGET_ID_15), String.valueOf(WIDGET_ID_WITH_DIFFERENT_URI)
+    );
+
+    private static final Map<String, String> WIDGETS_MAPPING_CROSS_MAPPING = Map.of(
+            String.valueOf(WIDGET_ID_WITH_SHORTCUT), String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS),
+            String.valueOf(WIDGET_ID_WITHOUT_SHORTCUT), String.valueOf(WIDGET_ID_WITHOUT_SHORTCUT),
+            String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS), String.valueOf(WIDGET_ID_WITH_SHORTCUT)
     );
 
     private ShortcutInfo mShortcutInfo;
@@ -1458,6 +1466,33 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         PeopleTileKey key11 = SharedPreferencesHelper.getPeopleTileKey(sp11);
         assertThat(key11.getShortcutId()).isNull();
         assertThat(key11.getPackageName()).isNull();
+    }
+
+    @Test
+    public void testRemapWidgetFiles_crossMapping() {
+        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT, URI);
+        setStorageForTile(OTHER_SHORTCUT_ID, TEST_PACKAGE_B, WIDGET_ID_WITHOUT_SHORTCUT, URI);
+        setStorageForTile(THIRD_SHORTCUT_ID, TEST_PACKAGE_C, WIDGET_ID_WITH_KEY_IN_OPTIONS, URI);
+
+        mManager.remapWidgetFiles(WIDGETS_MAPPING_CROSS_MAPPING);
+
+        SharedPreferences sp1 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITH_SHORTCUT), Context.MODE_PRIVATE);
+        PeopleTileKey key1 = SharedPreferencesHelper.getPeopleTileKey(sp1);
+        assertThat(key1.getShortcutId()).isEqualTo(THIRD_SHORTCUT_ID);
+        assertThat(key1.getPackageName()).isEqualTo(TEST_PACKAGE_C);
+
+        SharedPreferences sp2 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITHOUT_SHORTCUT), Context.MODE_PRIVATE);
+        PeopleTileKey key2 = SharedPreferencesHelper.getPeopleTileKey(sp2);
+        assertThat(key2.getShortcutId()).isEqualTo(OTHER_SHORTCUT_ID);
+        assertThat(key2.getPackageName()).isEqualTo(TEST_PACKAGE_B);
+
+        SharedPreferences sp4 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS), Context.MODE_PRIVATE);
+        PeopleTileKey key4 = SharedPreferencesHelper.getPeopleTileKey(sp4);
+        assertThat(key4.getShortcutId()).isEqualTo(SHORTCUT_ID);
+        assertThat(key4.getPackageName()).isEqualTo(TEST_PACKAGE_A);
     }
 
     @Test
