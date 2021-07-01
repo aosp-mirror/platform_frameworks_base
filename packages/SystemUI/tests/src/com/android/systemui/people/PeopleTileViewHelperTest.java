@@ -236,6 +236,21 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // No messages count.
         assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
+        mHeight = getSizeInDp(R.dimen.required_height_for_medium) - 1;
+        RemoteViews smallViewHorizontal = getPeopleTileViewHelper(
+                tileWithLastInteraction).getViews();
+        View smallResultHorizontal = smallViewHorizontal.apply(mContext, null);
+
+        // Show name over predefined icon.
+        assertEquals(View.VISIBLE, smallResultHorizontal.findViewById(R.id.name).getVisibility());
+        assertEquals(View.GONE,
+                smallResultHorizontal.findViewById(R.id.predefined_icon).getVisibility());
+        // Shows person icon.
+        assertEquals(View.VISIBLE,
+                smallResultHorizontal.findViewById(R.id.person_icon).getVisibility());
+        // No messages count.
+        assertEquals(View.GONE,
+                smallResultHorizontal.findViewById(R.id.messages_count).getVisibility());
 
         mWidth = getSizeInDp(R.dimen.required_width_for_large);
         mHeight = getSizeInDp(R.dimen.required_height_for_large);
@@ -292,6 +307,22 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // No messages count.
         assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
+        mHeight = getSizeInDp(R.dimen.required_height_for_medium) - 1;
+        RemoteViews smallViewHorizontal = getPeopleTileViewHelper(
+                tileWithAvailabilityAndNewStory).getViews();
+        View smallResultHorizontal = smallViewHorizontal.apply(mContext, null);
+
+        // Show name over predefined icon.
+        assertEquals(View.VISIBLE, smallResultHorizontal.findViewById(R.id.name).getVisibility());
+        assertEquals(View.GONE,
+                smallResultHorizontal.findViewById(R.id.predefined_icon).getVisibility());
+        // Shows person icon.
+        assertEquals(View.VISIBLE,
+                smallResultHorizontal.findViewById(R.id.person_icon).getVisibility());
+        // No messages count.
+        assertEquals(View.GONE,
+                smallResultHorizontal.findViewById(R.id.messages_count).getVisibility());
+
         mWidth = getSizeInDp(R.dimen.required_width_for_large);
         mHeight = getSizeInDp(R.dimen.required_height_for_large);
         RemoteViews largeView = getPeopleTileViewHelper(tileWithAvailabilityAndNewStory).getViews();
@@ -347,6 +378,22 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 smallResult.findViewById(R.id.person_icon).getVisibility());
         // No messages count.
         assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
+
+        mHeight = getSizeInDp(R.dimen.required_height_for_medium) - 1;
+        RemoteViews smallViewHorizontal = getPeopleTileViewHelper(
+                tileWithStatusTemplate).getViews();
+        View smallResultHorizontal = smallViewHorizontal.apply(mContext, null);
+
+        // Show name over predefined icon.
+        assertEquals(View.GONE, smallResultHorizontal.findViewById(R.id.name).getVisibility());
+        assertEquals(View.VISIBLE,
+                smallResultHorizontal.findViewById(R.id.predefined_icon).getVisibility());
+        // Shows person icon.
+        assertEquals(View.VISIBLE,
+                smallResultHorizontal.findViewById(R.id.person_icon).getVisibility());
+        // No messages count.
+        assertEquals(View.GONE,
+                smallResultHorizontal.findViewById(R.id.messages_count).getVisibility());
 
         mWidth = getSizeInDp(R.dimen.required_width_for_large);
         mHeight = getSizeInDp(R.dimen.required_height_for_large);
@@ -406,6 +453,22 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 smallResult.findViewById(R.id.person_icon).getVisibility());
         // No messages count.
         assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
+
+        mHeight = getSizeInDp(R.dimen.required_height_for_medium) - 1;
+        RemoteViews smallViewHorizontal = getPeopleTileViewHelper(
+                tileWithStatusTemplate).getViews();
+        View smallResultHorizontal = smallViewHorizontal.apply(mContext, null);
+
+        // Show name over predefined icon.
+        assertEquals(View.GONE, smallResultHorizontal.findViewById(R.id.name).getVisibility());
+        assertEquals(View.VISIBLE,
+                smallResultHorizontal.findViewById(R.id.predefined_icon).getVisibility());
+        // Shows person icon.
+        assertEquals(View.VISIBLE,
+                smallResultHorizontal.findViewById(R.id.person_icon).getVisibility());
+        // No messages count.
+        assertEquals(View.GONE,
+                smallResultHorizontal.findViewById(R.id.messages_count).getVisibility());
 
         mWidth = getSizeInDp(R.dimen.required_width_for_large);
         mHeight = getSizeInDp(R.dimen.required_height_for_large);
