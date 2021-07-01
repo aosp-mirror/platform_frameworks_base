@@ -43,7 +43,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
-import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_READY;
 
@@ -346,7 +345,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testDisplayAreaTransaction() {
         removeGlobalMinSizeRestriction();
-        final DisplayArea displayArea = new DisplayArea<>(mWm, ABOVE_TASKS, "DisplayArea");
+        final DisplayArea displayArea = mDisplayContent.getDefaultTaskDisplayArea();
         testTransaction(displayArea);
     }
 
@@ -364,7 +363,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         testSetWindowingMode(rootTask);
 
-        final DisplayArea displayArea = new DisplayArea<>(mWm, ABOVE_TASKS, "DisplayArea");
+        final DisplayArea displayArea = mDisplayContent.getDefaultTaskDisplayArea();
         displayArea.setWindowingMode(WINDOWING_MODE_FREEFORM);
         testSetWindowingMode(displayArea);
     }
