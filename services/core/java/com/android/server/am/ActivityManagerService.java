@@ -7629,6 +7629,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         t.traceEnd();
 
         t.traceBegin("ActivityManagerStartApps");
+        mBatteryStatsService.onSystemReady();
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                 Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
