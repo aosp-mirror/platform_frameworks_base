@@ -2558,16 +2558,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *     <li>During app update the state gets restored from the last version of the app</li>
      * </ul>
      *
-     * <p>This restores the permission state for all users.
-     *
      * @param pkg the package the permissions belong to
      * @param replace if the package is getting replaced (this might change the requested
      *                permissions of this package)
      * @param packageOfInterest If this is the name of {@code pkg} add extra logging
      * @param callback Result call back
+     * @param filterUserId If not {@link UserHandle.USER_ALL}, only restore the permission state for
+     *                     this particular user
      */
     private void restorePermissionState(@NonNull AndroidPackage pkg, boolean replace,
-            @Nullable String packageOfInterest, @Nullable PermissionCallback callback) {
+            @Nullable String packageOfInterest, @Nullable PermissionCallback callback,
+            @UserIdInt int filterUserId) {
         // IMPORTANT: There are two types of permissions: install and runtime.
         // Install time permissions are granted when the app is installed to
         // all device users and users added in the future. Runtime permissions
@@ -2585,7 +2586,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return;
         }
 
-        final int[] userIds = getAllUserIds();
+        final int[] userIds = filterUserId == UserHandle.USER_ALL ? getAllUserIds()
+                : new int[] { filterUserId };
 
         boolean runtimePermissionsRevoked = false;
         int[] updatedUserIds = EMPTY_INT_ARRAY;
@@ -3865,7 +3867,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         if (updatePermissions) {
             // Update permission of this app to take into account the new allowlist state.
-            restorePermissionState(pkg, false, pkg.getPackageName(), mDefaultPermissionCallback);
+            restorePermissionState(pkg, false, pkg.getPackageName(), mDefaultPermissionCallback,
+                    userId);
 
             // If this resulted in losing a permission we need to kill the app.
             if (oldGrantedRestrictedPermissions == null) {
@@ -4019,14 +4022,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * @param packageName The package that is updated
      * @param pkg The package that is updated, or {@code null} if package is deleted
+     * @param filterUserId If not {@link UserHandle.USER_ALL}, only restore the permission state for
+     *                     this particular user
      */
-    private void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg) {
+    private void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg,
+                                   @UserIdInt int filterUserId) {
         // If the package is being deleted, update the permissions of all the apps
         final int flags =
                 (pkg == null ? UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG
                         : UPDATE_PERMISSIONS_REPLACE_PKG);
-        updatePermissions(
-                packageName, pkg, getVolumeUuidForPackage(pkg), flags, mDefaultPermissionCallback);
+        updatePermissions(packageName, pkg, getVolumeUuidForPackage(pkg), flags,
+                mDefaultPermissionCallback, filterUserId);
     }
 
     /**
@@ -4048,7 +4054,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     (fingerprintChanged
                             ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
                             : 0);
-            updatePermissions(null, null, volumeUuid, flags, mDefaultPermissionCallback);
+            updatePermissions(null, null, volumeUuid, flags, mDefaultPermissionCallback,
+                    UserHandle.USER_ALL);
         } finally {
             PackageManager.uncorkPackageInfoCache();
         }
@@ -4097,12 +4104,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *                          all volumes
      * @param flags Control permission for which apps should be updated
      * @param callback Callback to call after permission changes
+     * @param filterUserId If not {@link UserHandle.USER_ALL}, only restore the permission state for
+     *                     this particular user
      */
     private void updatePermissions(final @Nullable String changingPkgName,
             final @Nullable AndroidPackage changingPkg,
             final @Nullable String replaceVolumeUuid,
             @UpdatePermissionFlags int flags,
-            final @Nullable PermissionCallback callback) {
+            final @Nullable PermissionCallback callback, @UserIdInt int filterUserId) {
         // TODO: Most of the methods exposing BasePermission internals [source package name,
         // etc..] shouldn't be needed. Instead, when we've parsed a permission that doesn't
         // have package settings, we should make note of it elsewhere [map between
@@ -4138,7 +4147,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // Only replace for packages on requested volume
                 final String volumeUuid = getVolumeUuidForPackage(pkg);
                 final boolean replace = replaceAll && Objects.equals(replaceVolumeUuid, volumeUuid);
-                restorePermissionState(pkg, replace, changingPkgName, callback);
+                restorePermissionState(pkg, replace, changingPkgName, callback, filterUserId);
             });
         }
 
@@ -4147,7 +4156,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final String volumeUuid = getVolumeUuidForPackage(changingPkg);
             final boolean replace = ((flags & UPDATE_PERMISSIONS_REPLACE_PKG) != 0)
                     && Objects.equals(replaceVolumeUuid, volumeUuid);
-            restorePermissionState(changingPkg, replace, changingPkgName, callback);
+            restorePermissionState(changingPkg, replace, changingPkgName, callback, filterUserId);
         }
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
@@ -4815,7 +4824,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private void onPackageInstalledInternal(@NonNull AndroidPackage pkg,
             @NonNull PermissionManagerServiceInternal.PackageInstalledParams params,
             @UserIdInt int userId) {
-        updatePermissions(pkg.getPackageName(), pkg);
+        updatePermissions(pkg.getPackageName(), pkg, userId);
         addAllowlistedRestrictedPermissionsInternal(pkg,
                 params.getAllowlistedRestrictedPermissions(),
                 FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
@@ -4862,7 +4871,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             resetRuntimePermissionsInternal(pkg, userId);
             return;
         }
-        updatePermissions(packageName, null);
+        updatePermissions(packageName, null, userId);
         if (sharedUserPkgs.isEmpty()) {
             removeUidStateAndResetPackageInstallPermissionsFixed(appId, packageName, userId);
         } else {
