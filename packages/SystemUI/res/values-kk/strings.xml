@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Барлығын көрсету"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Төлеу үшін құлыпты ашу"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Реттелмеген"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Пайдалану үшін құлыпты ашу"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Карталарыңыз алынбады, кейінірек қайталап көріңіз."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Экран құлпының параметрлері"</string>
@@ -743,7 +745,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Күйі:&lt;/b&gt; маңыздылық деңгейі төмендетілген"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті ретінде көрсетіледі."</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті болып көрсетіледі, қалқыма хабар түрінде шығады."</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті ретінде көрсетіледі, \"Мазаламау\" режимін тоқтатады."</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті ретінде көрсетіледі, Мазаламау режимін тоқтатады."</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті болып көрсетіледі, қалқыма хабар түрінде шығады, Мазаламау режимін тоқтатады."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Параметрлер"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маңызды"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Ашық әңгіме"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Әңгіме виджеттері"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Негізгі экранға қосқыңыз келетін әңгімені түртіңіз."</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Соңғы әңгімелеріңіз осы жерде көрсетіледі."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Маңызды әңгімелер"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Соңғы әңгімелер"</string>
     <string name="okay" msgid="6490552955618608554">"Жарайды"</string>
@@ -1145,7 +1146,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Соңғы хабарларды, өткізіп алған қоңыраулар мен жаңартылған күйлерді көруге болады."</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Әңгіме"</string>
-    <string name="paused_by_dnd" msgid="7856941866433556428">"\"Мазаламау\" режимі арқылы кідіртілді."</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Мазаламау режимі арқылы кідіртілді."</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> хабар жіберді."</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> сурет жіберді."</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Батарея зарядының дерегі алынбай жатыр"</string>
