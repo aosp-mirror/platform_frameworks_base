@@ -88,6 +88,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
                 mUnlockedScreenOffAnimationController);
+        mNotificationShadeWindowController.setScrimsVisibilityListener((visibility) -> {});
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
 
         mNotificationShadeWindowController.attach();
@@ -135,6 +136,28 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         verify(mNotificationShadeWindowView).setVisibility(eq(View.VISIBLE));
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_SHOW_WALLPAPER) != 0).isTrue();
+    }
+
+    @Test
+    public void attach_lightScrimHidesWallpaper() {
+        when(mKeyguardViewMediator.isShowingAndNotOccluded()).thenReturn(true);
+        mNotificationShadeWindowController.attach();
+
+        clearInvocations(mWindowManager);
+        mNotificationShadeWindowController.setLightRevealScrimAmount(0f);
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SHOW_WALLPAPER) == 0).isTrue();
+    }
+
+    @Test
+    public void attach_scrimHidesWallpaper() {
+        when(mKeyguardViewMediator.isShowingAndNotOccluded()).thenReturn(true);
+        mNotificationShadeWindowController.attach();
+
+        clearInvocations(mWindowManager);
+        mNotificationShadeWindowController.setScrimsVisibility(ScrimController.OPAQUE);
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SHOW_WALLPAPER) == 0).isTrue();
     }
 
     @Test
