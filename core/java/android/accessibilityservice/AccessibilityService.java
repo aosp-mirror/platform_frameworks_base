@@ -2074,6 +2074,10 @@ public abstract class AccessibilityService extends Service {
         if (WINDOW_SERVICE.equals(name)) {
             if (mWindowManager == null) {
                 mWindowManager = (WindowManager) getBaseContext().getSystemService(name);
+                final WindowManagerImpl wm = (WindowManagerImpl) mWindowManager;
+                // Set e default token obtained from the connection to ensure client could use
+                // accessibility overlay.
+                wm.setDefaultToken(mWindowToken);
             }
             return mWindowManager;
         }
@@ -2182,8 +2186,10 @@ public abstract class AccessibilityService extends Service {
 
                 // The client may have already obtained the window manager, so
                 // update the default token on whatever manager we gave them.
-                final WindowManagerImpl wm = (WindowManagerImpl) getSystemService(WINDOW_SERVICE);
-                wm.setDefaultToken(windowToken);
+                if (mWindowManager != null) {
+                    final WindowManagerImpl wm = (WindowManagerImpl) mWindowManager;
+                    wm.setDefaultToken(mWindowToken);
+                }
             }
 
             @Override
