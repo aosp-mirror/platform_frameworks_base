@@ -61,7 +61,7 @@ public class PackageItemInfo {
     public static final int MAX_SAFE_LABEL_LENGTH = 1000;
 
     /** @hide */
-    public static final float DEFAULT_MAX_LABEL_SIZE_PX = 500f;
+    public static final float DEFAULT_MAX_LABEL_SIZE_PX = 1000f;
 
     /**
      * Remove {@link Character#isWhitespace(int) whitespace} and non-breaking spaces from the edges
