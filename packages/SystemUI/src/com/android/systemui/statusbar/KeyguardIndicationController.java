@@ -882,7 +882,10 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                 return;
             }
 
-            if (biometricSourceType == BiometricSourceType.FACE && shouldSuppressFaceMsg()) {
+            if (biometricSourceType == BiometricSourceType.FACE
+                    && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
+                // suggest trying fingerprint
+                showTransientIndication(R.string.keyguard_try_fingerprint);
                 return;
             }
 
@@ -907,6 +910,12 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         public void onBiometricError(int msgId, String errString,
                 BiometricSourceType biometricSourceType) {
             if (shouldSuppressBiometricError(msgId, biometricSourceType, mKeyguardUpdateMonitor)) {
+                return;
+            }
+            if (biometricSourceType == BiometricSourceType.FACE
+                    && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
+                // suggest trying fingerprint
+                showTransientIndication(R.string.keyguard_try_fingerprint);
                 return;
             }
             if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
@@ -954,18 +963,16 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED);
         }
 
-        private boolean shouldSuppressFaceMsg() {
+        private boolean shouldSuppressFaceMsgAndShowTryFingerprintMsg() {
             // For dual biometric, don't show face auth messages unless face auth was explicitly
             // requested by the user.
-            return mKeyguardUpdateMonitor.isUdfpsEnrolled()
-                && mKeyguardUpdateMonitor.isFingerprintDetectionRunning()
-                && !mKeyguardUpdateMonitor.isFaceAuthUserRequested();
+            return mKeyguardUpdateMonitor.isFingerprintDetectionRunning()
+                && !mKeyguardUpdateMonitor.isFaceAuthUserRequested()
+                && mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                    true /* isStrongBiometric */);
         }
 
         private boolean shouldSuppressFaceError(int msgId, KeyguardUpdateMonitor updateMonitor) {
-            if (shouldSuppressFaceMsg()) {
-                return true;
-            }
             // Only checking if unlocking with Biometric is allowed (no matter strong or non-strong
             // as long as primary auth, i.e. PIN/pattern/password, is not required), so it's ok to
             // pass true for isStrongBiometric to isUnlockingWithBiometricAllowed() to bypass the
