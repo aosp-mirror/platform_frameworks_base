@@ -24,6 +24,7 @@ import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION
 import android.annotation.NonNull;
 import android.annotation.WorkerThread;
 import android.app.Activity;
+import android.app.assist.ActivityId;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
@@ -161,6 +162,7 @@ public class UiTranslationController {
                         view.setHasTranslationTransientState(false);
                     }
                 });
+                notifyTranslationFinished(/* activityDestroyed= */ false);
                 synchronized (mLock) {
                     mViews.clear();
                 }
@@ -175,9 +177,25 @@ public class UiTranslationController {
      */
     public void onActivityDestroyed() {
         synchronized (mLock) {
+            if (DEBUG) {
+                Log.i(TAG,
+                        "onActivityDestroyed(): mCurrentState is " + stateToString(mCurrentState));
+            }
+            if (mCurrentState != STATE_UI_TRANSLATION_FINISHED) {
+                notifyTranslationFinished(/* activityDestroyed= */ true);
+            }
             mViews.clear();
             destroyTranslators();
             mWorkerThread.quitSafely();
+        }
+    }
+
+    private void notifyTranslationFinished(boolean activityDestroyed) {
+        UiTranslationManager manager = mContext.getSystemService(UiTranslationManager.class);
+        if (manager != null) {
+            manager.onTranslationFinished(activityDestroyed,
+                    new ActivityId(mActivity.getTaskId(), mActivity.getShareableActivityToken()),
+                    mActivity.getComponentName());
         }
     }
 

@@ -16,6 +16,7 @@
 
 package android.view.translation;
 
+import android.content.ComponentName;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.ResultReceiver;
@@ -47,4 +48,6 @@ oneway interface ITranslationManager {
     void registerUiTranslationStateCallback(in IRemoteCallback callback, int userId);
     void unregisterUiTranslationStateCallback(in IRemoteCallback callback, int userId);
     void getServiceSettingsActivity(in IResultReceiver result, int userId);
+    void onTranslationFinished(boolean activityDestroyed, IBinder token,
+         in ComponentName componentName, int userId);
 }
