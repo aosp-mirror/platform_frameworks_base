@@ -18,6 +18,7 @@ package com.google.android.lint
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
 import com.android.tools.lint.checks.infrastructure.TestFile
+import com.android.tools.lint.checks.infrastructure.TestLintTask
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 
@@ -33,6 +34,8 @@ class CallingIdentityTokenDetectorTest : LintDetectorTest() {
             CallingIdentityTokenDetector.ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY,
             CallingIdentityTokenDetector.ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY
     )
+
+    override fun lint(): TestLintTask = super.lint().allowMissingSdk(true)
 
     /** No issue scenario */
 

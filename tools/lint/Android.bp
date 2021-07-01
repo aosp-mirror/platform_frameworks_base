@@ -31,16 +31,16 @@ java_library_host {
     ],
 }
 
-// TODO: (b/162368644) Implement these (working in gradle) Kotlin Tests to run on Soong
-//java_test_host {
-//    name: "AndroidFrameworkLintCheckerTest",
-//    srcs: [
-//     "checks/src/test/java/**/*.kt",
-//     "checks/src/main/java/**/*.kt",
-//    ],
-//    plugins: ["auto_service_plugin"],
-//    static_libs: [
-//        "auto_service_annotations",
-//        "lint_api",
-//    ],
-//}
+java_test_host {
+    name: "AndroidFrameworkLintCheckerTest",
+    srcs: ["checks/src/test/java/**/*.kt"],
+    static_libs: [
+        "AndroidFrameworkLintChecker",
+        "junit",
+        "lint",
+        "lint_tests",
+    ],
+    test_options: {
+        unit_test: true,
+    },
+}
