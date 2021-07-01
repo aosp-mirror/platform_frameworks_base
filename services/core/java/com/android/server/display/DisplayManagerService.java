@@ -399,9 +399,6 @@ public final class DisplayManagerService extends SystemService {
     // Receives notifications about changes to Settings.
     private SettingsObserver mSettingsObserver;
 
-    // Received notifications of the device-state action (such as "fold", "unfold")
-    private DeviceStateManager mDeviceStateManager;
-
     private final boolean mAllowNonNativeRefreshRateOverride;
 
     private final BrightnessSynchronizer mBrightnessSynchronizer;
@@ -1234,13 +1231,6 @@ public final class DisplayManagerService extends SystemService {
     private void registerDisplayAdapterLocked(DisplayAdapter adapter) {
         mDisplayAdapters.add(adapter);
         adapter.registerLocked();
-    }
-
-    @VisibleForTesting
-    void handleLogicalDisplayAdded(LogicalDisplay display) {
-        synchronized (mSyncRoot) {
-            handleLogicalDisplayAddedLocked(display);
-        }
     }
 
     private void handleLogicalDisplayAddedLocked(LogicalDisplay display) {
@@ -2106,7 +2096,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         final BrightnessSetting brightnessSetting = new BrightnessSetting(mPersistentDataStore,
-                display, mContext);
+                display, mSyncRoot);
         final DisplayPowerController displayPowerController = new DisplayPowerController(
                 mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
                 mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
