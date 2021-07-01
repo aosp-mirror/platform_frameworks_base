@@ -5015,6 +5015,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mAppStopped = true;
         // Reset the last saved PiP snap fraction on app stop.
         mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
+        mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();

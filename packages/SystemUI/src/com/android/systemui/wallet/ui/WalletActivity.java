@@ -136,7 +136,7 @@ public class WalletActivity extends LifecycleActivity implements
             }
         };
 
-        walletView.getAppButton().setOnClickListener(
+        walletView.setShowWalletAppOnClickListener(
                 v -> {
                     if (mWalletClient.createWalletIntent() == null) {
                         Log.w(TAG, "Unable to create wallet app intent.");

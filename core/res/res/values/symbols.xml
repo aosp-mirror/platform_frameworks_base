@@ -490,6 +490,7 @@
   <java-symbol type="integer" name="config_smartSelectionInitializedTimeoutMillis" />
   <java-symbol type="integer" name="config_smartSelectionInitializingTimeoutMillis" />
   <java-symbol type="bool" name="config_hibernationDeletesOatArtifactsEnabled"/>
+  <java-symbol type="integer" name="config_defaultAnalogClockSecondsHandFps"/>
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -560,6 +561,7 @@
   <java-symbol type="string" name="notification_title" />
   <java-symbol type="string" name="other_networks_no_internet" />
   <java-symbol type="string" name="permission_request_notification_with_subtitle" />
+  <java-symbol type="string" name="permission_request_notification_for_app_with_subtitle" />
   <java-symbol type="string" name="prepend_shortcut_label" />
   <java-symbol type="string" name="private_dns_broken_detailed" />
   <java-symbol type="string" name="paste_as_plain_text" />
@@ -2526,6 +2528,7 @@
   <java-symbol type="string" name="fingerprint_acquired_imager_dirty" />
   <java-symbol type="string" name="fingerprint_acquired_too_slow" />
   <java-symbol type="string" name="fingerprint_acquired_too_fast" />
+  <java-symbol type="string" name="fingerprint_acquired_too_bright" />
   <java-symbol type="array" name="fingerprint_acquired_vendor" />
   <java-symbol type="string" name="fingerprint_error_canceled" />
   <java-symbol type="string" name="fingerprint_error_user_canceled" />
@@ -4165,6 +4168,7 @@
   <java-symbol type="drawable" name="ic_work_apps_off" />
   <java-symbol type="drawable" name="ic_sharing_disabled" />
   <java-symbol type="drawable" name="ic_no_apps" />
+  <java-symbol type="drawable" name="ic_screenshot_edit" />
   <java-symbol type="dimen" name="resolver_empty_state_height" />
   <java-symbol type="dimen" name="resolver_empty_state_height_with_tabs" />
   <java-symbol type="dimen" name="resolver_max_collapsed_height_with_tabs" />
