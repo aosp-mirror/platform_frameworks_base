@@ -914,6 +914,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mTmpApplySurfaceChangesTransactionState.preferredModeId = preferredModeId;
                 }
 
+                final float preferredMinRefreshRate = getDisplayPolicy().getRefreshRatePolicy()
+                        .getPreferredMinRefreshRate(w);
+                if (mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate == 0
+                        && preferredMinRefreshRate != 0) {
+                    mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate =
+                            preferredMinRefreshRate;
+                }
+
                 final float preferredMaxRefreshRate = getDisplayPolicy().getRefreshRatePolicy()
                         .getPreferredMaxRefreshRate(w);
                 if (mTmpApplySurfaceChangesTransactionState.preferredMaxRefreshRate == 0
@@ -4321,6 +4329,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mLastHasContent,
                     mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferredModeId,
+                    mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferredMaxRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
                     true /* inTraversal, must call performTraversalInTrans... below */);
@@ -4611,6 +4620,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public boolean preferMinimalPostProcessing;
         public float preferredRefreshRate;
         public int preferredModeId;
+        public float preferredMinRefreshRate;
         public float preferredMaxRefreshRate;
 
         void reset() {
@@ -4620,6 +4630,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             preferMinimalPostProcessing = false;
             preferredRefreshRate = 0;
             preferredModeId = 0;
+            preferredMinRefreshRate = 0;
             preferredMaxRefreshRate = 0;
         }
     }
