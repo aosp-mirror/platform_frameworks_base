@@ -417,6 +417,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             // Fade in the security footer and the divider as we reach the final position
             builder = new Builder().setStartDelay(EXPANDED_TILE_DELAY);
             builder.addFloat(mSecurityFooter.getView(), "alpha", 0, 1);
+            if (mQsPanelController.shouldUseHorizontalLayout()
+                    && mQsPanelController.mMediaHost.hostView != null) {
+                builder.addFloat(mQsPanelController.mMediaHost.hostView, "alpha", 0, 1);
+            }
             mAllPagesDelayedAnimator = builder.build();
             mAllViews.add(mSecurityFooter.getView());
             translationYBuilder.setInterpolator(mQSExpansionPathInterpolator.getYInterpolator());
