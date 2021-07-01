@@ -440,7 +440,14 @@ public final class SensorPrivacyService extends SystemService {
                 inputMethodPackageName = ComponentName.unflattenFromString(
                         inputMethodComponent).getPackageName();
             }
-            int capability = mActivityManagerInternal.getUidCapability(uid);
+
+            int capability;
+            try {
+                capability = mActivityManagerInternal.getUidCapability(uid);
+            } catch (IllegalArgumentException e) {
+                Log.w(TAG, e);
+                return;
+            }
 
             if (sensor == MICROPHONE) {
                 VoiceInteractionManagerInternal voiceInteractionManagerInternal =
