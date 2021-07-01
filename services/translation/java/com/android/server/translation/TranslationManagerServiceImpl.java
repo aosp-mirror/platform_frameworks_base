@@ -20,10 +20,12 @@ import static android.view.translation.TranslationManager.EXTRA_CAPABILITIES;
 import static android.view.translation.UiTranslationManager.EXTRA_SOURCE_LOCALE;
 import static android.view.translation.UiTranslationManager.EXTRA_STATE;
 import static android.view.translation.UiTranslationManager.EXTRA_TARGET_LOCALE;
+import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_FINISHED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
@@ -33,6 +35,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.service.translation.TranslationServiceInfo;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InputMethodInfo;
@@ -83,6 +86,7 @@ final class TranslationManagerServiceImpl extends
             new TranslationServiceRemoteCallback();
     private final RemoteCallbackList<IRemoteCallback> mTranslationCapabilityCallbacks =
             new RemoteCallbackList<>();
+    private final ArraySet<IBinder> mWaitingFinishedCallbackActivities = new ArraySet();
 
     protected TranslationManagerServiceImpl(
             @NonNull TranslationManagerService master,
@@ -169,6 +173,41 @@ final class TranslationManagerServiceImpl extends
         }
     }
 
+    private int getActivityUidByComponentName(Context context, ComponentName componentName,
+            int userId) {
+        int translationActivityUid = -1;
+        try {
+            if (componentName != null) {
+                translationActivityUid = context.getPackageManager().getApplicationInfoAsUser(
+                        componentName.getPackageName(), 0, userId).uid;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.d(TAG, "Cannot find packageManager for" +  componentName);
+        }
+        return translationActivityUid;
+    }
+
+    @GuardedBy("mLock")
+    public void onTranslationFinishedLocked(boolean activityDestroyed, IBinder token,
+            ComponentName componentName) {
+        int translationActivityUid =
+                getActivityUidByComponentName(getContext(), componentName, getUserId());
+        if (activityDestroyed) {
+            // In the Activity destroy case, we only calls onTranslationFinished() in
+            // non-finisTranslation() state. If there is a finisTranslation() calls by apps, we
+            // should remove the waiting callback to avoid callback twice.
+            invokeCallbacks(STATE_UI_TRANSLATION_FINISHED, /* sourceSpec= */
+                    null, /* targetSpec= */null, translationActivityUid);
+            mWaitingFinishedCallbackActivities.remove(token);
+        } else {
+            if (mWaitingFinishedCallbackActivities.contains(token)) {
+                invokeCallbacks(STATE_UI_TRANSLATION_FINISHED, /* sourceSpec= */
+                        null, /* targetSpec= */null, translationActivityUid);
+                mWaitingFinishedCallbackActivities.remove(token);
+            }
+        }
+    }
+
     @GuardedBy("mLock")
     public void updateUiTranslationStateLocked(@UiTranslationState int state,
             TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
@@ -178,9 +217,12 @@ final class TranslationManagerServiceImpl extends
                 mActivityTaskManagerInternal.getTopActivityForTask(taskId);
         if (taskTopActivityTokens == null
                 || taskTopActivityTokens.getShareableActivityToken() != token) {
-            Slog.w(TAG, "Unknown activity or it was finished to query for update "
-                    + "translation state for token=" + token + " taskId=" + taskId);
+            Slog.w(TAG, "Unknown activity or it was finished to query for update translation "
+                    + "state for token=" + token + " taskId=" + taskId + " for state= " + state);
             return;
+        }
+        if (state == STATE_UI_TRANSLATION_FINISHED) {
+            mWaitingFinishedCallbackActivities.add(token);
         }
         int translationActivityUid = -1;
         try {
@@ -191,19 +233,14 @@ final class TranslationManagerServiceImpl extends
             mLastActivityTokens = new WeakReference<>(taskTopActivityTokens);
             ComponentName componentName =
                     mActivityTaskManagerInternal.getActivityName(activityToken);
-            try {
-                if (componentName != null) {
-                    translationActivityUid =
-                            getContext().getPackageManager().getApplicationInfoAsUser(
-                                    componentName.getPackageName(), 0, getUserId()).uid;
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.d(TAG, "Cannot find package for" +  componentName);
-            }
+            translationActivityUid =
+                    getActivityUidByComponentName(getContext(), componentName, getUserId());
         } catch (RemoteException e) {
             Slog.w(TAG, "Update UiTranslationState fail: " + e);
         }
-        invokeCallbacks(state, sourceSpec, targetSpec, translationActivityUid);
+        if (state != STATE_UI_TRANSLATION_FINISHED) {
+            invokeCallbacks(state, sourceSpec, targetSpec, translationActivityUid);
+        }
     }
 
     @GuardedBy("mLock")
@@ -226,6 +263,14 @@ final class TranslationManagerServiceImpl extends
         } else {
             pw.print(prefix); pw.println("No requested UiTranslation Activity.");
         }
+        final int waitingFinishCallbackSize = mWaitingFinishedCallbackActivities.size();
+        if (waitingFinishCallbackSize > 0) {
+            pw.print(prefix); pw.print("number waiting finish callback activities: ");
+            pw.println(waitingFinishCallbackSize);
+            for (IBinder activityToken : mWaitingFinishedCallbackActivities) {
+                pw.print(prefix); pw.print("activityToken: "); pw.println(activityToken);
+            }
+        }
     }
 
     private void invokeCallbacks(
@@ -243,7 +288,6 @@ final class TranslationManagerServiceImpl extends
                 LocalServices.getService(InputMethodManagerInternal.class)
                         .getEnabledInputMethodListAsUser(mUserId);
         mCallbacks.broadcast((callback, uid) -> {
-            // callback to the application that is translated if registered.
             if ((int) uid == translationActivityUid) {
                 try {
                     callback.sendResult(res);
