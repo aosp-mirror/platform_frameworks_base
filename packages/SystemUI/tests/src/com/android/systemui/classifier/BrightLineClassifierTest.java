@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.view.MotionEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -77,6 +78,8 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     private HistoryTracker mHistoryTracker;
     @Mock
     private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
 
     private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -101,7 +104,8 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider, mDockManager,
                 mMetricsLogger, mClassifiers, mSingleTapClassfier, mDoubleTapClassifier,
-                mHistoryTracker, mKeyguardStateController, false);
+                mHistoryTracker, mKeyguardStateController, mAccessibilityManager,
+                false);
 
 
         ArgumentCaptor<GestureFinalizedListener> gestureCompleteListenerCaptor =
