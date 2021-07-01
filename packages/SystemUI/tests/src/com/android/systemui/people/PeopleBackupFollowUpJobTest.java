@@ -156,7 +156,7 @@ public class PeopleBackupFollowUpJobTest extends SysuiTestCase {
     @Test
     public void testShouldCancelJob_noRemainingWidgets_longTimeElapsed_shouldCancel() {
         assertThat(mPeopleBackupFollowUpJob.shouldCancelJob(
-                new HashMap<>(), 10, Duration.ofHours(25).toMillis())).isTrue();
+                new HashMap<>(), 10, Duration.ofHours(50).toMillis())).isTrue();
     }
 
     @Test
@@ -171,7 +171,7 @@ public class PeopleBackupFollowUpJobTest extends SysuiTestCase {
         Map<String, Set<String>> remainingWidgets = new HashMap<>();
         remainingWidgets.put(PEOPLE_TILE_KEY.toString(), WIDGET_IDS);
         assertThat(mPeopleBackupFollowUpJob.shouldCancelJob(
-                remainingWidgets, 10, 1000 * 60 * 60 * 25)).isTrue();
+                remainingWidgets, 10, Duration.ofHours(50).toMillis())).isTrue();
     }
 
     @Test
