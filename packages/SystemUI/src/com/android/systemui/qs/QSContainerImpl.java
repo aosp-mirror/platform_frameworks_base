@@ -215,7 +215,7 @@ public class QSContainerImpl extends FrameLayout {
 
     public void setExpansion(float expansion) {
         mQsExpansion = expansion;
-        mQSPanelContainer.setScrollingEnabled(expansion > 0.0f);
+        mQSPanelContainer.setScrollingEnabled(expansion > 0f);
         updateExpansion();
     }
 
