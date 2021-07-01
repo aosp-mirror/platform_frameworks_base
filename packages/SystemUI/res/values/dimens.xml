@@ -1545,6 +1545,7 @@
     <dimen name="wallet_screen_header_icon_size">56dp</dimen>
     <dimen name="wallet_screen_header_view_size">80dp</dimen>
     <dimen name="card_margin">16dp</dimen>
+    <dimen name="wallet_card_carousel_container_top_margin">48dp</dimen>
     <dimen name="card_carousel_dot_offset">24dp</dimen>
     <dimen name="card_carousel_dot_unselected_radius">2dp</dimen>
     <dimen name="card_carousel_dot_selected_radius">3dp</dimen>
