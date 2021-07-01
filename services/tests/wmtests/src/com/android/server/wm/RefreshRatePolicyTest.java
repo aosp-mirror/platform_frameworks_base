@@ -84,10 +84,12 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         parcelLayoutParams(cameraUsingWindow);
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
         assertEquals(0, mPolicy.getPreferredRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
         assertEquals(0, mPolicy.getPreferredRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
         assertEquals(60, mPolicy.getPreferredMaxRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
         mPolicy.removeNonHighRefreshRatePackage("com.android.test");
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
@@ -127,6 +129,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
         assertEquals(0, mPolicy.getPreferredRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
     }
 
@@ -143,6 +146,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
         assertEquals(0, mPolicy.getPreferredRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
     }
 
@@ -156,6 +160,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
         assertEquals(0, mPolicy.getPreferredRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
         assertEquals(60, mPolicy.getPreferredMaxRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
 
         cameraUsingWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
@@ -163,6 +168,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                 false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
         assertEquals(0, mPolicy.getPreferredRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
     }
 
@@ -173,6 +179,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         parcelLayoutParams(window);
         assertEquals(0, mPolicy.getPreferredModeId(window));
         assertEquals(0, mPolicy.getPreferredRefreshRate(window), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(window), FLOAT_TOLERANCE);
         assertEquals(60, mPolicy.getPreferredMaxRefreshRate(window), FLOAT_TOLERANCE);
 
         window.mActivityRecord.mSurfaceAnimator.startAnimation(
@@ -180,6 +187,36 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                 false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
         assertEquals(0, mPolicy.getPreferredModeId(window));
         assertEquals(0, mPolicy.getPreferredRefreshRate(window), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(window), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(window), FLOAT_TOLERANCE);
+    }
+
+    @Test
+    public void testAppMinRefreshRate() {
+        final WindowState window = createWindow(null, TYPE_BASE_APPLICATION, "window");
+        window.mAttrs.preferredMinDisplayRefreshRate = 60f;
+        parcelLayoutParams(window);
+        assertEquals(0, mPolicy.getPreferredModeId(window));
+        assertEquals(0, mPolicy.getPreferredRefreshRate(window), FLOAT_TOLERANCE);
+        assertEquals(60, mPolicy.getPreferredMinRefreshRate(window), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(window), FLOAT_TOLERANCE);
+
+        window.mActivityRecord.mSurfaceAnimator.startAnimation(
+                window.getPendingTransaction(), mock(AnimationAdapter.class),
+                false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
+        assertEquals(0, mPolicy.getPreferredModeId(window));
+        assertEquals(0, mPolicy.getPreferredRefreshRate(window), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(window), FLOAT_TOLERANCE);
+    }
+
+    @Test
+    public void testAppPreferredRefreshRate() {
+        final WindowState window = createWindow(null, TYPE_BASE_APPLICATION, "window");
+        window.mAttrs.preferredRefreshRate = 60f;
+        parcelLayoutParams(window);
+        assertEquals(0, mPolicy.getPreferredModeId(window));
+        assertEquals(60, mPolicy.getPreferredRefreshRate(window), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(window), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(window), FLOAT_TOLERANCE);
     }
 }
