@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ສະແດງທັງໝົດ"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ປົດລັອກເພື່ອຈ່າຍ"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"ບໍ່ໄດ້ຕັ້ງຄ່າ"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ປົດລັອກເພື່ອໃຊ້"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ເກີດບັນຫາໃນການໂຫຼດບັດຂອງທ່ານ, ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ການຕັ້ງຄ່າໜ້າຈໍລັອກ"</string>
@@ -734,7 +736,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ບໍ່ມີສຽງ ຫຼື ການສັ່ນເຕືອນ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ບໍ່ມີສຽງ ຫຼື ການສັ່ນເຕືອນ ແລະ ປາກົດຢູ່ທາງລຸ່ມຂອງພາກສ່ວນການສົນທະນາ"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ອາດສົ່ງສຽງ ຫຼື ສັ່ນເຕືອນໂດຍອ້າງອີງຈາກການຕັ້ງຄ່າໂທລະສັບ"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ອາດສົ່ງສຽງ ຫຼື ສັ່ນເຕືອນໂດຍອ້າງອີງຈາກການຕັ້ງຄ່າໂທລະສັບ. ການສົນທະນາຈາກ <xliff:g id="APP_NAME">%1$s</xliff:g> ຈະເປັນ bubble ຕາມຄ່າເລີ່ມຕົ້ນ."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ອາດສົ່ງສຽງ ຫຼື ສັ່ນເຕືອນໂດຍອ້າງອີງຈາກການຕັ້ງຄ່າໂທລະສັບ. ການສົນທະນາຈາກ <xliff:g id="APP_NAME">%1$s</xliff:g> ຈະສະແດງເປັນຟອງຕາມຄ່າເລີ່ມຕົ້ນ."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ເອົາໃຈໃສ່ທາງລັດແບບລອຍໄປຫາເນື້ອຫານີ້."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ໃຫ້ລະບົບກຳນົດວ່າການແຈ້ງເຕືອນນິ້ຄວນມີສຽງ ຫຼື ສັ່ນເຕືອນຫຼືບໍ່"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ສະຖານະ:&lt;/b&gt; ເລື່ອນລະດັບເປັນຄ່າເລີ່ມຕົ້ນແລ້ວ"</string>

@@ -136,7 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Fotocamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefono"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Voice Assist"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Portafoglio"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Sblocca"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloccato"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"In attesa dell\'impronta"</string>
@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Espandi"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Sblocca per pagare"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nessuna configurazione"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Sblocca per usare"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Si è verificato un problema durante il recupero delle tue carte. Riprova più tardi."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Impostazioni schermata di blocco"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Apri conversazione"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widget di conversazione"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tocca una conversazione per aggiungerla alla schermata Home"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Le tue conversazioni recenti verranno visualizzate qui"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Conversazioni prioritarie"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversazioni recenti"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
