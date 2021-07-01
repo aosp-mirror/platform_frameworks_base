@@ -2951,9 +2951,11 @@
     <!-- Text when the Conversation widget when Do Not Disturb is suppressing the notification. [CHAR LIMIT=50] -->
     <string name="paused_by_dnd">Paused by Do Not Disturb</string>
     <!-- Content description text on the Conversation widget when a person has sent a new text message [CHAR LIMIT=150] -->
-    <string name="new_notification_text_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent a message</string>
+    <string name="new_notification_text_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent a message: <xliff:g id="notification" example="Hey! How is your day going">%2$s</xliff:g></string>
     <!-- Content description text on the Conversation widget when a person has sent a new image message [CHAR LIMIT=150] -->
     <string name="new_notification_image_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent an image</string>
+    <!-- Content description text on the Conversation widget when a person has a new status posted [CHAR LIMIT=150] -->
+    <string name="new_status_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> has a status update: <xliff:g id="status" example="Listening to music">%2$s</xliff:g></string>
 
     <!-- Title to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
     [CHAR LIMIT=NONE] -->
