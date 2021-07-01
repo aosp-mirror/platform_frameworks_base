@@ -1563,4 +1563,35 @@
     <!-- The padding between the icon and the text. -->
     <dimen name="ongoing_call_chip_icon_text_padding">4dp</dimen>
     <dimen name="ongoing_call_chip_corner_radius">28dp</dimen>
+
+    <!-- Internet panel related dimensions -->
+    <dimen name="internet_dialog_list_margin">12dp</dimen>
+    <dimen name="internet_dialog_list_max_height">614dp</dimen>
+
+    <!-- Signal icon in internet dialog -->
+    <dimen name="signal_strength_icon_size">24dp</dimen>
+
+    <!-- Internet dialog related dimensions -->
+    <dimen name="internet_dialog_corner_radius">24dp</dimen>
+
+    <!-- Size of internet dialog -->
+    <dimen name="settingslib_switchbar_margin">16dp</dimen>
+    <!-- Minimum width of switch -->
+    <dimen name="settingslib_min_switch_width">48dp</dimen>
+    <!-- Size of layout margin left -->
+    <dimen name="settingslib_switchbar_padding_left">20dp</dimen>
+    <!-- Size of layout margin right -->
+    <dimen name="settingslib_switchbar_padding_right">20dp</dimen>
+    <!-- Radius of switch bar -->
+    <dimen name="settingslib_switch_bar_radius">24dp</dimen>
+    <!-- Margin of switch thumb -->
+    <dimen name="settingslib_switch_thumb_margin">4dp</dimen>
+    <!-- Size of switch thumb -->
+    <dimen name="settingslib_switch_thumb_size">16dp</dimen>
+    <!-- Width of switch track -->
+    <dimen name="settingslib_switch_track_width">48dp</dimen>
+    <!-- Height of switch track -->
+    <dimen name="settingslib_switch_track_height">24dp</dimen>
+    <!-- Radius of switch track -->
+    <dimen name="settingslib_switch_track_radius">31dp</dimen>
 </resources>
