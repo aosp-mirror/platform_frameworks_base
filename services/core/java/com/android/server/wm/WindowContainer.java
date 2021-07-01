@@ -1735,6 +1735,28 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    /**
+     * For all task fragments at or below this container call the callback.
+     *
+     * @param callback Callback to be called for every task.
+     */
+    void forAllTaskFragments(Consumer<TaskFragment> callback) {
+        forAllTaskFragments(callback, true /*traverseTopToBottom*/);
+    }
+
+    void forAllTaskFragments(Consumer<TaskFragment> callback, boolean traverseTopToBottom) {
+        final int count = mChildren.size();
+        if (traverseTopToBottom) {
+            for (int i = count - 1; i >= 0; --i) {
+                mChildren.get(i).forAllTaskFragments(callback, traverseTopToBottom);
+            }
+        } else {
+            for (int i = 0; i < count; i++) {
+                mChildren.get(i).forAllTaskFragments(callback, traverseTopToBottom);
+            }
+        }
+    }
+
     void forAllLeafTasks(Consumer<Task> callback, boolean traverseTopToBottom) {
         final int count = mChildren.size();
         if (traverseTopToBottom) {

@@ -1657,7 +1657,6 @@ class ActivityStarter {
      *
      * Note: This method should only be called from {@link #startActivityUnchecked}.
      */
-
     // TODO(b/152429287): Make it easier to exercise code paths through startActivityInner
     @VisibleForTesting
     int startActivityInner(final ActivityRecord r, ActivityRecord sourceRecord,
@@ -1764,7 +1763,7 @@ class ActivityStarter {
         mStartActivity.logStartActivity(
                 EventLogTags.WM_CREATE_ACTIVITY, mStartActivity.getTask());
 
-        mTargetRootTask.mLastPausedActivity = null;
+        mStartActivity.getTaskFragment().clearLastPausedActivity();
 
         mRootWindowContainer.startPowerModeLaunchIfNeeded(
                 false /* forceSend */, mStartActivity);
@@ -2041,7 +2040,7 @@ class ActivityStarter {
         }
 
         // For paranoia, make sure we have correctly resumed the top activity.
-        topRootTask.mLastPausedActivity = null;
+        top.getTaskFragment().clearLastPausedActivity();
         if (mDoResume) {
             mRootWindowContainer.resumeFocusedTasksTopActivities();
         }
@@ -2137,7 +2136,7 @@ class ActivityStarter {
                 task.moveActivityToFrontLocked(act);
                 act.updateOptionsLocked(mOptions);
                 deliverNewIntent(act, intentGrants);
-                mTargetRootTask.mLastPausedActivity = null;
+                act.getTaskFragment().clearLastPausedActivity();
             } else {
                 mAddingToTask = true;
             }
@@ -2565,7 +2564,7 @@ class ActivityStarter {
      */
     private void setTargetRootTaskIfNeeded(ActivityRecord intentActivity) {
         mTargetRootTask = intentActivity.getRootTask();
-        mTargetRootTask.mLastPausedActivity = null;
+        intentActivity.getTaskFragment().clearLastPausedActivity();
         Task intentTask = intentActivity.getTask();
         // If the target task is not in the front, then we need to bring it to the front...
         // except...  well, with SINGLE_TASK_LAUNCH it's not entirely clear. We'd like to have

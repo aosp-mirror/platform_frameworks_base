@@ -1334,7 +1334,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 updatePictureInPictureMode(null, false);
             } else {
                 mLastReportedMultiWindowMode = inMultiWindowMode;
-                computeConfigurationAfterMultiWindowModeChange();
                 // If the activity is in stopping or stopped state, for instance, it's in the
                 // split screen task and not the top one, the last configuration it should keep
                 // is the one before multi-window mode change.
@@ -1361,24 +1360,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // precede the configuration change from the resize.
             mLastReportedPictureInPictureMode = inPictureInPictureMode;
             mLastReportedMultiWindowMode = inPictureInPictureMode;
-            if (targetRootTaskBounds != null && !targetRootTaskBounds.isEmpty()) {
-                computeConfigurationAfterMultiWindowModeChange();
-            }
             ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
                     true /* ignoreVisibility */);
         }
-    }
-
-    private void computeConfigurationAfterMultiWindowModeChange() {
-        final Configuration newConfig = new Configuration();
-        final TaskFragment taskFrag = getTaskFragment();
-        newConfig.setTo(taskFrag.getRequestedOverrideConfiguration());
-        Rect outBounds = newConfig.windowConfiguration.getBounds();
-        // TODO(b/189384393): which parent does this Activity really needed?
-        // I guess we should either call getRootTask or getDisplayArea for this case.
-        final Configuration parentConfig = taskFrag.getParent().getConfiguration();
-        taskFrag.adjustForMinimalTaskDimensions(outBounds, outBounds, parentConfig);
-        taskFrag.computeConfigResourceOverrides(newConfig, parentConfig);
     }
 
     Task getTask() {
@@ -3207,8 +3191,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Clear last paused activity to ensure top activity can be resumed during sleeping.
         if (isNextNotYetVisible && mDisplayContent.isSleeping()
-                && next == next.getRootTask().mLastPausedActivity) {
-            next.getRootTask().mLastPausedActivity = null;
+                && next == next.getTaskFragment().mLastPausedActivity) {
+            next.getTaskFragment().clearLastPausedActivity();
         }
 
         if (isCurrentVisible) {

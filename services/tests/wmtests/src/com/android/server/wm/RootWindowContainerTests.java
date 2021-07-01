@@ -558,8 +558,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         doReturn(rootTask).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
 
         // Use the task as target to resume.
-        mRootWindowContainer.resumeFocusedTasksTopActivities(
-                rootTask, activity, null /* targetOptions */);
+        mRootWindowContainer.resumeFocusedTasksTopActivities(rootTask, activity,
+                null /* targetOptions */);
 
         // Verify the target task should resume its activity.
         verify(rootTask, times(1)).resumeTopActivityUncheckedLocked(
@@ -775,7 +775,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     /**
-     * Tests that when starting {@link #ResolverActivity} for home, it should use the standard
+     * Tests that when starting {@link ResolverActivity} for home, it should use the standard
      * activity type (in a new root task) so the order of back stack won't be broken.
      */
     @Test
