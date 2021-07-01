@@ -713,7 +713,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Asnjë tingull ose dridhje"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Asnjë tingull ose dridhje dhe shfaqet më poshtë në seksionin e bisedave"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Mund të bjerë zilja ose të dridhet në bazë të cilësimeve të telefonit"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Mund të bjerë zilja ose të dridhet në bazë të cilësimeve të telefonit. Bisedat nga flluska e <xliff:g id="APP_NAME">%1$s</xliff:g> si parazgjedhje."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Mund të bjerë zilja ose të dridhet në bazë të cilësimeve të telefonit. Si parazgjedhje, bisedat nga <xliff:g id="APP_NAME">%1$s</xliff:g> shfaqen si flluska."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mban vëmendjen tënde me një shkurtore pluskuese te kjo përmbajtje."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Shfaqet në krye të seksionit të bisedës dhe shfaqet si flluskë pluskuese, shfaq fotografinë e profilit në ekranin e kyçjes"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cilësimet"</string>

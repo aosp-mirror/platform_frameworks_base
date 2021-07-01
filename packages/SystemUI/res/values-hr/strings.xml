@@ -720,7 +720,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Održava vam pozornost pomoću plutajućeg prečaca ovom sadržaju."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Prikazuje se pri vrhu odjeljka razgovora kao pomični oblačić i prikazuje profilnu sliku na zaključanom zaslonu"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Postavke"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava značajke razgovora"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nema nedavnih oblačića"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Ovdje će se prikazivati nedavni i odbačeni oblačići"</string>

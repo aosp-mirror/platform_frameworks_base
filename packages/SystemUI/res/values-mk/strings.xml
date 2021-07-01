@@ -713,7 +713,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звук или вибрации"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибрации и се појавува подолу во делот со разговори"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може да ѕвони или вибрира во зависност од поставките на телефонот"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да ѕвони или вибрира во зависност од поставките на телефонот Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да ѕвони или вибрира во зависност од поставките на телефонот. Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Ви го задржува вниманието со лебдечка кратенка на содржинава."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Се појавува на горниот дел од секцијата на разговорот во вид на лебдечко меурче, покажувајќи ја профилната слика на заклучениот екран"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Поставки"</string>

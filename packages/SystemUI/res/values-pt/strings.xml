@@ -707,7 +707,7 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Continuar alertando"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Desativar notificações"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Continuar mostrando notificações desse app?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Silencioso"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Silenciosas"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Padrão"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bolha"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Som e vibração desativados"</string>

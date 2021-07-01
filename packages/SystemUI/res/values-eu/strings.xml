@@ -226,7 +226,7 @@
     <string name="data_connection_roaming" msgid="375650836665414797">"Ibiltaritza"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wifia"</string>
-    <string name="accessibility_no_sim" msgid="1140839832913084973">"Ez dago SIM txartelik."</string>
+    <string name="accessibility_no_sim" msgid="1140839832913084973">"Ez dago SIMik."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Datu-konexioa"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Datu-konexioa aktibatuta"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Desaktibatuta dago datu-konexioa"</string>
