@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.location.LocationManagerInternal;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.PackageTagsList;
 import android.os.Process;
@@ -70,6 +71,9 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
     @NonNull
     private final Object mLock = new Object();
+
+    @NonNull
+    private final IBinder mToken = new Binder();
 
     @NonNull
     private final Context mContext;
@@ -180,6 +184,15 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         }, UserHandle.SYSTEM);
 
         initializeActivityRecognizersTags();
+
+        // If this device does not have telephony, restrict the phone call ops
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+            appOps.setUserRestrictionForUser(AppOpsManager.OP_PHONE_CALL_MICROPHONE, true, mToken,
+                    null, UserHandle.USER_ALL);
+            appOps.setUserRestrictionForUser(AppOpsManager.OP_PHONE_CALL_CAMERA, true, mToken,
+                    null, UserHandle.USER_ALL);
+        }
     }
 
     private static boolean isHotwordDetectionServiceRequired(PackageManager pm) {
