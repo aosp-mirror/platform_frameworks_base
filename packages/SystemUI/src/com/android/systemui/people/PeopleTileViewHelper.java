@@ -708,7 +708,8 @@ public class PeopleTileViewHelper {
         views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
         views.setTextViewText(R.id.text_content, statusText);
 
-        if (status.getActivity() == ACTIVITY_BIRTHDAY) {
+        if (status.getActivity() == ACTIVITY_BIRTHDAY
+            || status.getActivity() == ACTIVITY_UPCOMING_BIRTHDAY) {
             setEmojiBackground(views, EMOJI_CAKE);
         }
 
