@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -44,8 +45,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 /**
  * Structured description of Intent values to be matched.  An IntentFilter can
@@ -147,6 +150,8 @@ import java.util.function.BiConsumer;
  * will only match an Intent that does not have any categories.
  */
 public class IntentFilter implements Parcelable {
+    private static final String TAG = "IntentFilter";
+
     private static final String AGLOB_STR = "aglob";
     private static final String SGLOB_STR = "sglob";
     private static final String PREFIX_STR = "prefix";
@@ -1758,6 +1763,35 @@ public class IntentFilter implements Parcelable {
         }
 
         return null;
+    }
+
+    /**
+     * Return a {@link Predicate} which tests whether this filter matches the
+     * given <var>intent</var>.
+     * <p>
+     * The intent's type will always be tested using a simple
+     * {@link Intent#getType()} check. To instead perform a detailed type
+     * resolution before matching, use
+     * {@link #asPredicateWithTypeResolution(ContentResolver)}.
+     */
+    public @NonNull Predicate<Intent> asPredicate() {
+        return i -> match(null, i, false, TAG) >= 0;
+    }
+
+    /**
+     * Return a {@link Predicate} which tests whether this filter matches the
+     * given <var>intent</var>.
+     * <p>
+     * The intent's type will always be resolved by calling
+     * {@link Intent#resolveType(ContentResolver)} before matching.
+     *
+     * @param resolver to be used when calling
+     *            {@link Intent#resolveType(ContentResolver)} before matching.
+     */
+    public @NonNull Predicate<Intent> asPredicateWithTypeResolution(
+            @NonNull ContentResolver resolver) {
+        Objects.requireNonNull(resolver);
+        return i -> match(resolver, i, true, TAG) >= 0;
     }
 
     /**

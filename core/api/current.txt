@@ -11376,6 +11376,8 @@ package android.content {
     method public final void addDataScheme(String);
     method public final void addDataSchemeSpecificPart(String, int);
     method public final void addDataType(String) throws android.content.IntentFilter.MalformedMimeTypeException;
+    method @NonNull public java.util.function.Predicate<android.content.Intent> asPredicate();
+    method @NonNull public java.util.function.Predicate<android.content.Intent> asPredicateWithTypeResolution(@NonNull android.content.ContentResolver);
     method public final java.util.Iterator<android.content.IntentFilter.AuthorityEntry> authoritiesIterator();
     method public final java.util.Iterator<java.lang.String> categoriesIterator();
     method public final int countActions();
