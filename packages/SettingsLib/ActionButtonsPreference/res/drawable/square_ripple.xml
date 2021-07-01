@@ -14,20 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<!-- Long screenshot save button background -->
+
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-        android:color="?android:textColorPrimary">
-    <item android:id="@android:id/background">
-        <shape android:shape="rectangle">
-            <solid android:color="?androidprv:attr/colorAccentPrimary"/>
-            <corners android:radius="20dp"/>
-        </shape>
-    </item>
-    <item android:id="@android:id/mask">
-        <shape android:shape="rectangle">
-            <solid android:color="?android:textColorPrimary"/>
-            <corners android:radius="20dp"/>
-        </shape>
-    </item>
+        android:color="?android:attr/colorControlHighlight">
+    <item android:drawable="@drawable/square_bk"/>
 </ripple>

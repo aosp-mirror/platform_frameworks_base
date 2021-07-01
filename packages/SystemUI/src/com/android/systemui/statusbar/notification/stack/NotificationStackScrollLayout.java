@@ -77,7 +77,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.CommandQueue;
@@ -143,7 +142,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             false /* default */);
     // TODO(b/187291379) disable again before release
     private static final boolean DEBUG_REMOVE_ANIMATION = SystemProperties.getBoolean(
-            "persist.debug.nssl.dismiss", true /* default */);
+            "persist.debug.nssl.dismiss", false /* default */);
 
     private static final float RUBBER_BAND_FACTOR_NORMAL = 0.35f;
     private static final float RUBBER_BAND_FACTOR_AFTER_EXPAND = 0.15f;
@@ -201,6 +200,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mPaddingBetweenElements;
     private int mMaxTopPadding;
     private int mTopPadding;
+    private boolean mAnimateNextTopPaddingChange;
     private int mBottomMargin;
     private int mBottomInset = 0;
     private float mQsExpansionFraction;
@@ -1212,16 +1212,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void setTopPadding(int topPadding, boolean animate) {
         if (mTopPadding != topPadding) {
+            boolean shouldAnimate = animate || mAnimateNextTopPaddingChange;
             mTopPadding = topPadding;
             updateAlgorithmHeightAndPadding();
             updateContentHeight();
-            if (animate && mAnimationsEnabled && mIsExpanded) {
+            if (shouldAnimate && mAnimationsEnabled && mIsExpanded) {
                 mTopPaddingNeedsAnimation = true;
                 mNeedsAnimation = true;
             }
             updateStackPosition();
             requestChildrenUpdate();
-            notifyHeightChangeListener(null, animate);
+            notifyHeightChangeListener(null, shouldAnimate);
+            mAnimateNextTopPaddingChange = false;
         }
     }
 
@@ -2071,6 +2073,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         int scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight);
         int imeInset = getImeInset();
         scrollRange += Math.min(imeInset, Math.max(0, contentHeight - (getHeight() - imeInset)));
+        if (scrollRange > 0) {
+            scrollRange = Math.max(getScrollAmountToScrollBoundary(), scrollRange);
+        }
         return scrollRange;
     }
 
@@ -3205,6 +3210,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     ignoreChildren);
             mAnimationEvents.add(event);
             mSwipedOutViews.remove(child);
+            if (DEBUG_REMOVE_ANIMATION) {
+                String key = "";
+                if (child instanceof ExpandableNotificationRow) {
+                    key = ((ExpandableNotificationRow) child).getEntry().getKey();
+                }
+                Log.d(TAG, "created Remove Event - SwipedOut: " + childWasSwipedOut + " " + key);
+            }
         }
         mChildrenToRemoveAnimated.clear();
     }
@@ -5542,6 +5554,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     public int getTopClippingStartLocation() {
         return mIsExpanded ? mQsScrollBoundaryPosition : 0;
+    }
+
+    /**
+     * Request an animation whenever the toppadding changes next
+     */
+    public void animateNextTopPaddingChange() {
+        mAnimateNextTopPaddingChange = true;
     }
 
     /**

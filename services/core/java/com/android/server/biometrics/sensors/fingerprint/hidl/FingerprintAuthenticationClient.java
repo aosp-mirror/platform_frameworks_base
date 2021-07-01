@@ -32,6 +32,7 @@ import android.util.Slog;
 
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
@@ -110,6 +111,10 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     @Override
     public void onError(int errorCode, int vendorCode) {
         super.onError(errorCode, vendorCode);
+
+        if (errorCode == BiometricFingerprintConstants.FINGERPRINT_ERROR_BAD_CALIBARTION) {
+            BiometricNotificationUtils.showBadCalibrationNotification(getContext());
+        }
 
         UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
     }

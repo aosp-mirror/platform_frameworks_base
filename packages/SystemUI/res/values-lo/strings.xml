@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"ເພີ່ມຜູ້ໃຊ້"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ຜູ່ໃຊ້ໃໝ່"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ລຶບ​ແຂກ​ບໍ?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"ຣີເຊັດແຂກບໍ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ແອັບຯ​ແລະ​ຂໍ້​ມູນ​ທັງ​ໝົດ​ໃນ​ເຊດ​ຊັນ​ນີ້​ຈະ​ຖືກ​ລຶບ​ອອກ."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ລຶບ​"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"ຣີເຊັດ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ຍິນ​ດີ​ຕ້ອນ​ຮັບ​ກັບ​ມາ, ຜູ້ຢ້ຽມຢາມ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ທ່ານ​ຕ້ອງ​ການ​ສືບ​ຕໍ່​ເຊດ​ຊັນ​ຂອງ​ທ່ານບໍ່?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ເລີ່ມຕົ້ນໃຫມ່"</string>
@@ -672,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ສະແດງທັງໝົດ"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ປົດລັອກເພື່ອຈ່າຍ"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"ບໍ່ໄດ້ຕັ້ງຄ່າ"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ປົດລັອກເພື່ອໃຊ້"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ເກີດບັນຫາໃນການໂຫຼດບັດຂອງທ່ານ, ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ການຕັ້ງຄ່າໜ້າຈໍລັອກ"</string>
@@ -736,7 +736,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ບໍ່ມີສຽງ ຫຼື ການສັ່ນເຕືອນ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ບໍ່ມີສຽງ ຫຼື ການສັ່ນເຕືອນ ແລະ ປາກົດຢູ່ທາງລຸ່ມຂອງພາກສ່ວນການສົນທະນາ"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ອາດສົ່ງສຽງ ຫຼື ສັ່ນເຕືອນໂດຍອ້າງອີງຈາກການຕັ້ງຄ່າໂທລະສັບ"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ອາດສົ່ງສຽງ ຫຼື ສັ່ນເຕືອນໂດຍອ້າງອີງຈາກການຕັ້ງຄ່າໂທລະສັບ. ການສົນທະນາຈາກ <xliff:g id="APP_NAME">%1$s</xliff:g> ຈະເປັນ bubble ຕາມຄ່າເລີ່ມຕົ້ນ."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ອາດສົ່ງສຽງ ຫຼື ສັ່ນເຕືອນໂດຍອ້າງອີງຈາກການຕັ້ງຄ່າໂທລະສັບ. ການສົນທະນາຈາກ <xliff:g id="APP_NAME">%1$s</xliff:g> ຈະສະແດງເປັນຟອງຕາມຄ່າເລີ່ມຕົ້ນ."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ເອົາໃຈໃສ່ທາງລັດແບບລອຍໄປຫາເນື້ອຫານີ້."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ໃຫ້ລະບົບກຳນົດວ່າການແຈ້ງເຕືອນນິ້ຄວນມີສຽງ ຫຼື ສັ່ນເຕືອນຫຼືບໍ່"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ສະຖານະ:&lt;/b&gt; ເລື່ອນລະດັບເປັນຄ່າເລີ່ມຕົ້ນແລ້ວ"</string>
@@ -1117,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"ເປີດການສົນທະນາ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ວິດເຈັດການສົນທະນາ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ແຕະໃສ່ການສົນທະນາໃດໜຶ່ງເພື່ອເພີ່ມມັນໃສ່ໂຮມສະກຣີນຂອງທ່ານ"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"ກັບມາກວດເບິ່ງຢູ່ບ່ອນນີ້ຄືນໃໝ່ຫຼັງຈາກທີ່ທ່ານໄດ້ຮັບຂໍ້ຄວາມ"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"ການສົນທະນາຫຼ້າສຸດຂອງທ່ານຈະສະແດງຢູ່ບ່ອນນີ້"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ການສົນທະນາສຳຄັນ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ການສົນທະນາຫຼ້າສຸດ"</string>
     <string name="okay" msgid="6490552955618608554">"ຕົກລົງ"</string>
@@ -1146,6 +1146,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ເບິ່ງຂໍ້ຄວາມຫຼ້າສຸດ, ສາຍບໍ່ໄດ້ຮັບ ແລະ ອັບເດດສະຖານະ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"ການສົນທະນາ"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"ຢຸດຊົ່ວຄາວແລ້ວໂດຍໂໝດຫ້າມລົບກວນ"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ສົ່ງຂໍ້ຄວາມແລ້ວ"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ສົ່ງຮູບພາບແລ້ວ"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ເກີດບັນຫາໃນການອ່ານຕົວວັດແທກແບັດເຕີຣີຂອງທ່ານ"</string>

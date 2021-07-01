@@ -57,6 +57,12 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     private static final String TAG = "TileLifecycleManager";
 
+    private static final int META_DATA_QUERY_FLAGS =
+            PackageManager.GET_META_DATA
+                    | PackageManager.MATCH_UNINSTALLED_PACKAGES
+                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                    | PackageManager.MATCH_DIRECT_BOOT_AWARE;
+
     private static final int MSG_ON_ADDED = 0;
     private static final int MSG_ON_REMOVED = 1;
     private static final int MSG_ON_CLICK = 2;
@@ -130,7 +136,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     public boolean isActiveTile() {
         try {
             ServiceInfo info = mPackageManagerAdapter.getServiceInfo(mIntent.getComponent(),
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.GET_META_DATA);
+                    META_DATA_QUERY_FLAGS);
             return info.metaData != null
                     && info.metaData.getBoolean(TileService.META_DATA_ACTIVE_TILE, false);
         } catch (PackageManager.NameNotFoundException e) {
@@ -148,7 +154,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     public boolean isToggleableTile() {
         try {
             ServiceInfo info = mPackageManagerAdapter.getServiceInfo(mIntent.getComponent(),
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.GET_META_DATA);
+                    META_DATA_QUERY_FLAGS);
             return info.metaData != null
                     && info.metaData.getBoolean(TileService.META_DATA_TOGGLEABLE_TILE, false);
         } catch (PackageManager.NameNotFoundException e) {

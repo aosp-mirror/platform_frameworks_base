@@ -90,7 +90,7 @@ import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
+import android.os.UserManager;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.service.notification.ConversationChannelWrapper;
@@ -137,6 +137,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @RunWith(AndroidJUnit4.class)
 public class PreferencesHelperTest extends UiServiceTestCase {
     private static final int UID_N_MR1 = 0;
+    private static final int UID_HEADLESS = 1000000;
     private static final UserHandle USER = UserHandle.of(0);
     private static final int UID_O = 1111;
     private static final int UID_P = 2222;
@@ -1495,11 +1496,13 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testCreateAndDeleteCanChannelsBypassDnd() throws Exception {
+        int uid = UserManager.isHeadlessSystemUserMode() ? UID_HEADLESS : UID_N_MR1;
+
         // create notification channel that can't bypass dnd
         // expected result: areChannelsBypassingDnd = false
         // setNotificationPolicy isn't called since areChannelsBypassingDnd was already false
         NotificationChannel channel = new NotificationChannel("id1", "name1", IMPORTANCE_LOW);
-        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel, true, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, uid, channel, true, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, never()).setNotificationPolicy(any());
         resetZenModeHelper();
@@ -1508,18 +1511,18 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // expected result: areChannelsBypassingDnd = true
         NotificationChannel channel2 = new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
         channel2.setBypassDnd(true);
-        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2, true, true);
+        mHelper.createNotificationChannel(PKG_N_MR1, uid, channel2, true, true);
         assertTrue(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
         resetZenModeHelper();
 
         // delete channels
-        mHelper.deleteNotificationChannel(PKG_N_MR1, UID_N_MR1, channel.getId());
+        mHelper.deleteNotificationChannel(PKG_N_MR1, uid, channel.getId());
         assertTrue(mHelper.areChannelsBypassingDnd()); // channel2 can still bypass DND
         verify(mMockZenModeHelper, never()).setNotificationPolicy(any());
         resetZenModeHelper();
 
-        mHelper.deleteNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2.getId());
+        mHelper.deleteNotificationChannel(PKG_N_MR1, uid, channel2.getId());
         assertFalse(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
         resetZenModeHelper();
@@ -1527,11 +1530,13 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testUpdateCanChannelsBypassDnd() throws Exception {
+        int uid = UserManager.isHeadlessSystemUserMode() ? UID_HEADLESS : UID_N_MR1;
+
         // create notification channel that can't bypass dnd
         // expected result: areChannelsBypassingDnd = false
         // setNotificationPolicy isn't called since areChannelsBypassingDnd was already false
         NotificationChannel channel = new NotificationChannel("id1", "name1", IMPORTANCE_LOW);
-        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel, true, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, uid, channel, true, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, never()).setNotificationPolicy(any());
         resetZenModeHelper();
@@ -1539,7 +1544,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // update channel so it CAN bypass dnd:
         // expected result: areChannelsBypassingDnd = true
         channel.setBypassDnd(true);
-        mHelper.updateNotificationChannel(PKG_N_MR1, UID_N_MR1, channel, true);
+        mHelper.updateNotificationChannel(PKG_N_MR1, uid, channel, true);
         assertTrue(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
         resetZenModeHelper();
@@ -1547,7 +1552,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // update channel so it can't bypass dnd:
         // expected result: areChannelsBypassingDnd = false
         channel.setBypassDnd(false);
-        mHelper.updateNotificationChannel(PKG_N_MR1, UID_N_MR1, channel, true);
+        mHelper.updateNotificationChannel(PKG_N_MR1, uid, channel, true);
         assertFalse(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
         resetZenModeHelper();

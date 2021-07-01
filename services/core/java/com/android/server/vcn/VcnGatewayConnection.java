@@ -714,6 +714,18 @@ public class VcnGatewayConnection extends StateMachine {
     protected void onQuitting() {
         logDbg("Quitting VcnGatewayConnection");
 
+        if (mNetworkAgent != null) {
+            logWtf("NetworkAgent was non-null in onQuitting");
+            mNetworkAgent.unregister();
+            mNetworkAgent = null;
+        }
+
+        if (mIkeSession != null) {
+            logWtf("IkeSession was non-null in onQuitting");
+            mIkeSession.kill();
+            mIkeSession = null;
+        }
+
         // No need to call setInterfaceDown(); the IpSecInterface is being fully torn down.
         if (mTunnelIface != null) {
             mTunnelIface.close();
@@ -1863,6 +1875,7 @@ public class VcnGatewayConnection extends StateMachine {
 
             if (mUnderlying == null) {
                 logWtf("Underlying network was null in retry state");
+                teardownNetwork();
                 transitionTo(mDisconnectedState);
             } else {
                 // Safe to blindly set up, as it is cancelled and cleared on exiting this state
@@ -1879,6 +1892,7 @@ public class VcnGatewayConnection extends StateMachine {
 
                     // If new underlying is null, all networks were lost; go back to disconnected.
                     if (mUnderlying == null) {
+                        teardownNetwork();
                         transitionTo(mDisconnectedState);
                         return;
                     } else if (oldUnderlying != null
@@ -2134,6 +2148,8 @@ public class VcnGatewayConnection extends StateMachine {
                 + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup)
                 + "-"
                 + mConnectionConfig.getGatewayConnectionName()
+                + "-"
+                + System.identityHashCode(this)
                 + "] ";
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.face;
+package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
 import android.app.Notification;
@@ -27,11 +27,18 @@ import android.os.UserHandle;
 
 import com.android.internal.R;
 
-public class ReEnrollNotificationUtils {
+/**
+ * Biometric notification helper class.
+ */
+public class BiometricNotificationUtils {
 
-    private static final String NOTIFICATION_TAG = "FaceService";
+    private static final String RE_ENROLL_NOTIFICATION_TAG = "FaceService";
+    private static final String BAD_CALIBRATION_NOTIFICATION_TAG = "FingerprintService";
     private static final int NOTIFICATION_ID = 1;
 
+    /**
+     * Shows a face re-enrollment notification.
+     */
     public static void showReEnrollmentNotification(@NonNull Context context) {
         final NotificationManager notificationManager =
                 context.getSystemService(NotificationManager.class);
@@ -52,6 +59,42 @@ public class ReEnrollNotificationUtils {
 
         final String channelName = "FaceEnrollNotificationChannel";
 
+        showNotificationHelper(context, name, title, content, pendingIntent, channelName,
+                RE_ENROLL_NOTIFICATION_TAG);
+    }
+
+    /**
+     * Shows a fingerprint bad calibration notification.
+     */
+    public static void showBadCalibrationNotification(@NonNull Context context) {
+        final NotificationManager notificationManager =
+                context.getSystemService(NotificationManager.class);
+
+        final String name =
+                context.getString(R.string.fingerprint_recalibrate_notification_name);
+        final String title =
+                context.getString(R.string.fingerprint_recalibrate_notification_title);
+        final String content =
+                context.getString(R.string.fingerprint_recalibrate_notification_content);
+
+        final Intent intent = new Intent("android.settings.FINGERPRINT_SETTINGS");
+        intent.setPackage("com.android.settings");
+
+        final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context,
+                0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE /* flags */,
+                null /* options */, UserHandle.CURRENT);
+
+        final String channelName = "FingerprintBadCalibrationNotificationChannel";
+
+        showNotificationHelper(context, name, title, content, pendingIntent, channelName,
+                BAD_CALIBRATION_NOTIFICATION_TAG);
+    }
+
+    private static void showNotificationHelper(Context context, String name, String title,
+                String content, PendingIntent pendingIntent, String channelName,
+                String notificationTag) {
+        final NotificationManager notificationManager =
+                context.getSystemService(NotificationManager.class);
         final NotificationChannel channel = new NotificationChannel(channelName, name,
                 NotificationManager.IMPORTANCE_HIGH);
         final Notification notification = new Notification.Builder(context, channelName)
@@ -68,15 +111,28 @@ public class ReEnrollNotificationUtils {
                 .build();
 
         notificationManager.createNotificationChannel(channel);
-        notificationManager.notifyAsUser(NOTIFICATION_TAG,
-                NOTIFICATION_ID, notification,
+        notificationManager.notifyAsUser(notificationTag, NOTIFICATION_ID, notification,
                 UserHandle.CURRENT);
     }
 
-    public static void cancelNotification(@NonNull Context context) {
+    /**
+     * Cancels a face re-enrollment notification
+     */
+    public static void cancelReEnrollNotification(@NonNull Context context) {
         final NotificationManager notificationManager =
                 context.getSystemService(NotificationManager.class);
-        notificationManager.cancelAsUser(NOTIFICATION_TAG, NOTIFICATION_ID, UserHandle.CURRENT);
+        notificationManager.cancelAsUser(RE_ENROLL_NOTIFICATION_TAG, NOTIFICATION_ID,
+                UserHandle.CURRENT);
+    }
+
+    /**
+     * Cancels a fingerprint bad calibration notification
+     */
+    public static void cancelBadCalibrationNotification(@NonNull Context context) {
+        final NotificationManager notificationManager =
+                context.getSystemService(NotificationManager.class);
+        notificationManager.cancelAsUser(BAD_CALIBRATION_NOTIFICATION_TAG, NOTIFICATION_ID,
+                UserHandle.CURRENT);
     }
 
 }

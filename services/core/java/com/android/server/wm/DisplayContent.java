@@ -1564,12 +1564,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // window was transferred ({@link #mSkipAppTransitionAnimation}).
                 return false;
             }
-            if ((mAppTransition.getTransitFlags()
-                    & WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) != 0) {
-                // The transition may be finished before keyguard hidden. In order to avoid the
-                // intermediate orientation change, it is more stable to freeze the display.
-                return false;
-            }
             if (r.isState(RESUMED) && !r.getRootTask().mInResumeTopActivity) {
                 // If the activity is executing or has done the lifecycle callback, use normal
                 // rotation animation so the display info can be updated immediately (see
@@ -5492,6 +5486,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     boolean updateDisplayOverrideConfigurationLocked() {
+        // Preemptively cancel the running recents animation -- SysUI can't currently handle this
+        // case properly since the signals it receives all happen post-change
+        final RecentsAnimationController recentsAnimationController =
+                mWmService.getRecentsAnimationController();
+        if (recentsAnimationController != null) {
+            recentsAnimationController.cancelAnimationForDisplayChange();
+        }
+
         Configuration values = new Configuration();
         computeScreenConfiguration(values);
 

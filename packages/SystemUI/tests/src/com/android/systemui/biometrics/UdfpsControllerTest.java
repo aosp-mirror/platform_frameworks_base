@@ -56,6 +56,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.util.concurrency.Execution;
+import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -75,7 +77,7 @@ import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 public class UdfpsControllerTest extends SysuiTestCase {
 
     // Use this for inputs going into SystemUI. Use UdfpsController.mUdfpsSensorId for things
@@ -89,6 +91,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private UdfpsController mUdfpsController;
 
     // Dependencies
+    private Execution mExecution;
     @Mock
     private LayoutInflater mLayoutInflater;
     @Mock
@@ -123,6 +126,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ScreenLifecycle mScreenLifecycle;
     @Mock
     private Vibrator mVibrator;
+    @Mock
+    private UdfpsHapticsSimulator mUdfpsHapticsSimulator;
 
     private FakeExecutor mFgExecutor;
 
@@ -145,6 +150,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         setUpResources();
+        mExecution = new FakeExecution();
+
         when(mLayoutInflater.inflate(R.layout.udfps_view, null, false)).thenReturn(mUdfpsView);
         final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
 
@@ -166,6 +173,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mFgExecutor = new FakeExecutor(new FakeSystemClock());
         mUdfpsController = new UdfpsController(
                 mContext,
+                mExecution,
                 mLayoutInflater,
                 mFingerprintManager,
                 mWindowManager,
@@ -182,6 +190,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mLockscreenShadeTransitionController,
                 mScreenLifecycle,
                 mVibrator,
+                mUdfpsHapticsSimulator,
                 Optional.of(mHbmProvider));
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
@@ -338,7 +347,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         moveEvent.recycle();
 
         // THEN click haptic is played
-        verify(mVibrator).vibrate(mUdfpsController.mEffectClick,
+        verify(mVibrator).vibrate(mUdfpsController.EFFECT_CLICK,
                 UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES);
     }
 }

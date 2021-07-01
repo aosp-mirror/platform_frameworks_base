@@ -5684,16 +5684,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
         }
-        try {
-            if (uid != 0) { // bypass the root
-                final String[] packageNames = getPackageManager().getPackagesForUid(uid);
-                if (ArrayUtils.isEmpty(packageNames)) {
-                    // The uid is not existed or not visible to the caller.
-                    return PackageManager.PERMISSION_DENIED;
-                }
-            }
-        } catch (RemoteException e) {
-        }
         return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
                 ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
     }
@@ -7629,6 +7619,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         t.traceEnd();
 
         t.traceBegin("ActivityManagerStartApps");
+        mBatteryStatsService.onSystemReady();
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                 Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
@@ -14382,10 +14373,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int capability = uidRec != null ? uidRec.getSetCapability() : 0;
         final boolean ephemeral = uidRec != null ? uidRec.isEphemeral() : isEphemeralLocked(uid);
 
-        if (uidRec != null && uidRec.isIdle() && (change & UidRecord.CHANGE_IDLE) != 0) {
-            mProcessList.killAppIfForceStandbyAndCachedIdleLocked(uidRec);
-        }
-
         if (uidRec != null && !uidRec.isIdle() && (change & UidRecord.CHANGE_GONE) != 0) {
             // If this uid is going away, and we haven't yet reported it is gone,
             // then do so now.
@@ -15561,13 +15548,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public List<ProcessMemoryState> getMemoryStateForProcesses() {
             List<ProcessMemoryState> processMemoryStates = new ArrayList<>();
-            synchronized (mProcLock) {
-                synchronized (mPidsSelfLocked) {
-                    for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
-                        final ProcessRecord r = mPidsSelfLocked.valueAt(i);
-                        processMemoryStates.add(new ProcessMemoryState(
-                                r.uid, r.getPid(), r.processName, r.mState.getCurAdj()));
-                    }
+            synchronized (mPidsSelfLocked) {
+                for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
+                    final ProcessRecord r = mPidsSelfLocked.valueAt(i);
+                    processMemoryStates.add(new ProcessMemoryState(
+                            r.uid, r.getPid(), r.processName, r.mState.getCurAdj()));
                 }
             }
             return processMemoryStates;
@@ -16331,6 +16316,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         public @TempAllowListType int getPushMessagingOverQuotaBehavior() {
             synchronized (ActivityManagerService.this) {
                 return mConstants.mPushMessagingOverQuotaBehavior;
+            }
+        }
+
+        @Override
+        public int getUidCapability(int uid) {
+            synchronized (ActivityManagerService.this) {
+                UidRecord uidRecord = mProcessList.getUidRecordLOSP(uid);
+                if (uidRecord == null) {
+                    throw new IllegalArgumentException("uid record for " + uid + " not found");
+                }
+                return uidRecord.getCurCapability();
+            }
+        }
+
+        /**
+         * @return The PID list of the isolated process with packages matching the given uid.
+         */
+        @Nullable
+        public List<Integer> getIsolatedProcesses(int uid) {
+            synchronized (ActivityManagerService.this) {
+                return mProcessList.getIsolatedProcessesLocked(uid);
             }
         }
     }

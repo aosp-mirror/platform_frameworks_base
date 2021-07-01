@@ -352,7 +352,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Дозвољава апликацији да проширује или скупља статусну траку."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"приказује обавештења као активности преко целог екрана на закључаном уређају"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Омогућава апликацији да на закључаном уређају приказује обавештења као активности преко целог екрана."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"инсталирање пречица"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Инсталирање пречица"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Омогућава апликацији да додаје пречице на почетни екран без интервенције корисника."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"деинсталирање пречица"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Омогућава апликацији да уклања пречице са почетног екрана без интервенције корисника."</string>
@@ -605,7 +605,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Није регистрован ниједан отисак прста."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Овај уређај нема сензор за отисак прста."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сензор је привремено онемогућен."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"Сензор треба да се калибрише"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Не можете да користите сензор за отисак прста. Посетите добављача за поправке"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Прст <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Користите отисак прста"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Користите отисак прста или закључавање екрана"</string>
@@ -615,12 +615,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона отиска прста"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Откључавање лицем"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Поново региструјте лице"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Да бисте побољшали препознавање, поново региструјте лице"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Проблем са откључавање лицем"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Додирните да бисте избрисали модел лица, па поново додајте своје лице"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Подесите откључавање лицем"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Откључајте телефон тако што ћете га погледати"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Подесите још начина за откључавање"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Додирните да бисте додали отисак прста"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Откључавање отиском прста"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не можете да користите сензор за отисак прста"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Посетите добављача за поправке."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Снимање лица није успело. Пробајте поново."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Превише је светло. Пробајте са слабијим осветљењем."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Претамно је. Пробајте са јачим осветљењем."</string>

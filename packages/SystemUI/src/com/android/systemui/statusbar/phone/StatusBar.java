@@ -1723,9 +1723,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     /**
      * Asks {@link KeyguardUpdateMonitor} to run face auth.
      */
-    public void requestFaceAuth() {
+    public void requestFaceAuth(boolean userInitiatedRequest) {
         if (!mKeyguardStateController.canDismissLockScreen()) {
-            mKeyguardUpdateMonitor.requestFaceAuth();
+            mKeyguardUpdateMonitor.requestFaceAuth(userInitiatedRequest);
         }
     }
 
@@ -2112,8 +2112,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void disableKeyguardBlurs() {
-        mMainThreadHandler.post(mKeyguardViewMediator::disableBlursUntilHidden);
+    public void setBlursDisabledForAppLaunch(boolean disabled) {
+        mKeyguardViewMediator.setBlursDisabledForAppLaunch(disabled);
     }
 
     public boolean isDeviceInVrMode() {

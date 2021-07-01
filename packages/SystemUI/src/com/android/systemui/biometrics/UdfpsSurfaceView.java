@@ -23,43 +23,36 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
-import android.os.Build;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.android.systemui.biometrics.UdfpsHbmTypes.HbmType;
-
 /**
- * Under-display fingerprint sensor Surface View. The surface should be used for HBM-specific things
- * only. All other animations should be done on the other view.
+ * Surface View for providing the Global High-Brightness Mode (GHBM) illumination for UDFPS.
  */
-public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
+public class UdfpsSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = "UdfpsSurfaceView";
-    private static final String SETTING_HBM_TYPE =
-            "com.android.systemui.biometrics.UdfpsSurfaceView.hbmType";
-    private static final @HbmType int DEFAULT_HBM_TYPE = UdfpsHbmTypes.GLOBAL_HBM;
 
     /**
-     * This is used instead of {@link android.graphics.drawable.Drawable}, because the latter has
-     * several abstract methods that are not used here but require implementation.
+     * Notifies {@link UdfpsView} when to enable GHBM illumination.
      */
-    private interface SimpleDrawable {
-        void draw(Canvas canvas);
+    interface GhbmIlluminationListener {
+        /**
+         * @param surface the surface for which GHBM should be enabled.
+         * @param onIlluminatedRunnable a runnable that should be run after GHBM is enabled.
+         */
+        void enableGhbm(@NonNull Surface surface, @Nullable Runnable onIlluminatedRunnable);
     }
 
     @NonNull private final SurfaceHolder mHolder;
     @NonNull private final Paint mSensorPaint;
-    @NonNull private final SimpleDrawable mIlluminationDotDrawable;
-    private final int mOnIlluminatedDelayMs;
-    private final @HbmType int mHbmType;
 
-    @NonNull private RectF mSensorRect;
-    @Nullable private UdfpsHbmProvider mHbmProvider;
+    @Nullable private GhbmIlluminationListener mGhbmIlluminationListener;
+    @Nullable private Runnable mOnIlluminatedRunnable;
+    boolean mAwaitingSurfaceToStartIllumination;
+    boolean mHasValidSurface;
 
     public UdfpsSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -71,82 +64,77 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
         setZOrderOnTop(true);
 
         mHolder = getHolder();
+        mHolder.addCallback(this);
         mHolder.setFormat(PixelFormat.RGBA_8888);
 
-        mSensorRect = new RectF();
         mSensorPaint = new Paint(0 /* flags */);
         mSensorPaint.setAntiAlias(true);
         mSensorPaint.setARGB(255, 255, 255, 255);
         mSensorPaint.setStyle(Paint.Style.FILL);
+    }
 
-        mIlluminationDotDrawable = canvas -> {
-            canvas.drawOval(mSensorRect, mSensorPaint);
-        };
-
-        mOnIlluminatedDelayMs = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_udfps_illumination_transition_ms);
-
-        if (Build.IS_ENG || Build.IS_USERDEBUG) {
-            mHbmType = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    SETTING_HBM_TYPE, DEFAULT_HBM_TYPE, UserHandle.USER_CURRENT);
-        } else {
-            mHbmType = DEFAULT_HBM_TYPE;
+    @Override public void surfaceCreated(SurfaceHolder holder) {
+        mHasValidSurface = true;
+        if (mAwaitingSurfaceToStartIllumination) {
+            doIlluminate(mOnIlluminatedRunnable);
+            mOnIlluminatedRunnable = null;
+            mAwaitingSurfaceToStartIllumination = false;
         }
     }
 
     @Override
-    public void setHbmProvider(@Nullable UdfpsHbmProvider hbmProvider) {
-        mHbmProvider = hbmProvider;
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        // Unused.
     }
 
-    @Override
-    public void startIllumination(@Nullable Runnable onIlluminatedRunnable) {
-        if (mHbmProvider != null) {
-            final Surface surface =
-                    (mHbmType == UdfpsHbmTypes.GLOBAL_HBM) ? mHolder.getSurface() : null;
-
-            final Runnable onHbmEnabled = () -> {
-                if (mHbmType == UdfpsHbmTypes.GLOBAL_HBM) {
-                    drawImmediately(mIlluminationDotDrawable);
-                }
-                if (onIlluminatedRunnable != null) {
-                    // No framework API can reliably tell when a frame reaches the panel. A timeout
-                    // is the safest solution.
-                    postDelayed(onIlluminatedRunnable, mOnIlluminatedDelayMs);
-                } else {
-                    Log.w(TAG, "startIllumination | onIlluminatedRunnable is null");
-                }
-            };
-
-            mHbmProvider.enableHbm(mHbmType, surface, onHbmEnabled);
-        } else {
-            Log.e(TAG, "startIllumination | mHbmProvider is null");
-        }
+    @Override public void surfaceDestroyed(SurfaceHolder holder) {
+        mHasValidSurface = false;
     }
 
-    @Override
-    public void stopIllumination() {
-        if (mHbmProvider != null) {
-            final Runnable onHbmDisabled =
-                    (mHbmType == UdfpsHbmTypes.GLOBAL_HBM) ? this::invalidate : null;
-            mHbmProvider.disableHbm(onHbmDisabled);
-        } else {
-            Log.e(TAG, "stopIllumination | mHbmProvider is null");
-        }
-    }
-
-    void onSensorRectUpdated(@NonNull RectF sensorRect) {
-        mSensorRect = sensorRect;
+    void setGhbmIlluminationListener(@Nullable GhbmIlluminationListener listener) {
+        mGhbmIlluminationListener = listener;
     }
 
     /**
-     * Immediately draws the provided drawable on this SurfaceView's surface.
+     * Note: there is no corresponding method to stop GHBM illumination. It is expected that
+     * {@link UdfpsView} will hide this view, which would destroy the surface and remove the
+     * illumination dot.
      */
-    private void drawImmediately(@NonNull SimpleDrawable drawable) {
+    void startGhbmIllumination(@Nullable Runnable onIlluminatedRunnable) {
+        if (mGhbmIlluminationListener == null) {
+            Log.e(TAG, "startIllumination | mGhbmIlluminationListener is null");
+            return;
+        }
+
+        if (mHasValidSurface) {
+            doIlluminate(onIlluminatedRunnable);
+        } else {
+            mAwaitingSurfaceToStartIllumination = true;
+            mOnIlluminatedRunnable = onIlluminatedRunnable;
+        }
+    }
+
+    private void doIlluminate(@Nullable Runnable onIlluminatedRunnable) {
+        if (mGhbmIlluminationListener == null) {
+            Log.e(TAG, "doIlluminate | mGhbmIlluminationListener is null");
+            return;
+        }
+
+        mGhbmIlluminationListener.enableGhbm(mHolder.getSurface(), onIlluminatedRunnable);
+    }
+
+    /**
+     * Immediately draws the illumination dot on this SurfaceView's surface.
+     */
+    void drawIlluminationDot(@NonNull RectF sensorRect) {
+        if (!mHasValidSurface) {
+            Log.e(TAG, "drawIlluminationDot | the surface is destroyed or was never created.");
+            return;
+        }
         Canvas canvas = null;
         try {
             canvas = mHolder.lockCanvas();
-            drawable.draw(canvas);
+            canvas.drawOval(sensorRect, mSensorPaint);
         } finally {
             // Make sure the surface is never left in a bad state.
             if (canvas != null) {

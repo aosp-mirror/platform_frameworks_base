@@ -25,6 +25,7 @@ import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.widget.Chronometer
+import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
@@ -85,7 +86,7 @@ class OngoingCallController @Inject constructor(
                 val newOngoingCallInfo = CallNotificationInfo(
                         entry.sbn.key,
                         entry.sbn.notification.`when`,
-                        entry.sbn.notification.contentIntent.intent,
+                        entry.sbn.notification.contentIntent?.intent,
                         entry.sbn.uid,
                         entry.sbn.notification.extras.getInt(
                                 Notification.EXTRA_CALL_TYPE, -1) == CALL_TYPE_ONGOING
@@ -122,6 +123,7 @@ class OngoingCallController @Inject constructor(
      * Should only be called from [CollapsedStatusBarFragment].
      */
     fun setChipView(chipView: View) {
+        tearDownChipView()
         this.chipView = chipView
         if (hasOngoingCall()) {
             updateChip()
@@ -165,8 +167,7 @@ class OngoingCallController @Inject constructor(
         val currentCallNotificationInfo = callNotificationInfo ?: return
 
         val currentChipView = chipView
-        val timeView =
-            currentChipView?.findViewById<Chronometer>(R.id.ongoing_call_chip_time)
+        val timeView = currentChipView?.getTimeView()
         val backgroundView =
             currentChipView?.findViewById<View>(R.id.ongoing_call_chip_background)
 
@@ -176,14 +177,17 @@ class OngoingCallController @Inject constructor(
                     systemClock.elapsedRealtime()
             timeView.start()
 
-            currentChipView.setOnClickListener {
-                logger.logChipClicked()
-                activityStarter.postStartActivityDismissingKeyguard(
-                        currentCallNotificationInfo.intent, 0,
-                        ActivityLaunchAnimator.Controller.fromView(
-                                backgroundView,
-                                InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP)
-                )
+            currentCallNotificationInfo.intent?.let { intent ->
+                currentChipView.setOnClickListener {
+                    logger.logChipClicked()
+                    activityStarter.postStartActivityDismissingKeyguard(
+                            intent,
+                            0,
+                            ActivityLaunchAnimator.Controller.fromView(
+                                    backgroundView,
+                                    InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP)
+                    )
+                }
             }
 
             setUpUidObserver(currentCallNotificationInfo)
@@ -245,16 +249,23 @@ class OngoingCallController @Inject constructor(
 
     private fun removeChip() {
         callNotificationInfo = null
+        tearDownChipView()
         mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
         if (uidObserver != null) {
             iActivityManager.unregisterUidObserver(uidObserver)
         }
     }
 
+    /** Tear down anything related to the chip view to prevent leaks. */
+    @VisibleForTesting
+    fun tearDownChipView() = chipView?.getTimeView()?.stop()
+
+    private fun View.getTimeView(): Chronometer? = this.findViewById(R.id.ongoing_call_chip_time)
+
     private data class CallNotificationInfo(
         val key: String,
         val callStartTime: Long,
-        val intent: Intent,
+        val intent: Intent?,
         val uid: Int,
         /** True if the call is currently ongoing (as opposed to incoming, screening, etc.). */
         val isOngoing: Boolean

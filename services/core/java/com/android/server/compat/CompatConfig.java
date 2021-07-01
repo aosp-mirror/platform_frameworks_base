@@ -603,6 +603,10 @@ final class CompatConfig {
 
         try (InputStream in = new BufferedInputStream(new FileInputStream(overridesFile))) {
             Overrides overrides = com.android.server.compat.overrides.XmlParser.read(in);
+            if (overrides == null) {
+                Slog.w(TAG, "Parsing " + overridesFile.getPath() + " failed");
+                return;
+            }
             for (ChangeOverrides changeOverrides : overrides.getChangeOverrides()) {
                 long changeId = changeOverrides.getChangeId();
                 CompatChange compatChange = mChanges.get(changeId);

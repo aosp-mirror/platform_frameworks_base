@@ -1677,8 +1677,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
      * Disable notification shade background blurs until the keyguard is dismissed.
      * (Used during app launch animations)
      */
-    public void disableBlursUntilHidden() {
-        mNotificationShadeDepthController.get().setIgnoreShadeBlurUntilHidden(true);
+    public void setBlursDisabledForAppLaunch(boolean disabled) {
+        mNotificationShadeDepthController.get().setBlursDisabledForAppLaunch(disabled);
     }
 
     public boolean isSecure() {
@@ -2161,6 +2161,15 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             if (!mHiding
                     && !mSurfaceBehindRemoteAnimationRequested
                     && !mKeyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture()) {
+                if (finishedCallback != null) {
+                    // There will not execute animation, send a finish callback to ensure the remote
+                    // animation won't hanging there.
+                    try {
+                        finishedCallback.onAnimationFinished();
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to call onAnimationFinished", e);
+                    }
+                }
                 setShowingLocked(mShowing, true /* force */);
                 return;
             }
@@ -2176,12 +2185,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 mKeyguardViewControllerLazy.get().getViewRootImpl().setReportNextDraw();
                 notifyDrawn(mDrawnCallback);
                 mDrawnCallback = null;
-            }
-
-            // only play "unlock" noises if not on a call (since the incall UI
-            // disables the keyguard)
-            if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)) {
-                playSounds(false);
             }
 
             LatencyTracker.getInstance(mContext)
@@ -2301,6 +2304,13 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     }
 
     private void onKeyguardExitFinished() {
+        // only play "unlock" noises if not on a call (since the incall UI
+        // disables the keyguard)
+        if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)) {
+            Log.i("TEST", "playSounds: false");
+            playSounds(false);
+        }
+
         setShowingLocked(false);
         mWakeAndUnlocking = false;
         mDismissCallbackRegistry.notifyDismissSucceeded();

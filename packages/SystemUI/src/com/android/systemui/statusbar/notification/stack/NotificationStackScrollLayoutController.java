@@ -1459,6 +1459,13 @@ public class NotificationStackScrollLayoutController {
     }
 
     /**
+     * Request an animation whenever the toppadding changes next
+     */
+    public void animateNextTopPaddingChange() {
+        mView.animateNextTopPaddingChange();
+    }
+
+    /**
      * Enum for UiEvent logged from this class
      */
     enum NotificationPanelEvent implements UiEventLogger.UiEventEnum {

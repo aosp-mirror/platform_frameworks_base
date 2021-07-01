@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.ScrollCaptureCallback;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 /**
  * Provides built-in framework level Scroll Capture support for standard scrolling Views.
@@ -179,6 +180,11 @@ public class ScrollCaptureInternal {
                     Log.d(TAG, "scroll capture: FOUND " + view.getClass().getName()
                             + "[" + resolveId(view.getContext(), view.getId()) + "]"
                             + " -> TYPE_RECYCLING");
+                }
+                if (view instanceof ListView) {
+                    // ListView is special.
+                    return new ScrollCaptureViewSupport<>((ListView) view,
+                            new ListViewCaptureHelper());
                 }
                 return new ScrollCaptureViewSupport<>((ViewGroup) view,
                         new RecyclerViewCaptureHelper());

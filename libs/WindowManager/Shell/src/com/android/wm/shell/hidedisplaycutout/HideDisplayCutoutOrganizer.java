@@ -19,8 +19,8 @@ package com.android.wm.shell.hidedisplaycutout;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Insets;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -40,13 +40,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.R;
-import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
  * Manages the display areas of hide display cutout feature.
@@ -76,19 +75,29 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
     @VisibleForTesting
     int mRotation;
 
-    /**
-     * Handles rotation based on OnDisplayChangingListener callback.
-     */
-    private final DisplayChangeController.OnDisplayChangingListener mRotationController =
-            (display, fromRotation, toRotation, wct) -> {
-                mRotation = toRotation;
-                updateBoundsAndOffsets(true /* enable */);
-                final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                applyAllBoundsAndOffsets(wct, t);
-                // Only apply t here since the server will do the wct.apply when the method
-                // finishes.
-                t.apply();
-            };
+    private final DisplayController.OnDisplaysChangedListener mListener =
+            new DisplayController.OnDisplaysChangedListener() {
+                @Override
+                public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+                    if (displayId != DEFAULT_DISPLAY) {
+                        return;
+                    }
+                    DisplayLayout displayLayout =
+                            mDisplayController.getDisplayLayout(DEFAULT_DISPLAY);
+                    if (displayLayout == null) {
+                        return;
+                    }
+                    final boolean rotationChanged = mRotation != displayLayout.rotation();
+                    mRotation = displayLayout.rotation();
+                    if (rotationChanged || isDisplayBoundsChanged()) {
+                        updateBoundsAndOffsets(true /* enabled */);
+                        final WindowContainerTransaction wct = new WindowContainerTransaction();
+                        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                        applyAllBoundsAndOffsets(wct, t);
+                        applyTransaction(wct, t);
+                    }
+                }
+    };
 
     HideDisplayCutoutOrganizer(Context context, DisplayController displayController,
             ShellExecutor mainExecutor) {
@@ -154,10 +163,10 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
      * Enables hide display cutout.
      */
     void enableHideDisplayCutout() {
-        mDisplayController.addDisplayChangingController(mRotationController);
-        final Display display = mDisplayController.getDisplay(DEFAULT_DISPLAY);
-        if (display != null) {
-            mRotation = display.getRotation();
+        mDisplayController.addDisplayWindowListener(mListener);
+        final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(DEFAULT_DISPLAY);
+        if (displayLayout != null) {
+            mRotation = displayLayout.rotation();
         }
         final List<DisplayAreaAppearedInfo> displayAreaInfos =
                 registerOrganizer(DisplayAreaOrganizer.FEATURE_HIDE_DISPLAY_CUTOUT);
@@ -174,7 +183,7 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
      */
     void disableHideDisplayCutout() {
         updateBoundsAndOffsets(false /* enabled */);
-        mDisplayController.removeDisplayChangingController(mRotationController);
+        mDisplayController.removeDisplayWindowListener(mListener);
         unregisterOrganizer();
     }
 
@@ -193,21 +202,33 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
 
     @VisibleForTesting
     Rect getDisplayBoundsOfNaturalOrientation() {
-        Point realSize = new Point(0, 0);
-        final Display display = mDisplayController.getDisplay(DEFAULT_DISPLAY);
-        if (display != null) {
-            display.getRealSize(realSize);
+        final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(DEFAULT_DISPLAY);
+        if (displayLayout == null) {
+            return new Rect();
         }
         final boolean isDisplaySizeFlipped = isDisplaySizeFlipped();
         return new Rect(
                 0,
                 0,
-                isDisplaySizeFlipped ? realSize.y : realSize.x,
-                isDisplaySizeFlipped ? realSize.x : realSize.y);
+                isDisplaySizeFlipped ? displayLayout.height() : displayLayout.width(),
+                isDisplaySizeFlipped ? displayLayout.width() : displayLayout.height());
     }
 
     private boolean isDisplaySizeFlipped() {
         return mRotation == Surface.ROTATION_90 || mRotation == Surface.ROTATION_270;
+    }
+
+    private boolean isDisplayBoundsChanged() {
+        final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(DEFAULT_DISPLAY);
+        if (displayLayout == null) {
+            return false;
+        }
+        final boolean isDisplaySizeFlipped = isDisplaySizeFlipped();
+        final int width = isDisplaySizeFlipped ? displayLayout.height() : displayLayout.width();
+        final int height = isDisplaySizeFlipped ? displayLayout.width() : displayLayout.height();
+        return mDefaultDisplayBounds.isEmpty()
+                || mDefaultDisplayBounds.width() != width
+                || mDefaultDisplayBounds.height() != height;
     }
 
     /**
@@ -237,7 +258,6 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
                         mCurrentDisplayBounds.right);
             }
             mCurrentDisplayBounds.inset(mCurrentCutoutInsets);
-
             // Replace the top bound with the max(status bar height, cutout height) if there is
             // cutout on the top side.
             mStatusBarHeight = getStatusBarHeight();
@@ -256,7 +276,7 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
     }
 
     private void initDefaultValuesIfNeeded() {
-        if (!mDefaultDisplayBounds.isEmpty()) {
+        if (!isDisplayBoundsChanged()) {
             return;
         }
         mDefaultDisplayBounds.set(getDisplayBoundsOfNaturalOrientation());

@@ -1371,8 +1371,12 @@ public final class ViewRootImpl implements ViewParent,
         HardwareRenderer.ASurfaceTransactionCallback callback = (nativeTransactionObj,
                                                                  nativeSurfaceControlObj,
                                                                  frameNr) -> {
-            Transaction t = new Transaction(nativeTransactionObj);
-            mergeWithNextTransaction(t, frameNr);
+            if (mBlastBufferQueue == null) {
+                return false;
+            } else {
+                mBlastBufferQueue.mergeWithNextTransaction(nativeTransactionObj, frameNr);
+                return true;
+            }
         };
         mAttachInfo.mThreadedRenderer.setASurfaceTransactionCallback(callback);
     }
@@ -1438,8 +1442,10 @@ public final class ViewRootImpl implements ViewParent,
                     if (mHardwareRendererObserver != null) {
                         mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
                     }
-                    addPrepareSurfaceControlForWebviewCallback();
-                    addASurfaceTransactionCallback();
+                    if (HardwareRenderer.isWebViewOverlaysEnabled()) {
+                        addPrepareSurfaceControlForWebviewCallback();
+                        addASurfaceTransactionCallback();
+                    }
                     mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
                 }
             }
@@ -7773,8 +7779,10 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             if (mAttachInfo.mThreadedRenderer != null) {
-                addPrepareSurfaceControlForWebviewCallback();
-                addASurfaceTransactionCallback();
+                if (HardwareRenderer.isWebViewOverlaysEnabled()) {
+                    addPrepareSurfaceControlForWebviewCallback();
+                    addASurfaceTransactionCallback();
+                }
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
             }
         } else {

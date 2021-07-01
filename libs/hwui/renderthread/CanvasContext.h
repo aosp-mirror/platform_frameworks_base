@@ -110,6 +110,7 @@ public:
     GrDirectContext* getGrContext() const { return mRenderThread.getGrContext(); }
 
     ASurfaceControl* getSurfaceControl() const { return mSurfaceControl; }
+    int32_t getSurfaceControlGenerationId() const { return mSurfaceControlGenerationId; }
 
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
@@ -206,7 +207,7 @@ public:
             ASurfaceControlStats* stats);
 
     void setASurfaceTransactionCallback(
-            const std::function<void(int64_t, int64_t, int64_t)>& callback) {
+            const std::function<bool(int64_t, int64_t, int64_t)>& callback) {
         mASurfaceTransactionCallback = callback;
     }
 
@@ -253,6 +254,9 @@ private:
     // The SurfaceControl reference is passed from ViewRootImpl, can be set to
     // NULL to remove the reference
     ASurfaceControl* mSurfaceControl = nullptr;
+    // id to track surface control changes and WebViewFunctor uses it to determine
+    // whether reparenting is needed
+    int32_t mSurfaceControlGenerationId = 0;
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
     bool mStopped = false;
@@ -317,7 +321,7 @@ private:
     // If set to true, we expect that callbacks into onSurfaceStatsAvailable
     bool mExpectSurfaceStats = false;
 
-    std::function<void(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
+    std::function<bool(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
     std::function<void()> mPrepareSurfaceControlForWebviewCallback;
 
     void cleanupResources();
