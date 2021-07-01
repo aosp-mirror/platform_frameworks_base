@@ -5684,6 +5684,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
         }
+        try {
+            if (uid != 0) { // bypass the root
+                final String[] packageNames = getPackageManager().getPackagesForUid(uid);
+                if (ArrayUtils.isEmpty(packageNames)) {
+                    // The uid is not existed or not visible to the caller.
+                    return PackageManager.PERMISSION_DENIED;
+                }
+            }
+        } catch (RemoteException e) {
+        }
         return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
                 ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
     }
@@ -14371,10 +14381,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long procStateSeq = uidRec != null ? uidRec.curProcStateSeq : 0;
         final int capability = uidRec != null ? uidRec.getSetCapability() : 0;
         final boolean ephemeral = uidRec != null ? uidRec.isEphemeral() : isEphemeralLocked(uid);
-
-        if (uidRec != null && uidRec.isIdle() && (change & UidRecord.CHANGE_IDLE) != 0) {
-            mProcessList.killAppIfForceStandbyAndCachedIdleLocked(uidRec);
-        }
 
         if (uidRec != null && !uidRec.isIdle() && (change & UidRecord.CHANGE_GONE) != 0) {
             // If this uid is going away, and we haven't yet reported it is gone,

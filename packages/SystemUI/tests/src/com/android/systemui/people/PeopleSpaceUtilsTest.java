@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.Person;
+import android.app.backup.BackupManager;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
@@ -198,6 +199,8 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     private NotificationEntryManager mNotificationEntryManager;
     @Mock
     private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
+    @Mock
+    private BackupManager mBackupManager;
 
     private Bundle mOptions;
 
@@ -252,7 +255,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, key, mNotificationEntry1, 0,
-                        Optional.empty());
+                        Optional.empty(), mBackupManager);
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
         assertThat(actual.getNotificationSender()).isEqualTo(null);
@@ -292,7 +295,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, key, notificationEntry, 0,
-                        Optional.empty());
+                        Optional.empty(), mBackupManager);
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
         assertThat(actual.getNotificationSender().toString()).isEqualTo("name");
@@ -325,7 +328,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, key, notificationEntry, 0,
-                        Optional.empty());
+                        Optional.empty(), mBackupManager);
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_1);
         assertThat(actual.getNotificationDataUri()).isEqualTo(URI);
@@ -358,7 +361,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, key, notificationEntry, 0,
-                        Optional.empty());
+                        Optional.empty(), mBackupManager);
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_1);
         assertThat(actual.getNotificationDataUri()).isNull();
@@ -376,7 +379,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, key, mNotificationEntry3, 0,
-                        Optional.empty());
+                        Optional.empty(), mBackupManager);
 
         assertThat(actual.getNotificationContent()).isEqualTo(null);
     }

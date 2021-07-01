@@ -79,7 +79,7 @@ import java.util.function.Function;
 final class HotwordDetectionConnection {
     private static final String TAG = "HotwordDetectionConnection";
     // TODO (b/177502877): Set the Debug flag to false before shipping.
-    private static final boolean DEBUG = true;
+    static final boolean DEBUG = true;
 
     // TODO: These constants need to be refined.
     private static final long VALIDATION_TIMEOUT_MILLIS = 3000;

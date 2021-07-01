@@ -2633,10 +2633,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 final ActivityInfo ainfo = AppGlobals.getPackageManager().getActivityInfo(comp,
                         STOCK_PM_FLAGS, UserHandle.getUserId(callingUid));
-                if (ainfo.applicationInfo.uid != callingUid) {
-                    throw new SecurityException(
-                            "Can't add task for another application: target uid="
-                                    + ainfo.applicationInfo.uid + ", calling uid=" + callingUid);
+                if (ainfo == null || ainfo.applicationInfo.uid != callingUid) {
+                    Slog.e(TAG, "Can't add task for another application: target uid="
+                            + (ainfo == null ? Process.INVALID_UID : ainfo.applicationInfo.uid)
+                            + ", calling uid=" + callingUid);
+                    return INVALID_TASK_ID;
                 }
 
                 final Task rootTask = r.getRootTask();
@@ -4172,21 +4173,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /**
      * Update the asset configuration and increase the assets sequence number.
-     * @param processes the processes that needs to update the asset configuration
+     * @param processes the processes that needs to update the asset configuration, if none
+     *                  updates the global configuration for all processes.
      */
-    public void updateAssetConfiguration(List<WindowProcessController> processes,
-            boolean updateFrameworkRes) {
+    public void updateAssetConfiguration(List<WindowProcessController> processes) {
         synchronized (mGlobalLock) {
             final int assetSeq = increaseAssetConfigurationSeq();
 
-            if (updateFrameworkRes) {
+            // Update the global configuration if the no target processes
+            if (processes == null) {
                 Configuration newConfig = new Configuration();
                 newConfig.assetsSeq = assetSeq;
                 updateConfiguration(newConfig);
+                return;
             }
 
-            // Always update the override of every process so the asset sequence of the process is
-            // always greater than or equal to the global configuration.
             for (int i = processes.size() - 1; i >= 0; i--) {
                 final WindowProcessController wpc = processes.get(i);
                 wpc.updateAssetConfiguration(assetSeq);

@@ -444,12 +444,6 @@
     <string name="sensor_notification_service">Sensor Notification Service</string>
     <!-- Attribution for Twilight service. [CHAR LIMIT=NONE]-->
     <string name="twilight_service">Twilight Service</string>
-    <!-- Attribution for the Offline LocationTimeZoneProvider service, i.e. the service capable of
-         performing time zone detection using time zone geospatial information held on the device.
-         This text is shown in UIs related to an application name to help users and developers to
-         understand which sub-unit of an application is requesting permissions and using power.
-         [CHAR LIMIT=NONE]-->
-    <string name="offline_location_time_zone_detection_service_attribution">Time Zone Detector (No connectivity)</string>
     <!-- Attribution for Gnss Time Update service. [CHAR LIMIT=NONE]-->
     <string name="gnss_time_update_service">GNSS Time Update Service</string>
 
@@ -3964,6 +3958,8 @@
     <string name="deny">Deny</string>
     <string name="permission_request_notification_title">Permission requested</string>
     <string name="permission_request_notification_with_subtitle">Permission requested\nfor account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g>.</string>
+     <!-- Title and subtitle for notification shown when app request account access (two lines) [CHAR LIMIT=NONE] -->
+    <string name="permission_request_notification_for_app_with_subtitle">Permission requested by <xliff:g id="app" example="Gmail">%1$s</xliff:g>\nfor account <xliff:g id="account" example="foo@gmail.com">%2$s</xliff:g>.</string>
 
     <!-- Message to show when an intent automatically switches users into the personal profile. -->
     <string name="forward_intent_to_owner">You\'re using this app outside of your work profile</string>
