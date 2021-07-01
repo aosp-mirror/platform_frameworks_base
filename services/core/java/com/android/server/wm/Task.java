@@ -5942,9 +5942,9 @@ class Task extends TaskFragment {
         mLastRecentsAnimationTransaction = null;
         mLastRecentsAnimationOverlay = null;
         // reset also the crop and transform introduced by mLastRecentsAnimationTransaction
-        Rect bounds = getBounds();
         getPendingTransaction().setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9])
-                .setWindowCrop(mSurfaceControl, bounds.width(), bounds.height());
+                .setWindowCrop(mSurfaceControl, null)
+                .setCornerRadius(mSurfaceControl, 0);
     }
 
     void maybeApplyLastRecentsAnimationTransaction() {
