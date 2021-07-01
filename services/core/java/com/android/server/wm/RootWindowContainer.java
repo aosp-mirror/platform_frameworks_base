@@ -3543,6 +3543,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
+    // TODO(b/191434136): handle this properly when we add multi-window support on secondary
+    //  display.
     private void calculateDefaultMinimalSizeOfResizeableTasks() {
         final Resources res = mService.mContext.getResources();
         final float minimalSize = res.getDimension(
