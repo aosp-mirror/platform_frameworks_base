@@ -218,7 +218,7 @@
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Ibiltaritza"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wifia"</string>
-    <string name="accessibility_no_sim" msgid="1140839832913084973">"Ez dago SIM txartelik."</string>
+    <string name="accessibility_no_sim" msgid="1140839832913084973">"Ez dago SIMik."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Datu-konexioa"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Datu-konexioa aktibatuta"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Desaktibatuta"</string>
@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Erakutsi guztiak"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Desblokeatu ordaintzeko"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Konfiguratu gabe"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desblokeatu erabiltzeko"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Arazo bat izan da txartelak eskuratzean. Saiatu berriro geroago."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Pantaila blokeatuaren ezarpenak"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Elkarrizketa irekia"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Elkarrizketa-widgetak"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Sakatu elkarrizketa bat hasierako pantailan gehitzeko"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Azken elkarrizketak agertuko dira hemen"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Lehentasunezko elkarrizketak"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Azken elkarrizketak"</string>
     <string name="okay" msgid="6490552955618608554">"Ados"</string>

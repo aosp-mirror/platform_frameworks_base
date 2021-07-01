@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Прикажи ги сите"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Отклучете за да платите"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Не е поставено"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Отклучете за да користите"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Имаше проблем при преземањето на картичките. Обидете се повторно подоцна"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Поставки за заклучен екран"</string>
@@ -734,7 +736,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звук или вибрации"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибрации и се појавува подолу во делот со разговори"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може да ѕвони или вибрира во зависност од поставките на телефонот"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да ѕвони или вибрира во зависност од поставките на телефонот Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да ѕвони или вибрира во зависност од поставките на телефонот. Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Ви го задржува вниманието со лебдечка кратенка на содржинава."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Дозволете системот да определи дали известувањево треба да испушти звук или да вибрира"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Статус:&lt;/b&gt; поставено на „Стандардно“"</string>
@@ -743,8 +745,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус:&lt;/b&gt; рангирано пониско"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, се појавува како балонче"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, ја прекинува „Не вознемирувај“"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, се појавува како балонче, ја прекинува „Не вознемирувај“"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, го прекинува „Не вознемирувај“"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Се прикажува најгоре во известувањата за разговор и како профилна слика на заклучен екран, се појавува како балонче, го прекинува „Не вознемирувај“"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Поставки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритетно"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддржува функции за разговор"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Започни разговор"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виџети за разговор"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Допрете на разговор за да го додадете на вашиот почетен екран"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Вашите неодамнешни разговори ќе се прикажуваат тука"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Приоритетни разговори"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Неодамнешни разговори"</string>
     <string name="okay" msgid="6490552955618608554">"Во ред"</string>

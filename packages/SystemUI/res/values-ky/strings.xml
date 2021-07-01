@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Баарын көрсөтүү"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Төлөө үчүн кулпусун ачыңыз"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Жөндөлгөн эмес"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Колдонуу үчүн кулпусун ачыңыз"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Кыйытмаларды алууда ката кетти. Бир аздан кийин кайталап көрүңүз."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Кулпуланган экран жөндөөлөрү"</string>
@@ -742,9 +744,9 @@
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Абалы:&lt;/b&gt; Жогорулады"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Абалы:&lt;/b&gt; Төмөндөдү"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Сүйлөшүүлөр тууралуу билдирмелердин жогору жагында, ошондой эле кулпуланган экранда профилдин сүрөтү түрүндө көрүнөт"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Cүйлөшүүлөр тууралуу билдирмелердин жогору жагында жана кулпуланган экранда профилдин сүрөтү, ошондой эле калкып чыкма билдирме катары көрсөтүлөт"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Cүйлөшүүлөр тууралуу билдирмелердин жогору жагында жана кулпуланган экранда профилдин сүрөтү катары көрсөтүлүп, \"Тынчымды алба\" режимин үзгүлтүккө учуратат"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Cүйлөшүүлөр тууралуу билдирмелердин жогору жагында жана кулпуланган экранда профилдин сүрөтү, ошондой эле калкып чыкма билдирме катары көрсөтүлүп, \"Тынчымды алба\" режимин үзгүлтүккө учуратат"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Cүйлөшүүлөр тууралуу билдирмелердин жогору жагында жана кулпуланган экранда профилдин сүрөтү, ошондой эле калкып чыкма билдирме түрүндө көрүнөт"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Cүйлөшүүлөр тууралуу билдирмелердин жогору жагында жана кулпуланган экранда профилдин сүрөтү түрүндө көрүнүп, \"Тынчымды алба\" режимин токтотот"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Cүйлөшүүлөр тууралуу билдирмелердин жогору жагында жана кулпуланган экранда профилдин сүрөтү, ошондой эле калкып чыкма билдирме түрүндө көрүнүп, \"Тынчымды алба\" режимин токтотот"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Жөндөөлөр"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маанилүүлүгү"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда оозеки сүйлөшкөнгө болбойт"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Ачык сүйлөшүү"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Сүйлөшүүлөр виджеттери"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Сүйлөшүүнү башкы экранга кошуу үчүн таптап коюңуз"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Акыркы жазышууларыңыз ушул жерде көрүнөт"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Маанилүү сүйлөшүүлөр"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Акыркы сүйлөшүүлөр"</string>
     <string name="okay" msgid="6490552955618608554">"Макул"</string>
