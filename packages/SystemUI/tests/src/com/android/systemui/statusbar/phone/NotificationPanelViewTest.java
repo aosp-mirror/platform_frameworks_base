@@ -576,17 +576,19 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     }
 
     @Test
-    public void testKeyguardStatusView_isAlignedToGuidelineInSplitShadeMode() {
-        mNotificationPanelViewController.updateResources();
-
-        assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd)
-                .isEqualTo(ConstraintSet.PARENT_ID);
-
+    public void testKeyguardStatusViewInSplitShade_changesConstraintsDependingOnNotifications() {
+        mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade();
-        mNotificationPanelViewController.updateResources();
 
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        mNotificationPanelViewController.updateResources();
         assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd)
                 .isEqualTo(R.id.qs_edge_guideline);
+
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        mNotificationPanelViewController.updateResources();
+        assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd)
+                .isEqualTo(ConstraintSet.PARENT_ID);
     }
 
     @Test

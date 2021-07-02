@@ -60,6 +60,8 @@ import android.os.SystemClock;
 import android.os.UserManager;
 import android.os.VibrationEffect;
 import android.provider.Settings;
+import android.transition.ChangeBounds;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.LayoutInflater;
@@ -616,6 +618,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private KeyguardMediaController mKeyguardMediaController;
 
+    private boolean mStatusViewCentered = false;
+
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
@@ -1023,15 +1027,15 @@ public class NotificationPanelViewController extends PanelViewController {
             constraintSet.connect(
                     R.id.notification_stack_scroller, START,
                     R.id.qs_edge_guideline, START);
-            constraintSet.connect(R.id.keyguard_status_view, END, R.id.qs_edge_guideline, END);
         } else {
             constraintSet.connect(R.id.qs_frame, END, PARENT_ID, END);
             constraintSet.connect(R.id.notification_stack_scroller, START, PARENT_ID, START);
-            constraintSet.connect(R.id.keyguard_status_view, END, PARENT_ID, END);
         }
         constraintSet.getConstraint(R.id.notification_stack_scroller).layout.mWidth = panelWidth;
         constraintSet.getConstraint(R.id.qs_frame).layout.mWidth = qsWidth;
         constraintSet.applyTo(mNotificationContainerParent);
+
+        updateKeyguardStatusViewAlignment(false /* animate */);
 
         mKeyguardMediaController.refreshMediaPosition();
     }
@@ -1283,6 +1287,7 @@ public class NotificationPanelViewController extends PanelViewController {
         } else {
             mKeyguardStatusViewController.displayClock(LARGE);
         }
+        updateKeyguardStatusViewAlignment(true /* animate */);
         int userIconHeight = mKeyguardQsUserSwitchController != null
                 ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
         float expandedFraction =
@@ -1324,6 +1329,26 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         updateNotificationTranslucency();
         updateClock();
+    }
+
+    private void updateKeyguardStatusViewAlignment(boolean animate) {
+        boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
+                .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
+        boolean shouldBeCentered = !mShouldUseSplitNotificationShade || !hasVisibleNotifications;
+        if (mStatusViewCentered != shouldBeCentered) {
+            mStatusViewCentered = shouldBeCentered;
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(mNotificationContainerParent);
+            int statusConstraint = shouldBeCentered ? PARENT_ID : R.id.qs_edge_guideline;
+            constraintSet.connect(R.id.keyguard_status_view, END, statusConstraint, END);
+            if (animate) {
+                ChangeBounds transition = new ChangeBounds();
+                transition.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+                transition.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                TransitionManager.beginDelayedTransition(mNotificationContainerParent, transition);
+            }
+            constraintSet.applyTo(mNotificationContainerParent);
+        }
     }
 
     /**
