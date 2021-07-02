@@ -133,6 +133,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.security.metrics.CrashStats;
 import android.security.metrics.IKeystoreMetrics;
 import android.security.metrics.KeyCreationWithAuthInfo;
 import android.security.metrics.KeyCreationWithGeneralInfo;
@@ -731,6 +732,7 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.KEYSTORE2_KEY_OPERATION_WITH_PURPOSE_AND_MODES_INFO:
                     case FrameworkStatsLog.KEYSTORE2_KEY_OPERATION_WITH_GENERAL_INFO:
                     case FrameworkStatsLog.RKP_ERROR_STATS:
+                    case FrameworkStatsLog.KEYSTORE2_CRASH_STATS:
                         return pullKeystoreAtoms(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
@@ -927,6 +929,7 @@ public class StatsPullAtomService extends SystemService {
         registerKeystoreKeyOperationWithPurposeAndModesInfo();
         registerKeystoreKeyOperationWithGeneralInfo();
         registerRkpErrorStats();
+        registerKeystoreCrashStats();
     }
 
     private void initAndRegisterNetworkStatsPullers() {
@@ -4139,6 +4142,14 @@ public class StatsPullAtomService extends SystemService {
                 mStatsCallbackImpl);
     }
 
+    private void registerKeystoreCrashStats() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.KEYSTORE2_CRASH_STATS,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
     int parseKeystoreStorageStats(KeystoreAtom[] atoms, List<StatsEvent> pulledData) {
         for (KeystoreAtom atomWrapper : atoms) {
             if (atomWrapper.payload.getTag() != KeystoreAtomPayload.storageStats) {
@@ -4270,6 +4281,19 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
+    int parseKeystoreCrashStats(KeystoreAtom[] atoms,
+            List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag() != KeystoreAtomPayload.crashStats) {
+                return StatsManager.PULL_SKIP;
+            }
+            CrashStats atom = atomWrapper.payload.getCrashStats();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.KEYSTORE2_CRASH_STATS, atom.count_of_crash_events));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
     int pullKeystoreAtoms(int atomTag, List<StatsEvent> pulledData) {
         IKeystoreMetrics keystoreMetricsService = getIKeystoreMetricsService();
         if (keystoreMetricsService == null) {
@@ -4298,6 +4322,8 @@ public class StatsPullAtomService extends SystemService {
                     return parseKeystoreKeyOperationWithGeneralInfo(atoms, pulledData);
                 case FrameworkStatsLog.RKP_ERROR_STATS:
                     return parseRkpErrorStats(atoms, pulledData);
+                case FrameworkStatsLog.KEYSTORE2_CRASH_STATS:
+                    return parseKeystoreCrashStats(atoms, pulledData);
                 default:
                     Slog.w(TAG, "Unsupported keystore atom: " + atomTag);
                     return StatsManager.PULL_SKIP;
