@@ -5265,6 +5265,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mController.getNoticationRoundessManager()
                 .setViewsAffectedBySwipe(null, null, null,
                         getResources().getBoolean(R.bool.flag_notif_updates));
+        // Round bottom corners for notification right before shelf.
+        mShelf.updateAppearance();
     }
 
     void setTopHeadsUpEntry(NotificationEntry topEntry) {
