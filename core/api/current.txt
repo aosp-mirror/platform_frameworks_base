@@ -51435,7 +51435,6 @@ package android.view.autofill {
 
   public final class AutofillManager {
     method public void cancel();
-    method public void clearAutofillRequestCallback();
     method public void commit();
     method public void disableAutofillServices();
     method @Nullable public android.content.ComponentName getAutofillServiceComponentName();
@@ -51461,7 +51460,6 @@ package android.view.autofill {
     method public void registerCallback(@Nullable android.view.autofill.AutofillManager.AutofillCallback);
     method public void requestAutofill(@NonNull android.view.View);
     method public void requestAutofill(@NonNull android.view.View, int, @NonNull android.graphics.Rect);
-    method public void setAutofillRequestCallback(@NonNull java.util.concurrent.Executor, @NonNull android.view.autofill.AutofillRequestCallback);
     method public void setUserData(@Nullable android.service.autofill.UserData);
     method public void unregisterCallback(@Nullable android.view.autofill.AutofillManager.AutofillCallback);
     field public static final String EXTRA_ASSIST_STRUCTURE = "android.view.autofill.extra.ASSIST_STRUCTURE";
@@ -51478,10 +51476,6 @@ package android.view.autofill {
     field public static final int EVENT_INPUT_HIDDEN = 2; // 0x2
     field public static final int EVENT_INPUT_SHOWN = 1; // 0x1
     field public static final int EVENT_INPUT_UNAVAILABLE = 3; // 0x3
-  }
-
-  public interface AutofillRequestCallback {
-    method public void onFillRequest(@Nullable android.view.inputmethod.InlineSuggestionsRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.FillCallback);
   }
 
   public final class AutofillValue implements android.os.Parcelable {
@@ -51854,12 +51848,10 @@ package android.view.inputmethod {
     ctor public InlineSuggestionsRequest.Builder(@NonNull java.util.List<android.widget.inline.InlinePresentationSpec>);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder addInlinePresentationSpecs(@NonNull android.widget.inline.InlinePresentationSpec);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest build();
-    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setClientSupported(boolean);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setInlinePresentationSpecs(@NonNull java.util.List<android.widget.inline.InlinePresentationSpec>);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setInlineTooltipPresentationSpec(@NonNull android.widget.inline.InlinePresentationSpec);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setMaxSuggestionCount(int);
-    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setServiceSupported(boolean);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setSupportedLocales(@NonNull android.os.LocaleList);
   }
 
