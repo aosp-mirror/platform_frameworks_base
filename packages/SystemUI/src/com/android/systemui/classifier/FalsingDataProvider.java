@@ -22,6 +22,7 @@ import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.util.ArrayList;
@@ -40,7 +41,8 @@ public class FalsingDataProvider {
 
     private final int mWidthPixels;
     private final int mHeightPixels;
-    private final BatteryController mBatteryController;
+    private BatteryController mBatteryController;
+    private final DockManager mDockManager;
     private final float mXdpi;
     private final float mYdpi;
     private final List<SessionListener> mSessionListeners = new ArrayList<>();
@@ -59,12 +61,16 @@ public class FalsingDataProvider {
     private boolean mJustUnlockedWithFace;
 
     @Inject
-    public FalsingDataProvider(DisplayMetrics displayMetrics, BatteryController batteryController) {
+    public FalsingDataProvider(
+            DisplayMetrics displayMetrics,
+            BatteryController batteryController,
+            DockManager dockManager) {
         mXdpi = displayMetrics.xdpi;
         mYdpi = displayMetrics.ydpi;
         mWidthPixels = displayMetrics.widthPixels;
         mHeightPixels = displayMetrics.heightPixels;
         mBatteryController = batteryController;
+        mDockManager = dockManager;
 
         FalsingClassifier.logInfo("xdpi, ydpi: " + getXdpi() + ", " + getYdpi());
         FalsingClassifier.logInfo("width, height: " + getWidthPixels() + ", " + getHeightPixels());
@@ -219,11 +225,6 @@ public class FalsingDataProvider {
         return mLastMotionEvent.getY() < mFirstRecentMotionEvent.getY();
     }
 
-    /** Returns true if phone is being charged without a cable. */
-    public boolean isWirelessCharging() {
-        return mBatteryController.isWirelessCharging();
-    }
-
     private void recalculateData() {
         if (!mDirty) {
             return;
@@ -355,6 +356,11 @@ public class FalsingDataProvider {
 
     public void setJustUnlockedWithFace(boolean justUnlockedWithFace) {
         mJustUnlockedWithFace = justUnlockedWithFace;
+    }
+
+    /** Returns true if phone is sitting in a dock or is wirelessly charging. */
+    public boolean isDocked() {
+        return mBatteryController.isWirelessCharging() || mDockManager.isDocked();
     }
 
     /** Implement to be alerted abotu the beginning and ending of falsing tracking. */
