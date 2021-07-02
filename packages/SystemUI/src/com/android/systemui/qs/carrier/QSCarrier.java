@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.FeatureFlagUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,7 +38,7 @@ public class QSCarrier extends LinearLayout {
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
     private CellSignalState mLastSignalState;
-    private boolean mProviderModel;
+    private boolean mProviderModelInitialized = false;
 
     public QSCarrier(Context context) {
         super(context);
@@ -60,20 +59,10 @@ public class QSCarrier extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
-            mProviderModel = true;
-        } else {
-            mProviderModel = false;
-        }
         mMobileGroup = findViewById(R.id.mobile_combo);
         mMobileRoaming = findViewById(R.id.mobile_roaming);
         mMobileSignal = findViewById(R.id.mobile_signal);
         mCarrierText = findViewById(R.id.qs_carrier_text);
-        if (mProviderModel) {
-            mMobileSignal.setImageDrawable(mContext.getDrawable(R.drawable.ic_qs_no_calling_sms));
-        } else {
-            mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
-        }
     }
 
     /**
@@ -92,10 +81,19 @@ public class QSCarrier extends LinearLayout {
             mMobileRoaming.setImageTintList(colorStateList);
             mMobileSignal.setImageTintList(colorStateList);
 
-            if (mProviderModel) {
+            if (state.providerModelBehavior) {
+                if (!mProviderModelInitialized) {
+                    mProviderModelInitialized = true;
+                    mMobileSignal.setImageDrawable(
+                            mContext.getDrawable(R.drawable.ic_qs_no_calling_sms));
+                }
                 mMobileSignal.setImageDrawable(mContext.getDrawable(state.mobileSignalIconId));
                 mMobileSignal.setContentDescription(state.contentDescription);
             } else {
+                if (!mProviderModelInitialized) {
+                    mProviderModelInitialized = true;
+                    mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
+                }
                 mMobileSignal.setImageLevel(state.mobileSignalIconId);
                 StringBuilder contentDescription = new StringBuilder();
                 if (state.contentDescription != null) {
