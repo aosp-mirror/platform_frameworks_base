@@ -96,8 +96,6 @@ public final class FillRequest implements Parcelable {
      */
     public static final @RequestFlags int FLAG_VIEW_NOT_FOCUSED = 0x10;
 
-    // The flag value 0x20 has been defined in AutofillManager.
-
     /** @hide */
     public static final int INVALID_REQUEST_ID = Integer.MIN_VALUE;
 
