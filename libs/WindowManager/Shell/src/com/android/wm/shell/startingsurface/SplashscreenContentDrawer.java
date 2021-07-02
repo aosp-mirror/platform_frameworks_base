@@ -24,6 +24,7 @@ import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCRE
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -314,7 +315,7 @@ public class SplashscreenContentDrawer {
         private Drawable mOverlayDrawable;
         private int mSuggestType;
         private int mThemeColor;
-        private Drawable mFinalIconDrawable;
+        private Drawable[] mFinalIconDrawables;
         private int mFinalIconSize = mIconSize;
 
         StartingWindowViewBuilder(@NonNull Context context, @NonNull ActivityInfo aInfo) {
@@ -346,12 +347,13 @@ public class SplashscreenContentDrawer {
                 animationDuration = 0;
                 mFinalIconSize = 0;
             } else if (mTmpAttrs.mSplashScreenIcon != null) {
-                // replaced icon, don't process
+                // Using the windowSplashScreenAnimatedIcon attribute
                 iconDrawable = mTmpAttrs.mSplashScreenIcon;
                 animationDuration = mTmpAttrs.mAnimationDuration;
 
                 // There is no background below the icon, so scale the icon up
-                if (mTmpAttrs.mIconBgColor == Color.TRANSPARENT) {
+                if (mTmpAttrs.mIconBgColor == Color.TRANSPARENT
+                        || mTmpAttrs.mIconBgColor == mThemeColor) {
                     mFinalIconSize *= NO_BACKGROUND_SCALE;
                 }
                 createIconDrawable(iconDrawable, false);
@@ -382,7 +384,7 @@ public class SplashscreenContentDrawer {
                 animationDuration = 0;
             }
 
-            return fillViewWithIcon(mFinalIconSize, mFinalIconDrawable, animationDuration);
+            return fillViewWithIcon(mFinalIconSize, mFinalIconDrawables, animationDuration);
         }
 
         private class ShapeIconFactory extends BaseIconFactory {
@@ -393,12 +395,11 @@ public class SplashscreenContentDrawer {
 
         private void createIconDrawable(Drawable iconDrawable, boolean legacy) {
             if (legacy) {
-                mFinalIconDrawable = SplashscreenIconDrawableFactory.makeLegacyIconDrawable(
+                mFinalIconDrawables = SplashscreenIconDrawableFactory.makeLegacyIconDrawable(
                         iconDrawable, mDefaultIconSize, mFinalIconSize, mSplashscreenWorkerHandler);
             } else {
-                mFinalIconDrawable = SplashscreenIconDrawableFactory.makeIconDrawable(
-                        mTmpAttrs.mIconBgColor != Color.TRANSPARENT
-                                ? mTmpAttrs.mIconBgColor : mThemeColor,
+                mFinalIconDrawables = SplashscreenIconDrawableFactory.makeIconDrawable(
+                        mTmpAttrs.mIconBgColor, mThemeColor,
                         iconDrawable, mDefaultIconSize, mFinalIconSize, mSplashscreenWorkerHandler);
             }
         }
@@ -459,18 +460,24 @@ public class SplashscreenContentDrawer {
             return true;
         }
 
-        private SplashScreenView fillViewWithIcon(int iconSize, Drawable iconDrawable,
+        private SplashScreenView fillViewWithIcon(int iconSize, @Nullable Drawable[] iconDrawable,
                 int animationDuration) {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "fillViewWithIcon");
-            final SplashScreenView.Builder builder = new SplashScreenView.Builder(mContext);
-            builder.setBackgroundColor(mThemeColor);
-            builder.setOverlayDrawable(mOverlayDrawable);
+            Drawable foreground = null;
+            Drawable background = null;
             if (iconDrawable != null) {
-                builder.setIconSize(iconSize)
-                        .setIconBackground(mTmpAttrs.mIconBgColor)
-                        .setCenterViewDrawable(iconDrawable)
-                        .setAnimationDurationMillis(animationDuration);
+                foreground = iconDrawable.length > 0 ? iconDrawable[0] : null;
+                background = iconDrawable.length > 1 ? iconDrawable[1] : null;
             }
+
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "fillViewWithIcon");
+            final SplashScreenView.Builder builder = new SplashScreenView.Builder(mContext)
+                    .setBackgroundColor(mThemeColor)
+                    .setOverlayDrawable(mOverlayDrawable)
+                    .setIconSize(iconSize)
+                    .setIconBackground(background)
+                    .setCenterViewDrawable(foreground)
+                    .setAnimationDurationMillis(animationDuration);
+
             if (mSuggestType == STARTING_WINDOW_TYPE_SPLASH_SCREEN
                     && mTmpAttrs.mBrandingImage != null) {
                 builder.setBrandingDrawable(mTmpAttrs.mBrandingImage, mBrandingImageWidth,
