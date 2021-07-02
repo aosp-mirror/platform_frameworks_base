@@ -1047,8 +1047,16 @@ package android.graphics.fonts {
 package android.hardware {
 
   public final class SensorPrivacyManager {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacyForProfileGroup(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacyForProfileGroup(int, int, boolean);
+  }
+
+  public static class SensorPrivacyManager.Sources {
+    field public static final int DIALOG = 3; // 0x3
+    field public static final int OTHER = 5; // 0x5
+    field public static final int QS_TILE = 1; // 0x1
+    field public static final int SETTINGS = 2; // 0x2
+    field public static final int SHELL = 4; // 0x4
   }
 
 }

@@ -21,6 +21,7 @@ import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors.Sensor;
+import android.hardware.SensorPrivacyManager.Sources.Source;
 import android.util.ArraySet;
 import android.util.SparseBooleanArray;
 
@@ -62,8 +63,8 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
     }
 
     @Override
-    public void setSensorBlocked(@Sensor int sensor, boolean blocked) {
-        mSensorPrivacyManager.setSensorPrivacyForProfileGroup(sensor, blocked);
+    public void setSensorBlocked(@Source int source, @Sensor int sensor, boolean blocked) {
+        mSensorPrivacyManager.setSensorPrivacyForProfileGroup(source, sensor, blocked);
     }
 
     @Override

@@ -36,8 +36,25 @@ import static android.hardware.SensorPrivacyManager.EXTRA_ALL_SENSORS;
 import static android.hardware.SensorPrivacyManager.EXTRA_SENSOR;
 import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
+import static android.hardware.SensorPrivacyManager.Sources.DIALOG;
+import static android.hardware.SensorPrivacyManager.Sources.OTHER;
+import static android.hardware.SensorPrivacyManager.Sources.QS_TILE;
+import static android.hardware.SensorPrivacyManager.Sources.SETTINGS;
+import static android.hardware.SensorPrivacyManager.Sources.SHELL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.UNKNOWN;
+
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_OFF;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_ON;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__CAMERA;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__MICROPHONE;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__SENSOR_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__DIALOG;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__QS_TILE;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__SETTINGS;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__SOURCE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.write;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -287,12 +304,14 @@ public final class SensorPrivacyService extends SystemService {
             mAppOpsManager.startWatchingNoted(micAndCameraOps, this);
             mAppOpsManager.startWatchingStarted(micAndCameraOps, this);
 
+
+
             mContext.registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     setIndividualSensorPrivacy(
                             ((UserHandle) intent.getParcelableExtra(
-                                    Intent.EXTRA_USER)).getIdentifier(),
+                                    Intent.EXTRA_USER)).getIdentifier(), OTHER,
                             intent.getIntExtra(EXTRA_SENSOR, UNKNOWN), false);
                 }
             }, new IntentFilter(ACTION_DISABLE_INDIVIDUAL_SENSOR_PRIVACY),
@@ -627,10 +646,15 @@ public final class SensorPrivacyService extends SystemService {
         }
 
         @Override
-        public void setIndividualSensorPrivacy(@UserIdInt int userId, int sensor, boolean enable) {
+        public void setIndividualSensorPrivacy(@UserIdInt int userId,
+                @SensorPrivacyManager.Sources.Source int source, int sensor, boolean enable) {
             enforceManageSensorPrivacyPermission();
             if (!canChangeIndividualSensorPrivacy(userId, sensor)) {
                 return;
+            }
+
+            if (userId == mUserManagerInternal.getProfileParentId(userId)) {
+                logSensorPrivacyToggle(source, sensor, enable);
             }
 
             setIndividualSensorPrivacyUnchecked(userId, sensor, enable);
@@ -686,14 +710,56 @@ public final class SensorPrivacyService extends SystemService {
             return true;
         }
 
+        private void logSensorPrivacyToggle(int source, int sensor, boolean enable) {
+            long logMins = 0L;
+            //(TODO:pyuli) : Add timestamp after persistent storage for timestamp is done.
+
+            int logAction = -1;
+            if (enable) {
+                logAction = PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_OFF;
+            } else {
+                logAction = PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_ON;
+            }
+
+            int logSensor = -1;
+            switch(sensor) {
+                case CAMERA:
+                    logSensor = PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__CAMERA;
+                    break;
+                case MICROPHONE:
+                    logSensor = PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__MICROPHONE;
+                    break;
+                default:
+                    logSensor = PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__SENSOR_UNKNOWN;
+            }
+
+            int logSource = -1;
+            switch(source) {
+                case QS_TILE :
+                    logSource = PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__QS_TILE;
+                    break;
+                case DIALOG :
+                    logSource = PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__DIALOG;
+                    break;
+                case SETTINGS:
+                    logSource = PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__SETTINGS;
+                    break;
+                default:
+                    logSource = PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__SOURCE_UNKNOWN;
+            }
+
+            write(PRIVACY_SENSOR_TOGGLE_INTERACTION, logSensor, logAction, logSource, logMins);
+
+        }
+
         @Override
-        public void setIndividualSensorPrivacyForProfileGroup(@UserIdInt int userId, int sensor,
-                boolean enable) {
+        public void setIndividualSensorPrivacyForProfileGroup(@UserIdInt int userId,
+                @SensorPrivacyManager.Sources.Source int source, int sensor, boolean enable) {
             enforceManageSensorPrivacyPermission();
             int parentId = mUserManagerInternal.getProfileParentId(userId);
             forAllUsers(userId2 -> {
                 if (parentId == mUserManagerInternal.getProfileParentId(userId2)) {
-                    setIndividualSensorPrivacy(userId2, sensor, enable);
+                    setIndividualSensorPrivacy(userId2, source, sensor, enable);
                 }
             });
         }
@@ -1214,7 +1280,7 @@ public final class SensorPrivacyService extends SystemService {
                                 return -1;
                             }
 
-                            setIndividualSensorPrivacy(userId, sensor, true);
+                            setIndividualSensorPrivacy(userId, SHELL, sensor, true);
                         }
                         break;
                         case "disable" : {
@@ -1224,7 +1290,7 @@ public final class SensorPrivacyService extends SystemService {
                                 return -1;
                             }
 
-                            setIndividualSensorPrivacy(userId, sensor, false);
+                            setIndividualSensorPrivacy(userId, SHELL, sensor, false);
                         }
                         break;
                         case "reset": {
