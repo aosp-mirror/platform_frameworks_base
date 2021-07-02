@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -306,17 +307,19 @@ public abstract class ApexManager {
     /**
      * Reports error raised during installation of apk-in-apex.
      *
-     * @param scanDir the directory of the apex inside which apk-in-apex resides.
+     * @param scanDirPath the directory of the apex inside which apk-in-apex resides.
+     * @param errorMsg the actual error that occurred when scanning the path
      */
-    abstract void reportErrorWithApkInApex(String scanDirPath);
+    abstract void reportErrorWithApkInApex(String scanDirPath, String errorMsg);
 
     /**
-     * Returns true if there were no errors when installing apk-in-apex inside
-     * {@param apexPackageName}, otherwise false.
+     * Returns null if there were no errors when installing apk-in-apex inside
+     * {@param apexPackageName}, otherwise returns the error as string
      *
      * @param apexPackageName Package name of the apk container of apex
      */
-    abstract boolean isApkInApexInstallSuccess(String apexPackageName);
+    @Nullable
+    abstract String getApkInApexInstallError(String apexPackageName);
 
     /**
      * Returns list of {@code packageName} of apks inside the given apex.
@@ -438,7 +441,7 @@ public abstract class ApexManager {
          * inside {@code apexModuleName}.
          */
         @GuardedBy("mLock")
-        private Set<String> mErrorWithApkInApex = new ArraySet<>();
+        private Map<String, String> mErrorWithApkInApex = new ArrayMap<>();
 
         @GuardedBy("mLock")
         private List<PackageInfo> mAllPackagesCache;
@@ -841,26 +844,27 @@ public abstract class ApexManager {
         }
 
         @Override
-        void reportErrorWithApkInApex(String scanDirPath) {
+        void reportErrorWithApkInApex(String scanDirPath, String errorMsg) {
             synchronized (mLock) {
                 for (ActiveApexInfo aai : mActiveApexInfosCache) {
                     if (scanDirPath.startsWith(aai.apexDirectory.getAbsolutePath())) {
-                        mErrorWithApkInApex.add(aai.apexModuleName);
+                        mErrorWithApkInApex.put(aai.apexModuleName, errorMsg);
                     }
                 }
             }
         }
 
         @Override
-        boolean isApkInApexInstallSuccess(String apexPackageName) {
+        @Nullable
+        String getApkInApexInstallError(String apexPackageName) {
             synchronized (mLock) {
                 Preconditions.checkState(mPackageNameToApexModuleName != null,
                         "APEX packages have not been scanned");
                 String moduleName = mPackageNameToApexModuleName.get(apexPackageName);
                 if (moduleName == null) {
-                    return false;
+                    return null;
                 }
-                return !mErrorWithApkInApex.contains(moduleName);
+                return mErrorWithApkInApex.get(moduleName);
             }
         }
 
@@ -1273,13 +1277,14 @@ public abstract class ApexManager {
         }
 
         @Override
-        void reportErrorWithApkInApex(String scanDirPath) {
+        void reportErrorWithApkInApex(String scanDirPath, String errorMsg) {
             // No-op
         }
 
         @Override
-        boolean isApkInApexInstallSuccess(String apexPackageName) {
-            return true;
+        @Nullable
+        String getApkInApexInstallError(String apexPackageName) {
+            return null;
         }
 
         @Override
