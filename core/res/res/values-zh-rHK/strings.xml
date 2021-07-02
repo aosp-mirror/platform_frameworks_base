@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS 服務"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"感應器通知服務"</string>
     <string name="twilight_service" msgid="8964898045693187224">"暮光服務"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"時區偵測器 (沒有連線)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 時間更新服務"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"音樂識別管理員服務"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"您的裝置將被清除"</string>
@@ -1483,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"拒絕"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"已要求權限"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> 帳戶的\n權限要求。"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"「<xliff:g id="APP">%1$s</xliff:g>」要求帳戶 <xliff:g id="ACCOUNT">%2$s</xliff:g>\n的權限"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"您目前並未透過公司檔案使用這個應用程式"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"您目前透過公司檔案使用這個應用程式"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"輸入法"</string>
