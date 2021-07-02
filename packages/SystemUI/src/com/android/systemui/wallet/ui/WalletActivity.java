@@ -34,6 +34,7 @@ import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
@@ -70,6 +71,7 @@ public class WalletActivity extends LifecycleActivity implements
     private final UserTracker mUserTracker;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final StatusBarKeyguardViewManager mKeyguardViewManager;
+    private final UiEventLogger mUiEventLogger;
 
     private KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback;
     private WalletScreenController mWalletScreenController;
@@ -87,7 +89,8 @@ public class WalletActivity extends LifecycleActivity implements
             FalsingCollector falsingCollector,
             UserTracker userTracker,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            StatusBarKeyguardViewManager keyguardViewManager) {
+            StatusBarKeyguardViewManager keyguardViewManager,
+            UiEventLogger uiEventLogger) {
         mKeyguardStateController = keyguardStateController;
         mKeyguardDismissUtil = keyguardDismissUtil;
         mActivityStarter = activityStarter;
@@ -98,6 +101,7 @@ public class WalletActivity extends LifecycleActivity implements
         mUserTracker = userTracker;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardViewManager = keyguardViewManager;
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
@@ -129,7 +133,8 @@ public class WalletActivity extends LifecycleActivity implements
                 mUserTracker,
                 mFalsingManager,
                 mKeyguardUpdateMonitor,
-                mKeyguardStateController);
+                mKeyguardStateController,
+                mUiEventLogger);
         mKeyguardUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
             @Override
             public void onBiometricRunningStateChanged(
@@ -153,11 +158,14 @@ public class WalletActivity extends LifecycleActivity implements
                     }
 
                     if (mKeyguardStateController.isUnlocked()) {
+                        mUiEventLogger.log(WalletUiEvent.QAW_SHOW_ALL);
                         mActivityStarter.startActivity(
                                 mWalletClient.createWalletIntent(), true);
                         finish();
                     } else {
+                        mUiEventLogger.log(WalletUiEvent.QAW_UNLOCK_FROM_SHOW_ALL_BUTTON);
                         mKeyguardDismissUtil.executeWhenUnlocked(() -> {
+                            mUiEventLogger.log(WalletUiEvent.QAW_SHOW_ALL);
                             mActivityStarter.startActivity(
                                     mWalletClient.createWalletIntent(), true);
                             finish();
@@ -175,6 +183,7 @@ public class WalletActivity extends LifecycleActivity implements
                         return;
                     }
 
+                    mUiEventLogger.log(WalletUiEvent.QAW_UNLOCK_FROM_UNLOCK_BUTTON);
                     mKeyguardDismissUtil.executeWhenUnlocked(() -> false, false,
                             false);
                 });
