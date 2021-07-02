@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Servizio GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Servizio di notifica dei sensori"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Servizio Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Rilevatore di fuso orario (connessione a Internet non necessaria)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Servizio di aggiornamento dell\'orario GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Servizio di gestione del riconoscimento della musica"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Il dispositivo verrà resettato"</string>
@@ -253,9 +252,9 @@
     <string name="global_action_screenshot" msgid="2610053466156478564">"Screenshot"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Segnalazione di bug"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Verranno raccolte informazioni sullo stato corrente del dispositivo che saranno inviate sotto forma di messaggio email. Passerà un po\' di tempo prima che la segnalazione di bug aperta sia pronta per essere inviata; ti preghiamo di avere pazienza."</string>
-    <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Rapporto interattivo"</string>
+    <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Report interattivo"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilizza questa opzione nella maggior parte dei casi. Ti consente di monitorare l\'avanzamento della segnalazione, di inserire maggiori dettagli relativi al problema e di acquisire screenshot. Potrebbero essere omesse alcune sezioni meno utilizzate il cui inserimento nella segnalazione richiede molto tempo."</string>
-    <string name="bugreport_option_full_title" msgid="7681035745950045690">"Rapporto completo"</string>
+    <string name="bugreport_option_full_title" msgid="7681035745950045690">"Report completo"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utilizza questa opzione per ridurre al minimo l\'interferenza di sistema quando il dispositivo non risponde, è troppo lento oppure quando ti servono tutte le sezioni della segnalazione. Non puoi inserire altri dettagli o acquisire altri screenshot."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
       <item quantity="other">Lo screenshot per la segnalazione di bug verrà acquisito tra <xliff:g id="NUMBER_1">%d</xliff:g> secondi.</item>
@@ -1484,6 +1483,7 @@
     <string name="deny" msgid="6632259981847676572">"Rifiuta"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Autorizzazione richiesta"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Autorizzazione richiesta\nper l\'account <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Autorizzazione richiesta da <xliff:g id="APP">%1$s</xliff:g>\nper l\'account <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Stai utilizzando l\'app al di fuori del tuo profilo di lavoro"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Stai utilizzando l\'app nel tuo profilo di lavoro"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Metodo inserimento"</string>
