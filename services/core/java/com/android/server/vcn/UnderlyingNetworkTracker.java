@@ -460,6 +460,10 @@ public class UnderlyingNetworkTracker {
         private final Map<Network, UnderlyingNetworkRecord.Builder>
                 mUnderlyingNetworkRecordBuilders = new ArrayMap<>();
 
+        UnderlyingNetworkListener() {
+            super(NetworkCallback.FLAG_INCLUDE_LOCATION_INFO);
+        }
+
         private TreeSet<UnderlyingNetworkRecord> getSortedUnderlyingNetworks() {
             TreeSet<UnderlyingNetworkRecord> sorted =
                     new TreeSet<>(
