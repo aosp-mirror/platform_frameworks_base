@@ -44,6 +44,10 @@ public:
         mWebViewHandle->sync(data);
     }
 
+    virtual void onRemovedFromTree() {
+        mWebViewHandle->onRemovedFromTree();
+    }
+
 protected:
     virtual SkRect onGetBounds() override { return mBounds; }
 

@@ -58,6 +58,8 @@ public:
 
         void removeOverlays() { mReference.removeOverlays(); }
 
+        void onRemovedFromTree() { mReference.onRemovedFromTree(); }
+
     private:
         friend class WebViewFunctor;
 
@@ -74,6 +76,7 @@ public:
     void postDrawVk();
     void destroyContext();
     void removeOverlays();
+    void onRemovedFromTree();
 
     ASurfaceControl* getSurfaceControl();
     void mergeTransaction(ASurfaceTransaction* transaction);
