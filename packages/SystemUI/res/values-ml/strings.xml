@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"എല്ലാം കാണിക്കുക"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"പണമടയ്‌ക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"സജ്ജീകരിച്ചിട്ടില്ല"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ഉപയോഗിക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"നിങ്ങളുടെ കാർഡുകൾ ലഭ്യമാക്കുന്നതിൽ ഒരു പ്രശ്‌നമുണ്ടായി, പിന്നീട് വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ലോക്ക് സ്ക്രീൻ ക്രമീകരണം"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"സംഭാഷണം തുറക്കുക"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"സംഭാഷണ വിജറ്റുകൾ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"നിങ്ങളുടെ ഹോം സ്‌ക്രീനിൽ ചേർക്കാൻ സംഭാഷണത്തിൽ ടാപ്പ് ചെയ്യുക"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"നിങ്ങളുടെ സമീപകാല സംഭാഷണങ്ങൾ ഇവിടെ ദൃശ്യമാകും"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"മുൻഗണനാ സംഭാഷണങ്ങൾ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"അടുത്തിടെയുള്ള സംഭാഷണങ്ങൾ"</string>
     <string name="okay" msgid="6490552955618608554">"ശരി"</string>

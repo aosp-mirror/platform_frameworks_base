@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"అన్నింటినీ చూపు"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"పే చేయడానికి అన్‌లాక్ చేయండి"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"సెటప్ చేయలేదు"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"మీ కార్డ్‌లను పొందడంలో సమస్య ఉంది, దయచేసి తర్వాత మళ్లీ ట్రై చేయండి"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"లాక్ స్క్రీన్ సెట్టింగ్‌లు"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"సంభాషణను తెరవండి"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"సంభాషణ విడ్జెట్‌లు"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"దీనిని మీ మొదటి స్క్రీన్‌కు జోడించడానికి సంభాషణను ట్యాప్ చేయండి"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"మీ ఇటీవలి సంభాషణలు ఇక్కడ కనిపిస్తాయి"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ప్రాధాన్య సంభాషణలు"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ఇటీవలి సంభాషణలు"</string>
     <string name="okay" msgid="6490552955618608554">"సరే"</string>

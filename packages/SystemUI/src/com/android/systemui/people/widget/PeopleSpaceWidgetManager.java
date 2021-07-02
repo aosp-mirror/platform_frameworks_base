@@ -106,6 +106,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -398,7 +399,7 @@ public class PeopleSpaceWidgetManager {
             ConversationChannel channel = mIPeopleManager.getConversation(
                     key.getPackageName(), key.getUserId(), key.getShortcutId());
             if (channel == null) {
-                Log.d(TAG, "Could not retrieve conversation from storage");
+                if (DEBUG) Log.d(TAG, "Could not retrieve conversation from storage");
                 return null;
             }
 
@@ -585,7 +586,7 @@ public class PeopleSpaceWidgetManager {
     @Nullable
     public Optional<PeopleSpaceTile> getAugmentedTileForExistingWidget(int widgetId,
             Map<PeopleTileKey, Set<NotificationEntry>> notifications) {
-        Log.d(TAG, "Augmenting tile for existing widget: " + widgetId);
+        if (DEBUG) Log.d(TAG, "Augmenting tile for existing widget: " + widgetId);
         PeopleSpaceTile tile = getTileForExistingWidget(widgetId);
         if (tile == null) {
             if (DEBUG) {
@@ -1246,9 +1247,13 @@ public class PeopleSpaceWidgetManager {
     /** Remaps widget ids in widget specific files. */
     public void remapWidgetFiles(Map<String, String> widgets) {
         if (DEBUG) Log.d(TAG, "Remapping widget files");
+        Map<String, PeopleTileKey> remapped = new HashMap<>();
         for (Map.Entry<String, String> entry : widgets.entrySet()) {
             String from = String.valueOf(entry.getKey());
             String to = String.valueOf(entry.getValue());
+            if (Objects.equals(from, to)) {
+                continue;
+            }
 
             SharedPreferences src = mContext.getSharedPreferences(from, Context.MODE_PRIVATE);
             PeopleTileKey key = SharedPreferencesHelper.getPeopleTileKey(src);
@@ -1257,10 +1262,16 @@ public class PeopleSpaceWidgetManager {
                     Log.d(TAG, "Moving PeopleTileKey: " + key.toString() + " from file: "
                             + from + ", to file: " + to);
                 }
-                SharedPreferences dest = mContext.getSharedPreferences(to, Context.MODE_PRIVATE);
-                SharedPreferencesHelper.setPeopleTileKey(dest, key);
+                remapped.put(to, key);
                 SharedPreferencesHelper.clear(src);
+            } else {
+                if (DEBUG) Log.d(TAG, "Widget file has invalid key: " + key);
             }
+        }
+        for (Map.Entry<String, PeopleTileKey> entry : remapped.entrySet()) {
+            SharedPreferences dest = mContext.getSharedPreferences(
+                    entry.getKey(), Context.MODE_PRIVATE);
+            SharedPreferencesHelper.setPeopleTileKey(dest, entry.getValue());
         }
     }
 

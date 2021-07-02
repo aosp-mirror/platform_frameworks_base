@@ -254,7 +254,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private void applyKeyguardFlags(State state) {
         final boolean scrimsOccludingWallpaper =
-                state.mScrimsVisibility == ScrimController.OPAQUE;
+                state.mScrimsVisibility == ScrimController.OPAQUE || state.mLightRevealScrimOpaque;
         final boolean keyguardOrAod = state.mKeyguardShowing
                 || (state.mDozing && mDozeParameters.getAlwaysOn());
         if ((keyguardOrAod && !state.mBackdropShowing && !scrimsOccludingWallpaper)
@@ -570,6 +570,16 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @Override
+    public void setLightRevealScrimAmount(float amount) {
+        boolean lightRevealScrimOpaque = amount == 0;
+        if (mCurrentState.mLightRevealScrimOpaque == lightRevealScrimOpaque) {
+            return;
+        }
+        mCurrentState.mLightRevealScrimOpaque = lightRevealScrimOpaque;
+        apply(mCurrentState);
+    }
+
+    @Override
     public void setWallpaperSupportsAmbientMode(boolean supportsAmbientMode) {
         mCurrentState.mWallpaperSupportsAmbientMode = supportsAmbientMode;
         apply(mCurrentState);
@@ -734,6 +744,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         boolean mKeyguardGoingAway;
         boolean mQsExpanded;
         boolean mHeadsUpShowing;
+        boolean mLightRevealScrimOpaque;
         boolean mForceCollapsed;
         boolean mForceDozeBrightness;
         int mFaceAuthDisplayBrightness;
