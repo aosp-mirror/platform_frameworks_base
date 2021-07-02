@@ -40,6 +40,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingCollector;
 
 import java.util.List;
 
@@ -68,6 +69,7 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     private boolean mIsUdfpsEnabled = false;
     private OnClickListener mDeviceLockedActionOnClickListener;
     private OnClickListener mShowWalletAppOnClickListener;
+    private FalsingCollector mFalsingCollector;
 
     public WalletView(Context context) {
         this(context, null);
@@ -328,5 +330,24 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     private static CharSequence getActionButtonText(WalletCardViewInfo card) {
         String[] rawLabel = card.getLabel().toString().split("\\n");
         return rawLabel.length == 2 ? rawLabel[1] : null;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (mFalsingCollector != null) {
+            mFalsingCollector.onTouchEvent(ev);
+        }
+
+        boolean result = super.dispatchTouchEvent(ev);
+
+        if (mFalsingCollector != null) {
+            mFalsingCollector.onMotionEventComplete();
+        }
+
+        return result;
+    }
+
+    public void setFalsingCollector(FalsingCollector falsingCollector) {
+        mFalsingCollector = falsingCollector;
     }
 }
