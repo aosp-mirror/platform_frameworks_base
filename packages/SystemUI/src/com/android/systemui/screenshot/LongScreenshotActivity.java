@@ -80,6 +80,7 @@ public class LongScreenshotActivity extends Activity {
     private View mSave;
     private View mEdit;
     private View mShare;
+    private View mDelete;
     private CropView mCropView;
     private MagnifierView mMagnifierView;
     private ScrollCaptureResponse mScrollCaptureResponse;
@@ -120,17 +121,23 @@ public class LongScreenshotActivity extends Activity {
         mSave = requireViewById(R.id.save);
         mEdit = requireViewById(R.id.edit);
         mShare = requireViewById(R.id.share);
+        mDelete = requireViewById(R.id.delete);
         mCropView = requireViewById(R.id.crop_view);
         mMagnifierView = requireViewById(R.id.magnifier);
         mCropView.setCropInteractionListener(mMagnifierView);
         mTransitionView = requireViewById(R.id.transition);
         mEnterTransitionView = requireViewById(R.id.enter_transition);
 
-        requireViewById(R.id.cancel).setOnClickListener(v -> finishAndRemoveTask());
-
         mSave.setOnClickListener(this::onClicked);
         mEdit.setOnClickListener(this::onClicked);
         mShare.setOnClickListener(this::onClicked);
+
+        // Only show the delete button if we have something to delete (should typically be the case)
+        if (getIntent().getData() != null) {
+            mDelete.setOnClickListener(this::onClicked);
+        } else {
+            mDelete.setVisibility(View.GONE);
+        }
 
         mPreview.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
@@ -321,6 +328,7 @@ public class LongScreenshotActivity extends Activity {
         mSave.setEnabled(enabled);
         mEdit.setEnabled(enabled);
         mShare.setEnabled(enabled);
+        mDelete.setEnabled(enabled);
     }
 
     private void doEdit(Uri uri) {
@@ -368,6 +376,11 @@ public class LongScreenshotActivity extends Activity {
         } else if (id == R.id.share) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_SHARE);
             startExport(PendingAction.SHARE);
+        } else if (id == R.id.delete) {
+            mBackgroundExecutor.execute(() -> {
+                getContentResolver().delete(getIntent().getData(), null);
+                finishAndRemoveTask();
+            });
         }
     }
 
