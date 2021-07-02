@@ -429,7 +429,7 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"기기에 색상이 표시되는 방식을 조정합니다. 다음과 같은 상황에서 유용합니다.&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;색상을 더욱 정확하게 보고 싶을 때&lt;/li&gt; &lt;li&gt;&amp;nbsp;집중을 위해 색상을 제거하고 싶을 때&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>, <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간: 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"남은 시간 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"내 사용량을 기준으로 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> 남음"</string>
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"내 사용량(<xliff:g id="LEVEL">%2$s</xliff:g>)을 기준으로 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> 남음"</string>
@@ -568,12 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"게스트 삭제"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"게스트 재설정"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"게스트"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8047270010895437534) -->
-    <skip />
-    <!-- no translation found for guest_reset_guest_confirm_button (2989915693215617237) -->
-    <skip />
-    <!-- no translation found for guest_resetting (7822120170191509566) -->
-    <skip />
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"게스트를 재설정하시겠습니까?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"재설정"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"게스트 재설정 중…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"사진 찍기"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"이미지 선택"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"사진 선택"</string>
