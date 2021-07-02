@@ -334,11 +334,18 @@ public class LongScreenshotActivity extends Activity {
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
         mTransitionView.setImageBitmap(mOutputBitmap);
-        mTransitionView.setVisibility(View.VISIBLE);
         mTransitionView.setTransitionName(
                 ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME);
         // TODO: listen for transition completing instead of finishing onStop
         mTransitionStarted = true;
+        int[] locationOnScreen = new int[2];
+        mTransitionView.getLocationOnScreen(locationOnScreen);
+        int[] locationInWindow = new int[2];
+        mTransitionView.getLocationInWindow(locationInWindow);
+        int deltaX = locationOnScreen[0] - locationInWindow[0];
+        int deltaY = locationOnScreen[1] - locationInWindow[1];
+        mTransitionView.setX(mTransitionView.getX() - deltaX);
+        mTransitionView.setY(mTransitionView.getY() - deltaY);
         startActivity(intent,
                 ActivityOptions.makeSceneTransitionAnimation(this, mTransitionView,
                         ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle());
