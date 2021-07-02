@@ -2004,6 +2004,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return mFragmentToken;
     }
 
+    @Nullable
+    @VisibleForTesting
+    ITaskFragmentOrganizer getTaskFragmentOrganizer() {
+        return mTaskFragmentOrganizer;
+    }
+
     /** Clear {@link #mLastPausedActivity} for all {@link TaskFragment} children */
     void clearLastPausedActivity() {
         forAllTaskFragments(taskFragment -> taskFragment.mLastPausedActivity = null);
