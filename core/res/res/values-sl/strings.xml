@@ -1453,6 +1453,8 @@
     <string name="deny" msgid="6632259981847676572">"Zavrni"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Zahtevano je dovoljenje"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Zahtevano je dovoljenje\nza račun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Aplikacijo uporabljate zunaj delovnega profila"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"To aplikacijo uporabljate v delovnem profilu"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Način vnosa"</string>

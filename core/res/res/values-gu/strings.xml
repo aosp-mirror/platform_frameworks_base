@@ -1413,6 +1413,8 @@
     <string name="deny" msgid="6632259981847676572">"નકારો"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"પરવાનગીની વિનંતી કરી"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"એકાઉન્ટ <xliff:g id="ACCOUNT">%s</xliff:g> માટે\nપરવાનગીની વિનંતી કરી."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"તમે તમારી કાર્ય પ્રોફાઇલની બહાર આ એપ્લિકેશનનો ઉપયોગ કરી રહ્યાં છો"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"તમે તમારી કાર્ય પ્રોફાઇલમાં આ એપ્લિકેશનનો ઉપયોગ કરી રહ્યાં છો"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ઇનપુટ પદ્ધતિ"</string>
