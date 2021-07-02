@@ -211,7 +211,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi\'га туташканда, мүчүлүштүктөрдү аныктоо режими иштейт оңдоо режими"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Ката"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Жеткиликтүү түзмөктөрдү көрүү үчүн, мүчүлүштүктөрдү Wi-Fi аркылуу аныктоону күйгүзүңүз"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Жеткиликтүү түзмөктөрдү көрүү үчүн мүчүлүштүктөрдү Wi-Fi аркылуу аныктоону күйгүзүңүз"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Түзмөктү QR коду аркылуу жупташтыруу"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR кодунун сканерин колдонуп, жаңы түзмөктөрдү жупташтырыңыз"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Түзмөктү атайын код аркылуу жупташтыруу"</string>
@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Конокту өчүрүү"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Конок сеансын баштапкы абалга келтирүү"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Конок"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Конок сеансын баштапкы абалга келтиресизби?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Баштапкы абалга келтирүү"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Конок сеансы баштапкы абалга келтирилүүдө…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сүрөткө тартуу"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Сүрөт тандаңыз"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Сүрөт тандаңыз"</string>

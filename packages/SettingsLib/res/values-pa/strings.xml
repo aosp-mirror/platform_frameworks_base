@@ -456,7 +456,7 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - ਬੈਟਰੀ ਪੂਰੀ ਚਾਰਜ ਹੋਣ ਵਿੱਚ <xliff:g id="TIME">%2$s</xliff:g> ਬਾਕੀ"</string>
     <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - ਚਾਰਜਿੰਗ ਕੁਝ ਸਮੇਂ ਲਈ ਰੋਕੀ ਗਈ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ਅਗਿਆਤ"</string>
-    <string name="battery_info_status_charging" msgid="4279958015430387405">"ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
+    <string name="battery_info_status_charging" msgid="4279958015430387405">"ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ਤੇਜ਼ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"ਬਿਨਾਂ ਤਾਰ ਤੋਂ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
@@ -566,8 +566,11 @@
     <string name="user_nickname" msgid="262624187455825083">"ਉਪਨਾਮ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ਮਹਿਮਾਨ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ਮਹਿਮਾਨ ਹਟਾਓ"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"ਗੈਸਟ ਰੀਸੈੱਟ ਕਰੋ"</string>
+    <string name="guest_reset_guest" msgid="6110013010356013758">"ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਨੂੰ ਰੀਸੈੱਟ ਕਰੋ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ਮਹਿਮਾਨ"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"ਕੀ ਮਹਿਮਾਨ ਨੂੰ ਰੀਸੈੱਟ ਕਰਨਾ ਹੈ?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ਰੀਸੈੱਟ ਕਰੋ"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"ਮਹਿਮਾਨ ਨੂੰ ਰੀਸੈੱਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ਇੱਕ ਫ਼ੋਟੋ ਖਿੱਚੋ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ਕੋਈ ਚਿੱਤਰ ਚੁਣੋ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ਫ਼ੋਟੋ ਚੁਣੋ"</string>

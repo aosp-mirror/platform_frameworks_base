@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"අමුත්තා ඉවත් කරන්න"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ආගන්තුකයා යළි සකසන්න"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"අමුත්තා"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"අමුත්තා යළි සකසන්නද?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"යළි සකසන්න"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"අමුත්තා යළි සකසමින්…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ඡායාරූපයක් ගන්න"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"රූපයක් තෝරන්න"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ඡායාරූපය තෝරන්න"</string>

@@ -456,11 +456,11 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - នៅសល់ <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើបពេញ"</string>
     <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - បានដាក់កម្រិត​ការសាកថ្ម​ជាបណ្ដោះអាសន្ន"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"មិន​ស្គាល់"</string>
-    <string name="battery_info_status_charging" msgid="4279958015430387405">"កំពុងបញ្ចូល​ថ្ម"</string>
+    <string name="battery_info_status_charging" msgid="4279958015430387405">"កំពុងសាក​ថ្ម"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"កំពុងសាកថ្មយ៉ាងឆាប់រហ័ស"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"កំពុង​សាកថ្មយឺត"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"កំពុង​សាកថ្ម​ឥតខ្សែ"</string>
-    <string name="battery_info_status_discharging" msgid="6962689305413556485">"មិនកំពុង​បញ្ចូល​ថ្ម"</string>
+    <string name="battery_info_status_discharging" msgid="6962689305413556485">"មិនកំពុង​សាក​ថ្ម"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"បានភ្ជាប់ មិនកំពុង​សាកថ្ម"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"បាន​សាក​ថ្មពេញ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"គ្រប់គ្រងដោយអ្នកគ្រប់គ្រង"</string>
@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"ដកភ្ញៀវចេញ"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"កំណត់​ភ្ញៀវឡើង​វិញ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ភ្ញៀវ"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"កំណត់​ភ្ញៀវឡើង​វិញឬ?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"កំណត់​ឡើងវិញ"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"កំពុងកំណត់​ភ្ញៀវឡើងវិញ…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ថតរូប"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ជ្រើសរើស​រូបភាព"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ជ្រើសរើស​​រូបថត"</string>
