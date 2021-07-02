@@ -38,6 +38,7 @@ import com.android.systemui.R;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -121,8 +122,8 @@ public interface StatusBarIconController {
         private final DarkIconDispatcher mDarkIconDispatcher;
         private int mIconHPadding;
 
-        public DarkIconManager(LinearLayout linearLayout) {
-            super(linearLayout);
+        public DarkIconManager(LinearLayout linearLayout, FeatureFlags featureFlags) {
+            super(linearLayout, featureFlags);
             mIconHPadding = mContext.getResources().getDimensionPixelSize(
                     R.dimen.status_bar_icon_padding);
             mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
@@ -182,8 +183,8 @@ public interface StatusBarIconController {
     class TintedIconManager extends IconManager {
         private int mColor;
 
-        public TintedIconManager(ViewGroup group) {
-            super(group);
+        public TintedIconManager(ViewGroup group, FeatureFlags featureFlags) {
+            super(group, featureFlags);
         }
 
         @Override
@@ -218,6 +219,7 @@ public interface StatusBarIconController {
      * Turns info from StatusBarIconController into ImageViews in a ViewGroup.
      */
     class IconManager implements DemoModeCommandReceiver {
+        private final FeatureFlags mFeatureFlags;
         protected final ViewGroup mGroup;
         protected final Context mContext;
         protected final int mIconSize;
@@ -231,7 +233,8 @@ public interface StatusBarIconController {
 
         protected ArrayList<String> mBlockList = new ArrayList<>();
 
-        public IconManager(ViewGroup group) {
+        public IconManager(ViewGroup group, FeatureFlags featureFlags) {
+            mFeatureFlags = featureFlags;
             mGroup = group;
             mContext = group.getContext();
             mIconSize = mContext.getResources().getDimensionPixelSize(
@@ -332,7 +335,8 @@ public interface StatusBarIconController {
         }
 
         private StatusBarMobileView onCreateStatusBarMobileView(String slot) {
-            StatusBarMobileView view = StatusBarMobileView.fromContext(mContext, slot);
+            StatusBarMobileView view = StatusBarMobileView.fromContext(
+                            mContext, slot, mFeatureFlags.isCombinedStatusBarSignalIconsEnabled());
             return view;
         }
 
@@ -452,7 +456,7 @@ public interface StatusBarIconController {
         }
 
         protected DemoStatusIcons createDemoStatusIcons() {
-            return new DemoStatusIcons((LinearLayout) mGroup, mIconSize);
+            return new DemoStatusIcons((LinearLayout) mGroup, mIconSize, mFeatureFlags);
         }
     }
 }

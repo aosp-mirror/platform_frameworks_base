@@ -23,7 +23,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.View;
@@ -88,11 +87,11 @@ public class QuickStatusBarHeader extends FrameLayout {
     private float mKeyguardExpansionFraction;
     private int mTextColorPrimary = Color.TRANSPARENT;
     private int mTopViewMeasureHeight;
+    private boolean mProviderModel;
 
     private final String mMobileSlotName;
     private final String mNoCallingSlotName;
     private final String mCallStrengthSlotName;
-    private final boolean mProviderModel;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -100,11 +99,6 @@ public class QuickStatusBarHeader extends FrameLayout {
         mNoCallingSlotName = context.getString(com.android.internal.R.string.status_bar_no_calling);
         mCallStrengthSlotName =
                 context.getString(com.android.internal.R.string.status_bar_call_strength);
-        if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
-            mProviderModel = true;
-        } else {
-            mProviderModel = false;
-        }
     }
 
     /**
@@ -154,7 +148,9 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     void onAttach(TintedIconManager iconManager,
-            QSExpansionPathInterpolator qsExpansionPathInterpolator) {
+            QSExpansionPathInterpolator qsExpansionPathInterpolator,
+            boolean providerModel) {
+        mProviderModel = providerModel;
         mTintedIconManager = iconManager;
         int fillColor = Utils.getColorAttrDefaultColor(getContext(),
                 android.R.attr.textColorPrimary);
