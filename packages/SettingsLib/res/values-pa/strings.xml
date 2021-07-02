@@ -448,7 +448,7 @@
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ਤੱਕ ਚਾਰਜ ਹੋ ਜਾਵੇਗੀ"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ਬੈਟਰੀ ਦੀ ਸਥਿਤੀ ਲਈ ਅਨੁਕੂਲ ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ਅਗਿਆਤ"</string>
-    <string name="battery_info_status_charging" msgid="4279958015430387405">"ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
+    <string name="battery_info_status_charging" msgid="4279958015430387405">"ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ਤੇਜ਼ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>

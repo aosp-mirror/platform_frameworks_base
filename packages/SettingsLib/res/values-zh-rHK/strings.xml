@@ -449,7 +449,7 @@
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 優化電池效能"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"正在快速充電"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"快速充電中"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"正在慢速充電"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"非充電中"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已連接電源插頭，但目前無法充電"</string>
