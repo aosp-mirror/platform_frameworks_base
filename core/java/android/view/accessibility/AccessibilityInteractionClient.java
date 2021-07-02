@@ -147,7 +147,7 @@ public final class AccessibilityInteractionClient
     /**
      * @return The client for the current thread.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage()
     public static AccessibilityInteractionClient getInstance() {
         final long threadId = Thread.currentThread().getId();
         return getInstanceForThread(threadId);
@@ -896,7 +896,10 @@ public final class AccessibilityInteractionClient
         return false;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    /**
+     * Clears the accessibility cache.
+     */
+    @UnsupportedAppUsage()
     public void clearCache() {
         sAccessibilityCache.clear();
     }
