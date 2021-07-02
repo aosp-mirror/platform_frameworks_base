@@ -43,6 +43,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -117,6 +118,11 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 .thenReturn(PROC_STATE_INVISIBLE)
     }
 
+    @After
+    fun tearDown() {
+        controller.tearDownChipView()
+    }
+
     @Test
     fun onEntryUpdated_isOngoingCallNotif_listenerNotified() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
@@ -145,6 +151,37 @@ class OngoingCallControllerTest : SysuiTestCase() {
     fun onEntryUpdated_notifHasNullContentIntent_noCrash() {
         notifCollectionListener.onEntryUpdated(
                 createCallNotifEntry(ongoingCallStyle, nullContentIntent = true))
+    }
+
+    /** Regression test for b/192379214. */
+    @Test
+    fun onEntryUpdated_notificationWhenIsZero_timeHidden() {
+        val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
+        notification.modifyNotification(context).setWhen(0)
+
+        notifCollectionListener.onEntryUpdated(notification.build())
+        chipView.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+
+        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+                .isEqualTo(0)
+    }
+
+    @Test
+    fun onEntryUpdated_notificationWhenIsValid_timeShown() {
+        val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
+        notification.modifyNotification(context).setWhen(clock.currentTimeMillis())
+
+        notifCollectionListener.onEntryUpdated(notification.build())
+        chipView.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+
+        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+                .isGreaterThan(0)
     }
 
     /**

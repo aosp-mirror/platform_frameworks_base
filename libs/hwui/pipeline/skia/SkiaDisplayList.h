@@ -111,6 +111,13 @@ public:
      */
     void syncContents(const WebViewSyncData& data);
 
+    /**
+     * ONLY to be called by RenderNode::onRemovedFromTree so that we can notify any
+     * contained VectorDrawables or GLFunctors.
+     *
+     */
+    void onRemovedFromTree();
+
     void applyColorTransform(ColorTransform transform) {
         mDisplayList.applyColorTransform(transform);
     }

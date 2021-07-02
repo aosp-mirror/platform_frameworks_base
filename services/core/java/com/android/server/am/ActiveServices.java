@@ -36,6 +36,7 @@ import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.PowerExemptionManager.REASON_DEVICE_DEMO_MODE;
 import static android.os.PowerExemptionManager.REASON_DEVICE_OWNER;
 import static android.os.PowerExemptionManager.REASON_FGS_BINDING;
+import static android.os.PowerExemptionManager.REASON_CURRENT_INPUT_METHOD;
 import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_FGS_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_OPT_OUT_REQUESTED;
@@ -328,23 +329,11 @@ public final class ActiveServices {
      * Watch for apps being put into forced app standby, so we can step their fg
      * services down.
      */
-    class ForcedStandbyListener implements AppStateTracker.ForcedAppStandbyListener {
+    class ForcedStandbyListener implements AppStateTracker.ServiceStateListener {
         @Override
-        public void updateForceAppStandbyForUidPackage(int uid, String packageName,
-                boolean standby) {
+        public void stopForegroundServicesForUidPackage(final int uid, final String packageName) {
             synchronized (mAm) {
-                if (standby) {
-                    stopAllForegroundServicesLocked(uid, packageName);
-                }
-                mAm.mProcessList.updateForceAppStandbyForUidPackageLocked(
-                        uid, packageName, standby);
-            }
-        }
-
-        @Override
-        public void updateForcedAppStandbyForAllApps() {
-            synchronized (mAm) {
-                mAm.mProcessList.updateForcedAppStandbyForAllAppsLocked();
+                stopAllForegroundServicesLocked(uid, packageName);
             }
         }
     }
@@ -530,7 +519,7 @@ public final class ActiveServices {
 
     void systemServicesReady() {
         AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
-        ast.addForcedAppStandbyListener(new ForcedStandbyListener());
+        ast.addServiceStateListener(new ForcedStandbyListener());
         mAppWidgetManagerInternal = LocalServices.getService(AppWidgetManagerInternal.class);
         setAllowListWhileInUsePermissionInFgs();
     }
@@ -6174,6 +6163,20 @@ public final class ActiveServices {
                 ret = REASON_OP_ACTIVATE_PLATFORM_VPN;
             }
         }
+
+        if (ret == REASON_DENIED) {
+            final String inputMethod =
+                    Settings.Secure.getStringForUser(mAm.mContext.getContentResolver(),
+                            Settings.Secure.DEFAULT_INPUT_METHOD,
+                            UserHandle.getUserId(callingUid));
+            if (inputMethod != null) {
+                final ComponentName cn = ComponentName.unflattenFromString(inputMethod);
+                if (cn != null && cn.getPackageName().equals(callingPackage)) {
+                    ret = REASON_CURRENT_INPUT_METHOD;
+                }
+            }
+        }
+
         if (ret == REASON_DENIED) {
             if (mAm.mConstants.mFgsAllowOptOut
                     && targetService != null

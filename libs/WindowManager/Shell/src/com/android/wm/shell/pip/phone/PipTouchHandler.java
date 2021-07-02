@@ -726,12 +726,17 @@ public class PipTouchHandler {
     }
 
     private void animateToNormalSize(Runnable callback) {
+        // Save the current bounds as the user-resize bounds.
         mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
-        final Rect normalBounds = new Rect(mPipBoundsState.getNormalBounds());
+
+        final Size minMenuSize = mMenuController.getEstimatedMinMenuSize();
+        final Rect normalBounds = mPipBoundsState.getNormalBounds();
+        final Rect destBounds = mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds,
+                minMenuSize);
         Rect restoredMovementBounds = new Rect();
-        mPipBoundsAlgorithm.getMovementBounds(normalBounds,
+        mPipBoundsAlgorithm.getMovementBounds(destBounds,
                 mInsetBounds, restoredMovementBounds, mIsImeShowing ? mImeHeight : 0);
-        mSavedSnapFraction = mMotionHelper.animateToExpandedState(normalBounds,
+        mSavedSnapFraction = mMotionHelper.animateToExpandedState(destBounds,
                 mPipBoundsState.getMovementBounds(), restoredMovementBounds, callback);
     }
 

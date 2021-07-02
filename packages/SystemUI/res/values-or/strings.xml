@@ -669,7 +669,10 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ଆପଣଙ୍କ ଫୋନ୍ ମାଧ୍ୟମରେ ଆହୁରି ଶୀଘ୍ର, ଅଧିକ ସୁରକ୍ଷିତ କ୍ରୟ କରିବା ପାଇଁ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ସବୁ ଦେଖାନ୍ତୁ"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ପେମେଣ୍ଟ କରିବାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"ସେଟ୍ ଅପ୍ କରାଯାଇନାହିଁ"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ବ୍ୟବହାର କରିବାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ଆପଣଙ୍କ କାର୍ଡଗୁଡ଼ିକ ପାଇବାରେ ଏକ ସମସ୍ୟା ହୋଇଥିଲା। ଦୟାକରି ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ସ୍କ୍ରିନ୍ ଲକ୍ ସେଟିଂସ୍"</string>
@@ -1115,7 +1118,7 @@
     <string name="basic_status" msgid="2315371112182658176">"ବାର୍ତ୍ତାଳାପ ଖୋଲନ୍ତୁ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ବାର୍ତ୍ତାଳାପ ୱିଜେଟଗୁଡ଼ିକ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ଏକ ବାର୍ତ୍ତାଳାପକୁ ଆପଣଙ୍କ ମୂଳସ୍କ୍ରିନରେ ଯୋଗ କରିବା ପାଇଁ ସେଥିରେ ଟାପ୍ କରନ୍ତୁ"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"ଆପଣ କିଛି ମେସେଜ୍ ପାଇଲେ ଏଠାରେ ପୁଣି ଯାଞ୍ଚ କରନ୍ତୁ"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଏଠାରେ ଦେଖାଯିବ"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ପ୍ରାଥମିକତା ଦିଆଯାଇଥିବା ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ବର୍ତ୍ତମାନର ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ"</string>
     <string name="okay" msgid="6490552955618608554">"ଠିକ୍ ଅଛି"</string>
@@ -1144,10 +1147,12 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ବର୍ତ୍ତମାନର ମେସେଜ୍, ମିସ୍ଡ କଲ୍ ଏବଂ ସ୍ଥିତି ଅପଡେଟଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"ବାର୍ତ୍ତାଳାପ"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
+    <string name="paused_by_dnd" msgid="7856941866433556428">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଦ୍ୱାରା ବିରତ କରାଯାଇଛି"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
     <skip />
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ଏକ ମେସେଜ୍ ପଠାଇଛନ୍ତି"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ଏକ ଛବି ପଠାଇଛନ୍ତି"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ଆପଣଙ୍କ ବ୍ୟାଟେରୀ ମିଟର୍ ପଢ଼ିବାରେ ସମସ୍ୟା ହେଉଛି"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ଅଧିକ ସୂଚନା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ଆଲାରାମ ସେଟ୍ ହୋଇନାହିଁ"</string>

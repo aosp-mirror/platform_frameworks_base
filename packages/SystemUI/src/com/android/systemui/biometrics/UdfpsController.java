@@ -147,6 +147,7 @@ public class UdfpsController implements DozeReceiver {
     @Nullable private Runnable mCancelAodTimeoutAction;
     private boolean mScreenOn;
     private Runnable mAodInterruptRunnable;
+    private boolean mOnFingerDown;
 
     @VisibleForTesting
     public static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
@@ -430,21 +431,7 @@ public class UdfpsController implements DozeReceiver {
                             mTouchLogTime = SystemClock.elapsedRealtime();
                             mPowerManager.userActivity(SystemClock.uptimeMillis(),
                                     PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
-
-                            // TODO: this should eventually be removed after ux testing
-                            if (mVibrator != null) {
-                                final ContentResolver contentResolver =
-                                        mContext.getContentResolver();
-                                int startEnabled = Settings.Global.getInt(contentResolver,
-                                        "udfps_start", 1);
-                                if (startEnabled > 0) {
-                                    String startEffectSetting = Settings.Global.getString(
-                                            contentResolver, "udfps_start_type");
-                                    mVibrator.vibrate(getVibration(startEffectSetting,
-                                            EFFECT_CLICK), VIBRATION_SONIFICATION_ATTRIBUTES);
-                                }
-                            }
-
+                            playStartHaptic();
                             handled = true;
                         } else if (sinceLastLog >= MIN_TOUCH_LOG_INTERVAL) {
                             Log.v(TAG, "onTouch | finger move: " + touchInfo);
@@ -498,6 +485,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull LockscreenShadeTransitionController lockscreenShadeTransitionController,
             @NonNull ScreenLifecycle screenLifecycle,
             @Nullable Vibrator vibrator,
+            @NonNull UdfpsHapticsSimulator udfpsHapticsSimulator,
             @NonNull Optional<UdfpsHbmProvider> hbmProvider) {
         mContext = context;
         mExecution = execution;
@@ -544,6 +532,29 @@ public class UdfpsController implements DozeReceiver {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mBroadcastReceiver, filter);
+
+        udfpsHapticsSimulator.setUdfpsController(this);
+    }
+
+    /**
+     * Play haptic to signal udfps scanning started.
+     */
+    @VisibleForTesting
+    public void playStartHaptic() {
+        if (mVibrator != null) {
+            final ContentResolver contentResolver =
+                    mContext.getContentResolver();
+            // TODO: these settings checks should eventually be removed after ux testing
+            //  (b/185124905)
+            int startEnabled = Settings.Global.getInt(contentResolver,
+                    "udfps_start", 1);
+            if (startEnabled > 0) {
+                String startEffectSetting = Settings.Global.getString(
+                        contentResolver, "udfps_start_type");
+                mVibrator.vibrate(getVibration(startEffectSetting,
+                        EFFECT_CLICK), VIBRATION_SONIFICATION_ATTRIBUTES);
+            }
+        }
     }
 
     private int getCoreLayoutParamFlags() {
@@ -586,8 +597,10 @@ public class UdfpsController implements DozeReceiver {
     }
 
     private void updateOverlay() {
+        mExecution.assertIsMainThread();
+
         if (mServerRequest != null) {
-            showUdfpsOverlay(mServerRequest.mRequestReason);
+            showUdfpsOverlay(mServerRequest);
         } else {
             hideUdfpsOverlay();
         }
@@ -648,36 +661,37 @@ public class UdfpsController implements DozeReceiver {
         updateOverlay();
     }
 
-    private void showUdfpsOverlay(int reason) {
-        mFgExecutor.execute(() -> {
-            if (mView == null) {
-                try {
-                    Log.v(TAG, "showUdfpsOverlay | adding window reason=" + reason);
-                    mView = (UdfpsView) mInflater.inflate(R.layout.udfps_view, null, false);
-                    mView.setSensorProperties(mSensorProps);
-                    mView.setHbmProvider(mHbmProvider);
-                    UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
-                    animation.init();
-                    mView.setAnimationViewController(animation);
+    private void showUdfpsOverlay(@NonNull ServerRequest request) {
+        mExecution.assertIsMainThread();
+        final int reason = request.mRequestReason;
+        if (mView == null) {
+            try {
+                Log.v(TAG, "showUdfpsOverlay | adding window reason=" + reason);
+                mView = (UdfpsView) mInflater.inflate(R.layout.udfps_view, null, false);
+                mOnFingerDown = false;
+                mView.setSensorProperties(mSensorProps);
+                mView.setHbmProvider(mHbmProvider);
+                UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
+                animation.init();
+                mView.setAnimationViewController(animation);
 
-                    // This view overlaps the sensor area, so prevent it from being selectable
-                    // during a11y.
-                    if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
-                            || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
-                        mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-                    }
-
-                    mWindowManager.addView(mView, computeLayoutParams(animation));
-                    mAccessibilityManager.addTouchExplorationStateChangeListener(
-                            mTouchExplorationStateChangeListener);
-                    updateTouchListener();
-                } catch (RuntimeException e) {
-                    Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
+                // This view overlaps the sensor area, so prevent it from being selectable
+                // during a11y.
+                if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
+                        || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
+                    mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
                 }
-            } else {
-                Log.v(TAG, "showUdfpsOverlay | the overlay is already showing");
+
+                mWindowManager.addView(mView, computeLayoutParams(animation));
+                mAccessibilityManager.addTouchExplorationStateChangeListener(
+                        mTouchExplorationStateChangeListener);
+                updateTouchListener();
+            } catch (RuntimeException e) {
+                Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
             }
-        });
+        } else {
+            Log.v(TAG, "showUdfpsOverlay | the overlay is already showing");
+        }
     }
 
     private UdfpsAnimationViewController inflateUdfpsAnimation(int reason) {
@@ -813,6 +827,7 @@ public class UdfpsController implements DozeReceiver {
             Log.w(TAG, "Null view in onFingerDown");
             return;
         }
+        mOnFingerDown = true;
         mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
         Trace.endAsyncSection("UdfpsController.e2e.onPointerDown", 0);
         Trace.beginAsyncSection("UdfpsController.e2e.startIllumination", 0);
@@ -830,12 +845,14 @@ public class UdfpsController implements DozeReceiver {
             Log.w(TAG, "Null view in onFingerUp");
             return;
         }
-        mFingerprintManager.onPointerUp(mSensorProps.sensorId);
+        if (mOnFingerDown) {
+            mFingerprintManager.onPointerUp(mSensorProps.sensorId);
+        }
+        mOnFingerDown = false;
         if (mView.isIlluminationRequested()) {
             mView.stopIllumination();
         }
     }
-
 
     /**
      * get vibration to play given string

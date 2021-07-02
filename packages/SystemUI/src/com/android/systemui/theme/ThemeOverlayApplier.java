@@ -239,6 +239,14 @@ public class ThemeOverlayApplier implements Dumpable {
                     + category + ": " + enabled);
         }
 
+        OverlayInfo overlayInfo = mOverlayManager.getOverlayInfo(identifier,
+                UserHandle.of(currentUser));
+        if (overlayInfo == null) {
+            Log.i(TAG, "Won't enable " + identifier + ", it doesn't exist for user"
+                    + currentUser);
+            return;
+        }
+
         transaction.setEnabled(identifier, enabled, currentUser);
         if (currentUser != UserHandle.SYSTEM.getIdentifier()
                 && SYSTEM_USER_CATEGORIES.contains(category)) {
@@ -247,7 +255,7 @@ public class ThemeOverlayApplier implements Dumpable {
 
         // Do not apply Launcher or Theme picker overlays to managed users. Apps are not
         // installed in there.
-        OverlayInfo overlayInfo = mOverlayManager.getOverlayInfo(identifier, UserHandle.SYSTEM);
+        overlayInfo = mOverlayManager.getOverlayInfo(identifier, UserHandle.SYSTEM);
         if (overlayInfo == null || overlayInfo.targetPackageName.equals(mLauncherPackage)
                 || overlayInfo.targetPackageName.equals(mThemePickerPackage)) {
             return;

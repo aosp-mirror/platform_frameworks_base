@@ -61,7 +61,7 @@ public interface BiometricFingerprintConstants {
             BIOMETRIC_ERROR_RE_ENROLL,
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             FINGERPRINT_ERROR_UNKNOWN,
-            FINGERPRINT_ERROR_BAD_CALIBARTION})
+            FINGERPRINT_ERROR_BAD_CALIBRATION})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintError {}
 
@@ -185,7 +185,7 @@ public interface BiometricFingerprintConstants {
      * Error indicating that the fingerprint sensor has bad calibration.
      * @hide
      */
-    int FINGERPRINT_ERROR_BAD_CALIBARTION = 18;
+    int FINGERPRINT_ERROR_BAD_CALIBRATION = 18;
 
     /**
      * @hide
@@ -209,7 +209,8 @@ public interface BiometricFingerprintConstants {
             FINGERPRINT_ACQUIRED_VENDOR,
             FINGERPRINT_ACQUIRED_START,
             FINGERPRINT_ACQUIRED_UNKNOWN,
-            FINGERPRINT_ACQUIRED_IMMOBILE})
+            FINGERPRINT_ACQUIRED_IMMOBILE,
+            FINGERPRINT_ACQUIRED_TOO_BRIGHT})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintAcquired {}
 
@@ -285,6 +286,13 @@ public interface BiometricFingerprintConstants {
      * @hide
      */
     int FINGERPRINT_ACQUIRED_IMMOBILE = 9;
+
+    /**
+     * For sensors that require illumination, such as optical under-display fingerprint sensors,
+     * the image was too bright to be used for matching.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_TOO_BRIGHT = 10;
 
     /**
      * @hide

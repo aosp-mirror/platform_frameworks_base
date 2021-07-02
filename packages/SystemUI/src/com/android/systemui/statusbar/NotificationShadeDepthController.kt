@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.WallpaperManager
 import android.os.SystemClock
+import android.os.Trace
 import android.util.IndentingPrintWriter
 import android.util.Log
 import android.util.MathUtils
@@ -198,6 +199,7 @@ class NotificationShadeDepthController @Inject constructor(
         blur = (blur * (1f - brightnessMirrorSpring.ratio)).toInt()
 
         val opaque = scrimsVisible && !blursDisabledForAppLaunch
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur, opaque)
         try {
             if (root.isAttachedToWindow && root.windowToken != null) {
@@ -210,6 +212,7 @@ class NotificationShadeDepthController @Inject constructor(
         }
         listeners.forEach {
             it.onWallpaperZoomOutChanged(zoomOut)
+            it.onBlurRadiusChanged(blur)
         }
         notificationShadeWindowController.setBackgroundBlurRadius(blur)
     }
@@ -513,5 +516,8 @@ class NotificationShadeDepthController @Inject constructor(
          * Current wallpaper zoom out, where 0 is the closest, and 1 the farthest
          */
         fun onWallpaperZoomOutChanged(zoomOut: Float)
+
+        @JvmDefault
+        fun onBlurRadiusChanged(blurRadius: Int) {}
     }
 }

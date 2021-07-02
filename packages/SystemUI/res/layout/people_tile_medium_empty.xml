@@ -34,8 +34,8 @@
             android:orientation="horizontal">
             <ImageView
                 android:id="@+id/person_icon"
-                android:layout_width="64dp"
-                android:layout_height="64dp" />
+                android:layout_width="@dimen/avatar_size_for_medium_empty"
+                android:layout_height="@dimen/avatar_size_for_medium_empty" />
             <ImageView
                 android:id="@+id/availability"
                 android:layout_width="10dp"
@@ -46,8 +46,9 @@
                 android:background="@drawable/availability_dot_10dp" />
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/padding_before_availability"
             android:orientation="vertical"
-            android:paddingStart="4dp"
+            android:paddingStart="@dimen/availability_dot_shown_padding"
             android:gravity="top"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">

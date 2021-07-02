@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Услуга за GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Услуга за известия за сензорите"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Услуга Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Инструмент за установяване на часовата зона (няма връзка)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Услуга на GNSS за актуализиране на часа"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Услуга за управление на разпознаването на музика"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Данните на устройството ви ще бъдат изтрити"</string>
@@ -602,7 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Няма регистрирани отпечатъци."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Това устройство няма сензор за отпечатъци."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сензорът е временно деактивиран."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="374406495079531135">"За сензора се изисква калибриране"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Сензорът за отпечатъци не може да се използва. Посетете оторизиран сервиз."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Пръст <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Използване на отпечатък"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Използване на отпечатък или опцията за заключване на екрана"</string>
@@ -618,6 +617,9 @@
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отключвайте телефона си, като го погледнете"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Настройване на още начини за отключване на телефона"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Докоснете, за да добавите отпечатък"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отключване с отпечатък"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Сензорът за отпечатъци не може да се използва"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Посетете оторизиран сервиз."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Лицето не бе заснето точно. Опитайте отново."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Твърде светло е. Опитайте при по-слабо осветление."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Твърде тъмно е. Опитайте при по-силно осветление."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Отказване"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Иска се разрешение"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Иска се разрешение\nза профила <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Поискано е разрешение от <xliff:g id="APP">%1$s</xliff:g>\nза профила <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Използвате това приложение извън служебния си потребителски профил"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Използвате това приложение в служебния си потребителски профил"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Метод на въвеждане"</string>

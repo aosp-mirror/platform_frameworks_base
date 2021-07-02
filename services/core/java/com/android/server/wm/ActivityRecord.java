@@ -2252,6 +2252,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final WindowManagerPolicy.StartingSurface surface;
+        final StartingData startingData = mStartingData;
         if (mStartingData != null) {
             surface = mStartingSurface;
             mStartingData = null;
@@ -2278,7 +2279,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Runnable removeSurface = () -> {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Removing startingView=%s", surface);
             try {
-                surface.remove(prepareAnimation);
+                surface.remove(prepareAnimation && startingData.needRevealAnimation());
             } catch (Exception e) {
                 Slog.w(TAG_WM, "Exception when removing starting window", e);
             }
@@ -5015,6 +5016,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mAppStopped = true;
         // Reset the last saved PiP snap fraction on app stop.
         mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
+        mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();

@@ -207,9 +207,6 @@ public final class WidgetFlags {
     public static final String KEY_ANALOG_CLOCK_SECONDS_HAND_FPS =
             "widget__analog_clock_seconds_hand_fps";
 
-    /** Default value for the flag {@link #ANALOG_CLOCK_SECONDS_HAND_FPS}. */
-    public static final int ANALOG_CLOCK_SECONDS_HAND_FPS_DEFAULT = 1;
-
     private WidgetFlags() {
     }
 }

@@ -914,6 +914,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mTmpApplySurfaceChangesTransactionState.preferredModeId = preferredModeId;
                 }
 
+                final float preferredMinRefreshRate = getDisplayPolicy().getRefreshRatePolicy()
+                        .getPreferredMinRefreshRate(w);
+                if (mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate == 0
+                        && preferredMinRefreshRate != 0) {
+                    mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate =
+                            preferredMinRefreshRate;
+                }
+
                 final float preferredMaxRefreshRate = getDisplayPolicy().getRefreshRatePolicy()
                         .getPreferredMaxRefreshRate(w);
                 if (mTmpApplySurfaceChangesTransactionState.preferredMaxRefreshRate == 0
@@ -1562,12 +1570,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // Apply normal rotation animation in case of the activity set different requested
                 // orientation without activity switch, or the transition is unset due to starting
                 // window was transferred ({@link #mSkipAppTransitionAnimation}).
-                return false;
-            }
-            if ((mAppTransition.getTransitFlags()
-                    & WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) != 0) {
-                // The transition may be finished before keyguard hidden. In order to avoid the
-                // intermediate orientation change, it is more stable to freeze the display.
                 return false;
             }
             if (r.isState(RESUMED) && !r.getRootTask().mInResumeTopActivity) {
@@ -4327,6 +4329,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mLastHasContent,
                     mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferredModeId,
+                    mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferredMaxRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
                     true /* inTraversal, must call performTraversalInTrans... below */);
@@ -4617,6 +4620,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public boolean preferMinimalPostProcessing;
         public float preferredRefreshRate;
         public int preferredModeId;
+        public float preferredMinRefreshRate;
         public float preferredMaxRefreshRate;
 
         void reset() {
@@ -4626,6 +4630,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             preferMinimalPostProcessing = false;
             preferredRefreshRate = 0;
             preferredModeId = 0;
+            preferredMinRefreshRate = 0;
             preferredMaxRefreshRate = 0;
         }
     }
