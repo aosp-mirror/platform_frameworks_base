@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS ସର୍ଭିସ୍"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"ସେନ୍ସର୍ ନୋଟିଫିକେସନ୍ ସର୍ଭିସ୍"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ଟ୍ୱିଲାଇଟ୍ ସର୍ଭିସ୍"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"ଟାଇମ୍‍ ଜୋନ୍‍ ଡିଟେକ୍ଟର୍‍ (କୌଣସି ସଂଯୋଗ ନାହିଁ)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS ସମୟ ଅପଡେଟ୍ ସେବା"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"ମ୍ୟୁଜିକ୍ ଚିହ୍ନଟକରଣ ପରିଚାଳକ ସେବା"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ ବର୍ତ୍ତମାନ ଲିଭାଯିବ"</string>
@@ -602,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"କୌଣସି ଆଙ୍ଗୁଠି ଚିହ୍ନ ପଞ୍ଜୀକୃତ ହୋଇନାହିଁ।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ଏହି ଡିଭାଇସ୍‌ରେ ଟିପଚିହ୍ନ ସେନ୍‍ସର୍ ନାହିଁ।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (4385512597740168120) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ। ଏକ ମରାମତି କେନ୍ଦ୍ରକୁ ଭିଜିଟ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ଆଙ୍ଗୁଠି <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ଟିପଚିହ୍ନ ବା ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
@@ -619,12 +617,9 @@
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ଫୋନକୁ ଦେଖି ଏହାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ଅନଲକ୍ କରିବା ପାଇଁ ଆହୁରି ଅଧିକ ଉପାୟ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ଏକ ଟିପଚିହ୍ନ ଯୋଗ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for fingerprint_recalibrate_notification_name (1414578431898579354) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_title (2406561052064558497) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_content (8519935717822194943) -->
-    <skip />
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଅନଲକ୍"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ଏକ ମରାମତି କେନ୍ଦ୍ରକୁ ଭିଜିଟ୍ କରନ୍ତୁ।"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ମୁହଁର ଡାଟା କ୍ୟାପଚର୍ ହେଲାନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ଅତ୍ୟଧିକ ଉଜ୍ଵଳ। କମ୍ ଉଜ୍ବଳକରଣରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ଅତ୍ୟଧିକ ଅନ୍ଧକାର। ଉଜ୍ବଳ ଲାଇଟ୍ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
@@ -1487,6 +1482,8 @@
     <string name="deny" msgid="6632259981847676572">"ଅଗ୍ରାହ୍ୟ କରନ୍ତୁ"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"ଅନୁମତି ଅନୁରୋଧ କରାଯାଇଛି"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> ଆକାଉଣ୍ଟ ପାଇଁ ଅନୁମତି\n ଅନୁରୋଧ କରାଯାଇଛି।"</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"ଆପଣ ନିଜର ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ ବାହାରେ ଏହି ଆପ୍‌ର ପ୍ରୟୋଗ କରୁଛନ୍ତି"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"ଆପଣ ନିଜ ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ରେ ଏହି ଆପ୍‌ର ବ୍ୟବହାର କରୁଛନ୍ତି"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ଇନପୁଟ୍ ପଦ୍ଧତି"</string>

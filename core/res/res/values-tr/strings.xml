@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS Hizmeti"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensör Bildirim Hizmeti"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Alacakaranlık Hizmeti"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Zaman Dilimi Algılayıcı (Bağlantı yok)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS Zaman Güncelleme Hizmeti"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Müzik Tanıma Yöneticisi Hizmeti"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Cihazınız silinecek"</string>
@@ -1483,6 +1482,8 @@
     <string name="deny" msgid="6632259981847676572">"Reddet"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"İzin istendi"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> hesabı için\nizin isteğinde bulunuldu."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Bu uygulamayı iş profilinizin dışında kullanıyorsunuz"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Bu uygulamayı iş profilinizde kullanıyorsunuz"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Giriş yöntemi"</string>

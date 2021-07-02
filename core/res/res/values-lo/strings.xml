@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"ບໍລິການ GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"ບໍລິການການແຈ້ງເຕືອນເຊັນເຊີ"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ບໍລິການ Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"ຕົວກວດຫາເຂດເວລາ (ບໍ່ມີການເຊື່ອມຕໍ່)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"ບໍລິການອັບເດດເວລາ GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"ບໍລິການຕົວຈັດການການຈຳແນກເພງ"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ"</string>
@@ -1483,6 +1482,8 @@
     <string name="deny" msgid="6632259981847676572">"ປະ​ຕິ​ເສດ"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"ຕ້ອງການການອະນຸຍາດ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"ຮ້ອງຂໍການກຳນົດສິດ\nສຳລັບບັນຊີ <xliff:g id="ACCOUNT">%s</xliff:g> ແລ້ວ."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້ນອກ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້​ໃນ​ໂປຣ​ໄຟລ໌​​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ວິທີການປ້ອນຂໍ້ມູນ"</string>
