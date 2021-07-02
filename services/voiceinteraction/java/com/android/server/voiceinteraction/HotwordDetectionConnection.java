@@ -164,15 +164,7 @@ final class HotwordDetectionConnection {
                 public void sendResult(Bundle bundle) throws RemoteException {
                     if (DEBUG) {
                         Slog.d(TAG, "updateState finish");
-                        Slog.d(TAG, "updating hotword UID " + Binder.getCallingUid());
                     }
-                    // TODO: Do this earlier than this callback and have the provider point to the
-                    // current state stored in VoiceInteractionManagerServiceImpl.
-                    final int uid = Binder.getCallingUid();
-                    LocalServices.getService(PermissionManagerServiceInternal.class)
-                            .setHotwordDetectionServiceProvider(() -> uid);
-                    mIdentity =
-                            new HotwordDetectionServiceIdentity(uid, mVoiceInteractionServiceUid);
                     future.complete(null);
                     if (mUpdateStateAfterStartFinished.getAndSet(true)) {
                         Slog.w(TAG, "call callback after timeout");
@@ -679,6 +671,7 @@ final class HotwordDetectionConnection {
 
             updateAudioFlinger(connection);
             updateContentCaptureManager(connection);
+            updateServiceIdentity(connection);
             return connection;
         }
     }
@@ -792,16 +785,33 @@ final class HotwordDetectionConnection {
         if (audioFlinger == null) {
             throw new IllegalStateException("Service media.audio_flinger wasn't found.");
         }
-        connection.post(service -> service.updateAudioFlinger(audioFlinger));
+        connection.run(service -> service.updateAudioFlinger(audioFlinger));
     }
 
     private static void updateContentCaptureManager(ServiceConnection connection) {
         IBinder b = ServiceManager
                 .getService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
         IContentCaptureManager binderService = IContentCaptureManager.Stub.asInterface(b);
-        connection.post(
+        connection.run(
                 service -> service.updateContentCaptureManager(binderService,
                         new ContentCaptureOptions(null)));
+    }
+
+    private void updateServiceIdentity(ServiceConnection connection) {
+        connection.run(service -> service.ping(new IRemoteCallback.Stub() {
+            @Override
+            public void sendResult(Bundle bundle) throws RemoteException {
+                if (DEBUG) {
+                    Slog.d(TAG, "updating hotword UID " + Binder.getCallingUid());
+                }
+                // TODO: Have the provider point to the current state stored in
+                // VoiceInteractionManagerServiceImpl.
+                final int uid = Binder.getCallingUid();
+                LocalServices.getService(PermissionManagerServiceInternal.class)
+                        .setHotwordDetectionServiceProvider(() -> uid);
+                mIdentity = new HotwordDetectionServiceIdentity(uid, mVoiceInteractionServiceUid);
+            }
+        }));
     }
 
     private static void bestEffortClose(Closeable closeable) {
