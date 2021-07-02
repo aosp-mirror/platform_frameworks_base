@@ -387,9 +387,10 @@ public class StagingManager {
 
         for (StagedSession apexSession : apexSessions) {
             String packageName = apexSession.getPackageName();
-            if (!mApexManager.isApkInApexInstallSuccess(packageName)) {
+            String errorMsg = mApexManager.getApkInApexInstallError(packageName);
+            if (errorMsg != null) {
                 throw new PackageManagerException(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                        "Failed to install apk-in-apex of " + packageName);
+                        "Failed to install apk-in-apex of " + packageName + " : " + errorMsg);
             }
         }
     }
@@ -918,12 +919,17 @@ public class StagingManager {
                 continue;
             } else if (isApexSessionFailed(apexSession)) {
                 hasFailedApexSession = true;
-                String errorMsg = "APEX activation failed. " + apexSession.errorMessage;
                 if (!TextUtils.isEmpty(apexSession.crashingNativeProcess)) {
                     prepareForLoggingApexdRevert(session, apexSession.crashingNativeProcess);
-                    errorMsg = "Session reverted due to crashing native process: "
-                            + apexSession.crashingNativeProcess;
                 }
+                String errorMsg = "APEX activation failed.";
+                final String reasonForRevert = getReasonForRevert();
+                if (!TextUtils.isEmpty(reasonForRevert)) {
+                    errorMsg += " Reason: " + reasonForRevert;
+                } else if (!TextUtils.isEmpty(apexSession.errorMessage)) {
+                    errorMsg += " Error: " + apexSession.errorMessage;
+                }
+                Slog.d(TAG, errorMsg);
                 session.setSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, errorMsg);
                 continue;
             } else if (apexSession.isActivated || apexSession.isSuccess) {
