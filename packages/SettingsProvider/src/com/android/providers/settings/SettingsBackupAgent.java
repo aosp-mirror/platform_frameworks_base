@@ -848,9 +848,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             settingsHelper.restoreValue(this, cr, contentValues, destination, key, value,
                     mRestoredFromSdkInt);
 
-            if (DEBUG) {
-                Log.d(TAG, "Restored setting: " + destination + " : " + key + "=" + value);
-            }
+            Log.d(TAG, "Restored setting: " + destination + " : " + key + "=" + value);
         }
     }
 

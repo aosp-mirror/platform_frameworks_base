@@ -852,16 +852,20 @@ final class SettingsState {
             } catch (Throwable t) {
                 Slog.wtf(LOG_TAG, "Failed to write settings, restoring backup", t);
                 if (t instanceof IOException) {
-                    // we failed to create a directory, so log the permissions and existence
-                    // state for the settings file and directory
-                    logSettingsDirectoryInformation(destination.getBaseFile());
+                    if (DEBUG) {
+                        // we failed to create a directory, so log the permissions and existence
+                        // state for the settings file and directory
+                        logSettingsDirectoryInformation(destination.getBaseFile());
+                    }
                     if (t.getMessage().contains("Couldn't create directory")) {
                         // attempt to create the directory with Files.createDirectories, which
                         // throws more informative errors than File.mkdirs.
                         Path parentPath = destination.getBaseFile().getParentFile().toPath();
                         try {
                             Files.createDirectories(parentPath);
-                            Slog.i(LOG_TAG, "Successfully created " + parentPath);
+                            if (DEBUG) {
+                                Slog.i(LOG_TAG, "Successfully created " + parentPath);
+                            }
                         } catch (Throwable t2) {
                             Slog.e(LOG_TAG, "Failed to write " + parentPath
                                     + " with Files.writeDirectories", t2);
@@ -1014,7 +1018,9 @@ final class SettingsState {
             in = file.openRead();
         } catch (FileNotFoundException fnfe) {
             Slog.w(LOG_TAG, "No settings state " + mStatePersistFile);
-            logSettingsDirectoryInformation(mStatePersistFile);
+            if (DEBUG) {
+                logSettingsDirectoryInformation(mStatePersistFile);
+            }
             addHistoricalOperationLocked(HISTORICAL_OPERATION_INITIALIZE, null);
             return;
         }
@@ -1025,7 +1031,7 @@ final class SettingsState {
         // Settings file exists but is corrupted. Retry with the fallback file
         final File statePersistFallbackFile = new File(
                 mStatePersistFile.getAbsolutePath() + FALLBACK_FILE_SUFFIX);
-        Slog.i(LOG_TAG, "Failed parsing settings file: " + mStatePersistFile
+        Slog.w(LOG_TAG, "Failed parsing settings file: " + mStatePersistFile
                 + ", retrying with fallback file: " + statePersistFallbackFile);
         try {
             in = new AtomicFile(statePersistFallbackFile).openRead();

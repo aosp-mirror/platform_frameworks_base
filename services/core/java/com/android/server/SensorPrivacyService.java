@@ -30,6 +30,7 @@ import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.SensorPrivacyManager.EXTRA_ALL_SENSORS;
 import static android.hardware.SensorPrivacyManager.EXTRA_SENSOR;
@@ -440,7 +441,14 @@ public final class SensorPrivacyService extends SystemService {
                 inputMethodPackageName = ComponentName.unflattenFromString(
                         inputMethodComponent).getPackageName();
             }
-            int capability = mActivityManagerInternal.getUidCapability(uid);
+
+            int capability;
+            try {
+                capability = mActivityManagerInternal.getUidCapability(uid);
+            } catch (IllegalArgumentException e) {
+                Log.w(TAG, e);
+                return;
+            }
 
             if (sensor == MICROPHONE) {
                 VoiceInteractionManagerInternal voiceInteractionManagerInternal =
@@ -519,7 +527,8 @@ public final class SensorPrivacyService extends SystemService {
             options.setLaunchTaskId(info.mTaskId);
             options.setTaskOverlay(true, true);
 
-            dialogIntent.addFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            dialogIntent.addFlags(
+                    FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | FLAG_ACTIVITY_NO_USER_ACTION);
 
             dialogIntent.putExtra(EXTRA_PACKAGE_NAME, info.mPackageName);
             if (sensors.size() == 1) {

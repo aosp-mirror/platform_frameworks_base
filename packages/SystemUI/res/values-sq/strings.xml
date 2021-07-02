@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Shfaqi të gjitha"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Shkyçe për të paguar"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nuk është konfiguruar"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Shkyçe për ta përdorur"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Pati një problem me marrjen e kartave të tua. Provo përsëri më vonë"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Cilësimet e ekranit të kyçjes"</string>
@@ -734,7 +736,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Asnjë tingull ose dridhje"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Asnjë tingull ose dridhje dhe shfaqet më poshtë në seksionin e bisedave"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Mund të bjerë zilja ose të dridhet në bazë të cilësimeve të telefonit"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Mund të bjerë zilja ose të dridhet në bazë të cilësimeve të telefonit. Bisedat nga flluska e <xliff:g id="APP_NAME">%1$s</xliff:g> si parazgjedhje."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Mund të bjerë zilja ose të dridhet në bazë të cilësimeve të telefonit. Si parazgjedhje, bisedat nga <xliff:g id="APP_NAME">%1$s</xliff:g> shfaqen si flluska."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mban vëmendjen tënde me një shkurtore pluskuese te kjo përmbajtje."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Kërkoji sistemit të përcaktojë nëse ky njoftim duhet të lëshojë tingull apo dridhje"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Statusi:&lt;/b&gt; Promovuar si parazgjedhje"</string>

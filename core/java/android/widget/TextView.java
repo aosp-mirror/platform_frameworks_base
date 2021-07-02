@@ -13916,7 +13916,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onCreateViewTranslationRequest(@NonNull int[] supportedFormats,
             @NonNull Consumer<ViewTranslationRequest> requestsCollector) {
         if (supportedFormats == null || supportedFormats.length == 0) {
-            // TODO(b/182433547): remove before S release
             if (UiTranslationController.DEBUG) {
                 Log.w(LOG_TAG, "Do not provide the support translation formats.");
             }
@@ -13927,7 +13926,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Support Text translation
         if (ArrayUtils.contains(supportedFormats, TranslationSpec.DATA_FORMAT_TEXT)) {
             if (mText == null || mText.length() == 0) {
-                // TODO(b/182433547): remove before S release
                 if (UiTranslationController.DEBUG) {
                     Log.w(LOG_TAG, "Cannot create translation request for the empty text.");
                 }
@@ -13941,7 +13939,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             //  it, it needs broader changes to text APIs, we only allow to translate non selectable
             //  and editable text in S.
             if (isTextEditable() || isPassword || isTextSelectable()) {
-                // TODO(b/182433547): remove before S release
                 if (UiTranslationController.DEBUG) {
                     Log.w(LOG_TAG, "Cannot create translation request. editable = "
                             + isTextEditable() + ", isPassword = " + isPassword + ", selectable = "

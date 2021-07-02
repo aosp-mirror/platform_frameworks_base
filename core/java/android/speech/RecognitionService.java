@@ -259,6 +259,7 @@ public abstract class RecognitionService extends Service {
     @Override
     public void onDestroy() {
         if (DBG) Log.d(TAG, "onDestroy");
+        finishDataDelivery();
         mCurrentCallback = null;
         mBinder.clearReference();
         super.onDestroy();

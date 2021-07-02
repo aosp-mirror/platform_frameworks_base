@@ -47,6 +47,11 @@ public abstract class StartingData {
      */
     abstract StartingSurface createStartingSurface(ActivityRecord activity);
 
+    /**
+     * @return Whether to apply reveal animation when exiting the starting window.
+     */
+    abstract boolean needRevealAnimation();
+
     /** @see android.window.TaskSnapshot#hasImeSurface() */
     boolean hasImeSurface() {
         return false;

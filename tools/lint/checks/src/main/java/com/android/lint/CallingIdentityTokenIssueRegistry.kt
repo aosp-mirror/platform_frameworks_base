@@ -35,7 +35,8 @@ class CallingIdentityTokenIssueRegistry : IssueRegistry() {
             ISSUE_NON_FINAL_TOKEN,
             ISSUE_NESTED_CLEAR_IDENTITY_CALLS,
             ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK,
-            ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY
+            ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY,
+            ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY
     )
 
     override val api: Int
@@ -77,8 +78,9 @@ class CallingIdentityTokenIssueRegistry : IssueRegistry() {
         )
 
         fun getIncidentMessageUnusedToken(variableName: String) = "`$variableName` has not been " +
-                "used to restore the calling identity. Call " +
-                "`Binder.restoreCallingIdentity($variableName)` or remove `$variableName`."
+                "used to restore the calling identity. Introduce a `try`-`finally` after the " +
+                "declaration and call `Binder.restoreCallingIdentity($variableName)` in " +
+                "`finally` or remove `$variableName`."
 
         /** Issue: non-final token from Binder.clearCallingIdentity() */
         @JvmField
@@ -139,15 +141,16 @@ class CallingIdentityTokenIssueRegistry : IssueRegistry() {
             firstCallVariableName: String
         ): String = "Location of the `$firstCallVariableName` declaration."
 
-        /** Issue: Binder.restoreCallingIdentity() is not in finally block */
+        /** Issue: Binder.clearCallingIdentity() is not followed by `try-finally` statement */
         @JvmField
-        val ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK: Issue = Issue.create(
-                id = "RestoreIdentityCallNotInFinallyBlock",
-                briefDescription = "Binder.restoreCallingIdentity() is not in finally block",
+        val ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY: Issue = Issue.create(
+                id = "ClearIdentityCallNotFollowedByTryFinally",
+                briefDescription = "Binder.clearCallingIdentity() is not followed by try-finally " +
+                        "statement",
                 explanation = """
-                    You are restoring the original calling identity with \
-                    `Binder.restoreCallingIdentity()`, but the call is not in the `finally` block \
-                    of the `try` statement.
+                    You cleared the original calling identity with \
+                    `Binder.clearCallingIdentity()`, but the next statement is not a `try` \
+                    statement.
 
                     Use the following pattern for running operations with your own identity:
 
@@ -156,12 +159,14 @@ class CallingIdentityTokenIssueRegistry : IssueRegistry() {
                     try {
                         // Code using your own identity
                     } finally {
-                        Binder.restoreCallingIdentity();
+                        Binder.restoreCallingIdentity(token);
                     }
                     ```
 
-                    If you do not surround the code using your identity with the `try` statement \
-                    and call `Binder.restoreCallingIdentity()` in the `finally` block, you may run \
+                    Any calls/operations between `Binder.clearCallingIdentity()` and `try` \
+                    statement risk throwing an exception without doing a safe and unconditional \
+                    restore of the identity with `Binder.restoreCallingIdentity()` as an immediate \
+                    child of the `finally` block. If you do not follow the pattern, you may run \
                     code with your identity that was originally intended to run with the calling \
                     application's identity.
                     """,
@@ -174,9 +179,54 @@ class CallingIdentityTokenIssueRegistry : IssueRegistry() {
                 )
         )
 
+        fun getIncidentMessageClearIdentityCallNotFollowedByTryFinally(
+            variableName: String
+        ): String = "You cleared the calling identity and returned the result into " +
+                "`$variableName`, but the next statement is not a `try`-`finally` statement. " +
+                "Define a `try`-`finally` block after `$variableName` declaration to ensure a " +
+                "safe restore of the calling identity by calling " +
+                "`Binder.restoreCallingIdentity($variableName)` and making it an immediate child " +
+                "of the `finally` block."
+
+        /** Issue: Binder.restoreCallingIdentity() is not in finally block */
+        @JvmField
+        val ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK: Issue = Issue.create(
+                id = "RestoreIdentityCallNotInFinallyBlock",
+                briefDescription = "Binder.restoreCallingIdentity() is not in finally block",
+                explanation = """
+                    You are restoring the original calling identity with \
+                    `Binder.restoreCallingIdentity()`, but the call is not an immediate child of \
+                    the `finally` block of the `try` statement.
+
+                    Use the following pattern for running operations with your own identity:
+
+                    ```
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        // Code using your own identity
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                    ```
+
+                    If you do not surround the code using your identity with the `try` statement \
+                    and call `Binder.restoreCallingIdentity()` as an immediate child of the \
+                    `finally` block, you may run code with your identity that was originally \
+                    intended to run with the calling application's identity.
+                    """,
+                category = Category.SECURITY,
+                priority = 6,
+                severity = Severity.WARNING,
+                implementation = Implementation(
+                        CallingIdentityTokenDetector::class.java,
+                        Scope.JAVA_FILE_SCOPE
+                )
+        )
+
         fun getIncidentMessageRestoreIdentityCallNotInFinallyBlock(variableName: String): String =
-                "`Binder.restoreCallingIdentity($variableName)` is not in the `finally` block. " +
-                        "Surround the call with `finally` block."
+                "`Binder.restoreCallingIdentity($variableName)` is not an immediate child of the " +
+                        "`finally` block of the try statement after `$variableName` declaration. " +
+                        "Surround the call with `finally` block and call it unconditionally."
 
         /** Issue: Use of caller-aware methods after Binder.clearCallingIdentity() */
         @JvmField

@@ -95,6 +95,7 @@ android_library {
         "SystemUI-proto",
         "dagger2",
         "jsr330",
+        "lottie",
     ],
     manifest: "AndroidManifest.xml",
 

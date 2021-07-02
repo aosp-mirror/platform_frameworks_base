@@ -35,7 +35,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 10;
+    int VERSION = 11;
 
     String TAG = "QS";
 
@@ -107,6 +107,20 @@ public interface QS extends FragmentBase {
      * Add a listener for when the collapsed media visibility changes.
      */
     void setCollapsedMediaVisibilityChangedListener(Consumer<Boolean> listener);
+
+    /**
+     * Set a scroll listener for the QSPanel container
+     */
+    default void setScrollListener(ScrollListener scrollListener) {}
+
+    /**
+     * Callback for when QSPanel container is scrolled
+     */
+    @ProvidesInterface(version = ScrollListener.VERSION)
+    interface ScrollListener {
+        int VERSION = 1;
+        void onQsPanelScrollChanged(int scrollY);
+    }
 
     @ProvidesInterface(version = HeightListener.VERSION)
     interface HeightListener {

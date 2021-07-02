@@ -136,7 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Camera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefoon"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Spraakassistent"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Portemonnee"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Ontgrendelen"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Apparaat vergrendeld"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Wachten op vingerafdruk"</string>
@@ -665,11 +665,13 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Demomodus tonen"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Wekker"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Portemonnee"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Zorg dat je sneller en beter beveiligd aankopen kunt doen met je telefoon"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Alles tonen"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Ontgrendelen om te betalen"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Niet ingesteld"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ontgrendelen om te gebruiken"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Er is een probleem opgetreden bij het ophalen van je kaarten. Probeer het later opnieuw."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Instellingen voor vergrendelscherm"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Gesprek openen"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Gesprekswidgets"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tik op een gesprek om het toe te voegen aan je startscherm"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Je ziet je recente gesprekken hier"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioriteitsgesprekken"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Recente gesprekken"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
