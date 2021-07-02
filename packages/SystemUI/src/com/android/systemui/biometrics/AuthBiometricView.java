@@ -759,6 +759,9 @@ public abstract class AuthBiometricView extends LinearLayout {
             // Restore positive button(s) state
             mConfirmButton.setVisibility(
                     mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_CONFIRM_VISIBILITY));
+            if (mConfirmButton.getVisibility() == View.GONE) {
+                setRequireConfirmation(false);
+            }
             mTryAgainButton.setVisibility(
                     mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY));
 

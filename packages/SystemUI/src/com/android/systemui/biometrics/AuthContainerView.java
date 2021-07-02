@@ -24,7 +24,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.PromptInfo;
@@ -356,6 +355,12 @@ public class AuthContainerView extends LinearLayout
                             (AuthBiometricFaceToFingerprintView) factory.inflate(
                                     R.layout.auth_biometric_face_to_fingerprint_view, null, false);
                     faceToFingerprintView.setFingerprintSensorProps(fingerprintSensorProps);
+                    faceToFingerprintView.setModalityListener(new ModalityListener() {
+                        @Override
+                        public void onModalitySwitched(int oldModality, int newModality) {
+                            maybeUpdatePositionForUdfps(true /* invalidate */);
+                        }
+                    });
                     mBiometricView = faceToFingerprintView;
                 } else {
                     Log.e(TAG, "Fingerprint props not found for sensor ID: " + fingerprintSensorId);
@@ -489,9 +494,7 @@ public class AuthContainerView extends LinearLayout
                     + mConfig.mPromptInfo.getAuthenticators());
         }
 
-        if (shouldUpdatePositionForUdfps()) {
-            updatePositionForUdfps();
-        }
+        maybeUpdatePositionForUdfps(false /* invalidate */);
 
         if (mConfig.mSkipIntro) {
             mContainerState = STATE_SHOWING;
@@ -536,14 +539,14 @@ public class AuthContainerView extends LinearLayout
         }
     }
 
-    private boolean shouldUpdatePositionForUdfps() {
-        if (mBiometricView instanceof AuthBiometricUdfpsView) {
+    private static boolean shouldUpdatePositionForUdfps(@NonNull View view) {
+        if (view instanceof AuthBiometricUdfpsView) {
             return true;
         }
 
-        if (mBiometricView instanceof AuthBiometricFaceToFingerprintView) {
+        if (view instanceof AuthBiometricFaceToFingerprintView) {
             AuthBiometricFaceToFingerprintView faceToFingerprintView =
-                    (AuthBiometricFaceToFingerprintView) mBiometricView;
+                    (AuthBiometricFaceToFingerprintView) view;
             return faceToFingerprintView.getActiveSensorType() == TYPE_FINGERPRINT
                     && faceToFingerprintView.isFingerprintUdfps();
         }
@@ -551,7 +554,11 @@ public class AuthContainerView extends LinearLayout
         return false;
     }
 
-    private void updatePositionForUdfps() {
+    private boolean maybeUpdatePositionForUdfps(boolean invalidate) {
+        if (!shouldUpdatePositionForUdfps(mBiometricView)) {
+            return false;
+        }
+
         final int displayRotation = getDisplay().getRotation();
         switch (displayRotation) {
             case Surface.ROTATION_0:
@@ -576,6 +583,13 @@ public class AuthContainerView extends LinearLayout
                 setScrollViewGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
                 break;
         }
+
+        if (invalidate) {
+            mPanelView.invalidateOutline();
+            mBiometricView.requestLayout();
+        }
+
+        return true;
     }
 
     private void setScrollViewGravity(int gravity) {
@@ -626,13 +640,6 @@ public class AuthContainerView extends LinearLayout
     @Override
     public void onAuthenticationFailed(@Modality int modality, String failureReason) {
         mBiometricView.onAuthenticationFailed(modality, failureReason);
-        if (mBiometricView instanceof AuthBiometricFaceToFingerprintView
-                && ((AuthBiometricFaceToFingerprintView) mBiometricView).isFingerprintUdfps()
-                && modality == BiometricAuthenticator.TYPE_FACE) {
-            updatePositionForUdfps();
-            mPanelView.invalidateOutline();
-            mBiometricView.requestLayout();
-        }
     }
 
     @Override

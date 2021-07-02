@@ -138,6 +138,31 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
     }
 
     @Test
+    public void testStateUpdated_whenSwitchToFingerprint_invokesCallbacks() {
+        class TestModalityListener implements ModalityListener {
+            public int switchCount = 0;
+
+            @Override
+            public void onModalitySwitched(int oldModality, int newModality) {
+                assertEquals(TYPE_FINGERPRINT, newModality);
+                assertEquals(TYPE_FACE, oldModality);
+                switchCount++;
+            }
+        }
+        final TestModalityListener modalityListener = new TestModalityListener();
+
+        mFaceToFpView.onDialogAnimatedIn();
+        mFaceToFpView.setModalityListener(modalityListener);
+
+        assertEquals(0, modalityListener.switchCount);
+
+        mFaceToFpView.updateState(AuthBiometricFaceToFingerprintView.STATE_ERROR);
+        mFaceToFpView.updateState(AuthBiometricFaceToFingerprintView.STATE_AUTHENTICATING);
+
+        assertEquals(1, modalityListener.switchCount);
+    }
+
+    @Test
     public void testModeUpdated_onSoftError_whenSwitchToFingerprint() {
         mFaceToFpView.onDialogAnimatedIn();
         mFaceToFpView.onAuthenticationFailed(TYPE_FACE, "no face");

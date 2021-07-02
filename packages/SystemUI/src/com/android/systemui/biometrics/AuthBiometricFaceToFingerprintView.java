@@ -90,6 +90,7 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     }
 
     @Modality private int mActiveSensorType = TYPE_FACE;
+    @Nullable private ModalityListener mModalityListener;
     @Nullable private FingerprintSensorPropertiesInternal mFingerprintSensorProps;
     @Nullable private UdfpsDialogMeasureAdapter mUdfpsMeasureAdapter;
 
@@ -113,6 +114,10 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
 
     boolean isFingerprintUdfps() {
         return mFingerprintSensorProps.isAnyUdfpsType();
+    }
+
+    void setModalityListener(@NonNull ModalityListener listener) {
+        mModalityListener = listener;
     }
 
     void setFingerprintSensorProps(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
@@ -182,11 +187,16 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     @Override
     public void updateState(@BiometricState int newState) {
         if (mState == STATE_HELP || mState == STATE_ERROR) {
+            @Modality final int currentType = mActiveSensorType;
             mActiveSensorType = TYPE_FINGERPRINT;
 
             setRequireConfirmation(false);
             mConfirmButton.setEnabled(false);
             mConfirmButton.setVisibility(View.GONE);
+
+            if (mModalityListener != null && currentType != mActiveSensorType) {
+                mModalityListener.onModalitySwitched(currentType, mActiveSensorType);
+            }
         }
 
         super.updateState(newState);
