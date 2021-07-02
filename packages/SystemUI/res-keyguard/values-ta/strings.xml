@@ -27,7 +27,7 @@
     <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"புதிய சிம் பின் குறியீடு"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"கடவுச்சொல்லை உள்ளிட, தொடவும்"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"அன்லாக் செய்ய கடவுச்சொல்லை உள்ளிடவும்"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"திறக்க, பின்னை உள்ளிடவும்"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"அன்லாக் செய்ய, பின்னை உள்ளிடவும்"</string>
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"பின்னை உள்ளிடுக"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"பேட்டர்னை உள்ளிடுக"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"கடவுச்சொல்லை உள்ளிடுக"</string>
