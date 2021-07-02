@@ -671,7 +671,7 @@
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ஆப்ஸிற்கான அனுமதி உபயோகத்தை ஹோல்டருக்கு வழங்கும். இயல்பான ஆப்ஸிற்கு இது எப்போதுமே தேவைப்படாது."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"கடவுச்சொல் விதிகளை அமைக்கவும்"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"திரைப் பூட்டின் கடவுச்சொற்கள் மற்றும் பின்களில் அனுமதிக்கப்படும் நீளத்தையும் எழுத்துக்குறிகளையும் கட்டுப்படுத்தும்."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"திரையைத் திறப்பதற்கான முயற்சிகளைக் கண்காணி"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"திரையை அன்லாக் செய்வதற்கான முயற்சிகளைக் கண்காணி"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"திரையைத் திறக்கும்போது உள்ளிட்ட தவறான கடவுச்சொற்களின் எண்ணிக்கையைக் கண்காணிக்கும், மேலும் கடவுச்சொற்கள் பலமுறை தவறாக உள்ளிட்டிருந்தால், டேப்லெட்டைப் பூட்டும் அல்லது டேப்லெட்டின் எல்லா தரவையும் அழிக்கும்."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"திரையைத் திறக்கும்போது எத்தனை முறை தவறான கடவுச்சொற்களை உள்ளிட்டீர்கள் என்பதைக் கண்காணிக்கும், பலமுறை தவறாக உள்ளிட்டிருந்தால் Android TVயைப் பூட்டும் அல்லது Android TVயின் அனைத்துத் தரவையும் அழிக்கும்."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"திரையைத் திறக்கும்போது உள்ளிட்ட தவறான கடவுச்சொற்களின் எண்ணிக்கையைக் கண்காணிக்கும், மேலும் கடவுச்சொற்கள் பலமுறை தவறாக உள்ளிட்டிருந்தால், மொபைலைப் பூட்டும் அல்லது மொபைலின் எல்லா தரவையும் அழிக்கும்."</string>
@@ -819,16 +819,16 @@
     <string name="keyguard_password_enter_puk_prompt" msgid="2825313071899938305">"PUK குறியீடு"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"புதிய பின் குறியீடு"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"கடவுச்சொல்லை உள்ளிட, தட்டவும்"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"திறக்க, கடவுச்சொல்லை உள்ளிடவும்"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"திறக்க, பின்னை உள்ளிடவும்"</string>
+    <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"அன்லாக் செய்ய, கடவுச்சொல்லை உள்ளிடவும்"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"அன்லாக் செய்ய, பின்னை உள்ளிடவும்"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"தவறான பின் குறியீடு."</string>
-    <string name="keyguard_label_text" msgid="3841953694564168384">"தடைநீக்க, மெனுவை அழுத்தி பின்பு 0 ஐ அழுத்தவும்."</string>
+    <string name="keyguard_label_text" msgid="3841953694564168384">"அன்லாக் செய்ய, மெனுவை அழுத்தி பின்பு 0 ஐ அழுத்தவும்."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"அவசர எண்"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"சேவை இல்லை"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"திரை பூட்டப்பட்டுள்ளது."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"தடைநீக்க மெனுவை அழுத்தவும் அல்லது அவசர அழைப்பை மேற்கொள்ளவும்."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"திறக்க, மெனுவை அழுத்தவும்."</string>
-    <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"திறக்க வடிவத்தை வரையவும்"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"அன்லாக் செய்ய மெனுவை அழுத்தவும் அல்லது அவசர அழைப்பை மேற்கொள்ளவும்."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"அன்லாக் செய்ய, மெனுவை அழுத்தவும்."</string>
+    <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"அன்லாக் செய்ய, வடிவத்தை வரையவும்"</string>
     <string name="lockscreen_emergency_call" msgid="7549683825868928636">"அவசர அழைப்பு"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"அழைப்பிற்குத் திரும்பு"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"சரி!"</string>
@@ -857,30 +857,30 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"பயனர் கையேட்டைப் பார்க்கவும் அல்லது வாடிக்கையாளர் சேவையைத் தொடர்புகொள்ளவும்."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"சிம் கார்டு பூட்டப்பட்டுள்ளது."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"சிம் கார்டைத் திறக்கிறது..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"திறப்பதற்கான வடிவத்தை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"அன்லாக் பேட்டர்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"உங்கள் கடவுச்சொல்லை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக உள்ளிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"உங்கள் பின்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக உள்ளிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"அன்லாக் வடிவத்தை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக வரைந்தால், உங்கள் Google உள்நுழைவைப் பயன்படுத்தி டேப்லெட்டை அன்லாக் செய்யுமாறு கேட்கப்படுவீர்கள். \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"அன்லாக் பேட்டர்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக வரைந்தால் உங்கள் Google உள்நுழைவைப் பயன்படுத்தி Android TVயை அன்லாக் செய்யுமாறு கேட்கப்படுவீர்கள். \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"அன்லாக் பேட்டர்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக வரைந்தால், உங்கள் Google உள்நுழைவைப் பயன்படுத்தி மொபைலை அன்லாக் செய்யுமாறு கேட்கப்படுவீர்கள். \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"டேப்லெட்டை அன்லாக் செய்ய <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, டேப்லெட்டானது ஆரம்ப இயல்புநிலைக்கு மீட்டமைக்கப்பட்டு, எல்லா பயனர் தரவும் இழக்கப்படும்."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"உங்கள் Android TVயில் <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டுத் திறக்க முயன்றுள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டு முயன்றால் உங்கள் Android TV ஆரம்ப நிலைக்கு மீட்டமைக்கப்படுவதுடன் பயனரின் அனைத்துத் தரவையும் இழக்க நேரிடும்."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"தொலைபேசியைத் தடைநீக்க <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, தொலைபேசியானது ஆரம்ப இயல்புநிலைக்கு மீட்டமைக்கப்பட்டு, எல்லா பயனர் தரவும் இழக்கப்படும்."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"நீங்கள் டேப்லெட்டைத் தடைநீக்க <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். டேப்லெட் இப்போது ஆரம்ப இயல்புநிலைக்கு மீட்டமைக்கப்படும்."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"உங்கள் Android TVயில் <xliff:g id="NUMBER">%d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டுத் திறக்க முயன்றுள்ளீர்கள். இப்போது உங்கள் Android TV ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"நீங்கள் தொலைபேசியைத் தடைநீக்க <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். தொலைபேசி இப்போது ஆரம்ப இயல்புநிலைக்கு மீட்டமைக்கப்படும்."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"உங்கள் Android TVயில் <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டு அன்லாக் செய்ய முயன்றுள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டு முயன்றால் உங்கள் Android TV ஆரம்ப நிலைக்கு மீட்டமைக்கப்படுவதுடன் பயனரின் அனைத்துத் தரவையும் இழக்க நேரிடும்."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"மொபைலை அன்லாக் செய்ய <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, மொபைல் ஆரம்ப இயல்புநிலைக்கு மீட்டமைக்கப்பட்டு, எல்லா பயனர் தரவும் இழக்கப்படும்."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"நீங்கள் டேப்லெட்டை அன்லாக் செய்ய <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். டேப்லெட் இப்போது ஆரம்ப இயல்புநிலைக்கு மீட்டமைக்கப்படும்."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"உங்கள் Android TVயில் <xliff:g id="NUMBER">%d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டு அன்லாக் செய்ய முயன்றுள்ளீர்கள். இப்போது உங்கள் Android TV ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"மொபைலை அன்லாக் செய்ய <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். மொபைல் இப்போது ஆரம்ப இயல்புநிலைக்கு மீட்டமைக்கப்படும்."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> வினாடிகள் கழித்து மீண்டும் முயற்சிக்கவும்."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"வடிவத்தை மறந்துவிட்டீர்களா?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"கணக்கை அன்லாக் செய்"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"அதிகமான வடிவ முயற்சிகள்"</string>
-    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"திறக்க, Google கணக்கு மூலம் உள்நுழையவும்."</string>
+    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"அன்லாக் செய்ய, Google கணக்கு மூலம் உள்நுழையவும்."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"பயனர்பெயர் (மின்னஞ்சல் முகவரி)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"கடவுச்சொல்"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"உள்நுழைக"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"தவறான பயனர்பெயர் அல்லது கடவுச்சொல்."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"உங்கள் பயனர்பெயர் அல்லது கடவுச்சொல்லை மறந்துவிட்டீர்களா?\n"<b>"google.com/accounts/recovery"</b>" ஐப் பார்வையிடவும்."</string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"சரிபார்க்கிறது..."</string>
-    <string name="lockscreen_unlock_label" msgid="4648257878373307582">"தடைநீக்கு"</string>
+    <string name="lockscreen_unlock_label" msgid="4648257878373307582">"அன்லாக்"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"ஒலியை இயக்கு"</string>
     <string name="lockscreen_sound_off_label" msgid="2331496559245450053">"ஒலியை முடக்கு"</string>
     <string name="lockscreen_access_pattern_start" msgid="3778502525702613399">"பேட்டர்ன் தொடங்கியது"</string>
@@ -892,7 +892,7 @@
     <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%1$s. விட்ஜெட் %2$d / %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"விட்ஜெட்டைச் சேர்க்கவும்."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"காலியானது"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"திறக்கும் பகுதி விரிவாக்கப்பட்டது."</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"அன்லாக் பகுதி விரிவாக்கப்பட்டது."</string>
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"அன்லாக் செய்வதற்கான பகுதி சுருக்கப்பட்டது."</string>
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> விட்ஜெட்."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"பயனர் தேர்வி"</string>
@@ -903,13 +903,13 @@
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"விட்ஜெட்டை மீண்டும் வரிசைப்படுத்துவது முடிந்தது."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"விட்ஜெட் <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> நீக்கப்பட்டது."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"அன்லாக் செய்வதற்கான பகுதியை விரிவாக்கவும்"</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ஸ்லைடு மூலம் திறத்தல்."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"பேட்டர்ன் மூலம் திறத்தல்."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ஸ்லைடு அன்லாக்."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"பேட்டர்ன் அன்லாக்."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"முகம் காட்டித் திறத்தல்."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin மூலம் திறத்தல்."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin அன்லாக்."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"சிம் பின் அன்லாக்."</string>
-    <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"சிம்மைத் திறக்கும் Puk."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"கடவுச்சொல் மூலம் திறத்தல்."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"சிம் Puk அன்லாக்."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"கடவுச்சொல் மூலம் அன்லாக் செய்தல்."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"வடிவப் பகுதி."</string>
     <string name="keyguard_accessibility_slide_area" msgid="4331399051142520176">"ஸ்லைடு பகுதி."</string>
     <string name="password_keyboard_label_symbol_key" msgid="2716255580853511949">"?123"</string>
@@ -1413,6 +1413,8 @@
     <string name="deny" msgid="6632259981847676572">"நிராகரி"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"அனுமதிக் கோரப்பட்டது"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> கணக்கிற்கான அனுமதி\nகோரப்பட்டது."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"இந்தப் பயன்பாட்டைப் பணிக் கணக்கிற்கு வெளியே பயன்படுத்துகிறீர்கள்"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"பணிக் கணக்கில் பயன்பாட்டைப் பயன்படுத்துகிறீர்கள்"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"உள்ளீட்டு முறை"</string>
@@ -1607,16 +1609,16 @@
     <string name="kg_login_checking_password" msgid="4676010303243317253">"கணக்கைச் சரிபார்க்கிறது…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"உங்கள் பின்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக உள்ளிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"உங்கள் கடவுச்சொல்லை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக உள்ளிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"திறப்பதற்கான வடிவத்தை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயற்சிக்கவும்."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"டேப்லெட்டைத் திறக்க <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, டேப்லெட்டானது ஆரம்பநிலைக்கு மீட்டமைக்கப்பட்டு, எல்லா பயனர் தரவையும் இழப்பீர்கள்."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"உங்கள் Android TVயில் <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டுத் திறக்க முயன்றுள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டு முயன்றால் உங்கள் Android TV ஆரம்ப நிலைக்கு மீட்டமைக்கப்படுவதுடன் பயனரின் அனைத்துத் தரவையும் இழக்க நேரிடும்."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"மொபைலைத் திறக்க <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு,மொபைலானது ஆரம்பநிலைக்கு மீட்டமைக்கப்பட்டு, எல்லா பயனர் தரவையும் இழப்பீர்கள்."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"அன்லாக் பேட்டர்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயற்சிக்கவும்."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"டேப்லெட்டை அன்லாக் செய்ய <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, டேப்லெட்டானது ஆரம்பநிலைக்கு மீட்டமைக்கப்பட்டு, எல்லா பயனர் தரவையும் இழப்பீர்கள்."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"உங்கள் Android TVயில் <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டு அன்லாக் செய்ய முயன்றுள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டு முயன்றால் உங்கள் Android TV ஆரம்ப நிலைக்கு மீட்டமைக்கப்படுவதுடன் பயனரின் அனைத்துத் தரவையும் இழக்க நேரிடும்."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"மொபைலை அன்லாக் செய்ய <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு,மொபைலானது ஆரம்பநிலைக்கு மீட்டமைக்கப்பட்டு, எல்லா பயனர் தரவையும் இழப்பீர்கள்."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"டேப்லெட்டை அன்லாக் செய்ய <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். டேப்லெட் இப்போது ஆரம்பநிலைக்கு மீட்டமைக்கப்படும்."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"உங்கள் Android TVயில் <xliff:g id="NUMBER">%d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டுத் திறக்க முயன்றுள்ளீர்கள். இப்போது உங்கள் Android TV ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"மொபைலைத் திறக்க <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். மொபைல் இப்போது ஆரம்பநிலைக்கு மீட்டமைக்கப்படும்."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"திறப்பதற்கான வடிவத்தை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். மேலும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, மின்னஞ்சல் கணக்கைப் பயன்படுத்தி உங்கள் டேப்லெட்டைத் திறக்க கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகளில் மீண்டும் முயற்சிக்கவும்."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"திறப்பதற்கான பேட்டர்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக வரைந்தால் மின்னஞ்சல் கணக்கைப் பயன்படுத்தி Android TVயைத் திறக்கும்படி கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"அன்லாக் வடிவத்தை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். மேலும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, மின்னஞ்சல் கணக்கைப் பயன்படுத்தி உங்கள் மொபைலை அன்லாக் செய்யக் கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"உங்கள் Android TVயில் <xliff:g id="NUMBER">%d</xliff:g> முறை தவறான கடவுச்சொல்லை உள்ளிட்டு அன்லாக் செய்ய முயன்றுள்ளீர்கள். இப்போது உங்கள் Android TV ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"மொபைலை அன்லாக் செய்ய <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். மொபைல் இப்போது ஆரம்பநிலைக்கு மீட்டமைக்கப்படும்."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"அன்லாக் பேட்டர்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். மேலும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, மின்னஞ்சல் கணக்கைப் பயன்படுத்தி உங்கள் டேப்லெட்டை அன்லாக் செய்யும்படிக் கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகளில் மீண்டும் முயற்சிக்கவும்."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"அன்லாக் பேட்டர்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக வரைந்தால் மின்னஞ்சல் கணக்கைப் பயன்படுத்தி Android TVயை அன்லாக் செய்யும்படிக் கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"அன்லாக் பேட்டர்னை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். மேலும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, மின்னஞ்சல் கணக்கைப் பயன்படுத்தி உங்கள் மொபைலை அன்லாக் செய்யும்படிக் கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"அகற்று"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"பரிந்துரைத்த அளவை விட ஒலியை அதிகரிக்கவா?\n\nநீண்ட நேரத்திற்கு அதிகளவில் ஒலி கேட்பது கேட்கும் திறனைப் பாதிக்கலாம்."</string>

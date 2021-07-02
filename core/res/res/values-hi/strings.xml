@@ -1413,6 +1413,8 @@
     <string name="deny" msgid="6632259981847676572">"अस्वीकारें"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"अनुमति अनुरोधित"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> खाते के लिए अनुमति\nका अनुरोध किया गया."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"आप इस ऐप्स का उपयोग अपनी वर्क प्रोफ़ाइल से बाहर कर रहे हैं"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"आप इस ऐप्स का उपयोग अपनी वर्क प्रोफ़ाइल में कर रहे हैं"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"इनपुट विधि"</string>
@@ -1512,7 +1514,7 @@
     <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD कार्ड"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB डिस्‍क"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB डिस्‍क"</string>
-    <string name="storage_usb" msgid="2391213347883616886">"USB मेमोरी"</string>
+    <string name="storage_usb" msgid="2391213347883616886">"USB स्टोरेज"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"बदलाव करें"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"डेटा खर्च की चेतावनी"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"आप <xliff:g id="APP">%s</xliff:g> डेटा इस्तेमाल कर चुके हैं"</string>

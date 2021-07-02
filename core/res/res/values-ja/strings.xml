@@ -1413,6 +1413,7 @@
     <string name="deny" msgid="6632259981847676572">"拒否"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"権限がリクエストされました"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"次のアカウントにアクセスする権限が\nリクエストされました: <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"アカウント <xliff:g id="ACCOUNT">%2$s</xliff:g> へのアクセス権限が\n<xliff:g id="APP">%1$s</xliff:g> からリクエストされました。"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"仕事用プロファイルの外部でこのアプリを使用しています"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"仕事用プロファイルでこのアプリを使用しています"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"入力方法"</string>
