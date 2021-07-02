@@ -42,6 +42,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -101,7 +102,7 @@ public class ResourcesManager {
      * ApplicationInfo changes that need to be applied to Resources when the next configuration
      * change occurs.
      */
-    private ArrayList<ApplicationInfo> mPendingAppInfoUpdates;
+    private ArrayList<Pair<String[], ApplicationInfo>> mPendingAppInfoUpdates;
 
     /**
      * A mapping of ResourceImpls and their configurations. These are heavy weight objects
@@ -1273,19 +1274,33 @@ public class ResourcesManager {
         return newKey;
     }
 
-    public void updatePendingAppInfoUpdates(@NonNull ApplicationInfo appInfo) {
+    public void appendPendingAppInfoUpdate(@NonNull String[] oldSourceDirs,
+            @NonNull ApplicationInfo appInfo) {
         synchronized (mLock) {
             if (mPendingAppInfoUpdates == null) {
                 mPendingAppInfoUpdates = new ArrayList<>();
             }
-            // Clear previous app info changes for the package to prevent multiple ResourcesImpl
-            // recreations when only the last recreation will be used.
+            // Clear previous app info changes for a package to prevent multiple ResourcesImpl
+            // recreations when the recreation caused by this update completely overrides the
+            // previous pending changes.
             for (int i = mPendingAppInfoUpdates.size() - 1; i >= 0; i--) {
-                if (appInfo.sourceDir.equals(mPendingAppInfoUpdates.get(i).sourceDir)) {
+                if (ArrayUtils.containsAll(oldSourceDirs, mPendingAppInfoUpdates.get(i).first)) {
                     mPendingAppInfoUpdates.remove(i);
                 }
             }
-            mPendingAppInfoUpdates.add(appInfo);
+            mPendingAppInfoUpdates.add(new Pair<>(oldSourceDirs, appInfo));
+        }
+    }
+
+    public final void applyAllPendingAppInfoUpdates() {
+        synchronized (mLock) {
+            if (mPendingAppInfoUpdates != null) {
+                for (int i = 0, n = mPendingAppInfoUpdates.size(); i < n; i++) {
+                    final Pair<String[], ApplicationInfo> appInfo = mPendingAppInfoUpdates.get(i);
+                    applyNewResourceDirsLocked(appInfo.first, appInfo.second);
+                }
+                mPendingAppInfoUpdates = null;
+            }
         }
     }
 
@@ -1302,18 +1317,7 @@ public class ResourcesManager {
                 Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
                         "ResourcesManager#applyConfigurationToResources");
 
-                final boolean assetsUpdated = mPendingAppInfoUpdates != null
-                        && config.assetsSeq > mResConfiguration.assetsSeq;
-                if (assetsUpdated) {
-                    for (int i = 0, n = mPendingAppInfoUpdates.size(); i < n; i++) {
-                        final ApplicationInfo appInfo = mPendingAppInfoUpdates.get(i);
-                        applyNewResourceDirs(appInfo, new String[]{appInfo.sourceDir});
-                    }
-                    mPendingAppInfoUpdates = null;
-                }
-
-                if (!assetsUpdated && !mResConfiguration.isOtherSeqNewer(config)
-                        && compat == null) {
+                if (!mResConfiguration.isOtherSeqNewer(config) && compat == null) {
                     if (DEBUG || DEBUG_CONFIGURATION) {
                         Slog.v(TAG, "Skipping new config: curSeq="
                                 + mResConfiguration.seq + ", newSeq=" + config.seq);
@@ -1328,6 +1332,13 @@ public class ResourcesManager {
                     changes |= ActivityInfo.CONFIG_SCREEN_LAYOUT
                             | ActivityInfo.CONFIG_SCREEN_SIZE
                             | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+                }
+
+                // If a application info update was scheduled to occur in this process but has not
+                // occurred yet, apply it now so the resources objects will have updated paths when
+                // the assets sequence changes.
+                if ((changes & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
+                    applyAllPendingAppInfoUpdates();
                 }
 
                 DisplayMetrics displayMetrics = getDisplayMetrics();
@@ -1353,7 +1364,7 @@ public class ResourcesManager {
                     }
                 }
 
-                return assetsUpdated || changes != 0;
+                return changes != 0;
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
             }
@@ -1440,61 +1451,58 @@ public class ResourcesManager {
         }
     }
 
-    // TODO(adamlesinski): Make this accept more than just overlay directories.
-    void applyNewResourceDirs(@NonNull final ApplicationInfo appInfo,
-            @Nullable final String[] oldPaths) {
-        synchronized (mLock) {
-            try {
-                Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
-                        "ResourcesManager#applyNewResourceDirsLocked");
+    private void applyNewResourceDirsLocked(@Nullable final String[] oldSourceDirs,
+            @NonNull final ApplicationInfo appInfo) {
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
+                    "ResourcesManager#applyNewResourceDirsLocked");
 
-                String baseCodePath = appInfo.getBaseCodePath();
+            String baseCodePath = appInfo.getBaseCodePath();
 
-                final int myUid = Process.myUid();
-                String[] newSplitDirs = appInfo.uid == myUid
-                        ? appInfo.splitSourceDirs
-                        : appInfo.splitPublicSourceDirs;
+            final int myUid = Process.myUid();
+            String[] newSplitDirs = appInfo.uid == myUid
+                    ? appInfo.splitSourceDirs
+                    : appInfo.splitPublicSourceDirs;
 
-                // ApplicationInfo is mutable, so clone the arrays to prevent outside modification
-                String[] copiedSplitDirs = ArrayUtils.cloneOrNull(newSplitDirs);
-                String[] copiedResourceDirs = combinedOverlayPaths(appInfo.resourceDirs,
-                        appInfo.overlayPaths);
+            // ApplicationInfo is mutable, so clone the arrays to prevent outside modification
+            String[] copiedSplitDirs = ArrayUtils.cloneOrNull(newSplitDirs);
+            String[] copiedResourceDirs = combinedOverlayPaths(appInfo.resourceDirs,
+                    appInfo.overlayPaths);
 
-                if (appInfo.uid == myUid) {
-                    addApplicationPathsLocked(baseCodePath, copiedSplitDirs);
-                }
-
-                final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
-                final int implCount = mResourceImpls.size();
-                for (int i = 0; i < implCount; i++) {
-                    final ResourcesKey key = mResourceImpls.keyAt(i);
-                    final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
-                    final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
-
-                    if (impl == null) {
-                        continue;
-                    }
-
-                    if (key.mResDir == null
-                            || key.mResDir.equals(baseCodePath)
-                            || ArrayUtils.contains(oldPaths, key.mResDir)) {
-                        updatedResourceKeys.put(impl, new ResourcesKey(
-                                baseCodePath,
-                                copiedSplitDirs,
-                                copiedResourceDirs,
-                                key.mLibDirs,
-                                key.mDisplayId,
-                                key.mOverrideConfiguration,
-                                key.mCompatInfo,
-                                key.mLoaders
-                        ));
-                    }
-                }
-
-                redirectResourcesToNewImplLocked(updatedResourceKeys);
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+            if (appInfo.uid == myUid) {
+                addApplicationPathsLocked(baseCodePath, copiedSplitDirs);
             }
+
+            final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
+            final int implCount = mResourceImpls.size();
+            for (int i = 0; i < implCount; i++) {
+                final ResourcesKey key = mResourceImpls.keyAt(i);
+                final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
+                final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
+
+                if (impl == null) {
+                    continue;
+                }
+
+                if (key.mResDir == null
+                        || key.mResDir.equals(baseCodePath)
+                        || ArrayUtils.contains(oldSourceDirs, key.mResDir)) {
+                    updatedResourceKeys.put(impl, new ResourcesKey(
+                            baseCodePath,
+                            copiedSplitDirs,
+                            copiedResourceDirs,
+                            key.mLibDirs,
+                            key.mDisplayId,
+                            key.mOverrideConfiguration,
+                            key.mCompatInfo,
+                            key.mLoaders
+                    ));
+                }
+            }
+
+            redirectResourcesToNewImplLocked(updatedResourceKeys);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
     }
 
