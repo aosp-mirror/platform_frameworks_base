@@ -112,7 +112,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     public void onError(int errorCode, int vendorCode) {
         super.onError(errorCode, vendorCode);
 
-        if (errorCode == BiometricFingerprintConstants.FINGERPRINT_ERROR_BAD_CALIBARTION) {
+        if (errorCode == BiometricFingerprintConstants.FINGERPRINT_ERROR_BAD_CALIBRATION) {
             BiometricNotificationUtils.showBadCalibrationNotification(getContext());
         }
 
