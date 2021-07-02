@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.notification.collection.legacy.Notificatio
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.KeyguardBypassEnabledProvider;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
@@ -101,6 +102,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private KeyguardBypassEnabledProvider mKeyguardBypassEnabledProvider;
+    @Mock private KeyguardBypassController mBypassController;
     @Mock private NotificationSectionsManager mNotificationSectionsManager;
     @Mock private NotificationSection mNotificationSection;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
@@ -132,7 +134,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
         // Interact with real instance of AmbientState.
-        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager);
+        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController);
 
         // The actual class under test.  You may need to work with this class directly when
         // testing anonymous class members of mStackScroller, like mMenuEventListener,
