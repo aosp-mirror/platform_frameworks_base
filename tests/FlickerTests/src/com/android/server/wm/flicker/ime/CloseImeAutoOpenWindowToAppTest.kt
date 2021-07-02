@@ -21,7 +21,6 @@ import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -118,11 +117,11 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
     @Test
     fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerVisibleStart() {
         testSpec.assertLayersStart {
@@ -130,7 +129,7 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerInvisibleEnd() {
         testSpec.assertLayersEnd {
@@ -150,13 +149,13 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
         }
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun navBarLayerRotatesAndScales() {
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun statusBarLayerRotatesScales() {
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation)

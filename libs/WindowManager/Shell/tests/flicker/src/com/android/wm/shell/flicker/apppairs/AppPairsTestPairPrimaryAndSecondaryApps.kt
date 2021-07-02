@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.apppairs
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -57,6 +58,10 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
                 waitAppsShown(primaryApp, secondaryApp)
             }
         }
+
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
     @FlakyTest
     @Test

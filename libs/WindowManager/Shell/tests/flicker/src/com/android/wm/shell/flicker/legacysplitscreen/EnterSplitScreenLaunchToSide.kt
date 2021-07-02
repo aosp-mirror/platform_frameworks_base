@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -94,6 +95,11 @@ class EnterSplitScreenLaunchToSide(
     @Presubmit
     @Test
     fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
+
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

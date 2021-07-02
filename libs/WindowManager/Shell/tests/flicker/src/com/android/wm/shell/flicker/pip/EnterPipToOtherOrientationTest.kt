@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -82,6 +83,14 @@ class EnterPipToOtherOrientationTest(
             }
         }
 
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
+
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
@@ -92,9 +101,7 @@ class EnterPipToOtherOrientationTest(
 
     @FlakyTest
     @Test
-    override fun noUncoveredRegions() {
-        super.noUncoveredRegions()
-    }
+    override fun noUncoveredRegions() = super.noUncoveredRegions()
 
     @Presubmit
     @Test

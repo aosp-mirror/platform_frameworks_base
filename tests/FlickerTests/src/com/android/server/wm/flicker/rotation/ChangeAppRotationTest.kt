@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -66,7 +65,7 @@ class ChangeAppRotationTest(
         super.focusDoesNotChange()
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun screenshotLayerBecomesInvisible() {
         testSpec.assertLayers {
@@ -90,7 +89,7 @@ class ChangeAppRotationTest(
         testSpec.statusBarLayerIsVisible()
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarLayerRotatesScales() {
         testSpec.statusBarLayerRotatesScales(
