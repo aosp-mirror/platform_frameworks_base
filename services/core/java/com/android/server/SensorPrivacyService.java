@@ -94,6 +94,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -162,6 +163,7 @@ public final class SensorPrivacyService extends SystemService {
     private static final String XML_ATTRIBUTE_PERSISTENCE_VERSION = "persistence-version";
     private static final String XML_ATTRIBUTE_VERSION = "version";
     private static final String XML_ATTRIBUTE_ENABLED = "enabled";
+    private static final String XML_ATTRIBUTE_LAST_CHANGE = "last-change";
     private static final String XML_ATTRIBUTE_SENSOR = "sensor";
 
     private static final String SENSOR_PRIVACY_CHANNEL_ID = Context.SENSOR_PRIVACY_SERVICE;
@@ -248,7 +250,7 @@ public final class SensorPrivacyService extends SystemService {
         @GuardedBy("mLock")
         private SparseBooleanArray mEnabled = new SparseBooleanArray();
         @GuardedBy("mLock")
-        private SparseArray<SparseBooleanArray> mIndividualEnabled = new SparseArray<>();
+        private SparseArray<SparseArray<SensorState>> mIndividualEnabled = new SparseArray<>();
 
         /**
          * Packages for which not to show sensor use reminders.
@@ -261,6 +263,42 @@ public final class SensorPrivacyService extends SystemService {
 
         private final ArrayMap<SensorUseReminderDialogInfo, ArraySet<Integer>>
                 mQueuedSensorUseReminderDialogs = new ArrayMap<>();
+
+        private class SensorState {
+            private boolean mEnabled;
+            private long mLastChange;
+
+            SensorState(boolean enabled) {
+                mEnabled = enabled;
+                mLastChange = getCurrentTimeMillis();
+            }
+
+            SensorState(boolean enabled, long lastChange) {
+                mEnabled = enabled;
+                if (lastChange < 0) {
+                    mLastChange = getCurrentTimeMillis();
+                } else {
+                    mLastChange = lastChange;
+                }
+            }
+
+            boolean setEnabled(boolean enabled) {
+                if (mEnabled != enabled) {
+                    mEnabled = enabled;
+                    mLastChange = getCurrentTimeMillis();
+                    return true;
+                }
+                return false;
+            }
+
+            private long getCurrentTimeMillis() {
+                try {
+                    return SystemClock.currentNetworkTimeMillis();
+                } catch (Exception e) {
+                    return System.currentTimeMillis();
+                }
+            }
+        }
 
         private class SensorUseReminderDialogInfo {
             private int mTaskId;
@@ -680,9 +718,18 @@ public final class SensorPrivacyService extends SystemService {
 
         private void setIndividualSensorPrivacyUnchecked(int userId, int sensor, boolean enable) {
             synchronized (mLock) {
-                SparseBooleanArray userIndividualEnabled = mIndividualEnabled.get(userId,
-                        new SparseBooleanArray());
-                userIndividualEnabled.put(sensor, enable);
+                SparseArray<SensorState> userIndividualEnabled = mIndividualEnabled.get(userId,
+                        new SparseArray<>());
+                SensorState sensorState = userIndividualEnabled.get(sensor);
+                if (sensorState != null) {
+                    if (!sensorState.setEnabled(enable)) {
+                        // State not changing
+                        return;
+                    }
+                } else {
+                    sensorState = new SensorState(enable);
+                    userIndividualEnabled.put(sensor, sensorState);
+                }
                 mIndividualEnabled.put(userId, userIndividualEnabled);
 
                 if (!enable) {
@@ -828,11 +875,15 @@ public final class SensorPrivacyService extends SystemService {
         public boolean isIndividualSensorPrivacyEnabled(@UserIdInt int userId, int sensor) {
             enforceObserveSensorPrivacyPermission();
             synchronized (mLock) {
-                SparseBooleanArray states = mIndividualEnabled.get(userId);
+                SparseArray<SensorState> states = mIndividualEnabled.get(userId);
                 if (states == null) {
                     return false;
                 }
-                return states.get(sensor, false);
+                SensorState state = states.get(sensor);
+                if (state == null) {
+                    return false;
+                }
+                return state.mEnabled;
             }
         }
 
@@ -857,7 +908,7 @@ public final class SensorPrivacyService extends SystemService {
                     // these should never be changed even with refactorings.
                     if (persistenceVersion == 0) {
                         boolean enabled = parser.getAttributeBoolean(null, "enabled", false);
-                        SparseBooleanArray individualEnabled = new SparseBooleanArray();
+                        SparseArray<SensorState> individualEnabled = new SparseArray<>();
                         version = 0;
 
                         XmlUtils.nextElement(parser);
@@ -867,7 +918,7 @@ public final class SensorPrivacyService extends SystemService {
                                 int sensor = XmlUtils.readIntAttribute(parser, "sensor");
                                 boolean indEnabled = XmlUtils.readBooleanAttribute(parser,
                                         "enabled");
-                                individualEnabled.put(sensor, indEnabled);
+                                individualEnabled.put(sensor, new SensorState(indEnabled));
                                 XmlUtils.skipCurrentTag(parser);
                             } else {
                                 XmlUtils.nextElement(parser);
@@ -877,7 +928,8 @@ public final class SensorPrivacyService extends SystemService {
                         map.put(VER0_INDIVIDUAL_ENABLED, individualEnabled);
                     } else if (persistenceVersion == CURRENT_PERSISTENCE_VERSION) {
                         SparseBooleanArray enabled = new SparseBooleanArray();
-                        SparseArray<SparseBooleanArray> individualEnabled = new SparseArray<>();
+                        SparseArray<SparseArray<SensorState>> individualEnabled =
+                                new SparseArray<>();
                         version = parser.getAttributeInt(null,
                                 XML_ATTRIBUTE_VERSION, 1);
 
@@ -913,10 +965,13 @@ public final class SensorPrivacyService extends SystemService {
                                 int sensor = parser.getAttributeInt(null, XML_ATTRIBUTE_SENSOR);
                                 boolean isEnabled = parser.getAttributeBoolean(null,
                                         XML_ATTRIBUTE_ENABLED);
-                                SparseBooleanArray userIndividualEnabled = individualEnabled.get(
-                                        currentUserId, new SparseBooleanArray());
+                                long lastChange = parser
+                                        .getAttributeLong(null, XML_ATTRIBUTE_LAST_CHANGE, -1);
+                                SparseArray<SensorState> userIndividualEnabled =
+                                        individualEnabled.get(currentUserId, new SparseArray<>());
 
-                                userIndividualEnabled.put(sensor, isEnabled);
+                                userIndividualEnabled
+                                        .put(sensor, new SensorState(isEnabled, lastChange));
                                 individualEnabled.put(currentUserId, userIndividualEnabled);
                             }
                         }
@@ -949,7 +1004,7 @@ public final class SensorPrivacyService extends SystemService {
                 mEnabled = new SparseBooleanArray();
                 mIndividualEnabled = new SparseArray<>();
                 forAllUsers(userId -> mEnabled.put(userId, false));
-                forAllUsers(userId -> mIndividualEnabled.put(userId, new SparseBooleanArray()));
+                forAllUsers(userId -> mIndividualEnabled.put(userId, new SparseArray<>()));
                 return true;
             }
             boolean upgraded = false;
@@ -986,7 +1041,7 @@ public final class SensorPrivacyService extends SystemService {
             if (version == CURRENT_VERSION) {
                 mEnabled = (SparseBooleanArray) map.get(VER1_ENABLED);
                 mIndividualEnabled =
-                        (SparseArray<SparseBooleanArray>) map.get(VER1_INDIVIDUAL_ENABLED);
+                        (SparseArray<SparseArray<SensorState>>) map.get(VER1_INDIVIDUAL_ENABLED);
             }
             return upgraded;
         }
@@ -1016,15 +1071,18 @@ public final class SensorPrivacyService extends SystemService {
                     serializer.attributeBoolean(
                             null, XML_ATTRIBUTE_ENABLED, isSensorPrivacyEnabled(userId));
 
-                    SparseBooleanArray individualEnabled =
-                            mIndividualEnabled.get(userId, new SparseBooleanArray());
+                    SparseArray<SensorState> individualEnabled =
+                            mIndividualEnabled.get(userId, new SparseArray<>());
                     int numIndividual = individualEnabled.size();
                     for (int i = 0; i < numIndividual; i++) {
                         serializer.startTag(null, XML_TAG_INDIVIDUAL_SENSOR_PRIVACY);
                         int sensor = individualEnabled.keyAt(i);
-                        boolean enabled = individualEnabled.valueAt(i);
+                        SensorState sensorState = individualEnabled.valueAt(i);
+                        boolean enabled = sensorState.mEnabled;
+                        long lastChange = sensorState.mLastChange;
                         serializer.attributeInt(null, XML_ATTRIBUTE_SENSOR, sensor);
                         serializer.attributeBoolean(null, XML_ATTRIBUTE_ENABLED, enabled);
+                        serializer.attributeLong(null, XML_ATTRIBUTE_LAST_CHANGE, lastChange);
                         serializer.endTag(null, XML_TAG_INDIVIDUAL_SENSOR_PRIVACY);
                     }
                     serializer.endTag(null, XML_TAG_USER);
@@ -1229,7 +1287,7 @@ public final class SensorPrivacyService extends SystemService {
                     dumpStream.write("is_enabled", SensorPrivacyUserProto.IS_ENABLED,
                             mEnabled.get(userId, false));
 
-                    SparseBooleanArray individualEnabled = mIndividualEnabled.get(userId);
+                    SparseArray<SensorState> individualEnabled = mIndividualEnabled.get(userId);
                     if (individualEnabled != null) {
                         int numIndividualEnabled = individualEnabled.size();
                         for (int i = 0; i < numIndividualEnabled; i++) {
@@ -1241,7 +1299,8 @@ public final class SensorPrivacyService extends SystemService {
                                     individualEnabled.keyAt(i));
                             dumpStream.write("is_enabled",
                                     SensorPrivacyIndividualEnabledSensorProto.IS_ENABLED,
-                                    individualEnabled.valueAt(i));
+                                    individualEnabled.valueAt(i).mEnabled);
+                            // TODO dump last change
 
                             dumpStream.end(individualToken);
                         }
@@ -1321,7 +1380,7 @@ public final class SensorPrivacyService extends SystemService {
                             enforceManageSensorPrivacyPermission();
 
                             synchronized (mLock) {
-                                SparseBooleanArray individualEnabled =
+                                SparseArray<SensorState> individualEnabled =
                                         mIndividualEnabled.get(userId);
                                 if (individualEnabled != null) {
                                     individualEnabled.delete(sensor);
