@@ -489,7 +489,7 @@ final class ActivityManagerConstants extends ContentObserver {
     volatile long mFgsStartForegroundTimeoutMs = DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS;
 
     /**
-     * Sample rate for the FGS westworld atom.
+     * Sample rate for the FGS atom.
      *
      * If the value is 0.1, 10% of the installed packages would be sampled.
      */

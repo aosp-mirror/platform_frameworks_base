@@ -45,7 +45,7 @@ import java.util.Objects;
 import java.util.Random;
 
 /**
- * Logger Implementation using Westworld.
+ * Logger Implementation to log to statsd.
  *
  * <p>This class is thread-safe.
  *
@@ -95,7 +95,7 @@ public final class PlatformLogger implements AppSearchLogger {
     private long mLastPushTimeMillisLocked = 0;
 
     /**
-     * Helper class to hold platform specific stats for Westworld.
+     * Helper class to hold platform specific stats for statsd.
      */
     static final class ExtraStats {
         // UID for the calling package of the stats.
@@ -113,7 +113,7 @@ public final class PlatformLogger implements AppSearchLogger {
     }
 
     /**
-     * Westworld constructor
+     * Constructor
      */
     public PlatformLogger(
             @NonNull Context userContext,
