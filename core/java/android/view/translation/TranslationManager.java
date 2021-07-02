@@ -168,8 +168,10 @@ public final class TranslationManager {
                                 return;
                             }
 
-                            mTranslators.put(tId, translator);
-                            mTranslatorIds.put(translationContext, tId);
+                            synchronized (mLock) {
+                                mTranslators.put(tId, translator);
+                                mTranslatorIds.put(translationContext, tId);
+                            }
                             final long token = Binder.clearCallingIdentity();
                             try {
                                 executor.execute(() -> callback.accept(translator));
