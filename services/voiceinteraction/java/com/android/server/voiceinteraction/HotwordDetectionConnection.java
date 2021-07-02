@@ -92,6 +92,7 @@ final class HotwordDetectionConnection {
     private final ScheduledExecutorService mScheduledExecutorService =
             Executors.newSingleThreadScheduledExecutor();
     private final AtomicBoolean mUpdateStateAfterStartFinished = new AtomicBoolean(false);
+    private final IBinder.DeathRecipient mAudioServerDeathRecipient = this::audioServerDied;
     private final @NonNull ServiceConnectionFactory mServiceConnectionFactory;
 
     final Object mLock;
@@ -113,6 +114,7 @@ final class HotwordDetectionConnection {
     @GuardedBy("mLock")
     private boolean mPerformingSoftwareHotwordDetection;
     private @NonNull ServiceConnection mRemoteHotwordDetectionService;
+    private IBinder mAudioFlinger;
 
     HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
             ComponentName serviceName, int userId, boolean bindInstantServiceAllowed,
@@ -125,10 +127,11 @@ final class HotwordDetectionConnection {
         mUser = userId;
         final Intent intent = new Intent(HotwordDetectionService.SERVICE_INTERFACE);
         intent.setComponent(mDetectionComponentName);
+        initAudioFlingerLocked();
 
         mServiceConnectionFactory = new ServiceConnectionFactory(intent, bindInstantServiceAllowed);
 
-        mRemoteHotwordDetectionService = mServiceConnectionFactory.create();
+        mRemoteHotwordDetectionService = mServiceConnectionFactory.createLocked();
 
         if (callback == null) {
             updateStateLocked(options, sharedMemory);
@@ -150,6 +153,37 @@ final class HotwordDetectionConnection {
                 restartProcessLocked();
             }
         }, 30, 30, TimeUnit.MINUTES);
+    }
+
+    private void initAudioFlingerLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "initAudioFlingerLocked");
+        }
+        mAudioFlinger = ServiceManager.waitForService("media.audio_flinger");
+        if (mAudioFlinger == null) {
+            throw new IllegalStateException("Service media.audio_flinger wasn't found.");
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "Obtained audio_flinger binder.");
+        }
+        try {
+            mAudioFlinger.linkToDeath(mAudioServerDeathRecipient, /* flags= */ 0);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Audio server died before we registered a DeathRecipient; retrying init.",
+                    e);
+            initAudioFlingerLocked();
+        }
+    }
+
+    private void audioServerDied() {
+        Slog.w(TAG, "Audio server died; restarting the HotwordDetectionService.");
+        synchronized (mLock) {
+            // TODO: Check if this needs to be scheduled on a different thread.
+            initAudioFlingerLocked();
+            // We restart the process instead of simply sending over the new binder, to avoid race
+            // conditions with audio reading in the service.
+            restartProcessLocked();
+        }
     }
 
     private void updateStateAfterProcessStart(
@@ -230,6 +264,9 @@ final class HotwordDetectionConnection {
             mIdentity = null;
         }
         mCancellationTaskFuture.cancel(/* may interrupt */ true);
+        if (mAudioFlinger != null) {
+            mAudioFlinger.unlinkToDeath(mAudioServerDeathRecipient, /* flags= */ 0);
+        }
     }
 
     void updateStateLocked(PersistableBundle options, SharedMemory sharedMemory) {
@@ -479,7 +516,7 @@ final class HotwordDetectionConnection {
         mLastRestartInstant = Instant.now();
 
         // Recreate connection to reset the cache.
-        mRemoteHotwordDetectionService = mServiceConnectionFactory.create();
+        mRemoteHotwordDetectionService = mServiceConnectionFactory.createLocked();
 
         if (DEBUG) {
             Slog.i(TAG, "Started the new process, issuing #onProcessRestarted");
@@ -663,13 +700,13 @@ final class HotwordDetectionConnection {
             mBindingFlags = bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0;
         }
 
-        ServiceConnection create() {
+        ServiceConnection createLocked() {
             ServiceConnection connection =
                     new ServiceConnection(mContext, mIntent, mBindingFlags, mUser,
                             IHotwordDetectionService.Stub::asInterface, ++mRestartCount);
             connection.connect();
 
-            updateAudioFlinger(connection);
+            updateAudioFlinger(connection, mAudioFlinger);
             updateContentCaptureManager(connection);
             updateServiceIdentity(connection);
             return connection;
@@ -779,12 +816,8 @@ final class HotwordDetectionConnection {
         return Pair.create(fileDescriptors[0], fileDescriptors[1]);
     }
 
-    private static void updateAudioFlinger(ServiceConnection connection) {
+    private static void updateAudioFlinger(ServiceConnection connection, IBinder audioFlinger) {
         // TODO: Consider using a proxy that limits the exposed API surface.
-        IBinder audioFlinger = ServiceManager.getService("media.audio_flinger");
-        if (audioFlinger == null) {
-            throw new IllegalStateException("Service media.audio_flinger wasn't found.");
-        }
         connection.run(service -> service.updateAudioFlinger(audioFlinger));
     }
 
