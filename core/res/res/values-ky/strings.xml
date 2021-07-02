@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS кызматы"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Сенсордун билдирмелеринин кызматы"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight кызматы"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Убакыт алкагын аныктагыч (байланыш жок)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS Убакытты жаңыртуу кызматы"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Музыканы таануу кызматы"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Түзмөгүңүз тазаланат"</string>
@@ -606,7 +605,7 @@
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>-манжа"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Манжа изин колдонуу"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Манжа изин же экрандын кулпусун колдонуу"</string>
-    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Улантуу үчүн манжаңыздын изин колдонуңуз"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Улантуу үчүн манжаңызды сканерге тийгизиңиз"</string>
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Улантуу үчүн манжа изин же экрандын кулпусун колдонуңуз"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -1484,6 +1483,8 @@
     <string name="deny" msgid="6632259981847676572">"Уруксат берилбейт"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Уруксат талап кылуу"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Кийинки эсепке\nуруксат талап кылынууда: <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Бул колдонмо жумуш профилиңиздин сыртында колдонулуп жатат"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Бул колдонмону жумуш профилиңизде пайдаланып жатасыз"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Киргизүү ыкмасы"</string>

@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS-szolgáltatás"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Szenzoros értesítési szolgáltatás"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight szolgáltatás"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Időzóna-felismerő (Offline)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS időfrissítési szolgáltatás"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Zenefelismerést kezelő szolgáltatás"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"A rendszer törölni fogja eszközét"</string>
@@ -1484,6 +1483,7 @@
     <string name="deny" msgid="6632259981847676572">"Elutasítás"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Az engedélykérés megtörtént"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Az engedélykérés megtörtént\na(z) <xliff:g id="ACCOUNT">%s</xliff:g> fiók számára."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"A(z) <xliff:g id="APP">%1$s</xliff:g> alkalmazás által kért engedély\na következő fiók számára: <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Ezt az alkalmazást munkaprofilján kívül használja"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Munkaprofiljában már használja az alkalmazást"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Beviteli mód"</string>
