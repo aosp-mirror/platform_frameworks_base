@@ -3939,6 +3939,10 @@ public class NotificationPanelViewController extends PanelViewController {
                     mStatusBarKeyguardViewManager.updateKeyguardPosition(event.getX());
                 }
 
+                if (mLockIconViewController.onTouchEvent(event)) {
+                    return true;
+                }
+
                 handled |= super.onTouch(v, event);
                 return !mDozing || mPulsing || handled;
             }
