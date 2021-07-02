@@ -133,6 +133,12 @@ public:
         }
     }
 
+    void onRemovedFromTree() {
+        if (mImpl) {
+            mImpl->onRemovedFromTree();
+        }
+    }
+
     [[nodiscard]] bool hasText() const {
         return mImpl && mImpl->hasText();
     }
@@ -172,6 +178,7 @@ private:
             return false;
         }
         void syncContents(const WebViewSyncData& data) { }
+        void onRemovedFromTree() { }
         void applyColorTransform(ColorTransform transform) { }
     };
 
@@ -296,6 +303,10 @@ public:
 
     void syncContents(const WebViewSyncData& data) {
         apply([&](auto& it) { it.syncContents(data); });
+    }
+
+    void onRemovedFromTree() {
+        apply([&](auto& it) { it.onRemovedFromTree(); });
     }
 
     [[nodiscard]] bool hasText() const {
