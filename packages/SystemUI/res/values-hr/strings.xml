@@ -673,6 +673,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži sve"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Otključajte da biste platili"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nije postavljeno"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Otključajte da biste koristili"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Pojavio se problem prilikom dohvaćanja kartica, pokušajte ponovo kasnije"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Postavke zaključanog zaslona"</string>
@@ -749,7 +751,7 @@
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Prikazuje se pri vrhu obavijesti razgovora i kao profilna slika na zaključanom zaslonu, prekida Ne uznemiravaj"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikazuje se pri vrhu obavijesti razgovora i kao profilna slika na zaključanom zaslonu, izgleda kao oblačić, prekida Ne uznemiravaj"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Postavke"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava značajke razgovora"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Te se obavijesti ne mogu izmijeniti."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ta se grupa obavijesti ne može konfigurirati ovdje"</string>
@@ -935,7 +937,7 @@
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Nije dostupno jer <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Otvaranje postavki za <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Uređivanje redoslijeda postavki."</string>
-    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Izbornik tipke za uključivanje (/isključivanje)"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Izbornik tipke za uključivanje/isključivanje"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključan zaslon"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se isključio zbog vrućine"</string>
@@ -1121,8 +1123,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Otvoreni razgovor"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgeti razgovora"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Dodirnite razgovor da biste ga dodali na početni zaslon"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Ovdje će se prikazati vaši nedavni razgovori"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritetni razgovori"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Nedavni razgovori"</string>
     <string name="okay" msgid="6490552955618608554">"U redu"</string>

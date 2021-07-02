@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import static android.view.KeyCharacterMap.VIRTUAL_KEYBOARD;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_HOVER_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
@@ -112,6 +113,13 @@ public class MotionEventInjectorTest {
     private static final int CONTINUED_LINE_SEQUENCE_1 = 52;
     private static final int CONTINUED_LINE_SEQUENCE_2 = 53;
 
+    private static final float PRESSURE = 1;
+    private static final float X_PRECISION = 1;
+    private static final float Y_PRECISION = 1;
+    private static final int EDGEFLAGS = 0;
+    private static final float POINTER_SIZE = 1;
+    private static final int METASTATE = 0;
+
     MotionEventInjector mMotionEventInjector;
     IAccessibilityServiceClient mServiceInterface;
     AccessibilityTraceManager mTrace;
@@ -154,14 +162,18 @@ public class MotionEventInjectorTest {
                 CONTINUED_LINE_STROKE_ID_1, false, CONTINUED_LINE_INTERVAL, CONTINUED_LINE_MID1,
                 CONTINUED_LINE_MID2, CONTINUED_LINE_END);
 
-        mClickDownEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, CLICK_POINT.x, CLICK_POINT.y, 0);
+        mClickDownEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, CLICK_POINT.x, CLICK_POINT.y,
+                 PRESSURE, POINTER_SIZE, METASTATE, X_PRECISION, Y_PRECISION, VIRTUAL_KEYBOARD,
+                 EDGEFLAGS);
         mClickDownEvent.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         mClickUpEvent = MotionEvent.obtain(0, CLICK_DURATION, ACTION_UP, CLICK_POINT.x,
-                CLICK_POINT.y, 0);
+                CLICK_POINT.y, PRESSURE, POINTER_SIZE, METASTATE, X_PRECISION, Y_PRECISION,
+                VIRTUAL_KEYBOARD, EDGEFLAGS);
         mClickUpEvent.setSource(InputDevice.SOURCE_TOUCHSCREEN);
 
         mHoverMoveEvent = MotionEvent.obtain(0, 0, ACTION_HOVER_MOVE, CLICK_POINT.x, CLICK_POINT.y,
-                0);
+                PRESSURE, POINTER_SIZE, METASTATE, X_PRECISION, Y_PRECISION, VIRTUAL_KEYBOARD,
+                EDGEFLAGS);
         mHoverMoveEvent.setSource(InputDevice.SOURCE_MOUSE);
 
         mIsLineStart = allOf(IS_ACTION_DOWN, isAtPoint(LINE_START), hasStandardInitialization(),
@@ -876,12 +888,14 @@ public class MotionEventInjectorTest {
         return new TypeSafeMatcher<MotionEvent>() {
             @Override
             protected boolean matchesSafely(MotionEvent event) {
-                return (0 == event.getActionIndex()) && (0 == event.getDeviceId())
-                        && (0 == event.getEdgeFlags()) && (0 == event.getFlags())
-                        && (0 == event.getMetaState()) && (0F == event.getOrientation())
+                return (0 == event.getActionIndex()) && (VIRTUAL_KEYBOARD == event.getDeviceId())
+                        && (EDGEFLAGS == event.getEdgeFlags()) && (0 == event.getFlags())
+                        && (METASTATE == event.getMetaState()) && (0F == event.getOrientation())
                         && (0F == event.getTouchMajor()) && (0F == event.getTouchMinor())
-                        && (1F == event.getXPrecision()) && (1F == event.getYPrecision())
-                        && (1 == event.getPointerCount()) && (1F == event.getPressure())
+                        && (X_PRECISION == event.getXPrecision())
+                        && (Y_PRECISION == event.getYPrecision())
+                        && (POINTER_SIZE == event.getSize())
+                        && (1 == event.getPointerCount()) && (PRESSURE == event.getPressure())
                         && (InputDevice.SOURCE_TOUCHSCREEN == event.getSource());
             }
 

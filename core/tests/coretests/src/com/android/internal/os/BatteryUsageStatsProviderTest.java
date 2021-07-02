@@ -204,6 +204,7 @@ public class BatteryUsageStatsProviderTest {
         BatteryUsageStatsStore batteryUsageStatsStore = new BatteryUsageStatsStore(context,
                 batteryStats, new File(context.getCacheDir(), "BatteryUsageStatsProviderTest"),
                 new TestHandler(), Integer.MAX_VALUE);
+        batteryUsageStatsStore.onSystemReady();
 
         BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
                 batteryStats, batteryUsageStatsStore);

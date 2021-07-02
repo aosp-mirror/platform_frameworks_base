@@ -640,4 +640,10 @@ public abstract class ActivityManagerInternal {
      * Returns the capability of the given uid
      */
     public abstract @ProcessCapability int getUidCapability(int uid);
+
+    /**
+     * @return The PID list of the isolated process with packages matching the given uid.
+     */
+    @Nullable
+    public abstract List<Integer> getIsolatedProcesses(int uid);
 }

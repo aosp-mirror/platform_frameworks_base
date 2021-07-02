@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"모두 표시"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"잠금 해제하여 결제"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"설정되지 않음"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"잠금 해제하여 사용"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"카드를 가져오는 중에 문제가 발생했습니다. 나중에 다시 시도해 보세요."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"잠금 화면 설정"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"대화 열기"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"대화 위젯"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"대화를 탭하여 홈 화면에 추가하세요."</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"최근 대화가 여기에 표시됩니다."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"우선순위 대화"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"최근 대화"</string>
     <string name="okay" msgid="6490552955618608554">"확인"</string>

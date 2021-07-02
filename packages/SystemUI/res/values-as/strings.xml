@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"আটাইবোৰ দেখুৱাওক"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"পৰিশোধ কৰিবলৈ আনলক কৰক"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"ছেট আপ কৰা হোৱা নাই"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ব্যৱহাৰ কৰিবলৈ আনলক কৰক"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"আপোনাৰ কাৰ্ড লাভ কৰোঁতে এটা সমস্যা হৈছে, অনুগ্ৰহ কৰি পাছত পুনৰ চেষ্টা কৰক"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"লক স্ক্ৰীনৰ ছেটিং"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"বাৰ্তালাপ খোলক"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"বাৰ্তালাপ ৱিজেট"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"আপোনাৰ গৃহ স্ক্ৰীনত কোনো বাৰ্তালাপ যোগ দিবলৈ সেইটোত টিপক"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"আপোনাৰ শেহতীয়া বাৰ্তালাপসমূহ ইয়াত দেখা পোৱা যাব"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"অগ্ৰাধিকাৰপ্ৰাপ্ত বাৰ্তালাপ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"শেহতীয়া বাৰ্তালাপ"</string>
     <string name="okay" msgid="6490552955618608554">"ঠিক আছে"</string>
@@ -1145,8 +1146,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"শেহতীয়া বাৰ্তা, মিছড্‌ কল আৰু স্থিতিৰ আপডে’ট চাওক"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"বাৰ্তালাপ"</string>
-    <!-- no translation found for paused_by_dnd (7856941866433556428) -->
-    <skip />
+    <string name="paused_by_dnd" msgid="7856941866433556428">"অসুবিধা নিদিব সুবিধাটোৱে পজ কৰিছে"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g>এ এটা বাৰ্তা পঠিয়াইছে"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>এ এখন প্ৰতিচ্ছবি পঠিয়াইছে"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"আপোনাৰ বেটাৰী মিটাৰ পঢ়োঁতে সমস্যা হৈছে"</string>

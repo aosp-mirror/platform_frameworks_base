@@ -56,6 +56,7 @@ import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityThread;
@@ -2988,6 +2989,22 @@ public final class ProcessList {
         }
     }
 
+    @Nullable
+    @GuardedBy("mService")
+    List<Integer> getIsolatedProcessesLocked(int uid) {
+        List<Integer> ret = null;
+        for (int i = 0, size = mIsolatedProcesses.size(); i < size; i++) {
+            final ProcessRecord app = mIsolatedProcesses.valueAt(i);
+            if (app.info.uid == uid) {
+                if (ret == null) {
+                    ret = new ArrayList<>();
+                }
+                ret.add(app.getPid());
+            }
+        }
+        return ret;
+    }
+
     @GuardedBy("mService")
     ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
             boolean isolated, int isolatedUid, HostingRecord hostingRecord) {
@@ -4691,10 +4708,10 @@ public final class ProcessList {
                         final ApplicationInfo ai = AppGlobals.getPackageManager()
                                 .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);
                         if (ai != null) {
-                            app.getThread().scheduleApplicationInfoChanged(ai);
                             if (ai.packageName.equals(app.info.packageName)) {
                                 app.info = ai;
                             }
+                            app.getThread().scheduleApplicationInfoChanged(ai);
                             targetProcesses.add(app.getWindowProcessController());
                         }
                     } catch (RemoteException e) {
@@ -4705,8 +4722,7 @@ public final class ProcessList {
             });
         }
 
-        mService.mActivityTaskManager.updateAssetConfiguration(
-                updateFrameworkRes ? null : targetProcesses);
+        mService.mActivityTaskManager.updateAssetConfiguration(targetProcesses, updateFrameworkRes);
     }
 
     @GuardedBy("mService")

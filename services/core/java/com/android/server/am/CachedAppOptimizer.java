@@ -212,6 +212,23 @@ public final class CachedAppOptimizer {
                 }
             };
 
+    private final OnPropertiesChangedListener mOnNativeBootFlagsChangedListener =
+            new OnPropertiesChangedListener() {
+                @Override
+                public void onPropertiesChanged(Properties properties) {
+                    synchronized (mPhenotypeFlagLock) {
+                        for (String name : properties.getKeyset()) {
+                            if (KEY_FREEZER_DEBOUNCE_TIMEOUT.equals(name)) {
+                                updateFreezerDebounceTimeout();
+                            }
+                        }
+                    }
+                    if (mTestCallback != null) {
+                        mTestCallback.onPropertyChanged();
+                    }
+                }
+            };
+
     private final class SettingsContentObserver extends ContentObserver {
         SettingsContentObserver() {
             super(mAm.mHandler);
@@ -328,6 +345,10 @@ public final class CachedAppOptimizer {
         // TODO: initialize flags to default and only update them if values are set in DeviceConfig
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ActivityThread.currentApplication().getMainExecutor(), mOnFlagsChangedListener);
+        DeviceConfig.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+                ActivityThread.currentApplication().getMainExecutor(),
+                mOnNativeBootFlagsChangedListener);
         mAm.mContext.getContentResolver().registerContentObserver(
                 CACHED_APP_FREEZER_ENABLED_URI, false, mSettingsObserver);
         synchronized (mPhenotypeFlagLock) {

@@ -673,6 +673,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Прикажи све"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Откључај ради плаћања"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Није подешено"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Откључај ради коришћења"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Дошло је до проблема при преузимању картица. Пробајте поново касније"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Подешавања закључаног екрана"</string>
@@ -1121,8 +1123,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Отворите конверзацију"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виџети за конверзацију"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Додирните конверзацију да бисте је додали на почетни екран"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"Недавне конверзације ће се приказати овде"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Приоритетне конверзације"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Недавне конверзације"</string>
     <string name="okay" msgid="6490552955618608554">"Важи"</string>
