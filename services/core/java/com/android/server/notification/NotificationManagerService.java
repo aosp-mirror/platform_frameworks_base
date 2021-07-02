@@ -11039,8 +11039,6 @@ public class NotificationManagerService extends SystemService {
             String logcatMessage =
                     "Indirect notification activity start (trampoline) from " + packageName;
             if (blockTrampoline(uid)) {
-                // Post toast() call to mHandler to offload PM lookup from the activity start path
-                mHandler.post(() -> toast(packageName, uid));
                 Slog.e(TAG, logcatMessage + " blocked");
                 return false;
             } else {
@@ -11063,20 +11061,6 @@ public class NotificationManagerService extends SystemService {
             // trampolines are blocked.
             return tokens.contains(ALLOWLIST_TOKEN)
                     && !CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
-        }
-
-        private void toast(String packageName, int uid) {
-            final CharSequence label;
-            try {
-                label = mPackageManagerClient.getApplicationLabel(
-                        mPackageManager.getApplicationInfo(packageName, 0,
-                                UserHandle.getUserId(uid)));
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unexpected exception obtaining app label from PackageManager", e);
-                return;
-            }
-            mUiHandler.post(() -> Toast.makeText(getUiContext(),
-                    label + " launch blocked\ng.co/dev/trampolines", Toast.LENGTH_LONG).show());
         }
     }
 }
