@@ -112,12 +112,11 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
+    fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible(true)
 
     @Presubmit
     @Test
-    fun imeAppWindowBecomesVisible() =
-        testSpec.imeAppWindowBecomesVisible(testAppComponentName.className)
+    fun imeAppWindowIsAlwaysVisible() = testSpec.imeAppWindowIsAlwaysVisible(testApp, true)
 
     @Presubmit
     @Test
@@ -135,7 +134,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
+    fun imeLayerIsAlwaysVisible() = testSpec.imeLayerIsAlwaysVisible(true)
 
     @Presubmit
     @Test
@@ -171,7 +170,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
                     repetitions = 1,
                     supportedRotations = listOf(Surface.ROTATION_0),
                     supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
                     )
                 )
         }
