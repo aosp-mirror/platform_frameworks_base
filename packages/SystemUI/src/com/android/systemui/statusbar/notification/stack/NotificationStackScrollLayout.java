@@ -112,7 +112,6 @@ import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.util.Assert;
-import com.android.systemui.util.leak.RotationUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -950,7 +949,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return;
         }
         // Portrait is easy, just use the dimen for paddings
-        if (RotationUtils.getRotation(mContext) == RotationUtils.ROTATION_NONE) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             mSidePaddings = mMinimumPaddings;
             return;
         }
