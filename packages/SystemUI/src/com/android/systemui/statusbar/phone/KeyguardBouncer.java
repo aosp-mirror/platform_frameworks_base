@@ -367,6 +367,10 @@ public class KeyguardBouncer {
         return mShowingSoon || mExpansion != EXPANSION_HIDDEN && mExpansion != EXPANSION_VISIBLE;
     }
 
+    public boolean getShowingSoon() {
+        return mShowingSoon;
+    }
+
     /**
      * @return {@code true} when bouncer's pre-hide animation already started but isn't completely
      *         hidden yet, {@code false} otherwise.
