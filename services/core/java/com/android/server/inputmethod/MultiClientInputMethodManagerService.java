@@ -72,17 +72,9 @@ import android.view.inputmethod.InputMethodSubtype;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.inputmethod.CallbackUtils;
-import com.android.internal.inputmethod.IBooleanResultCallback;
-import com.android.internal.inputmethod.IInputBindResultResultCallback;
-import com.android.internal.inputmethod.IInputMethodInfoListResultCallback;
-import com.android.internal.inputmethod.IInputMethodSubtypeListResultCallback;
-import com.android.internal.inputmethod.IInputMethodSubtypeResultCallback;
-import com.android.internal.inputmethod.IIntResultCallback;
 import com.android.internal.inputmethod.IMultiClientInputMethod;
 import com.android.internal.inputmethod.IMultiClientInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IMultiClientInputMethodSession;
-import com.android.internal.inputmethod.IVoidResultCallback;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
@@ -112,7 +104,6 @@ import java.lang.annotation.Retention;
 import java.util.Collections;
 import java.util.List;
 import java.util.WeakHashMap;
-import java.util.function.Supplier;
 
 /**
  * Actual implementation of multi-client InputMethodManagerService.
@@ -1467,49 +1458,41 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void getInputMethodList(@UserIdInt int userId,
-                IInputMethodInfoListResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> {
-                if (UserHandle.getCallingUserId() != userId) {
-                    mContext.enforceCallingPermission(INTERACT_ACROSS_USERS_FULL, null);
-                }
-                return mInputMethodInfoMap.getAsList(userId);
-            });
+        public List<InputMethodInfo> getInputMethodList(@UserIdInt int userId) {
+            if (UserHandle.getCallingUserId() != userId) {
+                mContext.enforceCallingPermission(INTERACT_ACROSS_USERS_FULL, null);
+            }
+            return mInputMethodInfoMap.getAsList(userId);
         }
 
         @BinderThread
         @Override
-        public void getEnabledInputMethodList(@UserIdInt int userId,
-                IInputMethodInfoListResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> {
-                if (UserHandle.getCallingUserId() != userId) {
-                    mContext.enforceCallingPermission(INTERACT_ACROSS_USERS_FULL, null);
-                }
-                return mInputMethodInfoMap.getAsList(userId);
-            });
+        public List<InputMethodInfo> getEnabledInputMethodList(@UserIdInt int userId) {
+            if (UserHandle.getCallingUserId() != userId) {
+                mContext.enforceCallingPermission(INTERACT_ACROSS_USERS_FULL, null);
+            }
+            return mInputMethodInfoMap.getAsList(userId);
         }
 
         @BinderThread
         @Override
-        public void getEnabledInputMethodSubtypeList(String imiId,
-                boolean allowsImplicitlySelectedSubtypes,
-                IInputMethodSubtypeListResultCallback resultCallback) {
+        public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
+                boolean allowsImplicitlySelectedSubtypes) {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, Collections::emptyList);
+            return Collections.emptyList();
         }
 
         @BinderThread
         @Override
-        public void getLastInputMethodSubtype(IInputMethodSubtypeResultCallback resultCallback) {
+        public InputMethodSubtype getLastInputMethodSubtype() {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, () -> null);
+            return null;
         }
 
         @BinderThread
         @Override
-        public void removeImeSurface(IVoidResultCallback resultCallback) {
+        public void removeImeSurface() {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
@@ -1520,11 +1503,10 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void showSoftInput(
+        public boolean showSoftInput(
                 IInputMethodClient client, IBinder token, int flags, ResultReceiver resultReceiver,
-                @SoftInputShowHideReason int reason, IBooleanResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> showSoftInputInternal(client, token, flags, resultReceiver));
+                @SoftInputShowHideReason int reason) {
+            return showSoftInputInternal(client, token, flags, resultReceiver);
         }
 
         @BinderThread
@@ -1575,13 +1557,10 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void hideSoftInput(
+        public boolean hideSoftInput(
                 IInputMethodClient client, IBinder windowToken, int flags,
-                ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
-                IBooleanResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> hideSoftInputInternal(client, windowToken, flags, resultReceiver));
-
+                ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+            return hideSoftInputInternal(client, windowToken, flags, resultReceiver);
         }
 
         @BinderThread
@@ -1628,34 +1607,7 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void reportWindowGainedFocusAsync(
-                boolean nextFocusHasConnection,
-                @Nullable IInputMethodClient client,
-                @Nullable IBinder windowToken,
-                @StartInputFlags int startInputFlags,
-                @SoftInputModeFlags int softInputMode,
-                int windowFlags,
-                int unverifiedTargetSdkVersion) {
-            final int startInputReason = nextFocusHasConnection
-                    ? StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION
-                    : StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
-            try {
-                startInputOrWindowGainedFocusInternal(startInputReason, client, windowToken,
-                        startInputFlags, softInputMode, windowFlags, null /* editorInfo */,
-                        null /* inputContext */, 0 /* missingMethods */,
-                        unverifiedTargetSdkVersion);
-            } catch (Throwable t) {
-                if (client != null) {
-                    try {
-                        client.throwExceptionFromSystem(t.getMessage());
-                    } catch (RemoteException ignore) { }
-                }
-            }
-        }
-
-        @BinderThread
-        @Override
-        public void startInputOrWindowGainedFocus(
+        public InputBindResult startInputOrWindowGainedFocus(
                 @StartInputReason int startInputReason,
                 @Nullable IInputMethodClient client,
                 @Nullable IBinder windowToken,
@@ -1665,12 +1617,10 @@ public final class MultiClientInputMethodManagerService {
                 @Nullable EditorInfo editorInfo,
                 @Nullable IInputContext inputContext,
                 @MissingMethodFlags int missingMethods,
-                int unverifiedTargetSdkVersion,
-                IInputBindResultResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, (Supplier<InputBindResult>) () ->
-                    startInputOrWindowGainedFocusInternal(startInputReason, client, windowToken,
+                int unverifiedTargetSdkVersion) {
+            return startInputOrWindowGainedFocusInternal(startInputReason, client, windowToken,
                     startInputFlags, softInputMode, windowFlags, editorInfo, inputContext,
-                    missingMethods, unverifiedTargetSdkVersion));
+                    missingMethods, unverifiedTargetSdkVersion);
         }
 
         @BinderThread
@@ -1812,54 +1762,49 @@ public final class MultiClientInputMethodManagerService {
         @BinderThread
         @Override
         public void showInputMethodPickerFromClient(IInputMethodClient client,
-                int auxiliarySubtypeMode, IVoidResultCallback resultCallback) {
+                int auxiliarySubtypeMode) {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
         @Override
         public void showInputMethodPickerFromSystem(IInputMethodClient client,
-                int auxiliarySubtypeMode, int displayId, IVoidResultCallback resultCallback) {
+                int auxiliarySubtypeMode, int displayId) {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
         @Override
         public void showInputMethodAndSubtypeEnablerFromClient(IInputMethodClient client,
-                String inputMethodId, IVoidResultCallback resultCallback) {
+                String inputMethodId) {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
         @Override
-        public void isInputMethodPickerShownForTest(IBooleanResultCallback resultCallback) {
+        public boolean isInputMethodPickerShownForTest() {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, () -> false);
+            return false;
         }
 
         @BinderThread
         @Override
-        public void getCurrentInputMethodSubtype(IInputMethodSubtypeResultCallback resultCallback) {
+        public InputMethodSubtype getCurrentInputMethodSubtype() {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, () -> null);
+            return null;
         }
 
         @BinderThread
         @Override
-        public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes,
-                IVoidResultCallback resultCallback) {
+        public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
         @Override
-        public void getInputMethodWindowVisibleHeight(IIntResultCallback resultCallback) {
+        public int getInputMethodWindowVisibleHeight() {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, () -> 0);
+            return 0;
         }
 
         @BinderThread
@@ -1891,27 +1836,23 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void startProtoDump(byte[] clientProtoDump, int source, String where,
-                IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> { });
+        public void startProtoDump(byte[] clientProtoDump, int source, String where) {
         }
 
         @BinderThread
         @Override
-        public void isImeTraceEnabled(IBooleanResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> false);
+        public boolean isImeTraceEnabled() {
+            return false;
         }
 
         @BinderThread
         @Override
-        public void startImeTrace(IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> { });
+        public void startImeTrace() {
         }
 
         @BinderThread
         @Override
-        public void stopImeTrace(IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> { });
+        public void stopImeTrace() {
         }
     }
 }
