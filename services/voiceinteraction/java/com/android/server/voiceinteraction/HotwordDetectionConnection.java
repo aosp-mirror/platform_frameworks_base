@@ -283,6 +283,10 @@ final class HotwordDetectionConnection {
                     if (mPerformingSoftwareHotwordDetection) {
                         mSoftwareCallback.onDetected(result, null, null);
                         mPerformingSoftwareHotwordDetection = false;
+                        if (result != null) {
+                            Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
+                                    + " bits from hotword trusted process");
+                        }
                     } else {
                         Slog.i(TAG, "Hotword detection has already completed");
                     }
@@ -372,6 +376,10 @@ final class HotwordDetectionConnection {
                     if (mValidatingDspTrigger) {
                         mValidatingDspTrigger = false;
                         externalCallback.onKeyphraseDetected(recognitionEvent, result);
+                        if (result != null) {
+                            Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
+                                    + " bits from hotword trusted process");
+                        }
                     } else {
                         Slog.i(TAG, "Ignored hotword detected since trigger has been handled");
                     }
@@ -425,6 +433,10 @@ final class HotwordDetectionConnection {
                     }
                     mValidatingDspTrigger = false;
                     externalCallback.onKeyphraseDetected(recognitionEvent, result);
+                    if (result != null) {
+                        Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
+                                + " bits from hotword trusted process");
+                    }
                 }
             }
 
@@ -654,6 +666,10 @@ final class HotwordDetectionConnection {
                                 // TODO: noteOp here.
                                 callback.onDetected(triggerResult, null /* audioFormat */,
                                         null /* audioStream */);
+                                if (triggerResult != null) {
+                                    Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(
+                                            triggerResult) + " bits from hotword trusted process");
+                                }
                                 // TODO: Add a delay before closing.
                                 bestEffortClose(audioSource);
                             }
