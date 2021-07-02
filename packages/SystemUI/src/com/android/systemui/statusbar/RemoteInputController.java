@@ -132,6 +132,8 @@ public class RemoteInputController {
     public void removeRemoteInput(NotificationEntry entry, Object token) {
         Objects.requireNonNull(entry);
         if (entry.mRemoteEditImeVisible) return;
+        // If the view is being removed, this may be called even though we're not active
+        if (!isRemoteInputActive(entry)) return;
 
         pruneWeakThenRemoveAndContains(null /* contains */, entry /* remove */, token);
 

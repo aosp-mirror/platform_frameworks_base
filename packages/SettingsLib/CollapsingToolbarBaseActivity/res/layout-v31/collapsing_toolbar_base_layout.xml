@@ -33,7 +33,7 @@
         android:background="?android:attr/colorPrimary"
         android:theme="@style/Theme.CollapsingToolbar.Settings">
 
-        <com.android.settingslib.collapsingtoolbar.AdjustableToolbarLayout
+        <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_one_line_height"
@@ -59,7 +59,7 @@
                 android:transitionName="shared_element_view"
                 app:layout_collapseMode="pin"/>
 
-        </com.android.settingslib.collapsingtoolbar.AdjustableToolbarLayout>
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout

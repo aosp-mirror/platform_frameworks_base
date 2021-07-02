@@ -128,7 +128,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final MediaSessions mMediaSessions;
     protected C mCallbacks = new C();
     private final State mState = new State();
-    protected final MediaSessionsCallbacks mMediaSessionsCallbacksW = new MediaSessionsCallbacks();
+    protected final MediaSessionsCallbacks mMediaSessionsCallbacksW;
     private final Optional<Vibrator> mVibrator;
     private final boolean mHasVibrator;
     private boolean mShowA11yStream;
@@ -179,6 +179,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mWorkerLooper = theadFactory.buildLooperOnNewThread(
                 VolumeDialogControllerImpl.class.getSimpleName());
         mWorker = new W(mWorkerLooper);
+        mMediaSessionsCallbacksW = new MediaSessionsCallbacks(mContext);
         mMediaSessions = createMediaSessions(mContext, mWorkerLooper, mMediaSessionsCallbacksW);
         mAudio = audioManager;
         mNoMan = notificationManager;
@@ -1148,83 +1149,98 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         private final HashMap<Token, Integer> mRemoteStreams = new HashMap<>();
 
         private int mNextStream = DYNAMIC_STREAM_START_INDEX;
+        private final boolean mShowRemoteSessions;
+
+        public MediaSessionsCallbacks(Context context) {
+            mShowRemoteSessions = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_volumeShowRemoteSessions);
+        }
 
         @Override
         public void onRemoteUpdate(Token token, String name, PlaybackInfo pi) {
-            addStream(token, "onRemoteUpdate");
+            if (mShowRemoteSessions) {
+                addStream(token, "onRemoteUpdate");
 
-            int stream = 0;
-            synchronized (mRemoteStreams) {
-                 stream = mRemoteStreams.get(token);
-            }
-            Slog.d(TAG, "onRemoteUpdate: stream: " + stream + " volume: " + pi.getCurrentVolume());
-            boolean changed = mState.states.indexOfKey(stream) < 0;
-            final StreamState ss = streamStateW(stream);
-            ss.dynamic = true;
-            ss.levelMin = 0;
-            ss.levelMax = pi.getMaxVolume();
-            if (ss.level != pi.getCurrentVolume()) {
-                ss.level = pi.getCurrentVolume();
-                changed = true;
-            }
-            if (!Objects.equals(ss.remoteLabel, name)) {
-                ss.name = -1;
-                ss.remoteLabel = name;
-                changed = true;
-            }
-            if (changed) {
-                Log.d(TAG, "onRemoteUpdate: " + name + ": " + ss.level + " of " + ss.levelMax);
-                mCallbacks.onStateChanged(mState);
+                int stream = 0;
+                synchronized (mRemoteStreams) {
+                    stream = mRemoteStreams.get(token);
+                }
+                Slog.d(TAG,
+                        "onRemoteUpdate: stream: " + stream + " volume: " + pi.getCurrentVolume());
+                boolean changed = mState.states.indexOfKey(stream) < 0;
+                final StreamState ss = streamStateW(stream);
+                ss.dynamic = true;
+                ss.levelMin = 0;
+                ss.levelMax = pi.getMaxVolume();
+                if (ss.level != pi.getCurrentVolume()) {
+                    ss.level = pi.getCurrentVolume();
+                    changed = true;
+                }
+                if (!Objects.equals(ss.remoteLabel, name)) {
+                    ss.name = -1;
+                    ss.remoteLabel = name;
+                    changed = true;
+                }
+                if (changed) {
+                    Log.d(TAG, "onRemoteUpdate: " + name + ": " + ss.level + " of " + ss.levelMax);
+                    mCallbacks.onStateChanged(mState);
+                }
             }
         }
 
         @Override
         public void onRemoteVolumeChanged(Token token, int flags) {
-            addStream(token, "onRemoteVolumeChanged");
-            int stream = 0;
-            synchronized (mRemoteStreams) {
-                stream = mRemoteStreams.get(token);
-            }
-            final boolean showUI = shouldShowUI(flags);
-            Slog.d(TAG, "onRemoteVolumeChanged: stream: " + stream + " showui? " + showUI);
-            boolean changed = updateActiveStreamW(stream);
-            if (showUI) {
-                changed |= checkRoutedToBluetoothW(AudioManager.STREAM_MUSIC);
-            }
-            if (changed) {
-                Slog.d(TAG, "onRemoteChanged: updatingState");
-                mCallbacks.onStateChanged(mState);
-            }
-            if (showUI) {
-                mCallbacks.onShowRequested(Events.SHOW_REASON_REMOTE_VOLUME_CHANGED);
+            if (mShowRemoteSessions) {
+                addStream(token, "onRemoteVolumeChanged");
+                int stream = 0;
+                synchronized (mRemoteStreams) {
+                    stream = mRemoteStreams.get(token);
+                }
+                final boolean showUI = shouldShowUI(flags);
+                Slog.d(TAG, "onRemoteVolumeChanged: stream: " + stream + " showui? " + showUI);
+                boolean changed = updateActiveStreamW(stream);
+                if (showUI) {
+                    changed |= checkRoutedToBluetoothW(AudioManager.STREAM_MUSIC);
+                }
+                if (changed) {
+                    Slog.d(TAG, "onRemoteChanged: updatingState");
+                    mCallbacks.onStateChanged(mState);
+                }
+                if (showUI) {
+                    mCallbacks.onShowRequested(Events.SHOW_REASON_REMOTE_VOLUME_CHANGED);
+                }
             }
         }
 
         @Override
         public void onRemoteRemoved(Token token) {
-            int stream = 0;
-            synchronized (mRemoteStreams) {
-                if (!mRemoteStreams.containsKey(token)) {
-                    Log.d(TAG, "onRemoteRemoved: stream doesn't exist, "
-                            + "aborting remote removed for token:" +  token.toString());
-                    return;
+            if (mShowRemoteSessions) {
+                int stream = 0;
+                synchronized (mRemoteStreams) {
+                    if (!mRemoteStreams.containsKey(token)) {
+                        Log.d(TAG, "onRemoteRemoved: stream doesn't exist, "
+                                + "aborting remote removed for token:" + token.toString());
+                        return;
+                    }
+                    stream = mRemoteStreams.get(token);
                 }
-                stream = mRemoteStreams.get(token);
+                mState.states.remove(stream);
+                if (mState.activeStream == stream) {
+                    updateActiveStreamW(-1);
+                }
+                mCallbacks.onStateChanged(mState);
             }
-            mState.states.remove(stream);
-            if (mState.activeStream == stream) {
-                updateActiveStreamW(-1);
-            }
-            mCallbacks.onStateChanged(mState);
         }
 
         public void setStreamVolume(int stream, int level) {
-            final Token t = findToken(stream);
-            if (t == null) {
-                Log.w(TAG, "setStreamVolume: No token found for stream: " + stream);
-                return;
+            if (mShowRemoteSessions) {
+                final Token t = findToken(stream);
+                if (t == null) {
+                    Log.w(TAG, "setStreamVolume: No token found for stream: " + stream);
+                    return;
+                }
+                mMediaSessions.setVolume(t, level);
             }
-            mMediaSessions.setVolume(t, level);
         }
 
         private Token findToken(int stream) {

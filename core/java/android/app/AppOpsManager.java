@@ -4804,6 +4804,16 @@ public class AppOpsManager {
     public static final int HISTORY_FLAG_DISCRETE = 1 << 1;
 
     /**
+     * Flag for querying app op history: assemble attribution chains, and attach the last visible
+     * node in the chain to the start as a proxy info. This only applies to discrete accesses.
+     *
+     * TODO 191512294: Add to @SystemApi
+     *
+     * @hide
+     */
+    public static final int HISTORY_FLAG_GET_ATTRIBUTION_CHAINS = 1 << 2;
+
+    /**
      * Flag for querying app op history: get all types of historical access information.
      *
      * @see #getHistoricalOps(HistoricalOpsRequest, Executor, Consumer)
@@ -4819,7 +4829,8 @@ public class AppOpsManager {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "HISTORY_FLAG_" }, value = {
             HISTORY_FLAG_AGGREGATE,
-            HISTORY_FLAG_DISCRETE
+            HISTORY_FLAG_DISCRETE,
+            HISTORY_FLAG_GET_ATTRIBUTION_CHAINS
     })
     public @interface OpHistoryFlags {}
 
@@ -5037,7 +5048,8 @@ public class AppOpsManager {
              * @return This builder.
              */
             public @NonNull Builder setHistoryFlags(@OpHistoryFlags int flags) {
-                Preconditions.checkFlagsArgument(flags, HISTORY_FLAGS_ALL);
+                Preconditions.checkFlagsArgument(flags,
+                        HISTORY_FLAGS_ALL | HISTORY_FLAG_GET_ATTRIBUTION_CHAINS);
                 mHistoryFlags = flags;
                 return this;
             }
@@ -5290,8 +5302,17 @@ public class AppOpsManager {
                 @Nullable String attributionTag, @UidState int uidState, @OpFlags int opFlag,
                 long discreteAccessTime, long discreteAccessDuration) {
             getOrCreateHistoricalUidOps(uid).addDiscreteAccess(opCode, packageName, attributionTag,
-                    uidState, opFlag, discreteAccessTime, discreteAccessDuration);
-        };
+                    uidState, opFlag, discreteAccessTime, discreteAccessDuration, null);
+        }
+
+        /** @hide */
+        public void addDiscreteAccess(int opCode, int uid, @NonNull String packageName,
+                @Nullable String attributionTag, @UidState int uidState, @OpFlags int opFlag,
+                long discreteAccessTime, long discreteAccessDuration,
+                @Nullable OpEventProxyInfo proxy) {
+            getOrCreateHistoricalUidOps(uid).addDiscreteAccess(opCode, packageName, attributionTag,
+                    uidState, opFlag, discreteAccessTime, discreteAccessDuration, proxy);
+        }
 
 
         /** @hide */
@@ -5623,9 +5644,10 @@ public class AppOpsManager {
 
         private void addDiscreteAccess(int opCode, @NonNull String packageName,
                 @Nullable String attributionTag, @UidState int uidState,
-                @OpFlags int flag, long discreteAccessTime, long discreteAccessDuration) {
+                @OpFlags int flag, long discreteAccessTime, long discreteAccessDuration,
+                @Nullable OpEventProxyInfo proxy) {
             getOrCreateHistoricalPackageOps(packageName).addDiscreteAccess(opCode, attributionTag,
-                    uidState, flag, discreteAccessTime, discreteAccessDuration);
+                    uidState, flag, discreteAccessTime, discreteAccessDuration, proxy);
         };
 
         /**
@@ -5889,9 +5911,9 @@ public class AppOpsManager {
 
         private void addDiscreteAccess(int opCode, @Nullable String attributionTag,
                 @UidState int uidState, @OpFlags int flag, long discreteAccessTime,
-                long discreteAccessDuration) {
+                long discreteAccessDuration, @Nullable OpEventProxyInfo proxy) {
             getOrCreateAttributedHistoricalOps(attributionTag).addDiscreteAccess(opCode, uidState,
-                    flag, discreteAccessTime, discreteAccessDuration);
+                    flag, discreteAccessTime, discreteAccessDuration, proxy);
         }
 
         /**
@@ -6212,9 +6234,10 @@ public class AppOpsManager {
         }
 
         private void addDiscreteAccess(int opCode, @UidState int uidState, @OpFlags int flag,
-                long discreteAccessTime, long discreteAccessDuration) {
+                long discreteAccessTime, long discreteAccessDuration,
+                @Nullable OpEventProxyInfo proxy) {
             getOrCreateHistoricalOp(opCode).addDiscreteAccess(uidState,flag, discreteAccessTime,
-                    discreteAccessDuration);
+                    discreteAccessDuration, proxy);
         }
 
         /**
@@ -6583,11 +6606,12 @@ public class AppOpsManager {
         }
 
         private void addDiscreteAccess(@UidState int uidState, @OpFlags int flag,
-                long discreteAccessTime, long discreteAccessDuration) {
+                long discreteAccessTime, long discreteAccessDuration,
+                @Nullable OpEventProxyInfo proxy) {
             List<AttributedOpEntry> discreteAccesses = getOrCreateDiscreteAccesses();
             LongSparseArray<NoteOpEvent> accessEvents = new LongSparseArray<>();
             long key = makeKey(uidState, flag);
-            NoteOpEvent note = new NoteOpEvent(discreteAccessTime, discreteAccessDuration, null);
+            NoteOpEvent note = new NoteOpEvent(discreteAccessTime, discreteAccessDuration, proxy);
             accessEvents.append(key, note);
             AttributedOpEntry access = new AttributedOpEntry(mOp, false, accessEvents, null);
             int insertionPoint = discreteAccesses.size() - 1;
@@ -10022,6 +10046,8 @@ public class AppOpsManager {
                     NoteOpEvent existingAccess = accessEvents.get(key);
                     if (existingAccess == null || existingAccess.getDuration() == -1) {
                         accessEvents.append(key, access);
+                    } else if (existingAccess.mProxy == null && access.mProxy != null ) {
+                        existingAccess.mProxy = access.mProxy;
                     }
                 }
                 if (reject != null) {

@@ -90,6 +90,7 @@ public final class AppSearchSession implements Closeable {
             @NonNull Consumer<AppSearchResult<AppSearchSession>> callback) {
         try {
             mService.initialize(
+                    mPackageName,
                     mUserHandle,
                     /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                     new IAppSearchResultCallback.Stub() {
@@ -685,7 +686,9 @@ public final class AppSearchSession implements Closeable {
         if (mIsMutated && !mIsClosed) {
             try {
                 mService.persistToDisk(
-                        mUserHandle, /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime());
+                        mPackageName,
+                        mUserHandle,
+                        /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime());
                 mIsClosed = true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to close the AppSearchSession", e);

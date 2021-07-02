@@ -62,14 +62,14 @@ public class QSCarrierTest extends SysuiTestCase {
 
     @Test
     public void testUpdateState_first() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
 
         assertTrue(mQSCarrier.updateState(c));
     }
 
     @Test
     public void testUpdateState_same() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
 
         assertTrue(mQSCarrier.updateState(c));
         assertFalse(mQSCarrier.updateState(c));
@@ -77,7 +77,7 @@ public class QSCarrierTest extends SysuiTestCase {
 
     @Test
     public void testUpdateState_changed() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
 
         assertTrue(mQSCarrier.updateState(c));
 

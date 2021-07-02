@@ -201,6 +201,7 @@ void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
         funcs.releaseFunc(mSurfaceControl);
     }
     mSurfaceControl = surfaceControl;
+    mSurfaceControlGenerationId++;
     mExpectSurfaceStats = surfaceControl != nullptr;
     if (mSurfaceControl != nullptr) {
         funcs.acquireFunc(mSurfaceControl);
@@ -910,9 +911,8 @@ CanvasContext* CanvasContext::getActiveContext() {
 
 bool CanvasContext::mergeTransaction(ASurfaceTransaction* transaction, ASurfaceControl* control) {
     if (!mASurfaceTransactionCallback) return false;
-    std::invoke(mASurfaceTransactionCallback, reinterpret_cast<int64_t>(transaction),
-                reinterpret_cast<int64_t>(control), getFrameNumber());
-    return true;
+    return std::invoke(mASurfaceTransactionCallback, reinterpret_cast<int64_t>(transaction),
+                       reinterpret_cast<int64_t>(control), getFrameNumber());
 }
 
 void CanvasContext::prepareSurfaceControlForWebview() {

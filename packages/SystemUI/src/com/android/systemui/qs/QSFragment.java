@@ -53,6 +53,8 @@ import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.LifecycleFragment;
 import com.android.systemui.util.Utils;
 
+import java.util.function.Consumer;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -106,6 +108,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private QSPanelController mQSPanelController;
     private QuickQSPanelController mQuickQSPanelController;
     private QSCustomizerController mQSCustomizerController;
+    private ScrollListener mScrollListener;
     private FeatureFlags mFeatureFlags;
     /**
      * When true, QS will translate from outside the screen. It will be clipped with parallax
@@ -169,9 +172,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 });
         mQSPanelScrollView.setOnScrollChangeListener(
                 (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-            // Lazily update animators whenever the scrolling changes
-            mQSAnimator.onQsScrollingChanged();
-            mHeader.setExpandedScrollAmount(scrollY);
+                    // Lazily update animators whenever the scrolling changes
+                    mQSAnimator.onQsScrollingChanged();
+                    mHeader.setExpandedScrollAmount(scrollY);
+                    if (mScrollListener != null) {
+                        mScrollListener.onQsPanelScrollChanged(scrollY);
+                    }
         });
         mQSDetail = view.findViewById(R.id.qs_detail);
         mHeader = view.findViewById(R.id.header);
@@ -212,6 +218,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
+    public void setScrollListener(ScrollListener listener) {
+        mScrollListener = listener;
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         mStatusBarStateController.removeCallback(this);
@@ -220,6 +231,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         mQSCustomizerController.setQs(null);
         mQsDetailDisplayer.setQsPanelController(null);
+        mScrollListener = null;
     }
 
     @Override
@@ -281,6 +293,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         return mLastQSExpansion == 0.0f || mLastQSExpansion == -1;
     }
 
+    @Override
+    public void setCollapsedMediaVisibilityChangedListener(Consumer<Boolean> listener) {
+        mQuickQSPanelController.setMediaVisibilityChangedListener(listener);
+    }
+
     private void setEditLocation(View view) {
         View edit = view.findViewById(android.R.id.edit);
         int[] loc = edit.getLocationOnScreen();
@@ -293,6 +310,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void setContainer(ViewGroup container) {
         if (container instanceof NotificationsQuickSettingsContainer) {
             mQSCustomizerController.setContainer((NotificationsQuickSettingsContainer) container);
+            mQSDetail.setContainer((NotificationsQuickSettingsContainer) container);
         }
     }
 

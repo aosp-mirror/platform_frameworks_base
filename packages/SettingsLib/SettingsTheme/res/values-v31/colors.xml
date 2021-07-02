@@ -22,14 +22,17 @@
     <!-- Material next state off color-->
     <color name="settingslib_state_off_color">@android:color/system_accent2_100</color>
 
+    <!-- Material next thumb disable color-->
+    <color name="settingslib_thumb_disabled_color">@android:color/system_neutral2_100</color>
+
     <!-- Material next thumb off color-->
-    <color name="settingslib_thumb_off_color">@android:color/system_neutral2_100</color>
+    <color name="settingslib_thumb_off_color">@android:color/system_neutral2_300</color>
 
     <!-- Material next track on color-->
     <color name="settingslib_track_on_color">@android:color/system_accent1_600</color>
 
     <!-- Material next track off color-->
-    <color name="settingslib_track_off_color">@android:color/system_neutral2_600</color>
+    <color name="settingslib_track_off_color">@color/settingslib_switch_track_off</color>
 
     <!-- Dialog accent color -->
     <color name="settingslib_dialog_accent">@android:color/system_accent1_600</color>

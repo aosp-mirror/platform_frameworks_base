@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Binder;
 import android.os.UserHandle;
 import android.tracing.ITracingServiceProxy;
 import android.util.Log;
@@ -29,6 +30,8 @@ import com.android.server.SystemService;
 /**
  * TracingServiceProxy is the system_server intermediary between the Perfetto tracing daemon and the
  * system tracing app Traceur.
+ *
+ * Access to this service is restricted via SELinux. Normal apps do not have access.
  *
  * @hide
  */
@@ -87,11 +90,15 @@ public class TracingServiceProxy extends SystemService {
                 intent.setAction(INTENT_ACTION_NOTIFY_SESSION_STOPPED);
             }
 
+            final long identity = Binder.clearCallingIdentity();
             try {
                 mContext.startForegroundServiceAsUser(intent, UserHandle.SYSTEM);
             } catch (RuntimeException e) {
                 Log.e(TAG, "Failed to notifyTraceSessionEnded", e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
+
         } catch (NameNotFoundException e) {
             Log.e(TAG, "Failed to locate Traceur", e);
         }

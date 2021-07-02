@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.HardwareRenderer;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -46,20 +47,11 @@ class ImageTileSet {
 
     private static final String TAG = "ImageTileSet";
 
-    private CallbackRegistry<OnBoundsChangedListener, ImageTileSet, Rect> mOnBoundsListeners;
     private CallbackRegistry<OnContentChangedListener, ImageTileSet, Rect> mContentListeners;
 
     @Inject
     ImageTileSet(@UiThread Handler handler) {
         mHandler = handler;
-    }
-
-    interface OnBoundsChangedListener {
-        /**
-         * Reports an update to the bounding box that contains all active tiles. These are virtual
-         * (capture) coordinates which can be either negative or positive.
-         */
-        void onBoundsChanged(int left, int top, int right, int bottom);
     }
 
     interface OnContentChangedListener {
@@ -70,24 +62,8 @@ class ImageTileSet {
     }
 
     private final List<ImageTile> mTiles = new ArrayList<>();
-    private final Rect mBounds = new Rect();
+    private final Region mRegion = new Region();
     private final Handler mHandler;
-
-    void addOnBoundsChangedListener(OnBoundsChangedListener listener) {
-        if (mOnBoundsListeners == null) {
-            mOnBoundsListeners = new CallbackRegistry<>(
-                    new NotifierCallback<OnBoundsChangedListener, ImageTileSet, Rect>() {
-                        @Override
-                        public void onNotifyCallback(OnBoundsChangedListener callback,
-                                ImageTileSet sender,
-                                int arg, Rect newBounds) {
-                            callback.onBoundsChanged(newBounds.left, newBounds.top, newBounds.right,
-                                    newBounds.bottom);
-                        }
-                    });
-        }
-        mOnBoundsListeners.add(listener);
-    }
 
     void addOnContentChangedListener(OnContentChangedListener listener) {
         if (mContentListeners == null) {
@@ -110,26 +86,14 @@ class ImageTileSet {
             mHandler.post(() -> addTile(tile));
             return;
         }
-        final Rect newBounds = new Rect(mBounds);
-        final Rect newRect = tile.getLocation();
         mTiles.add(tile);
-        newBounds.union(newRect);
-        if (!newBounds.equals(mBounds)) {
-            mBounds.set(newBounds);
-            notifyBoundsChanged(mBounds);
-        }
+        mRegion.op(tile.getLocation(), mRegion, Region.Op.UNION);
         notifyContentChanged();
     }
 
     private void notifyContentChanged() {
         if (mContentListeners != null) {
             mContentListeners.notifyCallbacks(this, 0, null);
-        }
-    }
-
-    private void notifyBoundsChanged(Rect bounds) {
-        if (mOnBoundsListeners != null) {
-            mOnBoundsListeners.notifyCallbacks(this, 0, bounds);
         }
     }
 
@@ -151,6 +115,15 @@ class ImageTileSet {
 
     int size() {
         return mTiles.size();
+    }
+
+    /**
+     * @return the bounding rect around any gaps in the tiles.
+     */
+    Rect getGaps() {
+        Region difference = new Region();
+        difference.op(mRegion.getBounds(), mRegion, Region.Op.DIFFERENCE);
+        return difference.getBounds();
     }
 
     ImageTile get(int i) {
@@ -182,41 +155,40 @@ class ImageTileSet {
     }
 
     int getLeft() {
-        return mBounds.left;
+        return mRegion.getBounds().left;
     }
 
     int getTop() {
-        return mBounds.top;
+        return mRegion.getBounds().top;
     }
 
     int getRight() {
-        return mBounds.right;
+        return mRegion.getBounds().right;
     }
 
     int getBottom() {
-        return mBounds.bottom;
+        return mRegion.getBounds().bottom;
     }
 
     int getWidth() {
-        return mBounds.width();
+        return mRegion.getBounds().width();
     }
 
     int getHeight() {
-        return mBounds.height();
+        return mRegion.getBounds().height();
     }
 
     void clear() {
         if (mTiles.isEmpty()) {
             return;
         }
-        mBounds.setEmpty();
+        mRegion.setEmpty();
         Iterator<ImageTile> i = mTiles.iterator();
         while (i.hasNext()) {
             ImageTile next = i.next();
             next.close();
             i.remove();
         }
-        notifyBoundsChanged(mBounds);
         notifyContentChanged();
     }
 }

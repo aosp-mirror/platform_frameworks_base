@@ -126,6 +126,8 @@ public class LongScreenshotActivity extends Activity {
         mTransitionView = requireViewById(R.id.transition);
         mEnterTransitionView = requireViewById(R.id.enter_transition);
 
+        requireViewById(R.id.cancel).setOnClickListener(v -> finishAndRemoveTask());
+
         mSave.setOnClickListener(this::onClicked);
         mEdit.setOnClickListener(this::onClicked);
         mShare.setOnClickListener(this::onClicked);
@@ -200,7 +202,6 @@ public class LongScreenshotActivity extends Activity {
                         / (float) mLongScreenshot.getHeight());
 
         mEnterTransitionView.setImageDrawable(drawable);
-
         mEnterTransitionView.getViewTreeObserver().addOnPreDrawListener(
                 new ViewTreeObserver.OnPreDrawListener() {
                     @Override
@@ -220,7 +221,6 @@ public class LongScreenshotActivity extends Activity {
                                         mCropView.animateEntrance();
                                         mCropView.setVisibility(View.VISIBLE);
                                         setButtonsEnabled(true);
-                                        mEnterTransitionView.setVisibility(View.GONE);
                                     });
                         });
                         return true;
@@ -228,8 +228,8 @@ public class LongScreenshotActivity extends Activity {
                 });
 
         // Immediately export to temp image file for saved state
-        mCacheSaveFuture = mImageExporter.exportAsTempFile(mBackgroundExecutor,
-                mLongScreenshot.toBitmap());
+        mCacheSaveFuture = mImageExporter.exportToRawFile(mBackgroundExecutor,
+                mLongScreenshot.toBitmap(), new File(getCacheDir(), "long_screenshot_cache.png"));
         mCacheSaveFuture.addListener(() -> {
             try {
                 // Get the temp file path to persist, used in onSavedInstanceState

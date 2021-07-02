@@ -908,9 +908,32 @@ public final class PermissionManager {
      */
     public static boolean shouldShowPackageForIndicatorCached(@NonNull Context context,
             @NonNull String packageName) {
-        if (SYSTEM_PKG.equals(packageName)) {
-            return false;
+        return !getIndicatorExemptedPackages(context).contains(packageName);
+    }
+
+    /**
+     * Get the list of packages that are not shown by the indicators. Only a select few roles, and
+     * the system app itself, are hidden. These values are updated at most every 15 seconds.
+     * @hide
+     */
+    public static Set<String> getIndicatorExemptedPackages(@NonNull Context context) {
+        updateIndicatorExemptedPackages(context);
+        ArraySet<String> pkgNames = new ArraySet<>();
+        pkgNames.add(SYSTEM_PKG);
+        for (int i = 0; i < INDICATOR_EXEMPTED_PACKAGES.length; i++) {
+            String exemptedPackage = INDICATOR_EXEMPTED_PACKAGES[i];
+            if (exemptedPackage != null) {
+                pkgNames.add(exemptedPackage);
+            }
         }
+        return pkgNames;
+    }
+
+    /**
+     * Update the cached indicator exempted packages
+     * @hide
+     */
+    public static void updateIndicatorExemptedPackages(@NonNull Context context) {
         long now = SystemClock.elapsedRealtime();
         if (sLastIndicatorUpdateTime == -1
                 || (now - sLastIndicatorUpdateTime) > EXEMPTED_INDICATOR_ROLE_UPDATE_FREQUENCY_MS) {
@@ -919,14 +942,6 @@ public final class PermissionManager {
                 INDICATOR_EXEMPTED_PACKAGES[i] = context.getString(EXEMPTED_ROLES[i]);
             }
         }
-        for (int i = 0; i < EXEMPTED_ROLES.length; i++) {
-            String exemptedPackage = INDICATOR_EXEMPTED_PACKAGES[i];
-            if (exemptedPackage != null && exemptedPackage.equals(packageName)) {
-                return false;
-            }
-        }
-
-        return true;
     }
     /**
      * Gets the list of packages that have permissions that specified

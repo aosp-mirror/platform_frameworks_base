@@ -236,7 +236,7 @@ class MediaCarouselScrollHandler(
     }
 
     private fun updateSettingsPresentation() {
-        if (showsSettingsButton) {
+        if (showsSettingsButton && settingsButton.width > 0) {
             val settingsOffset = MathUtils.map(
                     0.0f,
                     getMaxTranslation().toFloat(),

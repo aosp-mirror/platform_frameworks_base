@@ -482,12 +482,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Lietotāja pievienošana"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Jauns lietotājs"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vai noņemt viesi?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tiks dzēstas visas šīs sesijas lietotnes un dati."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Noņemt"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Laipni lūdzam atpakaļ, viesi!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vai vēlaties turpināt savu sesiju?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Sākt no sākuma"</string>
@@ -677,6 +673,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Rādīt visu"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Lai maksātu, atbloķējiet ekrānu"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nav iestatīts"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lai izmantotu, atbloķējiet ekrānu"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ienesot jūsu kartes, radās problēma. Lūdzu, vēlāk mēģiniet vēlreiz."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Bloķēšanas ekrāna iestatījumi"</string>
@@ -1125,7 +1123,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Atvērt sarunu"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Sarunu logrīki"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Pieskarieties kādai sarunai, lai pievienotu to savam sākuma ekrānam."</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Atgriezieties šeit, kad būsiet saņēmis ziņojumus."</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Jūsu pēdējās sarunas būs redzamas šeit"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritārās sarunas"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Jaunākās sarunas"</string>
     <string name="okay" msgid="6490552955618608554">"Labi"</string>
@@ -1154,6 +1152,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Skatiet jaunākos ziņojumus, neatbildētos zvanus un statusa atjauninājumus."</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Saruna"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Rādīšana pārtraukta režīma Netraucēt dēļ"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> nosūtīja ziņojumu"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> nosūtīja attēlu"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Nevar iegūt informāciju par akumulatora uzlādes līmeni."</string>

@@ -86,6 +86,7 @@ public class SystemConfig {
     // and "allow-ignore-location-settings".
     private static final int ALLOW_OVERRIDE_APP_RESTRICTIONS = 0x100;
     private static final int ALLOW_IMPLICIT_BROADCASTS = 0x200;
+    private static final int ALLOW_VENDOR_APEX = 0x400;
     private static final int ALLOW_ALL = ~0;
 
     // property for runtime configuration differentiation
@@ -240,7 +241,7 @@ public class SystemConfig {
 
     private final ArraySet<String> mRollbackWhitelistedPackages = new ArraySet<>();
     private final ArraySet<String> mWhitelistedStagedInstallers = new ArraySet<>();
-    private final ArraySet<String> mAllowedPartnerApexes = new ArraySet<>();
+    private final ArraySet<String> mAllowedVendorApexes = new ArraySet<>();
 
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
@@ -411,8 +412,8 @@ public class SystemConfig {
         return mWhitelistedStagedInstallers;
     }
 
-    public Set<String> getAllowedPartnerApexes() {
-        return mAllowedPartnerApexes;
+    public Set<String> getAllowedVendorApexes() {
+        return mAllowedVendorApexes;
     }
 
     public ArraySet<String> getAppDataIsolationWhitelistedApps() {
@@ -489,7 +490,7 @@ public class SystemConfig {
 
         // Vendors are only allowed to customize these
         int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS
-                | ALLOW_ASSOCIATIONS;
+                | ALLOW_ASSOCIATIONS | ALLOW_VENDOR_APEX;
         if (Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.O_MR1) {
             // For backward compatibility
             vendorPermissionFlag |= (ALLOW_PERMISSIONS | ALLOW_APP_CONFIGS);
@@ -530,7 +531,8 @@ public class SystemConfig {
         }
 
         // Allow OEM to customize these
-        int oemPermissionFlag = ALLOW_FEATURES | ALLOW_OEM_PERMISSIONS | ALLOW_ASSOCIATIONS;
+        int oemPermissionFlag = ALLOW_FEATURES | ALLOW_OEM_PERMISSIONS | ALLOW_ASSOCIATIONS
+                | ALLOW_VENDOR_APEX;
         readPermissions(Environment.buildPath(
                 Environment.getOemDirectory(), "etc", "sysconfig"), oemPermissionFlag);
         readPermissions(Environment.buildPath(
@@ -541,7 +543,8 @@ public class SystemConfig {
         // the use of hidden APIs from the product partition.
         int productPermissionFlag = ALLOW_FEATURES | ALLOW_LIBS | ALLOW_PERMISSIONS
                 | ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS | ALLOW_HIDDENAPI_WHITELISTING
-                | ALLOW_ASSOCIATIONS | ALLOW_OVERRIDE_APP_RESTRICTIONS | ALLOW_IMPLICIT_BROADCASTS;
+                | ALLOW_ASSOCIATIONS | ALLOW_OVERRIDE_APP_RESTRICTIONS | ALLOW_IMPLICIT_BROADCASTS
+                | ALLOW_VENDOR_APEX;
         if (Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.R) {
             // TODO(b/157393157): This must check product interface enforcement instead of
             // DEVICE_INITIAL_SDK_INT for the devices without product interface enforcement.
@@ -668,6 +671,7 @@ public class SystemConfig {
                     (permissionFlag & ALLOW_OVERRIDE_APP_RESTRICTIONS) != 0;
             final boolean allowImplicitBroadcasts = (permissionFlag & ALLOW_IMPLICIT_BROADCASTS)
                     != 0;
+            final boolean allowVendorApex = (permissionFlag & ALLOW_VENDOR_APEX) != 0;
             while (true) {
                 XmlUtils.nextElement(parser);
                 if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
@@ -1217,15 +1221,14 @@ public class SystemConfig {
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
-                    case "allowed-partner-apex": {
-                        // TODO(b/189274479): should this be allowOemPermissions instead?
-                        if (allowAppConfigs) {
+                    case "allowed-vendor-apex": {
+                        if (allowVendorApex) {
                             String pkgName = parser.getAttributeValue(null, "package");
                             if (pkgName == null) {
                                 Slog.w(TAG, "<" + name + "> without package in " + permFile
                                         + " at " + parser.getPositionDescription());
                             } else {
-                                mAllowedPartnerApexes.add(pkgName);
+                                mAllowedVendorApexes.add(pkgName);
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);

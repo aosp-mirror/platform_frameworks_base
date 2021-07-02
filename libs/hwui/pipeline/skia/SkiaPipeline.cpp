@@ -59,6 +59,10 @@ void SkiaPipeline::onDestroyHardwareResources() {
 }
 
 bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
+    if (!mRenderThread.getGrContext()) {
+        ALOGD("Trying to pin an image with an invalid GrContext");
+        return false;
+    }
     for (SkImage* image : mutableImages) {
         if (SkImage_pinAsTexture(image, mRenderThread.getGrContext())) {
             mPinnedImages.emplace_back(sk_ref_sp(image));

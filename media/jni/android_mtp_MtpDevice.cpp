@@ -72,6 +72,7 @@ static jfieldID field_deviceInfo_version;
 static jfieldID field_deviceInfo_serialNumber;
 static jfieldID field_deviceInfo_operationsSupported;
 static jfieldID field_deviceInfo_eventsSupported;
+static jfieldID field_deviceInfo_devicePropertySupported;
 
 // MtpStorageInfo fields
 static jfieldID field_storageInfo_storageId;
@@ -129,6 +130,8 @@ static void initializeJavaIDs(JNIEnv* env) {
             GetFieldIDOrDie(env, clazz_deviceInfo, "mOperationsSupported", "[I");
         field_deviceInfo_eventsSupported =
             GetFieldIDOrDie(env, clazz_deviceInfo, "mEventsSupported", "[I");
+        field_deviceInfo_devicePropertySupported =
+            GetFieldIDOrDie(env, clazz_deviceInfo, "mDevicePropertySupported", "[I");
 
         clazz_storageInfo =
             (jclass)env->NewGlobalRef(FindClassOrDie(env, "android/mtp/MtpStorageInfo"));
@@ -377,7 +380,63 @@ android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
         }
     }
 
+    assert(deviceInfo->mDeviceProperties);
+    {
+        const size_t size = deviceInfo->mDeviceProperties->size();
+        ScopedLocalRef<jintArray> events(env, static_cast<jintArray>(env->NewIntArray(size)));
+        {
+            ScopedIntArrayRW elements(env, events.get());
+            if (elements.get() == NULL) {
+                ALOGE("Could not create devicePropertySupported element.");
+                return NULL;
+            }
+            for (size_t i = 0; i < size; ++i) {
+                elements[i] = static_cast<int>(deviceInfo->mDeviceProperties->at(i));
+            }
+            env->SetObjectField(info, field_deviceInfo_devicePropertySupported, events.get());
+        }
+    }
+
     return info;
+}
+
+static jint
+android_mtp_MtpDevice_set_device_property_init_version(JNIEnv *env, jobject thiz,
+                                                       jstring property_str) {
+    MtpDevice* const device = get_device_from_object(env, thiz);
+
+    if (!device) {
+        ALOGD("%s device is null\n", __func__);
+        env->ThrowNew(clazz_io_exception, "Failed to obtain MtpDevice.");
+        return -1;
+    }
+
+    const char *propertyStr = env->GetStringUTFChars(property_str, NULL);
+    if (propertyStr == NULL) {
+        return -1;
+    }
+
+    MtpProperty* property = new MtpProperty(MTP_DEVICE_PROPERTY_SESSION_INITIATOR_VERSION_INFO,
+                                            MTP_TYPE_STR, true);
+    if (!property) {
+        env->ThrowNew(clazz_io_exception, "Failed to obtain property.");
+        return -1;
+    }
+
+    if (property->getDataType() != MTP_TYPE_STR) {
+        env->ThrowNew(clazz_io_exception, "Unexpected property data type.");
+        return -1;
+    }
+
+    property->setCurrentValue(propertyStr);
+    if (!device->setDevicePropValueStr(property)) {
+        env->ThrowNew(clazz_io_exception, "Failed to obtain property value.");
+        return -1;
+    }
+
+    env->ReleaseStringUTFChars(property_str, propertyStr);
+
+    return 0;
 }
 
 static jintArray
@@ -847,6 +906,8 @@ static const JNINativeMethod gMethods[] = {
     {"native_close",            "()V",  (void *)android_mtp_MtpDevice_close},
     {"native_get_device_info",  "()Landroid/mtp/MtpDeviceInfo;",
                                         (void *)android_mtp_MtpDevice_get_device_info},
+    {"native_set_device_property_init_version",  "(Ljava/lang/String;)I",
+                        (void *)android_mtp_MtpDevice_set_device_property_init_version},
     {"native_get_storage_ids",  "()[I", (void *)android_mtp_MtpDevice_get_storage_ids},
     {"native_get_storage_info", "(I)Landroid/mtp/MtpStorageInfo;",
                                         (void *)android_mtp_MtpDevice_get_storage_info},

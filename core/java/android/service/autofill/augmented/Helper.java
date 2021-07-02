@@ -32,9 +32,12 @@ public final class Helper {
      */
     public static void logResponse(int type, @NonNull String servicePackageName,
             @NonNull ComponentName componentName, int mSessionId, long durationMs) {
+        // Remove activity name from logging
+        final ComponentName sanitizedComponentName =
+                new ComponentName(componentName.getPackageName(), "");
         final LogMaker log = new LogMaker(MetricsEvent.AUTOFILL_AUGMENTED_RESPONSE)
                 .setType(type)
-                .setComponentName(componentName)
+                .setComponentName(sanitizedComponentName)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, mSessionId)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, durationMs);

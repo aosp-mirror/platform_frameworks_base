@@ -56,6 +56,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     @Rule
     public AbandonSessionsRule mHostTestRule = new AbandonSessionsRule(this);
     private static final String SHIM_V2 = "com.android.apex.cts.shim.v2.apex";
+    private static final String APEX_WRONG_SHA = "com.android.apex.cts.shim.v2_wrong_sha.apex";
     private static final String APK_A = "TestAppAv1.apk";
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
 
@@ -320,6 +321,27 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         getDevice().reboot();
 
         runPhase("testFailStagedSessionIfStagingDirectoryDeleted_Verify");
+    }
+
+    @Test
+    public void testApexActivationFailureIsCapturedInSession() throws Exception {
+        // We initiate staging a normal apex update which passes pre-reboot verification.
+        // Then we replace the valid apex waiting in /data/app-staging with something
+        // that cannot be activated and reboot. The apex should fail to activate, which
+        // is what we want for this test.
+        runPhase("testApexActivationFailureIsCapturedInSession_Commit");
+        final String sessionId = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
+        assertThat(sessionId).isNotEmpty();
+        // Now replace the valid staged apex with something invalid
+        getDevice().enableAdbRoot();
+        getDevice().executeShellCommand("rm /data/app-staging/session_" + sessionId + "/*");
+        final File invalidApexFile = mHostUtils.getTestFile(APEX_WRONG_SHA);
+        getDevice().pushFile(invalidApexFile,
+                "/data/app-staging/session_" + sessionId + "/base.apex");
+        getDevice().reboot();
+
+        runPhase("testApexActivationFailureIsCapturedInSession_Verify");
     }
 
     private List<String> getStagingDirectories() throws DeviceNotAvailableException {

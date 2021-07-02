@@ -471,7 +471,7 @@
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Solo\nalarmas"</string>
     <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando de manera inalámbrica • Se completará en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando • Se completará en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando rápido • Se completará en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga rápida • Se completará en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando lento • Se completará en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambiar usuario"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Cambiar de usuario (usuario actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
@@ -480,12 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Agregar usuario"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Usuario nuevo"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"¿Quitar invitado?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Quitar"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Hola de nuevo, invitado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres retomar la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>
@@ -674,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostrar todo"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Desbloquear para pagar"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Sin configurar"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ocurrió un problema al obtener las tarjetas; vuelve a intentarlo más tarde"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Configuración de pantalla de bloqueo"</string>
@@ -1119,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Conversación abierta"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversación"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Presiona una conversación para agregarla a tu pantalla principal"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Vuelve a consultar cuando recibas algunos mensajes"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Tus conversaciones recientes se mostrarán aquí"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Conversaciones prioritarias"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversaciones recientes"</string>
     <string name="okay" msgid="6490552955618608554">"Aceptar"</string>
@@ -1148,6 +1146,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g> o más"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Consulta mensajes recientes, llamadas perdidas y actualizaciones de estado"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversación"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Se detuvo por el modo No interrumpir"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> envió un mensaje"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> envió una imagen"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema al leer el medidor de batería"</string>

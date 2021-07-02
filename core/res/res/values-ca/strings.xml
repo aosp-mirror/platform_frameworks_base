@@ -349,7 +349,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permet que l\'aplicació desplegui o replegui la barra d\'estat."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"mostrar notificacions com a activitats de pantalla completa en un dispositiu bloquejat"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Permet a l\'aplicació mostrar notificacions com a activitats de pantalla completa en un dispositiu bloquejat"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instal·lar dreceres"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instal·lar dreceres"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permet que una aplicació afegeixi dreceres a la pantalla d\'inici sense la intervenció de l\'usuari."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstal·la dreceres"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permet que l\'aplicació suprimeixi les dreceres de la pantalla d\'inici sense la intervenció de l\'usuari."</string>
@@ -585,6 +585,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prova una altra empremta digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Hi ha massa llum"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prova d\'ajustar l\'empremta digital"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Canvia lleugerament la posició del dit en cada intent"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"L\'empremta digital s\'ha autenticat"</string>
@@ -601,8 +602,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No s\'ha registrat cap empremta digital."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Aquest dispositiu no té sensor d\'empremtes digitals."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"El sensor està desactivat temporalment."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"No es pot utilitzar el sensor d\'empremtes digitals. Visita un proveïdor de reparacions."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dit <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utilitza l\'empremta digital"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Utilitza l\'empremta digital o el bloqueig de pantalla"</string>
@@ -612,12 +612,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona d\'empremta digital"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueig facial"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Torna a registrar la cara"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Per millorar el reconeixement, torna a registrar la cara"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema amb Desbloqueig facial"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toca per suprimir el teu model facial i, a continuació, torna a afegir la teva cara"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura Desbloqueig facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Mira el telèfon per desbloquejar-lo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura més maneres de desbloquejar el dispositiu"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca per afegir una empremta digital"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueig amb empremta digital"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"No es pot utilitzar el sensor d\'empremtes digitals"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visita un proveïdor de reparacions."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"No es reconeix la teva cara. Torna-ho a provar."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Massa brillant Prova una il·luminació més suau."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Massa fosc. Prova una il·luminació més brillant."</string>

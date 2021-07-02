@@ -232,6 +232,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 emptyList(), PACKAGE, session.getSessionToken(), null, device, true, null)
         player.bindPlayer(state, PACKAGE)
         assertThat(seamlessText.getText()).isEqualTo(DEVICE_NAME)
+        assertThat(seamless.contentDescription).isEqualTo(DEVICE_NAME)
         assertThat(seamless.isEnabled()).isTrue()
     }
 
@@ -251,13 +252,15 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun bindNullDevice() {
+        val fallbackString = context.getResources().getString(
+                com.android.internal.R.string.ext_media_seamless_action)
         player.attachPlayer(holder)
         val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
                 emptyList(), PACKAGE, session.getSessionToken(), null, null, true, null)
         player.bindPlayer(state, PACKAGE)
         assertThat(seamless.isEnabled()).isTrue()
-        assertThat(seamlessText.getText()).isEqualTo(context.getResources().getString(
-                com.android.internal.R.string.ext_media_seamless_action))
+        assertThat(seamlessText.getText()).isEqualTo(fallbackString)
+        assertThat(seamless.contentDescription).isEqualTo(fallbackString)
     }
 
     @Test

@@ -291,19 +291,24 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 ? res.getString(R.string.screenrecord_ongoing_screen_only)
                 : res.getString(R.string.screenrecord_ongoing_screen_and_audio);
 
-        Intent stopIntent = getNotificationIntent(this);
+        PendingIntent pendingIntent = PendingIntent.getService(
+                this,
+                REQUEST_CODE,
+                getNotificationIntent(this),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        Notification.Action stopAction = new Notification.Action.Builder(
+                Icon.createWithResource(this, R.drawable.ic_android),
+                getResources().getString(R.string.screenrecord_stop_label),
+                pendingIntent).build();
         Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_screenrecord)
                 .setContentTitle(notificationTitle)
-                .setContentText(getResources().getString(R.string.screenrecord_stop_text))
                 .setUsesChronometer(true)
                 .setColorized(true)
                 .setColor(getResources().getColor(R.color.GM2_red_700))
                 .setOngoing(true)
                 .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
-                .setContentIntent(
-                        PendingIntent.getService(this, REQUEST_CODE, stopIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
+                .addAction(stopAction)
                 .addExtras(extras);
         startForeground(NOTIFICATION_RECORDING_ID, builder.build());
     }

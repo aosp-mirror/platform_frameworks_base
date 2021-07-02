@@ -61,7 +61,7 @@ public class NsdService extends INsdManager.Stub {
     private static final String MDNS_TAG = "mDnsConnector";
 
     private static final boolean DBG = true;
-    private static final long CLEANUP_DELAY_MS = 3000;
+    private static final long CLEANUP_DELAY_MS = 10000;
 
     private final Context mContext;
     private final NsdSettings mNsdSettings;
@@ -94,19 +94,25 @@ public class NsdService extends INsdManager.Stub {
             return NsdManager.nameOf(what);
         }
 
-        void maybeStartDaemon() {
+        private void maybeStartDaemon() {
             mDaemon.maybeStart();
             maybeScheduleStop();
         }
 
-        void maybeScheduleStop() {
+        private boolean isAnyRequestActive() {
+            return mIdToClientInfoMap.size() != 0;
+        }
+
+        private void scheduleStop() {
+            sendMessageDelayed(NsdManager.DAEMON_CLEANUP, mCleanupDelayMs);
+        }
+        private void maybeScheduleStop() {
             if (!isAnyRequestActive()) {
-                cancelStop();
-                sendMessageDelayed(NsdManager.DAEMON_CLEANUP, mCleanupDelayMs);
+                scheduleStop();
             }
         }
 
-        void cancelStop() {
+        private void cancelStop() {
             this.removeMessages(NsdManager.DAEMON_CLEANUP);
         }
 
@@ -164,10 +170,15 @@ public class NsdService extends INsdManager.Stub {
                                 if (DBG) Slog.d(TAG, "Client connection lost with reason: " + msg.arg1);
                                 break;
                         }
+
                         cInfo = mClients.get(msg.replyTo);
                         if (cInfo != null) {
                             cInfo.expungeAllRequests();
                             mClients.remove(msg.replyTo);
+                        }
+                        //Last client
+                        if (mClients.size() == 0) {
+                            scheduleStop();
                         }
                         break;
                     case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION:
@@ -235,7 +246,7 @@ public class NsdService extends INsdManager.Stub {
             public void exit() {
                 // TODO: it is incorrect to stop the daemon without expunging all requests
                 // and sending error callbacks to clients.
-                maybeScheduleStop();
+                scheduleStop();
             }
 
             private boolean requestLimitReached(ClientInfo clientInfo) {
@@ -271,9 +282,6 @@ public class NsdService extends INsdManager.Stub {
                         return NOT_HANDLED;
                     case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
                         return NOT_HANDLED;
-                }
-
-                switch (msg.what) {
                     case NsdManager.DISABLE:
                         //TODO: cleanup clients
                         transitionTo(mDisabledState);
@@ -529,10 +537,6 @@ public class NsdService extends INsdManager.Stub {
                 return true;
             }
        }
-    }
-
-    private boolean isAnyRequestActive() {
-        return mIdToClientInfoMap.size() != 0;
     }
 
     private String unescape(String s) {
@@ -907,7 +911,6 @@ public class NsdService extends INsdManager.Stub {
             }
             mClientIds.clear();
             mClientRequests.clear();
-            mNsdStateMachine.maybeScheduleStop();
         }
 
         // mClientIds is a sparse array of listener id -> mDnsClient id.  For a given mDnsClient id,

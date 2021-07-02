@@ -456,7 +456,9 @@ public final class AppHibernationService extends SystemService {
     private void hibernatePackageGlobally(@NonNull String packageName, GlobalLevelState state) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackageGlobally");
         if (mOatArtifactDeletionEnabled) {
-            mPackageManagerInternal.deleteOatArtifactsOfPackage(packageName);
+            state.savedByte = Math.max(
+                    mPackageManagerInternal.deleteOatArtifactsOfPackage(packageName),
+                    0);
         }
         state.hibernated = true;
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
@@ -469,6 +471,7 @@ public final class AppHibernationService extends SystemService {
     private void unhibernatePackageGlobally(@NonNull String packageName, GlobalLevelState state) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackageGlobally");
         state.hibernated = false;
+        state.savedByte = 0;
         state.lastUnhibernatedMs = System.currentTimeMillis();
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
@@ -943,6 +946,9 @@ public final class AppHibernationService extends SystemService {
     }
 
     private final class StatsPullAtomCallbackImpl implements StatsPullAtomCallback {
+
+        private static final int MEGABYTE_IN_BYTES = 1000000;
+
         @Override
         public int onPullAtom(int atomTag, @NonNull List<StatsEvent> data) {
             if (!isAppHibernationEnabled()
@@ -969,12 +975,21 @@ public final class AppHibernationService extends SystemService {
                     break;
                 case FrameworkStatsLog.GLOBAL_HIBERNATED_APPS:
                     int hibernatedAppCount = 0;
+                    long storage_saved_byte = 0;
                     synchronized (mLock) {
                         for (GlobalLevelState state : mGlobalHibernationStates.values()) {
-                            if (state.hibernated) hibernatedAppCount++;
+                            if (state.hibernated) {
+                                hibernatedAppCount++;
+                                storage_saved_byte += state.savedByte;
+                            }
                         }
                     }
-                    data.add(FrameworkStatsLog.buildStatsEvent(atomTag, hibernatedAppCount));
+                    data.add(
+                            FrameworkStatsLog.buildStatsEvent(
+                                    atomTag,
+                                    hibernatedAppCount,
+                                    storage_saved_byte / MEGABYTE_IN_BYTES)
+                    );
                     break;
                 default:
                     return StatsManager.PULL_SKIP;

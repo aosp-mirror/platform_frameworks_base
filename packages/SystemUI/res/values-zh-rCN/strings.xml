@@ -26,8 +26,8 @@
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"通知"</string>
     <string name="battery_low_title" msgid="6891106956328275225">"电池电量可能很快就要耗尽"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"剩余<xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"剩余电量：<xliff:g id="PERCENTAGE">%1$s</xliff:g>；根据您的使用情况，大约还可使用 <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"剩余电量：<xliff:g id="PERCENTAGE">%1$s</xliff:g>；大约还可使用 <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"剩余电量：<xliff:g id="PERCENTAGE">%1$s</xliff:g>；根据您的使用情况，大约还可使用<xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"剩余电量：<xliff:g id="PERCENTAGE">%1$s</xliff:g>；大约还可使用<xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"剩余 <xliff:g id="PERCENTAGE">%s</xliff:g>。省电模式已开启。"</string>
     <string name="invalid_charger" msgid="4370074072117767416">"无法通过 USB 充电。请使用设备随附的充电器。"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"无法通过 USB 充电"</string>
@@ -228,7 +228,7 @@
     <string name="accessibility_no_sims" msgid="5711270400476534667">"没有 SIM 卡。"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"打开电量详情"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"电池电量为百分之 <xliff:g id="NUMBER">%d</xliff:g>。"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"电池电量为 <xliff:g id="PERCENTAGE">%1$s</xliff:g>，根据您的使用情况，大约还可使用 <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"电池电量为 <xliff:g id="PERCENTAGE">%1$s</xliff:g>，根据您的使用情况，大约还可使用<xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"正在充电，已完成 <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%。"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"系统设置。"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"通知。"</string>
@@ -480,10 +480,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"添加用户"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新用户"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"要移除访客吗？"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"要重置访客会话吗？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"此会话中的所有应用和数据都将被删除。"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"移除"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"重置"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"访客，欢迎回来！"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"要继续您的会话吗？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新开始"</string>
@@ -672,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"全部显示"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"解锁设备才能付款"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"未设置"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"解锁设备即可使用"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"获取您的卡片时出现问题，请稍后重试"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"锁定屏幕设置"</string>
@@ -1117,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"对话微件"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"点按对话即可将其添加到主屏幕"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"请在收到一些消息后再回来查看"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"您近期的对话将显示在此处"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"优先对话"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"近期对话"</string>
     <string name="okay" msgid="6490552955618608554">"确定"</string>
@@ -1146,6 +1146,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"查看近期的消息、未接电话和状态更新"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"对话"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"勿扰模式已暂停通知"</string>
     <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g>发送了一条消息"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>发送了一张图片"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"读取电池计量器时出现问题"</string>

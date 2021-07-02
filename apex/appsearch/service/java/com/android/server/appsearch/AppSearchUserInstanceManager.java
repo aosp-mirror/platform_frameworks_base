@@ -30,7 +30,7 @@ import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import com.android.server.appsearch.external.localstorage.FrameworkOptimizeStrategy;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
 import com.android.server.appsearch.stats.PlatformLogger;
-import com.android.server.appsearch.visibilitystore.VisibilityStore;
+import com.android.server.appsearch.visibilitystore.VisibilityStoreImpl;
 
 import java.io.File;
 import java.util.Map;
@@ -89,25 +89,24 @@ public final class AppSearchUserInstanceManager {
      * <p>If no AppSearchUserInstance exists for the unlocked user, Icing will be initialized and
      * one will be created.
      *
-     * @param context The context
+     * @param userContext Context of the user calling AppSearch
      * @param userHandle The multi-user handle of the device user calling AppSearch
      * @param config Flag manager for AppSearch
      * @return An initialized {@link AppSearchUserInstance} for this user
      */
     @NonNull
     public AppSearchUserInstance getOrCreateUserInstance(
-            @NonNull Context context,
+            @NonNull Context userContext,
             @NonNull UserHandle userHandle,
             @NonNull AppSearchConfig config)
             throws AppSearchException {
-        Objects.requireNonNull(context);
+        Objects.requireNonNull(userContext);
         Objects.requireNonNull(userHandle);
         Objects.requireNonNull(config);
 
         synchronized (mInstancesLocked) {
             AppSearchUserInstance instance = mInstancesLocked.get(userHandle);
             if (instance == null) {
-                Context userContext = context.createContextAsUser(userHandle, /*flags=*/ 0);
                 instance = createUserInstance(userContext, userHandle, config);
                 mInstancesLocked.put(userHandle, instance);
             }
@@ -169,16 +168,20 @@ public final class AppSearchUserInstanceManager {
         InitializeStats.Builder initStatsBuilder = new InitializeStats.Builder();
 
         // Initialize the classes that make up AppSearchUserInstance
-        PlatformLogger logger = new PlatformLogger(userContext, userHandle, config);
+        PlatformLogger logger = new PlatformLogger(userContext, config);
 
         File appSearchDir = getAppSearchDir(userHandle);
         File icingDir = new File(appSearchDir, "icing");
         Log.i(TAG, "Creating new AppSearch instance at: " + icingDir);
-        AppSearchImpl appSearchImpl =
-                AppSearchImpl.create(icingDir, initStatsBuilder, new FrameworkOptimizeStrategy());
+        AppSearchImpl appSearchImpl = AppSearchImpl.create(
+                icingDir,
+                new FrameworkLimitConfig(config),
+                initStatsBuilder,
+                new FrameworkOptimizeStrategy());
 
         long prepareVisibilityStoreLatencyStartMillis = SystemClock.elapsedRealtime();
-        VisibilityStore visibilityStore = VisibilityStore.create(appSearchImpl, userContext);
+        VisibilityStoreImpl visibilityStore =
+                VisibilityStoreImpl.create(appSearchImpl, userContext);
         long prepareVisibilityStoreLatencyEndMillis = SystemClock.elapsedRealtime();
 
         initStatsBuilder

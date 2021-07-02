@@ -18,6 +18,7 @@ import com.android.systemui.ExpandHelper
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.biometrics.UdfpsKeyguardViewController
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
@@ -107,6 +108,11 @@ class LockscreenShadeTransitionController @Inject constructor(
      * A flag to suppress the default animation when unlocking in the locked down shade.
      */
     private var nextHideKeyguardNeedsNoAnimation = false
+
+    /**
+     * The udfpsKeyguardViewController if it exists.
+     */
+    var udfpsKeyguardViewController: UdfpsKeyguardViewController? = null
 
     /**
      * The touch helper responsible for the drag down animation.
@@ -291,6 +297,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                     // Fade out all content only visible on the lockscreen
                     notificationPanelController.setKeyguardOnlyContentAlpha(1.0f - scrimProgress)
                     depthController.transitionToFullShadeProgress = scrimProgress
+                    udfpsKeyguardViewController?.setTransitionToFullShadeProgress(scrimProgress)
                 }
             }
         }

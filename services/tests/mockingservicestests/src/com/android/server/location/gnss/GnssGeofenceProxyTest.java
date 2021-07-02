@@ -18,6 +18,7 @@ package com.android.server.location.gnss;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.content.Context;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -49,6 +50,7 @@ public class GnssGeofenceProxyTest {
     private static final int NOTIFICATION_RESPONSIVENESS = 0;
     private static final int UNKNOWN_TIMER = 0;
 
+    private @Mock Context mContext;
     private @Mock GnssConfiguration mMockConfiguration;
     private @Mock GnssNative.GeofenceCallbacks mGeofenceCallbacks;
 
@@ -63,7 +65,7 @@ public class GnssGeofenceProxyTest {
         GnssNative.setGnssHalForTest(mFakeHal);
 
         GnssNative gnssNative = Objects.requireNonNull(
-                GnssNative.create(new TestInjector(), mMockConfiguration));
+                GnssNative.create(new TestInjector(mContext), mMockConfiguration));
         gnssNative.setGeofenceCallbacks(mGeofenceCallbacks);
         mTestProvider = new GnssGeofenceProxy(gnssNative);
         gnssNative.register();

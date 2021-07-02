@@ -404,6 +404,7 @@
         <item name="offStateColor">@android:color/system_neutral1_800</item>
         <item name="underSurfaceColor">@android:color/system_neutral1_1000</item>
         <item name="android:colorBackground">@android:color/system_neutral1_900</item>
+        <item name="android:itemTextAppearance">@style/Control.MenuItem</item>
     </style>
 
     <style name="Theme.SystemUI.QuickSettings.BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
@@ -641,7 +642,10 @@
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:tint">?android:attr/textColorPrimary</item>
         <item name="android:stateListAnimator">@anim/media_button_state_list_animator</item>
-        <item name="android:padding">12dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingBottom">16dp</item>
         <item name="android:scaleType">centerInside</item>
     </style>
 
@@ -691,6 +695,15 @@
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
+    </style>
+
+    <style name="ScreenRecord.Switch">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:switchMinWidth">52dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:track">@drawable/settingslib_switch_track</item>
+        <item name="android:thumb">@drawable/settingslib_switch_thumb</item>
     </style>
 
     <!-- Screenshots -->

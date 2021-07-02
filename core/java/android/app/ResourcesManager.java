@@ -42,10 +42,10 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+import android.view.DisplayInfo;
 import android.window.WindowContext;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,6 +96,12 @@ public class ResourcesManager {
      * resources apply their overrides to this display id.
      */
     private int mResDisplayId = DEFAULT_DISPLAY;
+
+    /**
+     * ApplicationInfo changes that need to be applied to Resources when the next configuration
+     * change occurs.
+     */
+    private ArrayList<ApplicationInfo> mPendingAppInfoUpdates;
 
     /**
      * A mapping of ResourceImpls and their configurations. These are heavy weight objects
@@ -251,12 +256,6 @@ public class ResourcesManager {
             new WeakHashMap<>();
 
     /**
-     * A cache of DisplayId, DisplayAdjustments to Display.
-     */
-    private final ArrayMap<Pair<Integer, DisplayAdjustments>, SoftReference<Display>>
-            mAdjustedDisplays = new ArrayMap<>();
-
-    /**
      * Callback implementation for handling updates to Resources objects.
      */
     private final UpdateHandler mUpdateCallbacks = new UpdateHandler();
@@ -331,10 +330,12 @@ public class ResourcesManager {
      */
     @VisibleForTesting
     protected @NonNull DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments da) {
-        DisplayMetrics dm = new DisplayMetrics();
-        final Display display = getAdjustedDisplay(displayId, da);
-        if (display != null) {
-            display.getMetrics(dm);
+        final DisplayManagerGlobal displayManagerGlobal = DisplayManagerGlobal.getInstance();
+        final DisplayMetrics dm = new DisplayMetrics();
+        final DisplayInfo displayInfo = displayManagerGlobal != null
+                ? displayManagerGlobal.getDisplayInfo(displayId) : null;
+        if (displayInfo != null) {
+            displayInfo.getAppMetrics(dm, da);
         } else {
             dm.setToDefaults();
         }
@@ -372,45 +373,6 @@ public class ResourcesManager {
             }
             return false;
         }
-    }
-
-    /**
-     * Returns an adjusted {@link Display} object based on the inputs or null if display isn't
-     * available. This method is only used within {@link ResourcesManager} to calculate display
-     * metrics based on a set {@link DisplayAdjustments}. All other usages should instead call
-     * {@link ResourcesManager#getAdjustedDisplay(int, Resources)}.
-     *
-     * @param displayId display Id.
-     * @param displayAdjustments display adjustments.
-     */
-    private Display getAdjustedDisplay(final int displayId,
-            @Nullable DisplayAdjustments displayAdjustments) {
-        final DisplayAdjustments displayAdjustmentsCopy = (displayAdjustments != null)
-                ? new DisplayAdjustments(displayAdjustments) : new DisplayAdjustments();
-        final Pair<Integer, DisplayAdjustments> key =
-                Pair.create(displayId, displayAdjustmentsCopy);
-        SoftReference<Display> sd;
-        synchronized (mLock) {
-            sd = mAdjustedDisplays.get(key);
-        }
-        if (sd != null) {
-            final Display display = sd.get();
-            if (display != null) {
-                return display;
-            }
-        }
-        final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
-        if (dm == null) {
-            // may be null early in system startup
-            return null;
-        }
-        final Display display = dm.getCompatibleDisplay(displayId, key.second);
-        if (display != null) {
-            synchronized (mLock) {
-                mAdjustedDisplays.put(key, new SoftReference<>(display));
-            }
-        }
-        return display;
     }
 
     /**
@@ -1032,7 +994,7 @@ public class ResourcesManager {
      * @param classLoader The classloader to use for the Resources object.
      *                    If null, {@link ClassLoader#getSystemClassLoader()} is used.
      * @return A Resources object that gets updated when
-     *         {@link #applyConfigurationToResourcesLocked(Configuration, CompatibilityInfo)}
+     *         {@link #applyConfigurationToResources(Configuration, CompatibilityInfo)}
      *         is called.
      */
     @Nullable
@@ -1159,8 +1121,8 @@ public class ResourcesManager {
     /**
      * Updates an Activity's Resources object with overrideConfig. The Resources object
      * that was previously returned by {@link #getResources(IBinder, String, String[], String[],
-     * String[], Integer, Configuration, CompatibilityInfo, ClassLoader, List)} is still valid and
-     * will have the updated configuration.
+     * String[], String[], Integer, Configuration, CompatibilityInfo, ClassLoader, List)} is still
+     * valid and will have the updated configuration.
      *
      * @param activityToken The Activity token.
      * @param overrideConfig The configuration override to update.
@@ -1311,6 +1273,22 @@ public class ResourcesManager {
         return newKey;
     }
 
+    public void updatePendingAppInfoUpdates(@NonNull ApplicationInfo appInfo) {
+        synchronized (mLock) {
+            if (mPendingAppInfoUpdates == null) {
+                mPendingAppInfoUpdates = new ArrayList<>();
+            }
+            // Clear previous app info changes for the package to prevent multiple ResourcesImpl
+            // recreations when only the last recreation will be used.
+            for (int i = mPendingAppInfoUpdates.size() - 1; i >= 0; i--) {
+                if (appInfo.sourceDir.equals(mPendingAppInfoUpdates.get(i).sourceDir)) {
+                    mPendingAppInfoUpdates.remove(i);
+                }
+            }
+            mPendingAppInfoUpdates.add(appInfo);
+        }
+    }
+
     public final boolean applyConfigurationToResources(@NonNull Configuration config,
             @Nullable CompatibilityInfo compat) {
         return applyConfigurationToResources(config, compat, null /* adjustments */);
@@ -1324,16 +1302,24 @@ public class ResourcesManager {
                 Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
                         "ResourcesManager#applyConfigurationToResources");
 
-                if (!mResConfiguration.isOtherSeqNewer(config) && compat == null) {
+                final boolean assetsUpdated = mPendingAppInfoUpdates != null
+                        && config.assetsSeq > mResConfiguration.assetsSeq;
+                if (assetsUpdated) {
+                    for (int i = 0, n = mPendingAppInfoUpdates.size(); i < n; i++) {
+                        final ApplicationInfo appInfo = mPendingAppInfoUpdates.get(i);
+                        applyNewResourceDirs(appInfo, new String[]{appInfo.sourceDir});
+                    }
+                    mPendingAppInfoUpdates = null;
+                }
+
+                if (!assetsUpdated && !mResConfiguration.isOtherSeqNewer(config)
+                        && compat == null) {
                     if (DEBUG || DEBUG_CONFIGURATION) {
                         Slog.v(TAG, "Skipping new config: curSeq="
                                 + mResConfiguration.seq + ", newSeq=" + config.seq);
                     }
                     return false;
                 }
-
-                // Things might have changed in display manager, so clear the cached displays.
-                mAdjustedDisplays.clear();
 
                 int changes = mResConfiguration.updateFrom(config);
                 if (compat != null && (mResCompatibilityInfo == null
@@ -1367,7 +1353,7 @@ public class ResourcesManager {
                     }
                 }
 
-                return changes != 0;
+                return assetsUpdated || changes != 0;
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
             }

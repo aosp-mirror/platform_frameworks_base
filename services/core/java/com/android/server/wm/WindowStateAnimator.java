@@ -16,12 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.graphics.Matrix.MSCALE_X;
-import static android.graphics.Matrix.MSCALE_Y;
-import static android.graphics.Matrix.MSKEW_X;
-import static android.graphics.Matrix.MSKEW_Y;
-import static android.graphics.Matrix.MTRANS_X;
-import static android.graphics.Matrix.MTRANS_Y;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -54,14 +48,12 @@ import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
 import static com.android.server.wm.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
 
 import android.content.Context;
-import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.DisplayInfo;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -260,7 +252,10 @@ class WindowStateAnimator {
         }
 
         if (postDrawTransaction != null) {
-            if (mLastHidden) {
+            // If there is no surface, the last draw was for the previous surface. We don't want to
+            // wait until the new surface is shown and instead just apply the transaction right
+            // away.
+            if (mLastHidden && mDrawState != NO_SURFACE) {
                 mPostDrawTransaction.merge(postDrawTransaction);
                 layoutNeeded = true;
             } else {
@@ -683,8 +678,9 @@ class WindowStateAnimator {
         }
 
         // We don't apply animation for application main window here since this window type
-        // should be controlled by AppWindowToken in general.
-        if (mAttrType != TYPE_BASE_APPLICATION) {
+        // should be controlled by ActivityRecord in general. Wallpaper is also excluded because
+        // WallpaperController should handle it.
+        if (mAttrType != TYPE_BASE_APPLICATION && !mIsWallpaper) {
             applyAnimationLocked(transit, true);
         }
 
@@ -829,6 +825,10 @@ class WindowStateAnimator {
     }
 
     void destroySurface(SurfaceControl.Transaction t) {
+        // Since the SurfaceControl is getting torn down, it's safe to just clean up any
+        // pending transactions that were in mPostDrawTransaction, as well.
+        t.merge(mPostDrawTransaction);
+
         try {
             if (mSurfaceController != null) {
                 mSurfaceController.destroy(t);

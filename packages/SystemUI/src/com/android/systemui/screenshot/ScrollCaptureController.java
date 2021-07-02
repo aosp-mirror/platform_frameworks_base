@@ -199,22 +199,20 @@ public class ScrollCaptureController {
         Log.d(TAG, "onCaptureResult: " + result + " scrolling " + (mScrollingUp ? "UP" : "DOWN")
                 + " finish on boundary: " + mFinishOnBoundary);
         boolean emptyResult = result.captured.height() == 0;
-        boolean partialResult = !emptyResult
-                && result.captured.height() < result.requested.height();
-        boolean finish = false;
 
         if (emptyResult) {
             // Potentially reached a vertical boundary. Extend in the other direction.
             if (mFinishOnBoundary) {
-                Log.d(TAG, "Partial/empty: finished!");
-                finish = true;
+                Log.d(TAG, "Empty: finished!");
+                finishCapture();
+                return;
             } else {
                 // We hit a boundary, clear the tiles, capture everything in the opposite direction,
                 // then finish.
                 mImageTileSet.clear();
                 mFinishOnBoundary = true;
                 mScrollingUp = !mScrollingUp;
-                Log.d(TAG, "Partial/empty: cleared, switch direction to finish");
+                Log.d(TAG, "Empty: cleared, switch direction to finish");
             }
         } else {
             // Got a non-empty result, but may already have enough bitmap data now
@@ -223,12 +221,14 @@ public class ScrollCaptureController {
                 Log.d(TAG, "Hit max tiles: finished");
                 // If we ever hit the max tiles, we've got enough bitmap data to finish
                 // (even if we weren't sure we'd finish on this pass).
-                finish = true;
+                finishCapture();
+                return;
             } else {
                 if (mScrollingUp && !mFinishOnBoundary) {
                     // During the initial scroll up, we only want to acquire the portion described
                     // by IDEAL_PORTION_ABOVE.
-                    if (expectedTiles >= mSession.getMaxTiles() * IDEAL_PORTION_ABOVE) {
+                    if (mImageTileSet.getHeight() + result.captured.height()
+                            >= mSession.getTargetHeight() * IDEAL_PORTION_ABOVE) {
                         Log.d(TAG, "Hit ideal portion above: clear and switch direction");
                         // We got enough above the start point, now see how far down it can go.
                         mImageTileSet.clear();
@@ -246,15 +246,15 @@ public class ScrollCaptureController {
                 + " - " +  mImageTileSet.getRight() + "," + mImageTileSet.getBottom()
                 + " (" + mImageTileSet.getWidth() + "x" + mImageTileSet.getHeight() + ")");
 
-
-        // Stop when "too tall"
-        if (mImageTileSet.getHeight() > MAX_HEIGHT) {
-            Log.d(TAG, "Max height reached.");
-            finish = true;
+        Rect gapBounds = mImageTileSet.getGaps();
+        if (!gapBounds.isEmpty()) {
+            Log.d(TAG, "Found gaps in tileset: " + gapBounds + ", requesting " + gapBounds.top);
+            requestNextTile(gapBounds.top);
+            return;
         }
 
-        if (finish) {
-            Log.d(TAG, "Stop.");
+        if (mImageTileSet.getHeight() >= mSession.getTargetHeight()) {
+            Log.d(TAG, "Target height reached.");
             finishCapture();
             return;
         }
@@ -268,8 +268,8 @@ public class ScrollCaptureController {
                     : result.requested.bottom;
         } else {
             nextTop = (mScrollingUp)
-                    ? result.captured.top - mSession.getTileHeight()
-                    : result.captured.bottom;
+                    ? mImageTileSet.getTop() - mSession.getTileHeight()
+                    : mImageTileSet.getBottom();
         }
         requestNextTile(nextTop);
     }
