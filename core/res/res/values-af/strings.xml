@@ -301,7 +301,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"by jou kalender in te gaan"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS-boodskappe te stuur en te bekyk"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Lêers en media"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Lêers- en media"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"toegang te verkry tot foto\'s, media en lêers op jou toestel"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofoon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"oudio op te neem"</string>
@@ -1413,6 +1413,8 @@
     <string name="deny" msgid="6632259981847676572">"Weier"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Toestemming versoek"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Toestemming versoek\nvir rekening <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Jy gebruik hierdie program buite jou werkprofiel"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Jy gebruik tans hierdie program in jou werkprofiel"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Invoermetode"</string>

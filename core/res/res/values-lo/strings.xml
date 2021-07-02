@@ -1413,6 +1413,7 @@
     <string name="deny" msgid="6632259981847676572">"ປະ​ຕິ​ເສດ"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"ຕ້ອງການການອະນຸຍາດ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"ຮ້ອງຂໍການກຳນົດສິດ\nສຳລັບບັນຊີ <xliff:g id="ACCOUNT">%s</xliff:g> ແລ້ວ."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"ຮ້ອງຂໍການອະນຸຍາດໂດຍ <xliff:g id="APP">%1$s</xliff:g>\nສຳລັບບັນຊີ <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້ນອກ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້​ໃນ​ໂປຣ​ໄຟລ໌​​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ວິທີການປ້ອນຂໍ້ມູນ"</string>
