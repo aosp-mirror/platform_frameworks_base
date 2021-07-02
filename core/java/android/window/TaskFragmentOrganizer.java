@@ -18,6 +18,7 @@ package android.window;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -26,9 +27,10 @@ import android.os.RemoteException;
 import java.util.concurrent.Executor;
 
 /**
- * Interface for WindowManager to delegate control of {@link com.android.server.wm.TaskFragment}.
+ * Interface for WindowManager to delegate control of {@code TaskFragment}.
  * @hide
  */
+@TestApi
 public class TaskFragmentOrganizer extends WindowOrganizer {
 
     /**
@@ -39,6 +41,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     /**
      * Creates a {@link Bundle} with an exception that can be passed to
      * {@link ITaskFragmentOrganizer#onTaskFragmentError}.
+     * @hide
      */
     public static Bundle putExceptionInBundle(@NonNull Throwable exception) {
         final Bundle exceptionBundle = new Bundle();
@@ -126,6 +129,8 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
         super.applyTransaction(t);
     }
 
+    // Suppress the lint because it is not a registration method.
+    @SuppressWarnings("ExecutorRegistration")
     @Override
     public int applySyncTransaction(@NonNull WindowContainerTransaction t,
             @NonNull WindowContainerTransactionCallback callback) {
@@ -169,8 +174,11 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
         }
     };
 
-    public ITaskFragmentOrganizer getIOrganizer() {
-        return mInterface;
+    private final TaskFragmentOrganizerToken mToken = new TaskFragmentOrganizerToken(mInterface);
+
+    @NonNull
+    public TaskFragmentOrganizerToken getOrganizerToken() {
+        return mToken;
     }
 
     private ITaskFragmentOrganizerController getController() {

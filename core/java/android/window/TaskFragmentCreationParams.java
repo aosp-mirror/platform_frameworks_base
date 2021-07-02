@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WindowingMode;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -29,11 +30,12 @@ import android.os.Parcelable;
  * Data object for options to create TaskFragment with.
  * @hide
  */
+@TestApi
 public final class TaskFragmentCreationParams implements Parcelable {
 
     /** The organizer that will organize this TaskFragment. */
     @NonNull
-    private final ITaskFragmentOrganizer mOrganizer;
+    private final TaskFragmentOrganizerToken mOrganizer;
 
     /**
      * Unique token assigned from the client organizer to identify the {@link TaskFragmentInfo} when
@@ -58,25 +60,29 @@ public final class TaskFragmentCreationParams implements Parcelable {
     private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
 
     private TaskFragmentCreationParams(
-            @NonNull ITaskFragmentOrganizer organizer, @NonNull IBinder fragmentToken,
-            @NonNull IBinder ownerToken) {
+            @NonNull TaskFragmentOrganizerToken organizer,
+            @NonNull IBinder fragmentToken, @NonNull IBinder ownerToken) {
         mOrganizer = organizer;
         mFragmentToken = fragmentToken;
         mOwnerToken = ownerToken;
     }
 
-    public ITaskFragmentOrganizer getOrganizer() {
+    @NonNull
+    public TaskFragmentOrganizerToken getOrganizer() {
         return mOrganizer;
     }
 
+    @NonNull
     public IBinder getFragmentToken() {
         return mFragmentToken;
     }
 
+    @NonNull
     public IBinder getOwnerToken() {
         return mOwnerToken;
     }
 
+    @NonNull
     public Rect getInitialBounds() {
         return mInitialBounds;
     }
@@ -87,16 +93,17 @@ public final class TaskFragmentCreationParams implements Parcelable {
     }
 
     private TaskFragmentCreationParams(Parcel in) {
-        mOrganizer = ITaskFragmentOrganizer.Stub.asInterface(in.readStrongBinder());
+        mOrganizer = TaskFragmentOrganizerToken.CREATOR.createFromParcel(in);
         mFragmentToken = in.readStrongBinder();
         mOwnerToken = in.readStrongBinder();
         mInitialBounds.readFromParcel(in);
         mWindowingMode = in.readInt();
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeStrongInterface(mOrganizer);
+        mOrganizer.writeToParcel(dest, flags);
         dest.writeStrongBinder(mFragmentToken);
         dest.writeStrongBinder(mOwnerToken);
         mInitialBounds.writeToParcel(dest, flags);
@@ -128,16 +135,17 @@ public final class TaskFragmentCreationParams implements Parcelable {
                 + "}";
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
     }
 
     /** Builder to construct the options to create TaskFragment with. */
-    public static class Builder {
+    public static final class Builder {
 
         @NonNull
-        private final ITaskFragmentOrganizer mOrganizer;
+        private final TaskFragmentOrganizerToken mOrganizer;
 
         @NonNull
         private final IBinder mFragmentToken;
@@ -151,26 +159,29 @@ public final class TaskFragmentCreationParams implements Parcelable {
         @WindowingMode
         private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
 
-        public Builder(@NonNull ITaskFragmentOrganizer organizer, @NonNull IBinder fragmentToken,
-                @NonNull IBinder ownerToken) {
+        public Builder(@NonNull TaskFragmentOrganizerToken organizer,
+                @NonNull IBinder fragmentToken, @NonNull IBinder ownerToken) {
             mOrganizer = organizer;
             mFragmentToken = fragmentToken;
             mOwnerToken = ownerToken;
         }
 
         /** Sets the initial bounds for the TaskFragment. */
+        @NonNull
         public Builder setInitialBounds(@NonNull Rect bounds) {
             mInitialBounds.set(bounds);
             return this;
         }
 
         /** Sets the initial windowing mode for the TaskFragment. */
+        @NonNull
         public Builder setWindowingMode(@WindowingMode int windowingMode) {
             mWindowingMode = windowingMode;
             return this;
         }
 
         /** Constructs the options to create TaskFragment with. */
+        @NonNull
         public TaskFragmentCreationParams build() {
             final TaskFragmentCreationParams result = new TaskFragmentCreationParams(
                     mOrganizer, mFragmentToken, mOwnerToken);

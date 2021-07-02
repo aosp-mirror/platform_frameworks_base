@@ -41,6 +41,7 @@ import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentCreationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizer;
+import android.window.TaskFragmentOrganizerToken;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
@@ -62,6 +63,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     private TaskFragmentOrganizerController mController;
     private TaskFragmentOrganizer mOrganizer;
+    private TaskFragmentOrganizerToken mOrganizerToken;
     private ITaskFragmentOrganizer mIOrganizer;
     private TaskFragment mTaskFragment;
     private TaskFragmentInfo mTaskFragmentInfo;
@@ -73,7 +75,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void setup() {
         mController = mWm.mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController;
         mOrganizer = new TaskFragmentOrganizer(Runnable::run);
-        mIOrganizer = mOrganizer.getIOrganizer();
+        mOrganizerToken = mOrganizer.getOrganizerToken();
+        mIOrganizer = ITaskFragmentOrganizer.Stub.asInterface(mOrganizerToken.asBinder());
         mTaskFragmentInfo = mock(TaskFragmentInfo.class);
         mFragmentToken = new Binder();
         mTaskFragment =
@@ -235,7 +238,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         });
 
         // Allow transaction to change a TaskFragment created by the organizer.
-        mTaskFragment.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* pid */);
 
         mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
     }
@@ -257,7 +260,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         });
 
         // Allow transaction to change a TaskFragment created by the organizer.
-        mTaskFragment.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* pid */);
 
         mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
     }
@@ -280,7 +283,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         });
 
         // Allow transaction to change a TaskFragment created by the organizer.
-        mTaskFragment.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* pid */);
 
         mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
     }
@@ -306,8 +309,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         });
 
         // Allow transaction to change a TaskFragment created by the organizer.
-        mTaskFragment.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
-        taskFragment2.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* pid */);
+        taskFragment2.setTaskFragmentOrganizer(mOrganizerToken, 10 /* pid */);
 
         mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
     }
@@ -317,7 +320,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mOrganizer.applyTransaction(mTransaction);
 
         // Allow organizer to create TaskFragment and start/reparent activity to TaskFragment.
-        mTransaction.createTaskFragment(mock(TaskFragmentCreationParams.class));
+        final TaskFragmentCreationParams mockParams = mock(TaskFragmentCreationParams.class);
+        doReturn(mOrganizerToken).when(mockParams).getOrganizer();
+        mTransaction.createTaskFragment(mockParams);
         mTransaction.startActivityInTaskFragment(
                 mFragmentToken, null /* callerToken */, new Intent(), null /* activityOptions */);
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, mock(IBinder.class));
@@ -352,7 +357,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         });
 
         // Allow transaction to change a TaskFragment created by the organizer.
-        mTaskFragment.setTaskFragmentOrganizer(mIOrganizer, 10 /* pid */);
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* pid */);
 
         mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
     }
