@@ -669,9 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ធ្វើការ​រៀបចំ ដើម្បី​ធ្វើការទិញ​កាន់តែលឿន​ជាងមុន សុវត្ថិភាព​ជាងមុន ដោយ​ប្រើ​ទូរសព្ទ​របស់អ្នក"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"បង្ហាញ​ទាំងអស់"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ដោះសោដើម្បីបង់ប្រាក់"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"មិន​បាន​រៀបចំទេ"</string>
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"បញ្ចូល​កាត"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"កំពុង​ធ្វើ​បច្ចុប្បន្នភាព"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ដោះសោដើម្បីប្រើប្រាស់"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"មានបញ្ហា​ក្នុងការទាញយក​កាត​របស់អ្នក សូម​ព្យាយាមម្ដងទៀត​នៅពេលក្រោយ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ការកំណត់អេក្រង់ចាក់សោ"</string>
@@ -1147,8 +1146,11 @@
     <string name="people_tile_description" msgid="8154966188085545556">"មើលព័ត៌មាន​ថ្មីៗ​អំពីស្ថានភាព ការខកខាន​ទទួល និងសារថ្មីៗ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"ការ​សន្ទនា"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"បានផ្អាក​ដោយមុខងារ​កុំរំខាន"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> បានផ្ញើសារ"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> បាន​ផ្ញើ​រូបភាព"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"មានបញ្ហាក្នុង​ការអាន​ឧបករណ៍រង្វាស់កម្រិតថ្មរបស់អ្នក"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ចុចដើម្បីទទួលបាន​ព័ត៌មានបន្ថែម"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"មិនបាន​កំណត់​ម៉ោងរោទ៍​ទេ"</string>
@@ -1159,4 +1161,29 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ប្រើស្នាមម្រាមដៃ ដើម្បីបើក"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"តម្រូវឱ្យ​មាន​ការផ្ទៀងផ្ទាត់។ សូមចុច​ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ ដើម្បី​ផ្ទៀងផ្ទាត់​។"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ការហៅទូរសព្ទ​ដែលកំពុង​ដំណើរការ"</string>
+    <!-- no translation found for airplane_mode (2536350001462130668) -->
+    <skip />
+    <!-- no translation found for mobile_data_settings_title (3955246641380064901) -->
+    <skip />
+    <!-- no translation found for preference_summary_default_combination (8453246369903749670) -->
+    <skip />
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"បានភ្ជាប់"</string>
+    <!-- no translation found for mobile_data_off_summary (5621158216585822679) -->
+    <skip />
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"មិនមាន​ការតភ្ជាប់ទេ"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"មិន​មាន​បណ្ដាញផ្សេងទៀតដែល​អាច​ប្រើ​បានទេ"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"មិន​មាន​បណ្ដាញដែល​អាច​ប្រើ​បានទេ"</string>
+    <!-- no translation found for turn_on_wifi (1308379840799281023) -->
+    <skip />
+    <!-- no translation found for pref_title_network_details (1639455355897668883) -->
+    <!-- no translation found for pref_title_network_details (7329759534269363308) -->
+    <skip />
+    <!-- no translation found for tap_a_network_to_connect (1565073330852369558) -->
+    <skip />
+    <!-- no translation found for wifi_empty_list_wifi_on (3864376632067585377) -->
+    <skip />
+    <!-- no translation found for wifi_failed_connect_message (4161863112079000071) -->
+    <skip />
+    <!-- no translation found for see_all_networks (3773666844913168122) -->
+    <skip />
 </resources>

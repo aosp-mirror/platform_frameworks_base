@@ -669,7 +669,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"اپنے فون سے تیز تر مزید محفوظ خریداریاں کرنے کے لیے، سیٹ اپ مکمل کریں"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"سبھی دکھائیں"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ادائیگی کرنے کے لیے غیر مقفل کریں"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"سیٹ اپ نہیں کیا گیا"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
+    <skip />
     <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
     <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"استعمال کرنے کے لیے غیر مقفل کریں"</string>
@@ -1117,8 +1118,7 @@
     <string name="basic_status" msgid="2315371112182658176">"گفتگو کھولیں"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"گفتگو ویجیٹس"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"اسے اپنے ہوم اسکرین پر شامل کرنے کے لیے گفتگو پر تھپتھپائیں"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"آپ کی حالیہ گفتگوئیں یہاں دکھائی دیں گی"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ترجیحی گفتگوئیں"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"حالیہ گفتگوئیں"</string>
     <string name="okay" msgid="6490552955618608554">"ٹھیک ہے"</string>
@@ -1148,8 +1148,11 @@
     <string name="people_tile_description" msgid="8154966188085545556">"حالیہ پیغامات، چھوٹی ہوئی کالز اور اسٹیٹس اپ ڈیٹس دیکھیں"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"گفتگو"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"\'ڈسٹرب نہ کریں\' کے ذریعے موقوف کیا گیا"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> نے ایک پیغام بھیجا"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> نے ایک تصویر بھیجی"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"آپ کے بیٹری میٹر کو پڑھنے میں دشواری"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"مزید معلومات کے لیے تھپتھپائیں"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"کوئی الارم سیٹ نہیں ہے"</string>
@@ -1160,4 +1163,29 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"کھولنے کے لیے فنگر پرنٹ کا استعمال کریں"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"توثیق مطلوب ہے۔ توثیق کرنے کے لیے فنگر پرنٹ سینسر کو ٹچ کریں۔"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"جاری فون کال"</string>
+    <!-- no translation found for airplane_mode (2536350001462130668) -->
+    <skip />
+    <!-- no translation found for mobile_data_settings_title (3955246641380064901) -->
+    <skip />
+    <!-- no translation found for preference_summary_default_combination (8453246369903749670) -->
+    <skip />
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"منسلک ہے"</string>
+    <!-- no translation found for mobile_data_off_summary (5621158216585822679) -->
+    <skip />
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"کوئی کنکشن نہیں"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"کوئی دوسرا نیٹ ورک دستیاب نہیں ہے"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"کوئی نیٹ ورکس دستیاب نہیں ہیں"</string>
+    <!-- no translation found for turn_on_wifi (1308379840799281023) -->
+    <skip />
+    <!-- no translation found for pref_title_network_details (1639455355897668883) -->
+    <!-- no translation found for pref_title_network_details (7329759534269363308) -->
+    <skip />
+    <!-- no translation found for tap_a_network_to_connect (1565073330852369558) -->
+    <skip />
+    <!-- no translation found for wifi_empty_list_wifi_on (3864376632067585377) -->
+    <skip />
+    <!-- no translation found for wifi_failed_connect_message (4161863112079000071) -->
+    <skip />
+    <!-- no translation found for see_all_networks (3773666844913168122) -->
+    <skip />
 </resources>

@@ -669,9 +669,9 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Thiết lập để mua hàng nhanh hơn và an toàn hơn bằng điện thoại"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hiện tất cả"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Mở khóa để thanh toán"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Chưa thiết lập"</string>
-    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <!-- no translation found for wallet_secondary_label_no_card (530725155985223497) -->
     <skip />
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Đang cập nhật"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Mở khóa để sử dụng"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Đã xảy ra sự cố khi tải thẻ của bạn. Vui lòng thử lại sau"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Cài đặt màn hình khóa"</string>
@@ -1147,8 +1147,11 @@
     <string name="people_tile_description" msgid="8154966188085545556">"Xem các tin nhắn, cuộc gọi nhỡ và thông tin cập nhật trạng thái gần đây"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Cuộc trò chuyện"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Đã tạm dừng do chế độ Không làm phiền"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> đã gửi một tin nhắn"</string>
+    <!-- no translation found for new_notification_text_content_description (2915029960094389291) -->
+    <skip />
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> đã gửi một hình ảnh"</string>
+    <!-- no translation found for new_status_content_description (6046637888641308327) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Đã xảy ra vấn đề khi đọc dung lượng pin của bạn"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Nhấn để biết thêm thông tin"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Chưa đặt chuông báo"</string>
@@ -1159,4 +1162,29 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Dùng vân tay để mở"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Bạn cần phải xác thực. Hãy chạm vào cảm biến vân tay để xác thực."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Đang gọi điện thoại"</string>
+    <!-- no translation found for airplane_mode (2536350001462130668) -->
+    <skip />
+    <!-- no translation found for mobile_data_settings_title (3955246641380064901) -->
+    <skip />
+    <!-- no translation found for preference_summary_default_combination (8453246369903749670) -->
+    <skip />
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Đã kết nối"</string>
+    <!-- no translation found for mobile_data_off_summary (5621158216585822679) -->
+    <skip />
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Không có kết nối mạng"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Không có mạng nào khác"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Không có mạng"</string>
+    <!-- no translation found for turn_on_wifi (1308379840799281023) -->
+    <skip />
+    <!-- no translation found for pref_title_network_details (1639455355897668883) -->
+    <!-- no translation found for pref_title_network_details (7329759534269363308) -->
+    <skip />
+    <!-- no translation found for tap_a_network_to_connect (1565073330852369558) -->
+    <skip />
+    <!-- no translation found for wifi_empty_list_wifi_on (3864376632067585377) -->
+    <skip />
+    <!-- no translation found for wifi_failed_connect_message (4161863112079000071) -->
+    <skip />
+    <!-- no translation found for see_all_networks (3773666844913168122) -->
+    <skip />
 </resources>
