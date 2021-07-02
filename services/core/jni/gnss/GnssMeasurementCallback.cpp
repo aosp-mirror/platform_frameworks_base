@@ -28,6 +28,7 @@ using hardware::gnss::GnssData;
 using hardware::gnss::GnssMeasurement;
 using hardware::gnss::SatellitePvt;
 
+namespace {
 jclass class_arrayList;
 jclass class_clockInfo;
 jclass class_correlationVectorBuilder;
@@ -62,6 +63,8 @@ jmethodID method_satellitePvtBuilderSetTropoDelayMeters;
 jmethodID method_positionEcef;
 jmethodID method_velocityEcef;
 jmethodID method_clockInfo;
+
+} // anonymous namespace
 
 void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz) {
     method_reportMeasurementData = env->GetMethodID(clazz, "reportMeasurementData",

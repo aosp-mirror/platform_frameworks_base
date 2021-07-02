@@ -1,0 +1,51 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+cc_library_shared {
+    name: "libservices.core-gnss",
+    defaults: ["libservices.core-gnss-libs"],
+
+    cpp_std: "c++2a",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+
+        "-DEGL_EGLEXT_PROTOTYPES",
+        "-DGL_GLEXT_PROTOTYPES",
+    ],
+
+    srcs: [
+        "GnssAntennaInfoCallback.cpp",
+        "GnssConfiguration.cpp",
+        "GnssMeasurement.cpp",
+        "GnssMeasurementCallback.cpp",
+        "Utils.cpp",
+    ],
+}
+
+cc_defaults {
+    name: "libservices.core-gnss-libs",
+    shared_libs: [
+        "libandroid_runtime",
+        "libbinder",
+        "libhidlbase",
+        "liblog",
+        "libnativehelper",
+        "libutils",
+        "android.hardware.gnss-V1-cpp",
+        "android.hardware.gnss@1.0",
+        "android.hardware.gnss@1.1",
+        "android.hardware.gnss@2.0",
+        "android.hardware.gnss@2.1",
+        "android.hardware.gnss.measurement_corrections@1.0",
+        "android.hardware.gnss.visibility_control@1.0",
+    ],
+}
