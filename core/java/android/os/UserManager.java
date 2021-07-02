@@ -37,6 +37,9 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -55,6 +58,7 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.AndroidException;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
@@ -1719,6 +1723,61 @@ public class UserManager {
         }
     }
 
+    /**
+     * For apps targeting {@link Build.VERSION_CODES#TIRAMISU} and above, any UserManager API marked
+     * as {@link  android.annotation.UserHandleAware @UserHandleAware} will use the context user
+     * (rather than the calling user).
+     * For apps targeting an SDK version <em>below</em> this, the behaviour
+     * depends on the particular method and when it was first introduced:
+     * <ul>
+     *     <li>
+     *         if the {@literal @}UserHandleAware specifies a
+     *         {@link  android.annotation.UserHandleAware#enabledSinceTargetSdkVersion} of
+     *         {@link Build.VERSION_CODES#TIRAMISU} the <em>calling</em> user is used.
+     *     </li>
+     *     <li>
+     *         if the {@literal @}UserHandleAware doesn't specify a
+     *         {@link  android.annotation.UserHandleAware#enabledSinceTargetSdkVersion}, the
+     *         <em>context</em> user is used.
+     *     </li>
+     *     <li>there should currently be no other values used by UserManager for
+     *         {@link  android.annotation.UserHandleAware#enabledSinceTargetSdkVersion}, since all
+     *         old implicitly user-dependant APIs were updated in that version and anything
+     *         introduced more recently should already be {@literal @}UserHandleAware.
+     *     </li>
+     * </ul>
+     *
+     * Note that when an API marked with
+     * {@link  android.annotation.UserHandleAware#enabledSinceTargetSdkVersion} is run
+     * on a device whose OS predates that version, the calling user will be used, since on such a
+     * device, the API is not {@literal @}UserHandleAware yet.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long ALWAYS_USE_CONTEXT_USER = 183155436L;
+
+    /**
+     * Returns the context user or the calling user, depending on the target SDK.
+     * New APIs do not require such gating and therefore should always use mUserId instead.
+     * @see #ALWAYS_USE_CONTEXT_USER
+     */
+    private @UserIdInt int getContextUserIfAppropriate() {
+        if (CompatChanges.isChangeEnabled(ALWAYS_USE_CONTEXT_USER)) {
+            return mUserId;
+        } else {
+            final int callingUser = UserHandle.myUserId();
+            if (callingUser != mUserId) {
+                Log.w(TAG, "Using the calling user " + callingUser
+                        + ", rather than the specified context user " + mUserId
+                        + ", because API is only UserHandleAware on higher targetSdkVersions.",
+                        new Throwable());
+            }
+            return callingUser;
+        }
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     public static UserManager get(Context context) {
@@ -1784,7 +1843,12 @@ public class UserManager {
      * @hide
      */
     @Deprecated
+    @RequiresPermission(allOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.MANAGE_USERS}, // Can be INTERACT_ACROSS_USERS instead.
+            conditional = true)
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UserHandleAware()
     public boolean canSwitchUsers() {
         boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
                 mContext.getContentResolver(),
@@ -1795,14 +1859,13 @@ public class UserManager {
         if (telephonyManager != null) {
             inCall = telephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE;
         }
-        boolean isUserSwitchDisallowed = hasUserRestriction(DISALLOW_USER_SWITCH);
+        boolean isUserSwitchDisallowed = hasUserRestrictionForUser(DISALLOW_USER_SWITCH, mUserId);
         return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall
                 && !isUserSwitchDisallowed;
     }
 
     /**
-     * Returns whether switching users is currently allowed for the user this process is running
-     * under.
+     * Returns whether switching users is currently allowed for the context user.
      * <p>
      * Switching users is not allowed in the following cases:
      * <li>the user is in a phone call</li>
@@ -1816,8 +1879,9 @@ public class UserManager {
     @RequiresPermission(allOf = {Manifest.permission.READ_PHONE_STATE,
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public @UserSwitchabilityResult int getUserSwitchability() {
-        return getUserSwitchability(Process.myUserHandle());
+        return getUserSwitchability(UserHandle.of(getContextUserIfAppropriate()));
     }
 
     /**
@@ -1842,7 +1906,7 @@ public class UserManager {
         if (tm.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
             flags |= SWITCHABILITY_STATUS_USER_IN_CALL;
         }
-        if (hasUserRestriction(DISALLOW_USER_SWITCH, userHandle)) {
+        if (hasUserRestrictionForUser(DISALLOW_USER_SWITCH, userHandle)) {
             flags |= SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED;
         }
 
@@ -1862,14 +1926,16 @@ public class UserManager {
     }
 
     /**
-     * Returns the user handle for the user that this process is running under.
+     * Returns the userId for the context user.
      *
-     * @return the user handle of this process.
+     * @return the userId of the context user.
      * @hide
      */
     @UnsupportedAppUsage
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    // *** Do NOT use this in UserManager. Instead always use mUserId. ***
     public @UserIdInt int getUserHandle() {
-        return UserHandle.myUserId();
+        return getContextUserIfAppropriate();
     }
 
     /**
@@ -1877,9 +1943,9 @@ public class UserManager {
      * @hide
      */
     @TestApi
-    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.CREATE_USERS
-    })
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS})
     @UserHandleAware
     public @NonNull String getUserType() {
         UserInfo userInfo = getUserInfo(mUserId);
@@ -1919,9 +1985,10 @@ public class UserManager {
     @SystemApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.GET_ACCOUNTS_PRIVILEGED})
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean isUserNameSet() {
         try {
-            return mService.isUserNameSet(getUserHandle());
+            return mService.isUserNameSet(getContextUserIfAppropriate());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1939,52 +2006,60 @@ public class UserManager {
      *
      * @return Returns whether the user making this call is a goat.
      */
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean isUserAGoat() {
         if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R) {
             return false;
         }
+        // Caution: This is NOT @UserHandleAware (because mContext is getApplicationContext and
+        // holds a different userId), but for R+ it returns false, so it doesn't matter anyway.
         return mContext.getPackageManager()
                 .isPackageAvailable("com.coffeestainstudios.goatsimulator");
     }
 
     /**
-     * Used to check if this process is running under the primary user. The primary user
+     * Used to check if the context user is the primary user. The primary user
      * is the first human user on a device. This is not supported in headless system user mode.
      *
-     * @return whether this process is running under the primary user.
+     * @return whether the context user is the primary user.
      * @hide
      */
     @SystemApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean isPrimaryUser() {
-        UserInfo user = getUserInfo(UserHandle.myUserId());
+        final UserInfo user = getUserInfo(getContextUserIfAppropriate());
         return user != null && user.isPrimary();
     }
 
     /**
-     * Used to check if this process is running under the system user. The system user
+     * Used to check if the context user is the system user. The system user
      * is the initial user that is implicitly created on first boot and hosts most of the
      * system services.
      *
-     * @return whether this process is running under the system user.
+     * @return whether the context user is the system user.
      */
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean isSystemUser() {
-        return UserHandle.myUserId() == UserHandle.USER_SYSTEM;
+        return getContextUserIfAppropriate() == UserHandle.USER_SYSTEM;
     }
 
     /**
-     * Used to check if this process is running as an admin user. An admin user is allowed to
+     * Used to check if the context user is an admin user. An admin user is allowed to
      * modify or configure certain settings that aren't available to non-admin users,
      * create and delete additional users, etc. There can be more than one admin users.
      *
-     * @return whether this process is running under an admin user.
+     * @return whether the context user is an admin user.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean isAdminUser() {
-        return isUserAdmin(UserHandle.myUserId());
+        return isUserAdmin(getContextUserIfAppropriate());
     }
 
     /**
@@ -2099,22 +2174,33 @@ public class UserManager {
      */
     @UnsupportedAppUsage
     @Deprecated
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresAnyOfPermissionsIfNotCaller = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.CREATE_USERS}
+    )
     public boolean isLinkedUser() {
         return isRestrictedProfile();
     }
 
     /**
-     * Used to check if this process is running under a restricted profile. Restricted profiles
+     * Used to check if the context user is a restricted profile. Restricted profiles
      * may have a reduced number of available apps, app restrictions, and account restrictions.
      *
-     * @return whether this process is running under a restricted profile.
+     * @return whether the context user is a restricted profile.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresAnyOfPermissionsIfNotCaller = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.CREATE_USERS}
+    )
     public boolean isRestrictedProfile() {
         try {
-            return mService.isRestricted();
+            return mService.isRestricted(getContextUserIfAppropriate());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2129,11 +2215,13 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS})
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS},
+            conditional = true)
     public boolean isRestrictedProfile(@NonNull UserHandle user) {
         try {
-            return mService.getUserInfo(user.getIdentifier()).isRestricted();
+            return mService.isRestricted(user.getIdentifier());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2156,15 +2244,16 @@ public class UserManager {
     }
 
     /**
-     * Returns whether the calling user has at least one restricted profile associated with it.
-     * @return
+     * Returns whether the context user has at least one restricted profile associated with it.
+     * @return whether the user has a restricted profile associated with it
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean hasRestrictedProfiles() {
         try {
-            return mService.hasRestrictedProfiles();
+            return mService.hasRestrictedProfiles(getContextUserIfAppropriate());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2203,29 +2292,34 @@ public class UserManager {
     }
 
     /**
-     * Used to check if this process is running under a guest user. A guest user may be transient.
+     * Used to check if the context user is a guest user. A guest user may be transient.
      *
-     * @return whether this process is running under a guest user.
+     * @return whether the context user is a guest user.
      * @hide
      */
     @SystemApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean isGuestUser() {
-        UserInfo user = getUserInfo(UserHandle.myUserId());
+        UserInfo user = getUserInfo(getContextUserIfAppropriate());
         return user != null && user.isGuest();
     }
 
 
     /**
-     * Checks if the calling app is running in a demo user. When running in a demo user,
+     * Checks if the context user is a demo user. When running in a demo user,
      * apps can be more helpful to the user, or explain their features in more detail.
      *
-     * @return whether the caller is a demo user.
+     * @return whether the context user is a demo user.
      */
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresPermissionIfNotCaller = android.Manifest.permission.MANAGE_USERS
+    )
     public boolean isDemoUser() {
         try {
-            return mService.isDemoUser(UserHandle.myUserId());
+            return mService.isDemoUser(getContextUserIfAppropriate());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2250,14 +2344,14 @@ public class UserManager {
     }
 
     private boolean isProfile(@UserIdInt int userId) {
-        if (userId == UserHandle.myUserId()) {
+        if (userId == mUserId) {
             // No need for synchronization.  Once it becomes non-null, it'll be non-null forever.
             // Worst case we might end up calling the AIDL method multiple times but that's fine.
             if (mIsProfileCached != null) {
                 return mIsProfileCached;
             }
             try {
-                mIsProfileCached = mService.isProfile(userId);
+                mIsProfileCached = mService.isProfile(mUserId);
                 return mIsProfileCached;
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
@@ -2272,22 +2366,18 @@ public class UserManager {
     }
 
     /**
-     * Checks if the calling app is running in a managed profile.
+     * Checks if the context user is a managed profile.
      *
-     * @return whether the caller is in a managed profile.
+     * @return whether the context user is a managed profile.
      */
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS}
+    )
     public boolean isManagedProfile() {
-        // No need for synchronization.  Once it becomes non-null, it'll be non-null forever.
-        // Worst case we might end up calling the AIDL method multiple times but that's fine.
-        if (mIsManagedProfileCached != null) {
-            return mIsManagedProfileCached;
-        }
-        try {
-            mIsManagedProfileCached = mService.isManagedProfile(UserHandle.myUserId());
-            return mIsManagedProfileCached;
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return isManagedProfile(getContextUserIfAppropriate());
     }
 
     /**
@@ -2303,13 +2393,24 @@ public class UserManager {
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isManagedProfile(@UserIdInt int userId) {
-        if (userId == UserHandle.myUserId()) {
-            return isManagedProfile();
-        }
-        try {
-            return mService.isManagedProfile(userId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+        if (userId == mUserId) {
+            // No need for synchronization.  Once it becomes non-null, it'll be non-null forever.
+            // Worst case we might end up calling the AIDL method multiple times but that's fine.
+            if (mIsManagedProfileCached != null) {
+                return mIsManagedProfileCached;
+            }
+            try {
+                mIsManagedProfileCached = mService.isManagedProfile(mUserId);
+                return mIsManagedProfileCached;
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        } else {
+            try {
+                return mService.isManagedProfile(userId);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -2339,15 +2440,16 @@ public class UserManager {
     }
 
     /**
-     * Checks if the calling app is running as an ephemeral user.
+     * Checks if the context user is an ephemeral user.
      *
-     * @return whether the caller is an ephemeral user.
+     * @return whether the context user is an ephemeral user.
      * @hide
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
+    @UserHandleAware()
     public boolean isEphemeralUser() {
-        return isUserEphemeral(UserHandle.myUserId());
+        return isUserEphemeral(mUserId);
     }
 
     /**
@@ -2436,7 +2538,7 @@ public class UserManager {
     }
 
     /**
-     * Return whether the calling user is running in an "unlocked" state.
+     * Return whether the context user is running in an "unlocked" state.
      * <p>
      * On devices with direct boot, a user is unlocked only after they've
      * entered their credentials (such as a lock pattern or PIN). On devices
@@ -2449,8 +2551,14 @@ public class UserManager {
      * @see Intent#ACTION_USER_UNLOCKED
      * @see Context#createDeviceProtectedStorageContext()
      */
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS}
+    )
     public boolean isUserUnlocked() {
-        return isUserUnlocked(Process.myUserHandle());
+        return isUserUnlocked(getContextUserIfAppropriate());
     }
 
     /**
@@ -2573,7 +2681,14 @@ public class UserManager {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    // NOT @UserHandleAware
     public long getUserStartRealtime() {
+        if (getContextUserIfAppropriate() != UserHandle.myUserId()) {
+            // Note: If we want to support this in the future, also annotate with
+            //       @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+            throw new IllegalArgumentException("Calling from a context differing from the calling "
+                    + "user is not currently supported.");
+        }
         try {
             return mService.getUserStartRealtime();
         } catch (RemoteException re) {
@@ -2582,13 +2697,20 @@ public class UserManager {
     }
 
     /**
-     * Return the time when the calling user was unlocked elapsed milliseconds since boot,
+     * Return the time when the context user was unlocked elapsed milliseconds since boot,
      * or 0 if not unlocked.
      *
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    // NOT @UserHandleAware
     public long getUserUnlockRealtime() {
+        if (getContextUserIfAppropriate() != UserHandle.myUserId()) {
+            // Note: If we want to support this in the future, also annotate with
+            //       @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+            throw new IllegalArgumentException("Calling from a context differing from the calling "
+                    + "user is not currently supported.");
+        }
         try {
             return mService.getUserUnlockRealtime();
         } catch (RemoteException re) {
@@ -2657,11 +2779,21 @@ public class UserManager {
     }
 
     /**
-     * Returns the user-wide restrictions imposed on this user.
+     * Returns the user-wide restrictions imposed on the context user.
      * @return a Bundle containing all the restrictions.
      */
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS}
+    )
     public Bundle getUserRestrictions() {
-        return getUserRestrictions(Process.myUserHandle());
+        try {
+            return mService.getUserRestrictions(getContextUserIfAppropriate());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2727,7 +2859,7 @@ public class UserManager {
     }
 
     /**
-     * Sets the value of a specific restriction.
+     * Sets the value of a specific restriction on the context user.
      * Requires the MANAGE_USERS permission.
      * @param key the key of the restriction
      * @param value the value for the restriction
@@ -2738,8 +2870,13 @@ public class UserManager {
      */
     @Deprecated
     @RequiresPermission(Manifest.permission.MANAGE_USERS)
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public void setUserRestriction(String key, boolean value) {
-        setUserRestriction(key, value, Process.myUserHandle());
+        try {
+            mService.setUserRestriction(key, value, getContextUserIfAppropriate());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2764,14 +2901,20 @@ public class UserManager {
     }
 
     /**
-     * Returns whether the current user has been disallowed from performing certain actions
+     * Returns whether the context user has been disallowed from performing certain actions
      * or setting certain settings.
      *
      * @param restrictionKey The string key representing the restriction.
-     * @return {@code true} if the current user has the given restriction, {@code false} otherwise.
+     * @return {@code true} if the context user has the given restriction, {@code false} otherwise.
      */
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS}
+    )
     public boolean hasUserRestriction(@UserRestrictionKey String restrictionKey) {
-        return hasUserRestrictionForUser(restrictionKey, Process.myUserHandle());
+        return hasUserRestrictionForUser(restrictionKey, getContextUserIfAppropriate());
     }
 
     /**
@@ -2780,8 +2923,13 @@ public class UserManager {
      * or setting certain settings.
      * @param restrictionKey the string key representing the restriction
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
+     * @deprecated Use {@link #hasUserRestrictionForUser(String, UserHandle)} instead.
      */
     @UnsupportedAppUsage
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @Deprecated
     public boolean hasUserRestriction(@UserRestrictionKey String restrictionKey,
             UserHandle userHandle) {
         return hasUserRestrictionForUser(restrictionKey, userHandle);
@@ -2805,8 +2953,16 @@ public class UserManager {
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean hasUserRestrictionForUser(@NonNull @UserRestrictionKey String restrictionKey,
             @NonNull UserHandle userHandle) {
+        return hasUserRestrictionForUser(restrictionKey, userHandle.getIdentifier());
+    }
+
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    private boolean hasUserRestrictionForUser(@NonNull @UserRestrictionKey String restrictionKey,
+            @UserIdInt int userId) {
         try {
-            return mService.hasUserRestriction(restrictionKey, userHandle.getIdentifier());
+            return mService.hasUserRestriction(restrictionKey, userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -3148,7 +3304,7 @@ public class UserManager {
 
     /**
      * Creates a restricted profile with the specified name. This method also sets necessary
-     * restrictions and adds shared accounts.
+     * restrictions and adds shared accounts (with the context user).
      *
      * @param name profile's name
      * @return the {@link UserInfo} object for the created user, or {@code null} if the user
@@ -3159,16 +3315,17 @@ public class UserManager {
     @TestApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
+    @UserHandleAware()
     public @Nullable UserInfo createRestrictedProfile(@Nullable String name) {
         try {
-            UserHandle parentUserHandle = Process.myUserHandle();
-            UserInfo user = mService.createRestrictedProfileWithThrow(name,
-                    parentUserHandle.getIdentifier());
-            if (user != null) {
+            final int parentUserId = mUserId;
+            final UserInfo profile = mService.createRestrictedProfileWithThrow(name, parentUserId);
+            if (profile != null) {
+                final UserHandle parentUserHandle = UserHandle.of(parentUserId);
                 AccountManager.get(mContext).addSharedAccountsFromParentUser(parentUserHandle,
-                        UserHandle.of(user.id));
+                        UserHandle.of(profile.id));
             }
-            return user;
+            return profile;
         } catch (ServiceSpecificException e) {
             return null;
         } catch (RemoteException re) {
@@ -3260,13 +3417,14 @@ public class UserManager {
     /**
      * @hide
      *
-     * Returns the preferred account name for user creation.
+     * Returns the preferred account name for the context user's creation.
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public String getSeedAccountName() {
         try {
-            return mService.getSeedAccountName();
+            return mService.getSeedAccountName(getContextUserIfAppropriate());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -3275,13 +3433,14 @@ public class UserManager {
     /**
      * @hide
      *
-     * Returns the preferred account type for user creation.
+     * Returns the preferred account type for the context user's creation.
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public String getSeedAccountType() {
         try {
-            return mService.getSeedAccountType();
+            return mService.getSeedAccountType(getContextUserIfAppropriate());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -3291,13 +3450,14 @@ public class UserManager {
      * @hide
      *
      * Returns the preferred account's options bundle for user creation.
-     * @return Any options set by the requestor that created the user.
+     * @return Any options set by the requestor that created the context user.
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public PersistableBundle getSeedAccountOptions() {
         try {
-            return mService.getSeedAccountOptions();
+            return mService.getSeedAccountOptions(getContextUserIfAppropriate());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -3327,13 +3487,14 @@ public class UserManager {
 
     /**
      * @hide
-     * Clears the seed information used to create this user.
+     * Clears the seed information used to create the context user.
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public void clearSeedAccountData() {
         try {
-            mService.clearSeedAccountData();
+            mService.clearSeedAccountData(getContextUserIfAppropriate());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -3657,8 +3818,8 @@ public class UserManager {
      * {@link #getEnabledProfiles(int)} if you need only the enabled ones.
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
-     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS}.
-     * {@link android.Manifest.permission#CREATE_USERS} suffices if userId is the calling user.
+     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or
+     * {@link android.Manifest.permission#CREATE_USERS} if userId is not the calling user.
      * @param userId profiles of this user will be returned.
      * @return the list of profiles.
      * @hide
@@ -3710,8 +3871,8 @@ public class UserManager {
      * Note that this returns only enabled.
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
-     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS}.
-     * {@link android.Manifest.permission#CREATE_USERS} suffices if userId is the calling user.
+     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or
+     * {@link android.Manifest.permission#CREATE_USERS} if userId is not the calling user.
      * @param userId profiles of this user will be returned.
      * @return the list of profiles.
      * @hide
@@ -3728,19 +3889,21 @@ public class UserManager {
     }
 
     /**
-     * Returns a list of UserHandles for profiles associated with the user that the calling process
-     * is running on, including the user itself.
+     * Returns a list of UserHandles for profiles associated with the context user, including the
+     * user itself.
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
-     * @return A non-empty list of UserHandles associated with the calling user.
+     * @return A non-empty list of UserHandles associated with the context user.
      */
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresAnyOfPermissionsIfNotCaller = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.CREATE_USERS}
+    )
     public List<UserHandle> getUserProfiles() {
-        int[] userIds = getProfileIds(UserHandle.myUserId(), true /* enabledOnly */);
-        List<UserHandle> result = new ArrayList<>(userIds.length);
-        for (int userId : userIds) {
-            result.add(UserHandle.of(userId));
-        }
-        return result;
+        int[] userIds = getProfileIds(getContextUserIfAppropriate(), true /* enabledOnly */);
+        return convertUserIdsToUserHandles(userIds);
     }
 
     /**
@@ -3748,7 +3911,7 @@ public class UserManager {
      * user itself.
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
-     * @return A non-empty list of UserHandles associated with the calling user.
+     * @return A non-empty list of UserHandles associated with the context user.
      * @hide
      */
     @SystemApi
@@ -3764,7 +3927,7 @@ public class UserManager {
      * itself.
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
-     * @return A non-empty list of UserHandles associated with the calling user.
+     * @return A non-empty list of UserHandles associated with the context user.
      * @hide
      */
     @SystemApi
@@ -3781,13 +3944,18 @@ public class UserManager {
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @param enabledOnly whether to return only {@link UserInfo#isEnabled() enabled} profiles
-     * @return A non-empty list of UserHandles associated with the calling user.
+     * @return A non-empty list of UserHandles associated with the context user.
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS}, conditional = true)
     @UserHandleAware
     private @NonNull List<UserHandle> getProfiles(boolean enabledOnly) {
         final int[] userIds = getProfileIds(mUserId, enabledOnly);
+        return convertUserIdsToUserHandles(userIds);
+    }
+
+    /** Converts the given array of userIds to a List of UserHandles. */
+    private @NonNull List<UserHandle> convertUserIdsToUserHandles(@NonNull int[] userIds) {
         final List<UserHandle> result = new ArrayList<>(userIds.length);
         for (int userId : userIds) {
             result.add(UserHandle.of(userId));
@@ -4433,6 +4601,11 @@ public class UserManager {
      * @return true if user switcher is enabled
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS // And INTERACT_ if diff profile group
+    })
+    @UserHandleAware()
     public boolean isUserSwitcherEnabled() {
         return isUserSwitcherEnabled(true);
     }
@@ -4445,11 +4618,16 @@ public class UserManager {
      * @return true if user switcher should be shown.
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS // And INTERACT_ if diff profile group
+    })
+    @UserHandleAware()
     public boolean isUserSwitcherEnabled(boolean showEvenIfNotActionable) {
         if (!supportsMultipleUsers()) {
             return false;
         }
-        if (hasUserRestriction(DISALLOW_USER_SWITCH)) {
+        if (hasUserRestrictionForUser(DISALLOW_USER_SWITCH, mUserId)) {
             return false;
         }
         // If Demo Mode is on, don't show user switcher
@@ -4468,10 +4646,14 @@ public class UserManager {
         // The feature is enabled. But is it worth showing?
         return showEvenIfNotActionable
                 || areThereUsersToWhichToSwitch() // There are switchable users.
-                || !hasUserRestriction(UserManager.DISALLOW_ADD_USER); // New users can be added.
+                || !hasUserRestrictionForUser(DISALLOW_ADD_USER, mUserId); // New users can be added
     }
 
     /** Returns whether there are any users (other than the current user) to which to switch. */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
     private boolean areThereUsersToWhichToSwitch() {
         final List<UserInfo> users = getAliveUsers();
         if (users == null) {
@@ -4530,8 +4712,8 @@ public class UserManager {
     }
 
     /**
-     * Returns a {@link Bundle} containing any saved application restrictions for this user, for the
-     * given package name. Only an application with this package name can call this method.
+     * Returns a {@link Bundle} containing any saved application restrictions for the context user,
+     * for the given package name. Only an application with this package name can call this method.
      *
      * <p>The returned {@link Bundle} consists of key-value pairs, as defined by the application,
      * where the types of values may be:
@@ -4551,9 +4733,11 @@ public class UserManager {
      * @see #KEY_RESTRICTIONS_PENDING
      */
     @WorkerThread
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public Bundle getApplicationRestrictions(String packageName) {
         try {
-            return mService.getApplicationRestrictions(packageName);
+            return mService.getApplicationRestrictionsForUser(packageName,
+                    getContextUserIfAppropriate());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
