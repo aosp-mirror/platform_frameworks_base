@@ -50,6 +50,10 @@ public class AppSearchConfigTest {
                 AppSearchConfig.DEFAULT_SAMPLING_INTERVAL);
         assertThat(appSearchConfig.getCachedSamplingIntervalForPutDocumentStats()).isEqualTo(
                 AppSearchConfig.DEFAULT_SAMPLING_INTERVAL);
+        assertThat(appSearchConfig.getCachedLimitConfigMaxDocumentSizeBytes()).isEqualTo(
+                AppSearchConfig.DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES);
+        assertThat(appSearchConfig.getCachedLimitConfigMaxDocumentCount()).isEqualTo(
+                AppSearchConfig.DEFAULT_LIMIT_CONFIG_MAX_DOCUMENT_COUNT);
     }
 
     @Test
@@ -262,6 +266,22 @@ public class AppSearchConfigTest {
 
         assertThat(appSearchConfig.getCachedSamplingIntervalForBatchCallStats()).isEqualTo(
                 samplingIntervalBatchCallStats);
+    }
+
+    @Test
+    public void testCustomizedValue() {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
+                AppSearchConfig.KEY_LIMIT_CONFIG_MAX_DOCUMENT_SIZE_BYTES,
+                Integer.toString(2001),
+                /*makeDefault=*/ false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_APPSEARCH,
+                AppSearchConfig.KEY_LIMIT_CONFIG_MAX_DOCUMENT_COUNT,
+                Integer.toString(2002),
+                /*makeDefault=*/ false);
+
+        AppSearchConfig appSearchConfig = AppSearchConfig.create(DIRECT_EXECUTOR);
+        assertThat(appSearchConfig.getCachedLimitConfigMaxDocumentSizeBytes()).isEqualTo(2001);
+        assertThat(appSearchConfig.getCachedLimitConfigMaxDocumentCount()).isEqualTo(2002);
     }
 
     @Test
