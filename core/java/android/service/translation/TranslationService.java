@@ -29,6 +29,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -38,7 +39,6 @@ import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.translation.ITranslationDirectManager;
 import android.view.translation.ITranslationServiceCallback;
@@ -51,6 +51,7 @@ import android.view.translation.TranslationSpec;
 
 import com.android.internal.os.IResultReceiver;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -366,10 +367,11 @@ public abstract class TranslationService extends Service {
                                     + "format compatibility");
                         }
 
-                        final ArraySet<TranslationCapability> capabilities = new ArraySet<>(values);
                         final Bundle bundle = new Bundle();
-                        bundle.putParcelableArray(TranslationManager.EXTRA_CAPABILITIES,
-                                capabilities.toArray(new TranslationCapability[0]));
+                        final ParceledListSlice<TranslationCapability> listSlice =
+                                new ParceledListSlice<>(Arrays.asList(
+                                        values.toArray(new TranslationCapability[0])));
+                        bundle.putParcelable(TranslationManager.EXTRA_CAPABILITIES, listSlice);
                         resultReceiver.send(STATUS_SYNC_CALL_SUCCESS, bundle);
                     }
                 });
