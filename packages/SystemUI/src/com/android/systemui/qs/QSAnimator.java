@@ -383,6 +383,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     mOtherTilesExpandAnimator.addView(tileView);
                     tileView.setClipChildren(true);
                     tileView.setClipToPadding(true);
+                    firstPageBuilder.addFloat(tileView.getSecondaryLabel(), "alpha", 0, 1);
                 }
 
                 mAllViews.add(tileView);
