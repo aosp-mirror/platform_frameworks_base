@@ -281,6 +281,26 @@ aidl_interface {
     },
 }
 
+// Build C++ bindings for OtaDexopt services. Needed by otapreopt_chroot
+aidl_interface {
+    name: "ota_dexopt_aidl_interface",
+    unstable: true,
+    srcs: [
+        "android/content/pm/IOtaDexopt.aidl",
+    ],
+    backend: {
+        java: {
+            sdk_version: "28",
+        },
+        cpp: {
+            enabled: true,
+        },
+        ndk: {
+            enabled: false,
+        },
+    },
+}
+
 // Avoid including Parcelable classes as we don't want to have two copies of
 // Parcelable cross the libraries. This is used by telephony-common (frameworks/opt/telephony)
 // and TeleService app (packages/services/Telephony).
