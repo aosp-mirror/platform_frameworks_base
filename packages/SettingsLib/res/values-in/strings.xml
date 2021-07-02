@@ -155,7 +155,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Beberapa setelan default"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Tidak ada setelan default"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Setelan text-to-speech"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Ouput text-to-speech"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Output text-to-speech"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Kecepatan ucapan"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Kecepatan teks diucapkan"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tinggi nada"</string>

@@ -448,10 +448,10 @@
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ទៀតទើបសាកថ្មពេញ"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើប​សាកថ្មពេញ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"មិន​ស្គាល់"</string>
-    <string name="battery_info_status_charging" msgid="4279958015430387405">"កំពុងបញ្ចូល​ថ្ម"</string>
+    <string name="battery_info_status_charging" msgid="4279958015430387405">"កំពុងសាក​ថ្ម"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"កំពុងសាកថ្មយ៉ាងឆាប់រហ័ស"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"កំពុង​សាកថ្មយឺត"</string>
-    <string name="battery_info_status_discharging" msgid="6962689305413556485">"មិនកំពុង​បញ្ចូល​ថ្ម"</string>
+    <string name="battery_info_status_discharging" msgid="6962689305413556485">"មិនកំពុង​សាក​ថ្ម"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ដោត​សាកថ្ម​រួចហើយ ប៉ុន្តែ​​សាកថ្ម​មិន​ចូលទេឥឡូវនេះ"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"ពេញ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"គ្រប់គ្រងដោយអ្នកគ្រប់គ្រង"</string>
