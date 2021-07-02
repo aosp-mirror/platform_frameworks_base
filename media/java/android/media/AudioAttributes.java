@@ -335,6 +335,10 @@ public final class AudioAttributes implements Parcelable {
 
     /**
      * Flag defining a behavior where the audibility of the sound will be ensured by the system.
+     * To ensure sound audibility, the system only uses built-in speakers or wired headphones
+     * and specifically excludes wireless audio devices.
+     * <p>Note this flag should only be used for sounds subject to regulatory behaviors in some
+     * countries, such as for camera shutter sound, and not for routing behaviors.
      */
     public final static int FLAG_AUDIBILITY_ENFORCED = 0x1 << 0;
     /**
