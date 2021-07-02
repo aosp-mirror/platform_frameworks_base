@@ -1231,12 +1231,6 @@ class Task extends TaskFragment {
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
 
         mRootWindowContainer.updateUIDsPresentOnDisplay();
-
-        // Resume next focusable root task after reparenting to another display if we aren't
-        // removing the prevous display.
-        if (oldDisplay != null && oldDisplay.isRemoving()) {
-            postReparent();
-        }
     }
 
     /** Returns the currently topmost resumed activity. */
@@ -4514,8 +4508,7 @@ class Task extends TaskFragment {
         mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
-    /** Resume next focusable root task after reparenting to another display. */
-    void postReparent() {
+    void resumeNextFocusAfterReparent() {
         adjustFocusToNextFocusableTask("reparent", true /* allowFocusSelf */,
                 true /* moveDisplayToTop */);
         mRootWindowContainer.resumeFocusedTasksTopActivities();
