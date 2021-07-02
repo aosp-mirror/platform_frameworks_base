@@ -38,6 +38,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -65,6 +66,7 @@ public class WalletActivity extends LifecycleActivity implements
     private final Executor mExecutor;
     private final Handler mHandler;
     private final FalsingManager mFalsingManager;
+    private FalsingCollector mFalsingCollector;
     private final UserTracker mUserTracker;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final StatusBarKeyguardViewManager mKeyguardViewManager;
@@ -82,6 +84,7 @@ public class WalletActivity extends LifecycleActivity implements
             @Background Executor executor,
             @Main Handler handler,
             FalsingManager falsingManager,
+            FalsingCollector falsingCollector,
             UserTracker userTracker,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarKeyguardViewManager keyguardViewManager) {
@@ -91,6 +94,7 @@ public class WalletActivity extends LifecycleActivity implements
         mExecutor = executor;
         mHandler = handler;
         mFalsingManager = falsingManager;
+        mFalsingCollector = falsingCollector;
         mUserTracker = userTracker;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardViewManager = keyguardViewManager;
@@ -136,6 +140,7 @@ public class WalletActivity extends LifecycleActivity implements
             }
         };
 
+        walletView.setFalsingCollector(mFalsingCollector);
         walletView.setShowWalletAppOnClickListener(
                 v -> {
                     if (mWalletClient.createWalletIntent() == null) {
