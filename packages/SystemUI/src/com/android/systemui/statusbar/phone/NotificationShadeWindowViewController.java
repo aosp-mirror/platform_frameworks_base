@@ -26,6 +26,7 @@ import android.media.session.MediaSessionLegacyHelper;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -66,6 +67,7 @@ import javax.inject.Inject;
  * Controller for {@link NotificationShadeWindowView}.
  */
 public class NotificationShadeWindowViewController {
+    private static final String TAG = "NotifShadeWindowVC";
     private final InjectionInflationController mInjectionInflationController;
     private final NotificationWakeUpCoordinator mCoordinator;
     private final PulseExpansionHandler mPulseExpansionHandler;
@@ -213,6 +215,10 @@ public class NotificationShadeWindowViewController {
         mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
             @Override
             public Boolean handleDispatchTouchEvent(MotionEvent ev) {
+                if (mStatusBarView == null) {
+                    Log.w(TAG, "Ignoring touch while statusBarView not yet set.");
+                    return false;
+                }
                 boolean isDown = ev.getActionMasked() == MotionEvent.ACTION_DOWN;
                 boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
                 boolean isCancel = ev.getActionMasked() == MotionEvent.ACTION_CANCEL;
