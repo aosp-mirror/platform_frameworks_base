@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS सेवा"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"सेन्सर सूचना सेवा"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ट्वायलाइट सेवा"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"टाइम झोन डिटेक्टर (कनेक्टिव्हिटी नाही)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS ची वेळ अपडेट करणारी सेवा"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"संगीत ओळख व्यवस्थापक सेवा"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"तुमचे डिव्हाइस मिटविले जाईल"</string>
@@ -258,8 +257,8 @@
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"संपूर्ण अहवाल"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"तुमचे डिव्हाइस प्रतिसाद देत नाही किंवा खूप धीमे असते अथवा तुम्हाला सर्व अहवाल विभागांची आवश्यकता असते तेव्हा कमीतकमी सिस्टम हस्तक्षेपासाठी या पर्यायाचा वापर करा. तुम्हाला आणखी तपशील एंटर करण्याची किंवा अतिरिक्त स्क्रीनशॉट घेण्याची अनुमती देत नाही."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">दोष अहवालासाठी <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्‍ये स्क्रीनशॉट घेत आहे.</item>
-      <item quantity="one">दोष अहवालासाठी <xliff:g id="NUMBER_0">%d</xliff:g> सेकंदामध्‍ये स्क्रीनशॉट घेत आहे.</item>
+      <item quantity="other">बग रिपोर्टसाठी <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्‍ये स्क्रीनशॉट घेत आहे.</item>
+      <item quantity="one">बग रिपोर्टसाठी <xliff:g id="NUMBER_0">%d</xliff:g> सेकंदामध्‍ये स्क्रीनशॉट घेत आहे.</item>
     </plurals>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"बग रिपोर्टसह घेतलेला स्क्रीनशॉट"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"बग रिपोर्टसह स्क्रीनशॉट घेता आला नाही"</string>
@@ -1385,10 +1384,10 @@
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB पोर्ट आपोआप बंद होईल. अधिक जाणून घेण्यासाठी टॅप करा."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB पोर्ट वापरण्यासाठी ठीक आहे"</string>
     <string name="usb_contaminant_not_detected_message" msgid="892863190942660462">"फोनला धूळ किंवा ओलावा आढळला नाही."</string>
-    <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"बग रीपोर्ट घेत आहे..."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"बग अहवाल शेअर करायचा?"</string>
-    <string name="sharing_remote_bugreport_notification_title" msgid="3077385149217638550">"बग रीपोर्ट शेअर करत आहे..."</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"आपल्या प्रशासकाने या डिव्हाइसचे समस्या निवारण करण्यात मदत करण्यासाठी दोष अहवालाची विनंती केली. अ‍ॅप्स आणि डेटा शेअर केले जाऊ शकतात."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"बग रिपोर्ट घेत आहे..."</string>
+    <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"बग रिपोर्ट शेअर करायचा का?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="3077385149217638550">"बग रिपोर्ट शेअर करत आहे..."</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"तुमच्या अ‍ॅडमिनने या डिव्हाइसचे समस्या निवारण करण्यात मदत करण्यासाठी बग रिपोर्टची विनंती केली. अ‍ॅप्स आणि डेटा शेअर केले जाऊ शकतात."</string>
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"शेअर करा"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"नकार द्या"</string>
     <string name="select_input_method" msgid="3971267998568587025">"इनपुट पद्धत निवडा"</string>
@@ -1483,6 +1482,8 @@
     <string name="deny" msgid="6632259981847676572">"नकार द्या"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"परवानगीची विनंती केली"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> खात्यासाठी\nपरवानगीची विनंती केली."</string>
+    <!-- no translation found for permission_request_notification_for_app_with_subtitle (1298704005732851350) -->
+    <skip />
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"तुम्ही हा अ‍ॅप आपल्‍या कार्य प्रोफाईलच्या बाहेर वापरत आहात"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"तुम्ही हा अ‍ॅप आपल्या कार्य प्रोफाईलमध्‍ये वापरत आहात"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"इनपुट पद्धत"</string>
