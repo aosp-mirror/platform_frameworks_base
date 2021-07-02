@@ -50,6 +50,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.FaceAuthScreenBrightnessController;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -80,7 +81,7 @@ import javax.inject.Inject;
 public class StatusBarKeyguardViewManager implements RemoteInputController.Callback,
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
         PanelExpansionListener, NavigationModeController.ModeChangedListener,
-        KeyguardViewController {
+        KeyguardViewController, WakefulnessLifecycle.Observer {
 
     // When hiding the Keyguard with timing supplied from WindowManager, better be early than late.
     private static final long HIDE_TIMING_CORRECTION_MS = - 16 * 3;
@@ -104,6 +105,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final Optional<FaceAuthScreenBrightnessController> mFaceAuthScreenBrightnessController;
     private final KeyguardBouncer.Factory mKeyguardBouncerFactory;
+    private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
         @Override
         public void onFullyShown() {
@@ -189,6 +192,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastPulsing;
     private int mLastBiometricMode;
     private boolean mQsExpanded;
+    private boolean mAnimatedToSleep;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private Runnable mKeyguardGoneCancelAction;
@@ -232,7 +236,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             KeyguardStateController keyguardStateController,
             Optional<FaceAuthScreenBrightnessController> faceAuthScreenBrightnessController,
             NotificationMediaManager notificationMediaManager,
-            KeyguardBouncer.Factory keyguardBouncerFactory) {
+            KeyguardBouncer.Factory keyguardBouncerFactory,
+            WakefulnessLifecycle wakefulnessLifecycle,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -246,6 +252,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mDockManager = dockManager;
         mFaceAuthScreenBrightnessController = faceAuthScreenBrightnessController;
         mKeyguardBouncerFactory = keyguardBouncerFactory;
+        mWakefulnessLifecycle = wakefulnessLifecycle;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
     }
 
     @Override
@@ -301,6 +309,20 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mDockManager.addListener(mDockEventListener);
             mIsDocked = mDockManager.isDocked();
         }
+        mWakefulnessLifecycle.addObserver(new WakefulnessLifecycle.Observer() {
+            @Override
+            public void onFinishedWakingUp() {
+                mAnimatedToSleep = false;
+                updateStates();
+            }
+
+            @Override
+            public void onFinishedGoingToSleep() {
+                mAnimatedToSleep =
+                        mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying();
+                updateStates();
+            }
+        });
     }
 
     @Override
@@ -981,7 +1003,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean hideWhileDozing = mDozing && biometricMode != MODE_WAKE_AND_UNLOCK_PULSING;
         boolean keyguardWithGestureNav = (keyguardShowing && !mDozing || mPulsing && !mIsDocked)
                 && mGesturalNav;
-        return (!keyguardShowing && !hideWhileDozing || mBouncer.isShowing()
+        return (!mAnimatedToSleep && !keyguardShowing && !hideWhileDozing || mBouncer.isShowing()
                 || mRemoteInputActive || keyguardWithGestureNav
                 || mGlobalActionsVisible);
     }
