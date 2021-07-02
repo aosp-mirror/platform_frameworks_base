@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserManager;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -476,6 +477,11 @@ public class AuthContainerView extends LinearLayout
     }
 
     @Override
+    public void onOrientationChanged() {
+        maybeUpdatePositionForUdfps(true /* invalidate */);
+    }
+
+    @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         onAttachedToWindowInternal();
@@ -555,11 +561,15 @@ public class AuthContainerView extends LinearLayout
     }
 
     private boolean maybeUpdatePositionForUdfps(boolean invalidate) {
+        final Display display = getDisplay();
+        if (display == null) {
+            return false;
+        }
         if (!shouldUpdatePositionForUdfps(mBiometricView)) {
             return false;
         }
 
-        final int displayRotation = getDisplay().getRotation();
+        final int displayRotation = display.getRotation();
         switch (displayRotation) {
             case Surface.ROTATION_0:
                 mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);

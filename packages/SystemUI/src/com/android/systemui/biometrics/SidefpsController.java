@@ -137,8 +137,7 @@ public class SidefpsController {
         }
     }
 
-
-    void onConfigurationChanged() {
+    void onOrientationChanged() {
         // If mView is null or if view is hidden, then return.
         if (mView == null || !mIsVisible) {
             return;

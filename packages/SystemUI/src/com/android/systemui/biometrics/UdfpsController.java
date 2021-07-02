@@ -650,7 +650,7 @@ public class UdfpsController implements DozeReceiver {
         return mCoreLayoutParams;
     }
 
-    void onConfigurationChanged() {
+    void onOrientationChanged() {
         // When the configuration changes it's almost always necessary to destroy and re-create
         // the overlay's window to pass it the new LayoutParams.
         // Hiding the overlay will destroy its window. It's safe to hide the overlay regardless
