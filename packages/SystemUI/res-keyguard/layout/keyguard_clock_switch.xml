@@ -57,7 +57,7 @@
             android:id="@+id/animatable_clock_view_large"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="center"
             android:gravity="center_horizontal"
             android:textSize="@dimen/large_clock_text_size"
             android:fontFamily="@font/clock"

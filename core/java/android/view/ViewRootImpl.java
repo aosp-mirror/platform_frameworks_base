@@ -1457,8 +1457,10 @@ public final class ViewRootImpl implements ViewParent,
                     if (mHardwareRendererObserver != null) {
                         mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
                     }
-                    addPrepareSurfaceControlForWebviewCallback();
-                    addASurfaceTransactionCallback();
+                    if (HardwareRenderer.isWebViewOverlaysEnabled()) {
+                        addPrepareSurfaceControlForWebviewCallback();
+                        addASurfaceTransactionCallback();
+                    }
                     mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
                 }
             }
@@ -7792,8 +7794,10 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             if (mAttachInfo.mThreadedRenderer != null) {
-                addPrepareSurfaceControlForWebviewCallback();
-                addASurfaceTransactionCallback();
+                if (HardwareRenderer.isWebViewOverlaysEnabled()) {
+                    addPrepareSurfaceControlForWebviewCallback();
+                    addASurfaceTransactionCallback();
+                }
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
             }
         } else {

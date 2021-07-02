@@ -176,9 +176,9 @@
     <string name="contentServiceSync" msgid="2341041749565687871">"समन्वयन"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"सिंक नहीं किया जा सकता"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"बहुत ज़्यादा <xliff:g id="CONTENT_TYPE">%s</xliff:g> मिटाने की कोशिश की गई."</string>
-    <string name="low_memory" product="tablet" msgid="5557552311566179924">"टैबलेट की मेमोरी भर गई है. जगह खाली करने के लिए कुछ फ़ाइलें मिटाएं."</string>
-    <string name="low_memory" product="watch" msgid="3479447988234030194">"घड़ी की मेमोरी भर गई है. स्‍थान खाली करने के लिए कुछ फ़ाइलें मिटाएं."</string>
-    <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV डिवाइस की मेमोरी में जगह नहीं बची है. जगह बनाने के लिए कुछ फाइलें मिटाएं."</string>
+    <string name="low_memory" product="tablet" msgid="5557552311566179924">"टैबलेट का स्टोरेज भर गया है. जगह खाली करने के लिए कुछ फ़ाइलें मिटाएं."</string>
+    <string name="low_memory" product="watch" msgid="3479447988234030194">"घड़ी का स्टोरेज भर गया है. स्‍थान खाली करने के लिए कुछ फ़ाइलें मिटाएं."</string>
+    <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV डिवाइस के स्टोरेज में जगह नहीं बची है. जगह बनाने के लिए कुछ फाइलें मिटाएं."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"फ़ोन मेमोरी भर गयी है. जगह खाली करने के लिए कुछ फ़ाइलें मिटाएं."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
       <item quantity="one">प्रमाणपत्र अनुमतियों को इंस्टॉल किया गया</item>
@@ -408,9 +408,9 @@
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"यह ऐप्लिकेशन को सिस्टम के शुरू होने की प्रक्रिया पूरा होते ही अपने आप चालू होने की अनुमति देता है. इससे आपके Android TV डिवाइस को चालू होने में ज़्यादा समय लग सकता है और ऐप्लिकेशन के हमेशा चालू रहने की वजह से आपके टीवी की परफ़ॉर्मेंस पर असर पड़ सकता है."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="7912677044558690092">"सिस्‍टम के चालू होते ही ऐप को अपने आप शुरू होने देती है. इससे फ़ोन को चालू होने में ज़्यादा समय लग सकता है और ऐप के लगातार चलते रहने से पूरा फ़ोन धीमा हो सकता है."</string>
     <string name="permlab_broadcastSticky" msgid="4552241916400572230">"स्टिकी प्रसारण भेजें"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="5058486069846384013">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण खत्म होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, टैबलेट की बहुत ज़्यादा मेमोरी का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="5058486069846384013">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण खत्म होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, टैबलेट की बहुत ज़्यादा स्टोरेज का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"यह ऐप्लिकेशन को स्टिकी ब्रॉडकास्ट भेजने की अनुमति देता है जो ब्रॉडकास्ट खत्म होने के बाद भी बने रहते हैं. इस सुविधा के ज़्यादा इस्तेमाल से आपके Android TV डिवाइस की मेमोरी कम हो सकती है जिससे टीवी की परफ़ॉर्मेंस पर असर पड़ सकता है और उसे इस्तेमाल करने में समस्याएं आ सकती हैं."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण खत्म होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, फ़ोन की बहुत ज़्यादा मेमोरी का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण खत्म होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, फ़ोन की बहुत ज़्यादा स्टोरेज का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"अपने संपर्क पढ़ें"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"यह ऐप्लिकेशन को आपके टैबलेट पर मौजूद संपर्कों का डेटा देखने की अनुमति देता है. ऐप्लिकेशन को आपके टैबलेट पर मौजूद उन खातों को ऐक्सेस करने की अनुमति भी होगी जिनसे संपर्क बनाए गए हैं. इसमें वे खाते भी शामिल हो सकते हैं जिन्हें आपके इंस्टॉल किए हुए ऐप्लिकेशन ने बनाया है. इस अनुमति के बाद, ऐप्लिकेशन आपके संपर्कों का डेटा सेव कर सकते हैं. हालांकि, नुकसान पहुंचाने वाले ऐप्लिकेशन, आपको बताए बिना ही संपर्कों का डेटा शेयर कर सकते हैं."</string>
     <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"यह ऐप्लिकेशन को आपके Android TV डिवाइस पर सेव किए संपर्कों का डेटा देखने की अनुमति देता है. ऐप्लिकेशन को आपके Android TV डिवाइस पर मौजूद उन खातों को ऐक्सेस करने की अनुमति भी होगी जिनसे संपर्क बनाए गए हैं. इसमें वे खाते भी शामिल हो सकते हैं जिन्हें आपके इंस्टॉल किए हुए ऐप्लिकेशन ने बनाया है. इस अनुमति के बाद, ऐप्लिकेशन आपके संपर्कों का डेटा सेव कर सकते हैं. हालांकि, नुकसान पहुंचाने वाले ऐप्लिकेशन, आपको बताए बिना ही संपर्कों का डेटा शेयर कर सकते हैं."</string>
@@ -602,8 +602,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"कोई फ़िंगरप्रिंट रजिस्टर नहीं किया गया है."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"इस डिवाइस में फ़िंगरप्रिंट सेंसर नहीं है."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"सेंसर कुछ समय के लिए बंद कर दिया गया है."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (4385512597740168120) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"फ़िंगरप्रिंट सेंसर इस्तेमाल नहीं किया जा सकता. रिपेयर की सेवा देने वाली कंपनी से संपर्क करें"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"फ़िंगरप्रिंट <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"फ़िंगरप्रिंट इस्तेमाल करें"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"फ़िंगरप्रिंट या स्क्रीन लॉक का क्रेडेंशियल इस्तेमाल करें"</string>
@@ -613,18 +612,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फ़िंगरप्रिंट आइकॉन"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"फ़ेस अनलॉक"</string>
-    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"फ़ेस अनलॉक के साथ कोई समस्या है"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"फ़ेस अनलॉक से जुड़ी समस्या"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"अपने चेहरे का मॉडल मिटाने के लिए टैप करें. इसके बाद, अपना चेहरा फिर से रजिस्टर करें"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"फे़स अनलॉक की सुविधा सेट अप करें"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"अपने फ़ोन की तरफ़ देखकर उसे अनलॉक करें"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"फ़ोन को अनलॉक करने के दूसरे तरीके सेट अप करें"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"फ़िंगरप्रिंट जोड़ने के लिए टैप करें"</string>
-    <!-- no translation found for fingerprint_recalibrate_notification_name (1414578431898579354) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_title (2406561052064558497) -->
-    <skip />
-    <!-- no translation found for fingerprint_recalibrate_notification_content (8519935717822194943) -->
-    <skip />
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"फ़िंगरप्रिंट अनलॉक"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"फ़िंगरप्रिंट सेंसर इस्तेमाल नहीं किया जा सकता"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"फ़िंगरप्रिंट सेंसर को रिपेयर करने की सेवा देने वाली कंपनी से संपर्क करें."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"चेहरे से जुड़ा सटीक डेटा कैप्चर नहीं किया जा सका. फिर से कोशिश करें."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"बहुत रोशनी है. हल्की रोशनी आज़माएं."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"बहुत अंधेरा है. बेहतर रोशनी में आज़माएं."</string>

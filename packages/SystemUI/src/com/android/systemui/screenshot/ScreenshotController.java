@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenshot;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
@@ -259,6 +260,7 @@ public class ScreenshotController {
     private ScreenshotView mScreenshotView;
     private Bitmap mScreenBitmap;
     private SaveImageInBackgroundTask mSaveInBgTask;
+    private boolean mScreenshotTakenInPortrait;
 
     private Animator mScreenshotAnimation;
     private RequestCallback mCurrentRequestCallback;
@@ -488,6 +490,9 @@ public class ScreenshotController {
      * Takes a screenshot of the current display and shows an animation.
      */
     private void takeScreenshotInternal(Consumer<Uri> finisher, Rect crop) {
+        mScreenshotTakenInPortrait =
+                mContext.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT;
+
         // copy the input Rect, since SurfaceControl.screenshot can mutate it
         Rect screenRect = new Rect(crop);
         Bitmap screenshot = captureScreenshot(crop);
@@ -661,7 +666,8 @@ public class ScreenshotController {
                 Bitmap newScreenshot = captureScreenshot(
                         new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels));
 
-                mScreenshotView.prepareScrollingTransition(response, mScreenBitmap, newScreenshot);
+                mScreenshotView.prepareScrollingTransition(response, mScreenBitmap, newScreenshot,
+                        mScreenshotTakenInPortrait);
                 // delay starting scroll capture to make sure the scrim is up before the app moves
                 mScreenshotView.post(() -> {
                     // Clear the reference to prevent close() in dismissScreenshot

@@ -1304,6 +1304,11 @@ public class HardwareRenderer {
      */
     public static native void preload();
 
+    /**
+     * @hide
+     */
+    public static native boolean isWebViewOverlaysEnabled();
+
     /** @hide */
     protected static native void setupShadersDiskCache(String cacheFile, String skiaCacheFile);
 

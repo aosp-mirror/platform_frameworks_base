@@ -455,6 +455,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             mWalletButton.setVisibility(GONE);
             mIndicationArea.setPadding(0, 0, 0, 0);
         } else {
+            Drawable tileIcon = mQuickAccessWalletController.getWalletClient().getTileIcon();
+            if (tileIcon != null) {
+                mWalletButton.setImageDrawable(tileIcon);
+            }
             mWalletButton.setVisibility(VISIBLE);
             mWalletButton.setOnClickListener(this::onWalletClick);
             mIndicationArea.setPadding(mIndicationPadding, 0, mIndicationPadding, 0);

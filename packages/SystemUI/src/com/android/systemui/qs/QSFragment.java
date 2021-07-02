@@ -108,6 +108,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private QSPanelController mQSPanelController;
     private QuickQSPanelController mQuickQSPanelController;
     private QSCustomizerController mQSCustomizerController;
+    private ScrollListener mScrollListener;
     private FeatureFlags mFeatureFlags;
     /**
      * When true, QS will translate from outside the screen. It will be clipped with parallax
@@ -171,9 +172,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 });
         mQSPanelScrollView.setOnScrollChangeListener(
                 (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-            // Lazily update animators whenever the scrolling changes
-            mQSAnimator.onQsScrollingChanged();
-            mHeader.setExpandedScrollAmount(scrollY);
+                    // Lazily update animators whenever the scrolling changes
+                    mQSAnimator.onQsScrollingChanged();
+                    mHeader.setExpandedScrollAmount(scrollY);
+                    if (mScrollListener != null) {
+                        mScrollListener.onQsPanelScrollChanged(scrollY);
+                    }
         });
         mQSDetail = view.findViewById(R.id.qs_detail);
         mHeader = view.findViewById(R.id.header);
@@ -214,6 +218,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
+    public void setScrollListener(ScrollListener listener) {
+        mScrollListener = listener;
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         mStatusBarStateController.removeCallback(this);
@@ -222,6 +231,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         mQSCustomizerController.setQs(null);
         mQsDetailDisplayer.setQsPanelController(null);
+        mScrollListener = null;
     }
 
     @Override

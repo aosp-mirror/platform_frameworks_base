@@ -670,6 +670,8 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"បង្ហាញ​ទាំងអស់"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ដោះសោដើម្បីបង់ប្រាក់"</string>
     <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"មិន​បាន​រៀបចំទេ"</string>
+    <!-- no translation found for wallet_secondary_label_updating (5726130686114928551) -->
+    <skip />
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ដោះសោដើម្បីប្រើប្រាស់"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"មានបញ្ហា​ក្នុងការទាញយក​កាត​របស់អ្នក សូម​ព្យាយាមម្ដងទៀត​នៅពេលក្រោយ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ការកំណត់អេក្រង់ចាក់សោ"</string>
@@ -1115,8 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"បើកការសន្ទនា"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ធាតុ​ក្រាហ្វិកនៃការសន្ទនា"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ចុចការសន្ទនា ដើម្បីបញ្ចូលវាទៅក្នុងអេក្រង់ដើមរបស់អ្នក"</string>
-    <!-- no translation found for no_conversations_text (5354115541282395015) -->
-    <skip />
+    <string name="no_conversations_text" msgid="5354115541282395015">"ការសន្ទនាថ្មីៗរបស់អ្នក​នឹងបង្ហាញ​នៅទីនេះ"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ការសន្ទនា​អាទិភាព"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ការសន្ទនាថ្មីៗ"</string>
     <string name="okay" msgid="6490552955618608554">"យល់ព្រម"</string>

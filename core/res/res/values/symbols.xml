@@ -2528,6 +2528,7 @@
   <java-symbol type="string" name="fingerprint_acquired_imager_dirty" />
   <java-symbol type="string" name="fingerprint_acquired_too_slow" />
   <java-symbol type="string" name="fingerprint_acquired_too_fast" />
+  <java-symbol type="string" name="fingerprint_acquired_too_bright" />
   <java-symbol type="array" name="fingerprint_acquired_vendor" />
   <java-symbol type="string" name="fingerprint_error_canceled" />
   <java-symbol type="string" name="fingerprint_error_user_canceled" />
@@ -4167,6 +4168,7 @@
   <java-symbol type="drawable" name="ic_work_apps_off" />
   <java-symbol type="drawable" name="ic_sharing_disabled" />
   <java-symbol type="drawable" name="ic_no_apps" />
+  <java-symbol type="drawable" name="ic_screenshot_edit" />
   <java-symbol type="dimen" name="resolver_empty_state_height" />
   <java-symbol type="dimen" name="resolver_empty_state_height_with_tabs" />
   <java-symbol type="dimen" name="resolver_max_collapsed_height_with_tabs" />
